@@ -296,13 +296,10 @@ export const FieldsDesigner = ({
     updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, fixedNumber, notEmpty: checked });
   };
 
-  const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName) => {
-    reorderField(draggedFieldIdx, droppedFieldName);
-  };
+  const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName, upDownOrder = false, order) =>
+    reorderField(draggedFieldIdx, droppedFieldName, upDownOrder, order);
 
-  const onFieldDragAndDropStart = draggedFieldIdx => {
-    setInitialFieldIndexDragged(draggedFieldIdx);
-  };
+  const onFieldDragAndDropStart = draggedFieldIdx => setInitialFieldIndexDragged(draggedFieldIdx);
 
   const onKeyChange = event => {
     if (event.key === 'Escape') {
@@ -548,17 +545,33 @@ export const FieldsDesigner = ({
     </ConfirmDialog>
   );
 
-  const renderAllFields = () => (
-    <div className={styles.fieldsWrapper}>
-      {isLoading && (
-        <div className={styles.overlay}>
-          <Spinner className={styles.spinner} />
-        </div>
-      )}
-      {viewType['tabularData'] ? (!isEmpty(fields) ? previewData() : renderNoFields()) : renderFields()}
-      {!viewType['tabularData'] && renderNewField()}
-    </div>
-  );
+  const renderAllFields = () => {
+    const renderSpinner = () => {
+      if (isLoading) {
+        return <Spinner className={styles.spinner} />;
+      }
+    };
+
+    const renderMainFields = () => {
+      if (viewType['tabularData']) {
+        if (!isEmpty(fields)) {
+          return previewData();
+        } else {
+          return renderNoFields();
+        }
+      } else {
+        return renderFields();
+      }
+    };
+
+    return (
+      <Fragment>
+        {renderSpinner()}
+        {renderMainFields()}
+        {renderNewField()}
+      </Fragment>
+    );
+  };
 
   const renderErrors = (errorTitle, error) => {
     return (
@@ -579,8 +592,8 @@ export const FieldsDesigner = ({
   };
 
   const renderNewField = () => {
-    return (
-      <div className={styles.fieldDesignerWrapper} key="0">
+    if (!viewType['tabularData']) {
+      return (
         <FieldDesigner
           addField={true}
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
@@ -619,8 +632,8 @@ export const FieldsDesigner = ({
           tableSchemaId={table.tableSchemaId}
           totalFields={!isNil(fields) ? fields.length : undefined}
         />
-      </div>
-    );
+      );
+    }
   };
 
   const renderFields = () => {
@@ -628,64 +641,62 @@ export const FieldsDesigner = ({
       !isNil(fields) && !isEmpty(fields) ? (
         fields.map((field, index) => {
           return (
-            <div className={styles.fieldDesignerWrapper} key={field.fieldId}>
-              <FieldDesigner
-                bulkDelete={bulkDelete}
-                checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
-                checkInvalidCharacters={name => FieldsDesignerUtils.checkInvalidCharacters(name)}
-                codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
-                datasetId={datasetId}
-                datasetSchemaId={datasetSchemaId}
-                fieldDescription={field.description || ''}
-                fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
-                fieldHasMultipleValues={field.pkHasMultipleValues}
-                fieldId={field.fieldId}
-                fieldLink={
-                  !isNull(field.referencedField)
-                    ? !TextUtils.areEquals(field.type, 'external_link')
-                      ? getReferencedFieldName(field.referencedField)
-                      : getExternalReferencedFieldName(field.referencedField)
-                    : null
-                }
-                fieldLinkedTableConditional={
-                  !isNil(field.referencedField) ? field.referencedField.linkedConditionalFieldId : ''
-                }
-                fieldLinkedTableLabel={!isNil(field.referencedField) ? field.referencedField.labelId : ''}
-                fieldMasterTableConditional={
-                  !isNil(field.referencedField) ? field.referencedField.masterConditionalFieldId : ''
-                }
-                fieldMustBeUsed={field.pkMustBeUsed}
-                fieldName={field.name}
-                fieldPK={field.pk}
-                fieldPKReferenced={field.pkReferenced}
-                fieldReadOnly={Boolean(field.readOnly)}
-                fieldRequired={Boolean(field.required)}
-                fields={fields}
-                fieldType={field.type}
-                fieldValue={field.value}
-                hasPK={fields.filter(field => field.pk).length > 0}
-                index={index}
-                initialFieldIndexDragged={initialFieldIndexDragged}
-                isCodelistOrLink={isCodelistOrLink}
-                isDataflowOpen={isDataflowOpen}
-                isDesignDatasetEditorRead={isDesignDatasetEditorRead}
-                isLoading={isLoading}
-                isReferenceDataset={isReferenceDataset}
-                key={field.fieldId}
-                markedForDeletion={markedForDeletion}
-                onBulkCheck={onBulkCheck}
-                onCodelistAndLinkShow={onCodelistAndLinkShow}
-                onFieldDelete={onFieldDelete}
-                onFieldDragAndDrop={onFieldDragAndDrop}
-                onFieldDragAndDropStart={onFieldDragAndDropStart}
-                onFieldUpdate={onFieldUpdate}
-                onNewFieldAdd={onFieldAdd}
-                onShowDialogError={onShowDialogError}
-                recordSchemaId={field.recordId}
-                tableSchemaId={table.tableSchemaId}
-                totalFields={!isNil(fields) ? fields.length : undefined}
-              />
-            </div>
+            <FieldDesigner
+              bulkDelete={bulkDelete}
+              checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
+              checkInvalidCharacters={name => FieldsDesignerUtils.checkInvalidCharacters(name)}
+              codelistItems={!isNil(field.codelistItems) ? field.codelistItems : []}
+              datasetId={datasetId}
+              datasetSchemaId={datasetSchemaId}
+              fieldDescription={field.description || ''}
+              fieldFileProperties={{ validExtensions: field.validExtensions, maxSize: field.maxSize }}
+              fieldHasMultipleValues={field.pkHasMultipleValues}
+              fieldId={field.fieldId}
+              fieldLink={
+                !isNull(field.referencedField)
+                  ? !TextUtils.areEquals(field.type, 'external_link')
+                    ? getReferencedFieldName(field.referencedField)
+                    : getExternalReferencedFieldName(field.referencedField)
+                  : null
+              }
+              fieldLinkedTableConditional={
+                !isNil(field.referencedField) ? field.referencedField.linkedConditionalFieldId : ''
+              }
+              fieldLinkedTableLabel={!isNil(field.referencedField) ? field.referencedField.labelId : ''}
+              fieldMasterTableConditional={
+                !isNil(field.referencedField) ? field.referencedField.masterConditionalFieldId : ''
+              }
+              fieldMustBeUsed={field.pkMustBeUsed}
+              fieldName={field.name}
+              fieldPK={field.pk}
+              fieldPKReferenced={field.pkReferenced}
+              fieldReadOnly={Boolean(field.readOnly)}
+              fieldRequired={Boolean(field.required)}
+              fields={fields}
+              fieldType={field.type}
+              fieldValue={field.value}
+              hasPK={fields.filter(field => field.pk).length > 0}
+              index={index}
+              initialFieldIndexDragged={initialFieldIndexDragged}
+              isCodelistOrLink={isCodelistOrLink}
+              isDataflowOpen={isDataflowOpen}
+              isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+              isLoading={isLoading}
+              isReferenceDataset={isReferenceDataset}
+              key={field.fieldId}
+              markedForDeletion={markedForDeletion}
+              onBulkCheck={onBulkCheck}
+              onCodelistAndLinkShow={onCodelistAndLinkShow}
+              onFieldDelete={onFieldDelete}
+              onFieldDragAndDrop={onFieldDragAndDrop}
+              onFieldDragAndDropStart={onFieldDragAndDropStart}
+              onFieldUpdate={onFieldUpdate}
+              onNewFieldAdd={onFieldAdd}
+              onShowDialogError={onShowDialogError}
+              recordSchemaId={field.recordId}
+              tableSchemaId={table.tableSchemaId}
+              totalFields={!isNil(fields) ? fields.length : undefined}
+            />
           );
         })
       ) : (
@@ -694,22 +705,30 @@ export const FieldsDesigner = ({
     return renderedFields;
   };
 
-  const reorderField = async (draggedFieldIdx, droppedFieldName) => {
+  const reorderField = async (draggedFieldIdx, droppedFieldName, upDownOrder, order) => {
+    const getDragAndDropPosition = (inmFields, droppedFieldIdx) => {
+      if (droppedFieldIdx === -1) {
+        return inmFields.length;
+      } else {
+        if (draggedFieldIdx < droppedFieldIdx) {
+          return droppedFieldIdx - 1;
+        } else {
+          return droppedFieldIdx;
+        }
+      }
+    };
+
     try {
       setIsLoading(true);
       const inmFields = [...fields];
-      const droppedFieldIdx = FieldsDesignerUtils.getIndexByFieldName(droppedFieldName, inmFields);
-      await DatasetService.updateFieldOrder(
-        datasetId,
-        droppedFieldIdx === -1
-          ? inmFields.length
-          : draggedFieldIdx < droppedFieldIdx
-          ? droppedFieldIdx - 1
-          : droppedFieldIdx,
-        inmFields[draggedFieldIdx].fieldId
-      );
-      setFields([...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)]);
-      onChangeFields(inmFields, false, table.tableSchemaId);
+      const droppedFieldIdx = !upDownOrder
+        ? FieldsDesignerUtils.getIndexByFieldName(droppedFieldName, inmFields)
+        : draggedFieldIdx + order;
+      const position = !upDownOrder ? getDragAndDropPosition(inmFields, droppedFieldIdx) : droppedFieldIdx;
+      await DatasetService.updateFieldOrder(datasetId, position, inmFields[draggedFieldIdx].fieldId);
+      const shiftedFields = [...FieldsDesignerUtils.arrayShift(inmFields, draggedFieldIdx, droppedFieldIdx)];
+      setFields(shiftedFields);
+      onChangeFields(shiftedFields, false, table.tableSchemaId);
     } catch (error) {
       console.error('FieldsDesigner - reorderField.', error);
     } finally {
@@ -943,30 +962,32 @@ export const FieldsDesigner = ({
           </div>
         </div>
       </div>
-      {!viewType['tabularData'] && (
-        <div className={styles.fieldsHeader}>
-          <span className={styles.PKWrap}>
-            <label>{resourcesContext.messages['pk']}</label>
-            <Button
-              className={`${styles.PKInfoButton} p-button-rounded p-button-secondary-transparent`}
-              icon="infoCircle"
-              id="infoPk"
-              title={resourcesContext.messages['PKTooltip']}
-              tooltip={resourcesContext.messages['PKTooltip']}
-              tooltipOptions={{ position: 'top' }}
-            />
-          </span>
-          <label>{resourcesContext.messages['required']}</label>
-          <label>{resourcesContext.messages['readOnly']}</label>
-          <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}>
-            {resourcesContext.messages['newFieldPlaceHolder']}
-          </label>
-          <label>{resourcesContext.messages['newFieldDescriptionPlaceHolder']}</label>
-          <label>{resourcesContext.messages['newFieldTypePlaceHolder']}</label>
-          <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}></label>
-          <label></label>
-          <label></label>
-          {/* <label>
+      <div className={styles.contentTable}>
+        {!viewType['tabularData'] && (
+          <div className={styles.fieldsHeader}>
+            <label></label>
+            <span className={styles.PKWrap}>
+              <label>{resourcesContext.messages['pk']}</label>
+              <Button
+                className={`${styles.PKInfoButton} p-button-rounded p-button-secondary-transparent`}
+                icon="infoCircle"
+                id="infoPk"
+                title={resourcesContext.messages['PKTooltip']}
+                tooltip={resourcesContext.messages['PKTooltip']}
+                tooltipOptions={{ position: 'top' }}
+              />
+            </span>
+            <label>{resourcesContext.messages['required']}</label>
+            <label>{resourcesContext.messages['readOnly']}</label>
+            <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}>
+              {resourcesContext.messages['newFieldPlaceHolder']}
+            </label>
+            <label>{resourcesContext.messages['newFieldDescriptionPlaceHolder']}</label>
+            <label>{resourcesContext.messages['newFieldTypePlaceHolder']}</label>
+            <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}></label>
+            <label></label>
+            <label></label>
+            {/* <label>
             <div
               className={`${styles.bulkDeleteButton} ${
                 markedForDeletion.length === 0 && bulkDelete ? styles.disabledButton : ''
@@ -1017,37 +1038,38 @@ export const FieldsDesigner = ({
               {resourcesContext.messages['cancel']}
             </ReactTooltip>
           </label> */}
-        </div>
-      )}
-      {renderAllFields()}
-      {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message, errorMessageAndTitle.focusElement)}
-      {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}
-      {designerState.isImportTableSchemaDialogVisible && (
-        <CustomFileUpload
-          accept=".csv"
-          chooseLabel={resourcesContext.messages['selectFile']}
-          className={styles.FileUpload}
-          dialogClassName={styles.Dialog}
-          dialogHeader={`${resourcesContext.messages['importTableSchemaDialogHeader']} ${table.tableSchemaName}`}
-          dialogOnHide={() => manageDialogs('isImportTableSchemaDialogVisible', false)}
-          dialogVisible={designerState.isImportTableSchemaDialogVisible}
-          infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
-          invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
-          isDialog={true}
-          mode="advanced"
-          name="file"
-          onError={onImportTableSchemaError}
-          onUpload={onUpload}
-          replaceCheck={true}
-          replaceCheckDisabled={hasPKReferenced}
-          replaceCheckLabelMessage={resourcesContext.messages['replaceDataPKInUse']}
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableSchema, {
-            datasetSchemaId: designerState.datasetSchemaId,
-            datasetId: datasetId,
-            tableSchemaId: table.tableSchemaId
-          })}`}
-        />
-      )}
+          </div>
+        )}
+        {renderAllFields()}
+        {renderErrors(errorMessageAndTitle.title, errorMessageAndTitle.message, errorMessageAndTitle.focusElement)}
+        {!isErrorDialogVisible && isDeleteDialogVisible && renderConfirmDialog()}
+        {designerState.isImportTableSchemaDialogVisible && (
+          <CustomFileUpload
+            accept=".csv"
+            chooseLabel={resourcesContext.messages['selectFile']}
+            className={styles.FileUpload}
+            dialogClassName={styles.Dialog}
+            dialogHeader={`${resourcesContext.messages['importTableSchemaDialogHeader']} ${table.tableSchemaName}`}
+            dialogOnHide={() => manageDialogs('isImportTableSchemaDialogVisible', false)}
+            dialogVisible={designerState.isImportTableSchemaDialogVisible}
+            infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
+            invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
+            isDialog={true}
+            mode="advanced"
+            name="file"
+            onError={onImportTableSchemaError}
+            onUpload={onUpload}
+            replaceCheck={true}
+            replaceCheckDisabled={hasPKReferenced}
+            replaceCheckLabelMessage={resourcesContext.messages['replaceDataPKInUse']}
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableSchema, {
+              datasetSchemaId: designerState.datasetSchemaId,
+              datasetId: datasetId,
+              tableSchemaId: table.tableSchemaId
+            })}`}
+          />
+        )}
+      </div>
     </Fragment>
   );
 };

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 

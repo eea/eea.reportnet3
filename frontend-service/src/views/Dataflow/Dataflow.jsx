@@ -1505,6 +1505,7 @@ const Dataflow = () => {
         {dataflowState.isReportingDataflowDialogVisible && (
           <ManageDataflow
             dataflowId={dataflowId}
+            isCustodian={isLeadDesigner}
             isEditForm
             isVisible={dataflowState.isReportingDataflowDialogVisible}
             manageDialogs={manageDialogs}
@@ -1556,8 +1557,8 @@ const Dataflow = () => {
           <ApiKeyDialog
             dataflowId={dataflowId}
             dataProviderId={dataProviderId}
-            hasCustodianPermissions={dataflowState.hasCustodianPermissions}
             isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
+            isCustodian={isLeadDesigner}
             manageDialogs={manageDialogs}
           />
         )}

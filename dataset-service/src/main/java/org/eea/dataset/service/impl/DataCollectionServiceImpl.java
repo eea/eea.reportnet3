@@ -1352,8 +1352,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
 
       // Create EUDataset-%s-STEWARD_SUPPORT
-      groups.add(createGroup(euDatasetId, ResourceTypeEnum.EU_DATASET,
-          SecurityRoleEnum.STEWARD_SUPPORT));
+      groups.add(
+          createGroup(euDatasetId, ResourceTypeEnum.EU_DATASET, SecurityRoleEnum.STEWARD_SUPPORT));
 
 
       // Assign DataCollection-%s-DATA_STEWARD
@@ -1451,7 +1451,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         // Assign ReferenceDataset-%s-STEWARD_SUPPORT
         for (UserRepresentationVO custodianSupport : custodiansSupport) {
           assignments.add(createAssignments(referenceDatasetId, custodianSupport.getEmail(),
-              ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+              ResourceGroupEnum.REFERENCEDATASET_STEWARD_SUPPORT));
         }
 
       }
@@ -1488,8 +1488,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_OBSERVER));
 
       // Create Dataset-%s-STEWARD_SUPPORT
-      groups.add(createGroup(entry.getKey(), ResourceTypeEnum.DATASET,
-          SecurityRoleEnum.STEWARD_SUPPORT));
+      groups.add(
+          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.STEWARD_SUPPORT));
 
       // Create Dataset-%s-LEAD_REPORTER
       groups.add(

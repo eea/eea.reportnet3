@@ -58,7 +58,9 @@ export const MyFilters = ({
   const calendarRefs = useRef([]);
 
   useLayoutEffect(() => {
-    if (!isEmpty(data)) loadFilters();
+    if (!isEmpty(data)) {
+      loadFilters();
+    }
   }, [data]);
 
   useEffect(() => {
@@ -97,12 +99,16 @@ export const MyFilters = ({
   }, [data, viewType]);
 
   useEffect(() => {
-    if (getFilteredData) getFilteredData(filteredData);
+    if (getFilteredData) {
+      getFilteredData(filteredData);
+    }
   }, [filteredData]);
 
   const applyFilters = () => {
     try {
-      if (isEmpty(filterBy)) return data;
+      if (isEmpty(filterBy)) {
+        return data;
+      }
 
       return onApplyFilters({ filterBy });
     } catch (error) {
@@ -290,13 +296,17 @@ export const MyFilters = ({
   };
 
   const renderDropdown = option => {
-    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderDropdown(nestedOption));
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(nestedOption => renderDropdown(nestedOption));
+    }
 
     return <Dropdown />;
   };
 
   const renderInput = option => {
-    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderInput(nestedOption));
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(nestedOption => renderInput(nestedOption));
+    }
 
     return (
       <div className={styles.block} key={option.key}>
@@ -325,7 +335,9 @@ export const MyFilters = ({
   };
 
   const renderMultiSelect = option => {
-    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));
+    }
 
     return (
       <div className={`${styles.block}`} key={option.key}>
@@ -336,6 +348,7 @@ export const MyFilters = ({
           className={styles.multiselectFilter}
           filter={option?.showInput}
           headerClassName={styles.selectHeader}
+          id={option.key}
           inputClassName={`p-float-label ${styles.label}`}
           inputId={`${option.key}_input`}
           isFilter={true}

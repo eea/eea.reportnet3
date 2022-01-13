@@ -1,7 +1,6 @@
 package org.eea.dataset.service.impl;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -19,13 +18,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipOutputStream;
 import javax.transaction.Transactional;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -81,7 +76,6 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.PaMService;
-import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.helper.PostgresBulkImporter;
 import org.eea.exception.EEAErrorMessage;
@@ -95,7 +89,6 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
-import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -111,7 +104,6 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
-import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -159,11 +151,6 @@ public class DatasetServiceImpl implements DatasetService {
 
   /** The Constant DATASET_ID: {@value}. */
   private static final String DATASET_ID = "dataset_%s";
-
-  /** The Constant FILE_PUBLIC_DATASET_PATTERN_NAME. */
-  private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s";
-
-
 
   /** The field max length. */
   @Value("${dataset.fieldMaxLength}")
@@ -854,36 +841,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
-   * Export file.
-   *
-   * @param datasetId the dataset id
-   * @param mimeType the mime type
-   * @param tableSchemaId the table schema id
-   *
-   * @return the byte[]
-   *
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Override
-  @Transactional
-  public byte[] exportFile(Long datasetId, String mimeType, final String tableSchemaId)
-      throws EEAException, IOException {
-    // Get the dataFlowId from the metabase
-    Long idDataflow = getDataFlowIdById(datasetId);
-
-    // Find if the dataset type is EU to include the countryCode
-    DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
-    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
-        || DatasetTypeEnum.COLLECTION.equals(datasetType);
-
-    final IFileExportContext contextExport = fileExportFactory.createContext(mimeType);
-    LOG.info("End of exportFile");
-    return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode,
-        false);
-  }
-
-  /**
    * Export file through integration.
    *
    * @param datasetId the dataset id
@@ -1474,11 +1431,12 @@ public class DatasetServiceImpl implements DatasetService {
           schemasRepository.findByIdDataSetSchema(new ObjectId(originDesign.getDatasetSchema()));
       if (StringUtils.isNoneBlank(originDesign.getDatasetSchema())) {
 
-        List<TableSchema> listOfTablesFiltered = getTablesFromSchema(schema);
+        List<TableSchema> listOfTablesFiltered = getTablesFromSchema(schema, true);
+        List<TableSchema> listOfTables = getTablesFromSchema(schema, false);
         // if there are tables of the origin dataset with tables ToPrefill, then we'll copy the data
         if (!listOfTablesFiltered.isEmpty()) {
           Map<String, String> dictionary =
-              filterDictionary(dictionaryOriginTargetObjectId, listOfTablesFiltered);
+              filterDictionary(dictionaryOriginTargetObjectId, listOfTables);
           List<String> tableSchemasIdPrefill = new ArrayList<>();
           listOfTablesFiltered.stream()
               .forEach(t -> tableSchemasIdPrefill.add(t.getIdTableSchema().toString()));
@@ -1690,7 +1648,7 @@ public class DatasetServiceImpl implements DatasetService {
   private void spreadDataPrefill(DataSetSchema datasetSchema, Long originId,
       DataSetMetabase targetDataset) {
     // get tables from schema
-    List<TableSchema> listOfTablesFiltered = getTablesFromSchema(datasetSchema);
+    List<TableSchema> listOfTablesFiltered = getTablesFromSchema(datasetSchema, true);
     // get the data from designs datasets
     if (!listOfTablesFiltered.isEmpty()) {
       TenantResolver.setTenantName(String.format(DATASET_ID, originId));
@@ -1889,17 +1847,21 @@ public class DatasetServiceImpl implements DatasetService {
     });
   }
 
+
+
   /**
    * Gets the tables from schema.
    *
    * @param schema the schema
+   * @param prefillChecked the prefill checked
    * @return the tables from schema
    */
-  private List<TableSchema> getTablesFromSchema(DataSetSchema schema) {
+  private List<TableSchema> getTablesFromSchema(DataSetSchema schema, Boolean prefillChecked) {
     List<TableSchema> listOfTables = schema.getTableSchemas();
     List<TableSchema> listOfTablesFiltered = new ArrayList<>();
     for (TableSchema desingTableToPrefill : listOfTables) {
-      if (Boolean.TRUE.equals(desingTableToPrefill.getToPrefill())) {
+      if (Boolean.TRUE.equals(desingTableToPrefill.getToPrefill())
+          || Boolean.FALSE.equals(prefillChecked)) {
         listOfTablesFiltered.add(desingTableToPrefill);
       }
     }
@@ -2793,52 +2755,6 @@ public class DatasetServiceImpl implements DatasetService {
     return schema;
   }
 
-
-  /**
-   * Save public files.
-   *
-   * @param dataflowId the dataflow id
-   * @param dataSetDataProvider the data set data provider
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Override
-  public void savePublicFiles(Long dataflowId, Long dataSetDataProvider) throws IOException {
-
-    LOG.info("Start creating files. DataflowId: {} DataProviderId: {}", dataflowId,
-        dataSetDataProvider);
-
-    List<RepresentativeVO> representativeList =
-        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
-
-    // we find representative
-    RepresentativeVO representative = representativeList.stream().filter(
-        representativeData -> representativeData.getDataProviderId().equals(dataSetDataProvider))
-        .findAny().orElse(null);
-
-    if (null != representative) {
-      // we create the dataflow folder to save it
-
-      File directoryDataflow = new File(pathPublicFile, "dataflow-" + dataflowId);
-      File directoryDataProvider =
-          new File(directoryDataflow, "dataProvider-" + representative.getDataProviderId());
-      // we create the dataprovider folder to save it andwe always delete it and put new files
-      FileUtils.deleteDirectory(directoryDataProvider);
-      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
-      if (!TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
-        createAllDatasetFiles(dataflowId, representative.getDataProviderId());
-      } else {
-        // we delete all file names in the table dataset
-        List<DataSetMetabase> datasetMetabaseList = dataSetMetabaseRepository
-            .findByDataflowIdAndDataProviderId(dataflowId, representative.getDataProviderId());
-        datasetMetabaseList.stream().forEach(datasetFileName -> {
-          datasetFileName.setPublicFileName(null);
-        });
-        dataSetMetabaseRepository.saveAll(datasetMetabaseList);
-      }
-    }
-  }
-
-
   /**
    * Export public file.
    *
@@ -2892,158 +2808,6 @@ public class DatasetServiceImpl implements DatasetService {
     }
     return file;
   }
-
-
-
-  /**
-   * Creeate all dataset files.
-   *
-   * @param dataflowId the dataflow id
-   * @param dataProviderId the data provider id
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  private void createAllDatasetFiles(Long dataflowId, Long dataProviderId) throws IOException {
-
-    DataProviderVO dataProvider = representativeControllerZuul.findDataProviderById(dataProviderId);
-
-    List<DataSetMetabase> datasetMetabaseList =
-        dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
-
-    // now we create all files depends if they are avaliable
-    for (DataSetMetabase datasetToFile : datasetMetabaseList) {
-      if (schemasRepository
-          .findAvailableInPublicByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()))) {
-
-        // we put the good in the correct field
-        List<DesignDataset> desingDataset = designDatasetRepository.findByDataflowId(dataflowId);
-        // we find the name of the dataset to asing it for file
-        String datasetDesingName = "";
-        for (DesignDataset designDatasetVO : desingDataset) {
-          if (designDatasetVO.getDatasetSchema()
-              .equalsIgnoreCase(datasetToFile.getDatasetSchema())) {
-            datasetDesingName = designDatasetVO.getDataSetName();
-          }
-        }
-
-        try {
-          // 1º we create
-          byte[] file = exportFile(datasetToFile.getId(), FileTypeEnum.XLSX.getValue(), null);
-          // we save the file in its files
-          if (null != file) {
-            String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
-                dataProvider.getCode(), datasetDesingName);
-            String nameFileScape = nameFileUnique + ".xlsx";
-
-            // we create the files and zip with the document if it is necessary
-            createFilesAndZip(dataflowId, dataProviderId, datasetToFile, file, nameFileUnique,
-                nameFileScape);
-
-
-            // we save the file in metabase with the name without the route
-            datasetToFile.setPublicFileName(nameFileUnique + ".zip");
-            dataSetMetabaseRepository.save(datasetToFile);
-          }
-        } catch (EEAException e) {
-          LOG_ERROR.error(
-              "File not created in dataflow {} with dataprovider {} with datasetId {} message {}",
-              dataflowId, datasetToFile.getDataProviderId(), datasetToFile.getId(), e.getMessage(),
-              e);
-        }
-        LOG.info("Start files created in DataflowId: {} with DataProviderId: {}", dataflowId,
-            datasetToFile.getDataProviderId());
-      } else {
-        datasetToFile.setPublicFileName(null);
-        dataSetMetabaseRepository.save(datasetToFile);
-      }
-    }
-  }
-
-  /**
-   * Creates the files and zip.
-   *
-   * @param dataflowId the dataflow id
-   * @param dataProviderId the data provider id
-   * @param datasetToFile the dataset to file
-   * @param file the file
-   * @param nameFileUnique the name file unique
-   * @param nameFileScape the name file scape
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  private void createFilesAndZip(Long dataflowId, Long dataProviderId,
-      DataSetMetabase datasetToFile, byte[] file, String nameFileUnique, String nameFileScape)
-      throws IOException {
-
-    // we create folder to save the file.zip
-    File fileFolderProvider = null;
-    if (dataProviderId != null) {
-      fileFolderProvider = new File((new File(pathPublicFile, "dataflow-" + dataflowId.toString())),
-          "dataProvider-" + dataProviderId.toString());
-    } else {
-      fileFolderProvider = new File(pathPublicFile, "dataflow-" + dataflowId.toString());
-    }
-    fileFolderProvider.mkdirs();
-
-    // we create the file.zip
-    File fileWriteZip = null;
-    if (dataProviderId != null) {
-      fileWriteZip =
-          new File(new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-              "dataProvider-" + dataProviderId.toString()), nameFileUnique + ".zip");
-    } else {
-      fileWriteZip = new File(new File(pathPublicFile, "dataflow-" + dataflowId.toString()),
-          nameFileUnique + ".zip");
-    }
-    // create the context to add all files in a treemap inside to attachment and file information
-    try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
-      // we get the dataschema and check every table to see if find any field attachemnt
-      DataSetSchema dataSetSchema =
-          schemasRepository.findByIdDataSetSchema(new ObjectId(datasetToFile.getDatasetSchema()));
-      for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
-
-        // we find if in any table have one field type ATTACHMENT
-        List<FieldSchema> fieldSchemaAttachment = tableSchema.getRecordSchema().getFieldSchema()
-            .stream().filter(field -> DataType.ATTACHMENT.equals(field.getType()))
-            .collect(Collectors.toList());
-        if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
-
-          LOG.info("We  are in tableSchema with id {} looking if we have attachments",
-              tableSchema.getIdTableSchema());
-          // We took every field for every table
-          for (FieldSchema fieldAttach : fieldSchemaAttachment) {
-            List<AttachmentValue> attachmentValue = attachmentRepository
-                .findAllByIdFieldSchemaAndValueIsNotNull(fieldAttach.getIdFieldSchema().toString());
-
-            // if there are filled we create a folder and inside of any folder we create the fields
-            if (!CollectionUtils.isEmpty(attachmentValue)) {
-              LOG.info(
-                  "We  are in tableSchema with id {}, checking field {} and we have attachments files",
-                  tableSchema.getIdTableSchema(), fieldAttach.getIdFieldSchema());
-
-              for (AttachmentValue attachment : attachmentValue) {
-                try {
-                  ZipEntry eFieldAttach = new ZipEntry(
-                      tableSchema.getNameTableSchema() + "/" + attachment.getFileName());
-                  out.putNextEntry(eFieldAttach);
-                  out.write(attachment.getContent(), 0, attachment.getContent().length);
-                } catch (ZipException e) {
-                  LOG.info("Error creating file {} because already exist", attachment.getFileName(),
-                      e);
-                }
-                out.closeEntry();
-              }
-            }
-          }
-        }
-      }
-
-      ZipEntry e = new ZipEntry(nameFileScape);
-      out.putNextEntry(e);
-      out.write(file, 0, file.length);
-      out.closeEntry();
-      LOG.info("We create file {} in the route ", fileWriteZip);
-    }
-  }
-
 
   /**
    * Gets the table schema.
@@ -3246,50 +3010,6 @@ public class DatasetServiceImpl implements DatasetService {
     } catch (IOException e) {
       LOG.error("ETLExport error in  Dataset: {}", datasetId, e);
     }
-  }
-
-  /**
-   * Creates the reference dataset files.
-   *
-   * @param dataset the dataset
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Override
-  @Transactional
-  public void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
-
-    List<DesignDataset> desingDataset =
-        designDatasetRepository.findByDataflowId(dataset.getDataflowId());
-    // look for the name of the design dataset to put the right name to the file
-    String datasetDesingName = "";
-    for (DesignDataset designDatasetVO : desingDataset) {
-      if (designDatasetVO.getDatasetSchema().equalsIgnoreCase(dataset.getDatasetSchema())) {
-        datasetDesingName = designDatasetVO.getDataSetName();
-      }
-    }
-
-    try {
-      // create the excel file
-      byte[] file = exportFile(dataset.getId(), FileTypeEnum.XLSX.getValue(), null);
-      // we save the file in its files
-      if (null != file) {
-        String nameFileUnique = String.format("%s", datasetDesingName);
-        String nameFileScape = nameFileUnique + ".xlsx";
-
-        // we create the files and zip with the attachment if it is necessary
-        createFilesAndZip(dataset.getDataflowId(), null, dataset, file, nameFileUnique,
-            nameFileScape);
-
-        // we save the file in metabase with the name without the route
-        dataset.setPublicFileName(nameFileUnique + ".zip");
-        dataSetMetabaseRepository.save(dataset);
-      }
-    } catch (EEAException e) {
-      LOG_ERROR.error("File not created in dataflow {}. Message: {}", dataset.getDataflowId(),
-          e.getMessage(), e);
-    }
-    LOG.info("File created in dataflowId {}", dataset.getDataflowId());
-
   }
 
   /**
@@ -3503,7 +3223,8 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public Boolean getCheckView(@DatasetId Long datasetId) {
+  public Boolean getCheckView(Long datasetId) {
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     return datasetRepository.findViewUpdatedById(datasetId);
   }
 

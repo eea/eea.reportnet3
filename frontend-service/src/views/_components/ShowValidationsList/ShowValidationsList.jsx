@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, memo, useContext, useEffect, useReducer, useState } from 'react';
 import ReactDOMServer from 'react-dom/server';
 
@@ -429,10 +428,11 @@ export const ShowValidationsList = memo(
         validationsServiceList?.validations?.map(validation => {
           return {
             automaticType: validation.automaticType,
-            id: validation.id,
             description: validation.description,
+            id: validation.id,
             message: validation.message,
-            name: validation.name
+            name: validation.name,
+            shortCode: validation.shortCode
           };
         })
       );

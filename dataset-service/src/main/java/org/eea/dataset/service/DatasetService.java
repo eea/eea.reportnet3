@@ -10,7 +10,6 @@ import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
@@ -121,21 +120,6 @@ public interface DatasetService {
    * @param datasetId the dataset id
    */
   void deleteTableBySchema(String tableSchemaId, @DatasetId Long datasetId);
-
-  /**
-   * Export file.
-   *
-   * @param datasetId the dataset id
-   * @param mimeType the mime type
-   * @param tableSchemaId the table schema id
-   *
-   * @return the byte[]
-   *
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  byte[] exportFile(@DatasetId Long datasetId, String mimeType, String tableSchemaId)
-      throws EEAException, IOException;
 
   /**
    * Creates the records.
@@ -522,17 +506,6 @@ public interface DatasetService {
   void createLockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
       String userName) throws EEAException;
 
-
-  /**
-   * Save public file.
-   *
-   * @param dataflowId the dataflow id
-   * @param dataSetDataProvider the data set data provider
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  void savePublicFiles(Long dataflowId, Long dataSetDataProvider) throws IOException;
-
-
   /**
    * Export public file.
    *
@@ -608,14 +581,6 @@ public interface DatasetService {
    */
   FailedValidationsDatasetVO getTotalFailedValidationsByIdDataset(Long datasetId,
       String idTableSchema);
-
-  /**
-   * Creates the reference dataset files.
-   *
-   * @param dataset the dataset
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException;
 
   /**
    * Update check view.

@@ -1,0 +1,55 @@
+@import '_styles/mixins';
+
+.checkedValueColumn {
+  text-align: center;
+  .icon {
+    color: var(--main-color-font);
+  }
+}
+
+.dialogContent,
+.noDataContent {
+  min-height: 56vh;
+}
+
+.dialogWidth {
+  min-width: 70vw;
+}
+
+.loadingSpinner {
+  height: 56vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
+}
+
+.noDataContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  flex-direction: column;
+  button {
+    padding: 0.5em 1em;
+  }
+}
+
+.editButtonWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.editRowButton {
+  border: 1px solid var(--general-border-color) !important;
+  @include shadow-0em;
+  margin-left: 3px !important;
+  &:enabled:hover {
+    border-color: var(--button-secondary-border-color-hover) !important;
+  }
+}
