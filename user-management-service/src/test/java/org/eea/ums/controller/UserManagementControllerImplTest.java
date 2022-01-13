@@ -236,7 +236,7 @@ public class UserManagementControllerImplTest {
     authentication.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authentication);
     Assert.assertEquals("provider@reportnet.net",
-        userManagementController.getUserByUserId("userId").getEmail());
+        userManagementController.getUserByUserId().getEmail());
   }
 
   @Test
@@ -248,7 +248,7 @@ public class UserManagementControllerImplTest {
     details.put(AuthenticationDetails.USER_ID, "userId");
     authentication.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authentication);
-    Assert.assertNull(userManagementController.getUserByUserId("userId"));
+    Assert.assertNull(userManagementController.getUserByUserId());
   }
 
   @Test

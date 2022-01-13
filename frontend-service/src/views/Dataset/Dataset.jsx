@@ -93,7 +93,7 @@ export const Dataset = ({ isReferenceDataset }) => {
     name: ''
   });
   const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
-  const [isCustodianOrSteward, setIsCustodianOrSteward] = useState(false);
+  const [hasCustodianPermissions, setHasCustodianPermissions] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
@@ -149,7 +149,7 @@ export const Dataset = ({ isReferenceDataset }) => {
   }, [metadata]);
 
   useEffect(() => {
-    if (isCustodianOrSteward) {
+    if (hasCustodianPermissions) {
       leftSideBarContext.addModels([
         {
           className: 'dataflow-showPublicInfo-help-step',
@@ -161,7 +161,7 @@ export const Dataset = ({ isReferenceDataset }) => {
         }
       ]);
     }
-  }, [isCustodianOrSteward, isReferenceDataset, isReferenceDatasetRegularDataflow]);
+  }, [isReferenceDataset, isReferenceDatasetRegularDataflow, hasCustodianPermissions]);
 
   useEffect(() => {
     if (!isNil(tableSchema) && tableSchema.length > 0) {
@@ -184,21 +184,30 @@ export const Dataset = ({ isReferenceDataset }) => {
             `${config.permissions.prefixes.DATASET}${datasetId}`
           ) ||
             userContext.hasPermission(
-              [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
+              [
+                config.permissions.roles.CUSTODIAN.key,
+                config.permissions.roles.STEWARD.key,
+                config.permissions.roles.STEWARD_SUPPORT.key
+              ],
               `${config.permissions.prefixes.TESTDATASET}${datasetId}`
             ) ||
-            (isCustodianOrSteward && isDatasetUpdatable)
+            (hasCustodianPermissions && isDatasetUpdatable)
         );
         setIsTestDataset(
           userContext.hasPermission(
-            [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
+            [
+              config.permissions.roles.CUSTODIAN.key,
+              config.permissions.roles.STEWARD.key,
+              config.permissions.roles.STEWARD_SUPPORT.key
+            ],
             `${config.permissions.prefixes.TESTDATASET}${datasetId}`
           )
         );
-        setIsCustodianOrSteward(
+        setHasCustodianPermissions(
           userContext.hasContextAccessPermission(config.permissions.prefixes.REFERENCEDATASET, datasetId, [
             config.permissions.roles.CUSTODIAN.key,
-            config.permissions.roles.STEWARD.key
+            config.permissions.roles.STEWARD.key,
+            config.permissions.roles.STEWARD_SUPPORT.key
           ])
         );
       }
@@ -713,13 +722,17 @@ export const Dataset = ({ isReferenceDataset }) => {
         datasetSchema.tables.map(tableSchema => {
           tableSchemaList.push({ name: tableSchema.tableSchemaName, id: tableSchema.tableSchemaId });
           return {
-            id: tableSchema['tableSchemaId'],
-            name: tableSchema['tableSchemaName'],
+            description: tableSchema.description || tableSchema.tableSchemaDescription,
+            id: tableSchema.tableSchemaId,
+            name: tableSchema.tableSchemaName,
+            notEmpty: tableSchema.notEmpty,
+            hasInfoTooltip: true,
             hasErrors: {
-              ...datasetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
+              ...datasetStatistics.tables.filter(table => table.tableSchemaId === tableSchema.tableSchemaId)[0]
             }.hasErrors,
-            fixedNumber: tableSchema['tableSchemaFixedNumber'],
-            readOnly: tableSchema['tableSchemaReadOnly']
+            fixedNumber: tableSchema.tableSchemaFixedNumber,
+            readOnly: tableSchema.tableSchemaReadOnly,
+            toPrefill: tableSchema.tableSchemaToPrefill
           };
         })
       );

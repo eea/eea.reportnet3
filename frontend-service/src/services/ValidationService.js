@@ -116,6 +116,10 @@ export const ValidationService = {
     return validationsList;
   },
 
+  getAllQCsHistoricInfo: async datasetId => await ValidationRepository.getAllQCsHistoricInfo(datasetId),
+
+  getQcHistoricInfo: async (datasetId, ruleId) => await ValidationRepository.getQcHistoricInfo(datasetId, ruleId),
+
   generateQCRulesFile: async datasetId => await ValidationRepository.generateQCRulesFile(datasetId),
 
   generateShowValidationsFile: async datasetId => await ValidationRepository.generateShowValidationsFile(datasetId),
@@ -218,5 +222,7 @@ export const ValidationService = {
   },
 
   evaluateSqlSentence: async (datasetId, sqlSentence) =>
-    await ValidationRepository.evaluateSqlSentence(datasetId, sqlSentence)
+    await ValidationRepository.evaluateSqlSentence(datasetId, sqlSentence),
+
+  viewUpdated: async datasetId => await ValidationRepository.viewUpdated(datasetId)
 };

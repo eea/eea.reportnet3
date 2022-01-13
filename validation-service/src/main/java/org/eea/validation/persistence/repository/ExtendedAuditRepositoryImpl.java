@@ -34,8 +34,9 @@ public class ExtendedAuditRepositoryImpl implements ExtendedAuditRepository {
    * @param user the user
    */
   @Override
-  public void createAudit(Rule rule, UserRepresentationVO user) {
+  public void createAudit(Rule rule, UserRepresentationVO user, Long datasetId) {
     Audit audit = new Audit();
+    audit.setDatasetId(datasetId);
     RuleHistoricInfo ruleHistoricInfo = new RuleHistoricInfo();
     ruleHistoricInfo.setRuleInfoId(new ObjectId());
     ruleHistoricInfo.setMetadata(true);
@@ -96,5 +97,19 @@ public class ExtendedAuditRepositoryImpl implements ExtendedAuditRepository {
     Criteria criteria = Criteria.where("_id").is(audit.getIdAudit());
     mongoTemplate.updateFirst(Query.query(criteria), update, "Audit");
   }
+
+  /**
+   * Gets the audits by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the audits by dataset id
+   */
+  @Override
+  public List<Audit> getAuditsByDatasetId(Long datasetId) {
+    Query query = new Query();
+    query.addCriteria(Criteria.where("datasetId").is(datasetId));
+    return mongoTemplate.find(query, Audit.class);
+  }
+
 
 }

@@ -3,8 +3,6 @@ import { Fragment, useContext, useEffect, useReducer } from 'react';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import dayjs from 'dayjs';
-
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
@@ -21,7 +19,6 @@ import { Spinner } from 'views/_components/Spinner';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { HistoricReleaseService } from 'services/HistoricReleaseService';
 
@@ -30,12 +27,13 @@ import { historicReleasesReducer } from './_functions/Reducers/historicReleasesR
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
+import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
+
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
 
   const [historicReleasesState, historicReleasesDispatch] = useReducer(historicReleasesReducer, {
     data: [],
@@ -44,6 +42,8 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     filteredData: [],
     isLoading: true
   });
+
+  const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
   useEffect(() => {
     onLoadHistoricReleases();
@@ -108,15 +108,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   };
 
   const renderReleaseDateTemplate = rowData => {
-    return (
-      <div className={styles.checkedValueColumn}>
-        {dayjs(rowData.releaseDate).format(
-          `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-            userContext.userProps.amPm24h ? '' : ' A'
-          }`
-        )}
-      </div>
-    );
+    return <div className={styles.checkedValueColumn}>{getDateTimeFormatByUserPreferences(rowData.releaseDate)}</div>;
   };
 
   const renderDataProviderLinkBodyColumn = rowData => (

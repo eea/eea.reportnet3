@@ -1446,7 +1446,8 @@ public class DatasetControllerImpl implements DatasetController {
    * @return the check view
    */
   @Override
-  @GetMapping("/private/viewUpdated/{datasetId}")
+  @GetMapping("/{datasetId}/viewUpdated")
+  @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Mark the view as updated or not", hidden = true)
   public Boolean getCheckView(@ApiParam(type = "Long", value = "Dataset Id",
       example = "0") @PathVariable("datasetId") Long datasetId) {

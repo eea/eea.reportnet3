@@ -1,20 +1,5 @@
 @import '_styles/mixins';
 
-.checkReadOnly {
-  margin-left: 3.5rem !important;
-  width: 70px;
-}
-.checkRequired {
-  margin-left: 3.5rem !important;
-  width: 70px;
-}
-.checkPK {
-  margin-left: 1rem !important;
-}
-.checkBulkDelete {
-  margin-left: 1rem !important;
-  padding-top: 3px !important;
-}
 .draggableFieldDiv .inputField {
   margin-left: 2.5rem;
   width: 20%;
@@ -39,13 +24,54 @@
     width: 25%;
   }
 }
+
+.emptyCodelistOrLink {
+  display: none;
+}
+
 .draggableFieldDiv {
-  display: flex;
-  justify-items: center;
-  flex-flow: wrap;
-  align-items: baseline;
-  margin: 0px 0 5px 0;
+  display: table;
   width: 100%;
+  margin: 5% auto 0;
+  text-align: center;
+  background-color: var(--bg-table);
+  border: 1px solid var(--box-shadow-table);
+  border-radius: 4px;
+  box-shadow: 0px 4px var(--box-shadow-table);
+  .draggableFieldContentCell {
+    height: 3em;
+    display: flex;
+    justify-content: center;
+    .draggableFieldCell {
+      display: flex;
+      flex-direction: row;
+      width: 50%;
+      border-bottom: 1px solid var(--box-shadow-table);
+      &:first-child {
+        display: flex;
+        text-align: left;
+        width: 50%;
+        font-weight: bold;
+        padding: 0 1em;
+        align-items: center;
+      }
+      &:last-child {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0 1em;
+        div > svg {
+          bottom: 0.7rem;
+        }
+        div > label > svg {
+          display: none;
+        }
+      }
+      button {
+        background-color: var(--bg-table-button);
+      }
+    }
+  }
 }
 
 .draggableFieldDiv:active {
@@ -67,22 +93,18 @@
 }
 
 .dropdownFieldType {
-  margin-left: 0.4rem;
-  width: 20%;
-  height: 33px;
-  min-width: 188px;
+  width: 100%;
+  text-align: left;
   &.withCodeListOrLink {
-    width: 20%;
-    min-width: 188px;
+    width: 100%;
   }
 }
 
 .codelistButton {
-  margin-left: 0.4rem !important;
   border: 1px solid var(--general-border-color) !important;
-  width: 8%;
+  padding: 0 0.5em !important;
   height: 1.95rem;
-  width: 4rem;
+  width: 100%;
   &:hover {
     border-color: var(--button-secondary-border-color-hover) !important;
   }
@@ -92,18 +114,19 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 4rem;
+  width: 8em;
   font-size: 13px;
+  text-align: left;
 }
 
 .button {
+  width: 2.5em;
   padding-top: 0.4rem;
   padding-bottom: 0.35rem;
-  margin-left: 0.4rem;
   border-radius: 3px;
-  height: 1.95rem;
   border: 1px solid var(--general-border-color);
   color: var(--main-font-color);
+  background-color: var(--bg-table-button);
   &:hover {
     background-color: var(--button-secondary-transparent-bg-hover);
     color: var(--main-font-color);
@@ -127,6 +150,15 @@
   cursor: not-allowed;
   &:hover {
     background-color: transparent;
+  }
+}
+
+.dragAndDropIcon {
+  width: 32px;
+}
+@media (max-width: 1090px) {
+  .dragAndDropIcon {
+    display: none;
   }
 }
 
@@ -155,11 +187,12 @@
     border: 2px dashed var(--field-designer-separator-border-color) !important;
     box-shadow: var(--field-designer-separator-box-shadow) !important;
     display: block;
+    grid-area: 1 / 1 / 2 / 11;
     height: 30px;
     margin: 5px 0;
     opacity: 0.7;
     padding: 5px;
-    width: 94%;
+    width: 98%;
   }
 }
 
@@ -175,9 +208,30 @@
   animation: flip 0.5s;
 }
 
+.emptyArrow {
+  display: none;
+}
+
+.moveArrows {
+  cursor: pointer;
+  width: 32px;
+}
+
 .qcButton {
   border: 1px solid var(--general-border-color) !important;
   align-self: center;
+  background-color: var(--bg-table-button) !important;
+  span {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    &:first-child {
+      display: none;
+    }
+    &:last-child {
+      padding: 0.5em !important;
+    }
+  }
   &:hover {
     border-color: var(--button-secondary-border-color-hover) !important;
   }
@@ -225,5 +279,118 @@
   100% {
     border: 1px dashed var(--c-gray-75);
     opacity: 0.7;
+  }
+}
+
+.PKWrap {
+  .PKInfoButton {
+    background-color: var(--bg-table-button) !important;
+    border-radius: 50% !important;
+    color: var(--datatable-header-info-button-color) !important;
+    font-size: 12pt !important;
+    height: 0.7em !important;
+    width: 0.7em !important;
+    margin-left: 0.4rem !important;
+    margin-right: 0.9rem !important;
+    margin-top: -1rem !important;
+    :global .pi-info-circle {
+      padding: 0 !important;
+      top: 40%;
+    }
+    > span {
+      left: 46% !important;
+      margin-left: -0.48em !important;
+      margin-top: -0.5em !important;
+    }
+    &:focus {
+      box-shadow: none !important;
+    }
+  }
+}
+
+@media (max-width: 1089px) {
+  .draggableFieldContentCell {
+    .draggableFieldCell {
+      &:last-child {
+        button {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: 1090px) {
+  .emptyCodelistOrLink {
+    display: block;
+    width: 4rem;
+    margin-right: 0.4rem;
+  }
+  .qcButton {
+    span {
+      &:first-child {
+        display: block;
+      }
+      &:last-child {
+        padding: 0.429em 1em 0.429em 2.25em !important;
+      }
+    }
+  }
+
+  .codelistButton {
+    width: 4rem;
+    span {
+      width: 100%;
+    }
+  }
+  .smallItems {
+    width: 5%;
+  }
+
+  .bigItems {
+    width: 16%;
+  }
+
+  .draggableFieldDiv {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+
+    .draggableFieldContentCell {
+      height: auto;
+      .draggableFieldCell {
+        margin-right: 0.5em;
+        width: 100%;
+        border: none;
+        padding: 3px 0;
+        &:first-child {
+          display: none;
+          padding-top: 10px;
+          padding-bottom: 10px;
+        }
+        &:last-child {
+          padding: 3px 0;
+          div > svg {
+            bottom: 0.8rem;
+          }
+          div > label > svg {
+            display: revert;
+            float: right;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: 1740px) {
+  .bigItems {
+    width: 20%;
   }
 }

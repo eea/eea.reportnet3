@@ -10,14 +10,11 @@ export const qcListReducer = (state, { type, payload }) => {
     case 'IS_DELETE_DIALOG_VISIBLE':
       return { ...state, isDeleteDialogVisible: payload.value };
 
-    case 'IS_FILTERED':
-      return { ...state, filtered: payload.value };
-
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
-    case 'ON_LOAD_VALIDATION_ID':
-      return { ...state, validationId: payload.value };
+    case 'SET_VALIDATION_ID':
+      return { ...state, validationId: payload };
 
     case 'ON_LOAD_VALIDATION_LIST':
       return { ...state, validationList: payload.validationsServiceList };
@@ -59,6 +56,9 @@ export const qcListReducer = (state, { type, payload }) => {
 
     case 'UPDATE_VALIDATION_RULE':
       return { ...state, editingRows: state.editingRows.filter(editingRow => editingRow.id !== payload.id) };
+
+    case 'SET_IS_HISTORY_DIALOG_VISIBLE':
+      return { ...state, isHistoryDialogVisible: payload };
 
     default: {
       return state;
