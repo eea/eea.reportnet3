@@ -77,35 +77,35 @@ export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, v
   };
 
   const getHistoryColumns = () => {
-    const headers = [
+    const columns = [
       {
-        id: 'user',
-        label: resourcesContext.messages['user']
+        key: 'user',
+        header: resourcesContext.messages['user']
       },
       {
-        id: 'timestamp',
-        label: resourcesContext.messages['timestamp'],
+        key: 'timestamp',
+        header: resourcesContext.messages['timestamp'],
         template: timestampTemplate
       },
       {
-        id: 'expression',
-        label: resourcesContext.messages['expressionText'],
+        key: 'expression',
+        header: resourcesContext.messages['expressionText'],
         template: checkTemplate
       },
       {
-        id: 'metadata',
-        label: resourcesContext.messages['metadata'],
+        key: 'metadata',
+        header: resourcesContext.messages['metadata'],
         template: checkTemplate
       },
       {
-        id: 'status',
-        label: resourcesContext.messages['status'],
+        key: 'status',
+        header: resourcesContext.messages['status'],
         template: checkTemplate
       }
     ];
 
-    return headers.map(header => {
-      return <Column body={header.template} field={header.id} header={header.label} key={header.id} sortable />;
+    return columns.map(column => {
+      return <Column body={column.template} field={column.key} header={column.header} key={column.key} sortable />;
     });
   };
 
