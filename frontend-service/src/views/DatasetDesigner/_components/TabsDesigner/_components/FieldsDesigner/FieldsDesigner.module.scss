@@ -18,25 +18,28 @@
 .fieldDesignerWrapper:last-child {
   margin-bottom: 1rem;
 }
-.fieldsWrapper {
-  position: relative;
+
+.contentTable {
+  width: 100%;
   .spinner {
     position: absolute;
-    top: 40%;
+    top: 75%;
   }
 }
+
 .fieldsHeader {
-  display: flex;
-  flex-direction: row;
-  margin-bottom: 3px;
+  display: none;
   color: var(--main-font-color);
   font-weight: bold;
-  span {
-    width: 60px;
-    margin-left: 2.5rem;
-  }
+
   label {
-    &:nth-child(2) {
+    &:nth-child(2),
+    &:nth-child(3),
+    &:nth-child(4) {
+      text-align: center;
+      word-wrap: break-word;
+    }
+    /*  &:nth-child(2) {
       width: 75px;
     }
     &:nth-child(3) {
@@ -110,12 +113,11 @@
     .bulkCancelDeleteButtonTooltip {
       font-size: 9pt;
       font-style: italic;
-    }
+    }*/
   }
   .PKWrap {
-    > label {
-      margin-left: 0.5rem !important;
-    }
+    text-align: center;
+
     .PKInfoButton {
       background-color: var(--c-white-color) !important;
       border-radius: 50% !important;
@@ -214,4 +216,25 @@
 
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
   @include shadow-0em;
+}
+
+@media (min-width: 1090px) {
+  .fieldsHeader {
+    display: grid;
+    grid-template-columns: 5% 5% 5% 5% 16% 16% 16% 22% 5% 5%;
+    grid-template-rows: 1fr;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+  }
+}
+
+@media (min-width: 1750px) {
+  .PKWrap {
+    label {
+      margin-left: 1.2rem;
+    }
+  }
+  .fieldsHeader {
+    grid-template-columns: 5% 5% 5% 5% 20% 20% 20% 10% 3% 3%;
+  }
 }

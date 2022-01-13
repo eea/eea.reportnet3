@@ -34,15 +34,7 @@ const { applyDates, applyInputs, applyMultiSelects, applySearch } = ApplyFilters
 const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
-export const MyFilters = ({
-  className,
-  data = [],
-  getFilteredData,
-  isStrictMode,
-  onFilter,
-  options = [],
-  viewType
-}) => {
+export const MyFilters = ({ className, data = [], isStrictMode, onFilter, options = [], viewType }) => {
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
   const [filteredData, setFilteredData] = useRecoilState(filteredDataState(viewType));
@@ -58,7 +50,9 @@ export const MyFilters = ({
   const calendarRefs = useRef([]);
 
   useLayoutEffect(() => {
-    if (!isEmpty(data)) loadFilters();
+    if (!isEmpty(data)) {
+      loadFilters();
+    }
   }, [data]);
 
   useEffect(() => {
@@ -96,13 +90,11 @@ export const MyFilters = ({
     getSortDefaultValues(options);
   }, [data, viewType]);
 
-  useEffect(() => {
-    if (getFilteredData) getFilteredData(filteredData);
-  }, [filteredData]);
-
   const applyFilters = () => {
     try {
-      if (isEmpty(filterBy)) return data;
+      if (isEmpty(filterBy)) {
+        return data;
+      }
 
       return onApplyFilters({ filterBy });
     } catch (error) {
@@ -290,13 +282,17 @@ export const MyFilters = ({
   };
 
   const renderDropdown = option => {
-    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderDropdown(nestedOption));
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(nestedOption => renderDropdown(nestedOption));
+    }
 
     return <Dropdown />;
   };
 
   const renderInput = option => {
-    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderInput(nestedOption));
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(nestedOption => renderInput(nestedOption));
+    }
 
     return (
       <div className={styles.block} key={option.key}>
@@ -325,7 +321,9 @@ export const MyFilters = ({
   };
 
   const renderMultiSelect = option => {
-    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));
+    }
 
     return (
       <div className={`${styles.block}`} key={option.key}>
@@ -336,6 +334,7 @@ export const MyFilters = ({
           className={styles.multiselectFilter}
           filter={option?.showInput}
           headerClassName={styles.selectHeader}
+          id={option.key}
           inputClassName={`p-float-label ${styles.label}`}
           inputId={`${option.key}_input`}
           isFilter={true}

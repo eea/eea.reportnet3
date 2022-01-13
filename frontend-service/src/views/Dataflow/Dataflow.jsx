@@ -84,6 +84,7 @@ const Dataflow = () => {
     description: '',
     designDatasetSchemas: [],
     formHasRepresentatives: false,
+    hasCustodianPermissions: false,
     hasReporters: false,
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
@@ -91,7 +92,6 @@ const Dataflow = () => {
     isApiKeyDialogVisible: false,
     isBusinessDataflowDialogVisible: false,
     isCopyDataCollectionToEUDatasetLoading: false,
-    isCustodian: false,
     isDataSchemaCorrect: [],
     isDatasetsInfoDialogVisible: false,
     isDataUpdated: false,
@@ -165,9 +165,11 @@ const Dataflow = () => {
 
   const isLeadDesigner = isSteward || isCustodian;
 
-  const isCustodianSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
-    config.permissions.roles.CUSTODIAN_SUPPORT.key
+  const isStewardSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    config.permissions.roles.STEWARD_SUPPORT.key
   ]);
+
+  const hasCustodianPermissions = isStewardSupport || isLeadDesigner;
 
   const isObserver = dataflowState.userRoles.some(userRole => userRole === config.permissions.roles.OBSERVER.key);
 
@@ -255,7 +257,7 @@ const Dataflow = () => {
   }, [userContext, dataflowState.data]);
 
   useEffect(() => {
-    if (dataflowState.isCustodian || isCustodianSupport) {
+    if (dataflowState.hasCustodianPermissions) {
       if (isOpenStatus) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
       } else {
@@ -333,7 +335,11 @@ const Dataflow = () => {
         isLeadReporterOfCountry && dataflowState.showPublicInfo && isReleased && !isBusinessDataflow,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
-        isLeadReporterOfCountry || isNationalCoordinatorOfCountry || isReporterOfCountry || isLeadDesigner || isObserver
+        hasCustodianPermissions ||
+        isLeadReporterOfCountry ||
+        isNationalCoordinatorOfCountry ||
+        isReporterOfCountry ||
+        isObserver
     };
   };
 
@@ -710,7 +716,7 @@ const Dataflow = () => {
       type: 'LOAD_PERMISSIONS',
       payload: {
         hasWritePermissions,
-        isCustodian: isLeadDesigner,
+        hasCustodianPermissions,
         isNationalCoordinator,
         isObserver,
         isAdmin,
@@ -1072,7 +1078,7 @@ const Dataflow = () => {
   const requesterRoleOptionsOpenStatus = [
     { label: config.permissions.roles.STEWARD.label, role: config.permissions.roles.STEWARD.key },
     { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
-    { label: config.permissions.roles.CUSTODIAN_SUPPORT.label, role: config.permissions.roles.CUSTODIAN_SUPPORT.key },
+    { label: config.permissions.roles.STEWARD_SUPPORT.label, role: config.permissions.roles.STEWARD_SUPPORT.key },
     { label: config.permissions.roles.OBSERVER.label, role: config.permissions.roles.OBSERVER.key }
   ];
 
@@ -1142,7 +1148,7 @@ const Dataflow = () => {
   };
 
   const layout = children => (
-    <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
+    <MainLayout leftSideBarConfig={{ hasCustodianPermissions: dataflowState.hasCustodianPermissions, buttons: [] }}>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );
@@ -1198,7 +1204,7 @@ const Dataflow = () => {
           </ConfirmDialog>
         )}
 
-        {(dataflowState.isCustodian || isCustodianSupport) && dataflowState.isManageRolesDialogVisible && (
+        {hasCustodianPermissions && dataflowState.isManageRolesDialogVisible && (
           <Dialog
             className="responsiveDialog"
             contentStyle={{ maxHeight: '60vh' }}
@@ -1499,6 +1505,7 @@ const Dataflow = () => {
         {dataflowState.isReportingDataflowDialogVisible && (
           <ManageDataflow
             dataflowId={dataflowId}
+            isCustodian={isLeadDesigner}
             isEditForm
             isVisible={dataflowState.isReportingDataflowDialogVisible}
             manageDialogs={manageDialogs}
@@ -1551,7 +1558,7 @@ const Dataflow = () => {
             dataflowId={dataflowId}
             dataProviderId={dataProviderId}
             isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
-            isCustodian={dataflowState.isCustodian}
+            isCustodian={isLeadDesigner}
             manageDialogs={manageDialogs}
           />
         )}
