@@ -3012,8 +3012,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         } else {
           columns.add(null);
         }
-        columns
-            .add(fieldSchema.getDescription().startsWith("=") ? " " + fieldSchema.getDescription()
+        columns.add(
+            fieldSchema.getDescription() != null && fieldSchema.getDescription().startsWith("=")
+                ? " " + fieldSchema.getDescription()
                 : fieldSchema.getDescription());
         columns.add(fieldSchema.getType().toString());
         if (fieldSchema.getCodelistItems() != null && fieldSchema.getCodelistItems().length > 0) {
