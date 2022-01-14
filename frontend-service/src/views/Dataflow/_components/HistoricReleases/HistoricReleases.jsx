@@ -228,16 +228,16 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         'historicReleaseDataProviderFilterLabel'
       )
     },
-    // {
-    //   type: 'checkbox',
-    //   properties: [
-    //     {
-    //       name: 'isDataCollectionReleased',
-    //       label: resourcesContext.messages['onlyReleasedDataCollectionCheckboxLabel']
-    //     },
-    //     { name: 'isEUReleased', label: resourcesContext.messages['onlyReleasedEUDatasetCheckboxLabel'] }
-    //   ]
-    // },
+    {
+      type: 'CHECKBOX',
+      nestedOptions: [
+        {
+          key: 'isDataCollectionReleased',
+          label: resourcesContext.messages['onlyReleasedDataCollectionCheckboxLabel']
+        },
+        { key: 'isEUReleased', label: resourcesContext.messages['onlyReleasedEUDatasetCheckboxLabel'] }
+      ]
+    },
     {
       type: 'MULTI_SELECT',
       key: 'restrictFromPublic',
