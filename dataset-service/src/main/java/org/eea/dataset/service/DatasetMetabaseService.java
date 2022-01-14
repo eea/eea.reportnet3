@@ -252,4 +252,13 @@ public interface DatasetMetabaseService {
    */
   List<DatasetsSummaryVO> getDatasetsSummaryList(Long dataflowId);
 
+  /**
+   * Find dataset metabase external.
+   *
+   * @param datasetId the dataset id
+   * @return the data set metabase VO
+   * @throws EEAException the EEA exception
+   */
+  DataSetMetabaseVO findDatasetMetabaseExternal(Long datasetId) throws EEAException;
+
 }

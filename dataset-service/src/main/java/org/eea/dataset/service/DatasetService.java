@@ -10,7 +10,6 @@ import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
@@ -26,6 +25,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
 
@@ -120,21 +120,6 @@ public interface DatasetService {
    * @param datasetId the dataset id
    */
   void deleteTableBySchema(String tableSchemaId, @DatasetId Long datasetId);
-
-  /**
-   * Export file.
-   *
-   * @param datasetId the dataset id
-   * @param mimeType the mime type
-   * @param tableSchemaId the table schema id
-   *
-   * @return the byte[]
-   *
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  byte[] exportFile(@DatasetId Long datasetId, String mimeType, String tableSchemaId)
-      throws EEAException, IOException;
 
   /**
    * Creates the records.
@@ -521,17 +506,6 @@ public interface DatasetService {
   void createLockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
       String userName) throws EEAException;
 
-
-  /**
-   * Save public file.
-   *
-   * @param dataflowId the dataflow id
-   * @param dataSetDataProvider the data set data provider
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  void savePublicFiles(Long dataflowId, Long dataSetDataProvider) throws IOException;
-
-
   /**
    * Export public file.
    *
@@ -591,10 +565,12 @@ public interface DatasetService {
    *
    * @param datasetId the dataset id
    * @param recordList the record list
+   * @param connectionDataVO the connection data VO
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
-  void storeRecords(Long datasetId, List<RecordValue> recordList) throws IOException, SQLException;
+  void storeRecords(Long datasetId, List<RecordValue> recordList, ConnectionDataVO connectionDataVO)
+      throws IOException, SQLException;
 
   /**
    * Gets the total failed validations by id dataset.
@@ -607,11 +583,18 @@ public interface DatasetService {
       String idTableSchema);
 
   /**
-   * Creates the reference dataset files.
+   * Update check view.
    *
-   * @param dataset the dataset
-   * @throws IOException Signals that an I/O exception has occurred.
+   * @param datasetId the dataset id
+   * @param updated the updated
    */
-  void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException;
+  void updateCheckView(@DatasetId Long datasetId, Boolean updated);
 
+  /**
+   * Gets the check view.
+   *
+   * @param datasetId the dataset id
+   * @return the check view
+   */
+  Boolean getCheckView(@DatasetId Long datasetId);
 }

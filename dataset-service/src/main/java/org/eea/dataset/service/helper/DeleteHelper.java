@@ -81,7 +81,8 @@ public class DeleteHelper {
   public void executeDeleteTableProcess(final Long datasetId, String tableSchemaId) {
     LOG.info("Deleting table {} from dataset {}", tableSchemaId, datasetId);
     datasetService.deleteTableBySchema(tableSchemaId, datasetId);
-
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
     EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
         ? EventType.DELETE_TABLE_COMPLETED_EVENT
         : EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT;
@@ -124,7 +125,8 @@ public class DeleteHelper {
   public void executeDeleteDatasetProcess(final Long datasetId, Boolean deletePrefilledTables) {
     LOG.info("Deleting data from dataset {}", datasetId);
     datasetService.deleteImportData(datasetId, deletePrefilledTables);
-
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
     EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
         ? EventType.DELETE_DATASET_DATA_COMPLETED_EVENT
         : EventType.DELETE_DATASET_SCHEMA_COMPLETED_EVENT;
@@ -170,6 +172,8 @@ public class DeleteHelper {
     datasetService.deleteImportData(datasetId, false);
     LOG.info("All data value deleted from datasetId {}. Next step call the FME by the kafka event",
         datasetId);
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
     // Send the kafka event after deleting to call FME
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
@@ -190,6 +194,8 @@ public class DeleteHelper {
     LOG.info("Deleting data with providerCode: {} ", providerCode);
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     recordRepository.deleteByDataProviderCode(providerCode);
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
   }
 
 }

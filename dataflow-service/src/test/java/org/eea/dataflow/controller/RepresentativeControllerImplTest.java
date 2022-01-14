@@ -333,7 +333,7 @@ public class RepresentativeControllerImplTest {
       representativeControllerImpl.exportLeadReportersFile(1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      assertEquals(null, e.getReason());
+      assertEquals("An unknown error happenned while exporting the lead reporters.", e.getReason());
     }
   }
 
@@ -368,7 +368,7 @@ public class RepresentativeControllerImplTest {
       representativeControllerImpl.exportTemplateReportersFile(1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      assertEquals(null, e.getReason());
+      assertEquals("An unknown error happenned while exporting the lead reporters.", e.getReason());
     }
   }
 
@@ -486,7 +486,7 @@ public class RepresentativeControllerImplTest {
   public void importFileCountryTemplateExceptionTest() throws EEAException, IOException {
     MockMultipartFile fileMock = new MockMultipartFile("file", "fileOriginal.csv",
         FileTypeEnum.CSV.getValue(), "content".getBytes());
-    when(representativeService.importFile(Mockito.any(), Mockito.any(), Mockito.any()))
+    when(representativeService.importLeadReportersFile(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
     try {
       representativeControllerImpl.importFileCountryTemplate(1L, 1L, fileMock);

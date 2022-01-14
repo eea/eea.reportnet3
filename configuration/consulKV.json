@@ -1738,5 +1738,9 @@
   {
     "key": "config/validation/validation.sqlFetchSize",
     "value": "JHtWQUxJREFUSU9OX1NRTF9GRVRDSF9TSVpFOjI1MH0="
+  },
+  {
+    "key": "config/dataset/dataset.import.batchRecordSave",
+    "value": "JHtEQVRBU0VUX0lNUE9SVF9CQVRDSFJFQ09SRFNBVkU6MjUwMH0="
   }
 ]

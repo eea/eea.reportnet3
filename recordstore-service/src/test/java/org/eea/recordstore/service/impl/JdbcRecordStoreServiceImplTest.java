@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -523,7 +524,7 @@ public class JdbcRecordStoreServiceImplTest {
         .thenReturn(datasetSchemaVO);
 
     jdbcRecordStoreService.createUpdateQueryView(1L, false);
-    Mockito.verify(jdbcTemplate, Mockito.times(3)).execute(Mockito.anyString());
+    Mockito.verify(jdbcTemplate, Mockito.times(4)).execute(Mockito.anyString());
   }
 
   @Test
@@ -626,19 +627,7 @@ public class JdbcRecordStoreServiceImplTest {
     assertFalse(file.exists());
   }
 
-  @After
-  public void afterTests() {
-    File file = new File("./nullsnapshot_1_table_DatasetValue.snap");
-    file.delete();
-    file = new File("./nullsnapshot_1_table_FieldValue.snap");
-    file.delete();
-    file = new File("./nullsnapshot_1_table_RecordValue.snap");
-    file.delete();
-    file = new File("./nullsnapshot_1_table_TableValue.snap");
-    file.delete();
-    file = new File("./nullsnapshot_1_table_AttachmentValue.snap");
-    file.delete();
-  }
+
 
   @Test
   public void testDeleteDataset() throws SQLException, IOException {
@@ -670,13 +659,31 @@ public class JdbcRecordStoreServiceImplTest {
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
     Mockito.when(((BaseConnection) connection).getEncoding())
         .thenReturn(Encoding.defaultEncoding());
-    driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
-        Mockito.anyString())).thenReturn(connection);
+    Statement stmt = Mockito.mock(Statement.class);
+    Mockito.when(connection.createStatement()).thenReturn(stmt);
+    Mockito.when(stmt.executeUpdate(Mockito.anyString())).thenReturn(1);
+
     jdbcRecordStoreService.createSnapshotToClone(1L, 1L, dictionaryOriginTargetObjectId, 1L,
         datasets);
     Mockito.verify(jdbcTemplate, times(2)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
 
+  @After
+  public void afterTests() {
+    File file = new File("./nullsnapshot_1_table_DatasetValue.snap");
+    file.delete();
+    file = new File("./nullsnapshot_1_table_FieldValue.snap");
+    file.delete();
+    file = new File("./nullsnapshot_1_table_RecordValue.snap");
+    file.delete();
+    file = new File("./nullsnapshot_1_table_TableValue.snap");
+    file.delete();
+    file = new File("./nullsnapshot_1_table_AttachmentValue.snap");
+    file.delete();
+    file = new File("./nullclone_1_to_1_table_TableValue.snap");
+    file.delete();
+
+  }
 
 }
