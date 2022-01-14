@@ -126,12 +126,9 @@
     border-color: var(--button-secondary-border-color-hover) !important;
   }
 }
-.deleteRowButton {
-  @extend .editRowButton;
-  color: var(--errors) !important;
-}
-
+.deleteRowButton,
 .invalidSqlIcon {
+  @extend .editRowButton;
   color: var(--errors) !important;
 }
 
