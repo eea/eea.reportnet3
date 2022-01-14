@@ -63,6 +63,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
       boolean updateCascadePK) throws EEAException {
     datasetService.updateRecords(datasetId, records, updateCascadePK);
     LOG.info("Records have been modified");
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_UPDATED_COMPLETED_EVENT, datasetId);
   }
@@ -79,6 +81,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
       String tableSchemaId) throws EEAException {
     datasetService.insertRecords(datasetId, records, tableSchemaId);
     LOG.info("Records have been created");
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
   }
@@ -96,6 +100,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
       datasetService.insertRecords(datasetId, tableVO.getRecords(), tableVO.getIdTableSchema());
     }
     LOG.info("Records have been created");
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
   }
@@ -112,6 +118,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
       throws EEAException {
     datasetService.deleteRecord(datasetId, recordId, deleteCascadePK);
     LOG.info("Records have been deleted");
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
     // after the records have been deleted, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_DELETED_COMPLETED_EVENT, datasetId);
   }
@@ -129,6 +137,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
       throws EEAException {
     datasetService.updateField(datasetId, field, updateCascadePK);
     LOG.info("Field is modified");
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
     // after the field has been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.FIELD_UPDATED_COMPLETED_EVENT, datasetId);
   }

@@ -110,6 +110,10 @@ public class Rule implements Serializable {
   private Double sqlCost;
 
 
+  /** The has historic. */
+  @Field(value = "hasHistoric")
+  private boolean hasHistoric;
+
   /**
    * Hash code.
    *

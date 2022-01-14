@@ -9,6 +9,8 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.DatasetHistoricRuleVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
@@ -301,4 +303,23 @@ public interface RulesService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   File downloadQCCSV(Long datasetId, String fileName) throws IOException;
+
+  /**
+   * Gets the rule historic info.
+   *
+   * @param datasetId the dataset id
+   * @param ruleId the rule id
+   * @return the rule historic info
+   * @throws EEAException the EEA exception
+   */
+  List<RuleHistoricInfoVO> getRuleHistoricInfo(Long datasetId, String ruleId) throws EEAException;
+
+  /**
+   * Gets the rule historic info by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the rule historic info by dataset id
+   */
+  List<DatasetHistoricRuleVO> getRuleHistoricInfoByDatasetId(Long datasetId);
+
 }
