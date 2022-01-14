@@ -98,12 +98,12 @@ public class EntityAccessService {
       result = (canAccess(entityId, objectAccessRoles.toArray(ObjectAccessRoleEnum[]::new))
           || dataflowControllerZuul.accessReferenceEntity(entity, entityId));
     } else {
-      result = canAccess(entityId,
-          List.of(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN, ObjectAccessRoleEnum.DATAFLOW_OBSERVER,
-              ObjectAccessRoleEnum.DATAFLOW_STEWARD,
-              ObjectAccessRoleEnum.DATAFLOW_NATIONAL_COORDINATOR,
-              ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER,
-              ObjectAccessRoleEnum.DATAFLOW_STEWARD_SUPPORT).toArray(ObjectAccessRoleEnum[]::new))
+      result = canAccess(entityId, List.of(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN,
+          ObjectAccessRoleEnum.DATAFLOW_OBSERVER, ObjectAccessRoleEnum.DATAFLOW_STEWARD,
+          ObjectAccessRoleEnum.DATAFLOW_NATIONAL_COORDINATOR,
+          ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER, ObjectAccessRoleEnum.DATAFLOW_REPORTER_WRITE,
+          ObjectAccessRoleEnum.DATAFLOW_REPORTER_READ,
+          ObjectAccessRoleEnum.DATAFLOW_STEWARD_SUPPORT).toArray(ObjectAccessRoleEnum[]::new))
           || dataflowControllerZuul.accessReferenceEntity(entity, entityId);
     }
     return result;
