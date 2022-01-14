@@ -5,9 +5,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
@@ -74,7 +76,6 @@ import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1049,7 +1050,7 @@ public class DataflowServiceImpl implements DataflowService {
   private void deleteDocuments(Long idDataflow, DataFlowVO dataflowVO) throws Exception {
     for (DocumentVO document : dataflowVO.getDocuments()) {
       try {
-        documentControllerZuul.deleteDocument(document.getId(), dataflowVO.getId(), Boolean.TRUE);
+        documentControllerZuul.deleteDocument(document.getId(), dataflowVO.getId(), Boolean.FALSE);
       } catch (EEAException e) {
         LOG.error("Error deleting document with id {}", document.getId());
         throw new EEAException(new StringBuilder().append("Error Deleting document ")
@@ -1247,9 +1248,7 @@ public class DataflowServiceImpl implements DataflowService {
         dataflowVO.setDesignDatasets(datasetMetabaseControllerZuul
             .findDesignDataSetIdByDataflowId(id).stream()
             .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
-        String userId = ((Map<String, String>) SecurityContextHolder.getContext()
-            .getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
-        UserRepresentationVO user = userManagementControllerZull.getUserByUserId(userId);
+        UserRepresentationVO user = userManagementControllerZull.getUserByUserId();
         dataflowVO.setRepresentatives(
             representativeService.getRepresetativesByDataflowIdAndEmail(id, user.getEmail()));
       }
@@ -1553,15 +1552,18 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Async
-  @Transactional
   public void validateAllReporters(String userId) throws EEAException {
 
     try {
       List<Representative> representativeList = representativeRepository.findAllByInvalid(true);
       List<TempUser> tempUserList = tempUserRepository.findAll();
 
+      Set<Long> dataflowsToCheck = new HashSet<>();
       for (Representative representative : representativeList) {
-        representativeService.validateLeadReporters(representative.getDataflow().getId(), false);
+        dataflowsToCheck.add(representative.getDataflow().getId());
+      }
+      for (Long dataflowId : dataflowsToCheck) {
+        representativeService.validateLeadReporters(dataflowId, false);
       }
 
       for (TempUser tempuser : tempUserList) {

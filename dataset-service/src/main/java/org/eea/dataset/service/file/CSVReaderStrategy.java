@@ -22,6 +22,7 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.opencsv.CSVParser;
@@ -35,10 +36,6 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor
 public class CSVReaderStrategy implements ReaderStrategy {
-
-
-  /** The Constant BATCH_RECORDS_SAVE. */
-  private static final int BATCH_RECORDS_SAVE = 1000;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -60,6 +57,11 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
   /** The provider code. */
   private String providerCode;
+
+  /** The batch record save. */
+  private int batchRecordSave;
+
+
 
   /**
    * Instantiates a new CSV reader strategy.
@@ -97,6 +99,28 @@ public class CSVReaderStrategy implements ReaderStrategy {
   }
 
   /**
+   * Instantiates a new CSV reader strategy.
+   *
+   * @param delimiter the delimiter
+   * @param fileCommon the file common
+   * @param datasetId the dataset id
+   * @param fieldMaxLength the field max length
+   * @param providerCode the provider code
+   * @param batchRecordSave the batch record save
+   */
+  public CSVReaderStrategy(char delimiter, FileCommonUtils fileCommon, Long datasetId,
+      int fieldMaxLength, String providerCode, int batchRecordSave) {
+    this.delimiter = delimiter;
+    this.fileCommon = fileCommon;
+    this.datasetId = datasetId;
+    this.fieldMaxLength = fieldMaxLength;
+    this.providerCode = providerCode;
+    this.batchRecordSave = batchRecordSave;
+  }
+
+
+
+  /**
    * Parses the file.
    *
    * @param inputStream the input stream
@@ -113,9 +137,11 @@ public class CSVReaderStrategy implements ReaderStrategy {
   @Override
   public void parseFile(final InputStream inputStream, final Long dataflowId,
       final Long partitionId, final String idTableSchema, Long datasetId, String fileName,
-      boolean replace, DataSetSchema schema) throws EEAException {
+      boolean replace, DataSetSchema schema, ConnectionDataVO connectionDataVO)
+      throws EEAException {
     LOG.info("starting csv file reading");
-    readLines(inputStream, partitionId, idTableSchema, datasetId, fileName, replace, schema);
+    readLines(inputStream, partitionId, idTableSchema, datasetId, fileName, replace, schema,
+        connectionDataVO);
   }
 
   /**
@@ -133,8 +159,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
    */
   private DatasetValue readLines(final InputStream inputStream, final Long partitionId,
       final String idTableSchema, Long datasetId, String fileName, boolean replace,
-      DataSetSchema dataSetSchema) throws EEAException {
-    LOG.info("Processing entries at method readLines");
+      DataSetSchema dataSetSchema, ConnectionDataVO connectionDataVO) throws EEAException {
+    LOG.info("Processing entries at method readLines in dataset {}", datasetId);
     // Init variables
     String[] line;
     TableValue table = new TableValue();
@@ -172,6 +198,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
         throw new IOException("All fields for this table " + tableSchema.getNameTableSchema()
             + " are readOnly, you can't import new fields");
       }
+      boolean manageFixedRecords =
+          fileCommon.schemaContainsFixedRecords(datasetId, dataSetSchema, idTableSchema);
+
       // through the file
       int numLines = 0;
       while ((line = reader.readNext()) != null && numLines < 5000) {
@@ -179,12 +208,12 @@ public class CSVReaderStrategy implements ReaderStrategy {
         sanitizeAndCreateDataSet(partitionId, table, tables, values, headers, idTableSchema,
             idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords);
         numLines++;
-        if (numLines == BATCH_RECORDS_SAVE) {
+        if (numLines == batchRecordSave) {
           dataset.setTableValues(tables);
           // Set the dataSetSchemaId of MongoDB
           dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
           fileCommon.persistImportedDataset(idTableSchema, datasetId, fileName, replace,
-              dataSetSchema, dataset);
+              dataSetSchema, dataset, manageFixedRecords, connectionDataVO);
           numLines = 0;
           tables.remove(table);
           table.setRecords(new ArrayList<>());
@@ -195,13 +224,13 @@ public class CSVReaderStrategy implements ReaderStrategy {
       // Set the dataSetSchemaId of MongoDB
       dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
       fileCommon.persistImportedDataset(idTableSchema, datasetId, fileName, replace, dataSetSchema,
-          dataset);
+          dataset, manageFixedRecords, connectionDataVO);
 
     } catch (final IOException | SQLException e) {
       LOG_ERROR.error(e.getMessage());
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
     }
-    LOG.info("Reading Csv File Completed");
+    LOG.info("Reading Csv File Completed in dataset {}", datasetId);
     return dataset;
   }
 
