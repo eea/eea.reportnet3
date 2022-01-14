@@ -326,16 +326,6 @@
     width: 4rem;
     margin-right: 0.4rem;
   }
-  .qcButton {
-    span {
-      &:first-child {
-        display: block;
-      }
-      &:last-child {
-        padding: 0.429em 1em 0.429em 2.25em !important;
-      }
-    }
-  }
 
   .codelistButton {
     width: 4rem;
@@ -343,12 +333,20 @@
       width: 100%;
     }
   }
+
+  .dragAndDropItemsCell {
+    width: 10%;
+  }
+
+  .dragAndDropItems {
+    justify-content: space-between !important;
+  }
   .smallItems {
     width: 5%;
   }
 
   .bigItems {
-    width: 16%;
+    width: 15%;
   }
 
   .draggableFieldDiv {
@@ -389,8 +387,24 @@
   }
 }
 
-@media (min-width: 1740px) {
+@media (min-width: 1240px) {
+  .qcButton {
+    span {
+      &:first-child {
+        display: block;
+      }
+      &:last-child {
+        padding: 0.429em 1em 0.429em 2.25em !important;
+      }
+    }
+  }
+}
+
+@media (min-width: 1980px) {
+  .smallItems {
+    width: 5%;
+  }
   .bigItems {
-    width: 20%;
+    width: 18%;
   }
 }
