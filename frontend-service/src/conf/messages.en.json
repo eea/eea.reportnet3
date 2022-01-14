@@ -1184,7 +1184,7 @@
     "sortFieldDesignFailedEvent": "Invalid values from field <strong title='{:fieldSchemaName}'>{:shortFieldSchemaName}</strong> of table <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}.</a> Please check it",
     "sortFieldFailedEvent": "Invalid values from field <strong title='{:fieldSchemaName}'>{:shortFieldSchemaName}</strong> of table <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}.</a> Please check it",
     "sound": "Sound",
-    "sqlErrorMessageCopy": "Please click to copy to clipboard the SQL Error.",
+    "sqlErrorMessageCopy": "Click to copy to clipboard the SQL Error.",
     "sqlSentence": "SQL sentence",
     "sqlSentenceCompanyCodeNote": "<i>Note: You can include the keyword {%R3_COMPANY_CODE%} to use the company code in the SQL sentence.</i>",
     "sqlSentenceCost": "SQL evaluation",

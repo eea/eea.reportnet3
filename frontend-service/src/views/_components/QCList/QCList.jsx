@@ -248,7 +248,7 @@ export const QCList = ({
             className={`${styles.invalidSqlIcon} p-button-secondary`}
             icon="warning"
             onClick={() => navigator.clipboard.writeText(rowData.sqlError)}
-            tooltip={`${rowData.sqlError} <br />  <br />${resourcesContext.messages['sqlErrorMessageCopy']} `}
+            tooltip={`${rowData.sqlError}<br/><br/><b><i>${resourcesContext.messages['sqlErrorMessageCopy']}</i></b>`}
             tooltipOptions={{ position: 'left' }}
           />
         );
