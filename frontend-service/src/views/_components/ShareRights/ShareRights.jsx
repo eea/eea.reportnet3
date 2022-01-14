@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
 import first from 'lodash/first';
@@ -15,7 +15,7 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dropdown } from 'views/_components/Dropdown';
-import { Filters } from 'views/_components/Filters';
+import { MyFilters } from 'views/_components/MyFilters';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
@@ -26,6 +26,8 @@ import { UserRightService } from 'services/UserRightService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
+
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
@@ -63,10 +65,7 @@ export const ShareRights = ({
   const notDeletableRolesRequester = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
   const userTypes = { REPORTER: 'reporter', REQUESTER: 'requester' };
 
-  const filterOptions = [
-    { type: 'input', properties: [{ name: 'account' }] },
-    { type: 'multiselect', properties: [{ name: 'role' }] }
-  ];
+  const { filteredData } = useFilters('shareRights');
 
   const isReporterManagement = userType === userTypes.REPORTER;
 
@@ -439,6 +438,16 @@ export const ShareRights = ({
     </Fragment>
   );
 
+  const renderDialogContent = () => {
+    if (isEmpty(filteredData)) {
+      return (
+        <div>
+          <h3>aaaaa</h3>
+        </div>
+      );
+    }
+  };
+
   const getTooltipMessage = userRight => {
     if (hasEmptyData(userRight)) {
       return resourcesContext.messages['incompleteDataTooltip'];
@@ -455,13 +464,31 @@ export const ShareRights = ({
 
   if (loadingStatus.isInitialLoading) return renderDialogLayout(<Spinner />);
 
-  const renderShareRightsFilters = () => {
+  const filterOptions = [
+    { key: 'account', label: resourcesContext.messages['account'], type: 'INPUT' },
+    { key: 'role', label: resourcesContext.messages['role'], type: 'MULTI_SELECT' }
+  ];
+
+  const renderFilters = () => {
+    if (!isEmpty(shareRightsState.userRightList)) {
+      return (
+        <MyFilters
+          className="ShareRights"
+          data={shareRightsState.userRightList}
+          options={filterOptions}
+          viewType="ShareRights"
+        />
+      );
+    }
+  };
+
+  /*const renderShareRightsFilters = () => {
     if (!isEmpty(shareRightsState.userRightList)) {
       return (
         <Filters data={shareRightsState.userRightList} getFilteredData={onLoadFilteredData} options={filterOptions} />
       );
     }
-  };
+  };*/
 
   const renderShareRightsTable = () => {
     if (isEmpty(shareRightsState.userRightList)) {
@@ -513,7 +540,7 @@ export const ShareRights = ({
 
   return renderDialogLayout(
     <Fragment>
-      {renderShareRightsFilters()}
+      {renderFilters()}
       {renderShareRightsTable()}
 
       {shareRightsState.isDeleteDialogVisible && (
