@@ -14,7 +14,7 @@ import { routes } from 'conf/routes';
 
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
-import { Filters } from 'views/_components/Filters';
+import { MyFilters } from 'views/_components/MyFilters';
 import { Spinner } from 'views/_components/Spinner';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -30,6 +30,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
   const notificationContext = useContext(NotificationContext);
@@ -38,10 +39,10 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   const [historicReleasesState, historicReleasesDispatch] = useReducer(historicReleasesReducer, {
     data: [],
     dataProviderCodes: [],
-    filtered: false,
-    filteredData: [],
     isLoading: true
   });
+
+  const { filteredData, isFiltered } = useFilters('historicReleases');
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
@@ -54,24 +55,20 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     historicReleasesDispatch({ type: 'GET_DATA_PROVIDER_CODES', payload: { dataProviderCodes } });
   };
 
-  const getFiltered = value => historicReleasesDispatch({ type: 'IS_FILTERED', payload: { value } });
-
   const getPaginatorRecordsCount = () => (
     <Fragment>
-      {historicReleasesState.filtered && historicReleasesState.data.length !== historicReleasesState.filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${historicReleasesState.filteredData.length} | `
+      {isFiltered && historicReleasesState.data.length !== filteredData.length
+        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {historicReleasesState.data.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
-      {historicReleasesState.filtered && historicReleasesState.data.length === historicReleasesState.filteredData.length
+      {isFiltered && historicReleasesState.data.length === filteredData.length
         ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
   );
 
   const isLoading = value => historicReleasesDispatch({ type: 'IS_LOADING', payload: { value } });
-
-  const onLoadFilteredData = data => historicReleasesDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
   const onLoadHistoricReleases = async () => {
     try {
@@ -96,7 +93,8 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       historicReleases.sort((a, b) => b.releaseDate - a.releaseDate);
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',
-        payload: { data: historicReleases, filteredData: historicReleases, filtered: false }
+        // payload: { data: historicReleases, filteredData: historicReleases, filtered: false }
+        payload: { data: historicReleases }
       });
       getDataProviderCode(historicReleases);
     } catch (error) {
@@ -142,7 +140,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const renderRestrictFromPublicTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
-      {!rowData.restrictFromPublic ? (
+      {rowData.restrictFromPublic ? (
         <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
       ) : null}
     </div>
@@ -222,47 +220,44 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const filterOptionsDataCollection = [
     {
-      type: 'multiselect',
-      properties: [
-        {
-          name: 'dataProviderCode',
-          label: TextByDataflowTypeUtils.getLabelByDataflowType(
-            resourcesContext.messages,
-            dataflowType,
-            'historicReleaseDataProviderFilterLabel'
-          )
-        }
-      ]
+      type: 'MULTI_SELECT',
+      key: 'dataProviderCode',
+      label: TextByDataflowTypeUtils.getLabelByDataflowType(
+        resourcesContext.messages,
+        dataflowType,
+        'historicReleaseDataProviderFilterLabel'
+      )
     },
+    // {
+    //   type: 'checkbox',
+    //   properties: [
+    //     {
+    //       name: 'isDataCollectionReleased',
+    //       label: resourcesContext.messages['onlyReleasedDataCollectionCheckboxLabel']
+    //     },
+    //     { name: 'isEUReleased', label: resourcesContext.messages['onlyReleasedEUDatasetCheckboxLabel'] }
+    //   ]
+    // },
     {
-      type: 'checkbox',
-      properties: [
-        {
-          name: 'isDataCollectionReleased',
-          label: resourcesContext.messages['onlyReleasedDataCollectionCheckboxLabel']
-        },
-        { name: 'isEUReleased', label: resourcesContext.messages['onlyReleasedEUDatasetCheckboxLabel'] }
-      ]
-    },
-    {
-      type: 'multiselect',
-      properties: [{ name: 'restrictFromPublic', label: resourcesContext.messages['restrictFromPublic'] }]
+      type: 'MULTI_SELECT',
+      key: 'restrictFromPublic',
+      label: resourcesContext.messages['restrictFromPublic']
     }
   ];
 
   const filterOptionsEUDataset = [
     {
-      type: 'multiselect',
-      properties: [
+      type: 'MULTI_SELECT',
+      nestedOptions: [
         {
-          name: 'dataProviderCode',
+          key: 'dataProviderCode',
           label: TextByDataflowTypeUtils.getLabelByDataflowType(
             resourcesContext.messages,
             dataflowType,
             'historicReleaseDataProviderFilterLabel'
           )
         },
-        { name: 'restrictFromPublic', label: resourcesContext.messages['restrictFromPublic'] }
+        { key: 'restrictFromPublic', label: resourcesContext.messages['restrictFromPublic'] }
       ]
     }
   ];
@@ -289,11 +284,11 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const getFilters = filterOptions => {
     return (
-      <Filters
+      <MyFilters
+        className="historicReleases"
         data={historicReleasesState.data}
-        getFilteredData={onLoadFilteredData}
-        getFilteredSearched={getFiltered}
         options={filterOptions}
+        viewType="historicReleases"
       />
     );
   };
@@ -309,7 +304,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   };
 
   const renderHistoricReleasesTable = () => {
-    if (isEmpty(historicReleasesState.filteredData)) {
+    if (isEmpty(filteredData)) {
       return (
         <div className={styles.emptyFilteredData}>
           {resourcesContext.messages['noHistoricReleasesWithSelectedParameters']}
@@ -327,12 +322,11 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary={resourcesContext.messages['historicReleases']}
-          totalRecords={historicReleasesState.filteredData.length}
-          value={historicReleasesState.filteredData}>
-          {historicReleasesView === 'dataCollection' && renderDataCollectionColumns(historicReleasesState.filteredData)}
-          {historicReleasesView === 'EUDataset' && renderEUDatasetColumns(historicReleasesState.filteredData)}
-          {historicReleasesView === 'reportingDataset' &&
-            renderReportingDatasetColumns(historicReleasesState.filteredData)}
+          totalRecords={filteredData.length}
+          value={filteredData}>
+          {historicReleasesView === 'dataCollection' && renderDataCollectionColumns(filteredData)}
+          {historicReleasesView === 'EUDataset' && renderEUDatasetColumns(filteredData)}
+          {historicReleasesView === 'reportingDataset' && renderReportingDatasetColumns(filteredData)}
         </DataTable>
       );
     }
