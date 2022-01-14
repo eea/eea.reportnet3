@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -203,6 +205,7 @@ public class DataflowHelper {
     Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
     List<DesignDatasetVO> listDesignDatasetVO =
         datasetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(dataflowId);
+    Collections.sort(listDesignDatasetVO, Comparator.comparing(DesignDatasetVO::getDataSetName));
 
     Map<String, String> tableNames = new HashMap<>();
     Map<String, String> fieldNames = new HashMap<>();
