@@ -245,7 +245,7 @@ export const QCList = ({
       } else if (!isNil(rowData.sqlError)) {
         return (
           <Button
-            className={`${styles.invalidSqlIcon} p-button-secondary`}
+            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.invalidSqlIcon}`}
             icon="warning"
             onClick={() => navigator.clipboard.writeText(rowData.sqlError)}
             tooltip={`${rowData.sqlError}<br/><br/><b><i>${resourcesContext.messages['sqlErrorMessageCopy']}</i></b>`}
@@ -374,7 +374,7 @@ export const QCList = ({
   const renderHistoricButton = id => {
     return (
       <Button
-        className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+        className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
         disabled={validationContext.isFetchingData}
         icon="info"
         onClick={() => onOpenHistoryDialog(id)}
@@ -404,7 +404,7 @@ export const QCList = ({
     return (
       <Fragment>
         <Button
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
           disabled={validationContext.isFetchingData}
           icon={getEditBtnIcon(row.id)}
           onClick={() => validationContext.onOpenToEdit(row, rowType)}
@@ -413,7 +413,7 @@ export const QCList = ({
           type="button"
         />
         <Button
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
           disabled={validationContext.isFetchingData}
           icon="clone"
           onClick={() => validationContext.onOpenToCopy(row, rowType)}
@@ -446,7 +446,7 @@ export const QCList = ({
     return (
       <Fragment>
         <Button
-          className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${styles.editRowButton}`}
+          className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${styles.actionButton}`}
           disabled={validationContext.isFetchingData}
           icon={getEditBtnIcon(row.id)}
           onClick={() => validationContext.onOpenToEdit(row, rowType)}

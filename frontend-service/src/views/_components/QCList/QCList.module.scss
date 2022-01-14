@@ -118,7 +118,7 @@
   }
 }
 
-.editRowButton {
+.actionButton {
   border: 1px solid var(--general-border-color) !important;
   @include shadow-0em;
   margin-left: 3px !important;
@@ -128,7 +128,7 @@
 }
 .deleteRowButton,
 .invalidSqlIcon {
-  @extend .editRowButton;
+  @extend .actionButton;
   color: var(--errors) !important;
 }
 
