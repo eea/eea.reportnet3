@@ -377,9 +377,7 @@ export const QCList = ({
         className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
         disabled={validationContext.isFetchingData}
         icon="info"
-        onClick={() => {
-          onOpenHistoryDialog(id);
-        }}
+        onClick={() => onOpenHistoryDialog(id)}
         tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
         tooltipOptions={{ position: 'top' }}
         type="button"
