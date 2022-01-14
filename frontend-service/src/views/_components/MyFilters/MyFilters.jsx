@@ -355,8 +355,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
     if (template === 'LevelError') {
       return <LevelError type={type} />;
     }
-
-    return <span className={styles.statusBox}>{type}</span>;
+    return <span className={styles.statusBox}>{type?.toString()}</span>;
   };
 
   const renderSearch = option => {
