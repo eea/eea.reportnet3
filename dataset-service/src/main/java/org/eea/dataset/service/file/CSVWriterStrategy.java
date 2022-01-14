@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.collections.CollectionUtils;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
@@ -197,13 +198,16 @@ public class CSVWriterStrategy implements WriterStrategy {
         if (includeCountryCode) {
           fieldsToWrite[0] = record.getDataProviderCode();
         }
-
-        for (FieldValue field : fields) {
-          if (null != field.getIdFieldSchema()) {
-            Integer index = indexMap.get(field.getIdFieldSchema());
-            fieldsToWrite[index] = field.getValue();
-          } else {
-            unknownColumns.add(field.getValue());
+        if (CollectionUtils.isNotEmpty(fields)) {
+          for (FieldValue field : fields) {
+            if (null != field.getIdFieldSchema()) {
+              Integer index = indexMap.get(field.getIdFieldSchema());
+              fieldsToWrite[index] =
+                  field.getValue().startsWith("=") ? " " + field.getValue() : field.getValue();
+            } else {
+              unknownColumns.add(
+                  field.getValue().startsWith("=") ? " " + field.getValue() : field.getValue());
+            }
           }
         }
         csvWriter.writeNext(joinOutputArray(unknownColumns, fieldsToWrite), false);

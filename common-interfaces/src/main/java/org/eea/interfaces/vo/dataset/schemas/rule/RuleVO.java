@@ -74,6 +74,9 @@ public class RuleVO {
   /** The sql cost. */
   private Double sqlCost;
 
+  /** The has historic. */
+  private boolean hasHistoric;
+
 
   /**
    * Hash code.

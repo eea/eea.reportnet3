@@ -787,7 +787,7 @@ public class DatasetSchemaControllerImplTest {
     try {
       dataSchemaControllerImpl.deleteTableSchema(1L, "");
     } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.EXECUTION_ERROR, ex.getReason());
+      assertEquals(EEAErrorMessage.DELETING_TABLE_SCHEMA, ex.getReason());
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatus());
     }
   }
@@ -1358,7 +1358,7 @@ public class DatasetSchemaControllerImplTest {
     try {
       dataSchemaControllerImpl.deleteFieldSchema(1L, "");
     } catch (ResponseStatusException ex) {
-      assertEquals(EEAErrorMessage.INVALID_OBJECTID, ex.getReason());
+      assertEquals(EEAErrorMessage.DELETING_FIELD_SCHEMA, ex.getReason());
       assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
       throw ex;
     }
