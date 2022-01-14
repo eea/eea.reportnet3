@@ -9,6 +9,7 @@ import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,22 +23,29 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.DatasetHistoricRuleVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
+import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.validation.mapper.DatasetHistoricRuleMapper;
 import org.eea.validation.mapper.IntegrityMapper;
+import org.eea.validation.mapper.RuleHistoricInfoMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
+import org.eea.validation.persistence.repository.AuditRepository;
 import org.eea.validation.persistence.repository.IntegritySchemaRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.RulesSequenceRepository;
@@ -48,6 +56,8 @@ import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.IntegritySchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.UniqueConstraintSchema;
+import org.eea.validation.persistence.schemas.audit.Audit;
+import org.eea.validation.persistence.schemas.audit.RuleHistoricInfo;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
@@ -63,7 +73,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
@@ -129,6 +141,23 @@ public class RulesServiceImpl implements RulesService {
   /** The dataset controller zuul. */
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
+
+  /** The audit repository. */
+  @Autowired
+  private AuditRepository auditRepository;
+
+  /** The user management controller zuul. */
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZuul;
+
+  /** The rule historic info mapper. */
+  @Autowired
+  private RuleHistoricInfoMapper ruleHistoricInfoMapper;
+
+  /** The dataset historic rule mapper. */
+  @Autowired
+  private DatasetHistoricRuleMapper datasetHistoricRuleMapper;
+
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -225,6 +254,10 @@ public class RulesServiceImpl implements RulesService {
         if (null != rule.getAutomaticType()
             && AutomaticRuleTypeEnum.FIELD_SQL_TYPE.equals(rule.getAutomaticType())) {
           rule.setSqlSentence(null);
+        }
+        var audit = auditRepository.getAuditByRuleId(rule.getRuleId());
+        if (null != audit) {
+          rule.setHasHistoric(true);
         }
       }
       rulesVO = rulesSchemaMapper.entityToClass(rulesSchema);
@@ -436,7 +469,7 @@ public class RulesServiceImpl implements RulesService {
       createRule(datasetSchemaId, rule);
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
-
+    addHistoricRuleInfo(rule, null, datasetId, null);
   }
 
   /**
@@ -667,7 +700,6 @@ public class RulesServiceImpl implements RulesService {
   }
 
 
-
   /**
    * Gets the PK field schema from schema.
    *
@@ -726,6 +758,7 @@ public class RulesServiceImpl implements RulesService {
    *
    * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
+   * @param typeData the type data
    */
   @Override
   public void deleteRuleRequired(String datasetSchemaId, String referenceId, DataType typeData) {
@@ -759,7 +792,6 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void updateRule(long datasetId, RuleVO ruleVO) throws EEAException {
-
     String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
     if (datasetSchemaId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -773,11 +805,20 @@ public class RulesServiceImpl implements RulesService {
         && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition()) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_FIELD_RECORD);
     }
+    var ruleOriginal =
+        rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleVO.getRuleId()));
+    if (null == ruleOriginal) {
+      throw new EEAException(EEAErrorMessage.RULE_NOT_FOUND);
+    }
+    var originalIntegrityVO = new IntegrityVO();
+    if (ruleOriginal.getIntegrityConstraintId() != null) {
+      originalIntegrityVO =
+          getIntegrityConstraint(ruleOriginal.getIntegrityConstraintId().toString());
+    }
     Rule rule = ruleMapper.classToEntity(ruleVO);
     rule.setAutomatic(false);
     rule.setActivationGroup(null);
     rule.setVerified(null);
-
     if (rule.getSqlSentence() != null) {
       try {
         rule.setSqlCost(sqlRulesService.evaluateSqlRule(datasetId, rule.getSqlSentence()));
@@ -795,7 +836,7 @@ public class RulesServiceImpl implements RulesService {
       }
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
-
+    addHistoricRuleInfo(rule, ruleOriginal, datasetId, originalIntegrityVO);
   }
 
   /**
@@ -865,14 +906,19 @@ public class RulesServiceImpl implements RulesService {
 
         // Find the actual rule
         Rule rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
-
         if (null != rule) {
-
+          Rule originalRule =
+              rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
+          if (null == originalRule) {
+            LOG_ERROR.error("RuleId not valid: {}", ruleId);
+            throw new EEAException(EEAErrorMessage.RULEID_INCORRECT);
+          }
           // Update only allowed properties
           updateAllowedRuleProperties(ruleVO, rule);
-
           // Save the modified rule
           rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+
+          addHistoricRuleInfo(rule, originalRule, datasetId, null);
         } else {
           LOG_ERROR.error("Rule not found for datasetSchemaId {} and ruleId {}", datasetSchemaId,
               ruleId);
@@ -1516,19 +1562,8 @@ public class RulesServiceImpl implements RulesService {
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
       // Creates an array list containing all the column names from the CSV defined as constants
-      List<String> headers = new ArrayList<>();
-      headers.add(TABLE);
-      headers.add(FIELD);
-      headers.add(CODE);
-      headers.add(QCNAME);
-      headers.add(QCDESC);
-      headers.add(MESSAGE);
-      headers.add(EXPRESSION);
-      headers.add(TYPE_OF_QC);
-      headers.add(LEVEL_ERROR);
-      headers.add(CREATION_MODE);
-      headers.add(STATUS);
-      headers.add(VALID);
+      List<String> headers = new ArrayList<>(Arrays.asList(TABLE, FIELD, CODE, QCNAME, QCDESC,
+          MESSAGE, EXPRESSION, TYPE_OF_QC, LEVEL_ERROR, CREATION_MODE, STATUS, VALID));
 
       // Writes the column names into the CSV Writer and sets the array String to headers size so it
       // only writes at most the number of columns as variables per row
@@ -1594,6 +1629,37 @@ public class RulesServiceImpl implements RulesService {
     }
 
     return file;
+  }
+
+  /**
+   * Gets the rule historic info.
+   *
+   * @param datasetId the dataset id
+   * @param ruleId the rule id
+   * @return the rule historic info
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public List<RuleHistoricInfoVO> getRuleHistoricInfo(Long datasetId, String ruleId)
+      throws EEAException {
+    List<RuleHistoricInfoVO> historic = new ArrayList<>();
+    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    if (datasetSchemaId == null) {
+      LOG.error("Datasetschema id not found on dataset {}", datasetId);
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    var rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
+    if (null == rule) {
+      LOG.error("Rule with id {} not found", ruleId);
+      throw new EEAException(EEAErrorMessage.RULE_NOT_FOUND);
+    }
+    var audit = auditRepository.getAuditByRuleId(rule.getRuleId());
+    if (null != audit) {
+      historic = ruleHistoricInfoMapper.entityListToClass(audit.getHistoric());
+
+    }
+    return historic;
   }
 
 
@@ -1746,6 +1812,201 @@ public class RulesServiceImpl implements RulesService {
     Map<String, String> tableNames = new HashMap<>();
     Map<String, String> fieldNames = new HashMap<>();
 
+    retrieveTableAndFieldNames(tables, tableNames, fieldNames);
+
+    RulesSchemaVO dataSetRules = getRulesSchemaByDatasetId(dataSetSchema);
+
+    String[] fieldsToWrite;
+
+    for (RuleVO rule : dataSetRules.getRules()) {
+      fieldsToWrite = new String[nHeaders];
+
+      if (rule.getType() == EntityTypeEnum.TABLE || rule.getType() == EntityTypeEnum.RECORD) {
+        fieldsToWrite[0] =
+            tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
+                : "Table not found"; // Table Name
+      } else {
+        fieldsToWrite[0] =
+            tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
+                : ""; // Table Name if it has a Field reference ID
+      }
+
+      fieldsToWrite[1] =
+          fieldNames.containsKey(rule.getReferenceId()) ? fieldNames.get(rule.getReferenceId())
+              : ""; // Field Name
+      fieldsToWrite[2] =
+          rule.getShortCode().startsWith("=") ? " " + rule.getShortCode() : rule.getShortCode();
+      fieldsToWrite[3] =
+          rule.getRuleName().startsWith("=") ? " " + rule.getRuleName() : rule.getRuleName();
+      fieldsToWrite[4] = rule.getDescription().startsWith("=") ? " " + rule.getDescription()
+          : rule.getDescription();
+      fieldsToWrite[5] =
+          rule.getThenCondition().get(0).startsWith("=") ? " " + rule.getThenCondition().get(0)
+              : rule.getThenCondition().get(0); // Message
+      if (rule.getSqlSentence() != null) {
+        fieldsToWrite[6] = rule.getSqlSentence().startsWith("=") ? " " + rule.getSqlSentence()
+            : rule.getSqlSentence();
+      } else if (rule.getExpressionText() != null) {
+        fieldsToWrite[6] = rule.getExpressionText().startsWith("=") ? " " + rule.getExpressionText()
+            : rule.getExpressionText();
+      }
+      fieldsToWrite[7] = rule.getType().toString(); // Type of QC
+      fieldsToWrite[8] = rule.getThenCondition().get(1); // Level Error
+      fieldsToWrite[9] = Boolean.toString(rule.isAutomatic()); // Creation Mode
+      fieldsToWrite[10] = Boolean.toString(rule.isEnabled()); // Status
+      fieldsToWrite[11] = rule.getVerified().toString(); // Valid
+
+      csvWriter.writeNext(fieldsToWrite);
+    }
+  }
+
+
+  /**
+   * Adds the historic rule info.
+   *
+   * @param rule the rule
+   * @param ruleOriginal the rule original
+   * @param datasetId the dataset id
+   * @param originalIntegrityVO the original integrity VO
+   * @throws EEAException the EEA exception
+   */
+  private void addHistoricRuleInfo(Rule rule, Rule ruleOriginal, Long datasetId,
+      IntegrityVO originalIntegrityVO) throws EEAException {
+    UserRepresentationVO user = userManagementControllerZuul.getUserByUserId();
+    Audit audit = auditRepository.getAuditByRuleId(rule.getRuleId());
+    if (null == audit) {
+      LOG.info("Creating a new historic for the rule {}", rule.getRuleId());
+      auditRepository.createAudit(rule, user, datasetId);
+    } else {
+      LOG.info("Adding new information in the historic of the rule {}", rule.getRuleId());
+      boolean metadata = checkMetadataHasChange(rule, ruleOriginal);
+      boolean status = checkStatusHasChange(rule, ruleOriginal);
+      boolean expression = checkExpressionHasChange(rule, ruleOriginal, originalIntegrityVO);
+      try {
+        auditRepository.updateAudit(audit, user, rule, status, expression, metadata);
+      } catch (JsonProcessingException e) {
+        LOG.error("Error updating historic information for rule {}", rule.getRuleId());
+        throw new EEAException(EEAErrorMessage.HISTORIC_QC_UPDATE_ERROR);
+      }
+    }
+  }
+
+
+  /**
+   * Check expression has change.
+   *
+   * @param ruleActual the rule actual
+   * @param ruleOriginal the rule original
+   * @param originalIntegrityVO the original integrity VO
+   * @return true, if successful
+   */
+  private boolean checkExpressionHasChange(Rule ruleActual, Rule ruleOriginal,
+      IntegrityVO originalIntegrityVO) {
+    return checkSQLSentenceHasChange(ruleActual, ruleOriginal)
+        || checkExpressionTextHasChange(ruleActual, ruleOriginal)
+        || checkDatasetComparisonHasChange(ruleActual, originalIntegrityVO);
+  }
+
+  /**
+   * Check dataset comparison has change.
+   *
+   * @param ruleActual the rule actual
+   * @param originalIntegrityVO the original integrity VO
+   * @return true, if successful
+   */
+  private boolean checkDatasetComparisonHasChange(Rule ruleActual,
+      IntegrityVO originalIntegrityVO) {
+    IntegrityVO actualIntegrityVO = null;
+    if (ruleActual.getIntegrityConstraintId() != null) {
+      actualIntegrityVO = getIntegrityConstraint(ruleActual.getIntegrityConstraintId().toString());
+    }
+    return (actualIntegrityVO != null && originalIntegrityVO != null
+        && ruleActual.getSqlSentence() == null && ruleActual.getExpressionText().equals("")
+        && (!(actualIntegrityVO.getOriginFields().equals(originalIntegrityVO.getOriginFields()))
+            || !(actualIntegrityVO.getReferencedFields()
+                .equals(originalIntegrityVO.getReferencedFields()))
+            || (actualIntegrityVO.getOriginFields().size() > originalIntegrityVO.getOriginFields()
+                .size()
+                || actualIntegrityVO.getReferencedFields().size() > originalIntegrityVO
+                    .getReferencedFields().size())));
+  }
+
+  /**
+   * Check SQL sentence has change.
+   *
+   * @param ruleActual the rule actual
+   * @param ruleOriginal the rule original
+   * @return true, if successful
+   */
+  private boolean checkSQLSentenceHasChange(Rule ruleActual, Rule ruleOriginal) {
+    boolean change = false;
+    if (ruleActual.getSqlSentence() == null && ruleOriginal.getSqlSentence() == null) {
+      change = false;
+    } else {
+      if ((ruleActual.getSqlSentence() != null && ruleOriginal.getSqlSentence() == null)
+          || !(ruleActual.getSqlSentence().equals(ruleOriginal.getSqlSentence()))) {
+        change = true;
+      }
+    }
+    return change;
+  }
+
+  /**
+   * Check expression text has change.
+   *
+   * @param ruleActual the rule actual
+   * @param ruleOriginal the rule original
+   * @return true, if successful
+   */
+  private boolean checkExpressionTextHasChange(Rule ruleActual, Rule ruleOriginal) {
+    boolean change = false;
+    if (ruleActual.getExpressionText() == null && ruleOriginal.getExpressionText() == null) {
+      change = false;
+    } else {
+      if ((ruleActual.getExpressionText() != null && ruleOriginal.getExpressionText() == null)
+          || !(ruleActual.getExpressionText().equals(ruleOriginal.getExpressionText()))) {
+        change = true;
+      }
+    }
+    return change;
+  }
+
+  /**
+   * Check metadata has change.
+   *
+   * @param ruleActual the rule actual
+   * @param ruleOriginal the rule original
+   * @return true, if successful
+   */
+  private boolean checkMetadataHasChange(Rule ruleActual, Rule ruleOriginal) {
+    return !(ruleActual.getRuleName().equals(ruleOriginal.getRuleName()))
+        || !(ruleActual.getDescription().equals(ruleOriginal.getDescription()))
+        || !(ruleActual.getShortCode().equals(ruleOriginal.getShortCode()))
+        || !(ruleActual.getThenCondition().get(0).equals(ruleOriginal.getThenCondition().get(0)))
+        || !(ruleActual.getThenCondition().get(1).equals(ruleOriginal.getThenCondition().get(1)));
+  }
+
+  /**
+   * Check status has change.
+   *
+   * @param ruleActual the rule actual
+   * @param ruleOriginal the rule original
+   * @return true, if successful
+   */
+  private boolean checkStatusHasChange(Rule ruleActual, Rule ruleOriginal) {
+    return ruleActual.isEnabled() != ruleOriginal.isEnabled();
+  }
+
+
+  /**
+   * Retrieve table and field names.
+   *
+   * @param tables the tables
+   * @param tableNames the table names
+   * @param fieldNames the field names
+   */
+  private void retrieveTableAndFieldNames(List<TableSchema> tables, Map<String, String> tableNames,
+      Map<String, String> fieldNames) {
     for (TableSchema table : tables) {
       tableNames.put(table.getIdTableSchema().toString(), table.getNameTableSchema());
 
@@ -1756,38 +2017,26 @@ public class RulesServiceImpl implements RulesService {
 
       }
     }
-
-    RulesSchemaVO dataSetRules = getRulesSchemaByDatasetId(dataSetSchema);
-
-    String[] fieldsToWrite;
-
-    for (RuleVO rule : dataSetRules.getRules()) {
-      fieldsToWrite = new String[nHeaders];
-
-      if (rule.getType() == EntityTypeEnum.TABLE || rule.getType() == EntityTypeEnum.RECORD)
-        fieldsToWrite[0] =
-            tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
-                : "Table not found"; // Table Name
-      else
-        fieldsToWrite[0] =
-            tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
-                : ""; // Table Name if it has a Field reference ID
-      fieldsToWrite[1] =
-          fieldNames.containsKey(rule.getReferenceId()) ? fieldNames.get(rule.getReferenceId())
-              : ""; // Field Name
-      fieldsToWrite[2] = rule.getShortCode();
-      fieldsToWrite[3] = rule.getRuleName();
-      fieldsToWrite[4] = rule.getDescription();
-      fieldsToWrite[5] = rule.getThenCondition().get(0); // Message
-      fieldsToWrite[6] =
-          rule.getSqlSentence() != null ? rule.getSqlSentence() : rule.getExpressionText();
-      fieldsToWrite[7] = rule.getType().toString(); // Type of QC
-      fieldsToWrite[8] = rule.getThenCondition().get(1); // Level Error
-      fieldsToWrite[9] = Boolean.toString(rule.isAutomatic()); // Creation Mode
-      fieldsToWrite[10] = Boolean.toString(rule.isEnabled()); // Status
-      fieldsToWrite[11] = rule.getVerified().toString(); // Valid
-
-      csvWriter.writeNext(fieldsToWrite);
-    }
   }
+
+  /**
+   * Gets the rule historic info by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the rule historic info by dataset id
+   */
+  @Override
+  @Transactional
+  public List<DatasetHistoricRuleVO> getRuleHistoricInfoByDatasetId(Long datasetId) {
+    List<Audit> audits = auditRepository.getAuditsByDatasetId(datasetId);
+    List<DatasetHistoricRuleVO> historic = new ArrayList<>();
+    for (Audit audit : audits) {
+      for (RuleHistoricInfo historicRuleInfo : audit.getHistoric()) {
+        historic.add(datasetHistoricRuleMapper.entityToClass(historicRuleInfo));
+      }
+    }
+    return historic;
+  }
+
+
 }

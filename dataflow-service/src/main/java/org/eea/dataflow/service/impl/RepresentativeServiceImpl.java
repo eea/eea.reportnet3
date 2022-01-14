@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
@@ -72,6 +74,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
   /** The Constant REGEX: {@value}. */
   private static final String REGEX = "-";
+
+  /** The Constant EMAIL_REGEX: {@value}. */
+  private static final String EMAIL_REGEX =
+      "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$";
 
   /** The Constant ROLE_PROVIDER: {@value}. */
   private static final String ROLE_PROVIDER = "ROLE_PROVIDER-";
@@ -153,12 +159,24 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-
   /** The Constant EMAIL: {@value}. */
   private static final String EMAIL = "Email";
 
   /** The Constant REPRESENTING: {@value}. */
   private static final String REPRESENTING = "Representing";
+
+  /** The Constant IMPORTED: {@value}. */
+  private static final String IMPORTED = "Imported";
+
+  /** The Constant OK_IMPORT: {@value}. */
+  private static final String OK_IMPORT = "OK - imported";
+
+  /** The Constant KO_INVALID_EMAIL: {@value}. */
+  private static final String KO_INVALID_EMAIL = "KO - invalid email";
+
+  /** The Constant KO_ALREADY_EXISTS: {@value}. */
+  private static final String KO_ALREADY_EXISTS =
+      "KO - imported user already exists in Reportnet representing for the same Representative.";
 
   /**
    * Creates the representative.
@@ -449,7 +467,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   }
 
   /**
-   * Import file.
+   * Import lead reporters file.
    *
    * @param dataflowId the dataflow id
    * @param groupId the group id
@@ -460,116 +478,30 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    */
   @Override
   @Transactional
-  public byte[] importFile(Long dataflowId, Long groupId, MultipartFile file)
+  public byte[] importLeadReportersFile(Long dataflowId, Long groupId, MultipartFile file)
       throws EEAException, IOException {
 
-    // we create the cvs to send when finish the import
+    // We create the CSV used to inform about the import results
     StringWriter writer = new StringWriter();
     try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
-      List<String> headers = new ArrayList<>();
-      headers.add(REPRESENTING);
-      headers.add(EMAIL);
-      headers.add("Imported");
-      csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
-      int nHeaders = 3;
-      String[] fieldsToWrite = new String[nHeaders];
 
+      List<String> headers = new ArrayList<>(Arrays.asList(REPRESENTING, EMAIL, IMPORTED));
+      csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
+      int nHeaders = headers.size();
 
       List<DataProvider> dataProviderList =
           dataProviderRepository.findAllByDataProviderGroup_id(groupId);
-      List<String> countryCodeList =
-          dataProviderList.stream().map(DataProvider::getCode).collect(Collectors.toList());
 
       String content = new String(file.getBytes());
       List<String> everyLines = new ArrayList<>(Arrays.asList(content.split("\n")));
+      // Removes the headers to be able to parse the Lead Reporters info
       everyLines.remove(0);
 
-      Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+      List<Representative> representativeList = fillImportLeadReporterResults(everyLines,
+          dataProviderList, nHeaders, csvWriter, dataflowId);
 
-      List<Representative> representativeList = new ArrayList<>();
-      String dataProviderType =
-          TypeDataflowEnum.BUSINESS.equals(dataflow.getType()) ? "company" : "country";
-      for (String representativeData : everyLines) {
-        String[] dataLine = representativeData.split("[" + delimiter + "]");
-        String contryCode = dataLine[0].replaceAll("\"", "");
-        String email = "";
-        UserRepresentationVO user = null;
-        if (dataLine.length == 2 && null != dataLine[1]) {
-          email = dataLine[1].replaceAll("\"", "").replaceAll("\r", "");
-          if (StringUtils.isNotBlank(email)) {
-            user = userManagementControllerZull.getUserByEmail(email.toLowerCase());
-          }
-        }
-
-        if (!countryCodeList.contains(contryCode)) {
-          fieldsToWrite[2] = "KO imported " + dataProviderType + " doesn't exist";
-        } else {
-          DataProvider dataProvider = dataProviderList.stream()
-              .filter(dataProv -> contryCode.equalsIgnoreCase(dataProv.getCode())).findFirst()
-              .orElse(null);
-          if (null != dataProvider) {
-            if (null == representativeRepository.findOneByDataflowIdAndDataProviderIdUserMail(
-                dataflowId, dataProvider.getId(), email.toLowerCase())) {
-
-              Representative representative = representativeList.stream()
-                  .filter(rep -> dataProvider.getId().equals(rep.getDataProvider().getId()))
-                  .findFirst().orElse(representativeRepository
-                      .findOneByDataflow_IdAndDataProvider_Id(dataflowId, dataProvider.getId()));
-
-              // if exist we dont create representative
-              if (null == representative) {
-                DataProvider dataProviderNew = new DataProvider();
-                representative = new Representative();
-                dataProviderNew.setId(dataProvider.getId());
-                representative.setDataflow(dataflow);
-                representative.setDataProvider(dataProviderNew);
-                representative.setReceiptDownloaded(false);
-                representative.setReceiptOutdated(false);
-                representative.setHasDatasets(false);
-                representative.setId(0L);
-                if (StringUtils.isNotBlank(email)) {
-                  LeadReporter leadReporter = new LeadReporter();
-                  leadReporter.setRepresentative(representative);
-                  leadReporter.setEmail(email.toLowerCase());
-                  if (null == user) {
-                    leadReporter.setInvalid(true);
-                  }
-                  representative.setLeadReporters(new ArrayList<>(Arrays.asList(leadReporter)));
-                } else {
-                  representative.setLeadReporters(new ArrayList<>());
-                }
-                representativeList.add(representative);
-              } else {
-                List<LeadReporter> leadReporters = representative.getLeadReporters();
-                if (StringUtils.isNotBlank(email)) {
-                  final String innerEmail = email.toLowerCase();
-                  if (leadReporters.stream().noneMatch(rep -> innerEmail.equals(rep.getEmail()))) {
-                    LeadReporter leadReporter = new LeadReporter();
-                    leadReporter.setRepresentative(representative);
-                    leadReporter.setEmail(innerEmail);
-                    if (null == user) {
-                      leadReporter.setInvalid(true);
-                    }
-                    leadReporters.add(leadReporter);
-                    representative.setLeadReporters(leadReporters);
-                  }
-                }
-                if (!representativeList.contains(representative)) {
-                  representativeList.add(representative);
-                }
-              }
-              fieldsToWrite[2] = "OK imported";
-            } else {
-              fieldsToWrite[2] = "KO imported already exist in reportnet";
-            }
-          }
-
-        }
-        fieldsToWrite[0] = contryCode;
-        fieldsToWrite[1] = email.toLowerCase();
-        csvWriter.writeNext(fieldsToWrite);
-      }
+      // Add the imported lead reporters whose email and country code was alright to the repository
       if (!Collections.isEmpty(representativeList)) {
         representativeRepository.saveAll(representativeList);
       }
@@ -578,10 +510,57 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     } catch (IndexOutOfBoundsException e) {
       LOG_ERROR.error(EEAErrorMessage.DATA_FILE_ERROR, e);
       throw new EEAException(EEAErrorMessage.DATA_FILE_ERROR);
+    } catch (EEAException e) {
+      LOG_ERROR.error(EEAErrorMessage.DATAFLOW_NOTFOUND, e);
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-    // Once read we convert it to string
+
+    // Converts the read buffer to string and write it into the CSV file
     String csv = writer.getBuffer().toString();
+
     return csv.getBytes();
+  }
+
+  /**
+   * Fill import lead reporter results.
+   *
+   * @param everyLines the every lines
+   * @param dataProviderList the data provider list
+   * @param headerSize the header size
+   * @param csvWriter the csv writer
+   * @param dataflowId the dataflow id
+   * @return the list
+   * @throws EEAException the EEA exception
+   */
+  private List<Representative> fillImportLeadReporterResults(List<String> everyLines,
+      List<DataProvider> dataProviderList, int headerSize, CSVWriter csvWriter, Long dataflowId)
+      throws EEAException {
+
+    List<String> countryCodeList =
+        dataProviderList.stream().map(DataProvider::getCode).collect(Collectors.toList());
+    List<Representative> representativeList = new ArrayList<>();
+
+    String[] fieldsToWrite = new String[headerSize];
+
+    for (String representativeData : everyLines) {
+      String[] dataLine = representativeData.split("[" + delimiter + "]");
+      String countryCode = dataLine[0].replace("\"", "");
+      String email = "";
+      UserRepresentationVO user = null;
+      if (dataLine.length == 2 && null != dataLine[1]) {
+        email = dataLine[1].replace("\"", "").replace("\r", "");
+        if (StringUtils.isNotBlank(email)) {
+          user = userManagementControllerZull.getUserByEmail(email.toLowerCase());
+        }
+      }
+
+      fieldsToWrite[0] = countryCode;
+      fieldsToWrite[1] = email.toLowerCase();
+      fieldsToWrite[2] = addLeadReporter(countryCodeList, countryCode, dataProviderList, dataflowId,
+          email, representativeList, user);
+      csvWriter.writeNext(fieldsToWrite);
+    }
+    return representativeList;
   }
 
   /**
@@ -653,13 +632,18 @@ public class RepresentativeServiceImpl implements RepresentativeService {
             userManagementControllerZull.getUserByEmail(leadReporterVO.getEmail().toLowerCase());
         leadReporter.setInvalid(newUser == null ? true : false);
         if (null != representative.getLeadReporters() && representative.getLeadReporters().stream()
-            .filter(reporter -> leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
-            .collect(Collectors.counting()) == 0) {
+            .filter(reporter -> !Boolean.TRUE.equals(leadReporter.getInvalid())
+                && leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
+            .collect(Collectors.counting()) == 1) {
           modifyLeadReporterPermissions(leadReporter.getEmail().toLowerCase(), representative,
-              true);
-          if (!Boolean.TRUE.equals(leadReporter.getInvalid())) {
-            modifyLeadReporterPermissions(leadReporterVO.getEmail(), representative, false);
-          }
+              false);
+          leadReporter.setEmail(leadReporterVO.getEmail());
+        } else if (null != representative.getLeadReporters()
+            && representative.getLeadReporters().stream()
+                .filter(reporter -> !Boolean.TRUE.equals(leadReporter.getInvalid())
+                    && leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
+                .collect(Collectors.counting()) == 0) {
+          modifyLeadReporterPermissions(leadReporterVO.getEmail(), representative, false);
           leadReporter.setEmail(leadReporterVO.getEmail());
         }
         leadReporter.setRepresentative(representative);
@@ -723,8 +707,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
 
     } catch (Exception e) {
-      LOG.error("An error was produced while validating lead reporters for dataflow {}",
-          dataflowId);
+      LOG.error("An error was produced while validating lead reporters for dataflow {}", dataflowId,
+          e);
       if (sendNotification) {
         NotificationVO notificationVO = NotificationVO.builder()
             .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -773,7 +757,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
               new EeaSecurityExpressionRoot(SecurityContextHolder.getContext().getAuthentication(),
                   userManagementControllerZull, entityAccessService);
           isAuthorized = eeaSecurityExpressionRoot.secondLevelAuthorize(dataflow.getId(),
-              ObjectAccessRoleEnum.DATAFLOW_STEWARD, ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN);
+              ObjectAccessRoleEnum.DATAFLOW_STEWARD, ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN,
+              ObjectAccessRoleEnum.DATAFLOW_STEWARD_SUPPORT);
         }
       }
     }
@@ -978,6 +963,170 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
     }
     return countryCode;
+  }
+
+
+  /**
+   * Adds the lead reporter.
+   *
+   * @param countryCodeList the country code list
+   * @param countryCode the country code
+   * @param dataProviderList the data provider list
+   * @param dataflowId the dataflow id
+   * @param email the email
+   * @param representativeList the representative list
+   * @param user the user
+   * @return the string
+   * @throws EEAException the EEA exception
+   */
+  private String addLeadReporter(List<String> countryCodeList, String countryCode,
+      List<DataProvider> dataProviderList, Long dataflowId, String email,
+      List<Representative> representativeList, UserRepresentationVO user) throws EEAException {
+
+    String importResult = "";
+
+    Dataflow dataflow = dataflowRepository.findById(dataflowId).orElse(null);
+
+    if (dataflow == null) {
+      throw new EEAException("Couldn't find a dataflow with the provided Id");
+    }
+
+    String dataProviderType =
+        TypeDataflowEnum.BUSINESS.equals(dataflow.getType()) ? "company" : "country";
+
+    if (!countryCodeList.contains(countryCode)) {
+      importResult = "Error during import, " + dataProviderType + " code doesn't correspond to a "
+          + dataProviderType + " in ReportNet";
+    } else {
+      importResult = prepareImportResult(countryCode, dataProviderList, email, representativeList,
+          user, importResult, dataflow);
+
+    }
+    return importResult;
+  }
+
+  /**
+   * Prepare import result.
+   *
+   * @param countryCode the country code
+   * @param dataProviderList the data provider list
+   * @param email the email
+   * @param representativeList the representative list
+   * @param user the user
+   * @param importResult the import result
+   * @param dataflow the dataflow
+   * @return the string
+   */
+  private String prepareImportResult(String countryCode, List<DataProvider> dataProviderList,
+      String email, List<Representative> representativeList, UserRepresentationVO user,
+      String importResult, Dataflow dataflow) {
+    DataProvider dataProvider = dataProviderList.stream()
+        .filter(dataProv -> countryCode.equalsIgnoreCase(dataProv.getCode())).findFirst()
+        .orElse(null);
+
+    if (null != dataProvider
+        && (null == representativeRepository.findOneByDataflowIdAndDataProviderIdUserMail(
+            dataflow.getId(), dataProvider.getId(), email.toLowerCase()))) {
+
+      Representative representative = representativeList.stream()
+          .filter(rep -> dataProvider.getId().equals(rep.getDataProvider().getId())).findFirst()
+          .orElse(representativeRepository.findOneByDataflow_IdAndDataProvider_Id(dataflow.getId(),
+              dataProvider.getId()));
+
+      Pattern p = Pattern.compile(EMAIL_REGEX);
+      Matcher m = p.matcher(email);
+
+      if (m.matches()) {
+        // If the representative exists we don't create it again
+        if (null == representative) {
+          importResult = createRepresentativeAndLeadReporter(email, representativeList, user,
+              dataflow, dataProvider);
+        } else {
+          importResult = createLeadReporterWhenRepresentativeExists(email, representativeList, user,
+              representative);
+        }
+      } else {
+        importResult = KO_INVALID_EMAIL;
+      }
+    }
+    return importResult;
+  }
+
+  /**
+   * Creates the lead reporter when representative exists.
+   *
+   * @param email the email
+   * @param representativeList the representative list
+   * @param user the user
+   * @param representative the representative
+   * @return the string
+   */
+  private String createLeadReporterWhenRepresentativeExists(String email,
+      List<Representative> representativeList, UserRepresentationVO user,
+      Representative representative) {
+    String importResult = "";
+    List<LeadReporter> leadReporters = representative.getLeadReporters();
+    if (StringUtils.isNotBlank(email)) {
+      final String innerEmail = email.toLowerCase();
+      if (leadReporters.stream().noneMatch(rep -> innerEmail.equals(rep.getEmail()))) {
+        LeadReporter leadReporter = new LeadReporter();
+        leadReporter.setRepresentative(representative);
+        leadReporter.setEmail(innerEmail);
+        if (null == user) {
+          leadReporter.setInvalid(true);
+        }
+        leadReporters.add(leadReporter);
+        representative.setLeadReporters(leadReporters);
+        importResult = OK_IMPORT;
+      } else {
+        importResult = KO_ALREADY_EXISTS;
+      }
+    }
+    if (!representativeList.contains(representative)) {
+      representativeList.add(representative);
+    }
+
+    return importResult;
+  }
+
+  /**
+   * Creates the representative and lead reporter.
+   *
+   * @param email the email
+   * @param representativeList the representative list
+   * @param user the user
+   * @param dataflow the dataflow
+   * @param dataProvider the data provider
+   * @return the string
+   */
+  private String createRepresentativeAndLeadReporter(String email,
+      List<Representative> representativeList, UserRepresentationVO user, Dataflow dataflow,
+      DataProvider dataProvider) {
+    String importResult;
+    Representative representative;
+    DataProvider dataProviderNew = new DataProvider();
+    representative = new Representative();
+    dataProviderNew.setId(dataProvider.getId());
+    representative.setDataflow(dataflow);
+    representative.setDataProvider(dataProviderNew);
+    representative.setReceiptDownloaded(false);
+    representative.setReceiptOutdated(false);
+    representative.setHasDatasets(false);
+    representative.setId(0L);
+    if (StringUtils.isNotBlank(email)) {
+      LeadReporter leadReporter = new LeadReporter();
+      leadReporter.setRepresentative(representative);
+      leadReporter.setEmail(email.toLowerCase());
+      if (null == user) {
+        leadReporter.setInvalid(true);
+      }
+      representative.setLeadReporters(new ArrayList<>(Arrays.asList(leadReporter)));
+    } else {
+      representative.setLeadReporters(new ArrayList<>());
+    }
+    representativeList.add(representative);
+    importResult = OK_IMPORT;
+    return importResult;
   }
 
 }

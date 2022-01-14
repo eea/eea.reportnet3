@@ -161,6 +161,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private ReferenceDatasetRepository referenceDatasetRepository;
 
+  /** The eea security expression root. */
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
+
   /**
    * The Constant LOG.
    */
@@ -777,7 +781,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   /**
-   * Gets the dataset destination foreign relation. It's used to know the datasetId destination of a
+   * Gets the dataset destination foreign relation. It"s used to know the datasetId destination of a
    * FK
    *
    * @param datasetIdOrigin the dataset id origin
@@ -1093,5 +1097,24 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     datasetsSummaryList.addAll(getReportingDatasetsSummaryList(dataflowId));
     return datasetsSummaryList;
   }
+
+  /**
+   * Find dataset metabase external.
+   *
+   * @param datasetId the dataset id
+   * @return the data set metabase VO
+   * @throws EEAException
+   */
+  @Override
+  public DataSetMetabaseVO findDatasetMetabaseExternal(Long datasetId) throws EEAException {
+    Optional<DataSetMetabase> datasetMetabase = dataSetMetabaseRepository.findById(datasetId);
+    DataSetMetabaseVO metabaseVO = new DataSetMetabaseVO();
+    if (datasetMetabase.isPresent()) {
+      metabaseVO = dataSetMetabaseMapper.entityToClass(datasetMetabase.get());
+      metabaseVO.setDatasetTypeEnum(getDatasetType(datasetId));
+    }
+    return metabaseVO;
+  }
+
 
 }

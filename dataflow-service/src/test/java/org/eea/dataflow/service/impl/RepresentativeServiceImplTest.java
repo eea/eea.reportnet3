@@ -672,7 +672,7 @@ public class RepresentativeServiceImplTest {
     dataflow.setType(TypeDataflowEnum.BUSINESS);
     Mockito.when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataflow));
 
-    representativeServiceImpl.importFile(1L, 2L, file);
+    representativeServiceImpl.importLeadReportersFile(1L, 2L, file);
     Mockito.verify(representativeRepository, times(1)).saveAll(Mockito.any());
 
   }

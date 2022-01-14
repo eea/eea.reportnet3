@@ -82,10 +82,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  // @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR')
-  // OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND
-  // checkAccessReferenceEntity('DATAFLOW',#dataflowId)) hasAnyRole('ADMIN')")
-  @PreAuthorize("isAuthenticated()")
+  @PreAuthorize("checkAccessSuperUser('DATAFLOW',#dataflowId) OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Find reporting dataset id by dataflow id", hidden = true)
   public List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(@ApiParam(type = "Long",
       value = "dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
@@ -119,7 +116,6 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/private/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "find dataset metabase", hidden = true)
   public DataSetMetabaseVO findDatasetMetabaseById(@ApiParam(type = "Long", value = "dataset Id",
       example = "0") @PathVariable("datasetId") Long datasetId) {
@@ -135,12 +131,15 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','DATASCHEMA_EDITOR_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATASET_NATIONAL_COORDINATOR')")
-  @PreAuthorize("isAuthenticated()")
+  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId)")
   @ApiOperation(value = "find dataset metabase", hidden = true)
   public DataSetMetabaseVO findExternalDatasetMetabaseById(@ApiParam(type = "Long",
       value = "dataset Id", example = "0") @PathVariable("datasetId") Long datasetId) {
-    return datasetMetabaseService.findDatasetMetabase(datasetId);
+    try {
+      return datasetMetabaseService.findDatasetMetabaseExternal(datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+    }
   }
 
 
@@ -220,13 +219,14 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @ApiOperation(value = "Update dataset Status", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated status"),
       @ApiResponse(code = 500, message = "Error updating status")})
-  @PreAuthorize("secondLevelAuthorize(#datasetStatusMessageVO.datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetStatusMessageVO.datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_STEWARD_SUPPORT')")
   public void updateDatasetStatus(@ApiParam(
       value = "dataset Status message object") @RequestBody DatasetStatusMessageVO datasetStatusMessageVO) {
     try {
       datasetMetabaseService.updateDatasetStatus(datasetStatusMessageVO);
     } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_DATASET_STATUS);
     }
   }
 
@@ -260,7 +260,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @HystrixCommand
   @GetMapping(value = "/{datasetId}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get statistics by dataset", hidden = true)
-  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','DATASCHEMA_EDITOR_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','DATASCHEMA_EDITOR_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @PreAuthorize("isAuthenticated()")
   public StatisticsVO getStatisticsById(@ApiParam(type = "Long", value = "dataset Id",
       example = "0") @PathVariable("datasetId") Long datasetId) {
@@ -288,7 +288,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @GetMapping(value = "/globalStatistics/dataflow/{dataflowId}/dataSchema/{dataschemaId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get global statistics", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   public List<StatisticsVO> getGlobalStatisticsByDataschemaId(
       @ApiParam(type = "String", value = "Dataset schema Id",
           example = "5cf0e9b3b793310e9ceca190") @PathVariable("dataschemaId") String dataschemaId,

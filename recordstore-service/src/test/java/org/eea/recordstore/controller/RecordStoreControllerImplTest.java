@@ -14,6 +14,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -111,7 +113,7 @@ public class RecordStoreControllerImplTest {
     try {
       recordStoreControllerImpl.createEmptyDataset(TEST, TEST);
     } catch (ResponseStatusException e) {
-      assertEquals(String.format("error"), e.getReason());
+      assertEquals(EEAErrorMessage.CREATING_EMPTY_DATASET, e.getReason());
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }

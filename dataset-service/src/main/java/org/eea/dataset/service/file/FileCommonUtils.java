@@ -29,6 +29,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.DatasetId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +81,8 @@ public class FileCommonUtils {
   /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+
 
   /**
    * The Constant LOG.
@@ -505,13 +508,15 @@ public class FileCommonUtils {
    * @param replace the replace
    * @param schema the schema
    * @param dataset the dataset
+   * @param manageFixedRecords the manage fixed records
+   * @param connectionDataVO the connection data VO
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
   public void persistImportedDataset(final String idTableSchema, Long datasetId, String fileName,
-      boolean replace, DataSetSchema schema, DatasetValue dataset)
-      throws EEAException, IOException, SQLException {
+      boolean replace, DataSetSchema schema, DatasetValue dataset, boolean manageFixedRecords,
+      ConnectionDataVO connectionDataVO) throws EEAException, IOException, SQLException {
     if (dataset == null || CollectionUtils.isEmpty(dataset.getTableValues())) {
       throw new EEAException("Error processing file " + fileName);
     }
@@ -528,7 +533,7 @@ public class FileCommonUtils {
       LOG.info("RN3-Import - Table saved: datasetId={}, fileName={}", datasetId, fileName);
     }
 
-    if (schemaContainsFixedRecords(datasetId, schema, idTableSchema)) {
+    if (Boolean.TRUE.equals(manageFixedRecords)) {
       if (replace) {
         ObjectId tableSchemaIdTemp = new ObjectId(idTableSchema);
         TableSchema tableSchema = schema.getTableSchemas().stream()
@@ -540,7 +545,8 @@ public class FileCommonUtils {
         }
       }
     } else {
-      datasetService.storeRecords(datasetId, dataset.getTableValues().get(0).getRecords());
+      datasetService.storeRecords(datasetId, dataset.getTableValues().get(0).getRecords(),
+          connectionDataVO);
     }
   }
 
