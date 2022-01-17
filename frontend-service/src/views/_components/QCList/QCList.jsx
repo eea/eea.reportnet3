@@ -441,15 +441,17 @@ export const QCList = ({
         />
         {isDataflowOpen && row.hasHistoric && renderHistoricButton(row.id)}
 
-        <Button
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
-          disabled={validationContext.isFetchingData}
-          icon={getDeleteBtnIcon()}
-          onClick={onShowDeleteDialog}
-          tooltip={resourcesContext.messages['delete']}
-          tooltipOptions={{ position: 'top' }}
-          type="button"
-        />
+        {!isDataflowOpen && (
+          <Button
+            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
+            disabled={validationContext.isFetchingData}
+            icon={getDeleteBtnIcon()}
+            onClick={onShowDeleteDialog}
+            tooltip={resourcesContext.messages['delete']}
+            tooltipOptions={{ position: 'top' }}
+            type="button"
+          />
+        )}
       </Fragment>
     );
   };
