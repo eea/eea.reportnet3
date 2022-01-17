@@ -31,6 +31,7 @@ import { QCGenericHistory } from './_components/QCGenericHistory';
 import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
+import { StepProgressBar } from 'views/_components/StepProgressBar';
 import { TabsDesigner } from './_components/TabsDesigner';
 import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
@@ -90,6 +91,22 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     dataflowType: '',
     datasetDescription: '',
     datasetHasData: false,
+    datasetProgressBarSteps: [
+      {
+        idx: 1,
+        labelCompleted: resourcesContext.messages['importedData'],
+        labelUndone: resourcesContext.messages['importData'],
+        labelRunning: resourcesContext.messages['importingData']
+      },
+      {
+        idx: 2,
+        labelCompleted: resourcesContext.messages['validatedData'],
+        labelUndone: resourcesContext.messages['validateData'],
+        labelRunning: resourcesContext.messages['validatingData'],
+        isRunning: true
+      }
+    ],
+    datasetProgressBarCurrentStep: 0,
     datasetSchema: {},
     datasetSchemaAllTables: [],
     datasetSchemaId: '',
@@ -169,6 +186,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const {
     arePrefilledTablesDeleted,
     datasetDescription,
+    datasetProgressBarCurrentStep,
+    datasetProgressBarSteps,
     datasetSchemaAllTables,
     dataViewerOptions,
     isDataflowOpen,
@@ -582,6 +601,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         },
         true
       );
+      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 1, currentStep: 2, value: true } });
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -687,10 +707,19 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     );
     if (validationFinished && validationFinished.content.datasetId?.toString() === datasetId.toString()) {
       onHighlightRefresh(true);
+      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 1, currentStep: 2, value: false } });
     }
     const isImportFieldSchemaCompleted = notificationContext.toShow.some(
       notification => notification.key === 'IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'
     );
+
+    const isImportDataCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'IMPORT_DESIGN_COMPLETED_EVENT'
+    );
+
+    if (isImportDataCompleted) {
+      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 1, currentStep: 2, value: true } });
+    }
 
     if (isImportFieldSchemaCompleted) {
       window.location.reload();
@@ -902,6 +931,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         },
         true
       );
+      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 0, currentStep: 1, value: true } });
     } catch (error) {
       console.error('DatasetDesigner - onUpload.', error);
       notificationContext.add(
@@ -1494,6 +1524,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               />
             </div>
           </div>
+          <StepProgressBar currentStep={datasetProgressBarCurrentStep} steps={datasetProgressBarSteps} />
           <Toolbar>
             <div className="p-toolbar-group-left">
               <Button
