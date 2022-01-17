@@ -337,23 +337,25 @@ export const QCList = ({
         header: resourcesContext.messages['ruleLevelError'],
         template: rowData => getLevelErrorTemplate(rowData, false),
         editor: dropdownEditor
-      },
-      { key: 'automatic', header: resourcesContext.messages['automatic'], template: getAutomaticTemplate },
-      {
-        key: 'enabled',
-        header: resourcesContext.messages['enabled'],
-        template: getEnabledTemplate,
-        editor: checkboxEditor
-      },
-      { key: 'isCorrect', header: resourcesContext.messages['valid'], template: getCorrectTemplate }
+      }
     ];
 
     if (!reporting) {
-      columns.push({
-        key: 'actions',
-        header: resourcesContext.messages['actions'],
-        template: getActionsTemplate
-      });
+      columns.push(
+        { key: 'automatic', header: resourcesContext.messages['automatic'], template: getAutomaticTemplate },
+        {
+          key: 'enabled',
+          header: resourcesContext.messages['enabled'],
+          template: getEnabledTemplate,
+          editor: checkboxEditor
+        },
+        { key: 'isCorrect', header: resourcesContext.messages['valid'], template: getCorrectTemplate },
+        {
+          key: 'actions',
+          header: resourcesContext.messages['actions'],
+          template: getActionsTemplate
+        }
+      );
     }
 
     return columns.map(column => (
@@ -369,6 +371,20 @@ export const QCList = ({
         style={getColumnStyles(column.key)}
       />
     ));
+  };
+
+  const getColumnStyles = field => {
+    const style = {};
+
+    if (field === 'description') {
+      style.width = '23%';
+    }
+
+    if (field === 'entityType' || field === 'levelError') {
+      style.minWidth = '6rem';
+    }
+
+    return style;
   };
 
   const getActionsTemplate = row => (row.automatic ? editTemplate(row) : editAndDeleteTemplate(row));
@@ -482,31 +498,6 @@ export const QCList = ({
       {resourcesContext.messages['deleteValidationConfirm']}
     </ConfirmDialog>
   );
-
-  const getColumnStyles = field => {
-    const style = {};
-    const invisibleFields = [];
-
-    if (reporting) {
-      invisibleFields.push('enabled', 'automatic', 'isCorrect');
-    }
-
-    if (field === 'description') {
-      style.width = '23%';
-    }
-
-    if (field === 'entityType' || field === 'levelError') {
-      style.minWidth = '6rem';
-    }
-
-    if (invisibleFields.includes(field)) {
-      style.display = 'none';
-    } else {
-      style.display = 'auto';
-    }
-
-    return style;
-  };
 
   const checkboxEditor = props => {
     const { rowData, field } = props;
