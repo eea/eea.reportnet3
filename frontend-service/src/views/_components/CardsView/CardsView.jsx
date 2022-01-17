@@ -94,7 +94,7 @@ export const CardsView = ({
             }}
             value={goToPage}
           />
-          <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="bottom">
+          <ReactTooltip border effect="solid" id="pageInputTooltip" place="bottom">
             {pageInputTooltip}
           </ReactTooltip>
           <label className={styles.currentPageOf}>

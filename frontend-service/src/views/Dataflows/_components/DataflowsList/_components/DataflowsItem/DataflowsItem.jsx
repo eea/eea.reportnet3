@@ -45,7 +45,7 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
                 style={{ opacity: '0.6' }}
               />
             </span>
-            <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={id} place="top">
+            <ReactTooltip border className={styles.tooltip} effect="solid" id={id} place="top">
               {resourcesContext.messages[itemContent.showPublicInfo ? 'public' : 'notPublic']}
             </ReactTooltip>
           </div>
@@ -119,7 +119,7 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
         </h3>
         <p>{itemContent.description}</p>
         {itemContent.name.length > 70 && (
-          <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={idTooltip} place="top">
+          <ReactTooltip border className={styles.tooltip} effect="solid" id={idTooltip} place="top">
             {itemContent.name}
           </ReactTooltip>
         )}

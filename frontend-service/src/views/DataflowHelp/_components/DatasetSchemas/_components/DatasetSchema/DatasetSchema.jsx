@@ -391,7 +391,7 @@ const DatasetSchema = ({
               icon={AwesomeIcons('externalUrl')}
             />
             <ReactTooltip
-              border={true}
+              border
               className={styles.tooltipClass}
               effect="solid"
               id={`${field.fieldId}_geometricTypeTooltip`}
@@ -531,7 +531,7 @@ const DatasetSchema = ({
           <a data-for="linkGoTop" data-tip href="#datasetSchemaIndex">
             <FontAwesomeIcon className={styles.dragArrow} icon={AwesomeIcons('arrowUp')} role="presentation" />
           </a>
-          <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="linkGoTop" place="top">
+          <ReactTooltip border className={styles.tooltip} effect="solid" id="linkGoTop" place="top">
             {resourcesContext.messages['goTop']}
           </ReactTooltip>
         </h3>

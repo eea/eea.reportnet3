@@ -406,7 +406,7 @@ export const ManageIntegrations = ({
       />
 
       {(isEmptyForm || isIntegrationNameDuplicated) && (
-        <ReactTooltip border={true} effect="solid" id="integrationTooltip" place="top">
+        <ReactTooltip border effect="solid" id="integrationTooltip" place="top">
           {isIntegrationNameDuplicated
             ? resourcesContext.messages['duplicatedIntegrationName']
             : resourcesContext.messages['fcSubmitButtonDisabled']}
@@ -629,7 +629,7 @@ export const ManageIntegrations = ({
             )}
 
             {isKeyDuplicated && (
-              <ReactTooltip border={true} effect="solid" id="addParameterTooltip" place="top">
+              <ReactTooltip border effect="solid" id="addParameterTooltip" place="top">
                 {resourcesContext.messages['parameterAlreadyExists']}
               </ReactTooltip>
             )}

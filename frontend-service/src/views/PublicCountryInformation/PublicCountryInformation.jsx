@@ -254,7 +254,7 @@ export const PublicCountryInformation = () => {
                 icon={AwesomeIcons('7z')}
               />
               <ReactTooltip
-                border={true}
+                border
                 className={styles.tooltipClass}
                 effect="solid"
                 id={publicFileName.fileName}
@@ -275,7 +275,7 @@ export const PublicCountryInformation = () => {
             icon={AwesomeIcons('lock')}
           />
           <ReactTooltip
-            border={true}
+            border
             className={styles.tooltipClass}
             effect="solid"
             id={'restrictFromPublicField'}
@@ -303,7 +303,7 @@ export const PublicCountryInformation = () => {
                 icon={AwesomeIcons('7z')}
               />
               <ReactTooltip
-                border={true}
+                border
                 className={styles.tooltipClass}
                 effect="solid"
                 id={referencePublicFilesName.fileName}

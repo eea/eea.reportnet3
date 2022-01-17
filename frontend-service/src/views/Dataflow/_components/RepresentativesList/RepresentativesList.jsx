@@ -346,7 +346,7 @@ const RepresentativesList = ({
             data-tip
             icon={leadReporter?.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
           />
-          <ReactTooltip border={true} effect="solid" id={leadReporter?.account} place="top">
+          <ReactTooltip border effect="solid" id={leadReporter?.account} place="top">
             {leadReporter?.isValid
               ? resourcesContext.messages['validUserTooltip']
               : resourcesContext.messages['invalidUserTooltip']}

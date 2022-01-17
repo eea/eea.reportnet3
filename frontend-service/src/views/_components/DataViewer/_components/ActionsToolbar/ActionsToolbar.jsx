@@ -326,7 +326,7 @@ const ActionsToolbar = ({
                     value={selectedRuleMessage}
                   />
                 </span>
-                <ReactTooltip border={true} effect="solid" id="groupedFilterTooltip" place="top">
+                <ReactTooltip border effect="solid" id="groupedFilterTooltip" place="top">
                   {selectedRuleMessage}
                 </ReactTooltip>
               </Fragment>
@@ -345,7 +345,7 @@ const ActionsToolbar = ({
                 value={decodeURIComponent(prevFilterValue)}
               />
             </span>
-            <ReactTooltip border={true} effect="solid" id="valueFilterTooltip" place="top">
+            <ReactTooltip border effect="solid" id="valueFilterTooltip" place="top">
               {decodeURIComponent(prevFilterValue)}
             </ReactTooltip>
           </Fragment>

@@ -156,7 +156,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
                   type="submit"
                 />
               </div>
-              <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="saveCopy" place="left">
+              <ReactTooltip border className={styles.tooltip} effect="solid" id="saveCopy" place="left">
                 {inputValue.length === 0
                   ? resourcesContext.messages['snapshotsEmptyDescription']
                   : inputValue.length > config.INPUT_MAX_LENGTH

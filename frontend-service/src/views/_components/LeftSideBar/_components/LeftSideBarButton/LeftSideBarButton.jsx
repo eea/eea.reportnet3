@@ -106,7 +106,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
   const renderTooltip = () => {
     if (!leftSideBarContext.isLeftSideBarOpened) {
       return (
-        <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id={title} place="right">
+        <ReactTooltip border className={styles.tooltipClass} effect="solid" id={title} place="right">
           <span>{!leftSideBarContext.isLeftSideBarOpened ? resourcesContext.messages[title] : undefined}</span>
         </ReactTooltip>
       );

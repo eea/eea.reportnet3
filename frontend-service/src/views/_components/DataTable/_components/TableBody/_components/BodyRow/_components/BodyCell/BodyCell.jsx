@@ -248,7 +248,7 @@ export class BodyCell extends Component {
             </span>
 
             <ReactTooltip
-              border={true}
+              border
               className={styles.tooltip}
               effect="solid"
               id={`quickEditSaveTooltip${this.props.rowIndex}`}
@@ -260,7 +260,7 @@ export class BodyCell extends Component {
               </span>
             </ReactTooltip>
             <ReactTooltip
-              border={true}
+              border
               className={styles.tooltip}
               effect="solid"
               id={`quickEditCancelTooltip${this.props.rowIndex}`}
@@ -286,12 +286,7 @@ export class BodyCell extends Component {
               />
             </span>
             {this.props.quickEditRowInfo.condition && (
-              <ReactTooltip
-                border={true}
-                className={styles.tooltip}
-                effect="solid"
-                id="sortedQuickEditTooltip"
-                place="top">
+              <ReactTooltip border className={styles.tooltip} effect="solid" id="sortedQuickEditTooltip" place="top">
                 <span> {this.context.messages['disabledQuickEdit']} </span>
               </ReactTooltip>
             )}

@@ -119,7 +119,7 @@ export const Article15 = ({ dataflowId, dataProviderId, datasetId, isReporting, 
           />
 
           {!isCreated && (
-            <ReactTooltip border={true} effect="solid" id="TableNotExists" place="top">
+            <ReactTooltip border effect="solid" id="TableNotExists" place="top">
               {`The table ${webform.name} is not created in the design, please check it`}
             </ReactTooltip>
           )}

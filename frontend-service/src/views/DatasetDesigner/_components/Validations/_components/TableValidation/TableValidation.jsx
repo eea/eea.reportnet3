@@ -605,7 +605,7 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
   const renderTooltip = () => {
     if (creationFormState.isValidationCreationDisabled || isSubmitDisabled) {
       return (
-        <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
+        <ReactTooltip border className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
           <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
         </ReactTooltip>
       );

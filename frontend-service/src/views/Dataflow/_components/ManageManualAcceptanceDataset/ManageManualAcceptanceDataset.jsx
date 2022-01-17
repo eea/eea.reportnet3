@@ -107,7 +107,7 @@ export const ManageManualAcceptanceDataset = ({
       />
       {(isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
         manageManualAcceptanceDatasetState.datasetFeedbackStatus === dataset.feedbackStatus) && (
-        <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
+        <ReactTooltip border className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
           <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
         </ReactTooltip>
       )}

@@ -692,7 +692,7 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
         <div className={styles.subsection}>
           {getRuleCreationBtn()}
           {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
-            <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
+            <ReactTooltip border className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
               <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
             </ReactTooltip>
           )}

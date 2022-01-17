@@ -538,7 +538,7 @@ export class DataTable extends Component {
                         }}
                         value={this.state.currentPage}
                       />
-                      <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="bottom">
+                      <ReactTooltip border effect="solid" id="pageInputTooltip" place="bottom">
                         {this.state.pageInputTooltip}
                       </ReactTooltip>
                       <label style={{ margin: '0 0 0 0.5rem' }}>
