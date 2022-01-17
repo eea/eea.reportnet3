@@ -45,7 +45,8 @@ export const QCList = ({
   dataset,
   datasetSchemaAllTables,
   datasetSchemaId,
-  reporting = false,
+  isDataflowOpen = false,
+  isDatasetDesigner = false,
   setHasValidations = () => {}
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -167,7 +168,7 @@ export const QCList = ({
 
     validationContext.onFetchingData(isFetchingData, updatedRuleId);
     try {
-      const validationsServiceList = await ValidationService.getAll(dataflowId, datasetSchemaId, reporting);
+      const validationsServiceList = await ValidationService.getAll(dataflowId, datasetSchemaId, !isDatasetDesigner);
       if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
         validationsServiceList.validations.forEach(validation => {
           const additionalInfo = getAdditionalValidationInfo(
@@ -346,7 +347,7 @@ export const QCList = ({
       }
     ];
 
-    if (!reporting) {
+    if (isDatasetDesigner) {
       columns.push(
         { key: 'automatic', header: resourcesContext.messages['automatic'], template: getAutomaticTemplate },
         {
@@ -438,7 +439,7 @@ export const QCList = ({
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
-        {row.hasHistoric && renderHistoricButton(row.id)}
+        {isDataflowOpen && row.hasHistoric && renderHistoricButton(row.id)}
 
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
@@ -471,7 +472,7 @@ export const QCList = ({
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
-        {row.hasHistoric && renderHistoricButton(row.id)}
+        {isDataflowOpen && row.hasHistoric && renderHistoricButton(row.id)}
       </Fragment>
     );
   };

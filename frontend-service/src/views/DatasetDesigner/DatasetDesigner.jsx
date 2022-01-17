@@ -206,7 +206,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     leftSideBarContext.removeModels();
     onLoadSchema();
     callSetMetaData();
-    if (isEmpty(webformOptions)) getWebformList();
+    if (isEmpty(webformOptions)) {
+      getWebformList();
+    }
   }, []);
 
   useEffect(() => {
@@ -998,13 +1000,15 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const renderActionButtonsValidationDialog = (
     <Fragment>
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon="info"
-        label={resourcesContext.messages['allQCsHistoryBtn']}
-        onClick={() => setIsHistoryDialogVisible(true)}
-        style={{ float: 'left' }}
-      />
+      {isDataflowOpen && (
+        <Button
+          className="p-button-secondary p-button-animated-blink"
+          icon="info"
+          label={resourcesContext.messages['allQCsHistoryBtn']}
+          onClick={() => setIsHistoryDialogVisible(true)}
+          style={{ float: 'left' }}
+        />
+      )}
       <Button
         className="p-button-secondary p-button-animated-blink"
         disabled={designerState.isDownloadingQCRules}
@@ -1306,6 +1310,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
+            isDataflowOpen={isDataflowOpen}
+            isDatasetDesigner
           />
         </Dialog>
       );
