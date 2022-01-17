@@ -241,22 +241,21 @@ export const QCList = ({
   const getCorrectTemplateContent = rowData => {
     if (isNil(rowData.isCorrect)) {
       return <FontAwesomeIcon className={`${styles.icon} ${styles.spinner}`} icon={AwesomeIcons('spinner')} />;
-    } else {
-      if (rowData.isCorrect) {
-        return <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />;
-      }
+    }
+    if (rowData.isCorrect) {
+      return <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />;
+    }
 
-      if (!isNil(rowData.sqlError)) {
-        return (
-          <Button
-            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.invalidSqlIcon}`}
-            icon="warning"
-            onClick={() => navigator.clipboard.writeText(rowData.sqlError)}
-            tooltip={`${rowData.sqlError}<br/><br/><b><i>${resourcesContext.messages['sqlErrorMessageCopy']}</i></b>`}
-            tooltipOptions={{ position: 'left' }}
-          />
-        );
-      }
+    if (!isNil(rowData.sqlError)) {
+      return (
+        <Button
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.invalidSqlIcon}`}
+          icon="warning"
+          onClick={() => navigator.clipboard.writeText(rowData.sqlError)}
+          tooltip={`${rowData.sqlError}<br/><br/><b><i>${resourcesContext.messages['sqlErrorMessageCopy']}</i></b>`}
+          tooltipOptions={{ position: 'left' }}
+        />
+      );
     }
   };
 
