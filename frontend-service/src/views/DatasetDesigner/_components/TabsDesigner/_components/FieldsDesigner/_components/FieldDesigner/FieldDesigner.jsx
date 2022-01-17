@@ -1200,9 +1200,9 @@ export const FieldDesigner = ({
 
     if (!addField) {
       return (
-        <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
+        <div className={`${styles.draggableFieldContentCell} ${styles.dragAndDropItemsCell}`}>
           <div className={styles.draggableFieldCell}>{resourcesContext.messages['moveField']}</div>
-          <div className={styles.draggableFieldCell}>
+          <div className={`${styles.draggableFieldCell} ${styles.dragAndDropItems}`}>
             <FontAwesomeIcon
               aria-label={resourcesContext.messages['moveField']}
               className={styles.dragAndDropIcon}
@@ -1216,7 +1216,7 @@ export const FieldDesigner = ({
       );
     } else {
       return (
-        <div className={`${styles.draggableFieldContentCell} ${styles.smallItems}`}>
+        <div className={`${styles.draggableFieldContentCell} ${styles.dragAndDropItemsCell}`}>
           <div className={styles.draggableFieldCell}>
             {resourcesContext.messages['add']} {resourcesContext.messages['field']}
           </div>
@@ -1359,7 +1359,7 @@ export const FieldDesigner = ({
         <div className={styles.draggableFieldCell}>
           <label>{resourcesContext.messages['newFieldTypePlaceHolder']}</label>
         </div>
-        <div className={styles.draggableFieldCell}>
+        <div className={`${styles.draggableFieldCell} ${styles.dropDownLabel}`}>
           <Dropdown
             appendTo={document.body}
             ariaLabel={'fieldType'}
