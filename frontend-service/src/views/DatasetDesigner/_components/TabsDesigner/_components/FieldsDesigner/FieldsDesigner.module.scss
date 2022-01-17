@@ -235,6 +235,12 @@
     }
   }
   .fieldsHeader {
+    grid-template-columns: 10% 5% 5% 5% 15% 15% 15% 9% 7% 7% 7%;
+  }
+}
+
+@media (min-width: 1980px) {
+  .fieldsHeader {
     grid-template-columns: 10% 5% 5% 5% 18% 18% 18% 3% 6% 6% 6%;
   }
 }

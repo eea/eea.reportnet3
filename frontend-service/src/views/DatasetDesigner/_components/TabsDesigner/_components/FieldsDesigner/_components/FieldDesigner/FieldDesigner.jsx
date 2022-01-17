@@ -1359,7 +1359,7 @@ export const FieldDesigner = ({
         <div className={styles.draggableFieldCell}>
           <label>{resourcesContext.messages['newFieldTypePlaceHolder']}</label>
         </div>
-        <div className={styles.draggableFieldCell}>
+        <div className={`${styles.draggableFieldCell} ${styles.dropDownLabel}`}>
           <Dropdown
             appendTo={document.body}
             ariaLabel={'fieldType'}
