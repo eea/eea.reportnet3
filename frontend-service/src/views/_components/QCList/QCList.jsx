@@ -323,7 +323,12 @@ export const QCList = ({
       { key: 'field', header: resourcesContext.messages['field'] },
       { key: 'shortCode', header: resourcesContext.messages['ruleCode'], editor: textEditor },
       { key: 'name', header: resourcesContext.messages['name'], editor: textEditor },
-      { key: 'description', header: resourcesContext.messages['description'], editor: textEditor },
+      {
+        key: 'description',
+        header: resourcesContext.messages['description'],
+        editor: textEditor,
+        className: styles.descriptionColumn
+      },
       { key: 'message', header: resourcesContext.messages['message'] },
       { key: 'expressionText', header: resourcesContext.messages['expressionText'], template: getExpressionsTemplate },
       {
@@ -331,12 +336,13 @@ export const QCList = ({
         header: resourcesContext.messages['sqlSentenceCost'],
         template: getSqlSentenceCostTemplate
       },
-      { key: 'entityType', header: resourcesContext.messages['entityType'] },
+      { key: 'entityType', header: resourcesContext.messages['entityType'], className: styles.entityTypeColumn },
       {
         key: 'levelError',
         header: resourcesContext.messages['ruleLevelError'],
         template: rowData => getLevelErrorTemplate(rowData, false),
-        editor: dropdownEditor
+        editor: dropdownEditor,
+        className: styles.levelErrorColumn
       }
     ];
 
@@ -361,6 +367,7 @@ export const QCList = ({
     return columns.map(column => (
       <Column
         body={column.template}
+        className={column.className ? column.className : ''}
         columnResizeMode="expand"
         editor={column.editor}
         field={column.key}
@@ -368,23 +375,8 @@ export const QCList = ({
         key={column.key}
         rowEditor={column.key === 'actions'}
         sortable={column.key !== 'actions' && tabsValidationsState.editingRows.length === 0}
-        style={getColumnStyles(column.key)}
       />
     ));
-  };
-
-  const getColumnStyles = field => {
-    const style = {};
-
-    if (field === 'description') {
-      style.width = '23%';
-    }
-
-    if (field === 'entityType' || field === 'levelError') {
-      style.minWidth = '6rem';
-    }
-
-    return style;
   };
 
   const getActionsTemplate = row => (row.automatic ? editTemplate(row) : editAndDeleteTemplate(row));

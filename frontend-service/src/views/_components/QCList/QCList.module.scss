@@ -142,3 +142,12 @@
   display: flex;
   justify-content: center;
 }
+
+.descriptionColumn {
+  width: 23%;
+}
+
+.entityTypeColumn,
+.levelErrorColumn {
+  min-width: 6rem;
+}
