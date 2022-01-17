@@ -999,7 +999,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const renderActionButtonsValidationDialog = (
-    <Fragment>
+    <div className={styles.qcDialogFooterWrapper}>
       {isDataflowOpen && (
         <Button
           className="p-button-secondary p-button-animated-blink"
@@ -1015,33 +1015,27 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         icon={designerState.isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadQCsButtonLabel']}
         onClick={() => onDownloadQCRules()}
-        style={{ float: 'left' }}
       />
-
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createFieldValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('field', 'validationsListDialog')}
-        style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createRowValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('row', 'validationsListDialog')}
-        style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createTableValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
-        style={{ float: 'left' }}
       />
-
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary p-button-animated-blink ${styles.buttonAlignRight}`}
         icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['validateSqlRulesBtn']}
         onClick={validateQcRules}
@@ -1054,7 +1048,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         label={resourcesContext.messages['close']}
         onClick={onHideValidationsDialog}
       />
-    </Fragment>
+    </div>
   );
 
   const renderDashboardFooter = (
