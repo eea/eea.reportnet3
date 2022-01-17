@@ -90,10 +90,11 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         historicReleases = data;
       }
 
+      historicReleases = historicReleases.map(historic => ({ ...historic, isPublic: !historic.restrictFromPublic }));
       historicReleases.sort((a, b) => b.releaseDate - a.releaseDate);
+
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',
-        // payload: { data: historicReleases, filteredData: historicReleases, filtered: false }
         payload: { data: historicReleases }
       });
       getDataProviderCode(historicReleases);
@@ -138,9 +139,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     </div>
   );
 
-  const renderRestrictFromPublicTemplate = rowData => (
+  const renderIsPublicTemplate = rowData => (
     <div className={styles.checkedValueColumn}>
-      {rowData.restrictFromPublic ? (
+      {rowData.isPublic ? (
         <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
       ) : null}
     </div>
@@ -154,7 +155,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           key.includes('releaseDate') ||
           key.includes('isDataCollectionReleased') ||
           key.includes('isEUReleased') ||
-          key.includes('restrictFromPublic')
+          key.includes('isPublic')
       )
       .map(field => {
         let template = null;
@@ -162,7 +163,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         if (field === 'releaseDate') template = renderReleaseDateTemplate;
         if (field === 'isEUReleased') template = renderIsEUReleasedTemplate;
         if (field === 'isDataCollectionReleased') template = renderIsDataCollectionReleasedTemplate;
-        if (field === 'restrictFromPublic') template = renderRestrictFromPublicTemplate;
+        if (field === 'isPublic') template = renderIsPublicTemplate;
 
         return (
           <Column
@@ -188,14 +189,12 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const renderEUDatasetColumns = historicReleases => {
     const fieldColumns = Object.keys(historicReleases[0])
-      .filter(
-        key => key.includes('dataProviderCode') || key.includes('releaseDate') || key.includes('restrictFromPublic')
-      )
+      .filter(key => key.includes('dataProviderCode') || key.includes('releaseDate') || key.includes('isPublic'))
       .map(field => {
         let template = null;
         if (field === 'dataProviderCode') template = renderDataProviderLinkBodyColumn;
         if (field === 'releaseDate') template = renderReleaseDateTemplate;
-        if (field === 'restrictFromPublic') template = renderRestrictFromPublicTemplate;
+        if (field === 'isPublic') template = renderIsPublicTemplate;
         return (
           <Column
             body={template}
@@ -240,8 +239,8 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     },
     {
       type: 'MULTI_SELECT',
-      key: 'restrictFromPublic',
-      label: resourcesContext.messages['restrictFromPublic']
+      key: 'isPublic',
+      label: resourcesContext.messages['public']
     }
   ];
 
@@ -257,7 +256,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             'historicReleaseDataProviderFilterLabel'
           )
         },
-        { key: 'restrictFromPublic', label: resourcesContext.messages['restrictFromPublic'] }
+        { key: 'isPublic', label: resourcesContext.messages['public'] }
       ]
     }
   ];
