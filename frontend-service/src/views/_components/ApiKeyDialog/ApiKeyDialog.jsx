@@ -17,8 +17,8 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
   const resourcesContext = useContext(ResourcesContext);
 
   const [apiKey, setApiKey] = useState('');
-  const [isKeyLoading, setIsKeyLoading] = useState(false);
   const [copyResultMessage, setCopyResultMessage] = useState('');
+  const [isKeyLoading, setIsKeyLoading] = useState(false);
 
   useLayoutEffect(() => {
     onGetApiKey();
