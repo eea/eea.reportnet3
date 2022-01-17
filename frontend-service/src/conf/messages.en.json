@@ -1443,6 +1443,12 @@
     "y": "Y",
     "yes": "Yes",
     "zipCsvTable": "ZIP (.csv for each table)",
-    "copyToClipboardError": "Error copying to clipboard"
+    "copyToClipboardError": "Error copying to clipboard",
+    "importedData": "Imported data",
+    "importData": "Import data",
+    "importingData": "Importing data",
+    "validatedData": "Validated data",
+    "validateData": "Validate data",
+    "validatingData": "Validating data"
   }
 }
