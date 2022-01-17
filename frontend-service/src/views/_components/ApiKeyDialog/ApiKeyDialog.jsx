@@ -1,22 +1,26 @@
 import { Fragment, useContext, useLayoutEffect, useState } from 'react';
 
+import isNil from 'lodash/isNil';
+
+import ReactTooltip from 'react-tooltip';
+
 import styles from './ApiKeyDialog.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
+import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'services/DataflowService';
-import { TooltipUtils } from 'views/_functions/Utils/TooltipUtils';
 
 const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCustodian, manageDialogs }) => {
   const resourcesContext = useContext(ResourcesContext);
 
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState(null);
+  const [copyResultMessage, setCopyResultMessage] = useState('');
   const [isKeyLoading, setIsKeyLoading] = useState(false);
-  const [textAreaRef, setTextAreaRef] = useState(null);
 
   useLayoutEffect(() => {
     onGetApiKey();
@@ -25,14 +29,10 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
   const onCloseDialog = () => manageDialogs('isApiKeyDialogVisible', false);
 
   const onCopyToClipboard = () => {
-    const textArea = textAreaRef;
-    textArea.select();
-    document.execCommand('copy');
-    window.getSelection().removeAllRanges();
-
-    setTimeout(() => {
-      TooltipUtils.removeElementsByClass('p-tooltip');
-    }, 750);
+    navigator.clipboard.writeText(apiKey).then(
+      () => setCopyResultMessage(resourcesContext.messages['copyToClipboardSuccess']),
+      () => setCopyResultMessage(resourcesContext.messages['copyToClipboardError'])
+    );
   };
 
   const onGetApiKey = async () => {
@@ -66,75 +66,79 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
         disabled={isKeyLoading}
         icon={isKeyLoading ? 'spinnerAnimate' : 'key'}
         label={resourcesContext.messages['generateApiKey']}
-        onClick={() => onGenerateApiKey()}
+        onClick={onGenerateApiKey}
       />
       <Button
         className="p-button-secondary p-button-right-aligned"
         icon="cancel"
         label={resourcesContext.messages['close']}
-        onClick={() => onCloseDialog()}
+        onClick={onCloseDialog}
       />
     </Fragment>
   );
+
+  const renderDialogContent = () => {
+    if (isKeyLoading) {
+      return <Spinner className={styles.spinner} />;
+    }
+
+    if (isNil(apiKey)) {
+      return <p>{resourcesContext.messages['noApiKey']}</p>;
+    }
+
+    return (
+      <Fragment>
+        <label className={styles.label}>{resourcesContext.messages['apiKeyDialogLabel']}</label>
+
+        <div className={styles.input_api}>
+          <div className={styles.flex}>
+            <InputText className={styles.inputText} id="apiKey" readOnly value={apiKey} />
+            <label className="srOnly" htmlFor="apiKey">
+              {apiKey}
+            </label>
+            <span data-for="onCopyToClipboardBtn" data-tip>
+              <Button className={`p-button-primary ${styles.copyBtn}`} icon="copy" onClick={onCopyToClipboard} />
+            </span>
+          </div>
+
+          <ReactTooltip
+            afterHide={() => setCopyResultMessage('')}
+            afterShow={() => setTimeout(ReactTooltip.hide, 750)}
+            border
+            className={styles.tooltip}
+            delayShow={100}
+            effect="solid"
+            event="mouseup"
+            id="onCopyToClipboardBtn"
+            place="top">
+            <span>{copyResultMessage}</span>
+          </ReactTooltip>
+
+          <p className={styles.ids_info}>
+            <span className={styles.ids_label}>
+              {resourcesContext.messages['dataflow']}: <strong>{dataflowId} </strong>
+            </span>
+            <span className={styles.ids_label} style={{ display: isCustodian ? 'none' : '' }}>
+              {resourcesContext.messages['apiKeyDataProviderIdLabel']}: <strong>{dataProviderId}</strong>
+            </span>
+          </p>
+        </div>
+      </Fragment>
+    );
+  };
 
   return (
     <Dialog
       blockScroll={false}
       footer={footer}
       header={resourcesContext.messages['apiKeyDialogHead']}
-      modal={true}
-      onHide={() => onCloseDialog()}
+      modal
+      onHide={onCloseDialog}
       style={{ width: '80%', maxWidth: '650px' }}
       visible={isApiKeyDialogVisible}
       zIndex={3003}>
       <div className={styles.container}>
-        {apiKey === '' ? (
-          isKeyLoading ? (
-            <div className={styles.row}>
-              <Spinner style={{ top: 0, left: 0, width: '50px', height: '50px' }} />
-            </div>
-          ) : (
-            <div className={styles.row}>
-              <p>{resourcesContext.messages['noApiKey']}</p>
-            </div>
-          )
-        ) : (
-          <div className={styles.row}>
-            <label className={styles.label}>{resourcesContext.messages['apiKeyDialogLabel']}</label>
-
-            <div className={styles.input_api}>
-              <div className={styles.flex}>
-                <textarea
-                  className={styles.textarea}
-                  id="apiKey"
-                  readOnly
-                  ref={textRef => setTextAreaRef(textRef)}
-                  rows={1}
-                  value={apiKey}
-                />
-                <label className="srOnly" htmlFor="apiKey">
-                  {apiKey}
-                </label>
-                <Button
-                  className={`p-button-primary ${styles.copyBtn}`}
-                  icon="copy"
-                  onClick={() => onCopyToClipboard()}
-                  showDelay="3000"
-                  tooltip={resourcesContext.messages['copyToClipboardSuccess']}
-                  tooltipOptions={{ event: 'focus', hideDelay: 750, position: 'top' }}
-                />
-              </div>
-              <p className={styles.ids_info}>
-                <span className={styles.ids_label}>
-                  {resourcesContext.messages['dataflow']}: <strong>{dataflowId} </strong>
-                </span>
-                <span className={styles.ids_label} style={{ display: isCustodian ? 'none' : '' }}>
-                  {resourcesContext.messages['apiKeyDataProviderIdLabel']}: <strong>{dataProviderId}</strong>
-                </span>
-              </p>
-            </div>
-          </div>
-        )}
+        <div className={styles.row}>{renderDialogContent()}</div>
       </div>
     </Dialog>
   );
