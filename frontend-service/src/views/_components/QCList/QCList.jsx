@@ -242,6 +242,7 @@ export const QCList = ({
     if (isNil(rowData.isCorrect)) {
       return <FontAwesomeIcon className={`${styles.icon} ${styles.spinner}`} icon={AwesomeIcons('spinner')} />;
     }
+
     if (rowData.isCorrect) {
       return <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />;
     }
