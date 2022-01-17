@@ -244,7 +244,9 @@ export const QCList = ({
     } else {
       if (rowData.isCorrect) {
         return <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />;
-      } else if (!isNil(rowData.sqlError)) {
+      }
+
+      if (!isNil(rowData.sqlError)) {
         return (
           <Button
             className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.invalidSqlIcon}`}
