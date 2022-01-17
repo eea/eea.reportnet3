@@ -76,9 +76,13 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
   );
 
   const renderDialogContent = () => {
-    if (isKeyLoading) return <Spinner style={{ top: 0, left: 0, width: '50px', height: '50px' }} />;
+    if (isKeyLoading) {
+      return <Spinner style={{ top: 0, left: 0, width: '50px', height: '50px' }} />;
+    }
 
-    if (apiKey === '') return <p>{resourcesContext.messages['noApiKey']}</p>;
+    if (apiKey === '') {
+      return <p>{resourcesContext.messages['noApiKey']}</p>;
+    }
 
     return (
       <Fragment>
