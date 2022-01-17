@@ -1,5 +1,5 @@
 .container {
-  min-height: 10em;
+  height: 10em;
   padding: 3em 0;
 }
 .row {
@@ -53,4 +53,11 @@
   align-self: center;
   border-radius: 0px 4px 4px 0px !important;
   border: 1.5px solid var(--button-primary-bg) !important;
+}
+
+.spinner {
+  top: 0 !important;
+  left: 0 !important;
+  width: 50px !important;
+  height: 50px !important;
 }
