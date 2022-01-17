@@ -79,7 +79,6 @@ export const ShareRights = ({
     actionsButtons: { id: null, isDeleting: false, isEditing: false },
     clonedUserRightList: [],
     dataUpdatedCount: 0,
-    filteredData: [],
     isDeleteDialogVisible: false,
     isDeletingUserRight: false,
     isEditingModal: false,
@@ -280,10 +279,6 @@ export const ShareRights = ({
     }
   };
 
-  const onLoadFilteredData = userRightList => {
-    shareRightsDispatch({ type: 'ON_LOAD_FILTERED_DATA', payload: { userRightList } });
-  };
-
   const onUpdateUser = async userRight => {
     setActions({ isDeleting: false, isEditing: true });
     if (userRight.role !== '') {
@@ -438,16 +433,6 @@ export const ShareRights = ({
     </Fragment>
   );
 
-  const renderDialogContent = () => {
-    if (isEmpty(filteredData)) {
-      return (
-        <div>
-          <h3>aaaaa</h3>
-        </div>
-      );
-    }
-  };
-
   const getTooltipMessage = userRight => {
     if (hasEmptyData(userRight)) {
       return resourcesContext.messages['incompleteDataTooltip'];
@@ -466,17 +451,21 @@ export const ShareRights = ({
 
   const filterOptions = [
     { key: 'account', label: resourcesContext.messages['account'], type: 'INPUT' },
-    { key: 'role', label: resourcesContext.messages['role'], type: 'MULTI_SELECT' }
+    {
+      key: 'role',
+      label: resourcesContext.messages['role'],
+      type: 'MULTI_SELECT'
+    }
   ];
 
   const renderFilters = () => {
     if (!isEmpty(shareRightsState.userRightList)) {
       return (
         <MyFilters
-          className="ShareRights"
+          className="lineItems"
           data={shareRightsState.userRightList}
           options={filterOptions}
-          viewType="ShareRights"
+          viewType="shareRights"
         />
       );
     }
@@ -497,7 +486,7 @@ export const ShareRights = ({
       );
     }
 
-    if (isEmpty(shareRightsState.filteredData)) {
+    if (isEmpty(filteredData)) {
       return (
         <div className={getShareRightsTableStyles()}>{resourcesContext.messages[`${userType}NotMatchingFilter`]}</div>
       );
@@ -513,7 +502,7 @@ export const ShareRights = ({
           rows={shareRightsState.pagination.rows}
           rowsPerPageOptions={[5, 10, 15]}
           summary="shareRights"
-          value={shareRightsState.filteredData}>
+          value={filteredData}>
           <Column body={renderAccountTemplate} header={columnHeader} />
           <Column body={renderRoleColumnTemplate} header={resourcesContext.messages['rolesColumn']} />
           <Column
@@ -530,7 +519,7 @@ export const ShareRights = ({
     if (!isEmpty(shareRightsState.userRightList)) {
       return styles.wrapperNoUserRoles;
     } else {
-      if (isEmpty(shareRightsState.filteredData)) {
+      if (isEmpty(filteredData)) {
         return styles.wrapperEmptyFilter;
       } else {
         return '';
