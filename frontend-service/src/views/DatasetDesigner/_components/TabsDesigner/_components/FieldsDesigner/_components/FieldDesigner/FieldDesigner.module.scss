@@ -29,6 +29,35 @@
   display: none;
 }
 
+.dropDownLabel {
+  div {
+    display: grid !important;
+    label {
+      display: flex !important;
+      justify-content: space-between;
+      span {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+    }
+  }
+}
+
+.draggableFieldDiv {
+  .bigItems {
+    &:last-child {
+      .draggableFieldCell {
+        &:last-child {
+          label > span {
+            overflow: unset;
+          }
+        }
+      }
+    }
+  }
+}
+
 .draggableFieldDiv {
   display: table;
   width: 100%;
@@ -69,6 +98,12 @@
       }
       button {
         background-color: var(--bg-table-button);
+      }
+
+      input,
+      .dropdownFieldType,
+      .button {
+        max-height: 33px !important;
       }
     }
   }
@@ -155,11 +190,6 @@
 
 .dragAndDropIcon {
   width: 32px;
-}
-@media (max-width: 1090px) {
-  .dragAndDropIcon {
-    display: none;
-  }
 }
 
 .duplicateButton {
@@ -309,12 +339,18 @@
 }
 
 @media (max-width: 1089px) {
+  .dragAndDropIcon {
+    display: none;
+  }
   .draggableFieldContentCell {
     .draggableFieldCell {
       &:last-child {
         button {
           width: 100%;
         }
+      }
+      textarea {
+        max-height: 33px !important;
       }
     }
   }
@@ -326,15 +362,13 @@
     width: 4rem;
     margin-right: 0.4rem;
   }
-  .qcButton {
-    span {
-      &:first-child {
-        display: block;
-      }
-      &:last-child {
-        padding: 0.429em 1em 0.429em 2.25em !important;
-      }
-    }
+
+  .dragAndDropItemsCell {
+    width: 10%;
+  }
+
+  .dragAndDropItems {
+    justify-content: space-between !important;
   }
 
   .codelistButton {
@@ -348,13 +382,12 @@
   }
 
   .bigItems {
-    width: 16%;
+    width: 15%;
   }
 
   .draggableFieldDiv {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
     padding: 0;
     margin: 0;
     background-color: transparent;
@@ -376,9 +409,6 @@
         }
         &:last-child {
           padding: 3px 0;
-          div > svg {
-            bottom: 0.8rem;
-          }
           div > label > svg {
             display: revert;
             float: right;
@@ -389,8 +419,30 @@
   }
 }
 
-@media (min-width: 1740px) {
+@media (min-width: 1240px) {
+  .qcButton {
+    span {
+      &:first-child {
+        display: block;
+      }
+      &:last-child {
+        padding: 0.429em 1em 0.429em 2.25em !important;
+      }
+    }
+  }
+}
+
+@media (min-width: 1750px) {
+  .dragAndDropItems {
+    padding: 0 0 0 30% !important;
+  }
+}
+
+@media (min-width: 1980px) {
+  .smallItems {
+    width: 5%;
+  }
   .bigItems {
-    width: 20%;
+    width: 18%;
   }
 }
