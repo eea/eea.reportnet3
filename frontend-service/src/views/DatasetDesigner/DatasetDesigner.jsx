@@ -1000,9 +1000,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     setIsHistoryDialogVisible(false);
   };
 
-  const renderActionButtonsValidationDialog = (
-    <div className={styles.qcDialogFooterWrapper}>
-      {isDataflowOpen && (
+  const renderQCsHistoryButton = () => {
+    if (isDataflowOpen) {
+      return (
         <span data-for="qcHistoryTooltip" data-tip>
           <Button
             className={`p-button-secondary ${designerState.hasQCsHistory ? 'p-button-animated-blink' : ''}`}
@@ -1012,13 +1012,24 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             onClick={() => setIsHistoryDialogVisible(true)}
           />
         </span>
-      )}
+      );
+    }
+  };
 
-      {!designerState.hasQCsHistory && (
+  const renderQCsHistoryButtonTooltip = () => {
+    if (designerState.hasQCsHistory) {
+      return (
         <ReactTooltip border effect="solid" id="qcHistoryTooltip" place="top">
           {resourcesContext.messages['genericQCsHistoryButtonTooltip']}
         </ReactTooltip>
-      )}
+      );
+    }
+  };
+
+  const renderActionButtonsValidationDialog = (
+    <div className={styles.qcDialogFooterWrapper}>
+      {renderQCsHistoryButton()}
+      {renderQCsHistoryButtonTooltip()}
 
       <Button
         className="p-button-secondary p-button-animated-blink"

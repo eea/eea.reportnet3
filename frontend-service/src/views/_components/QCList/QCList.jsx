@@ -99,9 +99,8 @@ export const QCList = ({
     }
   }, [validationContext.isAutomaticRuleUpdated]);
 
-  const checkHasHistoric = () => {
-    return tabsValidationsState.validationList.validations.some(validation => validation.hasHistoric);
-  };
+  const checkHasHistoric = () =>
+    tabsValidationsState.validationList.validations.some(validation => validation.hasHistoric);
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
@@ -402,18 +401,38 @@ export const QCList = ({
     return 'edit';
   };
 
-  const renderHistoricButton = id => {
-    return (
-      <Button
-        className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
-        disabled={validationContext.isFetchingData}
-        icon="info"
-        onClick={() => onOpenHistoryDialog(id)}
-        tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
-        tooltipOptions={{ position: 'top' }}
-        type="button"
-      />
-    );
+  const renderHistoricButton = (id, hasHistoric) => {
+    if (isDataflowOpen && hasHistoric) {
+      return (
+        <Button
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
+          disabled={validationContext.isFetchingData}
+          icon="info"
+          onClick={() => onOpenHistoryDialog(id)}
+          tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
+          tooltipOptions={{ position: 'top' }}
+          type="button"
+        />
+      );
+    }
+  };
+
+  const renderDeleteButton = id => {
+    if (!isDataflowOpen) {
+      return (
+        <Button
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
+          disabled={validationContext.isFetchingData}
+          icon={
+            id === tabsValidationsState.deletedRuleId && validationContext.isFetchingData ? 'spinnerAnimate' : 'trash'
+          }
+          onClick={onShowDeleteDialog}
+          tooltip={resourcesContext.messages['delete']}
+          tooltipOptions={{ position: 'top' }}
+          type="button"
+        />
+      );
+    }
   };
 
   const getRowType = entityType => {
@@ -449,23 +468,9 @@ export const QCList = ({
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
-        {isDataflowOpen && row.hasHistoric && renderHistoricButton(row.id)}
+        {renderHistoricButton(row.id, row.hasHistoric)}
 
-        {!isDataflowOpen && (
-          <Button
-            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
-            disabled={validationContext.isFetchingData}
-            icon={
-              row.id === tabsValidationsState.deletedRuleId && validationContext.isFetchingData
-                ? 'spinnerAnimate'
-                : 'trash'
-            }
-            onClick={onShowDeleteDialog}
-            tooltip={resourcesContext.messages['delete']}
-            tooltipOptions={{ position: 'top' }}
-            type="button"
-          />
-        )}
+        {renderDeleteButton(row.id)}
       </Fragment>
     );
   };
@@ -481,7 +486,7 @@ export const QCList = ({
         tooltipOptions={{ position: 'top' }}
         type="button"
       />
-      {isDataflowOpen && row.hasHistoric && renderHistoricButton(row.id)}
+      {renderHistoricButton(row.id, row.hasHistoric)}
     </Fragment>
   );
 
