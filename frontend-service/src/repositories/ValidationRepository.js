@@ -47,13 +47,11 @@ export const ValidationRepository = {
       data: { sqlRule: sqlSentence }
     }),
 
-  update: async (datasetId, validationRule) => {
-    let url = getUrl(ValidationConfig.update, { datasetId });
-    if (validationRule.automatic) {
-      url = getUrl(ValidationConfig.updateAutomatic, { datasetId });
-    }
-    return await HTTPRequester.update({ url: url, data: validationRule });
-  },
+  update: async (datasetId, validationRule) =>
+    await HTTPRequester.update({
+      url: getUrl(validationRule.automatic ? ValidationConfig.updateAutomatic : ValidationConfig.update, { datasetId }),
+      data: validationRule
+    }),
 
   evaluateSqlSentence: async (datasetId, sqlSentence) =>
     await HTTPRequester.post({

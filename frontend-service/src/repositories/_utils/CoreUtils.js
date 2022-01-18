@@ -3,18 +3,13 @@ import isUndefined from 'lodash/isUndefined';
 
 export const CoreUtils = (() => {
   const UtilsAPI = {
-    getDashboardLevelErrorByDataset: datasetDTO => {
-      let levelErrors = [];
-      datasetDTO.forEach(datasetTableDTO => {
-        levelErrors.push(UtilsAPI.getDashboardLevelErrorByTable(datasetTableDTO));
-      });
-      return levelErrors;
-    },
+    getDashboardLevelErrorByDataset: datasetDTO =>
+      datasetDTO.map(datasetTableDTO => UtilsAPI.getDashboardLevelErrorByTable(datasetTableDTO)),
 
     getDashboardLevelErrorByTable: datasetTableDTO => {
-      let levelErrors = [];
+      const levelErrors = [];
       datasetTableDTO.tables.forEach(datasetTableDTO => {
-        let corrects =
+        const corrects =
           datasetTableDTO.totalRecords -
           (datasetTableDTO.totalRecordsWithBlockers +
             datasetTableDTO.totalRecordsWithErrors +
@@ -40,34 +35,26 @@ export const CoreUtils = (() => {
     },
 
     getLevelErrorPriorityByLevelError: levelError => {
-      let levelErrorIndex = 0;
       switch (levelError) {
         case 'CORRECT':
-          levelErrorIndex = 0;
-          break;
+          return 0;
         case 'INFO':
-          levelErrorIndex = 1;
-          break;
+          return 1;
         case 'WARNING':
-          levelErrorIndex = 2;
-          break;
+          return 2;
         case 'ERROR':
-          levelErrorIndex = 3;
-          break;
+          return 3;
         case 'BLOCKER':
-          levelErrorIndex = 4;
-          break;
+          return 4;
         case '':
-          levelErrorIndex = 99;
-          break;
+          return 99;
         default:
-          levelErrorIndex = null;
+          return null;
       }
-      return levelErrorIndex;
     },
 
     getPercentage: valArr => {
-      let total = valArr.reduce((arr1, arr2) => arr1.map((v, i) => v + arr2[i]));
+      const total = valArr.reduce((arr1, arr2) => arr1.map((v, i) => v + arr2[i]));
       return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
     },
 
