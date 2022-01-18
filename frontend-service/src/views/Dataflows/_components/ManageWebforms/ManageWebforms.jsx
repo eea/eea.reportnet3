@@ -82,12 +82,14 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     if (id === selectedWebformId && isPending) {
       return 'spinnerAnimate';
     }
+
     return iconName;
   };
 
   const onAddClick = () => {
     //todo add Create dialog
   };
+
   const onShowDeleteDialog = id => {
     setSelectedWebformId(id);
     //todo add confirmation dialog
@@ -181,6 +183,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       </DataTable>
     );
   };
+
   return (
     <Dialog
       blockScroll={false}
