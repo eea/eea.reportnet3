@@ -1445,8 +1445,7 @@
     "zipCsvTable": "ZIP (.csv for each table)",
     "copyToClipboardError": "Error copying to clipboard",
     "genericQCsHistoryButtonTooltip": "There is no history data",
-    "manageWebformsButton": "Manage webforms",
-    "manageWebformsDialogHeader": "Manage webforms",
+    "manageWebforms": "Manage webforms",
     "loadWebformsError": "Error loading webforms list"
   }
 }

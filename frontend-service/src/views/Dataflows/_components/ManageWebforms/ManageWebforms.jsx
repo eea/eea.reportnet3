@@ -189,7 +189,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       blockScroll={false}
       className="responsiveDialog"
       footer={footer}
-      header={resourcesContext.messages['manageWebformsDialogHeader']}
+      header={resourcesContext.messages['manageWebforms']}
       modal
       onHide={onCloseDialog}
       visible={isDialogVisible}>
