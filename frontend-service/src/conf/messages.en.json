@@ -1444,6 +1444,6 @@
     "yes": "Yes",
     "zipCsvTable": "ZIP (.csv for each table)",
     "copyToClipboardError": "Error copying to clipboard",
-    "genericQCsHistoryButtonTooltip": "There is no history data in QCs"
+    "genericQCsHistoryButtonTooltip": "There is no history data"
   }
 }
