@@ -6,5 +6,5 @@ export const WebformConfig = {
   getAll: '/webform/listAll',
   getSinglePamData: '/pam/{:datasetId}/getListSinglePaM/{:groupPaMId}',
   getWebformConfig: '/webform/webformConfig/{:webformId}',
-  update: '/webform/webformConfig/'
+  update: '/webform/webformConfig/{:id}'
 };
