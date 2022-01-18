@@ -32,9 +32,5 @@ export const WebformRepository = {
     return data;
   },
 
-  update: async webform =>
-    await HTTPRequester.update({
-      url: getUrl(WebformConfig.update),
-      data: { webform }
-    })
+  update: async id => await HTTPRequester.update({ url: getUrl(WebformConfig.getWebformConfig, { id }) })
 };

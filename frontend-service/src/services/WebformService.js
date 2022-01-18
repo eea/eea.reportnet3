@@ -18,5 +18,5 @@ export const WebformService = {
 
   getWebformConfig: async webformId => await WebformRepository.getWebformConfig(webformId),
 
-  update: async webform => await WebformRepository.update(webform)
+  update: async id => await WebformRepository.update(id)
 };
