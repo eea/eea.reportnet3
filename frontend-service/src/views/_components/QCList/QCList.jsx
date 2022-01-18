@@ -481,7 +481,7 @@ export const QCList = ({
         tooltipOptions={{ position: 'top' }}
         type="button"
       />
-      {row.hasHistoric && renderHistoricButton(row.id)}
+      {isDataflowOpen && row.hasHistoric && renderHistoricButton(row.id)}
     </Fragment>
   );
 
