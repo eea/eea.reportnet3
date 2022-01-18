@@ -303,7 +303,7 @@ export const PublicCountryInformation = () => {
                 icon={AwesomeIcons('7z')}
               />
               <ReactTooltip
-                border
+                border={true}
                 className={styles.tooltipClass}
                 effect="solid"
                 id={referencePublicFilesName.fileName}
