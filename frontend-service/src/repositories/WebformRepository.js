@@ -6,18 +6,11 @@ export const WebformRepository = {
   addPamsRecords: async (datasetId, pamsRecord) =>
     await HTTPRequester.post({ url: getUrl(WebformConfig.createPamsRecords, { datasetId }), data: pamsRecord }),
 
-  create: async webform =>
-    await HTTPRequester.post({
-      url: getUrl(WebformConfig.create),
-      data: { webform }
-    }),
+  create: async webform => await HTTPRequester.post({ url: getUrl(WebformConfig.create), data: { webform } }),
 
   delete: async id => await HTTPRequester.delete({ url: getUrl(WebformConfig.delete, { id }) }),
 
-  download: async id =>
-    await HTTPRequester.download({
-      url: getUrl(WebformConfig.download, { id })
-    }),
+  download: async id => await HTTPRequester.download({ url: getUrl(WebformConfig.download, { id }) }),
 
   getAll: async () => {
     const { data } = await HTTPRequester.get({ url: getUrl(WebformConfig.getAll) });
