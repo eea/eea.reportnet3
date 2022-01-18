@@ -256,12 +256,10 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           blockScroll={false}
           className="edit-table"
           contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
+          footer={notificationsFooter}
           header={resourcesContext.messages['notifications']}
           modal={true}
-          onHide={() => {
-            setIsNotificationVisible(false);
-            notificationContext.deleteAll();
-          }}
+          onHide={onHideNotificationsList}
           style={{ width: '80%' }}
           visible={isNotificationVisible}
           zIndex={3100}>
