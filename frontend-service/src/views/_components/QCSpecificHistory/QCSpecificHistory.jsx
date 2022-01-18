@@ -85,22 +85,22 @@ export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, v
       {
         key: 'timestamp',
         header: resourcesContext.messages['timestamp'],
-        template: timestampTemplate
+        template: getTimestampTemplate
       },
       {
         key: 'expression',
         header: resourcesContext.messages['expressionText'],
-        template: checkTemplate
+        template: getCheckTemplate
       },
       {
         key: 'metadata',
         header: resourcesContext.messages['metadata'],
-        template: checkTemplate
+        template: getCheckTemplate
       },
       {
         key: 'status',
         header: resourcesContext.messages['status'],
-        template: checkTemplate
+        template: getCheckTemplate
       }
     ];
 
@@ -124,13 +124,13 @@ export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, v
     }
   };
 
-  const checkTemplate = (rowData, column) => (
+  const getCheckTemplate = (rowData, column) => (
     <div className={styles.checkedValueColumn}>
       {rowData[column.field] ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
     </div>
   );
 
-  const timestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
+  const getTimestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
 
   const dialogFooter = (
     <Button
