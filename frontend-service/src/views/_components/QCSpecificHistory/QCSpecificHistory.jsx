@@ -5,9 +5,6 @@ import orderBy from 'lodash/orderBy';
 
 import styles from './QCSpecificHistory.module.scss';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-
 import { Column } from 'primereact/column';
 
 import { Button } from 'views/_components/Button';
@@ -21,6 +18,8 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationService } from 'services/ValidationService';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
+
+import { DataTableUtils } from 'views/_functions/Utils/DataTableUtils';
 
 export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, validationId }) => {
   const notificationContext = useContext(NotificationContext);
@@ -90,17 +89,17 @@ export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, v
       {
         key: 'expression',
         header: resourcesContext.messages['expressionText'],
-        template: checkTemplate
+        template: DataTableUtils.getCheckTemplate
       },
       {
         key: 'metadata',
         header: resourcesContext.messages['metadata'],
-        template: checkTemplate
+        template: DataTableUtils.getCheckTemplate
       },
       {
         key: 'status',
         header: resourcesContext.messages['status'],
-        template: checkTemplate
+        template: DataTableUtils.getCheckTemplate
       }
     ];
 
@@ -123,12 +122,6 @@ export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, v
       setLoadingStatus('failed');
     }
   };
-
-  const checkTemplate = (rowData, column) => (
-    <div className={styles.checkedValueColumn}>
-      {rowData[column.field] ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
-    </div>
-  );
 
   const timestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
 

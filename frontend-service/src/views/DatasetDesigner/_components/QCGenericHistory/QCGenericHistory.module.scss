@@ -1,12 +1,5 @@
 @import '_styles/mixins';
 
-.checkedValueColumn {
-  text-align: center;
-  .icon {
-    color: var(--main-color-font);
-  }
-}
-
 .dialogContent,
 .noDataContent {
   min-height: 56vh;
