@@ -20,7 +20,16 @@ public interface WebformService {
    * @param content the content
    * @throws ParseException the parse exception
    */
-  void insertWebformConfig(Long id, String name, String content);
+  void insertWebformConfig(String name, String content);
+
+  /**
+   * Update webform config.
+   *
+   * @param id the id
+   * @param name the name
+   * @param content the content
+   */
+  void updateWebformConfig(Long id, String name, String content);
 
   /**
    * Find webform config content by id.

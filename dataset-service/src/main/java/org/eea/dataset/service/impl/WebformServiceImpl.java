@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.WebformMetabaseMapper;
+import org.eea.dataset.persistence.metabase.domain.WebformMetabase;
 import org.eea.dataset.persistence.metabase.repository.WebformRepository;
 import org.eea.dataset.persistence.schemas.domain.webform.WebformConfig;
 import org.eea.dataset.persistence.schemas.repository.WebformConfigRepository;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -59,12 +61,12 @@ public class WebformServiceImpl implements WebformService {
   /**
    * Insert webform config.
    *
-   * @param id the id
    * @param name the name
    * @param content the content
    */
   @Override
-  public void insertWebformConfig(Long id, String name, String content) {
+  @Transactional
+  public void insertWebformConfig(String name, String content) {
     WebformConfig webform = new WebformConfig();
 
     webform.setId(new ObjectId());
@@ -77,10 +79,51 @@ public class WebformServiceImpl implements WebformService {
     } catch (JsonProcessingException e) {
       LOG_ERROR.error("Error processing the json to insert");
     }
-    webform.setIdReferenced(id);
+    WebformMetabase webformMetabase = new WebformMetabase();
+    webformMetabase.setLabel(name);
+    webformMetabase.setValue(name);
+    webformRepository.save(webformMetabase);
+
+    webform.setIdReferenced(webformMetabase.getId());
 
     webformConfigRepository.save(webform);
   }
+
+
+
+  /**
+   * Update webform config.
+   *
+   * @param id the id
+   * @param name the name
+   * @param content the content
+   */
+  @Override
+  @Transactional
+  public void updateWebformConfig(Long id, String name, String content) {
+
+    WebformMetabase webformMetabase = webformRepository.findById(id).orElse(null);
+    if (null != webformMetabase) {
+
+      webformMetabase.setLabel(name);
+      webformMetabase.setValue(name);
+
+      WebformConfig webform = webformConfigRepository.findByIdReferenced(id);
+      ObjectMapper mapper = new ObjectMapper();
+      mapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
+      try {
+        webform.setFile(mapper.readValue(content, HashMap.class));
+      } catch (JsonProcessingException e) {
+        LOG_ERROR.error("Error processing the json to insert");
+      }
+      webform.setIdReferenced(id);
+      webform.setName(name);
+
+      webformConfigRepository.updateWebFormConfig(webform);
+      webformRepository.save(webformMetabase);
+    }
+  }
+
 
   /**
    * Find webform config content by id.

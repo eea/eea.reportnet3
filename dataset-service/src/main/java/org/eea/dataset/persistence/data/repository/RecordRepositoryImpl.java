@@ -811,6 +811,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
     conn.setSchema("dataset_" + datasetId);
     List<RecordValue> records = new ArrayList<>();
+    LOG.info("executing query in findByTableValueOrdered: {}", stringQuery);
     try (PreparedStatement stmt = conn.prepareStatement(stringQuery);
         ResultSet rs = stmt.executeQuery()) {
       ObjectMapper mapper = new ObjectMapper();

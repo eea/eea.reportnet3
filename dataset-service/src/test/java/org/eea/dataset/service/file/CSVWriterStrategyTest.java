@@ -75,6 +75,7 @@ public class CSVWriterStrategyTest {
     records.add(record);
     record.setDataProviderCode("ES");
     fieldSchemas.add(fieldSchema);
+    Mockito.when(fileCommon.countRecordsByTableSchema(Mockito.anyString())).thenReturn(100L);
     Mockito.when(fileCommon.getDataSetSchemaVO(Mockito.any(), Mockito.any()))
         .thenReturn(new DataSetSchemaVO());
     Mockito.when(fileCommon.getRecordValuesPaginated(Mockito.any(), Mockito.any(), Mockito.any()))
@@ -117,6 +118,7 @@ public class CSVWriterStrategyTest {
     tableSchemaVO.setIdTableSchema("AAAAAAAA");
     tableSchemas.add(tableSchemaVO);
     dataSetSchemaVO.setTableSchemas(tableSchemas);
+    Mockito.when(fileCommon.countRecordsByTableSchema(Mockito.anyString())).thenReturn(100L);
     Mockito.when(fileCommon.getDataSetSchemaVO(Mockito.any(), Mockito.any()))
         .thenReturn(dataSetSchemaVO);
     Mockito.when(fileCommon.getRecordValuesPaginated(Mockito.any(), Mockito.any(), Mockito.any()))
