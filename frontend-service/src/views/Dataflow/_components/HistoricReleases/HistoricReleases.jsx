@@ -75,16 +75,17 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             'historicReleaseDataProviderColumnHeader'
           ),
           template: renderDataProviderLinkBodyColumn
-        },
-        {
-          key: 'releaseDate',
-          header: resourcesContext.messages['releaseDate'],
-          template: renderReleaseDateTemplate
         }
       ];
 
       if (historicReleasesView === 'dataCollection') {
         columns = columns.concat([
+          {
+            key: 'isDataCollectionReleased',
+            header: resourcesContext.messages['isDataCollectionReleased'],
+            template: (rowData, column) =>
+              DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
+          },
           {
             key: 'isEUReleased',
             header: resourcesContext.messages['isEUReleased'],
@@ -92,10 +93,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
               DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
           },
           {
-            key: 'isDataCollectionReleased',
-            header: resourcesContext.messages['isDataCollectionReleased'],
-            template: (rowData, column) =>
-              DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
+            key: 'releaseDate',
+            header: resourcesContext.messages['releaseDate'],
+            template: renderReleaseDateTemplate
           },
           {
             key: 'isPublic',
@@ -106,11 +106,19 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         ]);
       } else {
         //EUDataset
-        columns.push({
-          key: 'isPublic',
-          header: resourcesContext.messages['isPublic'],
-          template: DataTableUtils.getCheckTemplate
-        });
+        columns = columns.concat([
+          {
+            key: 'isPublic',
+            header: resourcesContext.messages['isPublic'],
+            template: (rowData, column) =>
+              DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
+          },
+          {
+            key: 'releaseDate',
+            header: resourcesContext.messages['releaseDate'],
+            template: renderReleaseDateTemplate
+          }
+        ]);
       }
     }
 
