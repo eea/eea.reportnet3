@@ -96,12 +96,12 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
       {
         key: 'ruleCode',
         header: resourcesContext.messages['ruleCode'],
-        template: ruleCodeTemplate
+        template: getRuleCodeTemplate
       },
       {
         key: 'name',
         header: resourcesContext.messages['name'],
-        template: nameTemplate
+        template: getNameTemplate
       },
       {
         key: 'user',
@@ -110,7 +110,7 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
       {
         key: 'timestamp',
         header: resourcesContext.messages['timestamp'],
-        template: timestampTemplate
+        template: getTimestampTemplate
       },
       {
         key: 'expression',
@@ -133,7 +133,7 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
       {
         key: 'actions',
         header: resourcesContext.messages['actions'],
-        template: actionsTemplate
+        template: getActionsTemplate
       }
     ];
 
@@ -142,7 +142,7 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
     });
   };
 
-  const actionsTemplate = rowData => {
+  const getActionsTemplate = rowData => {
     return (
       <div className={styles.editButtonWrapper}>
         <Button
@@ -178,17 +178,17 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
   const getRuleSchema = ruleId =>
     validationContext.rulesDescription.find(ruleDescription => ruleDescription.id === ruleId);
 
-  const nameTemplate = rowData => {
+  const getNameTemplate = rowData => {
     const currentRule = getRuleSchema(rowData.ruleId);
     return <div>{currentRule?.name}</div>;
   };
 
-  const ruleCodeTemplate = rowData => {
+  const getRuleCodeTemplate = rowData => {
     const currentRule = getRuleSchema(rowData.ruleId);
     return <div>{currentRule?.shortCode}</div>;
   };
 
-  const timestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
+  const getTimestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
 
   const dialogFooter = (
     <Button

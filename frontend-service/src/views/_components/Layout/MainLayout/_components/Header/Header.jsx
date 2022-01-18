@@ -166,7 +166,6 @@ const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
   const localhostEnvironmentAlert = isLocalEnvironment() && (
     <div className={styles.localhostAlert}>
       <FontAwesomeIcon
-        aria-labelledby={resourcesContext.messages['localhostAlert']}
         icon={AwesomeIcons('localhostAlert')}
         role="button"
         title={resourcesContext.messages['localhostAlert']}

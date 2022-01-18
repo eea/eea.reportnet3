@@ -84,7 +84,7 @@ export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, v
       {
         key: 'timestamp',
         header: resourcesContext.messages['timestamp'],
-        template: timestampTemplate
+        template: getTimestampTemplate
       },
       {
         key: 'expression',
@@ -126,7 +126,7 @@ export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, v
     }
   };
 
-  const timestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
+  const getTimestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
 
   const dialogFooter = (
     <Button
