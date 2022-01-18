@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
 import first from 'lodash/first';
@@ -233,7 +233,11 @@ export const ShareRights = ({
     }
 
     try {
-      const userRightList = await callEndPoint(methodTypes.GET_ALL);
+      let userRightList = await callEndPoint(methodTypes.GET_ALL);
+      userRightList = userRightList.map(item => ({
+        ...item,
+        filteredRole: roleOptions.find(option => option.role === item.role)?.label
+      }));
 
       shareRightsDispatch({
         type: 'GET_USER_RIGHT_LIST',
@@ -452,7 +456,7 @@ export const ShareRights = ({
   const filterOptions = [
     { key: 'account', label: resourcesContext.messages['account'], type: 'INPUT' },
     {
-      key: 'role',
+      key: 'filteredRole',
       label: resourcesContext.messages['role'],
       type: 'MULTI_SELECT'
     }
@@ -470,14 +474,6 @@ export const ShareRights = ({
       );
     }
   };
-
-  /*const renderShareRightsFilters = () => {
-    if (!isEmpty(shareRightsState.userRightList)) {
-      return (
-        <Filters data={shareRightsState.userRightList} getFilteredData={onLoadFilteredData} options={filterOptions} />
-      );
-    }
-  };*/
 
   const renderShareRightsTable = () => {
     if (isEmpty(shareRightsState.userRightList)) {
