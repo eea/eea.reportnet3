@@ -108,15 +108,15 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         //EUDataset
         columns = columns.concat([
           {
+            key: 'releaseDate',
+            header: resourcesContext.messages['releaseDate'],
+            template: renderReleaseDateTemplate
+          },
+          {
             key: 'isPublic',
             header: resourcesContext.messages['isPublic'],
             template: (rowData, column) =>
               DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
-          },
-          {
-            key: 'releaseDate',
-            header: resourcesContext.messages['releaseDate'],
-            template: renderReleaseDateTemplate
           }
         ]);
       }
