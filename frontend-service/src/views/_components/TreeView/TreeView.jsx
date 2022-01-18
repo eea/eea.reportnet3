@@ -81,6 +81,7 @@ const TreeView = ({ className = '', columnOptions = {}, expandAll = true, proper
             marginTop: '1rem',
             marginBottom: '1rem'
           }}
+          summary="groupFields"
           value={fields}>
           {renderColumns(fields)}
         </DataTable>

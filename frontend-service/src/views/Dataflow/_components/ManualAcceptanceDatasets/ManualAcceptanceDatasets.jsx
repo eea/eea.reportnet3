@@ -200,7 +200,7 @@ export const ManualAcceptanceDatasets = ({
           paginatorRight={getPaginatorRecordsCount()}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
-          summary="manualAcceptance"
+          summary={resourcesContext.messages['manualAcceptance']}
           totalRecords={manualAcceptanceDatasetsState.filteredData.length}
           value={manualAcceptanceDatasetsState.filteredData}>
           {renderColumns(manualAcceptanceDatasetsState.filteredData)}

@@ -60,9 +60,15 @@ export const PublicCountries = () => {
         href={getUrl(routes.COUNTRY)}
         key={country.code}
         onMouseDown={e => onOpenCountry(e)}>
-        <ReactCountryFlag aria-label={country.name} className={styles.flag} countryCode={country.flag} svg />
+        <ReactCountryFlag
+          alt={country.name}
+          aria-label={country.name}
+          className={styles.flag}
+          countryCode={country.flag}
+          svg
+        />
 
-        <div className={styles.titleWrap}>
+        <div className={styles.titleWrap} id={country.name}>
           <h3>{country.name}</h3>
         </div>
 
