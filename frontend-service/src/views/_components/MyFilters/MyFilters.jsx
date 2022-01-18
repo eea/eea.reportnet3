@@ -231,6 +231,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
     if (option.nestedOptions) {
       return option.nestedOptions.map(nestedOption => renderCheckbox(nestedOption));
     }
+
     return (
       <div className={styles.block} key={option.key}>
         <div className={styles.labelCheckbox}>{option.label}</div>

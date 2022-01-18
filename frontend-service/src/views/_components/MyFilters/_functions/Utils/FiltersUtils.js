@@ -1,4 +1,4 @@
-import { isNil } from 'lodash';
+import isNil from 'lodash/isNil';
 import isDate from 'lodash/isDate';
 import isEmpty from 'lodash/isEmpty';
 import uniq from 'lodash/uniq';
