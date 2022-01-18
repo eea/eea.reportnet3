@@ -88,17 +88,20 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           {
             key: 'isEUReleased',
             header: resourcesContext.messages['isEUReleased'],
-            template: DataTableUtils.getCheckTemplate
+            template: (rowData, column) =>
+              DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
           },
           {
             key: 'isDataCollectionReleased',
             header: resourcesContext.messages['isDataCollectionReleased'],
-            template: DataTableUtils.getCheckTemplate
+            template: (rowData, column) =>
+              DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
           },
           {
             key: 'isPublic',
             header: resourcesContext.messages['isPublic'],
-            template: DataTableUtils.getCheckTemplate
+            template: (rowData, column) =>
+              DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
           }
         ]);
       } else {

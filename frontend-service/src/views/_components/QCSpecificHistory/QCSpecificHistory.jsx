@@ -89,17 +89,20 @@ export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, v
       {
         key: 'expression',
         header: resourcesContext.messages['expressionText'],
-        template: DataTableUtils.getCheckTemplate
+        template: (rowData, column) =>
+          DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
       },
       {
         key: 'metadata',
         header: resourcesContext.messages['metadata'],
-        template: DataTableUtils.getCheckTemplate
+        template: (rowData, column) =>
+          DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
       },
       {
         key: 'status',
         header: resourcesContext.messages['status'],
-        template: DataTableUtils.getCheckTemplate
+        template: (rowData, column) =>
+          DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
       }
     ];
 
