@@ -60,6 +60,12 @@
   margin-bottom: 1rem;
 }
 
+.stepProgressBar {
+  width: 75%;
+  display: flex;
+  justify-content: end;
+}
+
 .switchDivInput {
   display: flex;
   align-items: center;

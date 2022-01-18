@@ -1225,6 +1225,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
     return (
       <div className={styles.switchDivInput}>
+        <StepProgressBar
+          className={styles.stepProgressBar}
+          currentStep={datasetProgressBarCurrentStep}
+          steps={datasetProgressBarSteps}
+        />
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           {!isNil(designerState.webform) && !isDataflowOpen && !isDesignDatasetEditorRead
             ? renderRadioButtons()
@@ -1524,7 +1529,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               />
             </div>
           </div>
-          <StepProgressBar currentStep={datasetProgressBarCurrentStep} steps={datasetProgressBarSteps} />
           <Toolbar>
             <div className="p-toolbar-group-left">
               <Button

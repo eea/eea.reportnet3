@@ -365,7 +365,17 @@
     "webform-table-border": "1px solid var(--c-gray-10)",
     "bg-table": "var(--c-gray-5)",
     "bg-table-button": "var(--c-white-color)",
-    "box-shadow-table": "var(--c-gray-25)"
+    "box-shadow-table": "var(--c-gray-25)",
+    "step-progress-bar-activeCompleted-bg-color": "var(--success-color)",
+    "step-progress-bar-activeIncompleted-bg-color": "var(--c-corporate-blue)",
+    "step-progress-bar-activeCompleted-color": "var(--c-white-color)",
+    "step-progress-bar-inactive-color": "var(--c-gray-65)",
+    "step-progress-bar-inactive-bg-color": "var(--bg)",
+    "step-progress-bar-icon-border": "2px solid var(--c-gray-65)",
+    "step-progress-bar-link-bg-color": "var(--c-gray-65)",
+    "step-progress-bar-link-box-shadow": "0 2px 3px rgb(70 122 57 / 50%), 0 1px 2px rgb(70 122 57 / 50%), 0 -3px 2px rgb(70 122 57 / 4%), 0 -2px 2px rgb(70 122 57 / 50%)",
+    "step-progress-bar-link-done-bg-color": "var(--success-color)",
+    "step-progress-bar-label-color": "var(--main-font-color)"
   },
   "dark": {
     "accent-color": "var(--accent-color-dark-mode)",
@@ -734,7 +744,17 @@
     "webform-table-border": "1px solid var(--c-gray-75)",
     "bg-table": "var(--bg-dark-01dp)",
     "bg-table-button": "var(--bg-dark-00dp)",
-    "box-shadow-table": "var(--accent-color-dark-mode)"
+    "box-shadow-table": "var(--accent-color-dark-mode)",
+    "step-progress-bar-activeCompleted-bg-color": "var(--success-color)",
+    "step-progress-bar-activeIncompleted-bg-color": "var(--c-corporate-blue)",
+    "step-progress-bar-activeCompleted-color": "var(--c-white-color)",
+    "step-progress-bar-inactive-color": "var(--c-white-color)",
+    "step-progress-bar-inactive-bg-color": "var(--bg)",
+    "step-progress-bar-icon-border": "2px solid var(--c-white-color)",
+    "step-progress-bar-link-bg-color": "var(--c-white-color)",
+    "step-progress-bar-link-box-shadow": "0 2px 3px rgb(70 122 57 / 50%), 0 1px 2px rgb(70 122 57 / 50%), 0 -3px 2px rgb(70 122 57 / 4%), 0 -2px 2px rgb(70 122 57 / 50%)",
+    "step-progress-bar-link-done-bg-color": "var(--success-color)",
+    "step-progress-bar-label-color": "var(--main-font-color)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,

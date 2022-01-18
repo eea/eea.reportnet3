@@ -14,26 +14,35 @@
     position: relative;
     text-align: center;
     text-transform: uppercase;
-    color: #7d7d7d;
+    .stepLabel {
+      color: var(--step-progress-bar-label-color);
+    }
     .activeCompleted {
-      background-color: green;
-      color: white;
-      font-weight: bold;
+      background-color: var(--step-progress-bar-activeCompleted-bg-color);
+      animation: check 1s forwards;
+      svg {
+        color: var(--step-progress-bar-activeCompleted-color);
+        font-weight: bold;
+      }
     }
     .activeIncompleted {
-      background-color: blue;
-      color: white;
-      font-weight: bold;
+      background-color: var(--step-progress-bar-activeIncompleted-bg-color);
+      svg {
+        color: var(--step-progress-bar-activeCompleted-color);
+        font-weight: bold;
+      }
     }
     .inactive {
-      background-color: white;
-      color: gren;
+      background-color: var(--step-progress-bar-inactive-bg-color);
+      svg {
+        color: var(--step-progress-bar-inactive-color);
+      }
     }
     .iconWrapper {
       width: 24px;
       height: 24px;
       line-height: 24px;
-      border: 2px solid #7d7d7d;
+      border: var(--step-progress-bar-icon-border);
       display: block;
       text-align: center;
       margin: 0 auto 3px auto;
@@ -50,7 +59,7 @@
       height: 2px;
       content: '';
       position: absolute;
-      background-color: #7d7d7d;
+      background-color: var(--step-progress-bar-link-bg-color);
       top: 12px;
       left: -50%;
       z-index: 0;
@@ -58,13 +67,28 @@
     &:first-child:after {
       content: none;
     }
+    &.stepActive {
+      &:after {
+        animation: appear 1s forwards !important;
+      }
+    }
   }
 }
 
-.stepList .step.active:before {
-  border-color: #55b776;
-  background: green;
+@keyframes appear {
+  0% {
+    background-color: var(--step-progress-bar-link-bg-color);
+  }
+  100% {
+    background-color: var(--step-progress-bar-link-done-bg-color);
+  }
 }
-.stepList .step.active + .step:after {
-  background-color: #55b776;
+
+@keyframes check {
+  0% {
+    border-radius: 50%;
+  }
+  100% {
+    border-radius: 0%;
+  }
 }

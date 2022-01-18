@@ -6,7 +6,7 @@ import styles from './StepProgressBar.module.scss';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-export const StepProgressBar = ({ steps = [], currentStep }) => {
+export const StepProgressBar = ({ className = '', steps = [], currentStep }) => {
   const renderStepProgressBar = () => {
     const renderIcon = step => {
       if (step.idx < currentStep) {
@@ -36,29 +36,33 @@ export const StepProgressBar = ({ steps = [], currentStep }) => {
           return styles.inactive;
         }
       };
+
       const getStepLabel = step => {
-        if (!step.isRunning) {
+        if (step.idx < currentStep) {
           return step.labelCompleted;
         } else {
           if (step.idx === currentStep) {
-            return step.labelRunning;
+            if (step.isRunning) {
+              return step.labelRunning;
+            } else {
+              return step.labelCompleted;
+            }
           } else {
             return step.labelUndone;
           }
         }
       };
+
       return steps.map((step, index) => {
         return (
-          <li className={styles.step} key={uniqueId('step_')}>
-            {
-              <div className={`${styles.iconWrapper} ${getIconClassName(step)}`}>
-                <FontAwesomeIcon
-                  className={step.idx === currentStep && step.isRunning ? 'fa-spin' : ''}
-                  icon={renderIcon(step)}
-                />
-              </div>
-            }
-            {<label>{getStepLabel(step)}</label>}
+          <li className={`${styles.step} ${step.idx <= currentStep ? styles.stepActive : ''}`} key={uniqueId('step_')}>
+            <div className={`${styles.iconWrapper} ${getIconClassName(step)}`}>
+              <FontAwesomeIcon
+                className={step.idx === currentStep && step.isRunning ? 'fa-spin' : ''}
+                icon={renderIcon(step)}
+              />
+            </div>
+            <label className={styles.stepLabel}>{getStepLabel(step)}</label>
           </li>
         );
       });
@@ -66,14 +70,10 @@ export const StepProgressBar = ({ steps = [], currentStep }) => {
 
     if (!isEmpty(steps)) {
       return (
-        <div className={styles.stepsWrapper}>
+        <div className={`${className} ${styles.stepsWrapper}`}>
           <ul className={`${styles.stepList}`}>{renderSteps()}</ul>
         </div>
       );
-      //   <div className={styles.stepsWrapper} key={uniqueId('step_')}>
-      //     <FontAwesomeIcon className={styles.step} icon={AwesomeIcons(renderIcon(step))} />
-      //     <label>{step.label}</label>
-      //   </div>
     }
   };
 

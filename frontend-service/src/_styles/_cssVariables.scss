@@ -621,4 +621,17 @@
   --traffic-light-red-active: var(--c-red-50);
   --traffic-light-yellow-active: var(--c-orange-200);
   --traffic-light-green-active: var(--c-chart-correct);
+
+  /* Step progress bar */
+  --step-progress-bar-activeCompleted-bg-color: var(--success-color);
+  --step-progress-bar-activeIncompleted-bg-color: var(--c-corporate-blue);
+  --step-progress-bar-activeCompleted-color: var(--c-white-color);
+  --step-progress-bar-inactive-color: var(--c-gray-65);
+  --step-progress-bar-inactive-bg-color: var(--bg);
+  --step-progress-bar-icon-border: 2px solid var(--c-gray-65);
+  --step-progress-bar-link-bg-color: var(--c-gray-65);
+  --step-progress-bar-link-box-shadow: 0 2px 3px rgb(70 122 57 / 50%), 0 1px 2px rgb(70 122 57 / 50%),
+    0 -3px 2px rgb(70 122 57 / 4%), 0 -2px 2px rgb(70 122 57 / 50%);
+  --step-progress-bar-link-done-bg-color: var(--success-color);
+  --step-progress-bar-label-color: var(--main-font-color);
 }
