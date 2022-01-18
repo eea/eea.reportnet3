@@ -275,7 +275,7 @@ export const PublicCountryInformation = () => {
             icon={AwesomeIcons('lock')}
           />
           <ReactTooltip
-            border
+            border={true}
             className={styles.tooltipClass}
             effect="solid"
             id={'restrictFromPublicField'}
