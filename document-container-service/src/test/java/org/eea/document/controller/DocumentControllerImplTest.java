@@ -276,7 +276,7 @@ public class DocumentControllerImplTest {
       documentController.getDocument(1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      assertEquals(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e.getReason());
+      assertEquals(EEAErrorMessage.RETRIEVING_DOCUMENT, e.getReason());
     }
   }
 

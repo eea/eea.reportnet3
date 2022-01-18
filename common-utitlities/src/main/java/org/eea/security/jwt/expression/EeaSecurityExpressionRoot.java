@@ -14,7 +14,6 @@ import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.security.jwt.utils.EntityAccessService;
-import org.eea.utils.LiteralConstants;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
@@ -111,8 +110,7 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
           .map(objectAccessRoleEnum -> objectAccessRoleEnum.getAccessRole(idEntity))
           .collect(Collectors.toList());
 
-      canAccess = !roles.stream().filter(authorities::contains).findFirst()
-          .orElse(LiteralConstants.NOT_FOUND).equals(LiteralConstants.NOT_FOUND);
+      canAccess = roles.stream().anyMatch(authorities::contains);
       // No authority found in the current token. Check against keycloak to find it
       if (!canAccess) {
         // if there were some change at User rights that wasn't be propagated to the
@@ -131,8 +129,7 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
               .append(resourceAccessVO.getId()).append("-").append(resourceAccessVO.getRole())
               .toString().toUpperCase();
         }).collect(Collectors.toList());
-        canAccess = !roles.stream().filter(resourceRoles::contains).findFirst()
-            .orElse(LiteralConstants.NOT_FOUND).equals(LiteralConstants.NOT_FOUND);
+        canAccess = roles.stream().anyMatch(resourceRoles::contains);
       }
     }
     return canAccess;
@@ -187,6 +184,17 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
     return entityAccessService.isDataflowType(dataflowType, entity, entityId) && !isApiKey();
   }
 
+
+  /**
+   * Check access super user.
+   *
+   * @param entity the entity
+   * @param entityId the entity id
+   * @return true, if successful
+   */
+  public boolean checkAccessSuperUser(EntityClassEnum entity, Long entityId) {
+    return entityAccessService.accessSuperUser(entity, entityId) && !isApiKey();
+  }
 
   /**
    * Check api key boolean.

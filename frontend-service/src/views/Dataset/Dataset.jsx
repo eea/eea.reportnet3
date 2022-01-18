@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -52,7 +51,7 @@ import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const Dataset = ({ isReferenceDataset }) => {
+export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const navigate = useNavigate();
   const { dataflowId, datasetId } = useParams();
 
@@ -93,8 +92,8 @@ export const Dataset = ({ isReferenceDataset }) => {
     name: ''
   });
   const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
-  const [isCustodianOrSteward, setIsCustodianOrSteward] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [isDataset, setIsDataset] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
   const [isDownloadingQCRules, setIsDownloadingQCRules] = useState(false);
@@ -103,11 +102,11 @@ export const Dataset = ({ isReferenceDataset }) => {
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
-  const [isReferenceDatasetRegularDataflow, setIsReferenceDatasetRegularDataflow] = useState(false);
+  const [isReferenceDataset, setIsReferenceDataset] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isReportingWebform, setIsReportingWebform] = useState(false);
   const [isTableView, setIsTableView] = useState(true);
-  const [isTestDataset, setIsTestDataset] = useState(undefined);
+  const [isTestDataset, setIsTestDataset] = useState(false);
   const [isUpdatableDialogVisible, setIsUpdatableDialogVisible] = useState(false);
   const [isValidationsTabularView, setIsValidationsTabularView] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
@@ -139,7 +138,9 @@ export const Dataset = ({ isReferenceDataset }) => {
   useEffect(() => {
     leftSideBarContext.removeModels();
     getMetadata();
-    if (isEmpty(webformOptions)) getWebformList();
+    if (isEmpty(webformOptions)) {
+      getWebformList();
+    }
   }, []);
 
   useEffect(() => {
@@ -147,21 +148,6 @@ export const Dataset = ({ isReferenceDataset }) => {
       onLoadDatasetSchema();
     }
   }, [metadata]);
-
-  useEffect(() => {
-    if (isCustodianOrSteward) {
-      leftSideBarContext.addModels([
-        {
-          className: 'dataflow-showPublicInfo-help-step',
-          icon: 'lock',
-          isVisible: isReferenceDatasetRegularDataflow || isReferenceDataset,
-          label: 'referenceUpdateStatusLeftSideBarButton',
-          onClick: () => setIsUpdatableDialogVisible(true),
-          title: 'referenceUpdateStatusLeftSideBarButton'
-        }
-      ]);
-    }
-  }, [isCustodianOrSteward, isReferenceDataset, isReferenceDatasetRegularDataflow]);
 
   useEffect(() => {
     if (!isNil(tableSchema) && tableSchema.length > 0) {
@@ -174,33 +160,51 @@ export const Dataset = ({ isReferenceDataset }) => {
   }, [tableSchema]);
 
   useEffect(() => {
-    if (!isNil(dataset) && dataset.isReleasing) {
-      setHasWritePermissions(!dataset.isReleasing);
-    } else {
-      if (!isUndefined(userContext.contextRoles)) {
-        setHasWritePermissions(
-          userContext.hasPermission(
+    if (isNil(dataset)) {
+      return;
+    }
+
+    if (!isUndefined(userContext.contextRoles)) {
+      if (isDataset) {
+        if (dataset.isReleasing) {
+          setHasWritePermissions(false);
+        } else {
+          const isReporterDataset = userContext.hasPermission(
             [config.permissions.roles.LEAD_REPORTER.key, config.permissions.roles.REPORTER_WRITE.key],
             `${config.permissions.prefixes.DATASET}${datasetId}`
-          ) ||
-            userContext.hasPermission(
-              [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
-              `${config.permissions.prefixes.TESTDATASET}${datasetId}`
-            ) ||
-            (isCustodianOrSteward && isDatasetUpdatable)
-        );
-        setIsTestDataset(
-          userContext.hasPermission(
-            [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key],
-            `${config.permissions.prefixes.TESTDATASET}${datasetId}`
-          )
-        );
-        setIsCustodianOrSteward(
-          userContext.hasContextAccessPermission(config.permissions.prefixes.REFERENCEDATASET, datasetId, [
+          );
+          setHasWritePermissions(isReporterDataset);
+        }
+      } else if (isTestDataset) {
+        const hasWritePermissionsTestDataset = userContext.hasPermission(
+          [
             config.permissions.roles.CUSTODIAN.key,
-            config.permissions.roles.STEWARD.key
-          ])
+            config.permissions.roles.STEWARD.key,
+            config.permissions.roles.STEWARD_SUPPORT.key
+          ],
+          `${config.permissions.prefixes.TESTDATASET}${datasetId}`
         );
+        setHasWritePermissions(hasWritePermissionsTestDataset);
+      } else if (isReferenceDataset) {
+        const isCustodianInReferenceDataset = userContext.hasContextAccessPermission(
+          config.permissions.prefixes.REFERENCEDATASET,
+          datasetId,
+          [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key]
+        );
+        setHasWritePermissions(isCustodianInReferenceDataset && isDatasetUpdatable);
+
+        if (isCustodianInReferenceDataset) {
+          leftSideBarContext.addModels([
+            {
+              className: 'dataflow-showPublicInfo-help-step',
+              icon: 'lock',
+              isVisible: true,
+              label: 'referenceUpdateStatusLeftSideBarButton',
+              onClick: () => setIsUpdatableDialogVisible(true),
+              title: 'referenceUpdateStatusLeftSideBarButton'
+            }
+          ]);
+        }
       }
     }
   }, [userContext, dataset]);
@@ -253,10 +257,8 @@ export const Dataset = ({ isReferenceDataset }) => {
   } = useReporterDataset(datasetId, dataflowId);
 
   useEffect(() => {
-    if (!isUndefined(isTestDataset)) {
-      onLoadDataflow();
-    }
-  }, [isTestDataset]);
+    onLoadDataflow();
+  }, []);
 
   useEffect(() => {
     if (metadata?.dataset.datasetSchemaId) getFileExtensions();
@@ -373,14 +375,14 @@ export const Dataset = ({ isReferenceDataset }) => {
   ];
 
   function getCurrentPage() {
-    if (isReferenceDataset) {
-      return CurrentPage.REFERENCE_DATASET;
-    } else if (isReferenceDatasetRegularDataflow) {
-      return CurrentPage.DATAFLOW_REFERENCE_DATASET;
-    } else if (metadata?.dataset.dataProviderId === 0) {
-      return CurrentPage.TEST_DATASETS;
-    } else {
+    if (isDataset) {
       return CurrentPage.DATASET;
+    } else if (isTestDataset) {
+      return CurrentPage.TEST_DATASETS;
+    } else if (isReferenceDatasetReferenceDataflow) {
+      return CurrentPage.REFERENCE_DATASET;
+    } else if (isReferenceDataset) {
+      return CurrentPage.DATAFLOW_REFERENCE_DATASET;
     }
   }
 
@@ -623,25 +625,35 @@ export const Dataset = ({ isReferenceDataset }) => {
     try {
       const data = await DataflowService.get(dataflowId);
       setDataflowType(data.type);
-      let dataset = [];
-      if (isTestDataset) {
-        dataset = data.testDatasets.find(dataset => dataset.datasetId.toString() === datasetId);
-      } else if (isReferenceDataset) {
-        dataset = data.referenceDatasets.find(dataset => dataset.datasetId.toString() === datasetId);
-        setIsDatasetUpdatable(dataset.updatable);
-      } else {
-        dataset = data.datasets.find(dataset => dataset.datasetId.toString() === datasetId);
-        if (!isEmpty(dataset)) {
-          setIsDatasetReleased(dataset.isReleased);
-        } else {
-          dataset = data.referenceDatasets.find(dataset => dataset.datasetId.toString() === datasetId);
-          setIsReferenceDatasetRegularDataflow(true);
-          setIsDatasetReleased(dataset.isReleased);
-          setIsDatasetUpdatable(dataset.updatable);
-        }
+
+      const dataset = data.datasets.find(dataset => dataset.datasetId.toString() === datasetId);
+
+      if (!isNil(dataset)) {
+        setIsDatasetReleased(dataset.isReleased);
+        setIsDataset(true);
+        setDataset(dataset);
+        return;
       }
 
-      setDataset(dataset);
+      const testDataset = data.testDatasets.find(dataset => dataset.datasetId.toString() === datasetId);
+
+      if (!isNil(testDataset)) {
+        setIsTestDataset(true);
+        setDataset(testDataset);
+        return;
+      }
+
+      const referenceDataset = data.referenceDatasets.find(dataset => dataset.datasetId.toString() === datasetId);
+
+      if (!isNil(referenceDataset)) {
+        if (!isReferenceDatasetReferenceDataflow) {
+          setIsDatasetReleased(referenceDataset.isReleased);
+        }
+        setIsReferenceDataset(true);
+        setIsDatasetUpdatable(referenceDataset.updatable);
+        setDataset(referenceDataset);
+        return;
+      }
     } catch (error) {
       console.error('Dataset - onLoadDataflow.', error);
       const {
@@ -713,13 +725,17 @@ export const Dataset = ({ isReferenceDataset }) => {
         datasetSchema.tables.map(tableSchema => {
           tableSchemaList.push({ name: tableSchema.tableSchemaName, id: tableSchema.tableSchemaId });
           return {
-            id: tableSchema['tableSchemaId'],
-            name: tableSchema['tableSchemaName'],
+            description: tableSchema.description || tableSchema.tableSchemaDescription,
+            id: tableSchema.tableSchemaId,
+            name: tableSchema.tableSchemaName,
+            notEmpty: tableSchema.notEmpty,
+            hasInfoTooltip: true,
             hasErrors: {
-              ...datasetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
+              ...datasetStatistics.tables.filter(table => table.tableSchemaId === tableSchema.tableSchemaId)[0]
             }.hasErrors,
-            fixedNumber: tableSchema['tableSchemaFixedNumber'],
-            readOnly: tableSchema['tableSchemaReadOnly']
+            fixedNumber: tableSchema.tableSchemaFixedNumber,
+            readOnly: tableSchema.tableSchemaReadOnly,
+            toPrefill: tableSchema.tableSchemaToPrefill
           };
         })
       );
@@ -998,8 +1014,8 @@ export const Dataset = ({ isReferenceDataset }) => {
         snapshotState: snapshotState
       }}>
       <Title
-        icon={isReferenceDataset ? 'howTo' : 'dataset'}
-        iconSize={isReferenceDataset ? '4rem' : '3.5rem'}
+        icon={isReferenceDatasetReferenceDataflow ? 'howTo' : 'dataset'}
+        iconSize={isReferenceDatasetReferenceDataflow ? '4rem' : '3.5rem'}
         insideTitle={`${datasetInsideTitle()}`}
         subtitle={`${metadata?.dataflow.name} - ${
           isTestDataset ? resourcesContext.messages['testDataset'] : datasetName
@@ -1129,7 +1145,7 @@ export const Dataset = ({ isReferenceDataset }) => {
           hasWritePermissions={hasWritePermissions}
           isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
           isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
-          isReferenceDataset={isReferenceDataset || isReferenceDatasetRegularDataflow}
+          isReferenceDataset={isReferenceDataset}
           isReportingWebform={isReportingWebform}
           levelErrorTypes={levelErrorTypes}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}

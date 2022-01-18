@@ -139,6 +139,8 @@ public class ContributorServiceImpl implements ContributorService {
           resource);
       getContributorList(SecurityRoleEnum.DATA_STEWARD.toString(), contributorVOList, dataflowId,
           resource);
+      getContributorList(SecurityRoleEnum.STEWARD_SUPPORT.toString(), contributorVOList, dataflowId,
+          resource);
     }
 
     return contributorVOList;
@@ -248,7 +250,8 @@ public class ContributorServiceImpl implements ContributorService {
         getResourceReporters(dataflowId, account, role, dataProviderId, resourcesProviders);
         break;
       case DATA_OBSERVER:
-        getResourceObserver(dataflowId, account, resourcesProviders);
+      case STEWARD_SUPPORT:
+        getResourceObserverCustodianSupport(dataflowId, account, resourcesProviders, role);
         break;
       case DATA_CUSTODIAN:
       case DATA_STEWARD:
@@ -347,32 +350,47 @@ public class ContributorServiceImpl implements ContributorService {
    * @param resourcesProviders the resources providers
    * @return the resource observer
    */
-  private void getResourceObserver(Long dataflowId, String account,
-      List<ResourceAssignationVO> resourcesProviders) {
-    resourcesProviders
-        .add(fillResourceAssignation(dataflowId, account, ResourceGroupEnum.DATAFLOW_OBSERVER));
+  private void getResourceObserverCustodianSupport(Long dataflowId, String account,
+      List<ResourceAssignationVO> resourcesProviders, String role) {
+    boolean isObserver = SecurityRoleEnum.DATA_OBSERVER.toString().equals(role);
+    resourcesProviders.add(fillResourceAssignation(dataflowId, account,
+        isObserver ? ResourceGroupEnum.DATAFLOW_OBSERVER
+            : ResourceGroupEnum.DATAFLOW_STEWARD_SUPPORT));
     // dataset
     addResources(account, resourcesProviders,
         dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
             .map(ReportingDatasetVO::getId).collect(Collectors.toList()),
-        ResourceGroupEnum.DATASET_OBSERVER);
+        isObserver ? ResourceGroupEnum.DATASET_OBSERVER
+            : ResourceGroupEnum.DATASET_STEWARD_SUPPORT);
     // dc
     addResources(account, resourcesProviders,
         dataCollectionControllerZuul.findDataCollectionIdByDataflowId(dataflowId).stream()
             .map(DataCollectionVO::getId).collect(Collectors.toList()),
-        ResourceGroupEnum.DATACOLLECTION_OBSERVER);
+        isObserver ? ResourceGroupEnum.DATACOLLECTION_OBSERVER
+            : ResourceGroupEnum.DATACOLLECTION_STEWARD_SUPPORT);
     // eu
     addResources(account, resourcesProviders,
         eUDatasetControllerZuul.findEUDatasetByDataflowId(dataflowId).stream()
             .map(EUDatasetVO::getId).collect(Collectors.toList()),
-        ResourceGroupEnum.EUDATASET_OBSERVER);
+        isObserver ? ResourceGroupEnum.EUDATASET_OBSERVER
+            : ResourceGroupEnum.EUDATASET_STEWARD_SUPPORT);
 
     // reference
     addResources(account, resourcesProviders,
         referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId).stream()
             .map(ReferenceDatasetVO::getId).collect(Collectors.toList()),
-        ResourceGroupEnum.REFERENCEDATASET_OBSERVER);
+        isObserver ? ResourceGroupEnum.REFERENCEDATASET_OBSERVER
+            : ResourceGroupEnum.REFERENCEDATASET_STEWARD_SUPPORT);
+
+    if (!isObserver) {
+      // testdataset
+      addResources(account, resourcesProviders,
+          testDatasetControllerZuul.findTestDatasetByDataflowId(dataflowId).stream()
+              .map(TestDatasetVO::getId).collect(Collectors.toList()),
+          ResourceGroupEnum.TESTDATASET_STEWARD_SUPPORT);
+    }
   }
+
 
   /**
    * Gets the resource custodian steward.
@@ -421,11 +439,19 @@ public class ContributorServiceImpl implements ContributorService {
 
     // design datasets
     addResources(account, resourcesProviders,
-        referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId).stream()
-            .map(ReferenceDatasetVO::getId).collect(Collectors.toList()),
+        dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(dataflowId).stream()
+            .map(DesignDatasetVO::getId).collect(Collectors.toList()),
         SecurityRoleEnum.DATA_CUSTODIAN.toString().equals(role)
-            ? ResourceGroupEnum.REFERENCEDATASET_OBSERVER
-            : ResourceGroupEnum.REFERENCEDATASET_STEWARD);
+            ? ResourceGroupEnum.DATASCHEMA_CUSTODIAN
+            : ResourceGroupEnum.DATASCHEMA_STEWARD);
+
+    // test datasets
+    addResources(account, resourcesProviders,
+        testDatasetControllerZuul.findTestDatasetByDataflowId(dataflowId).stream()
+            .map(TestDatasetVO::getId).collect(Collectors.toList()),
+        SecurityRoleEnum.DATA_CUSTODIAN.toString().equals(role)
+            ? ResourceGroupEnum.TESTDATASET_CUSTODIAN
+            : ResourceGroupEnum.TESTDATASET_STEWARD);
   }
 
   /**
@@ -508,6 +534,15 @@ public class ContributorServiceImpl implements ContributorService {
             ResourceGroupEnum.DATACOLLECTION_STEWARD, ResourceGroupEnum.EUDATASET_STEWARD,
             ResourceGroupEnum.TESTDATASET_STEWARD, ResourceGroupEnum.DATASCHEMA_STEWARD,
             ResourceGroupEnum.REFERENCEDATASET_STEWARD);
+        break;
+      case STEWARD_SUPPORT:
+        createRequesterGroupsResources(dataflowId, contributorVO, dataProviderId,
+            resourceAssignationVOList, resourceInfoVOs, SecurityRoleEnum.STEWARD_SUPPORT,
+            ResourceGroupEnum.DATAFLOW_STEWARD_SUPPORT, ResourceGroupEnum.DATASET_STEWARD_SUPPORT,
+            ResourceGroupEnum.DATACOLLECTION_STEWARD_SUPPORT,
+            ResourceGroupEnum.EUDATASET_STEWARD_SUPPORT,
+            ResourceGroupEnum.TESTDATASET_STEWARD_SUPPORT, null,
+            ResourceGroupEnum.REFERENCEDATASET_STEWARD_SUPPORT);
         break;
       default:
         break;
@@ -667,19 +702,22 @@ public class ContributorServiceImpl implements ContributorService {
         ResourceTypeEnum.REFERENCE_DATASET);
 
     if (SecurityRoleEnum.DATA_CUSTODIAN.equals(securityRole)
-        || SecurityRoleEnum.DATA_STEWARD.equals(securityRole)) {
-      // schemas
-      createGroupList(dataflowId, contributorVO, resourceAssignationVOList, resourceInfoVOs,
-          resourceGroupSchema, securityRole,
-          dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(dataflowId).stream()
-              .map(DesignDatasetVO::getId).collect(Collectors.toList()),
-          ResourceTypeEnum.DATA_SCHEMA);
+        || SecurityRoleEnum.DATA_STEWARD.equals(securityRole)
+        || SecurityRoleEnum.STEWARD_SUPPORT.equals(securityRole)) {
       // test
       createGroupList(dataflowId, contributorVO, resourceAssignationVOList, resourceInfoVOs,
           resourceGroupTest, securityRole,
           testDatasetControllerZuul.findTestDatasetByDataflowId(dataflowId).stream()
               .map(TestDatasetVO::getId).collect(Collectors.toList()),
           ResourceTypeEnum.TEST_DATASET);
+      if (!SecurityRoleEnum.STEWARD_SUPPORT.equals(securityRole)) {
+        // schemas
+        createGroupList(dataflowId, contributorVO, resourceAssignationVOList, resourceInfoVOs,
+            resourceGroupSchema, securityRole,
+            dataSetMetabaseControllerZuul.findDesignDataSetIdByDataflowId(dataflowId).stream()
+                .map(DesignDatasetVO::getId).collect(Collectors.toList()),
+            ResourceTypeEnum.DATA_SCHEMA);
+      }
     }
 
     // Resources creation
@@ -767,6 +805,7 @@ public class ContributorServiceImpl implements ContributorService {
         || SecurityRoleEnum.REPORTER_READ.toString().equals(contributorVO.getRole())
         || SecurityRoleEnum.REPORTER_WRITE.toString().equals(contributorVO.getRole())
         || SecurityRoleEnum.DATA_CUSTODIAN.toString().equals(contributorVO.getRole())
+        || SecurityRoleEnum.STEWARD_SUPPORT.toString().equals(contributorVO.getRole())
         || SecurityRoleEnum.DATA_STEWARD.toString().equals(contributorVO.getRole())
         || SecurityRoleEnum.DATA_OBSERVER.toString().equals(contributorVO.getRole())) {
       contributorVO.setAccount(contributorVO.getAccount().toLowerCase());

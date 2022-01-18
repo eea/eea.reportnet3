@@ -51,6 +51,7 @@ export const ShareRights = ({
   placeholder,
   representativeId,
   roleOptions,
+  saveErrorNotificationKey,
   setHasReporters = () => {},
   setIsUserRightManagementDialogVisible,
   setRightPermissionsChange = () => {},
@@ -304,7 +305,7 @@ export const ShareRights = ({
           notificationContext.add({ type: 'EMAIL_NOT_FOUND_ERROR' }, true);
         } else if (error?.response?.status === 400) {
           shareRightsDispatch({ type: 'SET_ACCOUNT_HAS_ERROR', payload: { accountHasError: true } });
-          notificationContext.add({ type: 'IMPOSSIBLE_ROLE_ERROR' }, true);
+          notificationContext.add({ type: saveErrorNotificationKey }, true);
         } else {
           notificationContext.add(
             { type: userRight.isNew ? addErrorNotificationKey : updateErrorNotificationKey },
@@ -454,45 +455,67 @@ export const ShareRights = ({
 
   if (loadingStatus.isInitialLoading) return renderDialogLayout(<Spinner />);
 
+  const renderShareRightsFilters = () => {
+    if (!isEmpty(shareRightsState.userRightList)) {
+      return (
+        <Filters data={shareRightsState.userRightList} getFilteredData={onLoadFilteredData} options={filterOptions} />
+      );
+    }
+  };
+
+  const renderShareRightsTable = () => {
+    if (isEmpty(shareRightsState.userRightList)) {
+      return (
+        <div className={getShareRightsTableStyles()}>{resourcesContext.messages[`${userType}EmptyUserRightList`]}</div>
+      );
+    }
+
+    if (isEmpty(shareRightsState.filteredData)) {
+      return (
+        <div className={getShareRightsTableStyles()}>{resourcesContext.messages[`${userType}NotMatchingFilter`]}</div>
+      );
+    }
+
+    return (
+      <div className={styles.table}>
+        <DataTable
+          first={shareRightsState.pagination.first}
+          getPageChange={onPaginate}
+          loading={loadingStatus.isActionButtonsLoading}
+          paginator={true}
+          rows={shareRightsState.pagination.rows}
+          rowsPerPageOptions={[5, 10, 15]}
+          summary="shareRights"
+          value={shareRightsState.filteredData}>
+          <Column body={renderAccountTemplate} header={columnHeader} />
+          <Column body={renderRoleColumnTemplate} header={resourcesContext.messages['rolesColumn']} />
+          <Column
+            body={renderButtonsColumnTemplate}
+            header={resourcesContext.messages['actions']}
+            style={{ width: '100px' }}
+          />
+        </DataTable>
+      </div>
+    );
+  };
+
+  const getShareRightsTableStyles = () => {
+    if (!isEmpty(shareRightsState.userRightList)) {
+      return styles.wrapperNoUserRoles;
+    } else {
+      if (isEmpty(shareRightsState.filteredData)) {
+        return styles.wrapperEmptyFilter;
+      } else {
+        return '';
+      }
+    }
+  };
+
   return renderDialogLayout(
     <Fragment>
-      {!isEmpty(shareRightsState.userRightList) && (
-        <Filters data={shareRightsState.userRightList} getFilteredData={onLoadFilteredData} options={filterOptions} />
-      )}
-      <div
-        className={
-          isEmpty(shareRightsState.userRightList)
-            ? styles.wrapperNoUserRoles
-            : isEmpty(shareRightsState.filteredData)
-            ? styles.wrapperEmptyFilter
-            : ''
-        }>
-        {isEmpty(shareRightsState.userRightList) ? (
-          <h3>{resourcesContext.messages[`${userType}EmptyUserRightList`]}</h3>
-        ) : isEmpty(shareRightsState.filteredData) ? (
-          <h3>{resourcesContext.messages[`${userType}NotMatchingFilter`]}</h3>
-        ) : (
-          <div className={styles.table}>
-            <DataTable
-              first={shareRightsState.pagination.first}
-              getPageChange={onPaginate}
-              loading={loadingStatus.isActionButtonsLoading}
-              paginator={true}
-              rows={shareRightsState.pagination.rows}
-              rowsPerPageOptions={[5, 10, 15]}
-              summary="manageUsers"
-              value={shareRightsState.filteredData}>
-              <Column body={renderAccountTemplate} header={columnHeader} />
-              <Column body={renderRoleColumnTemplate} header={resourcesContext.messages['rolesColumn']} />
-              <Column
-                body={renderButtonsColumnTemplate}
-                header={resourcesContext.messages['actions']}
-                style={{ width: '100px' }}
-              />
-            </DataTable>
-          </div>
-        )}
-      </div>
+      {renderShareRightsFilters()}
+      {renderShareRightsTable()}
+
       {shareRightsState.isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}

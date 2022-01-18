@@ -1,9 +1,16 @@
-.modalSize {
+.modalEmpty {
   min-height: 50vh;
-  display: flex;
+  display: flex !important;
   justify-content: center;
+  width: 100% !important;
   align-items: center;
 }
+
+.modalData {
+  min-height: 50vh;
+  align-items: start;
+}
+
 .noReferencingWrap {
   width: 100%;
   height: 100%;

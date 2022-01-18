@@ -280,6 +280,7 @@ body .p-multiselect-panel {
   -webkit-box-shadow: var(--multiselect-panel-box-shadow);
   -moz-box-shadow: var(--multiselect-panel-box-shadow);
   box-shadow: var(--multiselect-panel-box-shadow);
+  z-index: 3000 !important;
 }
 body .p-multiselect-panel .p-multiselect-header {
   padding: 0.429em 0.857em 0.429em 0.857em;
@@ -756,7 +757,8 @@ body .p-fileupload-files {
   display: table-cell;
   width: 100%;
   font-size: 0.9em;
-  text-align: center;
+  word-break: break-all;
+  text-align: left;
 }
 body .p-fileupload .p-progressbar {
   top: 0;
@@ -2357,7 +2359,7 @@ body .p-dialog .p-dialog-content {
   background-color: var(--dialog-content-bg);
   color: var(--dialog-content-color);
   border: var(--dialog-content-border);
-  padding: 1em 1.5em;
+  padding: 2em 1.5em;
   max-height: 90vh;
   overflow: auto;
 }
@@ -2367,7 +2369,7 @@ body .p-dialog .p-dialog-footer {
   border-top: 0 none;
   background-color: var(--dialog-footer-bg);
   color: var(--dialog-content-color);
-  padding: 0.571em 1em;
+  padding: 1.012rem 1.5em;
   margin: 0;
   text-align: right;
   border-radius: 0 0 5px 5px;

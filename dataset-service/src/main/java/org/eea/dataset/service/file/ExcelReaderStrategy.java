@@ -23,6 +23,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import lombok.NoArgsConstructor;
@@ -101,13 +102,14 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @param fileName the file name
    * @param replace the replace
    * @param schema the schema
+   * @param connectionDataVO the connection data VO
    * @return the data set VO
    * @throws EEAException the EEA exception
    */
   @Override
   public void parseFile(InputStream inputStream, Long dataflowId, Long partitionId,
-      String idTableSchema, Long datasetId, String fileName, boolean replace, DataSetSchema schema)
-      throws EEAException {
+      String idTableSchema, Long datasetId, String fileName, boolean replace, DataSetSchema schema,
+      ConnectionDataVO connectionDataVO) throws EEAException {
 
     try (Workbook workbook = WorkbookFactory.create(inputStream)) {
 
@@ -125,7 +127,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       }
 
       LOG.info("Finishing reading Exel file");
-      createDataSet(schema, tables, idTableSchema, fileName, replace, schema);
+      createDataSet(schema, tables, idTableSchema, fileName, replace, schema, connectionDataVO);
     } catch (EncryptedDocumentException | InvalidFormatException | IOException | SQLException
         | IllegalArgumentException e) {
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
@@ -305,8 +307,8 @@ public class ExcelReaderStrategy implements ReaderStrategy {
    * @throws Exception
    */
   private void createDataSet(DataSetSchema dataSetSchema, List<TableValue> tables,
-      String idTableSchema, String fileName, boolean replace, DataSetSchema schema)
-      throws EEAException, IOException, SQLException {
+      String idTableSchema, String fileName, boolean replace, DataSetSchema schema,
+      ConnectionDataVO connectionDataVO) throws EEAException, IOException, SQLException {
     try {
 
       DatasetValue dataset = new DatasetValue();
@@ -316,8 +318,10 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       if (dataSetSchema != null) {
         dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
       }
+      boolean manageFixedRecords =
+          fileCommon.schemaContainsFixedRecords(datasetId, dataSetSchema, idTableSchema);
       fileCommon.persistImportedDataset(idTableSchema, datasetId, fileName, replace, schema,
-          dataset);
+          dataset, manageFixedRecords, connectionDataVO);
     } catch (EEAException | IOException | SQLException e) {
       LOG.error("error persisting excel file", e);
       throw e;

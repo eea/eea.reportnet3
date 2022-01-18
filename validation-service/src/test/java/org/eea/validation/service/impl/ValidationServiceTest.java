@@ -1015,6 +1015,8 @@ public class ValidationServiceTest {
 
     ruleVO.setShortCode("FML");
     rulesVO.add(ruleVO);
+    ruleVO.setRuleName("");
+    ruleVO.setDescription("");
     rulesSchemaVO.setRules(rulesVO);
 
     dataSetMetabase.setDataflowId(1L);

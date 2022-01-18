@@ -1,5 +1,6 @@
 package org.eea.enums.utils;
 
+import org.eea.exception.EEAErrorMessage;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 import org.springframework.http.HttpStatus;
@@ -36,7 +37,8 @@ public class StringToLongConverterFactory implements ConverterFactory<String, Lo
         long longValueAux = Long.parseLong(source);
         longValue = (T) Long.valueOf(longValueAux);
       } catch (NumberFormatException e) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.CONVERTING_FROM_STRING_TO_LONG);
       }
       return longValue;
     }

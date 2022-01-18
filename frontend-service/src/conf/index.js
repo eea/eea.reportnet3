@@ -31,7 +31,7 @@ config.GEOGRAPHICAL_LONG_COORD = { min: -180, max: 180 };
 config.GEOGRAPHICAL_LAT_COORD_3035 = { min: 32.88, max: 84.17 };
 config.GEOGRAPHICAL_LONG_COORD_3035 = { min: -16.1, max: 40.18 };
 config.SQL_SENTENCE_LOW_COST = 20;
-config.SQL_SENTENCE_HIGH_COST = 300;
+config.SQL_SENTENCE_HIGH_COST = 50;
 
 config.MAX_ATTACHMENT_SIZE = 20 * config.MB_SIZE;
 

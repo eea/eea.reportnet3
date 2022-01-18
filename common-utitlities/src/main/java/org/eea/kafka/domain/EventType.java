@@ -499,7 +499,11 @@ public enum EventType {
 
   /** The export table data failed event. */
   EXPORT_TABLE_DATA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "export_table_data_failed_event", true);
+      "export_table_data_failed_event", true),
+
+  /** The call fme process failed event. */
+  CALL_FME_PROCESS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "call_fme_process_failed_event", true);
 
   /** The topic. */
   private String topic;

@@ -1006,7 +1006,8 @@ public class DataflowControllerImplTest {
           .updateDataFlowStatus(Mockito.anyLong(), Mockito.any(), Mockito.any());
       dataflowControllerImpl.updateDataFlowStatus(Mockito.anyLong(), Mockito.any(), Mockito.any());
     } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getReason());
+      assertEquals("Couldn't update the dataflow status. An unknown error happenned.",
+          e.getReason());
       throw e;
     }
   }

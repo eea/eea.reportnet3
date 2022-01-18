@@ -126,6 +126,8 @@ public class UserRoleServiceImpl implements UserRoleService {
       getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.DATA_STEWARD.toString());
       // OBSERVER
       getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.DATA_OBSERVER.toString());
+      // STEWARD SUPPORT
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.STEWARD_SUPPORT.toString());
 
     }
     return finalList;
@@ -144,8 +146,11 @@ public class UserRoleServiceImpl implements UserRoleService {
     Collection<String> authorities = SecurityContextHolder.getContext().getAuthentication()
         .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
         .collect(Collectors.toList());
+    boolean isRequester = false;
     if (authorities.contains(ObjectAccessRoleEnum.DATASET_CUSTODIAN.getAccessRole(datasetId))
         || authorities.contains(ObjectAccessRoleEnum.DATASET_STEWARD.getAccessRole(datasetId))
+        || authorities
+            .contains(ObjectAccessRoleEnum.DATASET_STEWARD_SUPPORT.getAccessRole(datasetId))
         || authorities.contains(ObjectAccessRoleEnum.DATASET_OBSERVER.getAccessRole(datasetId))) {
       // CUSTODIAN
       setGroupsIntoMap(groupInfoMap,
@@ -162,11 +167,15 @@ public class UserRoleServiceImpl implements UserRoleService {
           new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService
               .getGroupsWithSearch(ResourceGroupEnum.DATASET_OBSERVER.getGroupName(datasetId)))),
           SecurityRoleEnum.DATA_OBSERVER.toString());
+      // STEWARD SUPPORT
+      setGroupsIntoMap(groupInfoMap,
+          new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService.getGroupsWithSearch(
+              ResourceGroupEnum.DATASET_STEWARD_SUPPORT.getGroupName(datasetId)))),
+          SecurityRoleEnum.STEWARD_SUPPORT.toString());
+      isRequester = true;
     }
-    if (authorities.contains(ObjectAccessRoleEnum.DATASET_CUSTODIAN.getAccessRole(datasetId))
-        || authorities.contains(ObjectAccessRoleEnum.DATASET_STEWARD.getAccessRole(datasetId))
-        || authorities
-            .contains(ObjectAccessRoleEnum.DATASET_NATIONAL_COORDINATOR.getAccessRole(datasetId))) {
+    if (isRequester || authorities
+        .contains(ObjectAccessRoleEnum.DATASET_NATIONAL_COORDINATOR.getAccessRole(datasetId))) {
       // NATIONAL COORDINATOR
       setGroupsIntoMap(groupInfoMap,
           new ArrayList<GroupInfo>(Arrays.asList(keycloakConnectorService.getGroupsWithSearch(
@@ -253,6 +262,8 @@ public class UserRoleServiceImpl implements UserRoleService {
         SecurityRoleEnum.EDITOR_READ.toString(), userRoleList, null);
     getUserRole(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId),
         SecurityRoleEnum.EDITOR_WRITE.toString(), userRoleList, null);
+    getUserRole(ResourceGroupEnum.DATAFLOW_STEWARD_SUPPORT.getGroupName(dataflowId),
+        SecurityRoleEnum.STEWARD_SUPPORT.toString(), userRoleList, null);
     return userRoleList;
   }
 

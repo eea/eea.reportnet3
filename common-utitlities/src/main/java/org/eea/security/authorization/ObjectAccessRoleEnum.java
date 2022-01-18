@@ -17,6 +17,9 @@ public enum ObjectAccessRoleEnum {
   /** The dataflow observer. */
   DATAFLOW_OBSERVER("ROLE_DATAFLOW-%s-DATA_OBSERVER"),
 
+  /** The dataflow steward support. */
+  DATAFLOW_STEWARD_SUPPORT("ROLE_DATAFLOW-%s-STEWARD_SUPPORT"),
+
   /** The dataflow reporter write. */
   DATAFLOW_REPORTER_WRITE("ROLE_DATAFLOW-%s-REPORTER_WRITE"),
 
@@ -49,6 +52,8 @@ public enum ObjectAccessRoleEnum {
 
   /** The dataset observer. */
   DATASET_OBSERVER("ROLE_DATASET-%s-DATA_OBSERVER"),
+
+  DATASET_STEWARD_SUPPORT("ROLE_DATASET-%s-STEWARD_SUPPORT"),
 
   /** The dataset reporter write. */
   DATASET_REPORTER_WRITE("ROLE_DATASET-%s-REPORTER_WRITE"),
@@ -86,6 +91,9 @@ public enum ObjectAccessRoleEnum {
   /** The datacollection observer. */
   DATACOLLECTION_OBSERVER("ROLE_DATACOLLECTION-%s-DATA_OBSERVER"),
 
+  /** The datacollection steward support. */
+  DATACOLLECTION_STEWARD_SUPPORT("ROLE_DATACOLLECTION-%s-STEWARD_SUPPORT"),
+
   /** The datacollection steward. */
   DATACOLLECTION_STEWARD("ROLE_DATACOLLECTION-%s-DATA_STEWARD"),
 
@@ -101,6 +109,9 @@ public enum ObjectAccessRoleEnum {
   /** The eudataset observer. */
   EUDATASET_OBSERVER("ROLE_EUDATASET-%s-DATA_OBSERVER"),
 
+  /** The eudataset steward support. */
+  EUDATASET_STEWARD_SUPPORT("ROLE_EUDATASET-%s-STEWARD_SUPPORT"),
+
   /** The testdataset custodian. */
   TESTDATASET_CUSTODIAN("ROLE_TESTDATASET-%s-DATA_CUSTODIAN"),
 
@@ -110,6 +121,9 @@ public enum ObjectAccessRoleEnum {
   /** The testdataset observer. */
   TESTDATASET_OBSERVER("ROLE_TESTDATASET-%s-DATA_OBSERVER"),
 
+  /** The testdataset steward support. */
+  TESTDATASET_STEWARD_SUPPORT("ROLE_TESTDATASET-%s-STEWARD_SUPPORT"),
+
   /** The referencedataset observer. */
   REFERENCEDATASET_OBSERVER("ROLE_REFERENCEDATASET-%s-DATA_OBSERVER"),
 
@@ -117,7 +131,10 @@ public enum ObjectAccessRoleEnum {
   REFERENCEDATASET_STEWARD("ROLE_REFERENCEDATASET-%s-DATA_STEWARD"),
 
   /** The referencedataset custodian. */
-  REFERENCEDATASET_CUSTODIAN("ROLE_REFERENCEDATASET-%s-DATA_CUSTODIAN");
+  REFERENCEDATASET_CUSTODIAN("ROLE_REFERENCEDATASET-%s-DATA_CUSTODIAN"),
+
+  /** The referencedataset steward support. */
+  REFERENCEDATASET_STEWARD_SUPPORT("ROLE_REFERENCEDATASET-%s-STEWARD_SUPPORT");
 
 
 
