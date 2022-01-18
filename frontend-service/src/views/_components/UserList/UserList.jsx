@@ -106,15 +106,6 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
     { type: 'INPUT', key: 'email', label: resourcesContext.messages['email'] }
   ];
 
-  const getFilters = filterOptions => (
-    <Filters
-      data={userListData}
-      getFilteredData={onLoadFilteredData}
-      getFilteredSearched={getFilteredState}
-      options={filterOptions}
-    />
-  );
-
   const renderFilters = () => {
     if (isNil(representativeId) && isNil(dataflowId)) {
       return getFilters(filterOptionsNoRepresentative);
