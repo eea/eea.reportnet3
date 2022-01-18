@@ -22,6 +22,7 @@ import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
+import { ManageWebforms } from './_components/ManageWebforms';
 import { MyFilters } from 'views/_components/MyFilters';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
@@ -218,6 +219,7 @@ const Dataflows = () => {
       onClick: () => manageDialogs('isManageWebformsDialogVisible', true),
       title: 'manageWebformsButton'
     };
+
     leftSideBarContext.addModels(
       [
         adminCreateNewPermissionsBtn,
@@ -673,6 +675,13 @@ const Dataflows = () => {
           visible={dataflowsState.isRecreatePermissionsDialogVisible}>
           {resourcesContext.messages['confirmCreateNewPermissions']}
         </ConfirmDialog>
+      )}
+
+      {dataflowsState.isManageWebformsDialogVisible && (
+        <ManageWebforms
+          isDialogVisible={dataflowsState.isManageWebformsDialogVisible}
+          onCloseDialog={() => manageDialogs('isManageWebformsDialogVisible', false)}
+        />
       )}
 
       {dataflowsState.isCitizenScienceDataflowDialogVisible && (
