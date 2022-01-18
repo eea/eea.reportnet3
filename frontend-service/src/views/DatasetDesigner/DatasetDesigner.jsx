@@ -1,5 +1,6 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import ReactTooltip from 'react-tooltip';
 
 import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
@@ -1002,6 +1003,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const renderActionButtonsValidationDialog = (
     <div className={styles.qcDialogFooterWrapper}>
       {isDataflowOpen && (
+        <span data-for="qcHistoryTooltip" data-tip>
           <Button
             className={`p-button-secondary ${designerState.hasQCsHistory ? 'p-button-animated-blink' : ''}`}
             disabled={!designerState.hasQCsHistory}
@@ -1009,6 +1011,13 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             label={resourcesContext.messages['allQCsHistoryBtn']}
             onClick={() => setIsHistoryDialogVisible(true)}
           />
+        </span>
+      )}
+
+      {!designerState.hasQCsHistory && (
+        <ReactTooltip border effect="solid" id="qcHistoryTooltip" place="top">
+          {resourcesContext.messages['genericQCsHistoryButtonTooltip']}
+        </ReactTooltip>
       )}
 
       <Button
