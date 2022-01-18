@@ -68,6 +68,28 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
     </Fragment>
   );
 
+  const getUserListColumns = () => {
+    const columns = [
+      { key: 'role', header: resourcesContext.messages['role'] },
+      { key: 'email', header: resourcesContext.messages['user'] }
+    ];
+    if (isNil(representativeId) && isNil(dataflowId)) {
+      columns.splice(0, 0, { key: 'dataflowName', header: resourcesContext.messages['dataflowName'] });
+    }
+    if (isNil(representativeId) && !isNil(dataflowId)) {
+      columns.push({
+        key: 'dataProviderName',
+        header: TextByDataflowTypeUtils.getLabelByDataflowType(
+          resourcesContext.messages,
+          dataflowType,
+          'userListDataProviderColumnHeader'
+        )
+      });
+    }
+
+    return columns.map(column => <Column field={column.key} header={column.header} key={column.key} sortable />);
+  };
+
   const filterOptionsWithDataflowIdRepresentativeId = [
     {
       type: 'MULTI_SELECT',
@@ -148,22 +170,7 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
           summary="usersList"
           totalRecords={userListData.length}
           value={filteredData}>
-          {isNil(representativeId) && isNil(dataflowId) && (
-            <Column field="dataflowName" header={resourcesContext.messages['dataflowName']} sortable={true} />
-          )}
-          <Column field="role" header={resourcesContext.messages['role']} sortable={true} />
-          <Column field="email" header={resourcesContext.messages['user']} sortable={true} />
-          {isNil(representativeId) && !isNil(dataflowId) && (
-            <Column
-              field="dataProviderName"
-              header={TextByDataflowTypeUtils.getLabelByDataflowType(
-                resourcesContext.messages,
-                dataflowType,
-                'userListDataProviderColumnHeader'
-              )}
-              sortable={true}
-            />
-          )}
+          {getUserListColumns()}
         </DataTable>
       );
     }
