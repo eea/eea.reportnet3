@@ -99,8 +99,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           disabled={isPending}
           icon={getBtnIcon(row.id, 'edit')}
           onClick={() => onEdit(row.id)}
-          tooltip={resourcesContext.messages['edit']}
-          tooltipOptions={{ position: 'top' }}
           type="button"
         />
         <Button
@@ -108,8 +106,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           disabled={isPending}
           icon={getBtnIcon(row.id, 'export')}
           onClick={() => onClickDownload(row.id)}
-          tooltip={resourcesContext.messages['download']}
-          tooltipOptions={{ position: 'top' }}
           type="button"
         />
         <Button
@@ -117,8 +113,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           disabled={isPending}
           icon={getBtnIcon(row.id, 'trash')}
           onClick={() => onShowDeleteDialog(row.id)}
-          tooltip={resourcesContext.messages['delete']}
-          tooltipOptions={{ position: 'top' }}
           type="button"
         />
       </Fragment>
