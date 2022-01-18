@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect, useContext } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import styles from './ManageWebforms.module.scss';
 
@@ -7,6 +7,7 @@ import { Column } from 'primereact/column';
 import { Button } from 'views/_components/Button';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
+import { Spinner } from 'views/_components/Spinner';
 
 import { WebformService } from 'services/WebformService';
 
@@ -17,7 +18,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
-  const [isLoadingStatus, setLoadingStatus] = useState('idle');
+  const [loadingStatus, setLoadingStatus] = useState('idle');
   const [isPending, setIsPending] = useState(false);
   const [selectedWebformId, setSelectedWebformId] = useState(null);
   const [webforms, setWebforms] = useState([]);
@@ -27,25 +28,31 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   }, []);
 
   useEffect(() => {
-    setIsPending(isPending);
-  }, [isLoadingStatus]);
+    setIsPending(loadingStatus === 'pending');
+  }, [loadingStatus]);
 
-  console.log(`webforms`, webforms);
-
-  // Tabla de Webforms
-  // => objeto de las columnas  //
-  //                webformName
-  //                actions
-  //                        delete => botón de borrar y que devuelva un error si el webform está en uso en algún dataset
-  //                        download => JSON
-  //                        edit
-
-  // Endpoints
+  // TODO
   // delete: /webform/webformConfig/{id} // Check that endpoint is correct
   // download: /webform/webformConfig/{id} // Check that endpoint is correct
 
   // Confirm dialog: Delete webform
-  //
+  // ADD / EDIT dialog
+
+  const getWebformList = async () => {
+    setLoadingStatus('pending');
+
+    try {
+      const data = await WebformService.getAll();
+      setWebforms(data);
+      setLoadingStatus('success');
+    } catch (error) {
+      console.error('ManageWebforms - getWebformList.', error);
+      setLoadingStatus('failed');
+      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true); // Todo add correct notification
+    } finally {
+      setLoadingStatus('idle');
+    }
+  };
 
   const getTableColumns = () => {
     const columns = [
@@ -53,13 +60,15 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       {
         key: 'actions',
         header: resourcesContext.messages['actions'],
-        template: getActionsTemplate
+        template: getActionsTemplate,
+        className: styles.actionsColumn
       }
     ];
 
     return columns.map(column => (
       <Column
         body={column.template}
+        className={column.className ? column.className : ''}
         columnResizeMode="expand"
         field={column.key}
         header={column.header}
@@ -76,6 +85,9 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     return iconName;
   };
 
+  const onAddClick = () => {
+    //todo add Create dialog
+  };
   const onShowDeleteDialog = id => {
     setSelectedWebformId(id);
     //todo add confirmation dialog
@@ -126,7 +138,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         disabled={isPending}
         icon={isPending ? 'spinnerAnimate' : 'plus'}
         label={resourcesContext.messages['add']}
-        // onClick={}
+        onClick={onAddClick}
       />
       <Button
         className="p-button-secondary p-button-right-aligned"
@@ -137,22 +149,38 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     </Fragment>
   );
 
-  const getWebformList = async () => {
-    setLoadingStatus('pending');
-
-    try {
-      const data = await WebformService.getAll();
-      setWebforms(data);
-      setLoadingStatus('success');
-    } catch (error) {
-      console.error('ManageWebforms - getWebformList.', error);
-      setLoadingStatus('failed');
-      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true); // Todo add correct notification
-    } finally {
-      setLoadingStatus('idle');
+  const renderDialogContent = () => {
+    if (isPending) {
+      return (
+        <div className={styles.loadingSpinner}>
+          <Spinner className={styles.spinnerPosition} />
+        </div>
+      );
     }
-  };
 
+    if (loadingStatus === 'failed') {
+      return (
+        <div className={styles.noDataContent}>
+          <p>{resourcesContext.messages['loadWebformsError']}</p>
+          <Button label={resourcesContext.messages['refresh']} onClick={getWebformList} />
+        </div>
+      );
+    }
+
+    return (
+      <DataTable
+        autoLayout
+        className={styles.dialogContent}
+        hasDefaultCurrentPage
+        paginator
+        rows={10}
+        rowsPerPageOptions={[5, 10, 15]}
+        totalRecords={webforms.length}
+        value={webforms}>
+        {getTableColumns()}
+      </DataTable>
+    );
+  };
   return (
     <Dialog
       blockScroll={false}
@@ -162,17 +190,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       modal
       onHide={onCloseDialog}
       visible={isDialogVisible}>
-      <DataTable
-        autoLayout
-        //   className={styles.dialogContent}
-        hasDefaultCurrentPage
-        paginator
-        rows={10}
-        rowsPerPageOptions={[5, 10, 15]}
-        totalRecords={webforms.length}
-        value={webforms}>
-        {getTableColumns()}
-      </DataTable>
+      {renderDialogContent()}
     </Dialog>
   );
 };

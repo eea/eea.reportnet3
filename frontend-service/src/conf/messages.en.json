@@ -1446,6 +1446,7 @@
     "copyToClipboardError": "Error copying to clipboard",
     "genericQCsHistoryButtonTooltip": "There is no history data",
     "manageWebformsButton": "Manage webforms",
-    "manageWebformsDialogHeader": "Manage webforms"
+    "manageWebformsDialogHeader": "Manage webforms",
+    "loadWebformsError": "Error loading webforms list"
   }
 }
