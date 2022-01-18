@@ -248,7 +248,7 @@ export class BodyCell extends Component {
             </span>
 
             <ReactTooltip
-              border
+              border={true}
               className={styles.tooltip}
               effect="solid"
               id={`quickEditSaveTooltip${this.props.rowIndex}`}
@@ -260,7 +260,7 @@ export class BodyCell extends Component {
               </span>
             </ReactTooltip>
             <ReactTooltip
-              border
+              border={true}
               className={styles.tooltip}
               effect="solid"
               id={`quickEditCancelTooltip${this.props.rowIndex}`}

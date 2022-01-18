@@ -391,7 +391,7 @@ const DatasetSchema = ({
               icon={AwesomeIcons('externalUrl')}
             />
             <ReactTooltip
-              border
+              border={true}
               className={styles.tooltipClass}
               effect="solid"
               id={`${field.fieldId}_geometricTypeTooltip`}

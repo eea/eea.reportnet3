@@ -32,7 +32,7 @@ export const TooltipButton = ({
         />
       </span>
       <ReactTooltip
-        border
+        border={true}
         className={`${tooltipClassName} ${maxWidth ? styles.maxWidth : null}`}
         effect="solid"
         getContent={() => (getContent ? getContent() : message)}
