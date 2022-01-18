@@ -76,6 +76,7 @@ const Dataflows = () => {
     isCustodian: null,
     isNationalCoordinator: false,
     isRecreatePermissionsDialogVisible: false,
+    isManageWebformsDialogVisible: false,
     isReferencedDataflowDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
@@ -209,9 +210,18 @@ const Dataflows = () => {
       title: 'adminCreatePermissions'
     };
 
+    const adminManageWebformsBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'table',
+      isVisible: isAdmin,
+      label: 'manageWebformsButton',
+      onClick: () => manageDialogs('isManageWebformsDialogVisible', true),
+      title: 'manageWebformsButton'
+    };
     leftSideBarContext.addModels(
       [
         adminCreateNewPermissionsBtn,
+        adminManageWebformsBtn,
         createBusinessDataflowBtn,
         createCitizenScienceDataflowBtn,
         createReferenceDataflowBtn,
