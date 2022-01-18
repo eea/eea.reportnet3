@@ -489,7 +489,7 @@ const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
             </span>
           )}
           {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
-            <ReactTooltip border className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
+            <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
               <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
             </ReactTooltip>
           )}

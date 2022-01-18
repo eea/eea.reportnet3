@@ -286,7 +286,12 @@ export class BodyCell extends Component {
               />
             </span>
             {this.props.quickEditRowInfo.condition && (
-              <ReactTooltip border className={styles.tooltip} effect="solid" id="sortedQuickEditTooltip" place="top">
+              <ReactTooltip
+                border={true}
+                className={styles.tooltip}
+                effect="solid"
+                id="sortedQuickEditTooltip"
+                place="top">
                 <span> {this.context.messages['disabledQuickEdit']} </span>
               </ReactTooltip>
             )}

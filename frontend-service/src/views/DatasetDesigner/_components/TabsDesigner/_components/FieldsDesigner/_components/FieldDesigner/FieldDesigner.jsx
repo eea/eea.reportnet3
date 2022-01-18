@@ -1229,7 +1229,7 @@ export const FieldDesigner = ({
   const duplicateButtonTooltipName = `${fieldDesignerState.fieldValue}_tooltip`;
 
   const renderDuplicateButtonTooltip = () => (
-    <ReactTooltip border effect="solid" id={duplicateButtonTooltipName} place="top">
+    <ReactTooltip border={true} effect="solid" id={duplicateButtonTooltipName} place="top">
       {resourcesContext.messages['duplicate']}
     </ReactTooltip>
   );

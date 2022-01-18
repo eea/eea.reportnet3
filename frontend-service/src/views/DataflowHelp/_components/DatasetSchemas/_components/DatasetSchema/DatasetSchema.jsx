@@ -531,7 +531,7 @@ const DatasetSchema = ({
           <a data-for="linkGoTop" data-tip href="#datasetSchemaIndex">
             <FontAwesomeIcon className={styles.dragArrow} icon={AwesomeIcons('arrowUp')} role="presentation" />
           </a>
-          <ReactTooltip border className={styles.tooltip} effect="solid" id="linkGoTop" place="top">
+          <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="linkGoTop" place="top">
             {resourcesContext.messages['goTop']}
           </ReactTooltip>
         </h3>

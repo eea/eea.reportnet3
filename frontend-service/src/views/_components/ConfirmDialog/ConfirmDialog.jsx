@@ -107,7 +107,7 @@ const ConfirmDialog = forwardRef((props, _) => {
             />
           </span>
           {confirmTooltip && (
-            <ReactTooltip border effect="solid" id="confirmTooltipId" place="top">
+            <ReactTooltip border={true} effect="solid" id="confirmTooltipId" place="top">
               {confirmTooltip}
             </ReactTooltip>
           )}

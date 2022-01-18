@@ -405,7 +405,7 @@ export const ShareRights = ({
             data-tip
             icon={userRight.isValid ? AwesomeIcons('userCheck') : AwesomeIcons('userTimes')}
           />
-          <ReactTooltip border effect="solid" id={userRight.account} place="top">
+          <ReactTooltip border={true} effect="solid" id={userRight.account} place="top">
             {userRight.isValid
               ? resourcesContext.messages['validUserTooltip']
               : resourcesContext.messages['invalidUserTooltip']}

@@ -57,7 +57,7 @@ export const PublicCard = ({ animation, dataflowId, dueDate, obligation, onCardC
         <h4 className={styles.subtitle} data-for={idTooltip} data-tip>
           {subtitle.url ? renderRedirectText(subtitle.text, subtitle.url) : subtitle.text}
         </h4>
-        <ReactTooltip border className={styles.tooltip} effect="solid" id={idTooltip} place="top">
+        <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={idTooltip} place="top">
           {subtitle.text}
         </ReactTooltip>
       </div>

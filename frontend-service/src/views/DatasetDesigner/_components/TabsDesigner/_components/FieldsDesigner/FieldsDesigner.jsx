@@ -528,7 +528,12 @@ export const FieldsDesigner = ({
                   <FontAwesomeIcon icon={AwesomeIcons(markedField.fieldType.fieldTypeIcon)} role="presentation" />
                 </span>
               </div>
-              <ReactTooltip border className={styles.tooltip} effect="solid" id={markedField.fieldName} place="top">
+              <ReactTooltip
+                border={true}
+                className={styles.tooltip}
+                effect="solid"
+                id={markedField.fieldName}
+                place="top">
                 {markedField.fieldName}
               </ReactTooltip>
             </li>
@@ -1017,7 +1022,7 @@ export const FieldsDesigner = ({
                 <span className="srOnly">{resourcesContext.messages['cancel']}</span>
               </div>
             )}
-            <ReactTooltip border effect="solid" id="bulkDeleteTooltip" place="top">
+            <ReactTooltip border={true} effect="solid" id="bulkDeleteTooltip" place="top">
               {!bulkDelete ? (
                 <div>
                   <p>{resourcesContext.messages['bulkDeleteCheckTooltip']}</p>
@@ -1029,7 +1034,7 @@ export const FieldsDesigner = ({
                 resourcesContext.messages['bulkDeleteConfirmTooltip']
               )}
             </ReactTooltip>
-            <ReactTooltip border effect="solid" id="bulkDeleteCancelTooltip" place="top">
+            <ReactTooltip border={true} effect="solid" id="bulkDeleteCancelTooltip" place="top">
               {resourcesContext.messages['cancel']}
             </ReactTooltip>
           </label> */}

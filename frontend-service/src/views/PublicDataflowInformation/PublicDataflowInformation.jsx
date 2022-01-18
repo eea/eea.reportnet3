@@ -85,7 +85,12 @@ export const PublicDataflowInformation = () => {
               key={publicFileName}
               onClick={() => onFileDownload(rowData.dataProviderId, publicFileName)}>
               <FontAwesomeIcon data-for={publicFileName} data-tip icon={AwesomeIcons('7z')} />
-              <ReactTooltip border className={styles.tooltipClass} effect="solid" id={publicFileName} place="top">
+              <ReactTooltip
+                border={true}
+                className={styles.tooltipClass}
+                effect="solid"
+                id={publicFileName}
+                place="top">
                 <span>{publicFileName.split('-')[1]}</span>
               </ReactTooltip>
             </span>
@@ -122,7 +127,12 @@ export const PublicDataflowInformation = () => {
           key={rowData.publicFileName}
           onClick={() => onFileDownload(null, rowData.publicFileName)}>
           <FontAwesomeIcon data-for={rowData.publicFileName} data-tip icon={AwesomeIcons('7z')} />
-          <ReactTooltip border className={styles.tooltipClass} effect="solid" id={rowData.publicFileName} place="top">
+          <ReactTooltip
+            border={true}
+            className={styles.tooltipClass}
+            effect="solid"
+            id={rowData.publicFileName}
+            place="top">
             <span>{rowData.publicFileName}</span>
           </ReactTooltip>
         </span>
@@ -221,7 +231,7 @@ export const PublicDataflowInformation = () => {
                 );
               }}
             />
-            <ReactTooltip border className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
+            <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="navigateTooltip" place="top">
               <span>{resourcesContext.messages['navigateToCountry']}</span>
             </ReactTooltip>
           </Fragment>
@@ -383,7 +393,7 @@ export const PublicDataflowInformation = () => {
       <div className={styles.filesContainer}>
         <span className={styles.downloadIcon} key={rowData.file} onClick={() => onDownloadDocument(rowData)}>
           <FontAwesomeIcon data-for={rowData.file} data-tip icon={AwesomeIcons('7z')} />
-          <ReactTooltip border className={styles.tooltipClass} effect="solid" id={rowData.file} place="top">
+          <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id={rowData.file} place="top">
             <span>{rowData.file}</span>
           </ReactTooltip>
         </span>
