@@ -6,7 +6,6 @@ import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 export const CitizenScienceDataflowService = {
   getAll: async (accessRoles, contextRoles) => {
     const dataflowsDTO = await CitizenScienceDataflowRepository.getAll();
-
     const dataflows = dataflowsDTO.data.map(dataflowDTO => {
       dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);
       return dataflowDTO;
@@ -14,6 +13,7 @@ export const CitizenScienceDataflowService = {
 
     return DataflowUtils.parseSortedDataflowListDTO(dataflows);
   },
+
   create: async (name, description, obligationId) =>
     await CitizenScienceDataflowRepository.create(name, description, obligationId),
 
