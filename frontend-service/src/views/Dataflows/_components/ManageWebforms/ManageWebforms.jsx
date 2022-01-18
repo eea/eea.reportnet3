@@ -106,7 +106,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
           disabled={isPending}
-          icon={getBtnIcon(row.id, 'download')}
+          icon={getBtnIcon(row.id, 'export')}
           onClick={() => onClickDownload(row.id)}
           tooltip={resourcesContext.messages['download']}
           tooltipOptions={{ position: 'top' }}
