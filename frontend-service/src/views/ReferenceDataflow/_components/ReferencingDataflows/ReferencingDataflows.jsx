@@ -15,8 +15,8 @@ import { referencingDataflowsReducer } from './_functions/referencingDataflowsRe
 
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
-import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const ReferencingDataflows = ({ referenceDataflowId }) => {
   const notificationContext = useContext(NotificationContext);
@@ -30,7 +30,7 @@ export const ReferencingDataflows = ({ referenceDataflowId }) => {
 
   const { filteredData } = useFilters('referencingDataflows');
 
-  const filterOptions = [{ type: 'INPUT', nestedOptions: [{ key: 'name', label: resourcesContext.messages['name'] }] }];
+  const filterOptions = [{ key: 'name', label: resourcesContext.messages['name'], type: 'INPUT' }];
 
   useEffect(() => {
     onLoadDataflows();
@@ -42,10 +42,7 @@ export const ReferencingDataflows = ({ referenceDataflowId }) => {
     try {
       const referencingDataflowsResponse = await ReferenceDataflowService.getReferencingDataflows(referenceDataflowId);
 
-      dispatch({
-        type: 'LOADING_SUCCESS',
-        payload: { dataflows: referencingDataflowsResponse.data }
-      });
+      dispatch({ type: 'LOADING_SUCCESS', payload: { dataflows: referencingDataflowsResponse.data } });
     } catch (error) {
       console.error('ReferencingDataflows - onLoadDataflows.', error);
       notificationContext.add({ type: 'LOADING_REFERENCING_DATAFLOWS_ERROR', error }, true);
@@ -54,12 +51,27 @@ export const ReferencingDataflows = ({ referenceDataflowId }) => {
 
   const onPaginate = event => {
     const pagination = { first: event.first, page: event.page, rows: event.rows };
+
     dispatch({ type: 'ON_PAGINATE', payload: { pagination } });
   };
 
-  const renderNameColumnTemplate = dataflow => <div>{dataflow.name}</div>;
+  const renderColumns = () => {
+    const columns = [
+      {
+        key: 'name',
+        header: resourcesContext.messages['referencingDataflowNameColumnLabel']
+      },
+      {
+        key: 'id',
+        className: styles.idColum,
+        header: resourcesContext.messages['referencingDataflowIdColumnLabel']
+      }
+    ];
 
-  const renderIdColumnTemplate = dataflow => <div>{dataflow.id}</div>;
+    return columns.map(column => (
+      <Column className={column.className} field={column.key} header={column.header} key={column.key} />
+    ));
+  };
 
   const renderDialogLayout = children => (
     <div className={isEmpty(state.dataflows) ? styles.modalEmpty : styles.modalData}>{children}</div>
@@ -95,15 +107,7 @@ export const ReferencingDataflows = ({ referenceDataflowId }) => {
         rows={state.pagination.rows}
         rowsPerPageOptions={[5, 10, 15]}
         value={filteredData}>
-        <Column
-          body={renderNameColumnTemplate}
-          header={resourcesContext.messages['referencingDataflowNameColumnLabel']}
-        />
-        <Column
-          body={renderIdColumnTemplate}
-          header={resourcesContext.messages['referencingDataflowIdColumnLabel']}
-          style={{ width: '120px' }}
-        />
+        {renderColumns()}
       </DataTable>
     );
   };

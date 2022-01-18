@@ -249,23 +249,27 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     };
   };
 
-  return (
-    isNotificationVisible && (
-      <Dialog
-        blockScroll={false}
-        className="edit-table"
-        contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
-        footer={notificationsFooter}
-        header={resourcesContext.messages['notifications']}
-        modal={true}
-        onHide={onHideNotificationsList}
-        style={{ width: '80%' }}
-        visible={isNotificationVisible}
-        zIndex={3100}>
-        {renderNotifications()}
-      </Dialog>
-    )
-  );
+  const renderNotificationsListContent = () => {
+    if (isNotificationVisible) {
+      return (
+        <Dialog
+          blockScroll={false}
+          className="edit-table"
+          contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
+          footer={notificationsFooter}
+          header={resourcesContext.messages['notifications']}
+          modal={true}
+          onHide={onHideNotificationsList}
+          style={{ width: '80%' }}
+          visible={isNotificationVisible}
+          zIndex={3100}>
+          {renderNotifications()}
+        </Dialog>
+      );
+    }
+  };
+
+  return renderNotificationsListContent();
 };
 
 export { NotificationsList };
