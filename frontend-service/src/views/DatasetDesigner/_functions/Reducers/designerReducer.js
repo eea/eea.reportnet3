@@ -216,6 +216,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'SET_WEBFORM_OPTIONS_LOADING_STATUS':
       return { ...state, webformOptionsLoadingStatus: payload.loadingStatus };
 
+    case 'SET_HAS_QCS_HISTORY':
+      return { ...state, hasQCsHistory: payload.hasQCsHistory };
+
     default:
       return state;
   }

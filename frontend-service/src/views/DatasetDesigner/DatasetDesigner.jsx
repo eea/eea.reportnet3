@@ -108,6 +108,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     exportButtonsList: [],
     exportDatasetFileType: '',
     externalOperationsList: { export: [], import: [], importOtherSystems: [] },
+    hasQCsHistory: false,
     hasWritePermissions: false,
     importButtonsList: [],
     initialDatasetDescription: '',
@@ -1001,14 +1002,15 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const renderActionButtonsValidationDialog = (
     <div className={styles.qcDialogFooterWrapper}>
       {isDataflowOpen && (
-        <Button
-          className="p-button-secondary p-button-animated-blink"
-          icon="info"
-          label={resourcesContext.messages['allQCsHistoryBtn']}
-          onClick={() => setIsHistoryDialogVisible(true)}
-          style={{ float: 'left' }}
-        />
+          <Button
+            className={`p-button-secondary ${designerState.hasQCsHistory ? 'p-button-animated-blink' : ''}`}
+            disabled={!designerState.hasQCsHistory}
+            icon="info"
+            label={resourcesContext.messages['allQCsHistoryBtn']}
+            onClick={() => setIsHistoryDialogVisible(true)}
+          />
       )}
+
       <Button
         className="p-button-secondary p-button-animated-blink"
         disabled={designerState.isDownloadingQCRules}
@@ -1290,6 +1292,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const setIsUniqueConstraintUpdating = isUniqueConstraintUpdatingValue =>
     designerDispatch({ type: 'SET_IS_CONSTRAINT_UPDATING', payload: { isUniqueConstraintUpdatingValue } });
 
+  const setHasQCsHistory = hasQCsHistory =>
+    designerDispatch({ type: 'SET_HAS_QCS_HISTORY', payload: { hasQCsHistory } });
+
   const validationsListDialog = () => {
     if (designerState.validationListDialogVisible) {
       return (
@@ -1306,6 +1311,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             datasetSchemaId={designerState.datasetSchemaId}
             isDataflowOpen={isDataflowOpen}
             isDatasetDesigner
+            setHasQCsHistory={setHasQCsHistory}
           />
         </Dialog>
       );

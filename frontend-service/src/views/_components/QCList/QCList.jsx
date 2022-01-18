@@ -47,6 +47,7 @@ export const QCList = ({
   datasetSchemaId,
   isDataflowOpen = false,
   isDatasetDesigner = false,
+  setHasQCsHistory = () => {},
   setHasValidations = () => {}
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -80,7 +81,15 @@ export const QCList = ({
   }, [tabsValidationsState.isDataUpdated]);
 
   useEffect(() => {
-    setHasValidations(!checkIsEmptyValidations());
+    const isEmptyValidations = checkIsEmptyValidations();
+    setHasValidations(!isEmptyValidations);
+    if (isDatasetDesigner && isDataflowOpen) {
+      if (isEmptyValidations) {
+        setHasQCsHistory(false);
+      } else {
+        setHasQCsHistory(checkHasHistoric());
+      }
+    }
   }, [tabsValidationsState.validationList]);
 
   useEffect(() => {
@@ -89,6 +98,10 @@ export const QCList = ({
       validationContext.onAutomaticRuleIsUpdated(false);
     }
   }, [validationContext.isAutomaticRuleUpdated]);
+
+  const checkHasHistoric = () => {
+    return tabsValidationsState.validationList.validations.some(validation => validation.hasHistoric);
+  };
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
