@@ -29,6 +29,8 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+import { DataTableUtils } from 'views/_functions/Utils/DataTableUtils';
+
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
@@ -86,17 +88,17 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           {
             key: 'isEUReleased',
             header: resourcesContext.messages['isEUReleased'],
-            template: renderIsEUReleasedTemplate
+            template: DataTableUtils.getCheckTemplate
           },
           {
             key: 'isDataCollectionReleased',
             header: resourcesContext.messages['isDataCollectionReleased'],
-            template: renderIsDataCollectionReleasedTemplate
+            template: DataTableUtils.getCheckTemplate
           },
           {
             key: 'isPublic',
             header: resourcesContext.messages['isPublic'],
-            template: renderIsPublicTemplate
+            template: DataTableUtils.getCheckTemplate
           }
         ]);
       } else {
@@ -104,7 +106,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         columns.push({
           key: 'isPublic',
           header: resourcesContext.messages['isPublic'],
-          template: renderIsPublicTemplate
+          template: DataTableUtils.getCheckTemplate
         });
       }
     }
@@ -186,30 +188,6 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalUrl')} />
         </a>
       </span>
-    </div>
-  );
-
-  const renderIsDataCollectionReleasedTemplate = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {rowData.isDataCollectionReleased ? (
-        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
-      ) : null}
-    </div>
-  );
-
-  const renderIsEUReleasedTemplate = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {rowData.isEUReleased ? (
-        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
-      ) : null}
-    </div>
-  );
-
-  const renderIsPublicTemplate = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {rowData.isPublic ? (
-        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
-      ) : null}
     </div>
   );
 
