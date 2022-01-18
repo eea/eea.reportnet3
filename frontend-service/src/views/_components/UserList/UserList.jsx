@@ -59,17 +59,6 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
 
   const getFilteredState = value => setIsDataFiltered(value);
 
-  const getFilters = filterOptions => {
-    return (
-      <Filters
-        data={userListData}
-        getFilteredData={onLoadFilteredData}
-        getFilteredSearched={getFilteredState}
-        options={filterOptions}
-      />
-    );
-  };
-
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {isDataFiltered && userListData.length !== filteredData.length
@@ -114,6 +103,15 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
     { type: 'multiselect', properties: [{ name: 'role' }] },
     { type: 'input', properties: [{ name: 'email' }] }
   ];
+
+  const getFilters = filterOptions => (
+    <Filters
+      data={userListData}
+      getFilteredData={onLoadFilteredData}
+      getFilteredSearched={getFilteredState}
+      options={filterOptions}
+    />
+  );
 
   const renderFilters = () => {
     if (isNil(representativeId) && isNil(dataflowId)) {

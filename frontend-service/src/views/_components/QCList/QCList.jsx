@@ -43,7 +43,9 @@ export const QCList = ({
   dataset,
   datasetSchemaAllTables,
   datasetSchemaId,
-  reporting = false,
+  isDataflowOpen = false,
+  isDatasetDesigner = false,
+  setHasQCsHistory = () => {},
   setHasValidations = () => {}
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -75,7 +77,15 @@ export const QCList = ({
   }, [tabsValidationsState.isDataUpdated]);
 
   useEffect(() => {
-    setHasValidations(!checkIsEmptyValidations());
+    const isEmptyValidations = checkIsEmptyValidations();
+    setHasValidations(!isEmptyValidations);
+    if (isDatasetDesigner && isDataflowOpen) {
+      if (isEmptyValidations) {
+        setHasQCsHistory(false);
+      } else {
+        setHasQCsHistory(checkHasHistoric());
+      }
+    }
   }, [tabsValidationsState.validationList]);
 
   useEffect(() => {
@@ -84,6 +94,9 @@ export const QCList = ({
       validationContext.onAutomaticRuleIsUpdated(false);
     }
   }, [validationContext.isAutomaticRuleUpdated]);
+
+  const checkHasHistoric = () =>
+    tabsValidationsState.validationList.validations.some(validation => validation.hasHistoric);
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
@@ -159,7 +172,7 @@ export const QCList = ({
 
     validationContext.onFetchingData(isFetchingData, updatedRuleId);
     try {
-      const validationsServiceList = await ValidationService.getAll(dataflowId, datasetSchemaId, reporting);
+      const validationsServiceList = await ValidationService.getAll(dataflowId, datasetSchemaId, !isDatasetDesigner);
       if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
         validationsServiceList.validations.forEach(validation => {
           const additionalInfo = getAdditionalValidationInfo(
@@ -313,12 +326,12 @@ export const QCList = ({
     const columns = [
       { key: 'table', header: resourcesContext.messages['table'] },
       { key: 'field', header: resourcesContext.messages['field'] },
-      { key: 'shortCode', header: resourcesContext.messages['ruleCode'], editor: textEditor },
-      { key: 'name', header: resourcesContext.messages['name'], editor: textEditor },
+      { key: 'shortCode', header: resourcesContext.messages['ruleCode'], editor: getTextEditor },
+      { key: 'name', header: resourcesContext.messages['name'], editor: getTextEditor },
       {
         key: 'description',
         header: resourcesContext.messages['description'],
-        editor: textEditor,
+        editor: getTextEditor,
         className: styles.descriptionColumn
       },
       { key: 'message', header: resourcesContext.messages['message'] },
@@ -333,19 +346,19 @@ export const QCList = ({
         key: 'levelError',
         header: resourcesContext.messages['ruleLevelError'],
         template: rowData => getLevelErrorTemplate(rowData, false),
-        editor: dropdownEditor,
+        editor: getDropdownEditor,
         className: styles.levelErrorColumn
       }
     ];
 
-    if (!reporting) {
+    if (isDatasetDesigner) {
       columns.push(
         { key: 'automatic', header: resourcesContext.messages['automatic'], template: getAutomaticTemplate },
         {
           key: 'enabled',
           header: resourcesContext.messages['enabled'],
           template: getEnabledTemplate,
-          editor: checkboxEditor
+          editor: getCheckboxEditor
         },
         { key: 'isCorrect', header: resourcesContext.messages['valid'], template: getCorrectTemplate },
         {
@@ -380,35 +393,52 @@ export const QCList = ({
     return 'edit';
   };
 
-  const renderHistoricButton = id => {
-    return (
-      <Button
-        className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
-        disabled={validationContext.isFetchingData}
-        icon="info"
-        onClick={() => onOpenHistoryDialog(id)}
-        tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
-        tooltipOptions={{ position: 'top' }}
-        type="button"
-      />
-    );
+  const renderHistoricButton = (id, hasHistoric) => {
+    if (isDataflowOpen && hasHistoric) {
+      return (
+        <Button
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
+          disabled={validationContext.isFetchingData}
+          icon="info"
+          onClick={() => onOpenHistoryDialog(id)}
+          tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
+          tooltipOptions={{ position: 'top' }}
+          type="button"
+        />
+      );
+    }
+  };
+
+  const renderDeleteButton = id => {
+    if (!isDataflowOpen) {
+      return (
+        <Button
+          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
+          disabled={validationContext.isFetchingData}
+          icon={
+            id === tabsValidationsState.deletedRuleId && validationContext.isFetchingData ? 'spinnerAnimate' : 'trash'
+          }
+          onClick={onShowDeleteDialog}
+          tooltip={resourcesContext.messages['delete']}
+          tooltipOptions={{ position: 'top' }}
+          type="button"
+        />
+      );
+    }
+  };
+
+  const getRowType = entityType => {
+    if (entityType === 'RECORD') {
+      return 'row';
+    } else if (entityType === 'TABLE') {
+      return 'dataset';
+    } else {
+      return 'field';
+    }
   };
 
   const editAndDeleteTemplate = row => {
-    let rowType = 'field';
-
-    if (row.entityType === 'RECORD') {
-      rowType = 'row';
-    } else if (row.entityType === 'TABLE') {
-      rowType = 'dataset';
-    }
-
-    const getDeleteBtnIcon = () => {
-      if (row.id === tabsValidationsState.deletedRuleId && validationContext.isFetchingData) {
-        return 'spinnerAnimate';
-      }
-      return 'trash';
-    };
+    const rowType = getRowType(row.entityType);
 
     return (
       <Fragment>
@@ -430,43 +460,27 @@ export const QCList = ({
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
-        {row.hasHistoric && renderHistoricButton(row.id)}
+        {renderHistoricButton(row.id, row.hasHistoric)}
 
-        <Button
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
-          disabled={validationContext.isFetchingData}
-          icon={getDeleteBtnIcon()}
-          onClick={onShowDeleteDialog}
-          tooltip={resourcesContext.messages['delete']}
-          tooltipOptions={{ position: 'top' }}
-          type="button"
-        />
+        {renderDeleteButton(row.id)}
       </Fragment>
     );
   };
 
-  const editTemplate = row => {
-    let rowType = 'field';
-
-    if (row.entityType === 'RECORD') rowType = 'row';
-
-    if (row.entityType === 'TABLE') rowType = 'dataset';
-
-    return (
-      <Fragment>
-        <Button
-          className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${styles.actionButton}`}
-          disabled={validationContext.isFetchingData}
-          icon={getEditBtnIcon(row.id)}
-          onClick={() => validationContext.onOpenToEdit(row, rowType)}
-          tooltip={resourcesContext.messages['edit']}
-          tooltipOptions={{ position: 'top' }}
-          type="button"
-        />
-        {row.hasHistoric && renderHistoricButton(row.id)}
-      </Fragment>
-    );
-  };
+  const editTemplate = row => (
+    <Fragment>
+      <Button
+        className={`p-button-rounded p-button-secondary-transparent  p-button-animated-blink ${styles.actionButton}`}
+        disabled={validationContext.isFetchingData}
+        icon={getEditBtnIcon(row.id)}
+        onClick={() => validationContext.onOpenToEdit(row, getRowType(row.entityType))}
+        tooltip={resourcesContext.messages['edit']}
+        tooltipOptions={{ position: 'top' }}
+        type="button"
+      />
+      {renderHistoricButton(row.id, row.hasHistoric)}
+    </Fragment>
+  );
 
   const deleteValidationDialog = () => (
     <ConfirmDialog
@@ -483,7 +497,7 @@ export const QCList = ({
     </ConfirmDialog>
   );
 
-  const checkboxEditor = props => {
+  const getCheckboxEditor = props => {
     const { rowData, field } = props;
 
     return (
@@ -502,31 +516,22 @@ export const QCList = ({
 
   const getCandidateRule = data => {
     const getExpressionType = () => {
-      let expressionType = '';
-      if (isNil(data.sqlSentence)) {
-        if (data.expressionsIf && data.expressionsIf.length > 0) {
-          expressionType = 'ifThenClause';
-        }
-
-        if (data.entityType === 'TABLE') {
-          expressionType = 'fieldRelations';
-        }
-
-        if (data.entityType === 'RECORD' && data.expressions.length > 0) {
-          expressionType = 'fieldComparison';
-        }
-
-        if (data.entityType === 'FIELD' && data.expressions.length > 0) {
-          expressionType = 'fieldTab';
-        }
+      if (!isNil(data.sqlSentence)) {
+        return 'sqlSentence';
+      } else if (data.expressionsIf && data.expressionsIf.length > 0) {
+        return 'ifThenClause';
+      } else if (data.entityType === 'TABLE') {
+        return 'fieldRelations';
+      } else if (data.entityType === 'RECORD' && data.expressions.length > 0) {
+        return 'fieldComparison';
+      } else if (data.entityType === 'FIELD' && data.expressions.length > 0) {
+        return 'fieldTab';
       } else {
-        expressionType = 'sqlSentence';
+        return '';
       }
-
-      return expressionType;
     };
 
-    const rule = {
+    return {
       ...data,
       active: data.enabled,
       errorMessage: data.message,
@@ -537,10 +542,9 @@ export const QCList = ({
       recordSchemaId: data.referenceId,
       expressionType: getExpressionType()
     };
-    return rule;
   };
 
-  const dropdownEditor = props => {
+  const getDropdownEditor = props => {
     const { rowData, field } = props;
 
     return (
@@ -559,7 +563,7 @@ export const QCList = ({
     );
   };
 
-  const textEditor = props => {
+  const getTextEditor = props => {
     const { rowData, field } = props;
 
     return (

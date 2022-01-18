@@ -121,7 +121,7 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
         paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
-        summary="datasetsInfo"
+        summary={resourcesContext.messages['datasetsInfo']}
         totalRecords={datasetsInfo.length}
         value={filteredData}>
         <Column field="name" header={resourcesContext.messages['name']} sortable={true} />
