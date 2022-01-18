@@ -1315,6 +1315,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const deletePrefilledDataCheckbox = (
     <div className={styles.checkboxWrapper}>
       <Checkbox
+        ariaLabelledBy="arePrefilledTablesDeleted"
         checked={arePrefilledTablesDeleted}
         id="arePrefilledTablesDeleted"
         inputId="arePrefilledTablesDeleted"
@@ -1382,6 +1383,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       }}>
       <div className={styles.noScrollDatasetDesigner}>
         <Title
+          ariaLabelledBy={designerState.datasetSchemaName}
           icon="pencilRuler"
           iconSize="3.4rem"
           subtitle={designerState.dataflowName}
