@@ -134,7 +134,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   const footer = (
-    <Fragment>
+    <div className={styles.footer}>
       <Button
         className="p-button-primary"
         disabled={isPending}
@@ -143,18 +143,18 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         onClick={onAddClick}
       />
       <Button
-        className="p-button-secondary p-button-right-aligned"
+        className={`p-button-secondary ${styles.buttonPushRight}`}
         icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={onCloseDialog}
       />
-    </Fragment>
+    </div>
   );
 
   const renderDialogContent = () => {
     if (isPending) {
       return (
-        <div className={styles.loadingSpinner}>
+        <div className={styles.noDataContent}>
           <Spinner className={styles.spinnerPosition} />
         </div>
       );
@@ -170,17 +170,18 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     }
 
     return (
-      <DataTable
-        autoLayout
-        className={styles.dialogContent}
-        hasDefaultCurrentPage
-        paginator
-        rows={10}
-        rowsPerPageOptions={[5, 10, 15]}
-        totalRecords={webforms.length}
-        value={webforms}>
-        {getTableColumns()}
-      </DataTable>
+      <div className={styles.dialogContent}>
+        <DataTable
+          autoLayout
+          hasDefaultCurrentPage
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 15]}
+          totalRecords={webforms.length}
+          value={webforms}>
+          {getTableColumns()}
+        </DataTable>
+      </div>
     );
   };
 
