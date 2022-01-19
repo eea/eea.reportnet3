@@ -27,6 +27,7 @@ public interface WebformService {
    * @param id the id
    * @param name the name
    * @param content the content
+   * @throws EEAException the EEA exception
    */
   void updateWebformConfig(Long id, String name, String content) throws EEAException;
 
