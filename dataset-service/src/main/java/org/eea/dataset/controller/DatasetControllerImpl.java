@@ -282,7 +282,7 @@ public class DatasetControllerImpl implements DatasetController {
 
   @Override
   @HystrixCommand
-  @LockMethod(removeWhenFinish = false)
+  // Put lock
   @PostMapping("/v1/{datasetId}/streamImportFileData")
   @ApiOperation(value = "Import file to dataset data",
       notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD\n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
