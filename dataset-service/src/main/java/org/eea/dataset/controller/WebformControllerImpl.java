@@ -3,6 +3,7 @@ package org.eea.dataset.controller;
 import java.util.List;
 import org.eea.dataset.service.WebformService;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.WebformController;
 import org.eea.interfaces.vo.dataset.schemas.WebformConfigVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
@@ -68,7 +69,11 @@ public class WebformControllerImpl implements WebformController {
   @PostMapping("/webformConfig")
   @ApiOperation(value = "Insert webform config json into the system", hidden = true)
   public void insertWebformConfig(@RequestBody WebformConfigVO webformConfig) {
-    webformService.insertWebformConfig(webformConfig.getName(), webformConfig.getContent());
+    try {
+      webformService.insertWebformConfig(webformConfig.getName(), webformConfig.getContent());
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
+    }
   }
 
 
@@ -83,8 +88,12 @@ public class WebformControllerImpl implements WebformController {
   @PutMapping("/webformConfig")
   @ApiOperation(value = "Update webform config json into the system", hidden = true)
   public void updateWebformConfig(@RequestBody WebformConfigVO webformConfig) {
-    webformService.updateWebformConfig(webformConfig.getIdReferenced(), webformConfig.getName(),
-        webformConfig.getContent());
+    try {
+      webformService.updateWebformConfig(webformConfig.getIdReferenced(), webformConfig.getName(),
+          webformConfig.getContent());
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
+    }
   }
 
   /**

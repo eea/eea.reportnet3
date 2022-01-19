@@ -5,6 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import org.eea.dataset.service.WebformService;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.schemas.WebformConfigVO;
 import org.json.simple.parser.ParseException;
 import org.junit.Assert;
@@ -14,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -50,13 +52,25 @@ public class WebformControllerImplTest {
   }
 
   @Test
-  public void testInsertWebformConfig() throws ParseException {
+  public void testInsertWebformConfig() throws ParseException, EEAException {
     WebformConfigVO webform = new WebformConfigVO();
     webform.setContent("json");
     webform.setIdReferenced(1L);
     webform.setName("test");
     webFormControllerImpl.insertWebformConfig(webform);
     Mockito.verify(webformservice, times(1)).insertWebformConfig(Mockito.any(), Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testInsertWebformConfigException() throws EEAException {
+    doThrow(new EEAException()).when(webformservice).insertWebformConfig(Mockito.any(),
+        Mockito.any());
+    try {
+      webFormControllerImpl.insertWebformConfig(new WebformConfigVO());
+    } catch (ResponseStatusException e) {
+      assertEquals(e.getStatus(), HttpStatus.BAD_REQUEST);
+      throw e;
+    }
   }
 
   @Test
@@ -75,6 +89,33 @@ public class WebformControllerImplTest {
       webFormControllerImpl.findWebformConfigById(1L);
     } catch (JsonProcessingException e) {
       assertEquals("not found", e.getMessage());
+    }
+  }
+
+  @Test
+  public void testUpdateWebformConfig() throws ParseException, EEAException {
+    WebformConfigVO webform = new WebformConfigVO();
+    webform.setContent("json");
+    webform.setIdReferenced(1L);
+    webform.setName("test");
+    webFormControllerImpl.updateWebformConfig(webform);
+    Mockito.verify(webformservice, times(1)).updateWebformConfig(Mockito.anyLong(), Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testUpdateWebformConfigException() throws EEAException {
+    doThrow(new EEAException()).when(webformservice).updateWebformConfig(Mockito.anyLong(),
+        Mockito.any(), Mockito.any());
+    try {
+      WebformConfigVO webform = new WebformConfigVO();
+      webform.setContent("json");
+      webform.setIdReferenced(1L);
+      webform.setName("test");
+      webFormControllerImpl.updateWebformConfig(webform);
+    } catch (ResponseStatusException e) {
+      assertEquals(e.getStatus(), HttpStatus.BAD_REQUEST);
+      throw e;
     }
   }
 
