@@ -241,18 +241,9 @@
   }
 }
 
-.referencingDataflows {
-  @extend .lineItems;
-}
-
-.datasetsInfo {
-  @extend .lineItems;
-}
-
-.userList {
-  @extend .lineItems;
-}
-
+.referencingDataflows,
+.datasetsInfo,
+.userList,
 .historicReleases {
   @extend .lineItems;
 }
