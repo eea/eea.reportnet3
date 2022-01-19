@@ -121,13 +121,6 @@ export const FieldDesigner = ({
   const [headerHeight, setHeaderHeight] = useState(0);
   const [headerInitialHeight, setHeaderInitialHeight] = useState();
 
-  const fieldscountRef = useRef(null);
-
-  useEffect(() => {
-    const fieldscount = fieldscountRef.current.childNodes.length;
-    console.log(fieldscount);
-  });
-
   useEffect(() => {
     const header = document.getElementById('header');
     const observer = new ResizeObserver(entries =>
@@ -1209,16 +1202,12 @@ export const FieldDesigner = ({
       return (
         <div className={`${styles.draggableFieldContentCell} ${styles.dragAndDropItemsCell}`}>
           <div className={styles.draggableFieldCell}>{resourcesContext.messages['moveField']}</div>
-          <div className={`${styles.draggableFieldCell} ${styles.dragAndDropItems}`}>
+          <div className={`${styles.draggableFieldCell} ${styles.dragAndDropItems} `}>
             <FontAwesomeIcon
               aria-label={resourcesContext.messages['moveField']}
-              className={styles.dragAndDropIcon}
+              className={`${styles.dragAndDropIcon}`}
               icon={AwesomeIcons('move')}
-              style={
-                { opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 } && {
-                  marginLeft: isDataflowOpen || isDesignDatasetEditorRead ? 0 : 'auto'
-                }
-              }
+              style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
             />
             {renderArrows(index > 0, 'arrowUp', -1, 'moveUp')}
             {renderArrows(index < fields.length - 1, 'arrowDown', 2, 'moveDown')}
@@ -1596,8 +1585,7 @@ export const FieldDesigner = ({
         onDragOver={onFieldDragOver}
         onDragStart={onFieldDragStart}
         onDrop={onFieldDragDrop}
-        style={{ cursor: isDataflowOpen || isDesignDatasetEditorRead ? 'default' : 'grab' }}
-        ref={fieldscountRef}>
+        style={{ cursor: isDataflowOpen || isDesignDatasetEditorRead ? 'default' : 'grab' }}>
         {renderDragAndDrop()}
         {renderCheckboxes()}
         {renderInputs()}

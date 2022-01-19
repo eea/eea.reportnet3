@@ -369,9 +369,6 @@
 
   .dragAndDropItems {
     justify-content: space-between !important;
-    /* svg {
-      margin-left: auto;
-    }*/
   }
 
   .codelistButton {
@@ -391,6 +388,7 @@
   .draggableFieldDiv {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     padding: 0;
     margin: 0;
     background-color: transparent;
