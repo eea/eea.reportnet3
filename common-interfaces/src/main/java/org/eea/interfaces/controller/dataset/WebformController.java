@@ -60,6 +60,11 @@ public interface WebformController {
   @GetMapping("/webformConfig/{id}")
   String findWebformConfigById(@PathVariable("id") Long id);
 
+  /**
+   * Delete webform config.
+   *
+   * @param id the id
+   */
   @DeleteMapping("/{id}/webformConfig")
   void deleteWebformConfig(Long id);
 }

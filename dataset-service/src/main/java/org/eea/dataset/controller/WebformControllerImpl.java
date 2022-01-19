@@ -24,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.ApiOperation;
+import springfox.documentation.annotations.ApiIgnore;
 
 
 /**
@@ -31,7 +32,7 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping("/webform")
-// @ApiIgnore
+@ApiIgnore
 public class WebformControllerImpl implements WebformController {
 
 
@@ -84,9 +85,9 @@ public class WebformControllerImpl implements WebformController {
    */
   @Override
   @HystrixCommand
-  // @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/webformConfig")
-  @ApiOperation(value = "Update webform config json into the system", hidden = false)
+  @ApiOperation(value = "Update webform config json into the system", hidden = true)
   public void updateWebformConfig(@RequestBody WebformConfigVO webformConfig) {
     try {
       webformService.updateWebformConfig(webformConfig.getIdReferenced(), webformConfig.getName(),
@@ -128,9 +129,9 @@ public class WebformControllerImpl implements WebformController {
    */
   @Override
   @HystrixCommand
-  // @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{id}/webformConfig")
-  @ApiOperation(value = "Delete webform config", hidden = false)
+  @ApiOperation(value = "Delete webform config", hidden = true)
   public void deleteWebformConfig(Long id) {
     try {
       webformService.deleteWebformConfig(id);
