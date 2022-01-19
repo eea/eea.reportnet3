@@ -1,5 +1,7 @@
 import { Fragment, useContext, useEffect, useLayoutEffect, useState } from 'react';
 
+import isNil from 'lodash/isNil';
+
 import styles from './ManageWebforms.module.scss';
 
 import { Column } from 'primereact/column';
@@ -7,6 +9,7 @@ import { Column } from 'primereact/column';
 import { Button } from 'views/_components/Button';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
+import { DownloadFile } from 'views/_components/DownloadFile';
 import { Spinner } from 'views/_components/Spinner';
 
 import { WebformService } from 'services/WebformService';
@@ -18,8 +21,9 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
-  const [loadingStatus, setLoadingStatus] = useState('idle');
+  const [isLoading, setIsLoading] = useState(true);
   const [isPending, setIsPending] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState('idle');
   const [selectedWebformId, setSelectedWebformId] = useState(null);
   const [webforms, setWebforms] = useState([]);
 
@@ -33,24 +37,39 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
   // TODO
   // delete: /webform/webformConfig/{id} // Check that endpoint is correct
-  // download: /webform/webformConfig/{id} // Check that endpoint is correct
 
-  // Confirm dialog: Delete webform
   // ADD / EDIT dialog
 
   const getWebformList = async () => {
-    setLoadingStatus('pending');
-
     try {
       const data = await WebformService.getAll();
       setWebforms(data);
-      setLoadingStatus('success');
     } catch (error) {
       console.error('ManageWebforms - getWebformList.', error);
+      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true); // Todo add correct notification
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onDownload = async (id, name) => {
+    setLoadingStatus('pending');
+
+    try {
+      const { data } = await WebformService.download(id);
+
+      if (!isNil(data)) {
+        DownloadFile(data, `${name}.json`);
+      }
+
+      setLoadingStatus('success');
+    } catch (error) {
+      console.error('ManageWebforms - onDownload.', error);
       setLoadingStatus('failed');
       notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true); // Todo add correct notification
     } finally {
       setLoadingStatus('idle');
+      setSelectedWebformId(null);
     }
   };
 
@@ -100,9 +119,9 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     //todo add edit dialog
   };
 
-  const onClickDownload = id => {
+  const onClickDownload = (id, name) => {
     setSelectedWebformId(id);
-    //todo add download dialog
+    onDownload(id, name);
   };
 
   const getActionsTemplate = row => {
@@ -119,7 +138,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
           disabled={isPending}
           icon={getBtnIcon(row.id, 'export')}
-          onClick={() => onClickDownload(row.id)}
+          onClick={() => onClickDownload(row.id, row.value)}
           type="button"
         />
         <Button
@@ -152,7 +171,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   );
 
   const renderDialogContent = () => {
-    if (isPending) {
+    if (isLoading) {
       return (
         <div className={styles.noDataContent}>
           <Spinner className={styles.spinnerPosition} />
