@@ -821,7 +821,9 @@
         { "key": "LOAD_DATASET_SCHEMA_INFO_ERROR" },
         { "key": "LOAD_HISTORY_DATA_ERROR" },
         { "key": "DELETE_WEBFORM_ERROR" },
-        { "key": "GET_WEBFORM_LIST_ERROR" }
+        { "key": "GET_WEBFORM_LIST_ERROR" },
+        { "key": "CREATE_WEBFORM_ERROR" },
+        { "key": "EDIT_WEBFORM_ERROR" }
       ]
     },
     {
