@@ -65,13 +65,13 @@ public class WebformServiceTest {
 
   @Test
   public void testInsertWebformConfig() {
-    webformServiceImpl.insertWebformConfig(1L, "test", "json");
+    webformServiceImpl.insertWebformConfig("test", "json");
     Mockito.verify(webformConfigRepository, times(1)).save(Mockito.any());
   }
 
   @Test
   public void testInsertWebformConfig2() {
-    webformServiceImpl.insertWebformConfig(1L, "test", "{ \"prop1\" : \"param1\" }");
+    webformServiceImpl.insertWebformConfig("test", "{ \"prop1\" : \"param1\" }");
     Mockito.verify(webformConfigRepository, times(1)).save(Mockito.any());
   }
 

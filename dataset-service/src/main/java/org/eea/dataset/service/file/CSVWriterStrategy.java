@@ -110,6 +110,7 @@ public class CSVWriterStrategy implements WriterStrategy {
 
       // Once read we convert it to string
       byteList.add(writer.getBuffer().toString().getBytes());
+      writer.flush();
       writer.getBuffer().setLength(0);
     });
 
@@ -187,8 +188,9 @@ public class CSVWriterStrategy implements WriterStrategy {
 
     Long totalRecords = fileCommon.countRecordsByTableSchema(idTableSchema);
     int batchSize = 50000 / nHeaders;
-
-    for (int numPage = 1; totalRecords >= 0; totalRecords = totalRecords - batchSize, numPage++) {
+    int totalPages = (int) Math.ceil((double) totalRecords / batchSize);
+    LOG.info("Total number of pages in export process: {}", totalPages);
+    for (int numPage = 1; numPage <= totalPages; numPage++) {
       for (RecordValue record : fileCommon.getRecordValuesPaginated(datasetId, idTableSchema,
           PageRequest.of(numPage, batchSize))) {
         List<FieldValue> fields = record.getFields();
