@@ -1202,10 +1202,10 @@ export const FieldDesigner = ({
       return (
         <div className={`${styles.draggableFieldContentCell} ${styles.dragAndDropItemsCell}`}>
           <div className={styles.draggableFieldCell}>{resourcesContext.messages['moveField']}</div>
-          <div className={`${styles.draggableFieldCell} ${styles.dragAndDropItems} `}>
+          <div className={`${styles.draggableFieldCell} ${styles.dragAndDropItems}`}>
             <FontAwesomeIcon
               aria-label={resourcesContext.messages['moveField']}
-              className={`${styles.dragAndDropIcon}`}
+              className={styles.dragAndDropIcon}
               icon={AwesomeIcons('move')}
               style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
             />
