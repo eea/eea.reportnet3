@@ -1451,7 +1451,7 @@
     "confirmDeleteWebform": "Are you sure you want to delete this webform?",
     "deleteWebformError": "Error deleting webform",
     "getWebformListError": "Error getting webforms",
-    "addWebformHeader": "Add new webform",
-    "editWebformHeader": "Edit webform"
+    "addWebformDialogHeader": "Add new webform",
+    "editWebformDialogHeader": "Edit webform"
   }
 }

@@ -1,6 +1,7 @@
 import { Fragment, useContext, useEffect, useLayoutEffect, useState } from 'react';
-
 import isNil from 'lodash/isNil';
+
+import classNames from 'classnames';
 
 import styles from './ManageWebforms.module.scss';
 
@@ -111,8 +112,26 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     return iconName;
   };
 
+  const addOrEditDialogFooter = (
+    <div>
+      <Button
+        className="p-button-primary p-button-animated-blink "
+        // disabled={}
+        icon={false ? 'spinnerAnimate' : 'check'}
+        label={resourcesContext.messages['create']}
+        onClick={() => onAddClick()}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon="cancel"
+        label={resourcesContext.messages['cancel']}
+        onClick={() => setIsAddOrEditDialogVisible(false)}
+      />
+    </div>
+  );
+
   const onAddClick = () => {
-    //todo add Create dialog
+    setIsAddOrEditDialogVisible(true);
   };
 
   const onShowDeleteDialog = id => {
@@ -196,6 +215,39 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
+  // const hasFiles = () => webform.files && state.files.length > 0;
+
+  // const renderChooseButton = () => {
+
+  //   const buttonClassName = classNames('p-button p-fileupload-choose p-component p-button-text-icon-left', {
+  //     'p-fileupload-choose-selected': hasFiles()
+  //   });
+
+  //   const iconClassName = classNames('p-button-icon-left pi', {
+  //     'pi-plus': !hasFiles() || auto,
+  //     'pi-upload': hasFiles() && !auto
+  //   });
+
+  //   return (
+  //     <span className={buttonClassName} onMouseUp={()=>{}}>
+  //       <span className={iconClassName} />
+  //       <span className="p-button-text p-clickable">
+  //         {auto ? chooseLabel : hasFiles() ? state.files[0].name : chooseLabel}
+  //       </span>
+  //       <input
+  //         // accept={accept}
+  //         // disabled={disabled}
+  //         // multiple={multiple}
+  //         // onBlur={onBlur}
+  //         // onChange={onFileSelect}
+  //         // onFocus={onFocus}
+  //         // ref={fileInput}
+  //         type="file"
+  //       />
+  //     </span>
+  //   );
+  // };
+
   const renderDialogContent = () => {
     if (isLoading) {
       return (
@@ -256,28 +308,33 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         </ConfirmDialog>
       )}
 
-      {true && (
+      {isAddOrEditDialogVisible && (
         <Dialog
           blockScroll={false}
           className="responsiveDialog"
-          footer={footer}
-          header={resourcesContext.messages['manageWebforms']}
+          footer={addOrEditDialogFooter}
+          header={resourcesContext.messages['addWebformDialogHeader']}
           modal
-          onHide={() => {}}
-          visible={true}>
+          onHide={() => {
+            setIsAddOrEditDialogVisible(false);
+          }}
+          visible={isAddOrEditDialogVisible}>
           <label htmlFor="name">
             {resourcesContext.messages['name']}
             <InputText className={styles.inputText} id="name" readOnly value={webform.name} />
           </label>
 
-          <CustomFileUpload
-            accept=".json"
-            chooseLabel={resourcesContext.messages['selectFile']}
-            isDialog={false}
-            mode="basic"
-            name="file"
-            // onUpload={onUpload}
-          />
+          <div>
+            {/* <CustomFileUpload
+              accept=".json"
+              chooseLabel={resourcesContext.messages['selectFile']}
+              isDialog={false}
+              mode="basic"
+              name="file"
+              // onUpload={onUpload}
+            /> */}
+            {/* {renderChooseButton()} */}
+          </div>
         </Dialog>
       )}
     </Fragment>

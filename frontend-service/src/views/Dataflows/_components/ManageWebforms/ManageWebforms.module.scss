@@ -46,3 +46,45 @@
   @extend .actionButton;
   color: var(--errors) !important;
 }
+
+.chooseButton {
+  display: flex;
+  margin-left: 0 !important;
+  width: 100%;
+  .chooseInput {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+    & + label {
+      width: 100%;
+      padding: 1rem 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+  }
+}
+
+.infoButton {
+  background-color: var(--c-white-color) !important;
+  border-radius: 50% !important;
+  color: var(--datatable-header-info-button-color) !important;
+  font-size: 12pt !important;
+  height: 0.7em !important;
+  margin-left: 0.4rem !important;
+  width: 0.7em !important;
+
+  > span {
+    left: 46% !important;
+    margin-left: -0.48em !important;
+    margin-top: -0.5em !important;
+  }
+
+  &:focus {
+    box-shadow: none !important;
+  }
+}
