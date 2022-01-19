@@ -962,7 +962,7 @@ export const FieldsDesigner = ({
           </div>
         </div>
       </div>
-      <div className={`${styles.contentTable} ${fields.length < 3 ? styles.dragAndDropItems : ''}`}>
+      <div className={`${styles.contentTable} ${fields?.length < 3 ? styles.dragAndDropItems : ''}`}>
         {!viewType['tabularData'] && (
           <div className={styles.fieldsHeader}>
             <label></label>
