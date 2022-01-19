@@ -233,14 +233,9 @@
   }
 }
 
-.referencingDataflows {
-  @extend .lineItems;
-}
-
-.datasetsInfo {
-  @extend .lineItems;
-}
-
-.userList {
+.referencingDataflows,
+.datasetsInfo,
+.userList,
+.cloneSchemas {
   @extend .lineItems;
 }
