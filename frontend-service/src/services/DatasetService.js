@@ -165,8 +165,8 @@ export const DatasetService = {
   exportDatasetDataExternal: async (datasetId, integrationId) =>
     await DatasetRepository.exportDatasetDataExternal(datasetId, integrationId),
 
-  exportTableData: async (datasetId, tableSchemaId, fileType) =>
-    await DatasetRepository.exportTableData(datasetId, tableSchemaId, fileType),
+  exportTableData: async (datasetId, tableSchemaId, fileType, filterValue) =>
+    await DatasetRepository.exportTableData(datasetId, tableSchemaId, fileType, filterValue),
 
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
     await DatasetRepository.exportTableSchema(datasetId, datasetSchemaId, tableSchemaId, fileType),

@@ -1,3 +1,4 @@
+import isEmpty from 'lodash/isEmpty';
 import { DatasetConfig } from './config/DatasetConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
@@ -107,11 +108,19 @@ export const DatasetRepository = {
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
-  exportTableData: async (datasetId, tableSchemaId, fileType) =>
-    await HTTPRequester.download({
-      url: getUrl(DatasetConfig.exportTableData, { datasetId, fileType, tableSchemaId }),
-      headers: { 'Content-Type': 'application/octet-stream' }
-    }),
+  // exportTableData: async (datasetId, tableSchemaId, fileType) =>
+  //   await HTTPRequester.download({
+  //     url: getUrl(DatasetConfig.exportTableData, { datasetId, fileType, tableSchemaId }),
+  //     headers: { 'Content-Type': 'application/octet-stream' }
+  //   }),
+
+  exportTableData: async (datasetId, tableSchemaId, fileType, filterValue) => {
+    const url = isEmpty(filterValue)
+      ? getUrl(DatasetConfig.exportTableData, { datasetId, fileType, tableSchemaId })
+      : getUrl(DatasetConfig.exportTableDataFiltered, { datasetId, fileType, tableSchemaId, filterValue });
+
+    return await HTTPRequester.download({ url });
+  },
 
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
     await HTTPRequester.download({
