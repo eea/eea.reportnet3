@@ -58,11 +58,13 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   const getHistoricReleasesColumns = () => {
     const getColumns = () => {
       if (historicReleasesView === 'releaseDate') {
-        return {
-          key: 'releaseDate',
-          header: resourcesContext.messages['releaseDate'],
-          template: renderReleaseDateTemplate
-        };
+        return [
+          {
+            key: 'releaseDate',
+            header: resourcesContext.messages['releaseDate'],
+            template: renderReleaseDateTemplate
+          }
+        ];
       } else {
         //EUDataset
         const columns = [
