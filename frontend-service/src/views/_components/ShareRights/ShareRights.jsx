@@ -27,15 +27,14 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-import { useFilters } from 'views/_functions/Hooks/useFilters';
-
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 import { TextUtils } from 'repositories/_utils/TextUtils';
-import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 export const ShareRights = ({
   addConfirmHeader,
@@ -233,8 +232,7 @@ export const ShareRights = ({
     }
 
     try {
-      let userRightList = await callEndPoint(methodTypes.GET_ALL);
-      userRightList = userRightList.map(item => ({
+      const userRightList = (await callEndPoint(methodTypes.GET_ALL)).map(item => ({
         ...item,
         filteredRole: roleOptions.find(option => option.role === item.role)?.label
       }));
