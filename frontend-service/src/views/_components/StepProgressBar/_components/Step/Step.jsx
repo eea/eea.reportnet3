@@ -4,7 +4,6 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const Step = ({ currentStep, step }) => {
-  console.log(step);
   const getIconClassName = () => {
     if (step?.idx === currentStep && step?.isRunning) {
       return 'fa-spin';

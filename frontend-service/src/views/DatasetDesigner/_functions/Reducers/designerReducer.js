@@ -198,7 +198,6 @@ export const designerReducer = (state, { type, payload }) => {
     case 'SET_PROGRESS_STEP_BAR':
       const inmDatasetProgressBarSteps = [...state.datasetProgressBarSteps];
       inmDatasetProgressBarSteps[payload.step].isRunning = payload.value;
-      console.log(inmDatasetProgressBarSteps);
       return {
         ...state,
         datasetProgressBarCurrentStep: payload.currentStep,

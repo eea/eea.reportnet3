@@ -8,7 +8,6 @@ import { Step } from './_components/Step';
 export const StepProgressBar = ({ className = '', steps = [], currentStep }) => {
   const renderStepProgressBar = () => {
     const renderSteps = () => {
-      console.log({ steps, currentStep });
       return steps.map(step => <Step currentStep={currentStep} key={uniqueId('step_')} step={step} />);
     };
 
