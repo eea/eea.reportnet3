@@ -130,7 +130,7 @@ public class WebformControllerImpl implements WebformController {
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('ADMIN')")
-  @DeleteMapping("/{id}/webformConfig")
+  @DeleteMapping("/webformConfig/{id}")
   @ApiOperation(value = "Delete webform config", hidden = true)
   public void deleteWebformConfig(Long id) {
     try {
