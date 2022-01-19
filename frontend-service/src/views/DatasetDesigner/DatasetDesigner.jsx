@@ -1,5 +1,6 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import ReactTooltip from 'react-tooltip';
 
 import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
@@ -125,6 +126,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     exportButtonsList: [],
     exportDatasetFileType: '',
     externalOperationsList: { export: [], import: [], importOtherSystems: [] },
+    hasQCsHistory: false,
     hasWritePermissions: false,
     importButtonsList: [],
     initialDatasetDescription: '',
@@ -225,7 +227,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     leftSideBarContext.removeModels();
     onLoadSchema();
     callSetMetaData();
-    if (isEmpty(webformOptions)) getWebformList();
+    if (isEmpty(webformOptions)) {
+      getWebformList();
+    }
   }, []);
 
   useEffect(() => {
@@ -1026,48 +1030,64 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     setIsHistoryDialogVisible(false);
   };
 
+  const renderQCsHistoryButton = () => {
+    if (isDataflowOpen) {
+      return (
+        <span data-for="qcHistoryTooltip" data-tip>
+          <Button
+            className={`p-button-secondary ${designerState.hasQCsHistory ? 'p-button-animated-blink' : ''}`}
+            disabled={!designerState.hasQCsHistory}
+            icon="info"
+            label={resourcesContext.messages['allQCsHistoryBtn']}
+            onClick={() => setIsHistoryDialogVisible(true)}
+          />
+        </span>
+      );
+    }
+  };
+
+  const renderQCsHistoryButtonTooltip = () => {
+    if (designerState.hasQCsHistory) {
+      return (
+        <ReactTooltip border effect="solid" id="qcHistoryTooltip" place="top">
+          {resourcesContext.messages['genericQCsHistoryButtonTooltip']}
+        </ReactTooltip>
+      );
+    }
+  };
+
   const renderActionButtonsValidationDialog = (
-    <Fragment>
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon="info"
-        label={resourcesContext.messages['allQCsHistoryBtn']}
-        onClick={() => setIsHistoryDialogVisible(true)}
-        style={{ float: 'left' }}
-      />
+    <div className={styles.qcDialogFooterWrapper}>
+      {renderQCsHistoryButton()}
+      {renderQCsHistoryButtonTooltip()}
+
       <Button
         className="p-button-secondary p-button-animated-blink"
         disabled={designerState.isDownloadingQCRules}
         icon={designerState.isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadQCsButtonLabel']}
         onClick={() => onDownloadQCRules()}
-        style={{ float: 'left' }}
       />
-
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createFieldValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('field', 'validationsListDialog')}
-        style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createRowValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('row', 'validationsListDialog')}
-        style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createTableValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
-        style={{ float: 'left' }}
       />
-
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary p-button-animated-blink ${styles.buttonAlignRight}`}
         icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['validateSqlRulesBtn']}
         onClick={validateQcRules}
@@ -1080,7 +1100,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         label={resourcesContext.messages['close']}
         onClick={onHideValidationsDialog}
       />
-    </Fragment>
+    </div>
   );
 
   const renderDashboardFooter = (
@@ -1327,6 +1347,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const setIsUniqueConstraintUpdating = isUniqueConstraintUpdatingValue =>
     designerDispatch({ type: 'SET_IS_CONSTRAINT_UPDATING', payload: { isUniqueConstraintUpdatingValue } });
 
+  const setHasQCsHistory = hasQCsHistory =>
+    designerDispatch({ type: 'SET_HAS_QCS_HISTORY', payload: { hasQCsHistory } });
+
   const validationsListDialog = () => {
     if (designerState.validationListDialogVisible) {
       return (
@@ -1341,6 +1364,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
+            isDataflowOpen={isDataflowOpen}
+            isDatasetDesigner
+            setHasQCsHistory={setHasQCsHistory}
           />
         </Dialog>
       );
@@ -1350,6 +1376,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const deletePrefilledDataCheckbox = (
     <div className={styles.checkboxWrapper}>
       <Checkbox
+        ariaLabelledBy="arePrefilledTablesDeleted"
         checked={arePrefilledTablesDeleted}
         id="arePrefilledTablesDeleted"
         inputId="arePrefilledTablesDeleted"
@@ -1417,6 +1444,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       }}>
       <div className={styles.noScrollDatasetDesigner}>
         <Title
+          ariaLabelledBy={designerState.datasetSchemaName}
           icon="pencilRuler"
           iconSize="3.4rem"
           subtitle={designerState.dataflowName}

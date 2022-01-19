@@ -166,3 +166,10 @@
   flex-direction: column;
   align-items: center;
 }
+
+.qcDialogFooterWrapper {
+  display: flex;
+}
+.buttonAlignRight {
+  margin-left: auto !important;
+}

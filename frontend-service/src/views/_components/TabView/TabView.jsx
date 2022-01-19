@@ -251,6 +251,7 @@ const TabView = ({
           readOnly={tab.props.readOnly}
           rightIcon={tab.props.rightIcon}
           rightIconClass={tab.props.rightIconClass}
+          rightIconTooltip={tab.props.rightIconTooltip}
           scrollTo={scrollTo}
           selected={selected}
           tableSchemaId={tab.props.tableSchemaId}
