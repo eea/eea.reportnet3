@@ -682,6 +682,15 @@ public final class EEAErrorMessage {
   /** The Constant HISTORIC_QC_UPDATE_ERROR: {@value}. */
   public static final String HISTORIC_QC_UPDATE_ERROR = "Error updating historic rule information.";
 
+  /** The Constant NAME_DUPLICATED. */
+  public static final String NAME_DUPLICATED = "Error: name duplicated.";
+
+  /** The Constant ERROR_JSON. */
+  public static final String ERROR_JSON = "Error in the json provided.";
+
+  /** The Constant ERROR_WEBFORM_IN_USE. */
+  public static final String ERROR_WEBFORM_IN_USE = "Error: the webform to delete is in use.";
+
   /**
    * Instantiates a new EEA error message.
    */

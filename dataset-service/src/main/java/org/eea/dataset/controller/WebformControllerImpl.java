@@ -3,6 +3,7 @@ package org.eea.dataset.controller;
 import java.util.List;
 import org.eea.dataset.service.WebformService;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.WebformController;
 import org.eea.interfaces.vo.dataset.schemas.WebformConfigVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -68,7 +70,11 @@ public class WebformControllerImpl implements WebformController {
   @PostMapping("/webformConfig")
   @ApiOperation(value = "Insert webform config json into the system", hidden = true)
   public void insertWebformConfig(@RequestBody WebformConfigVO webformConfig) {
-    webformService.insertWebformConfig(webformConfig.getName(), webformConfig.getContent());
+    try {
+      webformService.insertWebformConfig(webformConfig.getName(), webformConfig.getContent());
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
+    }
   }
 
 
@@ -83,8 +89,12 @@ public class WebformControllerImpl implements WebformController {
   @PutMapping("/webformConfig")
   @ApiOperation(value = "Update webform config json into the system", hidden = true)
   public void updateWebformConfig(@RequestBody WebformConfigVO webformConfig) {
-    webformService.updateWebformConfig(webformConfig.getIdReferenced(), webformConfig.getName(),
-        webformConfig.getContent());
+    try {
+      webformService.updateWebformConfig(webformConfig.getIdReferenced(), webformConfig.getName(),
+          webformConfig.getContent());
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
+    }
   }
 
   /**
@@ -109,6 +119,26 @@ public class WebformControllerImpl implements WebformController {
           EEAErrorMessage.OBTAINING_WEBFORM_CONFIG);
     }
     return json;
+  }
+
+
+  /**
+   * Delete webform config.
+   *
+   * @param id the id
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('ADMIN')")
+  @DeleteMapping("/webformConfig/{id}")
+  @ApiOperation(value = "Delete webform config", hidden = true)
+  public void deleteWebformConfig(Long id) {
+    try {
+      webformService.deleteWebformConfig(id);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.ERROR_WEBFORM_IN_USE);
+    }
   }
 
 }
