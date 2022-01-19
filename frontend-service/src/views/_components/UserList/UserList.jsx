@@ -15,8 +15,9 @@ import { DataflowService } from 'services/DataflowService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
+
+import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   const notificationContext = useContext(NotificationContext);
