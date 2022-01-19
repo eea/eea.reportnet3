@@ -121,6 +121,13 @@ export const FieldDesigner = ({
   const [headerHeight, setHeaderHeight] = useState(0);
   const [headerInitialHeight, setHeaderInitialHeight] = useState();
 
+  const fieldscountRef = useRef(null);
+
+  useEffect(() => {
+    const fieldscount = fieldscountRef.current.childNodes.length;
+    console.log(fieldscount);
+  });
+
   useEffect(() => {
     const header = document.getElementById('header');
     const observer = new ResizeObserver(entries =>
@@ -1207,7 +1214,11 @@ export const FieldDesigner = ({
               aria-label={resourcesContext.messages['moveField']}
               className={styles.dragAndDropIcon}
               icon={AwesomeIcons('move')}
-              style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
+              style={
+                { opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 } && {
+                  marginLeft: isDataflowOpen || isDesignDatasetEditorRead ? 0 : 'auto'
+                }
+              }
             />
             {renderArrows(index > 0, 'arrowUp', -1, 'moveUp')}
             {renderArrows(index < fields.length - 1, 'arrowDown', 2, 'moveDown')}
@@ -1585,7 +1596,8 @@ export const FieldDesigner = ({
         onDragOver={onFieldDragOver}
         onDragStart={onFieldDragStart}
         onDrop={onFieldDragDrop}
-        style={{ cursor: isDataflowOpen || isDesignDatasetEditorRead ? 'default' : 'grab' }}>
+        style={{ cursor: isDataflowOpen || isDesignDatasetEditorRead ? 'default' : 'grab' }}
+        ref={fieldscountRef}>
         {renderDragAndDrop()}
         {renderCheckboxes()}
         {renderInputs()}
