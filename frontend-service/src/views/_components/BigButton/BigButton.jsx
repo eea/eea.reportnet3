@@ -225,6 +225,7 @@ export const BigButton = ({
               restrictFromPublicAccess && manageDialogs('isRestrictFromPublicDialogVisible', true);
               setSelectedRepresentative(dataProviderId);
             }}
+            role="presentation"
             style={{ position: 'absolute', top: '4px', left: '2px', fontSize: '1.2rem' }}
           />
         )}

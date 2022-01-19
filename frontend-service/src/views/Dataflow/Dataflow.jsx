@@ -202,17 +202,15 @@ const Dataflow = () => {
   const getCountry = () => {
     if (uniqDataProviders.length === 1) {
       return uniq(map(dataflowState.data.datasets, 'datasetSchemaName'));
+    } else if (isNil(representativeId)) {
+      return null;
     } else {
-      if (isNil(representativeId)) {
-        return null;
-      } else {
-        return uniq(
-          map(
-            dataflowState.data?.datasets?.filter(d => d.dataProviderId?.toString() === representativeId),
-            'datasetSchemaName'
-          )
-        );
-      }
+      return uniq(
+        map(
+          dataflowState.data?.datasets?.filter(d => d.dataProviderId?.toString() === representativeId),
+          'datasetSchemaName'
+        )
+      );
     }
   };
 
@@ -612,7 +610,6 @@ const Dataflow = () => {
         popup={true}
         ref={exportImportMenuRef}
       />
-
       <Button
         className={`${styles.buttonLeft} p-button-secondary ${
           !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
@@ -686,7 +683,9 @@ const Dataflow = () => {
   );
 
   const getCurrentDatasetId = () => {
-    if (isEmpty(dataflowState.data)) return null;
+    if (isEmpty(dataflowState.data)) {
+      return null;
+    }
 
     const { datasets } = dataflowState.data;
 
