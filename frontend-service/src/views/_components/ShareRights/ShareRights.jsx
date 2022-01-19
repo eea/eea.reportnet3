@@ -491,24 +491,42 @@ export const ShareRights = ({
     return (
       <div className={styles.table}>
         <DataTable
-          first={shareRightsState.pagination.first}
-          getPageChange={onPaginate}
-          loading={loadingStatus.isActionButtonsLoading}
-          paginator={true}
-          rows={shareRightsState.pagination.rows}
+          autoLayout
+          className={styles.dialogContent}
+          hasDefaultCurrentPage
+          paginator
+          rows={10}
           rowsPerPageOptions={[5, 10, 15]}
-          summary="shareRights"
+          totalRecords={filteredData.length}
           value={filteredData}>
-          <Column body={renderAccountTemplate} header={columnHeader} />
-          <Column body={renderRoleColumnTemplate} header={resourcesContext.messages['rolesColumn']} />
-          <Column
-            body={renderButtonsColumnTemplate}
-            header={resourcesContext.messages['actions']}
-            style={{ width: '100px' }}
-          />
+          {getShareRightsColumns()}
         </DataTable>
       </div>
     );
+  };
+
+  const getShareRightsColumns = () => {
+    const columns = [
+      {
+        key: 'account',
+        header: columnHeader,
+        template: renderAccountTemplate
+      },
+      {
+        key: 'role',
+        header: resourcesContext.messages['rolesColumn'],
+        template: renderRoleColumnTemplate
+      },
+      {
+        key: 'actions',
+        header: resourcesContext.messages['actions'],
+        template: renderButtonsColumnTemplate
+      }
+    ];
+
+    return columns.map(column => {
+      return <Column body={column.template} field={column.key} header={column.header} key={column.key} sortable />;
+    });
   };
 
   const getShareRightsTableStyles = () => {
