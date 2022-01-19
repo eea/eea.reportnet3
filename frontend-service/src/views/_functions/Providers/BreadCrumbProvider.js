@@ -30,4 +30,5 @@ const BreadCrumbProvider = ({ children }) => {
     </BreadCrumbContext.Provider>
   );
 };
+
 export { BreadCrumbProvider };
