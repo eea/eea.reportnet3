@@ -199,11 +199,11 @@ export const Coordinates = ({
   };
 
   const renderErrorMessageSeparator = () => {
-    let message = errorMessage;
     if (hasErrors.latOutOfBounds || hasErrors.longOutOfBounds) {
-      return `${message}: `;
+      return `${errorMessage}: `;
     }
-    return message;
+
+    return errorMessage;
   };
 
   const renderLatitudeLongitudeInput = () => {
