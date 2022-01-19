@@ -8,4 +8,4 @@ const getCheckTemplate = (rowData, column, styleCheckValueColumn, stylesIcon) =>
   </div>
 );
 
-export const DataTableUtils = { getCheckTemplate };
+export const ColumnTemplateUtils = { getCheckTemplate };
