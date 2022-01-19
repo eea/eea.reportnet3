@@ -47,21 +47,9 @@ const checkInvalidCharacters = name => {
   return invalidCharsRegex.test(name);
 };
 
-const getIndexByFieldName = (fieldName, fieldsArray) => {
-  return fieldsArray
-    .map(field => {
-      return field.name;
-    })
-    .indexOf(fieldName);
-};
+const getIndexByFieldName = (fieldName, fieldsArray) => fieldsArray.map(field => field.name).indexOf(fieldName);
 
-const getIndexByFieldId = (fieldId, fieldsArray) => {
-  return fieldsArray
-    .map(field => {
-      return field.fieldId;
-    })
-    .indexOf(fieldId);
-};
+const getIndexByFieldId = (fieldId, fieldsArray) => fieldsArray.map(field => field.fieldId).indexOf(fieldId);
 
 export const FieldsDesignerUtils = {
   arrayShift,
