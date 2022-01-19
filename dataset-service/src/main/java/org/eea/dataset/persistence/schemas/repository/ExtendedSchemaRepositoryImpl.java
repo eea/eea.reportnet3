@@ -497,6 +497,12 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     return avaliable;
   }
 
+  /**
+   * Exists webform name.
+   *
+   * @param name the name
+   * @return true, if successful
+   */
   @Override
   public boolean existsWebformName(String name) {
     boolean exists = false;
