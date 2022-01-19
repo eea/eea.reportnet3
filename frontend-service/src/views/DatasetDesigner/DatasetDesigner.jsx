@@ -37,6 +37,7 @@ import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
+import { ValidateDatasetDesignerDialog } from './_components/ValidateDatasetDesignerDialog';
 import { Validations } from 'views/DatasetDesigner/_components/Validations';
 import { Webforms } from 'views/Webforms';
 
@@ -136,7 +137,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     isUniqueConstraintCreating: false,
     isUniqueConstraintsListDialogVisible: false,
     isUniqueConstraintUpdating: false,
-    isValidateDialogVisible: false,
     isValidationsTabularView: false,
     isValidationViewerVisible: false,
     levelErrorTypes: [],
@@ -177,7 +177,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     isDeleteDialogVisible,
     isDesignDatasetEditorRead,
     isImportOtherSystemsDialogVisible,
-    isValidateDialogVisible,
     webformOptions,
     webformOptionsLoadingStatus
   } = designerState;
@@ -569,7 +568,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onCloseConfigureWebformModal = () => manageDialogs('isConfigureWebformDialogVisible', false);
 
   const onConfirmValidate = async () => {
-    manageDialogs('isValidateDialogVisible', false);
     try {
       await DatasetService.validate(datasetId);
       notificationContext.add(
@@ -1565,14 +1563,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               />
             </div>
             <div className="p-toolbar-group-right">
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent ${
-                  !isDataflowOpen && !isDesignDatasetEditorRead ? ' p-button-animated-blink' : null
-                }`}
-                disabled={isDataflowOpen || isDesignDatasetEditorRead}
-                icon="validate"
-                label={resourcesContext.messages['validate']}
-                onClick={() => manageDialogs('isValidateDialogVisible', true)}
+              <ValidateDatasetDesignerDialog
+                isDataflowOpen={isDataflowOpen}
+                isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+                onConfirmValidate={onConfirmValidate}
               />
 
               <Button
@@ -1741,18 +1735,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           setIsUniqueConstraintCreating={setIsUniqueConstraintCreating}
           setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
         />
-
-        {isValidateDialogVisible && (
-          <ConfirmDialog
-            header={resourcesContext.messages['validateDataset']}
-            labelCancel={resourcesContext.messages['no']}
-            labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={onConfirmValidate}
-            onHide={() => manageDialogs('isValidateDialogVisible', false)}
-            visible={isValidateDialogVisible}>
-            {resourcesContext.messages['validateDatasetConfirm']}
-          </ConfirmDialog>
-        )}
 
         {isDeleteDialogVisible && (
           <ConfirmDialog
