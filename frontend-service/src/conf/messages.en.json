@@ -1448,6 +1448,10 @@
     "manageWebforms": "Manage webforms",
     "loadWebformsError": "Error loading webforms list",
     "deleteWebform": "Delete webform",
-    "confirmDeleteWebform": "Are you sure you want to delete this webform?"
+    "confirmDeleteWebform": "Are you sure you want to delete this webform?",
+    "deleteWebformError": "Error deleting webform",
+    "getWebformListError": "Error getting webforms",
+    "addWebformHeader": "Add new webform",
+    "editWebformHeader": "Edit webform"
   }
 }

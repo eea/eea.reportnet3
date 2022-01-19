@@ -6,9 +6,11 @@ import { Column } from 'primereact/column';
 
 import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
+import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Spinner } from 'views/_components/Spinner';
+import { InputText } from 'views/_components/InputText';
 
 import { WebformService } from 'services/WebformService';
 
@@ -23,7 +25,9 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const [isPending, setIsPending] = useState(false);
   const [selectedWebformId, setSelectedWebformId] = useState(null);
   const [webforms, setWebforms] = useState([]);
+  const [webform, setWebform] = useState({ name: '', json: null });
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isAddOrEditDialogVisible, setIsAddOrEditDialogVisible] = useState(false);
 
   useEffect(() => {
     getWebformList();
@@ -50,7 +54,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     } catch (error) {
       console.error('ManageWebforms - getWebformList.', error);
       setLoadingStatus('failed');
-      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true); // Todo add correct notification
+      notificationContext.add({ type: 'GET_WEBFORM_LIST_ERROR' }, true); // Todo add correct notification
     } finally {
       setLoadingStatus('idle');
     }
@@ -111,7 +115,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     } catch (error) {
       console.error('ManageWebforms - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
-      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true); // Todo add correct notification
+      notificationContext.add({ type: 'DELETE_WEBFORM_ERROR' }, true); // Todo add correct notification
     } finally {
       setLoadingStatus('idle');
       setSelectedWebformId(null);
@@ -231,6 +235,31 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           visible={isDeleteDialogVisible}>
           {resourcesContext.messages['confirmDeleteWebform']}
         </ConfirmDialog>
+      )}
+
+      {true && (
+        <Dialog
+          blockScroll={false}
+          className="responsiveDialog"
+          footer={footer}
+          header={resourcesContext.messages['manageWebforms']}
+          modal
+          onHide={() => {}}
+          visible={true}>
+          <label htmlFor="name">
+            {resourcesContext.messages['name']}
+            <InputText className={styles.inputText} id="name" readOnly value={webform.name} />
+          </label>
+
+          <CustomFileUpload
+            accept=".json"
+            chooseLabel={resourcesContext.messages['selectFile']}
+            isDialog={false}
+            mode="basic"
+            name="file"
+            // onUpload={onUpload}
+          />
+        </Dialog>
       )}
     </Fragment>
   );
