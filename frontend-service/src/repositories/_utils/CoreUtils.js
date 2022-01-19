@@ -15,22 +15,28 @@ export const CoreUtils = (() => {
             datasetTableDTO.totalRecordsWithErrors +
             datasetTableDTO.totalRecordsWithWarnings +
             datasetTableDTO.totalRecordsWithInfos);
+
         if (corrects > 0) {
           levelErrors.push('CORRECT');
         }
+
         if (datasetTableDTO.totalRecordsWithInfos > 0) {
           levelErrors.push('INFO');
         }
+
         if (datasetTableDTO.totalRecordsWithWarnings > 0) {
           levelErrors.push('WARNING');
         }
+
         if (datasetTableDTO.totalRecordsWithErrors > 0) {
           levelErrors.push('ERROR');
         }
+
         if (datasetTableDTO.totalRecordsWithBlockers > 0) {
           levelErrors.push('BLOCKER');
         }
       });
+
       return [...new Set(levelErrors)];
     },
 
@@ -61,8 +67,8 @@ export const CoreUtils = (() => {
     getPercentageOfValue: (val, total) => (total === 0 ? '0.00' : ((val / total) * 100).toFixed(2)),
 
     isDuplicatedInObject: (array, property) => {
-      let isDuplicated = false,
-        testObject = {};
+      let isDuplicated = false;
+      const testObject = {};
 
       array.forEach(item => {
         const itemPropertyName = item[property];
@@ -75,6 +81,7 @@ export const CoreUtils = (() => {
           delete item.duplicatedRoles;
         }
       });
+
       return isDuplicated;
     },
 
@@ -102,17 +109,19 @@ export const CoreUtils = (() => {
     },
 
     tableStatisticValuesWithErrors: tableStatisticValues => {
-      let tableStatisticValuesWithSomeError = [];
-      let valuesWithValidations = CoreUtils.transposeMatrix(tableStatisticValues).map(error => {
+      const tableStatisticValuesWithSomeError = [];
+      const valuesWithValidations = CoreUtils.transposeMatrix(tableStatisticValues).map(error => {
         return error.map(subError => {
           return subError;
         });
       });
+
       valuesWithValidations.forEach(item => {
         if (!isNil(item) && !item.every(value => value === 0)) {
           tableStatisticValuesWithSomeError.push(item);
         }
       });
+
       return tableStatisticValuesWithSomeError;
     },
 
@@ -122,5 +131,6 @@ export const CoreUtils = (() => {
       }
     }
   };
+
   return UtilsAPI;
 })();

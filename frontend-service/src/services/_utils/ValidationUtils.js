@@ -17,11 +17,17 @@ const getOperatorEquivalence = (valueTypeSelector, operatorType, operatorValue =
   } = config;
 
   if (isNil(operatorValue)) {
-    if (valueTypeSelector === 'value') return comparisonValuesOperatorEquivalences[operatorType].type;
+    if (valueTypeSelector === 'value') {
+      return comparisonValuesOperatorEquivalences[operatorType].type;
+    }
+
     return comparisonOperatorEquivalences[operatorType].type;
   } else {
     if (comparisonOperatorEquivalences[operatorType]) {
-      if (valueTypeSelector === 'value') return comparisonValuesOperatorEquivalences[operatorType][operatorValue];
+      if (valueTypeSelector === 'value') {
+        return comparisonValuesOperatorEquivalences[operatorType][operatorValue];
+      }
+
       return comparisonOperatorEquivalences[operatorType][operatorValue];
     }
   }
