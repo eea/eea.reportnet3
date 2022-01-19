@@ -73,7 +73,7 @@ const RepresentativesList = ({
 
   useEffect(() => {
     if (representativesImport) {
-      getInitialData(formDispatcher, dataflowId, formState);
+      getInitialData();
       setRepresentativeImport(false);
     }
   }, [representativesImport]);
@@ -175,7 +175,7 @@ const RepresentativesList = ({
 
   const getRepresentatives = async () => {
     try {
-      let responseRepresentatives = await RepresentativeService.getRepresentatives(dataflowId);
+      const responseRepresentatives = await RepresentativeService.getRepresentatives(dataflowId);
       const parsedLeadReporters = parseLeadReporters(responseRepresentatives.representatives);
 
       formDispatcher({

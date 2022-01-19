@@ -9,7 +9,9 @@ export const useFilters = recoilId => {
   const filteredData = useRecoilValue(filteredDataState(recoilId));
 
   const checkIsFilter = () => {
-    if (isEmpty(filterBy)) return false;
+    if (isEmpty(filterBy)) {
+      return false;
+    }
 
     return Object.values(filterBy)
       .map(key => isEmpty(key))
