@@ -61,6 +61,7 @@ export const TabsDesigner = ({
   const { dataflowId, datasetId } = useParams();
 
   const notificationContext = useContext(NotificationContext);
+  const resourcesContext = useContext(ResourcesContext);
 
   const [errorMessage, setErrorMessage] = useState();
   const [errorMessageTitle, setErrorMessageTitle] = useState();
@@ -69,8 +70,6 @@ export const TabsDesigner = ({
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [scrollFn, setScrollFn] = useState();
   const [tabs, setTabs] = useState([]);
-
-  const resourcesContext = useContext(ResourcesContext);
 
   useEffect(() => {
     if (!isNil(datasetSchema) && !isEmpty(datasetSchema)) {
@@ -334,6 +333,18 @@ export const TabsDesigner = ({
   };
 
   const renderTabViews = () => {
+    const getRightIcon = tab => {
+      if (tab.hasErrors) {
+        return config.icons['warning'];
+      }
+    };
+
+    const getRightIconTooltip = tab => {
+      if (tab.hasErrors) {
+        return resourcesContext.messages['tableWithErrorsTooltip'];
+      }
+    };
+
     const idx = TabsUtils.getIndexByTableProperty(
       !isNil(tableSchemaId)
         ? tableSchemaId
@@ -343,6 +354,7 @@ export const TabsDesigner = ({
       tabs,
       'tableSchemaId'
     );
+
     return (
       <TabView
         activeIndex={idx !== -1 ? idx : 0}
@@ -383,7 +395,8 @@ export const TabsDesigner = ({
                   newTab={tab.newTab}
                   notEmpty={tab.notEmpty}
                   readOnly={tab.readOnly}
-                  rightIcon={tab.hasErrors ? config.icons['warning'] : null}
+                  rightIcon={getRightIcon(tab)}
+                  rightIconTooltip={getRightIconTooltip(tab)}
                   tableSchemaId={tab.tableSchemaId}
                   toPrefill={tab.toPrefill}>
                   {(tabs.length > 0 && (isDataflowOpen || isDesignDatasetEditorRead)) || tabs.length > 1 ? (

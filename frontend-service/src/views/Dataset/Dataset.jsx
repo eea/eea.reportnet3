@@ -1215,7 +1215,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             dataset={{ datasetId: datasetId, name: datasetSchemaName }}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={metadata?.dataset.datasetSchemaId}
-            reporting={true}
           />
         </Dialog>
       )}
