@@ -54,6 +54,14 @@
   height: 2rem;
   font-size: 0.8333rem;
 
+  .checkbox {
+    margin: 0 1rem;
+  }
+
+  .labelCheckbox {
+    width: 52% !important;
+  }
+
   .label {
     clip: auto;
     height: auto;
@@ -233,14 +241,9 @@
   }
 }
 
-.referencingDataflows {
-  @extend .lineItems;
-}
-
-.datasetsInfo {
-  @extend .lineItems;
-}
-
-.userList {
+.referencingDataflows,
+.datasetsInfo,
+.userList,
+.historicReleases {
   @extend .lineItems;
 }
