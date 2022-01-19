@@ -26,7 +26,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const notificationContext = useContext(NotificationContext);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [isPending, setIsPending] = useState(false);
+
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [selectedWebformId, setSelectedWebformId] = useState(null);
   const [webforms, setWebforms] = useState([]);
@@ -37,11 +37,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   useEffect(() => {
     getWebformList();
   }, []);
-
-  useLayoutEffect(() => {
-    setIsPending(loadingStatus === 'pending');
-  }, [loadingStatus]);
-
   // TODO
   // delete: /webform/webformConfig/{id} // Check that endpoint is correct
 
@@ -53,7 +48,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       setWebforms(data);
     } catch (error) {
       console.error('ManageWebforms - getWebformList.', error);
-      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true); // Todo add correct notification
+      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +68,28 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     } catch (error) {
       console.error('ManageWebforms - onDownload.', error);
       setLoadingStatus('failed');
-      notificationContext.add({ type: 'GET_WEBFORM_LIST_ERROR' }, true); // Todo add correct notification
+      notificationContext.add({ type: 'GET_WEBFORM_LIST_ERROR' }, true);
+    } finally {
+      setLoadingStatus('idle');
+      setSelectedWebformId(null);
+    }
+  };
+
+  const onConfirm = async () => {
+    setLoadingStatus('pending');
+
+    try {
+      isNil(selectedWebformId)
+        ? await WebformService.create(webform)
+        : await WebformService.update(selectedWebformId, webform);
+
+      setLoadingStatus('success');
+    } catch (error) {
+      console.error('ManageWebforms - onConfirm.', error);
+      setLoadingStatus('failed');
+      isNil(selectedWebformId)
+        ? notificationContext.add({ type: 'ERROR_CREATING_WEBFORM' }, true)
+        : notificationContext.add({ type: 'ERROR_EDITING_WEBFORM' }, true);
     } finally {
       setLoadingStatus('idle');
       setSelectedWebformId(null);
@@ -105,33 +121,11 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   const getBtnIcon = (id, iconName) => {
-    if (id === selectedWebformId && isPending) {
+    if (id === selectedWebformId && loadingStatus === 'pending') {
       return 'spinnerAnimate';
     }
 
     return iconName;
-  };
-
-  const addOrEditDialogFooter = (
-    <div>
-      <Button
-        className="p-button-primary p-button-animated-blink "
-        // disabled={}
-        icon={false ? 'spinnerAnimate' : 'check'}
-        label={resourcesContext.messages['create']}
-        onClick={() => onAddClick()}
-      />
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon="cancel"
-        label={resourcesContext.messages['cancel']}
-        onClick={() => setIsAddOrEditDialogVisible(false)}
-      />
-    </div>
-  );
-
-  const onAddClick = () => {
-    setIsAddOrEditDialogVisible(true);
   };
 
   const onShowDeleteDialog = id => {
@@ -153,16 +147,25 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     } catch (error) {
       console.error('ManageWebforms - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
-      notificationContext.add({ type: 'DELETE_WEBFORM_ERROR' }, true); // Todo add correct notification
+      notificationContext.add({ type: 'DELETE_WEBFORM_ERROR' }, true);
     } finally {
       setLoadingStatus('idle');
       setSelectedWebformId(null);
     }
   };
 
-  const onEdit = id => {
+  const onEditClick = id => {
     setSelectedWebformId(id);
-    //todo add edit dialog
+    setIsAddOrEditDialogVisible(true);
+  };
+
+  const onAddClick = () => {
+    setIsAddOrEditDialogVisible(true);
+  };
+
+  const onAddOrEditDialogClose = () => {
+    setIsAddOrEditDialogVisible(false);
+    setSelectedWebformId(null);
   };
 
   const onClickDownload = (id, name) => {
@@ -175,21 +178,21 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       <Fragment>
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
-          disabled={isPending}
+          disabled={loadingStatus === 'pending'}
           icon={getBtnIcon(row.id, 'edit')}
-          onClick={() => onEdit(row.id)}
+          onClick={() => onEditClick(row.id)}
           type="button"
         />
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
-          disabled={isPending}
+          disabled={loadingStatus === 'pending'}
           icon={getBtnIcon(row.id, 'export')}
           onClick={() => onClickDownload(row.id, row.value)}
           type="button"
         />
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
-          disabled={isPending}
+          disabled={loadingStatus === 'pending'}
           icon={getBtnIcon(row.id, 'trash')}
           onClick={() => onShowDeleteDialog(row.id)}
           type="button"
@@ -198,7 +201,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     );
   };
 
-  const footer = (
+  const dialogFooter = (
     <div className={styles.footer}>
       <Button
         className="p-button-primary"
@@ -213,6 +216,24 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         onClick={onCloseDialog}
       />
     </div>
+  );
+
+  const addOrEditDialogFooter = (
+    <Fragment>
+      <Button
+        className="p-button-primary p-button-animated-blink "
+        // disabled={}
+        icon={false ? 'spinnerAnimate' : 'check'}
+        label={isNil(selectedWebformId) ? resourcesContext.messages['create'] : resourcesContext.messages['edit']}
+        onClick={() => onConfirm()}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon="cancel"
+        label={resourcesContext.messages['cancel']}
+        onClick={() => onAddOrEditDialogClose()}
+      />
+    </Fragment>
   );
 
   // const hasFiles = () => webform.files && state.files.length > 0;
@@ -287,7 +308,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       <Dialog
         blockScroll={false}
         className="responsiveDialog"
-        footer={footer}
+        footer={dialogFooter}
         header={resourcesContext.messages['manageWebforms']}
         modal
         onHide={onCloseDialog}
@@ -313,11 +334,13 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           blockScroll={false}
           className="responsiveDialog"
           footer={addOrEditDialogFooter}
-          header={resourcesContext.messages['addWebformDialogHeader']}
+          header={
+            isNil(selectedWebformId)
+              ? resourcesContext.messages['addWebformDialogHeader']
+              : resourcesContext.messages['editWebformDialogHeader']
+          }
           modal
-          onHide={() => {
-            setIsAddOrEditDialogVisible(false);
-          }}
+          onHide={onAddOrEditDialogClose}
           visible={isAddOrEditDialogVisible}>
           <label htmlFor="name">
             {resourcesContext.messages['name']}
