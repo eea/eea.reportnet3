@@ -35,6 +35,8 @@ const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
 export const MyFilters = ({ className, data = [], isStrictMode, onFilter, options = [], viewType }) => {
+  const isFilteredByBE = !isNil(onFilter);
+
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
   const [filteredData, setFilteredData] = useRecoilState(filteredDataState(viewType));
@@ -153,6 +155,10 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
   };
 
   const onApplyFilters = ({ filterBy, searchValue = searchBy }) => {
+    if (isFilteredByBE) {
+      return data;
+    }
+
     return data.filter(
       item =>
         applyInputs({ filterBy, filterByKeys, item }) &&
@@ -407,7 +413,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
       {renderFilters()}
       {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
 
-      {!isNil(onFilter) && (
+      {isFilteredByBE && (
         <Button
           className="p-button-primary p-button-rounded p-button-animated-blink"
           icon="filter"
