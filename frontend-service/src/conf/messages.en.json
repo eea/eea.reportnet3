@@ -1446,6 +1446,8 @@
     "copyToClipboardError": "Error copying to clipboard",
     "genericQCsHistoryButtonTooltip": "There is no history data",
     "manageWebforms": "Manage webforms",
-    "loadWebformsError": "Error loading webforms list"
+    "loadWebformsError": "Error loading webforms list",
+    "deleteWebform": "Delete webform",
+    "confirmDeleteWebform": "Are you sure you want to delete this webform?"
   }
 }

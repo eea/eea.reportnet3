@@ -5,6 +5,7 @@ import styles from './ManageWebforms.module.scss';
 import { Column } from 'primereact/column';
 
 import { Button } from 'views/_components/Button';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Spinner } from 'views/_components/Spinner';
@@ -22,6 +23,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const [isPending, setIsPending] = useState(false);
   const [selectedWebformId, setSelectedWebformId] = useState(null);
   const [webforms, setWebforms] = useState([]);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
 
   useEffect(() => {
     getWebformList();
@@ -92,7 +94,28 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
   const onShowDeleteDialog = id => {
     setSelectedWebformId(id);
-    //todo add confirmation dialog
+    setIsDeleteDialogVisible(true);
+  };
+
+  const onHideDeleteDialog = () => {
+    setIsDeleteDialogVisible(false);
+    setSelectedWebformId(null);
+  };
+
+  const onConfirmDeleteDialog = async () => {
+    setLoadingStatus('pending');
+    setIsDeleteDialogVisible(false);
+    try {
+      await WebformService.delete(selectedWebformId);
+      setLoadingStatus('success');
+    } catch (error) {
+      console.error('ManageWebforms - onConfirmDeleteDialog.', error);
+      setLoadingStatus('failed');
+      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true); // Todo add correct notification
+    } finally {
+      setLoadingStatus('idle');
+      setSelectedWebformId(null);
+    }
   };
 
   const onEdit = id => {
@@ -185,15 +208,30 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   return (
-    <Dialog
-      blockScroll={false}
-      className="responsiveDialog"
-      footer={footer}
-      header={resourcesContext.messages['manageWebforms']}
-      modal
-      onHide={onCloseDialog}
-      visible={isDialogVisible}>
-      {renderDialogContent()}
-    </Dialog>
+    <Fragment>
+      <Dialog
+        blockScroll={false}
+        className="responsiveDialog"
+        footer={footer}
+        header={resourcesContext.messages['manageWebforms']}
+        modal
+        onHide={onCloseDialog}
+        visible={isDialogVisible}>
+        {renderDialogContent()}
+      </Dialog>
+
+      {isDeleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resourcesContext.messages['deleteWebform']}
+          labelCancel={resourcesContext.messages['cancel']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onConfirmDeleteDialog}
+          onHide={onHideDeleteDialog}
+          visible={isDeleteDialogVisible}>
+          {resourcesContext.messages['confirmDeleteWebform']}
+        </ConfirmDialog>
+      )}
+    </Fragment>
   );
 };
