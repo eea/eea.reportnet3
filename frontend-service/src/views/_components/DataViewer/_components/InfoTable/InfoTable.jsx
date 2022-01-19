@@ -358,6 +358,7 @@ export const InfoTable = ({ data, filteredColumns, isPasting, numCopiedRecords, 
           paginatorRight={totalCount}
           rows={5}
           rowsPerPageOptions={[5, 10]}
+          summary={resourcesContext.messages['pasteRecords']}
           totalRecords={numCopiedRecords}
           value={data}>
           {getColumns()}

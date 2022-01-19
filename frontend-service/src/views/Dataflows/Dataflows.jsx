@@ -22,6 +22,7 @@ import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
+import { ManageWebforms } from './_components/ManageWebforms';
 import { MyFilters } from 'views/_components/MyFilters';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
@@ -44,6 +45,7 @@ import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { CurrentPage } from 'views/_functions/Utils';
@@ -74,17 +76,17 @@ const Dataflows = () => {
     isBusinessDataflowDialogVisible: false,
     isCitizenScienceDataflowDialogVisible: false,
     isCustodian: null,
+    isManageWebformsDialogVisible: false,
     isNationalCoordinator: false,
     isRecreatePermissionsDialogVisible: false,
     isReferencedDataflowDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
-    isValidatingAllDataflowsUsers: false,
     isUserListVisible: false,
+    isValidatingAllDataflowsUsers: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     reference: [],
     reporting: [],
-    filteredData: { business: [], citizenScience: [], reference: [], reporting: [] },
     pinnedSeparatorIndex: -1
   });
 
@@ -94,7 +96,6 @@ const Dataflows = () => {
   const {
     activeIndex,
     dataflowsCount,
-    filteredData,
     isAdmin,
     isCustodian,
     isNationalCoordinator,
@@ -140,6 +141,8 @@ const Dataflows = () => {
         ];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
+
+  const { filteredData } = useFilters(tabId);
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -209,9 +212,19 @@ const Dataflows = () => {
       title: 'adminCreatePermissions'
     };
 
+    const adminManageWebformsBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'table',
+      isVisible: isAdmin,
+      label: 'manageWebforms',
+      onClick: () => manageDialogs('isManageWebformsDialogVisible', true),
+      title: 'manageWebforms'
+    };
+
     leftSideBarContext.addModels(
       [
         adminCreateNewPermissionsBtn,
+        adminManageWebformsBtn,
         createBusinessDataflowBtn,
         createCitizenScienceDataflowBtn,
         createReferenceDataflowBtn,
@@ -245,6 +258,10 @@ const Dataflows = () => {
   useEffect(() => {
     setActiveIndexTabOnBack();
   }, [isCustodian, isAdmin]);
+
+  useEffect(() => {
+    onUpdatePinnedSeparatorPosition();
+  }, [filteredData]);
 
   const setIsValidatingAllDataflowsUsers = isValidatingAllDataflowsUsers => {
     dataflowsDispatch({ type: 'SET_IS_VALIDATING_ALL_DATAFLOWS_USERS', payload: { isValidatingAllDataflowsUsers } });
@@ -326,12 +343,11 @@ const Dataflows = () => {
     }
   };
 
-  const getFilteredData = data => {
-    const orderedFilteredData = sortDataflows(data);
+  const onUpdatePinnedSeparatorPosition = () => {
+    const orderedFilteredData = sortDataflows(filteredData);
     const orderedPinned = orderedFilteredData.map(el => el.pinned);
 
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf('pinned'));
-    dataflowsDispatch({ type: 'GET_FILTERED_DATA', payload: { type: tabId, data } });
   };
 
   const manageDialogs = (dialog, value) => {
@@ -397,7 +413,7 @@ const Dataflows = () => {
     const { business, citizenScience, reference, reporting } = dataflowsState;
 
     const copyData = [...reporting, ...reference, ...business, ...citizenScience];
-    const copyFilteredData = [...filteredData[tabId]];
+    const copyFilteredData = [...filteredData];
 
     const userProperties = updateUserPropertiesPinnedDataflows({ pinnedItem, data: copyData });
 
@@ -602,15 +618,10 @@ const Dataflows = () => {
             onTabChange={event => onChangeTab(event.index, event.value)}
           />
         </div>
-        <MyFilters
-          data={dataflowsState[tabId]}
-          getFilteredData={getFilteredData}
-          options={options[tabId]}
-          viewType={tabId}
-        />
+        <MyFilters data={dataflowsState[tabId]} options={options[tabId]} viewType={tabId} />
         <DataflowsList
           className="dataflowList-accepted-help-step"
-          filteredData={filteredData[tabId]}
+          filteredData={filteredData}
           isAdmin={isAdmin}
           isCustodian={isCustodian}
           isLoading={loadingStatus[tabId]}
@@ -663,6 +674,13 @@ const Dataflows = () => {
           visible={dataflowsState.isRecreatePermissionsDialogVisible}>
           {resourcesContext.messages['confirmCreateNewPermissions']}
         </ConfirmDialog>
+      )}
+
+      {dataflowsState.isManageWebformsDialogVisible && (
+        <ManageWebforms
+          isDialogVisible={dataflowsState.isManageWebformsDialogVisible}
+          onCloseDialog={() => manageDialogs('isManageWebformsDialogVisible', false)}
+        />
       )}
 
       {dataflowsState.isCitizenScienceDataflowDialogVisible && (

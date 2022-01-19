@@ -119,6 +119,7 @@ export const TableViewSchemas = ({
       paginatorRight={paginatorRightText}
       rows={pagination.rows}
       rowsPerPageOptions={[5, 10, 15]}
+      summary={resourcesContext.messages['dataflows']}
       totalRecords={data.length}
       value={data}>
       {renderColumns(data)}
