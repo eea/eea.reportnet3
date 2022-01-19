@@ -1447,6 +1447,6 @@
     "genericQCsHistoryButtonTooltip": "There is no history data",
     "manageWebforms": "Manage webforms",
     "loadWebformsError": "Error loading webforms list",
-    "exportFilteredCsv": "CSV (.csv filtered)"
+    "exportFilteredCsv": "CSV (.csv with filters)"
   }
 }
