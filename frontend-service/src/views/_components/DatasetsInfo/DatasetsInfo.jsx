@@ -1,5 +1,4 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -18,7 +17,7 @@ import { DataflowService } from 'services/DataflowService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { filterByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
@@ -26,12 +25,10 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const filterBy = useRecoilValue(filterByState('datasetInfo'));
-  const isDataFiltered = !isEmpty(filterBy);
-
   const [datasetsInfo, setDatasetsInfo] = useState([]);
-  const [filteredData, setFilteredData] = useState(datasetsInfo);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { filteredData, isFiltered } = useFilters('datasetInfo');
 
   useEffect(() => {
     onLoadDatasetsSummary();
@@ -60,12 +57,12 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
-      {isDataFiltered && datasetsInfo.length !== filteredData.length
+      {isFiltered && datasetsInfo.length !== filteredData.length
         ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {datasetsInfo.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
-      {isDataFiltered && datasetsInfo.length === filteredData.length
+      {isFiltered && datasetsInfo.length === filteredData.length
         ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
@@ -93,8 +90,6 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     { key: 'name', label: resourcesContext.messages['name'], type: 'INPUT' },
     { key: 'type', label: resourcesContext.messages['type'], type: 'MULTI_SELECT' }
   ];
-
-  const onLoadFilteredData = value => setFilteredData(value);
 
   const renderDatasetsInfoContent = () => {
     if (isLoading) {
@@ -151,7 +146,6 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     <MyFilters
       className="datasetsInfo"
       data={datasetsInfo}
-      getFilteredData={onLoadFilteredData}
       options={dataflowType === config.dataflowType.REFERENCE.value ? filterReferenceDataflowOptions : filterOptions}
       viewType="datasetInfo"
     />
