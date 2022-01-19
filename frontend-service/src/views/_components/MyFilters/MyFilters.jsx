@@ -34,15 +34,7 @@ const { applyDates, applyInputs, applyMultiSelects, applySearch } = ApplyFilters
 const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
-export const MyFilters = ({
-  className,
-  data = [],
-  getFilteredData,
-  isStrictMode,
-  onFilter,
-  options = [],
-  viewType
-}) => {
+export const MyFilters = ({ className, data = [], isStrictMode, onFilter, options = [], viewType }) => {
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
   const [filteredData, setFilteredData] = useRecoilState(filteredDataState(viewType));
@@ -97,12 +89,6 @@ export const MyFilters = ({
     getFilterByKeys();
     getSortDefaultValues(options);
   }, [data, viewType]);
-
-  useEffect(() => {
-    if (getFilteredData) {
-      getFilteredData(filteredData);
-    }
-  }, [filteredData]);
 
   const applyFilters = () => {
     try {

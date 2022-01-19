@@ -5,8 +5,32 @@
   height: 58vh;
 }
 
+.noDataContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  flex-direction: column;
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
+  button {
+    padding: 0.5em 1em;
+  }
+}
+
 .actionsColumn {
   width: 133px;
+}
+
+.footer {
+  display: flex;
+}
+
+.buttonPushRight {
+  margin-left: auto !important;
 }
 
 .actionButton {
@@ -21,28 +45,4 @@
 .deleteRowButton {
   @extend .actionButton;
   color: var(--errors) !important;
-}
-
-.loadingSpinner {
-  height: 58vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  .spinnerPosition {
-    top: 0;
-    left: 0;
-  }
-}
-
-.noDataContent {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  font-weight: bold;
-  flex-direction: column;
-  button {
-    padding: 0.5em 1em;
-  }
 }

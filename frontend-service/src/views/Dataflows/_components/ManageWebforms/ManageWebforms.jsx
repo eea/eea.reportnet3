@@ -1,4 +1,6 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useState } from 'react';
+
+import isNil from 'lodash/isNil';
 
 import styles from './ManageWebforms.module.scss';
 
@@ -9,6 +11,7 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
+import { DownloadFile } from 'views/_components/DownloadFile';
 import { Spinner } from 'views/_components/Spinner';
 import { InputText } from 'views/_components/InputText';
 
@@ -21,8 +24,9 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
-  const [loadingStatus, setLoadingStatus] = useState('idle');
+  const [isLoading, setIsLoading] = useState(true);
   const [isPending, setIsPending] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState('idle');
   const [selectedWebformId, setSelectedWebformId] = useState(null);
   const [webforms, setWebforms] = useState([]);
   const [webform, setWebform] = useState({ name: '', json: null });
@@ -33,30 +37,45 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     getWebformList();
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setIsPending(loadingStatus === 'pending');
   }, [loadingStatus]);
 
   // TODO
   // delete: /webform/webformConfig/{id} // Check that endpoint is correct
-  // download: /webform/webformConfig/{id} // Check that endpoint is correct
 
-  // Confirm dialog: Delete webform
   // ADD / EDIT dialog
 
   const getWebformList = async () => {
-    setLoadingStatus('pending');
-
     try {
       const data = await WebformService.getAll();
       setWebforms(data);
-      setLoadingStatus('success');
     } catch (error) {
       console.error('ManageWebforms - getWebformList.', error);
+      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true); // Todo add correct notification
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onDownload = async (id, name) => {
+    setLoadingStatus('pending');
+
+    try {
+      const { data } = await WebformService.download(id);
+
+      if (!isNil(data)) {
+        DownloadFile(data, `${name}.json`);
+      }
+
+      setLoadingStatus('success');
+    } catch (error) {
+      console.error('ManageWebforms - onDownload.', error);
       setLoadingStatus('failed');
       notificationContext.add({ type: 'GET_WEBFORM_LIST_ERROR' }, true); // Todo add correct notification
     } finally {
       setLoadingStatus('idle');
+      setSelectedWebformId(null);
     }
   };
 
@@ -127,9 +146,9 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     //todo add edit dialog
   };
 
-  const onClickDownload = id => {
+  const onClickDownload = (id, name) => {
     setSelectedWebformId(id);
-    //todo add download dialog
+    onDownload(id, name);
   };
 
   const getActionsTemplate = row => {
@@ -146,7 +165,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
           disabled={isPending}
           icon={getBtnIcon(row.id, 'export')}
-          onClick={() => onClickDownload(row.id)}
+          onClick={() => onClickDownload(row.id, row.value)}
           type="button"
         />
         <Button
@@ -161,27 +180,26 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   const footer = (
-    <Fragment>
+    <div className={styles.footer}>
       <Button
         className="p-button-primary"
-        disabled={isPending}
-        icon={isPending ? 'spinnerAnimate' : 'plus'}
+        icon={'plus'}
         label={resourcesContext.messages['add']}
         onClick={onAddClick}
       />
       <Button
-        className="p-button-secondary p-button-right-aligned"
+        className={`p-button-secondary ${styles.buttonPushRight}`}
         icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={onCloseDialog}
       />
-    </Fragment>
+    </div>
   );
 
   const renderDialogContent = () => {
-    if (isPending) {
+    if (isLoading) {
       return (
-        <div className={styles.loadingSpinner}>
+        <div className={styles.noDataContent}>
           <Spinner className={styles.spinnerPosition} />
         </div>
       );
@@ -197,17 +215,18 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     }
 
     return (
-      <DataTable
-        autoLayout
-        className={styles.dialogContent}
-        hasDefaultCurrentPage
-        paginator
-        rows={10}
-        rowsPerPageOptions={[5, 10, 15]}
-        totalRecords={webforms.length}
-        value={webforms}>
-        {getTableColumns()}
-      </DataTable>
+      <div className={styles.dialogContent}>
+        <DataTable
+          autoLayout
+          hasDefaultCurrentPage
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 15]}
+          totalRecords={webforms.length}
+          value={webforms}>
+          {getTableColumns()}
+        </DataTable>
+      </div>
     );
   };
 
