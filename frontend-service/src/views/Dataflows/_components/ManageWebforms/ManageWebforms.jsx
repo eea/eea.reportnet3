@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import isNil from 'lodash/isNil';
 
 import classNames from 'classnames';
@@ -30,7 +30,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [selectedWebformId, setSelectedWebformId] = useState(null);
   const [webforms, setWebforms] = useState([]);
-  const [webform, setWebform] = useState({ name: '', json: null });
+  const [webform, setWebform] = useState({ name: '', jsonContent: null });
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isAddOrEditDialogVisible, setIsAddOrEditDialogVisible] = useState(false);
 
