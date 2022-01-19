@@ -27,11 +27,10 @@ import { historicReleasesReducer } from './_functions/Reducers/historicReleasesR
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { DataTableUtils } from 'views/_functions/Utils/DataTableUtils';
-
-import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
   const notificationContext = useContext(NotificationContext);
