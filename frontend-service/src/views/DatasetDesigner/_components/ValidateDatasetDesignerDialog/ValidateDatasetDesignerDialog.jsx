@@ -44,6 +44,7 @@ export const ValidateDatasetDesignerDialog = ({ isDataflowOpen, isDesignDatasetE
       );
     }
   };
+
   return (
     <Fragment>
       {renderValidateButton()}
