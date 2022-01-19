@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useState } from 'react';
 
 import styles from './ManageWebforms.module.scss';
 
@@ -27,7 +27,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     getWebformList();
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setIsPending(loadingStatus === 'pending');
   }, [loadingStatus]);
 
