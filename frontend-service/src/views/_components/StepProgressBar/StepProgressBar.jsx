@@ -3,69 +3,13 @@ import uniqueId from 'lodash/uniqueId';
 
 import styles from './StepProgressBar.module.scss';
 
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Step } from './_components/Step';
 
 export const StepProgressBar = ({ className = '', steps = [], currentStep }) => {
   const renderStepProgressBar = () => {
-    const renderIcon = step => {
-      if (step.idx < currentStep) {
-        return AwesomeIcons('check');
-      } else if (step.idx === currentStep) {
-        if (step.isRunning) {
-          return AwesomeIcons('spinner');
-        } else {
-          return AwesomeIcons('check');
-        }
-      } else {
-        return AwesomeIcons('cross');
-      }
-    };
-
     const renderSteps = () => {
-      const getIconClassName = step => {
-        if (step.idx < currentStep) {
-          return styles.activeCompleted;
-        } else if (step.idx === currentStep) {
-          if (step.isRunning) {
-            return styles.activeIncompleted;
-          } else {
-            return styles.activeCompleted;
-          }
-        } else {
-          return styles.inactive;
-        }
-      };
-
-      const getStepLabel = step => {
-        if (step.idx < currentStep) {
-          return step.labelCompleted;
-        } else {
-          if (step.idx === currentStep) {
-            if (step.isRunning) {
-              return step.labelRunning;
-            } else {
-              return step.labelCompleted;
-            }
-          } else {
-            return step.labelUndone;
-          }
-        }
-      };
-
-      return steps.map((step, index) => {
-        return (
-          <li className={`${styles.step} ${step.idx <= currentStep ? styles.stepActive : ''}`} key={uniqueId('step_')}>
-            <div className={`${styles.iconWrapper} ${getIconClassName(step)}`}>
-              <FontAwesomeIcon
-                className={step.idx === currentStep && step.isRunning ? 'fa-spin' : ''}
-                icon={renderIcon(step)}
-              />
-            </div>
-            <label className={styles.stepLabel}>{getStepLabel(step)}</label>
-          </li>
-        );
-      });
+      console.log({ steps, currentStep });
+      return steps.map(step => <Step currentStep={currentStep} key={uniqueId('step_')} step={step} />);
     };
 
     if (!isEmpty(steps)) {
