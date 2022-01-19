@@ -156,8 +156,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     <div className={styles.footer}>
       <Button
         className="p-button-primary"
-        disabled={isPending}
-        icon={isPending ? 'spinnerAnimate' : 'plus'}
+        icon={'plus'}
         label={resourcesContext.messages['add']}
         onClick={onAddClick}
       />
