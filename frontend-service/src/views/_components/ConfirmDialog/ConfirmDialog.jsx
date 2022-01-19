@@ -1,5 +1,7 @@
 import { Fragment, useContext, forwardRef } from 'react';
 
+import styles from './ConfirmDialog.module.scss';
+
 import ReactTooltip from 'react-tooltip';
 
 import isUndefined from 'lodash/isUndefined';
@@ -124,7 +126,11 @@ const ConfirmDialog = forwardRef((props, _) => {
   );
 
   return (
-    <div className="confirmDialog" onKeyPress={!disabledConfirm ? onKeyPress : null} onPaste={onPaste} ref={divRef}>
+    <div
+      className={styles.confirmDialog}
+      onKeyPress={!disabledConfirm ? onKeyPress : null}
+      onPaste={onPaste}
+      ref={divRef}>
       <Dialog
         className={className}
         focusOnShow={true}

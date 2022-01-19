@@ -30,6 +30,7 @@ const parseDataflowCount = (dataflowCountDTO, dataflowType) => {
   dataflowCountDTO.forEach(dataflowType => {
     dataflowCount[camelCase(dataflowType.type)] = dataflowType.amount;
   });
+
   return dataflowCount;
 };
 
@@ -97,12 +98,12 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   allDataflowsUserListDTO.forEach((dataflow, dataflowIndex) => {
     dataflow.users.forEach((user, usersIndex) => {
       user.roles.forEach((role, roleIndex) => {
-        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(
-          role
-        );
+        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] =
+          UserRoleUtils.getUserRoleLabel(role);
       });
     });
   });
+
   const usersList = [];
   allDataflowsUserListDTO.forEach(dataflow => {
     const { dataflowId, dataflowName } = dataflow;
@@ -113,6 +114,7 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
       });
     });
   });
+
   return usersList;
 };
 
@@ -122,6 +124,7 @@ const parseDataProvidersUserList = usersListDTO => {
       usersListDTO[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(role);
     });
   });
+
   const usersList = [];
   usersListDTO.forEach(parsedUser => {
     const { dataProviderName, email, roles } = parsedUser;
@@ -130,6 +133,7 @@ const parseDataProvidersUserList = usersListDTO => {
       usersList.push({ dataProviderName, email, role });
     });
   });
+
   usersList.forEach(user => {
     if (isNil(user.dataProviderName)) {
       user.dataProviderName = '';
@@ -145,6 +149,7 @@ const parseUsersList = usersListDTO => {
       usersListDTO[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(role);
     });
   });
+
   const usersList = [];
   usersListDTO.forEach(parsedUser => {
     const { email, roles } = parsedUser;
@@ -152,31 +157,28 @@ const parseUsersList = usersListDTO => {
       usersList.push({ email, role });
     });
   });
+
   return usersList;
 };
 
 const getTechnicalAcceptanceStatus = (datasetsStatus = []) => {
-  if (datasetsStatus.some(status => status === config.datasetStatus.CORRECTION_REQUESTED.key))
+  if (datasetsStatus.some(status => status === config.datasetStatus.CORRECTION_REQUESTED.key)) {
     return config.datasetStatus.CORRECTION_REQUESTED.label;
-
-  if (datasetsStatus.some(status => status === config.datasetStatus.FINAL_FEEDBACK.key))
+  } else if (datasetsStatus.some(status => status === config.datasetStatus.FINAL_FEEDBACK.key)) {
     return config.datasetStatus.FINAL_FEEDBACK.label;
-
-  if (datasetsStatus.every(status => status === config.datasetStatus.TECHNICALLY_ACCEPTED.key))
+  } else if (datasetsStatus.every(status => status === config.datasetStatus.TECHNICALLY_ACCEPTED.key)) {
     return config.datasetStatus.TECHNICALLY_ACCEPTED.label;
+  }
 };
 
-const parseDatasetsInfoDTO = datasetsDTO => {
-  return datasetsDTO.map(datasetDTO => {
-    return {
-      dataProviderCode: datasetDTO.dataProviderCode,
-      dataProviderName: datasetDTO.dataProviderName,
-      id: datasetDTO.id,
-      name: datasetDTO.dataSetName,
-      type: getDatasetType(datasetDTO.datasetTypeEnum)
-    };
-  });
-};
+const parseDatasetsInfoDTO = datasetsDTO =>
+  datasetsDTO.map(datasetDTO => ({
+    dataProviderCode: datasetDTO.dataProviderCode,
+    dataProviderName: datasetDTO.dataProviderName,
+    id: datasetDTO.id,
+    name: datasetDTO.dataSetName,
+    type: getDatasetType(datasetDTO.datasetTypeEnum)
+  }));
 
 const getDatasetType = datasetType => config.datasetType.find(type => type.key === datasetType)?.value;
 

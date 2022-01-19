@@ -39,7 +39,10 @@ const getAllLevelErrorsFromRuleValidations = rulesDTO =>
   ]);
 
 const isValidJSON = value => {
-  if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) return false;
+  if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) {
+    return false;
+  }
+
   try {
     JSON.parse(value);
   } catch (error) {
