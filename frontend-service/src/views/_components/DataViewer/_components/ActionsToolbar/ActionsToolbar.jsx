@@ -114,18 +114,21 @@ const ActionsToolbar = ({
   useCheckNotifications(['EXPORT_TABLE_DATA_COMPLETED_EVENT'], onDownloadTableData);
   useCheckNotifications(['EXPORT_TABLE_DATA_FAILED_EVENT'], setIsLoadingFile, false);
 
-  const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
-    label: resourcesContext.messages[type.key],
-    icon: type.code,
-    command: () => onExportTableData(type.code)
-  }));
+  const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => {
+    const extensionsTypes = type.code.split('+');
+    return {
+      command: () => onExportTableData(type.code),
+      icon: extensionsTypes[0],
+      label: resourcesContext.messages[type.key]
+    };
+  });
 
   const onExportTableData = async fileType => {
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
       setExportTableDataName(createTableName(tableName, fileType));
-      await DatasetService.exportTableData(datasetId, tableId, fileType);
+      await DatasetService.exportTableData(datasetId, tableId, fileType, filter.valueFilter);
     } catch (error) {
       console.error('ActionsToolbar - onExportTableData.', error);
       setIsLoadingFile(false);
