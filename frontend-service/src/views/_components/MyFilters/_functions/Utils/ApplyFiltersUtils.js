@@ -9,6 +9,12 @@ const { areEquals } = TextUtils;
 const getEndOfDay = date => new Date(dayjs(date).endOf('day').format()).getTime();
 const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getTime();
 
+const applyCheckBox = ({ filterBy, filterByKeys, item }) => {
+  const filteredKeys = filterByKeys.CHECKBOX.filter(key => Object.keys(filterBy).includes(key));
+  return filteredKeys.every(
+    filteredKey => !filterBy[filteredKey] || item[filteredKey]?.toString().includes(filterBy[filteredKey]?.toString())
+  );
+};
 const applyDates = ({ filterBy, filterByKeys, item }) => {
   const filteredKeys = filterByKeys.DATE.filter(key => Object.keys(filterBy).includes(key));
 
@@ -60,4 +66,4 @@ const applySearch = ({ filterByKeys, item, value }) => {
   );
 };
 
-export const ApplyFiltersUtils = { applyDates, applyInputs, applyMultiSelects, applySearch };
+export const ApplyFiltersUtils = { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch };
