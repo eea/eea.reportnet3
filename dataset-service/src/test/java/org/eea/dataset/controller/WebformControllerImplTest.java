@@ -56,8 +56,7 @@ public class WebformControllerImplTest {
     webform.setIdReferenced(1L);
     webform.setName("test");
     webFormControllerImpl.insertWebformConfig(webform);
-    Mockito.verify(webformservice, times(1)).insertWebformConfig(Mockito.anyLong(), Mockito.any(),
-        Mockito.any());
+    Mockito.verify(webformservice, times(1)).insertWebformConfig(Mockito.any(), Mockito.any());
   }
 
   @Test

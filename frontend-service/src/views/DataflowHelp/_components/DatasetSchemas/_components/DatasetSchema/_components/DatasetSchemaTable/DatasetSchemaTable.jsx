@@ -278,6 +278,7 @@ export const DatasetSchemaTable = ({ columnOptions, fields, type }) => {
         marginTop: '1rem',
         marginBottom: '1rem'
       }}
+      summary={resourcesContext.messages['datasetSchema']}
       value={fields}>
       {renderColumns(filterReferencedFieldAndCodelist(columnOptions[type].columns))}
     </DataTable>

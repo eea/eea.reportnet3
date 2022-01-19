@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -64,10 +65,25 @@ public class WebformControllerImpl implements WebformController {
   @Override
   @HystrixCommand
   @PreAuthorize("hasRole('ADMIN')")
-  @PostMapping("/private/webformConfig")
+  @PostMapping("/webformConfig")
   @ApiOperation(value = "Insert webform config json into the system", hidden = true)
   public void insertWebformConfig(@RequestBody WebformConfigVO webformConfig) {
-    webformService.insertWebformConfig(webformConfig.getIdReferenced(), webformConfig.getName(),
+    webformService.insertWebformConfig(webformConfig.getName(), webformConfig.getContent());
+  }
+
+
+  /**
+   * Update webform config.
+   *
+   * @param webformConfig the webform config
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("hasRole('ADMIN')")
+  @PutMapping("/webformConfig")
+  @ApiOperation(value = "Update webform config json into the system", hidden = true)
+  public void updateWebformConfig(@RequestBody WebformConfigVO webformConfig) {
+    webformService.updateWebformConfig(webformConfig.getIdReferenced(), webformConfig.getName(),
         webformConfig.getContent());
   }
 

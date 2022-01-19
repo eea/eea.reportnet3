@@ -77,22 +77,6 @@ const ReferenceDataflow = () => {
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowReducer, dataflowInitialState);
 
-  const isAdmin = userContext.accessRole?.some(role => role === config.permissions.roles.ADMIN.key);
-
-  const isCustodianUser = userContext.accessRole?.some(role => role === config.permissions.roles.CUSTODIAN.key);
-
-  const isCustodian = userContext.hasContextAccessPermission(
-    config.permissions.prefixes.DATAFLOW,
-    referenceDataflowId,
-    [config.permissions.roles.CUSTODIAN.key]
-  );
-
-  const isSteward = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, referenceDataflowId, [
-    config.permissions.roles.STEWARD.key
-  ]);
-
-  const isLeadDesigner = isSteward || isCustodian;
-
   const setUpdatedDatasetSchema = updatedData =>
     dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
 
@@ -101,10 +85,23 @@ const ReferenceDataflow = () => {
   }, [dataflowState.refresh]);
 
   useEffect(() => {
-    if (!isNil(userContext.contextRoles)) onLoadPermissions();
+    if (!isNil(userContext)) {
+      onLoadPermissions();
+    }
   }, [userContext]);
 
   useBreadCrumbs({ currentPage: CurrentPage.REFERENCE_DATAFLOW, referenceDataflowId });
+
+  const getLeftSidebarButtonsVisibility = () => ({
+    apiKeyBtn: dataflowState.isCustodian,
+    datasetsInfoBtn: dataflowState.isAdmin,
+    editBtn: dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian,
+    manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
+    propertiesBtn: true,
+    reportingDataflowsBtn:
+      dataflowState.status === config.dataflowStatus.OPEN &&
+      (dataflowState.isCustodian || dataflowState.isCustodianUser)
+  });
 
   useLeftSideBar(dataflowState, getLeftSidebarButtonsVisibility, manageDialogs);
 
@@ -203,7 +200,25 @@ const ReferenceDataflow = () => {
   };
 
   const onLoadPermissions = () => {
-    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isAdmin, isCustodian: isLeadDesigner, isCustodianUser } });
+    const isAdmin = userContext.accessRole?.some(role => role === config.permissions.roles.ADMIN.key);
+    const isCustodianUser = userContext.accessRole?.some(role => role === config.permissions.roles.CUSTODIAN.key);
+    const isStewardUser = userContext.accessRole?.some(role => role === config.permissions.roles.CUSTODIAN.key);
+
+    const isCustodian = userContext.hasContextAccessPermission(
+      config.permissions.prefixes.DATAFLOW,
+      referenceDataflowId,
+      [config.permissions.roles.CUSTODIAN.key]
+    );
+    const isSteward = userContext.hasContextAccessPermission(
+      config.permissions.prefixes.DATAFLOW,
+      referenceDataflowId,
+      [config.permissions.roles.STEWARD.key]
+    );
+
+    dataflowDispatch({
+      type: 'LOAD_PERMISSIONS',
+      payload: { isAdmin, isCustodian: isSteward || isCustodian, isCustodianUser: isCustodianUser || isStewardUser }
+    });
   };
 
   const onLoadReferenceDataflow = async () => {
@@ -281,18 +296,6 @@ const ReferenceDataflow = () => {
     { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
     { label: config.permissions.roles.STEWARD.label, role: config.permissions.roles.STEWARD.key }
   ];
-
-  function getLeftSidebarButtonsVisibility() {
-    return {
-      apiKeyBtn: isLeadDesigner,
-      datasetsInfoBtn: isAdmin,
-      editBtn: dataflowState.status === config.dataflowStatus.DESIGN && isLeadDesigner,
-      manageRequestersBtn: isAdmin || isLeadDesigner,
-      propertiesBtn: true,
-      reportingDataflowsBtn:
-        dataflowState.status === config.dataflowStatus.OPEN && (isLeadDesigner || dataflowState.isCustodianUser)
-    };
-  }
 
   const layout = children => (
     <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>

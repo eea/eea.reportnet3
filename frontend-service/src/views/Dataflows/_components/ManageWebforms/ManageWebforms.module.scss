@@ -1,17 +1,26 @@
-.checkedValueColumn {
-  text-align: center;
-  .icon {
-    color: var(--main-color-font);
-  }
-}
+@import '_styles/mixins';
 
 .dialogContent,
 .noDataContent {
   height: 58vh;
 }
 
-.dialogWidth {
-  min-width: 60vw;
+.actionsColumn {
+  width: 133px;
+}
+
+.actionButton {
+  border: 1px solid var(--general-border-color) !important;
+  @include shadow-0em;
+  margin-left: 3px !important;
+  &:enabled:hover {
+    border-color: var(--button-secondary-border-color-hover) !important;
+  }
+}
+
+.deleteRowButton {
+  @extend .actionButton;
+  color: var(--errors) !important;
 }
 
 .loadingSpinner {

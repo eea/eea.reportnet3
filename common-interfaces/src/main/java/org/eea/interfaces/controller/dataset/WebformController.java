@@ -7,6 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -38,8 +39,16 @@ public interface WebformController {
    *
    * @param webformConfig the webform config
    */
-  @PostMapping("/private/webformConfig")
+  @PostMapping("/webformConfig")
   void insertWebformConfig(@RequestBody WebformConfigVO webformConfig);
+
+  /**
+   * Update webform config.
+   *
+   * @param webformConfig the webform config
+   */
+  @PutMapping("/webformConfig")
+  void updateWebformConfig(@RequestBody WebformConfigVO webformConfig);
 
   /**
    * Find webform config by id.

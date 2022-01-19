@@ -694,6 +694,10 @@ export const FieldsDesigner = ({
               onNewFieldAdd={onFieldAdd}
               onShowDialogError={onShowDialogError}
               recordSchemaId={field.recordId}
+              setIsLoading={(loading, ref) => {
+                setRefElement(ref.element);
+                setIsLoading(loading);
+              }}
               tableSchemaId={table.tableSchemaId}
               totalFields={!isNil(fields) ? fields.length : undefined}
             />

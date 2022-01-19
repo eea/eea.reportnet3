@@ -97,12 +97,12 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
       {
         key: 'ruleCode',
         header: resourcesContext.messages['ruleCode'],
-        template: ruleCodeTemplate
+        template: getRuleCodeTemplate
       },
       {
         key: 'name',
         header: resourcesContext.messages['name'],
-        template: nameTemplate
+        template: getNameTemplate
       },
       {
         key: 'user',
@@ -111,27 +111,27 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
       {
         key: 'timestamp',
         header: resourcesContext.messages['timestamp'],
-        template: timestampTemplate
+        template: getTimestampTemplate
       },
       {
         key: 'expression',
         header: resourcesContext.messages['expressionText'],
-        template: checkTemplate
+        template: getCheckTemplate
       },
       {
         key: 'metadata',
         header: resourcesContext.messages['metadata'],
-        template: checkTemplate
+        template: getCheckTemplate
       },
       {
         key: 'status',
         header: resourcesContext.messages['status'],
-        template: checkTemplate
+        template: getCheckTemplate
       },
       {
         key: 'actions',
         header: resourcesContext.messages['actions'],
-        template: actionsTemplate
+        template: getActionsTemplate
       }
     ];
 
@@ -140,7 +140,7 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
     });
   };
 
-  const actionsTemplate = rowData => {
+  const getActionsTemplate = rowData => {
     return (
       <div className={styles.editButtonWrapper}>
         <Button
@@ -173,7 +173,7 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
     }
   };
 
-  const checkTemplate = (rowData, column) => (
+  const getCheckTemplate = (rowData, column) => (
     <div className={styles.checkedValueColumn}>
       {rowData[column.field] ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
     </div>
@@ -182,17 +182,17 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
   const getRuleSchema = ruleId =>
     validationContext.rulesDescription.find(ruleDescription => ruleDescription.id === ruleId);
 
-  const nameTemplate = rowData => {
+  const getNameTemplate = rowData => {
     const currentRule = getRuleSchema(rowData.ruleId);
     return <div>{currentRule?.name}</div>;
   };
 
-  const ruleCodeTemplate = rowData => {
+  const getRuleCodeTemplate = rowData => {
     const currentRule = getRuleSchema(rowData.ruleId);
     return <div>{currentRule?.shortCode}</div>;
   };
 
-  const timestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
+  const getTimestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
 
   const dialogFooter = (
     <Button
