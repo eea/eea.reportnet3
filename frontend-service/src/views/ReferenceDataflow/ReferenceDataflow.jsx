@@ -201,24 +201,24 @@ const ReferenceDataflow = () => {
 
   const onLoadPermissions = () => {
     const isAdmin = userContext.accessRole?.some(role => role === config.permissions.roles.ADMIN.key);
-
     const isCustodianUser = userContext.accessRole?.some(role => role === config.permissions.roles.CUSTODIAN.key);
+    const isStewardUser = userContext.accessRole?.some(role => role === config.permissions.roles.CUSTODIAN.key);
 
     const isCustodian = userContext.hasContextAccessPermission(
       config.permissions.prefixes.DATAFLOW,
       referenceDataflowId,
       [config.permissions.roles.CUSTODIAN.key]
     );
-
     const isSteward = userContext.hasContextAccessPermission(
       config.permissions.prefixes.DATAFLOW,
       referenceDataflowId,
       [config.permissions.roles.STEWARD.key]
     );
 
-    const isLeadDesigner = isSteward || isCustodian;
-
-    dataflowDispatch({ type: 'LOAD_PERMISSIONS', payload: { isAdmin, isCustodian: isLeadDesigner, isCustodianUser } });
+    dataflowDispatch({
+      type: 'LOAD_PERMISSIONS',
+      payload: { isAdmin, isCustodian: isSteward || isCustodian, isCustodianUser: isCustodianUser || isStewardUser }
+    });
   };
 
   const onLoadReferenceDataflow = async () => {

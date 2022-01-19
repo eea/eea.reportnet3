@@ -810,6 +810,10 @@ export const FieldsDesigner = ({
     }
   };
 
+  const getContentTableClassName = () => {
+    return !isNil(fields) && fields.length < 3 ? styles.dragAndDropItems : '';
+  };
+
   return (
     <Fragment>
       <Toolbar>
@@ -966,7 +970,7 @@ export const FieldsDesigner = ({
           </div>
         </div>
       </div>
-      <div className={styles.contentTable}>
+      <div className={`${styles.contentTable} ${getContentTableClassName()}`}>
         {!viewType['tabularData'] && (
           <div className={styles.fieldsHeader}>
             <label></label>

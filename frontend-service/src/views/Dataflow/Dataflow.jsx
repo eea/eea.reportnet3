@@ -32,7 +32,7 @@ import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { Menu } from 'views/_components/Menu';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
-import { RepresentativesList } from './_components/RepresentativesList';
+import { ManageLeadReporters } from './_components/ManageLeadReporters';
 import { ShareRights } from 'views/_components/ShareRights';
 import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
@@ -1212,7 +1212,7 @@ const Dataflow = () => {
             onHide={() => manageDialogs('isManageRolesDialogVisible', false)}
             visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
-              <RepresentativesList
+              <ManageLeadReporters
                 dataflowId={dataflowId}
                 dataflowType={dataflowState.dataflowType}
                 representativesImport={dataflowState.representativesImport}

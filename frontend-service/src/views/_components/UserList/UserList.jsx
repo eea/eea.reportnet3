@@ -52,9 +52,9 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
     }
   };
 
-  const getFilters = filterOptions => {
-    return <MyFilters className="userList" data={userListData} options={filterOptions} viewType="userList" />;
-  };
+  const getFilters = filterOptions => (
+    <MyFilters className="userList" data={userListData} options={filterOptions} viewType="userList" />
+  );
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
@@ -74,9 +74,11 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
       { key: 'role', header: resourcesContext.messages['role'] },
       { key: 'email', header: resourcesContext.messages['user'] }
     ];
+
     if (isNil(representativeId) && isNil(dataflowId)) {
       columns.splice(0, 0, { key: 'dataflowName', header: resourcesContext.messages['dataflowName'] });
     }
+
     if (isNil(representativeId) && !isNil(dataflowId)) {
       columns.push({
         key: 'dataProviderName',

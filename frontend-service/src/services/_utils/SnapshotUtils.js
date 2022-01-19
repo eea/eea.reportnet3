@@ -1,7 +1,7 @@
 import { Snapshot } from 'entities/Snapshot';
 
-const parseSnapshotListDTO = snapshotsDTO => {
-  return snapshotsDTO?.map(
+const parseSnapshotListDTO = snapshotsDTO =>
+  snapshotsDTO?.map(
     snapshotDTO =>
       new Snapshot({
         creationDate: snapshotDTO.creationDate,
@@ -11,6 +11,5 @@ const parseSnapshotListDTO = snapshotsDTO => {
         isReleased: snapshotDTO.release
       })
   );
-};
 
 export const SnapshotUtils = { parseSnapshotListDTO };

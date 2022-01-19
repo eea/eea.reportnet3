@@ -214,6 +214,14 @@
   }
 }
 
+.dragAndDropItems {
+  div > div:first-child {
+    svg {
+      margin-left: auto;
+    }
+  }
+}
+
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
   @include shadow-0em;
 }
