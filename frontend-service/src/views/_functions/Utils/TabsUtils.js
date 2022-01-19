@@ -1,26 +1,17 @@
-const getIndexByHeader = (header, tabsArray) => {
-  return tabsArray
-    .map(tab => {
-      return tab.header;
-    })
-    .indexOf(header);
-};
+const getIndexByHeader = (header, tabsArray) => tabsArray.map(tab => tab.header).indexOf(header);
 
 const getIndexByTableProperty = (value, tabsArray, property) => {
-  const indx = tabsArray
-    .map(tab => {
-      return tab[property];
-    })
-    .indexOf(value);
+  const indx = tabsArray.map(tab => tab[property]).indexOf(value);
   return indx !== -1 ? indx : 0;
 };
 
-const getMaxIndex = tabsArray => {
-  return Math.max(...tabsArray.map(tab => tab.index));
-};
+const getMaxIndex = tabsArray => Math.max(...tabsArray.map(tab => tab.index));
 
 const getTableSchemaIdByIndex = (index, tabsArray) => {
-  if (index === '') return -1;
+  if (index === '') {
+    return -1;
+  }
+
   return tabsArray[index].id;
 };
 
