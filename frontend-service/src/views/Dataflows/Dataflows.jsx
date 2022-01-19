@@ -22,6 +22,7 @@ import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
+import { ManageWebforms } from './_components/ManageWebforms';
 import { MyFilters } from 'views/_components/MyFilters';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
@@ -75,13 +76,14 @@ const Dataflows = () => {
     isBusinessDataflowDialogVisible: false,
     isCitizenScienceDataflowDialogVisible: false,
     isCustodian: null,
+    isManageWebformsDialogVisible: false,
     isNationalCoordinator: false,
     isRecreatePermissionsDialogVisible: false,
     isReferencedDataflowDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
-    isValidatingAllDataflowsUsers: false,
     isUserListVisible: false,
+    isValidatingAllDataflowsUsers: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     reference: [],
     reporting: [],
@@ -210,9 +212,19 @@ const Dataflows = () => {
       title: 'adminCreatePermissions'
     };
 
+    const adminManageWebformsBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'table',
+      isVisible: isAdmin,
+      label: 'manageWebforms',
+      onClick: () => manageDialogs('isManageWebformsDialogVisible', true),
+      title: 'manageWebforms'
+    };
+
     leftSideBarContext.addModels(
       [
         adminCreateNewPermissionsBtn,
+        adminManageWebformsBtn,
         createBusinessDataflowBtn,
         createCitizenScienceDataflowBtn,
         createReferenceDataflowBtn,
@@ -662,6 +674,13 @@ const Dataflows = () => {
           visible={dataflowsState.isRecreatePermissionsDialogVisible}>
           {resourcesContext.messages['confirmCreateNewPermissions']}
         </ConfirmDialog>
+      )}
+
+      {dataflowsState.isManageWebformsDialogVisible && (
+        <ManageWebforms
+          isDialogVisible={dataflowsState.isManageWebformsDialogVisible}
+          onCloseDialog={() => manageDialogs('isManageWebformsDialogVisible', false)}
+        />
       )}
 
       {dataflowsState.isCitizenScienceDataflowDialogVisible && (
