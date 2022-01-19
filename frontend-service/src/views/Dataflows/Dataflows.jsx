@@ -142,7 +142,7 @@ const Dataflows = () => {
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
-  const { filteredData } = useFilters(tabId);
+  const { filteredData, filterBy } = useFilters(tabId);
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -307,7 +307,7 @@ const Dataflows = () => {
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {
-        const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles, filterBy);
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'reporting' });
       } else if (TextUtils.areEquals(tabId, 'reference')) {
@@ -618,7 +618,7 @@ const Dataflows = () => {
             onTabChange={event => onChangeTab(event.index, event.value)}
           />
         </div>
-        <MyFilters data={dataflowsState[tabId]} options={options[tabId]} viewType={tabId} />
+        <MyFilters data={dataflowsState[tabId]} onFilter={getDataflows} options={options[tabId]} viewType={tabId} />
         <DataflowsList
           className="dataflowList-accepted-help-step"
           filteredData={filteredData}
