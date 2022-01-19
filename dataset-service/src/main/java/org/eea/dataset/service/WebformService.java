@@ -45,4 +45,12 @@ public interface WebformService {
    * @return the list webforms
    */
   List<WebformMetabaseVO> getListWebforms();
+
+  /**
+   * Delete webform config.
+   *
+   * @param id the id
+   * @throws EEAException the EEA exception
+   */
+  void deleteWebformConfig(Long id) throws EEAException;
 }

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +24,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.ApiOperation;
-import springfox.documentation.annotations.ApiIgnore;
 
 
 /**
@@ -31,7 +31,7 @@ import springfox.documentation.annotations.ApiIgnore;
  */
 @RestController
 @RequestMapping("/webform")
-@ApiIgnore
+// @ApiIgnore
 public class WebformControllerImpl implements WebformController {
 
 
@@ -84,9 +84,9 @@ public class WebformControllerImpl implements WebformController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasRole('ADMIN')")
+  // @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/webformConfig")
-  @ApiOperation(value = "Update webform config json into the system", hidden = true)
+  @ApiOperation(value = "Update webform config json into the system", hidden = false)
   public void updateWebformConfig(@RequestBody WebformConfigVO webformConfig) {
     try {
       webformService.updateWebformConfig(webformConfig.getIdReferenced(), webformConfig.getName(),
@@ -118,6 +118,26 @@ public class WebformControllerImpl implements WebformController {
           EEAErrorMessage.OBTAINING_WEBFORM_CONFIG);
     }
     return json;
+  }
+
+
+  /**
+   * Delete webform config.
+   *
+   * @param id the id
+   */
+  @Override
+  @HystrixCommand
+  // @PreAuthorize("hasRole('ADMIN')")
+  @DeleteMapping("/{id}/webformConfig")
+  @ApiOperation(value = "Delete webform config", hidden = false)
+  public void deleteWebformConfig(Long id) {
+    try {
+      webformService.deleteWebformConfig(id);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.ERROR_WEBFORM_IN_USE);
+    }
   }
 
 }

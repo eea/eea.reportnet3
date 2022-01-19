@@ -11,6 +11,7 @@ import org.eea.dataset.mapper.WebformMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.WebformMetabase;
 import org.eea.dataset.persistence.metabase.repository.WebformRepository;
 import org.eea.dataset.persistence.schemas.domain.webform.WebformConfig;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.WebformConfigRepository;
 import org.eea.dataset.service.impl.WebformServiceImpl;
 import org.eea.exception.EEAErrorMessage;
@@ -46,6 +47,9 @@ public class WebformServiceTest {
 
   @Mock
   private WebformConfigRepository webformConfigRepository;
+
+  @Mock
+  private SchemasRepository schemasRepository;
 
   /**
    * Inits the mocks.
@@ -117,4 +121,22 @@ public class WebformServiceTest {
     Mockito.verify(webformConfigRepository, times(1)).findByIdReferenced(Mockito.any());
   }
 
+  @Test
+  public void testDeleteWebformConfig() throws EEAException {
+    WebformMetabase webformMetabase = new WebformMetabase();
+    webformMetabase.setId(1L);
+    webformMetabase.setLabel("test");
+    webformMetabase.setValue("test");
+    Mockito.when(webformRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(webformMetabase));
+    WebformConfig webform = new WebformConfig();
+    webform.setIdReferenced(1L);
+    webform.setName("test");
+    Map<String, Object> content = new HashMap<>();
+    content.put("name", "value1");
+    webform.setFile(content);
+    Mockito.when(webformConfigRepository.findByIdReferenced(Mockito.anyLong())).thenReturn(webform);
+    webformServiceImpl.deleteWebformConfig(1L);
+    Mockito.verify(webformConfigRepository, times(1)).deleteByIdReferenced(Mockito.anyLong());
+  }
 }

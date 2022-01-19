@@ -188,4 +188,6 @@ public interface ExtendedSchemaRepository {
    * @return true, if successful
    */
   boolean findAvailableInPublicByIdDataSetSchema(ObjectId idDatasetSchema);
+
+  boolean existsWebformName(String name);
 }

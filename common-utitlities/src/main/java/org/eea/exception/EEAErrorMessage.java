@@ -688,6 +688,9 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_JSON. */
   public static final String ERROR_JSON = "Error in the json provided.";
 
+  /** The Constant ERROR_WEBFORM_IN_USE. */
+  public static final String ERROR_WEBFORM_IN_USE = "Error: the webform to delete is in use.";
+
   /**
    * Instantiates a new EEA error message.
    */

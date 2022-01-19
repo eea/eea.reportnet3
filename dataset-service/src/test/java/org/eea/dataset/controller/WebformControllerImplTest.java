@@ -119,4 +119,22 @@ public class WebformControllerImplTest {
     }
   }
 
+  @Test
+  public void testDeleteWebformConfig() throws EEAException {
+    Mockito.doNothing().when(webformservice).deleteWebformConfig(Mockito.anyLong());
+    webFormControllerImpl.deleteWebformConfig(1L);
+    Mockito.verify(webformservice, times(1)).deleteWebformConfig(Mockito.anyLong());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteWebformConfigException() throws EEAException {
+    doThrow(new EEAException()).when(webformservice).deleteWebformConfig(Mockito.anyLong());
+    try {
+      webFormControllerImpl.deleteWebformConfig(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(e.getStatus(), HttpStatus.BAD_REQUEST);
+      throw e;
+    }
+  }
+
 }

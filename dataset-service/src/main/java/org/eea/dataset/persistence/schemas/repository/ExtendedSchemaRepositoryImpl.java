@@ -496,4 +496,15 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
     }
     return avaliable;
   }
+
+  @Override
+  public boolean existsWebformName(String name) {
+    boolean exists = false;
+    Object document = mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
+        .find(new Document("webform.name", name)).first();
+    if (null != document) {
+      exists = true;
+    }
+    return exists;
+  }
 }

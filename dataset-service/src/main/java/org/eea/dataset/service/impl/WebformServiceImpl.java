@@ -2,11 +2,13 @@ package org.eea.dataset.service.impl;
 
 import java.util.HashMap;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.WebformMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.WebformMetabase;
 import org.eea.dataset.persistence.metabase.repository.WebformRepository;
 import org.eea.dataset.persistence.schemas.domain.webform.WebformConfig;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.WebformConfigRepository;
 import org.eea.dataset.service.WebformService;
 import org.eea.exception.EEAErrorMessage;
@@ -51,6 +53,8 @@ public class WebformServiceImpl implements WebformService {
   private WebformMetabaseMapper webformMetabaseMapper;
 
 
+  @Autowired
+  private SchemasRepository schemasRepository;
 
   /**
    * Gets the webforms list.
@@ -121,23 +125,29 @@ public class WebformServiceImpl implements WebformService {
     if (null != webformMetabase) {
 
       List<WebformMetabaseVO> existingWebforms = getListWebforms();
-      if (existingWebforms.stream()
+      if (StringUtils.isNotBlank(name) && existingWebforms.stream()
           .filter(w -> w.getLabel().equals(name) && !w.getId().equals(webformMetabase.getId()))
           .count() > 0) {
         LOG_ERROR.error("Error updating new webform config. The name already exists");
         throw new EEAException(EEAErrorMessage.NAME_DUPLICATED);
       }
 
-      webformMetabase.setLabel(name);
-      webformMetabase.setValue(name);
+      if (StringUtils.isNotBlank(name)) {
+        webformMetabase.setLabel(name);
+        webformMetabase.setValue(name);
+      }
 
       WebformConfig webform = webformConfigRepository.findByIdReferenced(id);
       ObjectMapper mapper = new ObjectMapper();
       mapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
       try {
-        webform.setFile(mapper.readValue(content, HashMap.class));
+        if (StringUtils.isNotBlank(content)) {
+          webform.setFile(mapper.readValue(content, HashMap.class));
+        }
         webform.setIdReferenced(id);
-        webform.setName(name);
+        if (StringUtils.isNotBlank(name)) {
+          webform.setName(name);
+        }
 
         webformConfigRepository.updateWebFormConfig(webform);
         webformRepository.save(webformMetabase);
@@ -149,6 +159,33 @@ public class WebformServiceImpl implements WebformService {
     }
   }
 
+  /**
+   * Delete webform config.
+   *
+   * @param id the id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void deleteWebformConfig(Long id) throws EEAException {
+
+    WebformMetabase webformMetabase = webformRepository.findById(id).orElse(null);
+
+    if (null != webformMetabase) {
+      boolean used = schemasRepository.existsWebformName(webformMetabase.getLabel());
+      if (Boolean.FALSE.equals(used)) {
+        WebformConfig webform = webformConfigRepository.findByIdReferenced(id);
+        webformConfigRepository.deleteByIdReferenced(webform.getIdReferenced());
+        webformRepository.delete(webformMetabase);
+        LOG.info("The webform with id {} and name {} has been deleted", id,
+            webformMetabase.getLabel());
+      } else {
+        LOG_ERROR.error("The webform with id {} and name {} cannot be deleted because is in use",
+            id, webformMetabase.getLabel());
+        throw new EEAException(EEAErrorMessage.ERROR_WEBFORM_IN_USE);
+      }
+    }
+  }
 
   /**
    * Find webform config content by id.
