@@ -109,6 +109,7 @@ const initialState = {
 
 export const ValidationProvider = ({ children }) => {
   const [state, dispatch] = useReducer(validationReducer, initialState);
+
   return (
     <ValidationContext.Provider
       value={{

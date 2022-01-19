@@ -44,8 +44,8 @@ export const DatasetService = {
   createRecord: async (datasetId, tableSchemaId, records) => {
     const datasetTableRecords = [];
     records.forEach(record => {
-      let fields = record.dataRow.map(dataTableFieldDTO => {
-        let newField = new DatasetTableField({});
+      const fields = record.dataRow.map(dataTableFieldDTO => {
+        const newField = new DatasetTableField({});
         newField.id = null;
         newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
         newField.type = dataTableFieldDTO.fieldData.type;
@@ -57,7 +57,8 @@ export const DatasetService = {
 
         return newField;
       });
-      let datasetTableRecord = new DatasetTableRecord();
+
+      const datasetTableRecord = new DatasetTableRecord();
 
       datasetTableRecord.datasetPartitionId = record.dataSetPartitionId;
       datasetTableRecord.fields = fields;
@@ -112,15 +113,14 @@ export const DatasetService = {
     const datasetTablesDTO = await DatasetRepository.getStatistics(datasetId);
 
     //Sort by schema order
-    datasetTablesDTO.data.tables = datasetTablesDTO.data.tables.sort((a, b) => {
-      return tableSchemaNames.indexOf(a.nameTableSchema) - tableSchemaNames.indexOf(b.nameTableSchema);
-    });
+    datasetTablesDTO.data.tables = datasetTablesDTO.data.tables.sort(
+      (a, b) => tableSchemaNames.indexOf(a.nameTableSchema) - tableSchemaNames.indexOf(b.nameTableSchema)
+    );
 
     const dataset = new Dataset({});
     dataset.datasetSchemaName = datasetTablesDTO.data.nameDataSetSchema;
     dataset.datasetErrors = datasetTablesDTO.data.datasetErrors;
     const tableStatisticValues = [];
-    let levelErrors = [];
     const allDatasetLevelErrors = [];
     const datasetTables = datasetTablesDTO.data.tables.map(datasetTableDTO => {
       allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(datasetTablesDTO.data));
@@ -135,6 +135,7 @@ export const DatasetService = {
         datasetTableDTO.totalRecordsWithErrors,
         datasetTableDTO.totalRecordsWithBlockers
       ]);
+
       return new DatasetTable({
         hasErrors: datasetTableDTO.tableErrors,
         tableSchemaId: datasetTableDTO.idTableSchema,
@@ -146,8 +147,8 @@ export const DatasetService = {
     const tableBarStatisticValues = !isEmpty(tableStatisticValues)
       ? DatasetUtils.tableStatisticValuesWithErrors(tableStatisticValues)
       : [];
-    levelErrors = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
-    dataset.levelErrorTypes = levelErrors;
+
+    dataset.levelErrorTypes = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
 
     let transposedValues = !isEmpty(tableStatisticValues) ? CoreUtils.transposeMatrix(tableStatisticValues) : [];
 
@@ -200,6 +201,7 @@ export const DatasetService = {
       datasetSchemaId,
       resultsNumber
     );
+
     return referencedFieldValuesDTO.data.map(
       referencedFieldDTO =>
         new DatasetTableField({
@@ -292,28 +294,32 @@ export const DatasetService = {
       const records = !isNull(datasetTableDTO.recordSchema)
         ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
             const fields = !isNull(dataTableRecordDTO.fieldSchema)
-              ? dataTableRecordDTO.fieldSchema.map(dataTableFieldDTO => {
-                  return new DatasetTableField({
-                    codelistItems: dataTableFieldDTO.codelistItems,
-                    description: dataTableFieldDTO.description,
-                    fieldId: dataTableFieldDTO.id,
-                    maxSize: dataTableFieldDTO.maxSize,
-                    pk: !isNull(dataTableFieldDTO.pk) ? dataTableFieldDTO.pk : false,
-                    pkHasMultipleValues: !isNull(dataTableFieldDTO.pkHasMultipleValues)
-                      ? dataTableFieldDTO.pkHasMultipleValues
-                      : false,
-                    pkMustBeUsed: !isNull(dataTableFieldDTO.pkMustBeUsed) ? dataTableFieldDTO.pkMustBeUsed : false,
-                    pkReferenced: !isNull(dataTableFieldDTO.pkReferenced) ? dataTableFieldDTO.pkReferenced : false,
-                    name: dataTableFieldDTO.name,
-                    readOnly: dataTableFieldDTO.readOnly,
-                    recordId: dataTableFieldDTO.idRecord,
-                    referencedField: dataTableFieldDTO.referencedField,
-                    required: dataTableFieldDTO.required,
-                    type: dataTableFieldDTO.type,
-                    validExtensions: !isNull(dataTableFieldDTO.validExtensions) ? dataTableFieldDTO.validExtensions : []
-                  });
-                })
+              ? dataTableRecordDTO.fieldSchema.map(
+                  dataTableFieldDTO =>
+                    new DatasetTableField({
+                      codelistItems: dataTableFieldDTO.codelistItems,
+                      description: dataTableFieldDTO.description,
+                      fieldId: dataTableFieldDTO.id,
+                      maxSize: dataTableFieldDTO.maxSize,
+                      pk: !isNull(dataTableFieldDTO.pk) ? dataTableFieldDTO.pk : false,
+                      pkHasMultipleValues: !isNull(dataTableFieldDTO.pkHasMultipleValues)
+                        ? dataTableFieldDTO.pkHasMultipleValues
+                        : false,
+                      pkMustBeUsed: !isNull(dataTableFieldDTO.pkMustBeUsed) ? dataTableFieldDTO.pkMustBeUsed : false,
+                      pkReferenced: !isNull(dataTableFieldDTO.pkReferenced) ? dataTableFieldDTO.pkReferenced : false,
+                      name: dataTableFieldDTO.name,
+                      readOnly: dataTableFieldDTO.readOnly,
+                      recordId: dataTableFieldDTO.idRecord,
+                      referencedField: dataTableFieldDTO.referencedField,
+                      required: dataTableFieldDTO.required,
+                      type: dataTableFieldDTO.type,
+                      validExtensions: !isNull(dataTableFieldDTO.validExtensions)
+                        ? dataTableFieldDTO.validExtensions
+                        : []
+                    })
+                )
               : null;
+
             return new DatasetTableRecord({
               datasetPartitionId: dataTableRecordDTO.id,
               fields,
@@ -321,6 +327,7 @@ export const DatasetService = {
             });
           })
         : null;
+
       return new DatasetTable({
         hasPKReferenced: !isEmpty(
           records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
@@ -336,6 +343,7 @@ export const DatasetService = {
         recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
       });
     });
+
     dataset.tables = tables;
     return dataset;
   },
@@ -406,15 +414,16 @@ export const DatasetService = {
       });
 
       if (!isNull(dataTableRecordDTO.recordValidations)) {
-        record.validations = dataTableRecordDTO.recordValidations.map(recordValidation => {
-          return new Validation({
-            date: recordValidation.validation.validationDate,
-            entityType: recordValidation.validation.typeEntity,
-            id: recordValidation.id,
-            levelError: recordValidation.validation.levelError,
-            message: recordValidation.validation.message
-          });
-        });
+        record.validations = dataTableRecordDTO.recordValidations.map(
+          recordValidation =>
+            new Validation({
+              date: recordValidation.validation.validationDate,
+              entityType: recordValidation.validation.typeEntity,
+              id: recordValidation.id,
+              levelError: recordValidation.validation.levelError,
+              message: recordValidation.validation.message
+            })
+        );
       }
       return record;
     });
@@ -473,6 +482,7 @@ export const DatasetService = {
 
       return newField;
     });
+
     const datasetTableRecord = new DatasetTableRecord();
 
     datasetTableRecord.datasetPartitionId = record.dataSetPartitionId;
