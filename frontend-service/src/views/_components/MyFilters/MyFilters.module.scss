@@ -249,6 +249,10 @@
   @extend .lineItems;
 }
 
+.userList {
+  @extend .lineItems;
+}
+
 .historicReleases {
   @extend .lineItems;
 }
