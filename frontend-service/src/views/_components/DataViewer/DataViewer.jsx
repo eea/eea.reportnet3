@@ -1108,6 +1108,7 @@ const DataViewer = ({
         isGroupedValidationSelected={isGroupedValidationSelected}
         isLoading={isLoading}
         levelErrorTypesWithCorrects={levelErrorAllTypes}
+        levelErrorValidations={levelErrorValidations}
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onRefresh={onRefresh}
         onSetVisible={onSetVisible}

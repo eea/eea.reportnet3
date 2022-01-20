@@ -114,10 +114,16 @@ export const DatasetRepository = {
   //     headers: { 'Content-Type': 'application/octet-stream' }
   //   }),
 
-  exportTableData: async (datasetId, tableSchemaId, fileType, filterValue) => {
-    const url = isEmpty(filterValue)
+  exportTableData: async (datasetId, tableSchemaId, fileType, filterValue, levelErrorValidations) => {
+    const url = isEmpty(filterValue || levelErrorValidations)
       ? getUrl(DatasetConfig.exportTableData, { datasetId, fileType, tableSchemaId })
-      : getUrl(DatasetConfig.exportTableDataFiltered, { datasetId, fileType, tableSchemaId, filterValue });
+      : getUrl(DatasetConfig.exportTableDataFiltered, {
+          datasetId,
+          fileType,
+          tableSchemaId,
+          filterValue,
+          levelError: levelErrorValidations
+        });
 
     return await HTTPRequester.download({ url });
   },

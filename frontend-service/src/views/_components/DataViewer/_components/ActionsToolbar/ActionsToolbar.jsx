@@ -44,6 +44,7 @@ const ActionsToolbar = ({
   isGroupedValidationSelected,
   isLoading,
   levelErrorTypesWithCorrects,
+  levelErrorValidations,
   onHideSelectGroupedValidation,
   onSetVisible,
   onUpdateData,
@@ -125,7 +126,7 @@ const ActionsToolbar = ({
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
       setExportTableDataName(createTableName(tableName, fileType));
-      await DatasetService.exportTableData(datasetId, tableId, fileType, filter.valueFilter);
+      await DatasetService.exportTableData(datasetId, tableId, fileType, filter.valueFilter, levelErrorValidations);
     } catch (error) {
       console.error('ActionsToolbar - onExportTableData.', error);
       setIsLoadingFile(false);
