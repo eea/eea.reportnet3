@@ -24,6 +24,7 @@ import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ManageWebforms } from './_components/ManageWebforms';
 import { MyFilters } from 'views/_components/MyFilters';
+import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
@@ -71,6 +72,7 @@ const Dataflows = () => {
     citizenScience: [],
     dataflowsCount: {},
     dataflowsCountFirstLoad: false,
+    filteredData: { business: [], citizenScience: [], reference: [], reporting: [] },
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
     isCitizenScienceDataflowDialogVisible: false,
@@ -84,10 +86,10 @@ const Dataflows = () => {
     isUserListVisible: false,
     isValidatingAllDataflowsUsers: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
+    pagination: { firstRow: 0, numberRows: 10, pageNum: 0 },
+    pinnedSeparatorIndex: -1,
     reference: [],
-    reporting: [],
-    filteredData: { business: [], citizenScience: [], reference: [], reporting: [] },
-    pinnedSeparatorIndex: -1
+    reporting: []
   });
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
@@ -101,6 +103,7 @@ const Dataflows = () => {
     isCustodian,
     isNationalCoordinator,
     loadingStatus,
+    pagination,
     pinnedSeparatorIndex
   } = dataflowsState;
 
@@ -244,13 +247,13 @@ const Dataflows = () => {
   useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       onLoadPermissions();
-      getDataflows();
+      getDataflows(pagination.firstRow, pagination.numberRows, pagination.pageNum);
     }
   }, [userContext.contextRoles]);
 
   useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
-      getDataflows();
+      getDataflows(pagination.firstRow, pagination.numberRows, pagination.pageNum);
     }
   }, [tabId]);
 
@@ -297,7 +300,7 @@ const Dataflows = () => {
       return dataflow;
     });
 
-  const getDataflows = async () => {
+  const getDataflows = async (firstRow, numberRows, pageNum) => {
     setLoading(true);
 
     try {
@@ -602,6 +605,29 @@ const Dataflows = () => {
     reporting: dataflowsFilterOptions
   };
 
+  const onChangePagination = pagination => dataflowsDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
+
+  const onPaginate = event => {
+    onChangePagination({ first: event.first, rows: event.rows, pageNum: event.page });
+    getDataflows(event.first, event.rows, event.page);
+  };
+
+  const renderPaginator = () => {
+    if (filteredData[tabId].length > 10 && !loadingStatus[tabId]) {
+      return (
+        <Paginator
+          className="p-paginator-bottom"
+          first={pagination.firstRow}
+          onPageChange={onPaginate}
+          // rightContent={getPaginatorRecordsCount()}
+          rightContent={`${resourcesContext.messages['totalRecords']} ${dataflowsState[tabId].length}`}
+          rows={pagination.numberRows}
+          rowsPerPageOptions={[5, 10, 15]}
+          totalRecords={filteredData[tabId].length}
+        />
+      );
+    }
+  };
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
@@ -620,6 +646,7 @@ const Dataflows = () => {
           options={options[tabId]}
           viewType={tabId}
         />
+        {renderPaginator()}
         <DataflowsList
           className="dataflowList-accepted-help-step"
           filteredData={filteredData[tabId]}
@@ -630,6 +657,7 @@ const Dataflows = () => {
           reorderDataflows={onReorderPinnedDataflows}
           visibleTab={tabId}
         />
+        {renderPaginator()}
       </div>
 
       <GoTopButton parentRef={containerRef} referenceMargin={70} />

@@ -61,6 +61,9 @@ export const dataflowsReducer = (state, { type, payload }) => {
     case 'ON_LOAD_OBLIGATION':
       return { ...state, obligation: { id: payload.id, title: payload.title } };
 
+    case 'ON_PAGINATE':
+      return { ...state, pagination: payload.pagination };
+
     case 'SET_IS_VALIDATING_ALL_DATAFLOWS_USERS':
       return { ...state, isValidatingAllDataflowsUsers: payload.isValidatingAllDataflowsUsers };
 
