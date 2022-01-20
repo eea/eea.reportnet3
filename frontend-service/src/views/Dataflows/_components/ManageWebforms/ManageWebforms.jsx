@@ -78,7 +78,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     } catch (error) {
       console.error('ManageWebforms - onDownload.', error);
       setLoadingStatus('error');
-      notificationContext.add({ type: 'GET_WEBFORM_LIST_ERROR' }, true);
+      notificationContext.add({ type: 'GET_WEBFORM_CONFIGURATION_LIST_ERROR' }, true);
     } finally {
       setSelectedWebformId(null);
     }
@@ -98,8 +98,8 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       console.error('ManageWebforms - onConfirm.', error);
       setLoadingStatus('error');
       isNil(selectedWebformId)
-        ? notificationContext.add({ type: 'CREATE_WEBFORM_ERROR' }, true)
-        : notificationContext.add({ type: 'EDIT_WEBFORM_ERROR' }, true);
+        ? notificationContext.add({ type: 'CREATE_WEBFORM_CONFIGURATION_ERROR' }, true)
+        : notificationContext.add({ type: 'EDIT_WEBFORM_CONFIGURATION_ERROR' }, true);
     } finally {
       setIsAddEditDialogVisible(false);
       setJsonContent(null);
@@ -126,7 +126,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     } catch (error) {
       console.error('ManageWebforms - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
-      notificationContext.add({ type: 'DELETE_WEBFORM_ERROR' }, true);
+      notificationContext.add({ type: 'DELETE_WEBFORM_CONFIGURATION_ERROR' }, true);
     } finally {
       setLoadingStatus('idle');
       setSelectedWebformId(null);
