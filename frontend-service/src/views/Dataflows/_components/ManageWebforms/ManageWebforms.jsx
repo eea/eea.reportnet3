@@ -140,7 +140,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
   const onAddClick = () => setIsAddEditDialogVisible(true);
 
-  const onAddOrEditDialogClose = () => {
+  const onAddEditDialogClose = () => {
     setIsAddEditDialogVisible(false);
     setSelectedWebformId(null);
   };
@@ -152,7 +152,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
   const onFileUpload = async e => {
     e.preventDefault();
-    if (!isEmpty(e.target.files[0])) {
+    if (!isNil(e.target.files[0])) {
       const reader = new FileReader();
       reader.onload = async e => {
         const text = e.target.result;
@@ -260,7 +260,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         className="p-button-secondary p-button-animated-blink"
         icon="cancel"
         label={resourcesContext.messages['cancel']}
-        onClick={onAddOrEditDialogClose}
+        onClick={onAddEditDialogClose}
       />
     </Fragment>
   );
@@ -336,7 +336,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
               : resourcesContext.messages['editWebformDialogHeader']
           }
           modal
-          onHide={onAddOrEditDialogClose}
+          onHide={onAddEditDialogClose}
           visible={isAddEditDialogVisible}>
           <label htmlFor="name">
             {resourcesContext.messages['name']}
@@ -351,7 +351,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           <label htmlFor="jsonContent">
             {resourcesContext.messages['jsonFile']}
             <input
-              className="jsonContent"
+              accept="application/JSON"
               id="jsonContent"
               name="jsonContent"
               onChange={onFileUpload}
