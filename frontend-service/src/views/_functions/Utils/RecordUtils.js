@@ -44,14 +44,23 @@ const changeRecordInTable = (tableData, rowIndex, colsSchema, records) => {
 };
 
 const formatDate = (date, isInvalidDate) => {
-  if (isInvalidDate) return '';
-  let d = new Date(date),
-    month = '' + (d.getMonth() + 1),
-    day = '' + d.getDate(),
-    year = d.getFullYear();
+  if (isInvalidDate) {
+    return '';
+  }
 
-  if (month.length < 2) month = '0' + month;
-  if (day.length < 2) day = '0' + day;
+  const d = new Date(date);
+
+  let month = '' + (d.getMonth() + 1);
+  let day = '' + d.getDate();
+  let year = d.getFullYear();
+
+  if (month.length < 2) {
+    month = '0' + month;
+  }
+
+  if (day.length < 2) {
+    day = '0' + day;
+  }
 
   return [year, month, day].join('-');
 };
@@ -122,10 +131,9 @@ const getClipboardData = (pastedData, pastedRecords, colsSchema, fetchedDataFirs
     emptyRecord.copiedCols = copiedCols.length;
     copiedBulkRecords.push(emptyRecord);
   });
+
   //Slice to 500 records and renumber de records for delete button
-  return copiedBulkRecords.slice(0, 500).map((record, i) => {
-    return { ...record, recordId: i };
-  });
+  return copiedBulkRecords.slice(0, 500).map((record, i) => ({ ...record, recordId: i }));
 };
 
 const getCodelistItems = (colsSchema, field) => {
@@ -133,9 +141,7 @@ const getCodelistItems = (colsSchema, field) => {
   return !isNil(codelistItems)
     ? codelistItems
         .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-        .map(codelistItem => {
-          return { itemType: codelistItem, value: codelistItem };
-        })
+        .map(codelistItem => ({ itemType: codelistItem, value: codelistItem }))
     : [];
 };
 
@@ -144,23 +150,20 @@ const getCodelistItemsInSingleColumn = column => {
   return !isNil(codelistItems)
     ? codelistItems
         .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-        .map(codelistItem => {
-          return { itemType: codelistItem, value: codelistItem };
-        })
+        .map(codelistItem => ({ itemType: codelistItem, value: codelistItem }))
     : [];
 };
 
 const getCodelistItemsWithEmptyOption = (column, noneText) => {
   const codelistItems = column.codelistItems
     ?.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }))
-    .map(codelistItem => {
-      return { itemType: codelistItem, value: codelistItem };
-    });
+    .map(codelistItem => ({ itemType: codelistItem, value: codelistItem }));
 
   codelistItems.unshift({
     itemType: noneText,
     value: ''
   });
+
   return codelistItems;
 };
 
@@ -247,13 +250,7 @@ const getNumCopiedRecords = pastedData => {
   }
 };
 
-const getRecordId = (tableData, record) => {
-  return tableData
-    .map(e => {
-      return e.recordId;
-    })
-    .indexOf(record.recordId);
-};
+const getRecordId = (tableData, record) => tableData.map(e => e.recordId).indexOf(record.recordId);
 
 const getTextWidth = (text, font) => {
   const canvas =
@@ -267,18 +264,18 @@ const getTextWidth = (text, font) => {
 const createEmptyObject = (columnsSchema, data) => {
   let fields;
   if (!isUndefined(columnsSchema)) {
-    fields = columnsSchema.map(column => {
-      return {
-        fieldData: { [column.field]: null, type: column.type, fieldSchemaId: column.field }
-      };
-    });
+    fields = columnsSchema.map(column => ({
+      fieldData: { [column.field]: null, type: column.type, fieldSchemaId: column.field }
+    }));
   }
+
   const obj = {
     dataRow: fields,
     recordSchemaId: columnsSchema[0].recordId
   };
 
   obj.datasetPartitionId = null;
+
   //dataSetPartitionId is needed for checking the rows owned by delegated contributors
   if (!isUndefined(data) && data.length > 0) {
     obj.datasetPartitionId = data.datasetPartitionId;

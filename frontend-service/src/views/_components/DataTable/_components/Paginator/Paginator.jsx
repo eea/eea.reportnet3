@@ -164,39 +164,33 @@ export class Paginator extends Component {
   }
 
   renderElement(key, template) {
-    let element;
-
     switch (key) {
       case 'FirstPageLink':
-        element = (
+        return (
           <FirstPageLink
             disabled={this.isFirstPage() || this.props.disabled}
             key={key}
             onClick={this.changePageToFirst}
           />
         );
-        break;
       case 'PrevPageLink':
-        element = (
+        return (
           <PrevPageLink
             disabled={this.isFirstPage() || this.props.disabled}
             key={key}
             onClick={this.changePageToPrev}
           />
         );
-        break;
       case 'NextPageLink':
-        element = (
+        return (
           <NextPageLink disabled={this.isLastPage() || this.props.disabled} key={key} onClick={this.changePageToNext} />
         );
-        break;
       case 'LastPageLink':
-        element = (
+        return (
           <LastPageLink disabled={this.isLastPage() || this.props.disabled} key={key} onClick={this.changePageToLast} />
         );
-        break;
       case 'PageLinks':
-        element = (
+        return (
           <PageLinks
             disabled={this.props.disabled}
             key={key}
@@ -205,9 +199,8 @@ export class Paginator extends Component {
             value={this.updatePageLinks()}
           />
         );
-        break;
       case 'CurrentPageReport':
-        element = (
+        return (
           <CurrentPageReport
             first={this.props.first}
             key={key}
@@ -219,13 +212,9 @@ export class Paginator extends Component {
             totalRecords={this.props.totalRecords}
           />
         );
-        break;
       default:
-        element = null;
-        break;
+        return null;
     }
-
-    return element;
   }
 
   renderElements() {
@@ -254,35 +243,28 @@ export class Paginator extends Component {
   render() {
     if (!this.props.alwaysShow && this.getPageCount() === 1) {
       return null;
-    } else {
-      let className = classNames('p-paginator p-component p-unselectable-text', this.props.className);
-
-      let paginatorElements = this.renderElements();
-
-      let leftContent = this.props.leftContent && (
-        <div className="p-paginator-left-content">{this.props.leftContent}</div>
-      );
-      let rightContent = this.props.rightContent && (
-        <div className="p-paginator-right-content">{this.props.rightContent}</div>
-      );
-
-      return (
-        <div className={className} style={this.props.style}>
-          <div className="p-paginator-left-content-rowsPerPage">
-            <RowsPerPageDropdown
-              disabled={this.props.disabled}
-              key="RowsPerPageDropdown"
-              label={this.context.messages['rowsPerPage']}
-              onChange={this.onRowsChange}
-              options={this.props.rowsPerPageOptions}
-              value={this.props.rows}
-            />
-            {leftContent}
-          </div>
-          <div className="p-paginator-middle-content">{paginatorElements}</div>
-          <div>{rightContent}</div>
-        </div>
-      );
     }
+
+    return (
+      <div
+        className={classNames('p-paginator p-component p-unselectable-text', this.props.className)}
+        style={this.props.style}>
+        <div className="p-paginator-left-content-rowsPerPage">
+          <RowsPerPageDropdown
+            disabled={this.props.disabled}
+            key="RowsPerPageDropdown"
+            label={this.context.messages['rowsPerPage']}
+            onChange={this.onRowsChange}
+            options={this.props.rowsPerPageOptions}
+            value={this.props.rows}
+          />
+          {this.props.leftContent && <div className="p-paginator-left-content">{this.props.leftContent}</div>}
+        </div>
+        <div className="p-paginator-middle-content">{this.renderElements()}</div>
+        <div>
+          {this.props.rightContent && <div className="p-paginator-right-content">{this.props.rightContent}</div>}
+        </div>
+      </div>
+    );
   }
 }

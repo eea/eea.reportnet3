@@ -1,5 +1,4 @@
 import { Fragment, useContext, useEffect, useLayoutEffect, useReducer } from 'react';
-import { useRecoilValue } from 'recoil';
 
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
@@ -31,11 +30,10 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
-import { filterByState } from '../MyFilters/_functions/Stores/filtersStores';
-
 import { qcListReducer } from './Reducers/qcListReducer';
 
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { getExpressionString } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/getExpressionString';
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -54,13 +52,11 @@ export const QCList = ({
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
 
-  const filterBy = useRecoilValue(filterByState(`qcList_${dataset.datasetId}`));
-  const isDataFiltered = !isEmpty(filterBy);
+  const { filteredData, isFiltered } = useFilters(`qcList_${dataset.datasetId}`);
 
   const [tabsValidationsState, tabsValidationsDispatch] = useReducer(qcListReducer, {
     deletedRuleId: null,
     editingRows: [],
-    filteredData: [],
     hasEmptyFields: false,
     initialFilteredData: [],
     initialValidationsList: [],
@@ -104,14 +100,12 @@ export const QCList = ({
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
-      {isDataFiltered &&
-      tabsValidationsState.validationList.validations.length !== tabsValidationsState.filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${tabsValidationsState.filteredData.length} | `
+      {isFiltered && tabsValidationsState.validationList.validations.length !== filteredData.length
+        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {tabsValidationsState.validationList.validations.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
-      {isDataFiltered &&
-      tabsValidationsState.validationList.validations.length === tabsValidationsState.filteredData.length
+      {isFiltered && tabsValidationsState.validationList.validations.length === filteredData.length
         ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
@@ -171,8 +165,6 @@ export const QCList = ({
   const onHideDeleteDialog = () => {
     isDeleteDialogVisible(false);
   };
-
-  const onLoadFilteredData = data => tabsValidationsDispatch({ type: 'FILTER_DATA', payload: { data } });
 
   const onLoadValidationsList = async datasetSchemaId => {
     let updatedRuleId = validationContext.updatedRuleId;
@@ -734,12 +726,11 @@ export const QCList = ({
           <MyFilters
             className="qcList"
             data={tabsValidationsState.validationList.validations}
-            getFilteredData={onLoadFilteredData}
             options={FILTER_OPTIONS}
             viewType={`qcList_${dataset.datasetId}`}
           />
         </div>
-        {!isEmpty(tabsValidationsState.filteredData) ? (
+        {!isEmpty(filteredData) ? (
           <DataTable
             autoLayout
             className={styles.paginatorValidationViewer}
@@ -753,14 +744,14 @@ export const QCList = ({
             onSort={event => onSort(event)}
             paginator
             paginatorDisabled={tabsValidationsState.editingRows.length > 0}
-            paginatorRight={!isNil(tabsValidationsState.filteredData) && getPaginatorRecordsCount()}
+            paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
             quickEditRowInfo={{
               updatedRow: validationContext.updatedRuleId,
               deletedRow: tabsValidationsState.deletedRuleId,
               property: 'id',
               condition:
                 validationContext.isFetchingData ||
-                isDataFiltered ||
+                isFiltered ||
                 tabsValidationsState.hasEmptyFields ||
                 tabsValidationsState.isTableSorted,
               requiredFields: ['name', 'message', 'shortCode']
@@ -770,7 +761,7 @@ export const QCList = ({
             sortField={tabsValidationsState.sortFieldValidations}
             sortOrder={tabsValidationsState.sortOrderValidations}
             totalRecords={tabsValidationsState.validationList.validations.length}
-            value={cloneDeep(tabsValidationsState.filteredData)}>
+            value={cloneDeep(filteredData)}>
             {getTableColumns()}
           </DataTable>
         ) : (

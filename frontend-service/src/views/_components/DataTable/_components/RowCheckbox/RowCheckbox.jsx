@@ -12,11 +12,11 @@ export const RowCheckbox = props => {
     }
   };
 
-  let className = classNames('p-checkbox-box p-component', {
+  const className = classNames('p-checkbox-box p-component', {
     'p-highlight': props.selected,
     'p-disabled': props.disabled
   });
-  let iconClassName = classNames('p-checkbox-icon p-clickable', { 'pi pi-check': props.selected });
+  const iconClassName = classNames('p-checkbox-icon p-clickable', { 'pi pi-check': props.selected });
 
   return (
     <div className="p-checkbox p-component">
