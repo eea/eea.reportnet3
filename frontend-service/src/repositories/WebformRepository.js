@@ -40,7 +40,7 @@ export const WebformRepository = {
       data.name = name;
     }
 
-    return await HTTPRequester.put({
+    return await HTTPRequester.update({
       url: getUrl(WebformConfig.update, { id }),
       data
     });
