@@ -5,7 +5,7 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const ValidateDatasetDialog = ({ disabled, onConfirmValidate }) => {
+export const DatasetValidateDialog = ({ disabled, onConfirmValidate }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [isValidateDialogVisible, setIsValidateDialogVisible] = useState(false);

@@ -18,7 +18,7 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { Dashboard } from 'views/_components/Dashboard';
 import { Dialog } from 'views/_components/Dialog';
-import { DeleteDatasetDataDialog } from 'views/_components/DeleteDatasetDataDialog';
+import { DatasetDeleteDataDialog } from 'views/_components/DatasetDeleteDataDialog';
 import { MainLayout } from 'views/_components/Layout';
 import { Menu } from 'views/_components/Menu';
 import { QCList } from 'views/_components/QCList';
@@ -31,7 +31,7 @@ import { TabsSchema } from 'views/_components/TabsSchema';
 import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
-import { ValidateDatasetDialog } from 'views/_components/ValidateDatasetDialog';
+import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -78,7 +78,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     tableSchemaId: QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : ''
   });
   const [datasetHasData, setDatasetHasData] = useState(false);
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [externalOperationsList, setExternalOperationsList] = useState({
     export: [],
@@ -413,7 +412,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const onConfirmDelete = async () => {
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
-      setDeleteDialogVisible(false);
       await DatasetService.deleteData(datasetId);
     } catch (error) {
       if (error.response.status === 423) {
@@ -1059,10 +1057,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               popup={true}
               ref={exportMenuRef}
             />
-            <DeleteDatasetDataDialog disabled={!hasWritePermissions} onConfirmDelete={onConfirmDelete} />
+            <DatasetDeleteDataDialog disabled={!hasWritePermissions} onConfirmDelete={onConfirmDelete} />
           </div>
           <div className="p-toolbar-group-right">
-            <ValidateDatasetDialog disabled={!hasWritePermissions} onConfirmValidate={onConfirmValidate} />
+            <DatasetValidateDialog disabled={!hasWritePermissions} onConfirmValidate={onConfirmValidate} />
             <Button
               className="p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step p-button-animated-blink"
               icon="warning"

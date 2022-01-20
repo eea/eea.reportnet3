@@ -6,7 +6,7 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const DeleteDatasetDataDialog = ({ children, disabled = false, onConfirmDelete, onHideDelete = () => {} }) => {
+export const DatasetDeleteDataDialog = ({ children, disabled = false, onConfirmDelete, onHideDelete = () => {} }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);

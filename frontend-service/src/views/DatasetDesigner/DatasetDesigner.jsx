@@ -17,10 +17,10 @@ import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchem
 import { Button } from 'views/_components/Button';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
-import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { Dashboard } from 'views/_components/Dashboard';
-import { DeleteDatasetDataDialog } from 'views/_components/DeleteDatasetDataDialog';
+import { DatasetDeleteDataDialog } from 'views/_components/DatasetDeleteDataDialog';
+import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputTextarea } from 'views/_components/InputTextarea';
@@ -38,7 +38,6 @@ import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
-import { ValidateDatasetDialog } from 'views/_components/ValidateDatasetDialog';
 import { Validations } from 'views/DatasetDesigner/_components/Validations';
 import { Webforms } from 'views/Webforms';
 
@@ -1554,12 +1553,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 popup={true}
                 ref={exportMenuRef}
               />
-              <DeleteDatasetDataDialog onConfirmDelete={onConfirmDelete} onHideDelete={onHideDelete}>
+              <DatasetDeleteDataDialog onConfirmDelete={onConfirmDelete} onHideDelete={onHideDelete}>
                 {deletePrefilledDataCheckbox}
-              </DeleteDatasetDataDialog>
+              </DatasetDeleteDataDialog>
             </div>
             <div className="p-toolbar-group-right">
-              <ValidateDatasetDialog
+              <DatasetValidateDialog
                 disabled={isDataflowOpen || isDesignDatasetEditorRead}
                 onConfirmValidate={onConfirmValidate}
               />
