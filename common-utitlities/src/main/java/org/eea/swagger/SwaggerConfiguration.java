@@ -27,7 +27,6 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration
 @EnableSwagger2
 @EnableWebMvc
-@Profile("!production")
 public class SwaggerConfiguration implements WebMvcConfigurer {
 
   /**
@@ -36,7 +35,8 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
    * @return the docket
    */
   @Bean
-  public Docket api() {
+  @Profile("!production")
+  public Docket nonProdApi() {
     return new Docket(DocumentationType.SWAGGER_2)
         .securityContexts(Lists.newArrayList(securityContext()))
         .securitySchemes(Lists.newArrayList(apiKey())).select()
@@ -44,35 +44,16 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
   }
 
   /**
-   * Api key.
+   * Prod api docket.
    *
-   * @return the api key
+   * @return the docket
    */
-  private static ApiKey apiKey() {
-    return new ApiKey("JWT", "Authorization", "header");
-  }
-
-  /**
-   * Security context.
-   *
-   * @return the security context
-   */
-  private SecurityContext securityContext() {
-    return SecurityContext.builder().securityReferences(defaultAuth())
-        .forPaths(PathSelectors.regex("/.*")).build();
-  }
-
-  /**
-   * Default auth list.
-   *
-   * @return the list
-   */
-  List<SecurityReference> defaultAuth() {
-    final AuthorizationScope authorizationScope =
-        new AuthorizationScope("global", "accessEverything");
-    final AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
-    authorizationScopes[0] = authorizationScope;
-    return Lists.newArrayList(new SecurityReference("JWT", authorizationScopes));
+  @Bean
+  @Profile("production")
+  public Docket prodApi() {
+    return new Docket(DocumentationType.SWAGGER_2)
+        .select()
+        .apis(RequestHandlerSelectors.basePackage("org.eea")).paths(PathSelectors.any()).build();
   }
 
   /**
@@ -106,5 +87,37 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
 
     source.registerCorsConfiguration("/v2/api-docs", config);
     return new CorsFilter(source);
+  }
+
+  /**
+   * Api key.
+   *
+   * @return the api key
+   */
+  private static ApiKey apiKey() {
+    return new ApiKey("JWT", "Authorization", "header");
+  }
+
+  /**
+   * Security context.
+   *
+   * @return the security context
+   */
+  private SecurityContext securityContext() {
+    return SecurityContext.builder().securityReferences(defaultAuth())
+        .forPaths(PathSelectors.regex("/.*")).build();
+  }
+
+  /**
+   * Default auth list.
+   *
+   * @return the list
+   */
+  private List<SecurityReference> defaultAuth() {
+    final AuthorizationScope authorizationScope =
+        new AuthorizationScope("global", "accessEverything");
+    final AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
+    authorizationScopes[0] = authorizationScope;
+    return Lists.newArrayList(new SecurityReference("JWT", authorizationScopes));
   }
 }
