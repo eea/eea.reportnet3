@@ -18,8 +18,13 @@ public interface ExtendedAuditRepository {
    * @param rule the rule
    * @param user the user
    * @param datasetId the dataset id
+   * @param status the status
+   * @param expression the expression
+   * @param metadata the metadata
+   * @throws JsonProcessingException the json processing exception
    */
-  void createAudit(Rule rule, UserRepresentationVO user, Long datasetId);
+  void createAudit(Rule rule, UserRepresentationVO user, Long datasetId, boolean status,
+      boolean expression, boolean metadata) throws JsonProcessingException;
 
   /**
    * Gets the audit by rule id.
