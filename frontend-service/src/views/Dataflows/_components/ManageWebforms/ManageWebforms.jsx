@@ -241,11 +241,19 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
+  const getIsDisabled = () => {
+    if (isNil(selectedWebformId)) {
+      return isNil(webformName) || isEmpty(webformName) || isNil(jsonContent) || loadingStatus === 'pending';
+    }
+
+    return (isNil(jsonContent) && (isNil(webformName) || isEmpty(webformName))) || loadingStatus === 'pending';
+  };
+
   const addEditDialogFooter = (
     <Fragment>
       <Button
         className="p-button-primary p-button-animated-blink "
-        disabled={loadingStatus === 'pending'}
+        disabled={getIsDisabled()}
         icon={loadingStatus === 'pending' ? 'spinnerAnimate' : 'check'}
         label={isNil(selectedWebformId) ? resourcesContext.messages['create'] : resourcesContext.messages['edit']}
         onClick={() => onConfirm()}
