@@ -63,31 +63,6 @@
   }
 }
 
-.actionButtons {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  .btnDelete,
-  .btnEdit {
-    border: 1px solid var(--general-border-color) !important;
-    box-shadow: 0em var(--c-blue-90) !important;
-    color: var(--errors) !important;
-    margin-left: 3px !important;
-
-    &:focus {
-      box-shadow: none;
-    }
-
-    &:enabled:hover {
-      border-color: var(--button-secondary-border-color-hover) !important;
-    }
-  }
-  .btnEdit {
-    color: var(--main-color-font) !important;
-  }
-}
-
 .checkedValueColumn {
   text-align: center;
 

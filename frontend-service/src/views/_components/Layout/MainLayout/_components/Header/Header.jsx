@@ -155,13 +155,7 @@ const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
     </a>
   );
 
-  const isLocalEnvironment = () => {
-    let url = window.location.href;
-    if (url.toString().includes('localhost')) {
-      return true;
-    }
-    return false;
-  };
+  const isLocalEnvironment = () => window.location.href.toString().includes('localhost');
 
   const localhostEnvironmentAlert = isLocalEnvironment() && (
     <div className={styles.localhostAlert}>

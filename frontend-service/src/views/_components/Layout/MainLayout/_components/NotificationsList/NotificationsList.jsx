@@ -79,14 +79,15 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   }, [columns]);
 
   const getValidUrl = (url = '') => {
-    let newUrl = window.decodeURIComponent(url);
-    newUrl = newUrl.trim().replace(/\s/g, '');
+    const newUrl = window.decodeURIComponent(url).trim().replace(/\s/g, '');
 
-    if (/^(:\/\/)/.test(newUrl)) return `http${newUrl}`;
-
-    if (!/^(f|ht)tps?:\/\//i.test(newUrl)) return `//${newUrl}`;
-
-    return newUrl;
+    if (/^(:\/\/)/.test(newUrl)) {
+      return `http${newUrl}`;
+    } else if (!/^(f|ht)tps?:\/\//i.test(newUrl)) {
+      return `//${newUrl}`;
+    } else {
+      return newUrl;
+    }
   };
 
   const linkTemplate = rowData => {
@@ -111,15 +112,12 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       }}></label>
   );
 
-  const notificationLevelTemplate = rowData => {
-    return (
-      !isNil(rowData.levelError) && (
-        <div className={styles.notificationLevelTemplateWrapper}>
-          <LevelError type={rowData.levelError.toLowerCase()} />
-        </div>
-      )
+  const notificationLevelTemplate = rowData =>
+    !isNil(rowData.levelError) && (
+      <div className={styles.notificationLevelTemplateWrapper}>
+        <LevelError type={rowData.levelError.toLowerCase()} />
+      </div>
     );
-  };
 
   const onChangePage = event => {
     setPaginationInfo({ ...paginationInfo, recordsPerPage: event.rows, firstPageRecord: event.first });
@@ -226,28 +224,24 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           {columns}
         </DataTable>
       );
+    } else if (isLoading) {
+      return (
+        <div className={styles.loadingSpinner}>
+          <Spinner className={styles.spinnerPosition} />
+        </div>
+      );
     } else {
-      if (isLoading) {
-        return (
-          <div className={styles.loadingSpinner}>
-            <Spinner className={styles.spinnerPosition} />
-          </div>
-        );
-      } else {
-        return (
-          <div className={styles.notificationsWithoutTable}>
-            <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
-          </div>
-        );
-      }
+      return (
+        <div className={styles.notificationsWithoutTable}>
+          <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
+        </div>
+      );
     }
   };
 
-  const newNotificationsClassName = rowData => {
-    return {
-      'p-highlight-bg': rowData.index < notificationContext.all.filter(notification => !notification.isSystem).length
-    };
-  };
+  const newNotificationsClassName = rowData => ({
+    'p-highlight-bg': rowData.index < notificationContext.all.filter(notification => !notification.isSystem).length
+  });
 
   const renderNotificationsListContent = () => {
     if (isNotificationVisible) {
