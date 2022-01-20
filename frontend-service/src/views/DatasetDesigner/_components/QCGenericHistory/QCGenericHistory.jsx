@@ -21,7 +21,7 @@ import { ValidationService } from 'services/ValidationService';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
-import { DataTableUtils } from 'views/_functions/Utils/DataTableUtils';
+import { ColumnTemplateUtils } from 'views/_functions/Utils/ColumnTemplateUtils';
 
 export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) => {
   const notificationContext = useContext(NotificationContext);
@@ -116,19 +116,19 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
         key: 'expression',
         header: resourcesContext.messages['expressionText'],
         template: (rowData, column) =>
-          DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
+          ColumnTemplateUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
       },
       {
         key: 'metadata',
         header: resourcesContext.messages['metadata'],
         template: (rowData, column) =>
-          DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
+          ColumnTemplateUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
       },
       {
         key: 'status',
         header: resourcesContext.messages['status'],
         template: (rowData, column) =>
-          DataTableUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
+          ColumnTemplateUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
       },
       {
         key: 'actions',

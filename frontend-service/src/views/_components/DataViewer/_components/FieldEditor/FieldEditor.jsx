@@ -126,6 +126,7 @@ const FieldEditor = ({
 
   const onFilter = async filter => {
     const colSchema = colsSchema.filter(colSchema => colSchema.field === cells.field)[0];
+
     if (isNil(colSchema) || isNil(colSchema.referencedField)) {
       return;
     }

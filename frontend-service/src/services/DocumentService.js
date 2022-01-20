@@ -12,13 +12,11 @@ export const DocumentService = {
 
   publicDownload: async (documentId, dataflowId) => await DocumentRepository.publicDownload(documentId, dataflowId),
 
-  upload: async (dataflowId, description, language, file, isPublic) => {
-    return await DocumentRepository.upload(dataflowId, description, language, file, isPublic);
-  },
+  upload: async (dataflowId, description, language, file, isPublic) =>
+    await DocumentRepository.upload(dataflowId, description, language, file, isPublic),
 
-  update: async (dataflowId, description, language, file, isPublic, documentId) => {
-    return await DocumentRepository.update(dataflowId, description, language, file, isPublic, documentId);
-  },
+  update: async (dataflowId, description, language, file, isPublic, documentId) =>
+    await DocumentRepository.update(dataflowId, description, language, file, isPublic, documentId),
 
   delete: async (documentId, dataflowId) => await DocumentRepository.delete(documentId, dataflowId)
 };
