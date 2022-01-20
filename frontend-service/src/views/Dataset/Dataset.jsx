@@ -16,7 +16,7 @@ import { Button } from 'views/_components/Button';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
-import { Dashboard } from 'views/_components/Dashboard';
+import { DatasetDashboardDialog } from 'views/_components/DatasetDashboardDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { DatasetDeleteDataDialog } from 'views/_components/DatasetDeleteDataDialog';
 import { MainLayout } from 'views/_components/Layout';
@@ -907,15 +907,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
   };
 
-  const renderDashboardFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon="cancel"
-      label={resourcesContext.messages['close']}
-      onClick={() => onSetVisible(setDashDialogVisible, false)}
-    />
-  );
-
   const renderImportOtherSystemsFooter = (
     <Fragment>
       <Button
@@ -1076,14 +1067,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               label={resourcesContext.messages['qcRules']}
               onClick={() => onSetVisible(setValidationListDialogVisible, true)}
             />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent dataset-dashboards-help-step ${
-                !datasetHasData ? null : 'p-button-animated-blink'
-              }`}
+            <DatasetDashboardDialog
               disabled={!datasetHasData}
-              icon="dashboard"
-              label={resourcesContext.messages['dashboards']}
-              onClick={() => onSetVisible(setDashDialogVisible, true)}
+              levelErrorTypes={levelErrorTypes}
+              tableSchemaNames={schemaTables.map(table => table.name)}
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
@@ -1106,20 +1093,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         </Toolbar>
       </div>
       {renderSwitchView()}
-      {dashDialogVisible && (
-        <Dialog
-          footer={renderDashboardFooter}
-          header={resourcesContext.messages['titleDashboard']}
-          onHide={() => onSetVisible(setDashDialogVisible, false)}
-          style={{ width: '70vw' }}
-          visible={dashDialogVisible}>
-          <Dashboard
-            levelErrorTypes={levelErrorTypes}
-            refresh={dashDialogVisible}
-            tableSchemaNames={schemaTables.map(table => table.name)}
-          />
-        </Dialog>
-      )}
       {isTableView ? (
         <TabsSchema
           dataProviderId={metadata?.dataset.dataProviderId}

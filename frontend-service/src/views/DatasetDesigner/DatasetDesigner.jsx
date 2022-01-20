@@ -18,7 +18,7 @@ import { Button } from 'views/_components/Button';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
-import { Dashboard } from 'views/_components/Dashboard';
+import { DatasetDashboardDialog } from 'views/_components/DatasetDashboardDialog';
 import { DatasetDeleteDataDialog } from 'views/_components/DatasetDeleteDataDialog';
 import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
 import { Dialog } from 'views/_components/Dialog';
@@ -1069,15 +1069,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     </div>
   );
 
-  const renderDashboardFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon="cancel"
-      label={resourcesContext.messages['close']}
-      onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
-    />
-  );
-
   const renderImportOtherSystemsFooter = (
     <Fragment>
       <Button
@@ -1604,18 +1595,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 label={resourcesContext.messages['externalIntegrations']}
                 onClick={() => manageDialogs('isIntegrationListDialogVisible', true)}
               />
-
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData &&
-                  !isDataflowOpen &&
-                  !isDesignDatasetEditorRead &&
-                  'p-button-animated-blink'
-                }`}
+              <DatasetDashboardDialog
                 disabled={!designerState.datasetHasData || isDataflowOpen || isDesignDatasetEditorRead}
-                icon="dashboard"
-                label={resourcesContext.messages['dashboards']}
-                onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: true })}
+                levelErrorTypes={designerState.levelErrorTypes}
+                tableSchemas={designerState.schemaTables.map(table => table.name)}
               />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
@@ -1728,20 +1711,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           setIsUniqueConstraintCreating={setIsUniqueConstraintCreating}
           setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
         />
-        {designerState.dashDialogVisible && (
-          <Dialog
-            footer={renderDashboardFooter}
-            header={resourcesContext.messages['titleDashboard']}
-            onHide={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
-            style={{ width: '70vw' }}
-            visible={designerState.dashDialogVisible}>
-            <Dashboard
-              levelErrorTypes={designerState.levelErrorTypes}
-              refresh={designerState.dashDialogVisible}
-              tableSchemaNames={designerState.schemaTables.map(table => table.name)}
-            />
-          </Dialog>
-        )}
         {designerState.isConfigureWebformDialogVisible && (
           <Dialog
             footer={renderConfigureWebformFooter}
