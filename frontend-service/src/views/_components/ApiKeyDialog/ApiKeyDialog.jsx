@@ -18,7 +18,7 @@ import { DataflowService } from 'services/DataflowService';
 const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCustodian, manageDialogs }) => {
   const resourcesContext = useContext(ResourcesContext);
 
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState(null);
   const [copyResultMessage, setCopyResultMessage] = useState('');
   const [isKeyLoading, setIsKeyLoading] = useState(true);
 

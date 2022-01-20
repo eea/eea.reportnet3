@@ -42,11 +42,11 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   }, [selectedWebformId]);
 
   const getInitialName = () => {
-    if (selectedWebformId) {
-      return webforms.find(webform => webform.id === selectedWebformId).label;
+    if (!selectedWebformId) {
+      return '';
     }
 
-    return '';
+    return webforms.find(webform => webform.id === selectedWebformId).label;
   };
 
   const getWebformList = async () => {
@@ -138,9 +138,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     setIsAddEditDialogVisible(true);
   };
 
-  const onAddClick = () => {
-    setIsAddEditDialogVisible(true);
-  };
+  const onAddClick = () => setIsAddEditDialogVisible(true);
 
   const onAddOrEditDialogClose = () => {
     setIsAddEditDialogVisible(false);
