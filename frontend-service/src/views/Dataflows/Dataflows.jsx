@@ -618,7 +618,7 @@ const Dataflows = () => {
   };
 
   const renderPaginator = () => {
-    if (filteredData[tabId].length > 10 && !loadingStatus[tabId]) {
+    if (filteredData.length > 10 && !loadingStatus[tabId]) {
       return (
         <Paginator
           className="p-paginator-bottom"
@@ -628,7 +628,7 @@ const Dataflows = () => {
           rightContent={`${resourcesContext.messages['totalRecords']} ${dataflowsState[tabId].length}`}
           rows={pagination.numberRows}
           rowsPerPageOptions={[5, 10, 15]}
-          totalRecords={filteredData[tabId].length}
+          totalRecords={filteredData.length}
         />
       );
     }
