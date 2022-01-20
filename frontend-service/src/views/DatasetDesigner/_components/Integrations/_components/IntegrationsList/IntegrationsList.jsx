@@ -94,6 +94,37 @@ export const IntegrationsList = ({
     />
   );
 
+  const getIntegrationListColumns = () => {
+    const columns = [
+      {
+        key: 'integrationName',
+        header: resourcesContext.messages['integrationName'],
+        template: integrationNameTemplate,
+        sortable: true
+      },
+      { key: 'operationName', header: resourcesContext.messages['operationName'], sortable: true },
+      {
+        key: 'actions',
+        header: resourcesContext.messages['actions'],
+        template: rowData => actionsTemplate(rowData),
+        className: styles.validationCol,
+        style: { width: '100px' }
+      }
+    ];
+
+    return columns.map(column => (
+      <Column
+        body={column.template}
+        className={column?.className}
+        field={column.key}
+        header={column.header}
+        key={column.key}
+        sortable={column?.sortable}
+        style={column?.style}
+      />
+    ));
+  };
+
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {isFiltered && integrationListState.data.length !== filteredData.length
@@ -211,26 +242,7 @@ export const IntegrationsList = ({
           summary={resourcesContext.messages['externalIntegrations']}
           totalRecords={filteredData.length}
           value={filteredData}>
-          <Column
-            body={integrationNameTemplate}
-            field="integrationName"
-            header={resourcesContext.messages['integrationName']}
-            key="integrationName"
-            sortable={true}
-          />
-          <Column
-            field="operationName"
-            header={resourcesContext.messages['operationName']}
-            key="operationName"
-            sortable={true}
-          />
-          <Column
-            body={row => actionsTemplate(row)}
-            className={styles.validationCol}
-            header={resourcesContext.messages['actions']}
-            key="actions"
-            style={{ width: '100px' }}
-          />
+          {getIntegrationListColumns()}
         </DataTable>
       ) : (
         <div className={styles.emptyFilteredData}>
