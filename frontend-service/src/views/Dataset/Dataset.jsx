@@ -30,6 +30,7 @@ import { TabsSchema } from 'views/_components/TabsSchema';
 import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
+import { ValidateDatasetDialog } from 'views/_components/ValidateDatasetDialog';
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -115,7 +116,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [schemaTables, setSchemaTables] = useState([]);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [webformData, setWebformData] = useState(null);
@@ -436,7 +436,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const onConfirmValidate = async () => {
     try {
-      setValidateDialogVisible(false);
       await DatasetService.validate(datasetId);
       notificationContext.add(
         {
@@ -1070,15 +1069,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             />
           </div>
           <div className="p-toolbar-group-right">
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent dataset-validate-help-step ${
-                hasWritePermissions && 'p-button-animated-blink'
-              }`}
-              disabled={!hasWritePermissions}
-              icon="validate"
-              label={resourcesContext.messages['validate']}
-              onClick={() => onSetVisible(setValidateDialogVisible, true)}
-            />
+            <ValidateDatasetDialog disabled={!hasWritePermissions} onConfirmValidate={onConfirmValidate} />
             <Button
               className="p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step p-button-animated-blink"
               icon="warning"
@@ -1303,19 +1294,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           {resourcesContext.messages['deleteDatasetConfirm']}
         </ConfirmDialog>
       )}
-
-      {validateDialogVisible && (
-        <ConfirmDialog
-          header={resourcesContext.messages['validateDataset']}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={onConfirmValidate}
-          onHide={() => onSetVisible(setValidateDialogVisible, false)}
-          visible={validateDialogVisible}>
-          {resourcesContext.messages['validateDatasetConfirm']}
-        </ConfirmDialog>
-      )}
-
       {isUpdatableDialogVisible && (
         <ConfirmDialog
           disabledConfirm={isDatasetUpdatable === dataset.updatable}

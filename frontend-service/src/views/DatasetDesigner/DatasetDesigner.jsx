@@ -37,7 +37,7 @@ import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
-import { ValidateDatasetDesignerDialog } from './_components/ValidateDatasetDesignerDialog';
+import { ValidateDatasetDialog } from 'views/_components/ValidateDatasetDialog';
 import { Validations } from 'views/DatasetDesigner/_components/Validations';
 import { Webforms } from 'views/Webforms';
 
@@ -1563,12 +1563,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               />
             </div>
             <div className="p-toolbar-group-right">
-              <ValidateDatasetDesignerDialog
-                isDataflowOpen={isDataflowOpen}
-                isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+              <ValidateDatasetDialog
+                disabled={isDataflowOpen || isDesignDatasetEditorRead}
                 onConfirmValidate={onConfirmValidate}
               />
-
               <Button
                 className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
                 icon="warning"

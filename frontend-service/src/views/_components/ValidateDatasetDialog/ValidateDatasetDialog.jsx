@@ -5,7 +5,7 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const ValidateDatasetDesignerDialog = ({ isDataflowOpen, isDesignDatasetEditorRead, onConfirmValidate }) => {
+export const ValidateDatasetDialog = ({ disabled, onConfirmValidate }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [isValidateDialogVisible, setIsValidateDialogVisible] = useState(false);
@@ -18,10 +18,8 @@ export const ValidateDatasetDesignerDialog = ({ isDataflowOpen, isDesignDatasetE
   const renderValidateButton = () => {
     return (
       <Button
-        className={`p-button-rounded p-button-secondary-transparent ${
-          !isDataflowOpen && !isDesignDatasetEditorRead ? ' p-button-animated-blink' : null
-        }`}
-        disabled={isDataflowOpen || isDesignDatasetEditorRead}
+        className={`p-button-rounded p-button-secondary-transparent ${!disabled ? ' p-button-animated-blink' : null}`}
+        disabled={disabled}
         icon="validate"
         label={resourcesContext.messages['validate']}
         onClick={() => setIsValidateDialogVisible(true)}
