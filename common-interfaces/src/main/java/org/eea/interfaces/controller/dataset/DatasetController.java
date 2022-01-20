@@ -572,7 +572,8 @@ public interface DatasetController {
    * @param integrationId the integration id
    * @param delimiter the delimiter
    */
-  @PostMapping("/v1/{datasetId}/streamImportFileData")
+  @PostMapping(path = "/v1/{datasetId}/streamImportFileData",
+      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
   void streamImportFileData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
