@@ -1,15 +1,13 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 import isNil from 'lodash/isNil';
 
-import classNames from 'classnames';
-
 import styles from './ManageWebforms.module.scss';
 
 import { Column } from 'primereact/column';
 
 import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
-import { CustomFileUpload } from 'views/_components/CustomFileUpload';
+
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
@@ -30,17 +28,26 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [selectedWebformId, setSelectedWebformId] = useState(null);
   const [webforms, setWebforms] = useState([]);
-  const [webform, setWebform] = useState({ name: '', jsonContent: null });
+  const [jsonContent, setJsonContent] = useState(null);
+  const [webformName, setWebformName] = useState('');
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isAddOrEditDialogVisible, setIsAddOrEditDialogVisible] = useState(false);
 
   useEffect(() => {
     getWebformList();
   }, []);
-  // TODO
-  // delete: /webform/webformConfig/{id} // Check that endpoint is correct
 
-  // ADD / EDIT dialog
+  useEffect(() => {
+    setWebformName(() => getInitialName());
+  }, [selectedWebformId]);
+
+  const getInitialName = () => {
+    if (selectedWebformId) {
+      return webforms.find(webform => webform.id === selectedWebformId).label;
+    }
+
+    return '';
+  };
 
   const getWebformList = async () => {
     try {
@@ -80,8 +87,8 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
     try {
       isNil(selectedWebformId)
-        ? await WebformService.create(webform)
-        : await WebformService.update(selectedWebformId, webform);
+        ? await WebformService.create(webformName, jsonContent)
+        : await WebformService.update(webformName, jsonContent, selectedWebformId);
 
       setLoadingStatus('success');
     } catch (error) {
@@ -236,39 +243,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     </Fragment>
   );
 
-  // const hasFiles = () => webform.files && state.files.length > 0;
-
-  // const renderChooseButton = () => {
-
-  //   const buttonClassName = classNames('p-button p-fileupload-choose p-component p-button-text-icon-left', {
-  //     'p-fileupload-choose-selected': hasFiles()
-  //   });
-
-  //   const iconClassName = classNames('p-button-icon-left pi', {
-  //     'pi-plus': !hasFiles() || auto,
-  //     'pi-upload': hasFiles() && !auto
-  //   });
-
-  //   return (
-  //     <span className={buttonClassName} onMouseUp={()=>{}}>
-  //       <span className={iconClassName} />
-  //       <span className="p-button-text p-clickable">
-  //         {auto ? chooseLabel : hasFiles() ? state.files[0].name : chooseLabel}
-  //       </span>
-  //       <input
-  //         // accept={accept}
-  //         // disabled={disabled}
-  //         // multiple={multiple}
-  //         // onBlur={onBlur}
-  //         // onChange={onFileSelect}
-  //         // onFocus={onFocus}
-  //         // ref={fileInput}
-  //         type="file"
-  //       />
-  //     </span>
-  //   );
-  // };
-
   const renderDialogContent = () => {
     if (isLoading) {
       return (
@@ -344,20 +318,28 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           visible={isAddOrEditDialogVisible}>
           <label htmlFor="name">
             {resourcesContext.messages['name']}
-            <InputText className={styles.inputText} id="name" readOnly value={webform.name} />
+            <InputText
+              className={styles.inputText}
+              id="name"
+              onChange={event => setWebformName(event.target.value)}
+              value={webformName}
+            />
           </label>
 
-          <div>
-            {/* <CustomFileUpload
-              accept=".json"
-              chooseLabel={resourcesContext.messages['selectFile']}
-              isDialog={false}
-              mode="basic"
-              name="file"
-              // onUpload={onUpload}
-            /> */}
-            {/* {renderChooseButton()} */}
-          </div>
+          <label htmlFor="jsonContent">
+            {resourcesContext.messages['jsonFile']}
+            <input
+              className="jsonContent"
+              id="jsonContent"
+              name="jsonContent"
+              onChange={e => {
+                console.log(e.target.files[0]);
+                setJsonContent(JSON.stringify(e.target.files[0]));
+              }}
+              placeholder="file upload"
+              type="file"
+            />
+          </label>
         </Dialog>
       )}
     </Fragment>

@@ -1454,6 +1454,7 @@
     "addWebformDialogHeader": "Add webform",
     "editWebformDialogHeader": "Edit webform",
     "createWebformError": "Error creating webform",
-    "editWebformError": "Error updating webform"
+    "editWebformError": "Error updating webform",
+    "jsonFile": "JSON file"
   }
 }
