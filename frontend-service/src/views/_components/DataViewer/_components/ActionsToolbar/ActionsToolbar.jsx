@@ -84,10 +84,7 @@ const ActionsToolbar = ({
   const dropdownFilterRef = useRef();
 
   useEffect(() => {
-    const dropdownFilter = colsSchema.map(colSchema => {
-      return { label: colSchema.header, key: colSchema.field };
-    });
-
+    const dropdownFilter = colsSchema.map(colSchema => ({ label: colSchema.header, key: colSchema.field }));
     dispatchFilter({ type: 'INIT_FILTERS', payload: { dropdownFilter, levelErrors: getLevelErrorFilters() } });
   }, []);
 
@@ -155,9 +152,7 @@ const ActionsToolbar = ({
     }
   };
 
-  const createTableName = (tableName, fileType) => {
-    return `${tableName}.${fileType}`;
-  };
+  const createTableName = (tableName, fileType) => `${tableName}.${fileType}`;
 
   const getExportButtonPosition = e => {
     const exportButton = e.currentTarget;
@@ -170,29 +165,28 @@ const ActionsToolbar = ({
   };
 
   const getLevelErrorFilters = () => {
-    let filters = [];
+    const filters = [];
+
     if (!isUndefined(levelErrorTypesWithCorrects)) {
       levelErrorTypesWithCorrects.forEach(value => {
         if (!isUndefined(value) && !isNull(value)) {
-          let filter = {
+          filters.push({
             label: capitalize(value),
             key: capitalize(value)
-          };
-          filters.push(filter);
+          });
         }
       });
     }
+
     return filters;
   };
 
-  const getTooltipMessage = () => {
-    return (
-      <Fragment>
-        <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipGeometryNote']}</span>
-        <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipCaseSensitiveNote']}</span>
-      </Fragment>
-    );
-  };
+  const getTooltipMessage = () => (
+    <Fragment>
+      <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipGeometryNote']}</span>
+      <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipCaseSensitiveNote']}</span>
+    </Fragment>
+  );
 
   const showFilters = columnKeys => {
     const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId', 'providerCode'];

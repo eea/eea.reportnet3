@@ -109,12 +109,8 @@ export const CoreUtils = (() => {
     },
 
     tableStatisticValuesWithErrors: tableStatisticValues => {
+      const valuesWithValidations = CoreUtils.transposeMatrix(tableStatisticValues);
       const tableStatisticValuesWithSomeError = [];
-      const valuesWithValidations = CoreUtils.transposeMatrix(tableStatisticValues).map(error => {
-        return error.map(subError => {
-          return subError;
-        });
-      });
 
       valuesWithValidations.forEach(item => {
         if (!isNil(item) && !item.every(value => value === 0)) {

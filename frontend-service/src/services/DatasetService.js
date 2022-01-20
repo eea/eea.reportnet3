@@ -150,7 +150,7 @@ export const DatasetService = {
 
     dataset.levelErrorTypes = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
 
-    let transposedValues = !isEmpty(tableStatisticValues) ? CoreUtils.transposeMatrix(tableStatisticValues) : [];
+    const transposedValues = !isEmpty(tableStatisticValues) ? CoreUtils.transposeMatrix(tableStatisticValues) : [];
 
     dataset.tableStatisticValues = !isEmpty(tableStatisticValues)
       ? CoreUtils.transposeMatrix(tableBarStatisticValues)
@@ -470,7 +470,7 @@ export const DatasetService = {
 
   updateRecord: async (datasetId, record, updateInCascade) => {
     const fields = record.dataRow.map(dataTableFieldDTO => {
-      let newField = new DatasetTableField({});
+      const newField = new DatasetTableField({});
       newField.id = dataTableFieldDTO.fieldData.id;
       newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
       newField.type = dataTableFieldDTO.fieldData.type;
