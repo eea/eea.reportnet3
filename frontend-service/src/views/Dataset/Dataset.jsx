@@ -18,6 +18,7 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { Dashboard } from 'views/_components/Dashboard';
 import { Dialog } from 'views/_components/Dialog';
+import { DeleteDatasetDataDialog } from 'views/_components/DeleteDatasetDataDialog';
 import { MainLayout } from 'views/_components/Layout';
 import { Menu } from 'views/_components/Menu';
 import { QCList } from 'views/_components/QCList';
@@ -1058,15 +1059,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               popup={true}
               ref={exportMenuRef}
             />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent ${
-                !hasWritePermissions ? null : 'p-button-animated-blink dataset-deleteDataset-help-step'
-              }`}
-              disabled={!hasWritePermissions}
-              icon="trash"
-              label={resourcesContext.messages['deleteDatasetData']}
-              onClick={() => onSetVisible(setDeleteDialogVisible, true)}
-            />
+            <DeleteDatasetDataDialog disabled={!hasWritePermissions} onConfirmDelete={onConfirmDelete} />
           </div>
           <div className="p-toolbar-group-right">
             <ValidateDatasetDialog disabled={!hasWritePermissions} onConfirmValidate={onConfirmValidate} />
@@ -1282,18 +1275,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         </Dialog>
       )}
 
-      {deleteDialogVisible && (
-        <ConfirmDialog
-          classNameConfirm={'p-button-danger'}
-          header={resourcesContext.messages['deleteDatasetHeader']}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={onConfirmDelete}
-          onHide={() => onSetVisible(setDeleteDialogVisible, false)}
-          visible={deleteDialogVisible}>
-          {resourcesContext.messages['deleteDatasetConfirm']}
-        </ConfirmDialog>
-      )}
       {isUpdatableDialogVisible && (
         <ConfirmDialog
           disabledConfirm={isDatasetUpdatable === dataset.updatable}

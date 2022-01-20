@@ -20,6 +20,7 @@ import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { Dashboard } from 'views/_components/Dashboard';
+import { DeleteDatasetDataDialog } from 'views/_components/DeleteDatasetDataDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputTextarea } from 'views/_components/InputTextarea';
@@ -118,7 +119,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     isConfigureWebformDialogVisible: false,
     isDataflowOpen: false,
     isDataUpdated: false,
-    isDeleteDialogVisible: false,
     isDownloadingQCRules: false,
     isDownloadingValidations: false,
     isDuplicatedToManageUnique: false,
@@ -174,7 +174,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     datasetSchemaAllTables,
     dataViewerOptions,
     isDataflowOpen,
-    isDeleteDialogVisible,
     isDesignDatasetEditorRead,
     isImportOtherSystemsDialogVisible,
     webformOptions,
@@ -609,7 +608,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onConfirmDelete = async () => {
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
-      manageDialogs('isDeleteDialogVisible', false);
       await DatasetService.deleteData(datasetId, arePrefilledTablesDeleted);
       onResetDelete();
     } catch (error) {
@@ -634,7 +632,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const onHideDelete = () => {
-    manageDialogs('isDeleteDialogVisible', false);
     onResetDelete();
   };
 
@@ -740,10 +737,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const onResetDelete = () => {
-    designerDispatch({
-      type: 'SET_ARE_PREFILLED_TABLES_DELETED',
-      payload: { arePrefilledTablesDeleted: false }
-    });
+    if (arePrefilledTablesDeleted) {
+      designerDispatch({
+        type: 'SET_ARE_PREFILLED_TABLES_DELETED',
+        payload: { arePrefilledTablesDeleted: false }
+      });
+    }
   };
 
   const onKeyChange = event => {
@@ -1555,12 +1554,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 popup={true}
                 ref={exportMenuRef}
               />
-              <Button
-                className="p-button-rounded p-button-secondary-transparent p-button-animated-blink dataset-deleteDataset-help-step"
-                icon="trash"
-                label={resourcesContext.messages['deleteDatasetData']}
-                onClick={() => manageDialogs('isDeleteDialogVisible', true)}
-              />
+              <DeleteDatasetDataDialog onConfirmDelete={onConfirmDelete} onHideDelete={onHideDelete}>
+                {deletePrefilledDataCheckbox}
+              </DeleteDatasetDataDialog>
             </div>
             <div className="p-toolbar-group-right">
               <ValidateDatasetDialog
@@ -1733,21 +1729,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           setIsUniqueConstraintCreating={setIsUniqueConstraintCreating}
           setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
         />
-
-        {isDeleteDialogVisible && (
-          <ConfirmDialog
-            classNameConfirm={'p-button-danger'}
-            header={resourcesContext.messages['deleteDatasetHeader']}
-            labelCancel={resourcesContext.messages['no']}
-            labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={onConfirmDelete}
-            onHide={onHideDelete}
-            visible={isDeleteDialogVisible}>
-            <div>{resourcesContext.messages['deleteDatasetConfirm']}</div>
-            {deletePrefilledDataCheckbox}
-          </ConfirmDialog>
-        )}
-
         {designerState.dashDialogVisible && (
           <Dialog
             footer={renderDashboardFooter}
