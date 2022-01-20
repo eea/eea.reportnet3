@@ -6,7 +6,7 @@
     },
     {
       "key": "exportFilteredCsv",
-      "code": "csv+filtered"
+      "code": "csv"
     },
     {
       "key": "exportXlsx",
