@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import styles from './ManageWebforms.module.scss';
@@ -23,15 +24,14 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
+  const [isAddEditDialogVisible, setIsAddEditDialogVisible] = useState(false);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [jsonContent, setJsonContent] = useState(null);
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [selectedWebformId, setSelectedWebformId] = useState(null);
-  const [webforms, setWebforms] = useState([]);
-  const [jsonContent, setJsonContent] = useState(null);
   const [webformName, setWebformName] = useState('');
-  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isAddEditDialogVisible, setIsAddEditDialogVisible] = useState(false);
+  const [webforms, setWebforms] = useState([]);
 
   useEffect(() => {
     getWebformList();
