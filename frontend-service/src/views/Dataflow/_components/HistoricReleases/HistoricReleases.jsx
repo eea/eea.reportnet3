@@ -66,7 +66,6 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           }
         ];
       } else {
-        //EUDataset with dataProviderCode, releaseDate and isPublic
         const columns = [
           {
             key: 'dataProviderCode',
