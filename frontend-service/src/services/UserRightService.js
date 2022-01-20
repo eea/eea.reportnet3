@@ -13,23 +13,17 @@ export const UserRightService = {
     return UserRightUtils.parseUserRightListDTO(userRightListDTO.data);
   },
 
-  deleteReporter: async (userRight, dataflowId, dataProviderId) => {
-    return await UserRightRepository.deleteReporter(userRight, dataflowId, dataProviderId);
-  },
+  deleteReporter: async (userRight, dataflowId, dataProviderId) =>
+    await UserRightRepository.deleteReporter(userRight, dataflowId, dataProviderId),
 
-  deleteRequester: async (userRight, dataflowId, dataProviderId) => {
-    return await UserRightRepository.deleteRequester(userRight, dataflowId, dataProviderId);
-  },
+  deleteRequester: async (userRight, dataflowId, dataProviderId) =>
+    await UserRightRepository.deleteRequester(userRight, dataflowId, dataProviderId),
 
-  updateReporter: async (userRight, dataflowId, dataProviderId) => {
-    return await UserRightRepository.updateReporter(userRight, dataflowId, dataProviderId);
-  },
+  updateReporter: async (userRight, dataflowId, dataProviderId) =>
+    await UserRightRepository.updateReporter(userRight, dataflowId, dataProviderId),
 
-  updateRequester: async (userRight, dataflowId) => {
-    return await UserRightRepository.updateRequester(userRight, dataflowId);
-  },
+  updateRequester: async (userRight, dataflowId) => await UserRightRepository.updateRequester(userRight, dataflowId),
 
-  validateReporters: async (dataflowId, dataProviderId) => {
-    return await UserRightRepository.validateReporters(dataflowId, dataProviderId);
-  }
+  validateReporters: async (dataflowId, dataProviderId) =>
+    await UserRightRepository.validateReporters(dataflowId, dataProviderId)
 };

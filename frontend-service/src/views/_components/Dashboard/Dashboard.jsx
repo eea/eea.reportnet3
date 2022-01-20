@@ -23,13 +23,7 @@ import { ErrorUtils } from 'views/_functions/Utils';
 const Dashboard = memo(({ refresh, tableSchemaNames }) => {
   const { datasetId } = useParams();
 
-  const dashboardColors = {
-    CORRECT: colors.correct,
-    INFO: colors.info,
-    WARNING: colors.warning,
-    ERROR: colors.error,
-    BLOCKER: colors.blocker
-  };
+  const resourcesContext = useContext(ResourcesContext);
 
   const [dashboardData, setDashboardData] = useState({});
   const [dashboardTitle, setDashboardTitle] = useState('');
@@ -38,9 +32,15 @@ const Dashboard = memo(({ refresh, tableSchemaNames }) => {
 
   const { updatedState, statusDispatcher } = useStatusFilter(dashboardData);
 
-  const resourcesContext = useContext(ResourcesContext);
-
   const chartRef = useRef();
+
+  const dashboardColors = {
+    CORRECT: colors.correct,
+    INFO: colors.info,
+    WARNING: colors.warning,
+    ERROR: colors.error,
+    BLOCKER: colors.blocker
+  };
 
   useEffect(() => {
     if (refresh) {
@@ -51,20 +51,17 @@ const Dashboard = memo(({ refresh, tableSchemaNames }) => {
     };
   }, [refresh, datasetId]);
 
-  const getLevelErrorsOrdered = levelErrors => {
-    return ErrorUtils.orderLevelErrors(levelErrors);
-  };
+  const getLevelErrorsOrdered = levelErrors => ErrorUtils.orderLevelErrors(levelErrors);
 
-  const getLevelErrorPriority = levelError => {
-    return ErrorUtils.getLevelErrorPriorityByLevelError(levelError);
-  };
+  const getLevelErrorPriority = levelError => ErrorUtils.getLevelErrorPriorityByLevelError(levelError);
 
   const getDashboardBarsByDatasetData = dataset => {
     const dashboardBars = [];
-    let levelErrors = getLevelErrorsOrdered(dataset.levelErrorTypes);
+    const levelErrors = getLevelErrorsOrdered(dataset.levelErrorTypes);
+
     levelErrors.forEach(levelError => {
-      let levelErrorIndex = getLevelErrorPriority(levelError);
-      let bar = {
+      const levelErrorIndex = getLevelErrorPriority(levelError);
+      const bar = {
         label: capitalize(levelError),
         backgroundColor: !isUndefined(dashboardColors) ? dashboardColors[levelError] : colors.levelError,
         data: dataset.tableStatisticPercentages[levelErrorIndex],
@@ -72,6 +69,7 @@ const Dashboard = memo(({ refresh, tableSchemaNames }) => {
       };
       dashboardBars.push(bar);
     });
+
     return dashboardBars;
   };
 
