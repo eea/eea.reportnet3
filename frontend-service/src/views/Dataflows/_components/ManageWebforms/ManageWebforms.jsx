@@ -154,12 +154,14 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
   const onFileUpload = async e => {
     e.preventDefault();
-    const reader = new FileReader();
-    reader.onload = async e => {
-      const text = e.target.result;
-      setJsonContent(text);
-    };
-    reader.readAsText(e.target.files[0]);
+    if (!isEmpty(e.target.files[0])) {
+      const reader = new FileReader();
+      reader.onload = async e => {
+        const text = e.target.result;
+        setJsonContent(text);
+      };
+      reader.readAsText(e.target.files[0]);
+    }
   };
 
   const getTableColumns = () => {
