@@ -306,7 +306,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       {isAddOrEditDialogVisible && (
         <Dialog
           blockScroll={false}
-          className="responsiveDialog"
+          className={`responsiveDialog ${styles.addEditDialog}`}
           footer={addOrEditDialogFooter}
           header={
             isNil(selectedWebformId)
@@ -319,7 +319,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           <label htmlFor="name">
             {resourcesContext.messages['name']}
             <InputText
-              className={styles.inputText}
+              className={styles.nameInput}
               id="name"
               onChange={event => setWebformName(event.target.value)}
               value={webformName}
