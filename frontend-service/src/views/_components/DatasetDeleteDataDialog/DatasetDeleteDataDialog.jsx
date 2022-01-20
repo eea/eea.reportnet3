@@ -1,5 +1,6 @@
-import isNil from 'lodash/isNil';
 import { Fragment, useContext, useState } from 'react';
+
+import isNil from 'lodash/isNil';
 
 import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
@@ -25,19 +26,17 @@ export const DatasetDeleteDataDialog = ({ children, disabled = false, onConfirmD
     }
   };
 
-  const renderDeleteButton = () => {
-    return (
-      <Button
-        className={`p-button-rounded p-button-secondary-transparent ${
-          !disabled ? 'p-button-animated-blink' : ''
-        } dataset-deleteDataset-help-step`}
-        disabled={disabled}
-        icon="trash"
-        label={resourcesContext.messages['deleteDatasetData']}
-        onClick={() => setIsDeleteDialogVisible(true)}
-      />
-    );
-  };
+  const renderDeleteButton = () => (
+    <Button
+      className={`p-button-rounded p-button-secondary-transparent ${
+        !disabled ? 'p-button-animated-blink' : ''
+      } dataset-deleteDataset-help-step`}
+      disabled={disabled}
+      icon="trash"
+      label={resourcesContext.messages['deleteDatasetData']}
+      onClick={() => setIsDeleteDialogVisible(true)}
+    />
+  );
 
   const renderDeleteDialog = () => {
     if (isDeleteDialogVisible) {

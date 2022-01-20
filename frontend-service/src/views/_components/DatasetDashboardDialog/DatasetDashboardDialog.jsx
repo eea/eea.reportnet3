@@ -8,21 +8,20 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const DatasetDashboardDialog = ({ disabled = false, levelErrorTypes, tableSchemas }) => {
   const resourcesContext = useContext(ResourcesContext);
+
   const [isDashboardDialogVisible, setIsDashboardDialogVisible] = useState(false);
 
-  const renderButton = () => {
-    return (
-      <Button
-        className={`p-button-rounded p-button-secondary-transparent dataset-dashboards-help-step ${
-          !disabled && 'p-button-animated-blink'
-        }`}
-        disabled={disabled}
-        icon="dashboard"
-        label={resourcesContext.messages['dashboards']}
-        onClick={() => setIsDashboardDialogVisible(true)}
-      />
-    );
-  };
+  const renderButton = () => (
+    <Button
+      className={`p-button-rounded p-button-secondary-transparent dataset-dashboards-help-step ${
+        !disabled && 'p-button-animated-blink'
+      }`}
+      disabled={disabled}
+      icon="dashboard"
+      label={resourcesContext.messages['dashboards']}
+      onClick={() => setIsDashboardDialogVisible(true)}
+    />
+  );
 
   const renderDashboardFooter = (
     <Button
@@ -51,6 +50,7 @@ export const DatasetDashboardDialog = ({ disabled = false, levelErrorTypes, tabl
       );
     }
   };
+
   return (
     <Fragment>
       {renderButton()}
