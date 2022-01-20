@@ -11,8 +11,10 @@ export const RowRadioButton = props => {
     }
   };
 
-  let className = classNames('p-radiobutton-box p-component p-radiobutton-relative', { 'p-highlight': props.selected });
-  let iconClassName = classNames('p-radiobutton-icon p-clickable', { 'pi pi-circle-on': props.selected });
+  const className = classNames('p-radiobutton-box p-component p-radiobutton-relative', {
+    'p-highlight': props.selected
+  });
+  const iconClassName = classNames('p-radiobutton-icon p-clickable', { 'pi pi-circle-on': props.selected });
 
   return (
     <div className="p-radiobutton p-component">
