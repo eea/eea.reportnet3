@@ -25,7 +25,7 @@ export const DatasetDeleteDataDialog = ({ children, disabled = false, onConfirmD
     }
   };
 
-  const renderValidateButton = () => {
+  const renderDeleteButton = () => {
     return (
       <Button
         className={`p-button-rounded p-button-secondary-transparent ${
@@ -39,7 +39,7 @@ export const DatasetDeleteDataDialog = ({ children, disabled = false, onConfirmD
     );
   };
 
-  const renderValidateDialog = () => {
+  const renderDeleteDialog = () => {
     if (isDeleteDialogVisible) {
       return (
         <ConfirmDialog
@@ -59,8 +59,8 @@ export const DatasetDeleteDataDialog = ({ children, disabled = false, onConfirmD
 
   return (
     <Fragment>
-      {renderValidateButton()}
-      {renderValidateDialog()}
+      {renderDeleteButton()}
+      {renderDeleteDialog()}
     </Fragment>
   );
 };
