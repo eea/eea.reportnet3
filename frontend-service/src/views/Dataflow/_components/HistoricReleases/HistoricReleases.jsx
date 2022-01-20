@@ -66,7 +66,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           }
         ];
       } else {
-        //EUDataset
+        //EUDataset with dataProviderCode, releaseDate and isPublic
         const columns = [
           {
             key: 'dataProviderCode',
@@ -76,24 +76,11 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
               'historicReleaseDataProviderColumnHeader'
             ),
             template: renderDataProviderLinkBodyColumn
-          },
-          {
-            key: 'releaseDate',
-            header: resourcesContext.messages['releaseDate'],
-            template: renderReleaseDateTemplate
-          },
-          {
-            key: 'isPublic',
-            header: resourcesContext.messages['isPublic'],
-            template: (rowData, column) =>
-              ColumnTemplateUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
           }
         ];
 
         if (historicReleasesView === 'dataCollection') {
-          columns.splice(
-            1,
-            0,
+          columns.push(
             {
               key: 'isDataCollectionReleased',
               header: resourcesContext.messages['isDataCollectionReleased'],
@@ -109,13 +96,25 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           );
         }
 
+        columns.push(
+          {
+            key: 'releaseDate',
+            header: resourcesContext.messages['releaseDate'],
+            template: renderReleaseDateTemplate
+          },
+          {
+            key: 'isPublic',
+            header: resourcesContext.messages['isPublic'],
+            template: (rowData, column) =>
+              ColumnTemplateUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
+          }
+        );
+
         return columns;
       }
     };
 
-    const columns = getColumns();
-
-    return columns.map(column => (
+    return getColumns().map(column => (
       <Column
         body={column.template}
         columnResizeMode="expand"

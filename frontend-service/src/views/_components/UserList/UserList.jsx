@@ -70,14 +70,16 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   );
 
   const getUserListColumns = () => {
-    const columns = [
-      { key: 'role', header: resourcesContext.messages['role'] },
-      { key: 'email', header: resourcesContext.messages['user'] }
-    ];
+    const columns = [];
 
     if (isNil(representativeId) && isNil(dataflowId)) {
-      columns.splice(0, 0, { key: 'dataflowName', header: resourcesContext.messages['dataflowName'] });
+      columns.push({ key: 'dataflowName', header: resourcesContext.messages['dataflowName'] });
     }
+
+    columns.push(
+      { key: 'role', header: resourcesContext.messages['role'] },
+      { key: 'email', header: resourcesContext.messages['user'] }
+    );
 
     if (isNil(representativeId) && !isNil(dataflowId)) {
       columns.push({
