@@ -22,26 +22,23 @@ export class RowsPerPageDropdown extends Component {
   };
 
   render() {
-    if (this.props.options) {
-      let options = this.props.options.map((opt, i) => {
-        return { label: String(opt), value: opt };
-      });
-      return (
-        <div>
-          <label>{this.props.label}</label>
-          <Dropdown
-            appendTo={document.body}
-            ariaLabel={'rowsPerPage'}
-            disabled={this.props.disabled}
-            name={uniqueId('rowsPerPage')}
-            onChange={this.props.onChange}
-            options={options}
-            value={this.props.value}
-          />
-        </div>
-      );
-    } else {
+    if (!this.props.options) {
       return null;
     }
+
+    return (
+      <div>
+        <label>{this.props.label}</label>
+        <Dropdown
+          appendTo={document.body}
+          ariaLabel={'rowsPerPage'}
+          disabled={this.props.disabled}
+          name={uniqueId('rowsPerPage')}
+          onChange={this.props.onChange}
+          options={this.props.options.map(opt => ({ label: String(opt), value: opt }))}
+          value={this.props.value}
+        />
+      </div>
+    );
   }
 }

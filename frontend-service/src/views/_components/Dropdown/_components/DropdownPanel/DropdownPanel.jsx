@@ -25,7 +25,7 @@ export class DropdownPanel extends Component {
   };
 
   renderElement() {
-    let className = classNames('p-dropdown-panel p-hidden p-input-overlay', this.props.panelClassName);
+    const className = classNames('p-dropdown-panel p-hidden p-input-overlay', this.props.panelClassName);
 
     return (
       <div
@@ -45,7 +45,7 @@ export class DropdownPanel extends Component {
   }
 
   render() {
-    let element = this.renderElement();
+    const element = this.renderElement();
 
     if (this.props.appendTo) {
       return ReactDOM.createPortal(element, this.props.appendTo);

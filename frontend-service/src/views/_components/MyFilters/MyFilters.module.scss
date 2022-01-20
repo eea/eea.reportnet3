@@ -244,6 +244,7 @@
 .referencingDataflows,
 .datasetsInfo,
 .userList,
-.historicReleases {
+.historicReleases, 
+.cloneSchemas {
   @extend .lineItems;
 }

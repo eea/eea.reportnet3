@@ -205,22 +205,16 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
       switch (option.type) {
         case 'CHECKBOX':
           return renderCheckbox(option);
-
         case 'DATE':
           return renderDate(option);
-
         case 'DROPDOWN':
           return renderDropdown(option);
-
         case 'INPUT':
           return renderInput(option);
-
         case 'MULTI_SELECT':
           return renderMultiSelect(option);
-
         case 'SEARCH':
           return renderSearch(option);
-
         default:
           throw new Error('The option type is not correct.');
       }
@@ -382,6 +376,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
     if (template === 'LevelError') {
       return <LevelError type={type} />;
     }
+
     return <span className={styles.statusBox}>{type?.toString()}</span>;
   };
 
