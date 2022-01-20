@@ -1116,6 +1116,7 @@ const DataViewer = ({
         originalColumns={originalColumns}
         prevFilterValue={prevFilterValue}
         records={records}
+        selectedRuleId={selectedRuleId}
         selectedRuleLevelError={selectedRuleLevelError}
         selectedRuleMessage={selectedRuleMessage}
         selectedTableSchemaId={selectedTableSchemaId}

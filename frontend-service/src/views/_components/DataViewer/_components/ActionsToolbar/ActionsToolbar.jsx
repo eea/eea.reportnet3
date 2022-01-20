@@ -51,6 +51,7 @@ const ActionsToolbar = ({
   originalColumns,
   prevFilterValue,
   records,
+  selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
   selectedTableSchemaId,
@@ -126,7 +127,15 @@ const ActionsToolbar = ({
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
       setExportTableDataName(createTableName(tableName, fileType));
-      await DatasetService.exportTableData(datasetId, tableId, fileType, filter.valueFilter, levelErrorValidations);
+      await DatasetService.exportTableData(
+        datasetId,
+        tableId,
+        fileType,
+        filter.valueFilter,
+        isFilterValidationsActive,
+        levelErrorValidations,
+        selectedRuleId
+      );
     } catch (error) {
       console.error('ActionsToolbar - onExportTableData.', error);
       setIsLoadingFile(false);
