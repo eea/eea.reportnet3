@@ -7,9 +7,6 @@ export const HistoricReleaseRepository = {
 
   getAllRepresentative: async (dataflowId, dataProviderId) =>
     await HTTPRequester.get({
-      url: getUrl(HistoricReleaseConfig.getAllRepresentative, {
-        dataflowId,
-        representativeId: dataProviderId
-      })
+      url: getUrl(HistoricReleaseConfig.getAllRepresentative, { dataflowId, representativeId: dataProviderId })
     })
 };

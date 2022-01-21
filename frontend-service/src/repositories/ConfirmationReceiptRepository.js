@@ -3,9 +3,8 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const ConfirmationReceiptRepository = {
-  download: async (dataflowId, dataProviderId) => {
-    return await HTTPRequester.download({
+  download: async (dataflowId, dataProviderId) =>
+    await HTTPRequester.download({
       url: getUrl(ConfirmationReceiptConfig.download, { dataflowId, dataProviderId })
-    });
-  }
+    })
 };
