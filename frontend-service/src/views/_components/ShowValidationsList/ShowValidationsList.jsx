@@ -98,89 +98,81 @@ export const ShowValidationsList = memo(
     useEffect(() => {
       const headers = [
         {
-          id: 'entityType',
-          header: resourcesContext.messages['entity']
+          key: 'entityType',
+          header: resourcesContext.messages['entity'],
+          style: columnStyles('entityType'),
+          sortable: true
         },
         {
-          id: 'tableSchemaName',
-          header: resourcesContext.messages['table']
+          key: 'tableSchemaName',
+          header: resourcesContext.messages['table'],
+          style: columnStyles('tableSchemaName'),
+          sortable: true
         },
         {
-          id: 'fieldSchemaName',
-          header: resourcesContext.messages['field']
+          key: 'fieldSchemaName',
+          header: resourcesContext.messages['field'],
+          style: columnStyles('fieldSchemaName'),
+          sortable: true
         },
         {
-          id: 'shortCode',
+          key: 'shortCode',
           header: resourcesContext.messages['ruleCode'],
-          template: ruleCodeTemplate
+          template: ruleCodeTemplate,
+          style: columnStyles('shortCode'),
+          sortable: true
         },
         {
-          id: 'levelError',
+          key: 'levelError',
           header: resourcesContext.messages['levelError'],
-          template: levelErrorTemplate
+          template: levelErrorTemplate,
+          style: columnStyles('levelError'),
+          sortable: true
         },
         {
-          id: 'message',
-          header: resourcesContext.messages['errorMessage']
+          key: 'message',
+          header: resourcesContext.messages['errorMessage'],
+          style: columnStyles('message'),
+          sortable: true
+        },
+        {
+          key: 'recordId',
+          header: resourcesContext.messages['recordId'],
+          className: styles.invisibleHeader
+        },
+        {
+          key: 'datasetPartitionId',
+          header: resourcesContext.messages['datasetPartitionId'],
+          className: styles.invisibleHeader
+        },
+        {
+          key: 'tableSchemaId',
+          header: resourcesContext.messages['tableSchemaId'],
+          className: styles.invisibleHeader
+        },
+        {
+          key: 'ruleId',
+          header: resourcesContext.messages['id'],
+          className: styles.invisibleHeader
+        },
+        {
+          key: 'numberOfRecords',
+          header: resourcesContext.messages['numberOfRecords'],
+          sortable: true
         }
       ];
 
-      let columnsArr = headers.map(col => {
-        return !isNil(col.template) ? (
-          <Column
-            body={col.template}
-            field={col.id}
-            header={col.header}
-            key={col.id}
-            sortable={true}
-            style={columnStyles(col.id)}
-          />
-        ) : (
-          <Column field={col.id} header={col.header} key={col.id} sortable={true} style={columnStyles(col.id)} />
-        );
-      });
-
-      columnsArr.push(
+      const columnsArr = headers.map(column => (
         <Column
-          className={styles.invisibleHeader}
-          field="recordId"
-          header={resourcesContext.messages['recordId']}
-          key="recordId"
+          body={column?.template}
+          className={column?.className}
+          field={column.key}
+          header={column.header}
+          key={column.key}
+          sortable={column?.sortable}
+          style={column?.style}
         />
-      );
-      columnsArr.push(
-        <Column
-          className={styles.invisibleHeader}
-          field="datasetPartitionId"
-          header={resourcesContext.messages['datasetPartitionId']}
-          key="datasetPartitionId"
-        />
-      );
-      columnsArr.push(
-        <Column
-          className={styles.invisibleHeader}
-          field="tableSchemaId"
-          header={resourcesContext.messages['tableSchemaId']}
-          key="tableSchemaId"
-        />
-      );
-      columnsArr.push(
-        <Column
-          className={styles.invisibleHeader}
-          field="ruleId"
-          header={resourcesContext.messages['ruleId']}
-          key="ruleId"
-        />
-      );
-
-      columnsArr.push(
-        <Column
-          field="numberOfRecords"
-          header={resourcesContext.messages['numberOfRecords']}
-          key="numberOfRecords"
-          sortable={true}
-        />
-      );
+      ));
 
       setColumns(columnsArr);
     }, [validationContext.rulesDescription]);
@@ -399,6 +391,7 @@ export const ShowValidationsList = memo(
     };
 
     const onLoadFilteredValidations = filterData => {
+      console.log('log_filterDAta: ', filterData);
       setFirstRow(0);
       setFieldValueFilter(filterData.fieldSchemaName);
       setLevelErrorsFilter(filterData.levelError);
