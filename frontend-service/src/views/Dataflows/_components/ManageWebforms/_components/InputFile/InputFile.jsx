@@ -15,7 +15,6 @@ export const InputFile = ({ onChange, buttonTextNoFile, buttonTextWithFile, acce
   const onFileSelect = e => {
     e.preventDefault();
     setFileName(e.target?.files[0]?.name ? e.target.files[0].name : '');
-
     onChange(e);
   };
 
