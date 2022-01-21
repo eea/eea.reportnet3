@@ -39,7 +39,6 @@ export const InputFile = ({ onChange, buttonTextNoFile, buttonTextWithFile, acce
       {!isEmpty(fileName) && (
         <div className={styles.fileNameWrapper}>
           <div className={styles.fileName}>{fileName}</div>
-
           <FontAwesomeIcon className={styles.clearButton} icon={AwesomeIcons('cross')} onClick={onFileClear} />
         </div>
       )}
