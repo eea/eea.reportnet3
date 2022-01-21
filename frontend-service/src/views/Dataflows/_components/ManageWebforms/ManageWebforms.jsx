@@ -44,14 +44,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     setWebformName(() => getInitialName());
   }, [selectedWebformId]);
 
-  const getInitialName = () => {
-    if (!selectedWebformId) {
-      return '';
-    }
-
-    return webforms.find(webform => webform.id === selectedWebformId).label;
-  };
-
   const getWebformList = async () => {
     setLoadingStatus('pending');
 
@@ -64,6 +56,24 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     } finally {
       setLoadingStatus('idle');
       setIsLoading(false);
+    }
+  };
+
+  const onConfirmDeleteDialog = async () => {
+    setLoadingStatus('pending');
+    setIsDeleteDialogVisible(false);
+
+    try {
+      await WebformService.delete(selectedWebformId);
+      setLoadingStatus('success');
+      getWebformList();
+    } catch (error) {
+      console.error('ManageWebforms - onConfirmDeleteDialog.', error);
+      setLoadingStatus('failed');
+      notificationContext.add({ type: 'DELETE_WEBFORM_CONFIGURATION_ERROR' }, true);
+    } finally {
+      setLoadingStatus('idle');
+      setSelectedWebformId(null);
     }
   };
 
@@ -118,23 +128,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const onHideDeleteDialog = () => {
     setIsDeleteDialogVisible(false);
     setSelectedWebformId(null);
-  };
-
-  const onConfirmDeleteDialog = async () => {
-    setLoadingStatus('pending');
-    setIsDeleteDialogVisible(false);
-    try {
-      await WebformService.delete(selectedWebformId);
-      setLoadingStatus('success');
-      getWebformList();
-    } catch (error) {
-      console.error('ManageWebforms - onConfirmDeleteDialog.', error);
-      setLoadingStatus('failed');
-      notificationContext.add({ type: 'DELETE_WEBFORM_CONFIGURATION_ERROR' }, true);
-    } finally {
-      setLoadingStatus('idle');
-      setSelectedWebformId(null);
-    }
   };
 
   const onEditClick = id => {
@@ -245,6 +238,14 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       />
     </div>
   );
+
+  const getInitialName = () => {
+    if (!selectedWebformId) {
+      return '';
+    }
+
+    return webforms.find(webform => webform.id === selectedWebformId).label;
+  };
 
   const checkNameExists = () => webforms.some(webform => webform.label === webformName);
 
