@@ -15,7 +15,7 @@ import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dropdown } from 'views/_components/Dropdown';
-import { Filters } from 'views/_components/Filters';
+import { MyFilters } from 'views/_components/MyFilters';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
@@ -29,11 +29,12 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { shareRightsReducer } from './_functions/Reducers/shareRightsReducer';
 
+import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 import { TextUtils } from 'repositories/_utils/TextUtils';
-import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 export const ShareRights = ({
   addConfirmHeader,
@@ -63,10 +64,7 @@ export const ShareRights = ({
   const notDeletableRolesRequester = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
   const userTypes = { REPORTER: 'reporter', REQUESTER: 'requester' };
 
-  const filterOptions = [
-    { type: 'input', properties: [{ name: 'account' }] },
-    { type: 'multiselect', properties: [{ name: 'role' }] }
-  ];
+  const { filteredData } = useFilters('shareRights');
 
   const isReporterManagement = userType === userTypes.REPORTER;
 
@@ -80,7 +78,6 @@ export const ShareRights = ({
     actionsButtons: { id: null, isDeleting: false, isEditing: false },
     clonedUserRightList: [],
     dataUpdatedCount: 0,
-    filteredData: [],
     isDeleteDialogVisible: false,
     isDeletingUserRight: false,
     isEditingModal: false,
@@ -235,7 +232,10 @@ export const ShareRights = ({
     }
 
     try {
-      const userRightList = await callEndPoint(methodTypes.GET_ALL);
+      const userRightList = (await callEndPoint(methodTypes.GET_ALL)).map(item => ({
+        ...item,
+        filteredRole: roleOptions.find(option => option.role === item.role)?.label
+      }));
 
       shareRightsDispatch({
         type: 'GET_USER_RIGHT_LIST',
@@ -279,10 +279,6 @@ export const ShareRights = ({
       onToggleDeletingUser(false);
       shareRightsDispatch({ type: 'SET_IS_VISIBLE_DELETE_CONFIRM_DIALOG', payload: { isDeleteDialogVisible: false } });
     }
-  };
-
-  const onLoadFilteredData = userRightList => {
-    shareRightsDispatch({ type: 'ON_LOAD_FILTERED_DATA', payload: { userRightList } });
   };
 
   const onUpdateUser = async userRight => {
@@ -455,10 +451,24 @@ export const ShareRights = ({
 
   if (loadingStatus.isInitialLoading) return renderDialogLayout(<Spinner />);
 
-  const renderShareRightsFilters = () => {
+  const filterOptions = [
+    { key: 'account', label: resourcesContext.messages['account'], type: 'INPUT' },
+    {
+      key: 'filteredRole',
+      label: resourcesContext.messages['role'],
+      type: 'MULTI_SELECT'
+    }
+  ];
+
+  const renderFilters = () => {
     if (!isEmpty(shareRightsState.userRightList)) {
       return (
-        <Filters data={shareRightsState.userRightList} getFilteredData={onLoadFilteredData} options={filterOptions} />
+        <MyFilters
+          className="lineItems"
+          data={shareRightsState.userRightList}
+          options={filterOptions}
+          viewType="shareRights"
+        />
       );
     }
   };
@@ -470,7 +480,7 @@ export const ShareRights = ({
       );
     }
 
-    if (isEmpty(shareRightsState.filteredData)) {
+    if (isEmpty(filteredData)) {
       return (
         <div className={getShareRightsTableStyles()}>{resourcesContext.messages[`${userType}NotMatchingFilter`]}</div>
       );
@@ -479,31 +489,49 @@ export const ShareRights = ({
     return (
       <div className={styles.table}>
         <DataTable
-          first={shareRightsState.pagination.first}
-          getPageChange={onPaginate}
-          loading={loadingStatus.isActionButtonsLoading}
-          paginator={true}
-          rows={shareRightsState.pagination.rows}
+          autoLayout
+          className={styles.dialogContent}
+          hasDefaultCurrentPage
+          paginator
+          rows={10}
           rowsPerPageOptions={[5, 10, 15]}
-          summary="shareRights"
-          value={shareRightsState.filteredData}>
-          <Column body={renderAccountTemplate} header={columnHeader} />
-          <Column body={renderRoleColumnTemplate} header={resourcesContext.messages['rolesColumn']} />
-          <Column
-            body={renderButtonsColumnTemplate}
-            header={resourcesContext.messages['actions']}
-            style={{ width: '100px' }}
-          />
+          totalRecords={filteredData.length}
+          value={filteredData}>
+          {getShareRightsColumns()}
         </DataTable>
       </div>
     );
+  };
+
+  const getShareRightsColumns = () => {
+    const columns = [
+      {
+        key: 'account',
+        header: columnHeader,
+        template: renderAccountTemplate
+      },
+      {
+        key: 'role',
+        header: resourcesContext.messages['rolesColumn'],
+        template: renderRoleColumnTemplate
+      },
+      {
+        key: 'actions',
+        header: resourcesContext.messages['actions'],
+        template: renderButtonsColumnTemplate
+      }
+    ];
+
+    return columns.map(column => {
+      return <Column body={column.template} field={column.key} header={column.header} key={column.key} sortable />;
+    });
   };
 
   const getShareRightsTableStyles = () => {
     if (!isEmpty(shareRightsState.userRightList)) {
       return styles.wrapperNoUserRoles;
     } else {
-      if (isEmpty(shareRightsState.filteredData)) {
+      if (isEmpty(filteredData)) {
         return styles.wrapperEmptyFilter;
       } else {
         return '';
@@ -513,7 +541,7 @@ export const ShareRights = ({
 
   return renderDialogLayout(
     <Fragment>
-      {renderShareRightsFilters()}
+      {renderFilters()}
       {renderShareRightsTable()}
 
       {shareRightsState.isDeleteDialogVisible && (
