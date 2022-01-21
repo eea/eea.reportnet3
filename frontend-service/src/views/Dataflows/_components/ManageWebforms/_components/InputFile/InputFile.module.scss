@@ -1,3 +1,7 @@
+.container {
+  display: flex;
+}
+
 .fileName {
   margin-left: 1rem;
 }
@@ -12,4 +16,12 @@
 .fileNameWrapper {
   display: flex;
   align-items: center;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.buttonWrap {
+  flex-shrink: 0;
 }

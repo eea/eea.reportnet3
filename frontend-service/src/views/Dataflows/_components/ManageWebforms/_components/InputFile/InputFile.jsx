@@ -25,8 +25,8 @@ export const InputFile = ({ onChange, buttonTextNoFile, buttonTextWithFile, acce
   };
 
   return (
-    <div style={{ display: 'flex' }}>
-      <div style={{ flexShrink: 0 }}>
+    <div className={styles.container}>
+      <div className={styles.buttonWrap}>
         <Button
           className="p-button p-component p-button-primary p-button-animated-blink p-button-text-icon-left"
           icon="upload"
@@ -44,12 +44,12 @@ export const InputFile = ({ onChange, buttonTextNoFile, buttonTextWithFile, acce
 
       <input
         accept={accept}
+        className={styles.hiddenFileInput}
         hidden
         id="fileInput"
         name="fileInput"
         onChange={onFileSelect}
         ref={fileRef}
-        style={{ display: 'none' }}
         type="file"
       />
     </div>
