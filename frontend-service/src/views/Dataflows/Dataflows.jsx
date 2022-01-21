@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useResetRecoilState } from 'recoil';
 
@@ -18,6 +18,7 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'views/_components/Dialog';
 import { GoTopButton } from 'views/_components/GoTopButton';
+import { InputText } from 'views/_components/InputText';
 import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
@@ -25,6 +26,7 @@ import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDatafl
 import { ManageWebforms } from './_components/ManageWebforms';
 import { MyFilters } from 'views/_components/MyFilters';
 import { Paginator } from 'views/_components/DataTable/_components/Paginator';
+import ReactTooltip from 'react-tooltip';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
@@ -88,6 +90,9 @@ const Dataflows = () => {
     isValidatingAllDataflowsUsers: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     pagination: { firstRow: 0, numberRows: 5, pageNum: 0 },
+    currentPage: 0,
+    goToPage: 1,
+    pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
     pinnedSeparatorIndex: -1,
     reference: [],
     reporting: []
@@ -99,6 +104,7 @@ const Dataflows = () => {
   const {
     activeIndex,
     dataflowsCount,
+    goToPage,
     isAdmin,
     isCustodian,
     isNationalCoordinator,
@@ -395,6 +401,7 @@ const Dataflows = () => {
       userContext.setCurrentDataflowType(currentTabDataflowType);
     }
     dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
+    onChangePagination({ firstRow: 0, numberRows: 5, pageNum: 0 });
   };
 
   const onHideObligationDialog = () => {
@@ -623,12 +630,86 @@ const Dataflows = () => {
     reporting: dataflowsFilterOptions
   };
 
+  const onChangeCurrentPage = event => {
+    if (event.key === 'Enter' && goToPage !== '' && goToPage !== pagination.first + 1) {
+      var pc = Math.ceil(filteredData.length / pagination.numberRows) || 1;
+      var p = Math.floor(event.target.value - 1);
+
+      if (p >= 0 && p < pc) {
+        var newPageState = {
+          firstRow: (event.target.value - 1) * pagination.numberRows,
+          numberRows: pagination.numberRows,
+          pageNum: p
+        };
+        onChangePagination(newPageState);
+        setCurrentPage(p);
+      }
+    } else {
+      setGoToPage(event.target.value);
+      if (event.target.value <= 0 || event.target.value > Math.ceil(filteredData.length / pagination.numberRows)) {
+        setPageInputTooltip(
+          `${resourcesContext.messages['currentPageErrorMessage']} ${Math.ceil(
+            filteredData.length / pagination.numberRows
+          )}`
+        );
+      } else {
+        setPageInputTooltip(resourcesContext.messages['currentPageInfoMessage']);
+      }
+    }
+  };
+
   const onChangePagination = pagination => dataflowsDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
 
+  const setGoToPage = value => dataflowsDispatch({ type: 'SET_GO_TO_PAGE', payload: value });
+
+  const setCurrentPage = value => dataflowsDispatch({ type: 'SET_CURRENT_PAGE', payload: value });
+
+  const setPageInputTooltip = value => dataflowsDispatch({ type: 'SET_PAGE_INPUT_TOOLTIP', payload: value });
+
   const onPaginate = event => {
+    setCurrentPage(event.page);
+    setGoToPage(event.page + 1);
     onChangePagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
-    getDataflows(event.first, event.rows, event.page);
   };
+
+  const currentPageTemplate = {
+    layout: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport',
+    // eslint-disable-next-line react/no-multi-comp
+    CurrentPageReport: options => {
+      return (
+        <span className={styles.currentPageWrapper}>
+          <label className={styles.currentPageLabel}>{resourcesContext.messages['goTo']}</label>
+          <InputText
+            className={styles.currentPageInput}
+            data-for="pageInputTooltip"
+            data-tip
+            id="currentPageInput"
+            keyfilter="pint"
+            onChange={onChangeCurrentPage}
+            onKeyDown={onChangeCurrentPage}
+            style={{
+              border: (goToPage <= 0 || goToPage > options.totalPages) && '1px solid var(--errors)',
+              boxShadow:
+                goToPage <= 0 || goToPage > options.totalPages ? 'var(--inputtext-box-shadow-focus-error)' : 'none'
+            }}
+            value={goToPage}
+          />
+          <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="bottom">
+            {dataflowsState.pageInputTooltip}
+          </ReactTooltip>
+          <label className={styles.currentPageOf}>
+            {filteredData.length > 0
+              ? `${resourcesContext.messages['of']} ${Math.ceil(filteredData.length / pagination.numberRows)}`
+              : 1}
+          </label>
+        </span>
+      );
+    }
+  };
+
+  const begin = Math.max(0, Math.ceil(dataflowsState.currentPage * pagination.numberRows));
+  const end = begin + pagination.numberRows;
+  const currentPosts = filteredData.slice(begin, end);
 
   const renderPaginator = () => {
     if (!loadingStatus[tabId]) {
@@ -640,6 +721,7 @@ const Dataflows = () => {
           rightContent={getPaginatorRecordsCount()}
           rows={pagination.numberRows}
           rowsPerPageOptions={[5, 10, 15]}
+          template={currentPageTemplate}
           totalRecords={filteredData.length}
         />
       );
