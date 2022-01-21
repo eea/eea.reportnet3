@@ -87,7 +87,7 @@ const Dataflows = () => {
     isUserListVisible: false,
     isValidatingAllDataflowsUsers: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
-    pagination: { firstRow: 0, numberRows: 10, pageNum: 0 },
+    pagination: { firstRow: 0, numberRows: 5, pageNum: 0 },
     pinnedSeparatorIndex: -1,
     reference: [],
     reporting: []
@@ -626,7 +626,7 @@ const Dataflows = () => {
   const onChangePagination = pagination => dataflowsDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
 
   const onPaginate = event => {
-    onChangePagination({ first: event.first, rows: event.rows, pageNum: event.page });
+    onChangePagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
     getDataflows(event.first, event.rows, event.page);
   };
 
