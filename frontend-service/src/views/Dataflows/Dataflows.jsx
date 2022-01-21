@@ -249,13 +249,13 @@ const Dataflows = () => {
   useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       onLoadPermissions();
-      getDataflows(pagination.firstRow, pagination.numberRows, pagination.pageNum);
+      getDataflows();
     }
   }, [userContext.contextRoles]);
 
   useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
-      getDataflows(pagination.firstRow, pagination.numberRows, pagination.pageNum);
+      getDataflows();
     }
   }, [tabId]);
 
