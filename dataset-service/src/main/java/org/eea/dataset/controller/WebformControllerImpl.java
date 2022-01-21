@@ -132,7 +132,7 @@ public class WebformControllerImpl implements WebformController {
   @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/webformConfig/{id}")
   @ApiOperation(value = "Delete webform config", hidden = true)
-  public void deleteWebformConfig(Long id) {
+  public void deleteWebformConfig(@PathVariable("id") Long id) {
     try {
       webformService.deleteWebformConfig(id);
     } catch (EEAException e) {

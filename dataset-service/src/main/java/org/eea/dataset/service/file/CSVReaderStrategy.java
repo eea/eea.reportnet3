@@ -21,6 +21,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.slf4j.Logger;
@@ -324,7 +325,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       LOG_ERROR.error(
           "Error parsing CSV file. No headers matching FieldSchemas: datasetId={}, tableSchemaId={}, expectedHeaders={}, actualHeaders={}",
           datasetId, idTableSchema, getFieldNames(idTableSchema, dataSetSchema), values);
-      throw new EEAException("No headers matching FieldSchemas");
+      throw new EEAException(EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING);
     }
 
     return headers;
