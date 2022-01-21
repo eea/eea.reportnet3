@@ -366,7 +366,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           <InputFile
             accept="application/JSON"
             buttonTextNoFile={resourcesContext.messages['inputFileButtonNotSelected']}
-            buttonTextWithFile={resourcesContext.messages['file']}
+            buttonTextWithFile={resourcesContext.messages['inputFileButtonSelected']}
             fileRef={fileRef}
             onChange={onFileUpload}
             onClearFile={onClearFile}
