@@ -1,13 +1,13 @@
 import { useState } from 'react';
-
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './InputFile.module.scss';
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import { Button } from 'views/_components/Button';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const InputFile = ({ onChange, buttonTextNoFile, buttonTextWithFile, accept, fileRef, onClearFile }) => {
   const [fileName, setFileName] = useState('');
