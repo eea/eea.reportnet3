@@ -28,7 +28,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [jsonContent, setJsonContent] = useState(null);
-  const [jsonName, setJsonName] = useState(null);
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [selectedWebformId, setSelectedWebformId] = useState(null);
   const [webformName, setWebformName] = useState('');
@@ -146,7 +145,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const onAddEditDialogClose = () => {
     setIsAddEditDialogVisible(false);
     setSelectedWebformId(null);
-    setJsonName(null);
     setJsonContent(null);
   };
 
@@ -156,9 +154,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   const onFileUpload = async e => {
-    e.preventDefault();
-    setJsonName(e.target?.files[0]?.name ? e.target.files[0].name : '');
-
     if (!isNil(e.target.files[0])) {
       const reader = new FileReader();
       reader.onload = async e => {
