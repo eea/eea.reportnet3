@@ -358,6 +358,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
             <InputText
               className={styles.nameInput}
               id="name"
+              maxLength={50}
               onChange={event => setWebformName(event.target.value)}
               value={webformName}
             />
