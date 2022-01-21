@@ -57,7 +57,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
     try {
       const data = await WebformService.getAll();
-      setWebforms(orderBy(data, 'id', 'desc'));
+      setWebforms(orderBy(data, 'id', 'asc'));
     } catch (error) {
       console.error('ManageWebforms - getWebformList.', error);
       notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
@@ -141,8 +141,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     setSelectedWebformId(id);
     setIsAddEditDialogVisible(true);
   };
-
-  const onAddClick = () => setIsAddEditDialogVisible(true);
 
   const onAddEditDialogClose = () => {
     setIsAddEditDialogVisible(false);
@@ -237,7 +235,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         className="p-button-primary"
         icon={'plus'}
         label={resourcesContext.messages['add']}
-        onClick={onAddClick}
+        onClick={() => setIsAddEditDialogVisible(true)}
       />
       <Button
         className={`p-button-secondary ${styles.buttonPushRight}`}
