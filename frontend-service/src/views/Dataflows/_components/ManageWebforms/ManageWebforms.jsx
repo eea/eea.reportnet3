@@ -248,29 +248,18 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
-  const checkIsNotUniqueName = () => !webforms.some(webform => webform.label === webformName);
+  const checkNameExists = () => webforms.some(webform => webform.label === webformName);
 
   const getIsDisabledConfirmBtn = () => {
     if (isNil(selectedWebformId)) {
-      return (
-        isNil(webformName) ||
-        isEmpty(webformName) ||
-        isEmpty(jsonContent) ||
-        checkIsNotUniqueName() ||
-        loadingStatus === 'pending'
-      );
+      return isEmpty(webformName) || isEmpty(jsonContent) || checkNameExists() || loadingStatus === 'pending';
     }
 
     if (!isEmpty(webformName) && isEmpty(jsonContent)) {
-      return getInitialName() === webformName || checkIsNotUniqueName();
+      return getInitialName() === webformName || checkNameExists();
     }
 
-    return (
-      (isEmpty(jsonContent) && isNil(webformName)) ||
-      isEmpty(webformName) ||
-      checkIsNotUniqueName() ||
-      loadingStatus === 'pending'
-    );
+    return (isEmpty(jsonContent) && isEmpty(webformName)) || isEmpty(webformName) || loadingStatus === 'pending';
   };
 
   const addEditDialogFooter = (
