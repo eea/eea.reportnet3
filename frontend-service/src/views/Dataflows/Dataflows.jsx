@@ -669,7 +669,7 @@ const Dataflows = () => {
           reorderDataflows={onReorderPinnedDataflows}
           visibleTab={tabId}
         />
-        {renderPaginator()}
+        <div className={styles.bottomPaginator}>{renderPaginator()}</div>
       </div>
 
       <GoTopButton parentRef={containerRef} referenceMargin={70} />
