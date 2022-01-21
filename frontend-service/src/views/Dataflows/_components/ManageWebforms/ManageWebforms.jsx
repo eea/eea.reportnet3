@@ -215,7 +215,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
           disabled={loadingStatus === 'pending'}
           icon={getBtnIcon(row.id, 'export')}
-          onClick={() => onClickDownload(row.id, row.value)}
+          onClick={() => onClickDownload(row.id, row.label)}
           type="button"
         />
         <Button
