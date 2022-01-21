@@ -146,7 +146,7 @@ const Dataflows = () => {
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
-  const { filteredData } = useFilters(tabId);
+  const { filteredData, isFiltered } = useFilters(tabId);
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -346,6 +346,19 @@ const Dataflows = () => {
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' }, true);
     }
   };
+
+  const getPaginatorRecordsCount = () => (
+    <Fragment>
+      {isFiltered && dataflowsState[tabId].length !== filteredData.length
+        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
+        : ''}
+      {resourcesContext.messages['totalRecords']} {dataflowsState[tabId].length}{' '}
+      {resourcesContext.messages['records'].toLowerCase()}
+      {isFiltered && dataflowsState[tabId].length === filteredData.length
+        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
+        : ''}
+    </Fragment>
+  );
 
   const onUpdatePinnedSeparatorPosition = () => {
     const orderedFilteredData = sortDataflows(filteredData);
@@ -624,8 +637,7 @@ const Dataflows = () => {
           className="p-paginator-bottom"
           first={pagination.firstRow}
           onPageChange={onPaginate}
-          // rightContent={getPaginatorRecordsCount()}
-          rightContent={`${resourcesContext.messages['totalRecords']} ${dataflowsState[tabId].length}`}
+          rightContent={getPaginatorRecordsCount()}
           rows={pagination.numberRows}
           rowsPerPageOptions={[5, 10, 15]}
           totalRecords={filteredData.length}
