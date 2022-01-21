@@ -9,7 +9,7 @@ import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
-import { Filters } from 'views/_components/Filters';
+import { MyFilters } from 'views/_components/MyFilters';
 import { Spinner } from 'views/_components/Spinner';
 
 import { IntegrationService } from 'services/IntegrationService';
@@ -19,6 +19,8 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { integrationsListReducer } from './_functions/Reducers/integrationsListReducer';
 import { TooltipButton } from 'views/_components/TooltipButton';
+
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -42,8 +44,6 @@ export const IntegrationsList = ({
 
   const [integrationListState, integrationListDispatch] = useReducer(integrationsListReducer, {
     data: [],
-    filtered: false,
-    filteredData: [],
     integrationId: '',
     integrationToDeleteId: '',
     isDataUpdated: false,
@@ -51,6 +51,8 @@ export const IntegrationsList = ({
     isDeleting: false,
     isLoading: true
   });
+
+  const { filteredData, isFiltered } = useFilters('integrationsList');
 
   useEffect(() => {
     if (!designerState.isIntegrationManageDialogVisible && needsRefresh) {
@@ -92,16 +94,45 @@ export const IntegrationsList = ({
     />
   );
 
-  const getFilteredSearched = value => integrationListDispatch({ type: 'IS_FILTERED', payload: { value } });
+  const getIntegrationListColumns = () => {
+    const columns = [
+      {
+        key: 'integrationName',
+        header: resourcesContext.messages['integrationName'],
+        template: integrationNameTemplate,
+        sortable: true
+      },
+      { key: 'operationName', header: resourcesContext.messages['operationName'], sortable: true },
+      {
+        key: 'actions',
+        header: resourcesContext.messages['actions'],
+        template: rowData => actionsTemplate(rowData),
+        className: styles.validationCol,
+        style: { width: '100px' }
+      }
+    ];
+
+    return columns.map(column => (
+      <Column
+        body={column.template}
+        className={column?.className}
+        field={column.key}
+        header={column.header}
+        key={column.key}
+        sortable={column?.sortable}
+        style={column?.style}
+      />
+    ));
+  };
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
-      {integrationListState.filtered && integrationListState.data.length !== integrationListState.filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${integrationListState.filteredData.length} | `
+      {isFiltered && integrationListState.data.length !== filteredData.length
+        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {integrationListState.data.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
-      {integrationListState.filtered && integrationListState.data.length === integrationListState.filteredData.length
+      {isFiltered && integrationListState.data.length === filteredData.length
         ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
@@ -136,8 +167,6 @@ export const IntegrationsList = ({
     }
   };
 
-  const onLoadFilteredData = data => integrationListDispatch({ type: 'FILTERED_DATA', payload: { data } });
-
   const onLoadIntegrations = async () => {
     try {
       if (isCreating || isUpdating || integrationsList.isDeleting) {
@@ -163,8 +192,11 @@ export const IntegrationsList = ({
   };
 
   const filterOptions = [
-    { type: 'input', properties: [{ name: 'integrationName' }] },
-    { type: 'multiselect', properties: [{ name: 'operationName' }] }
+    { type: 'INPUT', key: 'integrationName', label: resourcesContext.messages['integrationName'] },
+    {
+      type: 'MULTI_SELECT',
+      nestedOptions: [{ key: 'operationName', label: resourcesContext.messages['operationName'] }]
+    }
   ];
 
   if (integrationListState.isLoading) {
@@ -192,14 +224,14 @@ export const IntegrationsList = ({
     </div>
   ) : (
     <div className={styles.integrations}>
-      <Filters
+      <MyFilters
+        className="integrationsList"
         data={integrationListState.data}
-        getFilteredData={onLoadFilteredData}
-        getFilteredSearched={getFilteredSearched}
         options={filterOptions}
+        viewType="integrationsList"
       />
 
-      {!isEmpty(integrationListState.filteredData) ? (
+      {!isEmpty(filteredData) ? (
         <DataTable
           autoLayout={true}
           onRowClick={event => integrationId(event.data.integrationId)}
@@ -208,28 +240,9 @@ export const IntegrationsList = ({
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary={resourcesContext.messages['externalIntegrations']}
-          totalRecords={integrationListState.filteredData.length}
-          value={integrationListState.filteredData}>
-          <Column
-            body={integrationNameTemplate}
-            field="integrationName"
-            header={resourcesContext.messages['integrationName']}
-            key="integrationName"
-            sortable={true}
-          />
-          <Column
-            field="operationName"
-            header={resourcesContext.messages['operationName']}
-            key="operationName"
-            sortable={true}
-          />
-          <Column
-            body={row => actionsTemplate(row)}
-            className={styles.validationCol}
-            header={resourcesContext.messages['actions']}
-            key="actions"
-            style={{ width: '100px' }}
-          />
+          totalRecords={filteredData.length}
+          value={filteredData}>
+          {getIntegrationListColumns()}
         </DataTable>
       ) : (
         <div className={styles.emptyFilteredData}>
