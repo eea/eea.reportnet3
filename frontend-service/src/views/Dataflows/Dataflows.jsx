@@ -257,7 +257,7 @@ const Dataflows = () => {
     if (!isNil(userContext.contextRoles)) {
       getDataflows();
     }
-  }, [tabId]);
+  }, [tabId, pagination]);
 
   useEffect(() => {
     setActiveIndexTabOnBack();
