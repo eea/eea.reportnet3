@@ -214,11 +214,15 @@
   }
 }
 
-.dragAndDropItems {
-  div > div:first-child {
-    svg {
-      margin-left: auto;
-    }
+.inactiveDragAndDropItems ~ div > div:first-child {
+  svg {
+    opacity: 0.5 !important;
+  }
+}
+
+.activeDragAndDropItems ~ div > div:first-child {
+  svg {
+    cursor: pointer;
   }
 }
 

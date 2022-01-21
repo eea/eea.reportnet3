@@ -1182,48 +1182,33 @@ export const FieldDesigner = ({
   };
 
   const renderDragAndDrop = () => {
-    const renderArrows = (condition, icon, order, text) => {
-      if (condition) {
-        return (
-          <FontAwesomeIcon
-            aria-label={resourcesContext.messages[text]}
-            className={styles.moveArrows}
-            icon={AwesomeIcons(icon)}
-            onClick={() => onMoveFieldUpDown(order)}
-            style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
-          />
-        );
-      } else {
-        return <div className={styles.emptyArrow}></div>;
-      }
+    const renderArrows = (icon, order, text) => {
+      return (
+        <FontAwesomeIcon
+          aria-label={resourcesContext.messages[text]}
+          className={styles.moveArrows}
+          icon={AwesomeIcons(icon)}
+          onClick={() => onMoveFieldUpDown(order)}
+          style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
+        />
+      );
     };
 
-    if (!addField) {
-      return (
-        <div className={`${styles.draggableFieldContentCell} ${styles.dragAndDropItemsCell}`}>
-          <div className={styles.draggableFieldCell}>{resourcesContext.messages['moveField']}</div>
-          <div className={`${styles.draggableFieldCell} ${styles.dragAndDropItems}`}>
-            <FontAwesomeIcon
-              aria-label={resourcesContext.messages['moveField']}
-              className={styles.dragAndDropIcon}
-              icon={AwesomeIcons('move')}
-              style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
-            />
-            {renderArrows(index > 0, 'arrowUp', -1, 'moveUp')}
-            {renderArrows(index < fields.length - 1, 'arrowDown', 2, 'moveDown')}
-          </div>
+    return (
+      <div className={`${styles.draggableFieldContentCell} ${styles.dragAndDropItemsCell}`}>
+        <div className={styles.draggableFieldCell}>{resourcesContext.messages['moveField']}</div>
+        <div className={`${styles.draggableFieldCell} ${styles.dragAndDropItems}`}>
+          <FontAwesomeIcon
+            aria-label={resourcesContext.messages['moveField']}
+            className={styles.dragAndDropIcon}
+            icon={AwesomeIcons('move')}
+            style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
+          />
+          {renderArrows('arrowUp', -1, 'moveUp')}
+          {renderArrows('arrowDown', 2, 'moveDown')}
         </div>
-      );
-    } else {
-      return (
-        <div className={`${styles.draggableFieldContentCell} ${styles.dragAndDropItemsCell}`}>
-          <div className={styles.draggableFieldCell}>
-            {resourcesContext.messages['add']} {resourcesContext.messages['field']}
-          </div>
-          <div className={styles.draggableFieldCell}></div>
-        </div>
-      );
-    }
+      </div>
+    );
   };
 
   const duplicateButtonTooltipName = `${fieldDesignerState.fieldValue}_tooltip`;
@@ -1585,7 +1570,7 @@ export const FieldDesigner = ({
         onDragOver={onFieldDragOver}
         onDragStart={onFieldDragStart}
         onDrop={onFieldDragDrop}
-        style={{ cursor: isDataflowOpen || isDesignDatasetEditorRead ? 'default' : 'grab' }}>
+        style={{ cursor: fields?.length < 2 ? 'default' : 'grab' }}>
         {renderDragAndDrop()}
         {renderCheckboxes()}
         {renderInputs()}
