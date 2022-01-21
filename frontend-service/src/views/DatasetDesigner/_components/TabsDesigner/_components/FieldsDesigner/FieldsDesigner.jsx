@@ -811,7 +811,11 @@ export const FieldsDesigner = ({
   };
 
   const getContentTableClassName = () => {
-    return !isNil(fields) && fields.length < 2 ? styles.inactiveDragAndDropItems : styles.activeDragAndDropItems;
+    if (!isNil(fields) && fields.length < 2) {
+      return styles.inactiveDragAndDropItems;
+    } else {
+      return styles.activeDragAndDropItems;
+    }
   };
 
   return (

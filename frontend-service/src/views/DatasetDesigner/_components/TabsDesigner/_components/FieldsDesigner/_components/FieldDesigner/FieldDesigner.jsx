@@ -1182,18 +1182,15 @@ export const FieldDesigner = ({
   };
 
   const renderDragAndDrop = () => {
-    const renderArrows = (icon, order, text) => {
-      return (
-        <FontAwesomeIcon
-          aria-label={resourcesContext.messages[text]}
-          className={styles.moveArrows}
-          icon={AwesomeIcons(icon)}
-          onClick={() => onMoveFieldUpDown(order)}
-          style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
-        />
-      );
-    };
-
+    const renderArrows = (icon, order, text) => (
+      <FontAwesomeIcon
+        aria-label={resourcesContext.messages[text]}
+        className={styles.moveArrows}
+        icon={AwesomeIcons(icon)}
+        onClick={() => onMoveFieldUpDown(order)}
+        style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
+      />
+    );
     return (
       <div className={`${styles.draggableFieldContentCell} ${styles.dragAndDropItemsCell}`}>
         <div className={styles.draggableFieldCell}>{resourcesContext.messages['moveField']}</div>
