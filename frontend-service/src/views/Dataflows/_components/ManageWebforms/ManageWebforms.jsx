@@ -96,16 +96,16 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
       setLoadingStatus('success');
       getWebformList();
+      setIsAddEditDialogVisible(false);
+      setJsonContent(null);
+      setSelectedWebformId(null);
+      setWebformName('');
     } catch (error) {
       console.error('ManageWebforms - onConfirm.', error);
       setLoadingStatus('error');
       isNil(selectedWebformId)
         ? notificationContext.add({ type: 'CREATE_WEBFORM_ERROR' }, true)
         : notificationContext.add({ type: 'EDIT_WEBFORM_ERROR' }, true);
-    } finally {
-      setIsAddEditDialogVisible(false);
-      setJsonContent(null);
-      setSelectedWebformId(null);
     }
   };
 
