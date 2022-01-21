@@ -81,7 +81,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     } catch (error) {
       console.error('ManageWebforms - onDownload.', error);
       setLoadingStatus('error');
-      notificationContext.add({ type: 'GET_WEBFORM_LIST_ERROR' }, true);
+      notificationContext.add({ type: 'DOWNLOAD_WEBFORM_CONFIGURATION_ERROR' }, true);
     } finally {
       setSelectedWebformId(null);
     }
@@ -105,8 +105,8 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       console.error('ManageWebforms - onConfirm.', error);
       setLoadingStatus('error');
       isNil(selectedWebformId)
-        ? notificationContext.add({ type: 'CREATE_WEBFORM_ERROR' }, true)
-        : notificationContext.add({ type: 'EDIT_WEBFORM_ERROR' }, true);
+        ? notificationContext.add({ type: 'CREATE_WEBFORM_CONFIGURATION_ERROR' }, true)
+        : notificationContext.add({ type: 'EDIT_WEBFORM_CONFIGURATION_ERROR' }, true);
     }
   };
 
@@ -130,7 +130,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     } catch (error) {
       console.error('ManageWebforms - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
-      notificationContext.add({ type: 'DELETE_WEBFORM_ERROR' }, true);
+      notificationContext.add({ type: 'DELETE_WEBFORM_CONFIGURATION_ERROR' }, true);
     } finally {
       setLoadingStatus('idle');
       setSelectedWebformId(null);
@@ -292,7 +292,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     if (loadingStatus === 'failed') {
       return (
         <div className={styles.noDataContent}>
-          <p>{resourcesContext.messages['loadWebformsError']}</p>
+          <p>{resourcesContext.messages['loadWebformsConfigurationError']}</p>
           <Button label={resourcesContext.messages['refresh']} onClick={getWebformList} />
         </div>
       );
@@ -320,7 +320,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         blockScroll={false}
         className="responsiveDialog"
         footer={dialogFooter}
-        header={resourcesContext.messages['manageWebforms']}
+        header={resourcesContext.messages['manageWebformsConfiguration']}
         modal
         onHide={onCloseDialog}
         visible={isDialogVisible}>
@@ -330,13 +330,13 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       {isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
-          header={resourcesContext.messages['deleteWebform']}
+          header={resourcesContext.messages['deleteWebformConfiguration']}
           labelCancel={resourcesContext.messages['cancel']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteDialog}
           onHide={onHideDeleteDialog}
           visible={isDeleteDialogVisible}>
-          {resourcesContext.messages['confirmDeleteWebform']}
+          {resourcesContext.messages['confirmDeleteWebformConfiguration']}
         </ConfirmDialog>
       )}
 
@@ -347,8 +347,8 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           footer={addEditDialogFooter}
           header={
             isNil(selectedWebformId)
-              ? resourcesContext.messages['addWebformDialogHeader']
-              : resourcesContext.messages['editWebformDialogHeader']
+              ? resourcesContext.messages['addWebformConfigurationDialogHeader']
+              : resourcesContext.messages['editWebformConfigurationDialogHeader']
           }
           modal
           onHide={onAddEditDialogClose}
