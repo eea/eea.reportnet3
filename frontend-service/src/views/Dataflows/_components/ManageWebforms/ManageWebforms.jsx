@@ -247,23 +247,23 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
-  const getIsDisabled = () => {
+  const getIsDisabledConfirmBtn = () => {
     if (isNil(selectedWebformId)) {
-      return (
-        isNil(webformName) || isEmpty(webformName) || isEmpty(fileRef.current?.value) || loadingStatus === 'pending'
-      );
+      return isNil(webformName) || isEmpty(webformName) || isEmpty(jsonContent) || loadingStatus === 'pending';
     }
 
-    return (
-      (isEmpty(fileRef.current?.value) && isNil(webformName)) || isEmpty(webformName) || loadingStatus === 'pending'
-    );
+    if (!isEmpty(webformName) && isEmpty(jsonContent)) {
+      return getInitialName() === webformName;
+    }
+
+    return (isEmpty(jsonContent) && isNil(webformName)) || isEmpty(webformName) || loadingStatus === 'pending';
   };
 
   const addEditDialogFooter = (
     <Fragment>
       <Button
-        className="p-button-primary p-button-animated-blink "
-        disabled={getIsDisabled()}
+        className={`p-button-primary ${getIsDisabledConfirmBtn() ? '' : 'p-button-animated-blink'}`}
+        disabled={getIsDisabledConfirmBtn()}
         icon={loadingStatus === 'pending' ? 'spinnerAnimate' : 'check'}
         label={isNil(selectedWebformId) ? resourcesContext.messages['create'] : resourcesContext.messages['edit']}
         onClick={onConfirm}
