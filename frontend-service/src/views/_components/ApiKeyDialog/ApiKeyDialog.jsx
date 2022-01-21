@@ -1,6 +1,6 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 
-import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import ReactTooltip from 'react-tooltip';
 
@@ -81,7 +81,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
       return <Spinner className={styles.spinner} />;
     }
 
-    if (isEmpty(apiKey)) {
+    if (isNil(apiKey)) {
       return <p>{resourcesContext.messages['noApiKey']}</p>;
     }
 
