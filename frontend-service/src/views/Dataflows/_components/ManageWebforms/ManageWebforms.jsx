@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -8,7 +8,7 @@ import { Column } from 'primereact/column';
 
 import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
-
+import { InputFile } from './_components/InputFile';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
@@ -28,10 +28,13 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [jsonContent, setJsonContent] = useState(null);
+  const [jsonName, setJsonName] = useState(null);
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [selectedWebformId, setSelectedWebformId] = useState(null);
   const [webformName, setWebformName] = useState('');
   const [webforms, setWebforms] = useState([]);
+
+  const fileRef = useRef(null);
 
   useEffect(() => {
     getWebformList();
@@ -143,6 +146,8 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const onAddEditDialogClose = () => {
     setIsAddEditDialogVisible(false);
     setSelectedWebformId(null);
+    setJsonName(null);
+    setJsonContent(null);
   };
 
   const onClickDownload = (id, name) => {
@@ -152,6 +157,8 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
   const onFileUpload = async e => {
     e.preventDefault();
+    setJsonName(e.target?.files[0]?.name ? e.target.files[0].name : '');
+
     if (!isNil(e.target.files[0])) {
       const reader = new FileReader();
       reader.onload = async e => {
@@ -160,6 +167,10 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       };
       reader.readAsText(e.target.files[0]);
     }
+  };
+
+  const onClearFile = () => {
+    setJsonContent(null);
   };
 
   const getTableColumns = () => {
@@ -241,10 +252,14 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
   const getIsDisabled = () => {
     if (isNil(selectedWebformId)) {
-      return isNil(webformName) || isEmpty(webformName) || isNil(jsonContent) || loadingStatus === 'pending';
+      return (
+        isNil(webformName) || isEmpty(webformName) || isEmpty(fileRef.current.value) || loadingStatus === 'pending'
+      );
     }
 
-    return (isNil(jsonContent) && (isNil(webformName) || isEmpty(webformName))) || loadingStatus === 'pending';
+    return (
+      (isEmpty(fileRef.current.value) && (isNil(webformName) || isEmpty(webformName))) || loadingStatus === 'pending'
+    );
   };
 
   const addEditDialogFooter = (
@@ -254,7 +269,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         disabled={getIsDisabled()}
         icon={loadingStatus === 'pending' ? 'spinnerAnimate' : 'check'}
         label={isNil(selectedWebformId) ? resourcesContext.messages['create'] : resourcesContext.messages['edit']}
-        onClick={() => onConfirm()}
+        onClick={onConfirm}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
@@ -348,17 +363,14 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
             />
           </label>
 
-          <label htmlFor="jsonContent">
-            {resourcesContext.messages['jsonFile']}
-            <input
-              accept="application/JSON"
-              id="jsonContent"
-              name="jsonContent"
-              onChange={onFileUpload}
-              placeholder="file upload"
-              type="file"
-            />
-          </label>
+          <InputFile
+            accept="application/JSON"
+            buttonTextNoFile={resourcesContext.messages['inputFileButtonNotSelected']}
+            buttonTextWithFile={resourcesContext.messages['file']}
+            fileRef={fileRef}
+            onChange={onFileUpload}
+            onClearFile={onClearFile}
+          />
         </Dialog>
       )}
     </Fragment>

@@ -1455,6 +1455,7 @@
     "editWebformDialogHeader": "Edit webform",
     "createWebformError": "Error creating webform",
     "editWebformError": "Error updating webform",
-    "jsonFile": "JSON file"
+    "jsonFile": "JSON file",
+    "inputFileButtonNotSelected": "Select file"
   }
 }
