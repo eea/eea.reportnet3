@@ -96,7 +96,6 @@ const DataViewer = ({
   const [addDialogVisible, setAddDialogVisible] = useState(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
   const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [editDialogVisible, setEditDialogVisible] = useState(false);
   const [fetchedData, setFetchedData] = useState([]);
   const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
@@ -539,8 +538,7 @@ const DataViewer = ({
       notificationContext.add({ type: 'DELETE_TABLE_DATA_INIT' });
       await DatasetService.deleteTableData(datasetId, tableId);
       setFetchedData([]);
-      dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
-      dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
+      dispatchRecords({ type: 'RESET_TOTAL', payload: 0 });
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -558,8 +556,6 @@ const DataViewer = ({
           true
         );
       }
-    } finally {
-      setDeleteDialogVisible(false);
     }
   };
 
@@ -600,8 +596,6 @@ const DataViewer = ({
           true
         );
       }
-    } finally {
-      setDeleteDialogVisible(false);
     }
   };
 
@@ -1045,22 +1039,48 @@ const DataViewer = ({
     );
   };
 
-  const getPaginatorRecordsCount = () => (
-    <Fragment>
-      {(isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
-      records.totalRecords !== records.totalFilteredRecords
-        ? `${resourcesContext.messages['filtered']}: ${records.totalFilteredRecords} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {!isUndefined(records.totalRecords) ? records.totalRecords : 0}{' '}
-      {records.totalRecords === 1
-        ? resourcesContext.messages['record'].toLowerCase()
-        : resourcesContext.messages['records'].toLowerCase()}
-      {(isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
-      records.totalRecords === records.totalFilteredRecords
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
-    </Fragment>
-  );
+  const renderPaginatorRecordsCount = () => {
+    const renderFilteredRowsLabel = () => {
+      if (
+        (isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
+        records.totalRecords !== records.totalFilteredRecords
+      ) {
+        return `${resourcesContext.messages['filtered']}: ${records.totalFilteredRecords} | `;
+      }
+    };
+
+    const renderTotalRowsLabel = () => {
+      return `${resourcesContext.messages['totalRecords']} ${
+        !isUndefined(records.totalRecords) ? records.totalRecords : 0
+      } `;
+    };
+
+    const renderRowsLabel = () => {
+      if (records.totalRecords === 1) {
+        return resourcesContext.messages['record'].toLowerCase();
+      } else {
+        return resourcesContext.messages['records'].toLowerCase();
+      }
+    };
+
+    const renderFilteredLabel = () => {
+      if (
+        (isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
+        records.totalRecords === records.totalFilteredRecords
+      ) {
+        return ` (${resourcesContext.messages['filtered'].toLowerCase()})`;
+      }
+    };
+
+    return (
+      <Fragment>
+        {renderFilteredRowsLabel()}
+        {renderTotalRowsLabel()}
+        {renderRowsLabel()}
+        {renderFilteredLabel()}
+      </Fragment>
+    );
+  };
 
   const onKeyPress = event => {
     if (event.key === 'Enter' && !isSaving && !records.isSaveDisabled) {
@@ -1068,6 +1088,7 @@ const DataViewer = ({
       onSaveRecord(records.newRecord);
     }
   };
+
   const getAttachExtensions = [{ datasetSchemaId, fileExtension: records.selectedValidExtensions || [] }]
     .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
     .flat()
@@ -1108,6 +1129,7 @@ const DataViewer = ({
         isGroupedValidationSelected={isGroupedValidationSelected}
         isLoading={isLoading}
         levelErrorTypesWithCorrects={levelErrorAllTypes}
+        onConfirmDeleteTable={onConfirmDeleteTable}
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onRefresh={onRefresh}
         onSetVisible={onSetVisible}
@@ -1119,7 +1141,6 @@ const DataViewer = ({
         selectedRuleMessage={selectedRuleMessage}
         selectedTableSchemaId={selectedTableSchemaId}
         setColumns={setColumns}
-        setDeleteDialogVisible={setDeleteDialogVisible}
         setImportTableDialogVisible={setImportTableDialogVisible}
         showGroupedValidationFilter={showGroupedValidationFilter}
         showValidationFilter={showValidationFilter}
@@ -1176,7 +1197,7 @@ const DataViewer = ({
           onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
           onSort={onSort}
           paginator={true}
-          paginatorRight={getPaginatorRecordsCount()}
+          paginatorRight={renderPaginatorRecordsCount()}
           ref={datatableRef}
           reorderableColumns={true}
           resizableColumns={true}
@@ -1371,19 +1392,6 @@ const DataViewer = ({
             />
           </div>
         </Dialog>
-      )}
-
-      {deleteDialogVisible && (
-        <ConfirmDialog
-          classNameConfirm={'p-button-danger'}
-          header={`${resourcesContext.messages['deleteDatasetTableHeader']} (${tableName})`}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={onConfirmDeleteTable}
-          onHide={() => onSetVisible(setDeleteDialogVisible, false)}
-          visible={deleteDialogVisible}>
-          {resourcesContext.messages['deleteDatasetTableConfirm']}
-        </ConfirmDialog>
       )}
 
       {isDeleteAttachmentVisible && (
