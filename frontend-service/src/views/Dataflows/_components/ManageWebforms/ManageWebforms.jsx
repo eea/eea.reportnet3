@@ -146,6 +146,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     setIsAddEditDialogVisible(false);
     setSelectedWebformId(null);
     setJsonContent(null);
+    setWebformName('');
   };
 
   const onClickDownload = (id, name) => {
