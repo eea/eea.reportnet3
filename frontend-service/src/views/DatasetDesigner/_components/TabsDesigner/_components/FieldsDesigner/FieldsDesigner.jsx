@@ -810,6 +810,14 @@ export const FieldsDesigner = ({
     }
   };
 
+  const getContentTableClassName = () => {
+    if (!isNil(fields) && fields.length < 2) {
+      return styles.inactiveDragAndDropItems;
+    } else {
+      return styles.activeDragAndDropItems;
+    }
+  };
+
   return (
     <Fragment>
       <Toolbar>
@@ -968,7 +976,7 @@ export const FieldsDesigner = ({
       </div>
       <div className={styles.contentTable}>
         {!viewType['tabularData'] && (
-          <div className={styles.fieldsHeader}>
+          <div className={`${styles.fieldsHeader} ${getContentTableClassName()}`}>
             <label></label>
             <span className={styles.PKWrap}>
               <label>{resourcesContext.messages['pk']}</label>

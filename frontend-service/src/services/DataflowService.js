@@ -72,8 +72,8 @@ export const DataflowService = {
     );
 
     datasetsDashboardsDataDTO.data.sort((a, b) => {
-      let datasetName_A = a.nameDataSetSchema;
-      let datasetName_B = b.nameDataSetSchema;
+      const datasetName_A = a.nameDataSetSchema;
+      const datasetName_B = b.nameDataSetSchema;
       return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
     });
 
@@ -188,22 +188,20 @@ export const DataflowService = {
 
   getDatasetsFinalFeedback: async dataflowId => {
     const datasetsFinalFeedbackDTO = await DataflowRepository.getDatasetsFinalFeedbackAndReleasedStatus(dataflowId);
-    return datasetsFinalFeedbackDTO.data.map(dataset => {
-      return {
-        dataProviderName: dataset.dataSetName,
-        datasetName: dataset.nameDatasetSchema,
-        datasetId: dataset.id,
-        isReleased: dataset.isReleased ?? false,
-        feedbackStatus: !isNil(dataset.status) && capitalize(dataset.status.split('_').join(' '))
-      };
-    });
+    return datasetsFinalFeedbackDTO.data.map(dataset => ({
+      dataProviderName: dataset.dataSetName,
+      datasetName: dataset.nameDatasetSchema,
+      datasetId: dataset.id,
+      isReleased: dataset.isReleased ?? false,
+      feedbackStatus: !isNil(dataset.status) && capitalize(dataset.status.split('_').join(' '))
+    }));
   },
 
   getDatasetsReleasedStatus: async dataflowId => {
     const datasetsReleasedStatusDTO = await DataflowRepository.getDatasetsFinalFeedbackAndReleasedStatus(dataflowId);
     datasetsReleasedStatusDTO.data.sort((a, b) => {
-      let datasetName_A = a.dataSetName;
-      let datasetName_B = b.dataSetName;
+      const datasetName_A = a.dataSetName;
+      const datasetName_B = b.dataSetName;
       return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
     });
 
@@ -250,25 +248,26 @@ export const DataflowService = {
         const records = !isNull(datasetTableDTO.recordSchema)
           ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
               const fields = !isNull(dataTableRecordDTO.fieldSchema)
-                ? dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
-                    return new DatasetTableField({
-                      codelistItems: DataTableFieldDTO.codelistItems,
-                      description: DataTableFieldDTO.description,
-                      fieldId: DataTableFieldDTO.id,
-                      pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
-                      pkHasMultipleValues: !isNull(DataTableFieldDTO.pkHasMultipleValues)
-                        ? DataTableFieldDTO.pkHasMultipleValues
-                        : false,
-                      pkMustBeUsed: !isNull(DataTableFieldDTO.pkMustBeUsed) ? DataTableFieldDTO.pkMustBeUsed : false,
-                      pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
-                      name: DataTableFieldDTO.name,
-                      readOnly: DataTableFieldDTO.readOnly,
-                      recordId: DataTableFieldDTO.idRecord,
-                      referencedField: DataTableFieldDTO.referencedField,
-                      required: DataTableFieldDTO.required,
-                      type: DataTableFieldDTO.type
-                    });
-                  })
+                ? dataTableRecordDTO.fieldSchema.map(
+                    DataTableFieldDTO =>
+                      new DatasetTableField({
+                        codelistItems: DataTableFieldDTO.codelistItems,
+                        description: DataTableFieldDTO.description,
+                        fieldId: DataTableFieldDTO.id,
+                        pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
+                        pkHasMultipleValues: !isNull(DataTableFieldDTO.pkHasMultipleValues)
+                          ? DataTableFieldDTO.pkHasMultipleValues
+                          : false,
+                        pkMustBeUsed: !isNull(DataTableFieldDTO.pkMustBeUsed) ? DataTableFieldDTO.pkMustBeUsed : false,
+                        pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
+                        name: DataTableFieldDTO.name,
+                        readOnly: DataTableFieldDTO.readOnly,
+                        recordId: DataTableFieldDTO.idRecord,
+                        referencedField: DataTableFieldDTO.referencedField,
+                        required: DataTableFieldDTO.required,
+                        type: DataTableFieldDTO.type
+                      })
+                  )
                 : null;
               return new DatasetTableRecord({
                 datasetPartitionId: dataTableRecordDTO.id,
