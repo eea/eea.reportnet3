@@ -26,6 +26,14 @@ public enum EventType {
   IMPORT_REPORTING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_reporting_failed_event", true),
 
+  /** The import reporting failed namefile event. */
+  IMPORT_REPORTING_FAILED_NAMEFILE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_reporting_namefile_failed_event", true),
+
+  /** The import reporting failed no headers matching event. */
+  IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_reporting_no_headers_failed_event", true),
+
   /** The import design completed event. */
   IMPORT_DESIGN_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_design_completed_event", true),
@@ -33,6 +41,14 @@ public enum EventType {
   /** The import design failed event. */
   IMPORT_DESIGN_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "import_design_failed_event",
       true),
+
+  /** The import design failed no headers matching event. */
+  IMPORT_DESIGN_FAILED_NO_HEADERS_MATCHING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_design_no_headers_failed_event", true),
+
+  /** The import design failed namefile event. */
+  IMPORT_DESIGN_FAILED_NAMEFILE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_design_namefile_failed_event", true),
 
   /** The external import reporting from other system completed event. */
   EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,

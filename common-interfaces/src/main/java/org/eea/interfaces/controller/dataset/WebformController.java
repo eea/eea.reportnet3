@@ -66,5 +66,5 @@ public interface WebformController {
    * @param id the id
    */
   @DeleteMapping("/webformConfig/{id}")
-  void deleteWebformConfig(Long id);
+  void deleteWebformConfig(@PathVariable("id") Long id);
 }
