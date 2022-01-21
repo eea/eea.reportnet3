@@ -16,8 +16,9 @@ import { Button } from 'views/_components/Button';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
-import { Dashboard } from 'views/_components/Dashboard';
+import { DatasetDashboardDialog } from 'views/_components/DatasetDashboardDialog';
 import { Dialog } from 'views/_components/Dialog';
+import { DatasetDeleteDataDialog } from 'views/_components/DatasetDeleteDataDialog';
 import { MainLayout } from 'views/_components/Layout';
 import { Menu } from 'views/_components/Menu';
 import { QCList } from 'views/_components/QCList';
@@ -30,6 +31,7 @@ import { TabsSchema } from 'views/_components/TabsSchema';
 import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
+import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -76,7 +78,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     tableSchemaId: QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : ''
   });
   const [datasetHasData, setDatasetHasData] = useState(false);
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [exportButtonsList, setExportButtonsList] = useState([]);
   const [externalOperationsList, setExternalOperationsList] = useState({
     export: [],
@@ -115,7 +116,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [schemaTables, setSchemaTables] = useState([]);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  const [validateDialogVisible, setValidateDialogVisible] = useState(false);
   const [validationListDialogVisible, setValidationListDialogVisible] = useState(false);
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [webformData, setWebformData] = useState(null);
@@ -412,7 +412,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const onConfirmDelete = async () => {
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
-      setDeleteDialogVisible(false);
       await DatasetService.deleteData(datasetId);
     } catch (error) {
       if (error.response.status === 423) {
@@ -436,7 +435,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const onConfirmValidate = async () => {
     try {
-      setValidateDialogVisible(false);
       await DatasetService.validate(datasetId);
       notificationContext.add(
         {
@@ -909,15 +907,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
   };
 
-  const renderDashboardFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon="cancel"
-      label={resourcesContext.messages['close']}
-      onClick={() => onSetVisible(setDashDialogVisible, false)}
-    />
-  );
-
   const renderImportOtherSystemsFooter = (
     <Fragment>
       <Button
@@ -1059,26 +1048,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               popup={true}
               ref={exportMenuRef}
             />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent ${
-                !hasWritePermissions ? null : 'p-button-animated-blink dataset-deleteDataset-help-step'
-              }`}
-              disabled={!hasWritePermissions}
-              icon="trash"
-              label={resourcesContext.messages['deleteDatasetData']}
-              onClick={() => onSetVisible(setDeleteDialogVisible, true)}
-            />
+            <DatasetDeleteDataDialog disabled={!hasWritePermissions} onConfirmDelete={onConfirmDelete} />
           </div>
           <div className="p-toolbar-group-right">
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent dataset-validate-help-step ${
-                hasWritePermissions && 'p-button-animated-blink'
-              }`}
-              disabled={!hasWritePermissions}
-              icon="validate"
-              label={resourcesContext.messages['validate']}
-              onClick={() => onSetVisible(setValidateDialogVisible, true)}
-            />
+            <DatasetValidateDialog disabled={!hasWritePermissions} onConfirmValidate={onConfirmValidate} />
             <Button
               className="p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step p-button-animated-blink"
               icon="warning"
@@ -1094,14 +1067,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               label={resourcesContext.messages['qcRules']}
               onClick={() => onSetVisible(setValidationListDialogVisible, true)}
             />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent dataset-dashboards-help-step ${
-                !datasetHasData ? null : 'p-button-animated-blink'
-              }`}
+            <DatasetDashboardDialog
               disabled={!datasetHasData}
-              icon="dashboard"
-              label={resourcesContext.messages['dashboards']}
-              onClick={() => onSetVisible(setDashDialogVisible, true)}
+              levelErrorTypes={levelErrorTypes}
+              tableSchemaNames={schemaTables.map(table => table.name)}
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
@@ -1124,20 +1093,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         </Toolbar>
       </div>
       {renderSwitchView()}
-      {dashDialogVisible && (
-        <Dialog
-          footer={renderDashboardFooter}
-          header={resourcesContext.messages['titleDashboard']}
-          onHide={() => onSetVisible(setDashDialogVisible, false)}
-          style={{ width: '70vw' }}
-          visible={dashDialogVisible}>
-          <Dashboard
-            levelErrorTypes={levelErrorTypes}
-            refresh={dashDialogVisible}
-            tableSchemaNames={schemaTables.map(table => table.name)}
-          />
-        </Dialog>
-      )}
       {isTableView ? (
         <TabsSchema
           dataProviderId={metadata?.dataset.dataProviderId}
@@ -1289,31 +1244,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             </label>
           </div>
         </Dialog>
-      )}
-
-      {deleteDialogVisible && (
-        <ConfirmDialog
-          classNameConfirm={'p-button-danger'}
-          header={resourcesContext.messages['deleteDatasetHeader']}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={onConfirmDelete}
-          onHide={() => onSetVisible(setDeleteDialogVisible, false)}
-          visible={deleteDialogVisible}>
-          {resourcesContext.messages['deleteDatasetConfirm']}
-        </ConfirmDialog>
-      )}
-
-      {validateDialogVisible && (
-        <ConfirmDialog
-          header={resourcesContext.messages['validateDataset']}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={onConfirmValidate}
-          onHide={() => onSetVisible(setValidateDialogVisible, false)}
-          visible={validateDialogVisible}>
-          {resourcesContext.messages['validateDatasetConfirm']}
-        </ConfirmDialog>
       )}
 
       {isUpdatableDialogVisible && (
