@@ -2,6 +2,14 @@
   height: 53.5vh;
 }
 
+.checkedValueColumn {
+  text-align: center;
+
+  .icon {
+    color: var(--main-font-color);
+  }
+}
+
 .spinner {
   height: 100%;
   display: flex;
@@ -20,10 +28,6 @@
 
 .historicReleases {
   height: 50vh;
-}
-
-.checkedValueColumn {
-  text-align: center;
 }
 
 .noHistoricReleases,
