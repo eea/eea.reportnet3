@@ -1191,6 +1191,7 @@ export const FieldDesigner = ({
         style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
       />
     );
+
     return (
       <div className={`${styles.draggableFieldContentCell} ${styles.dragAndDropItemsCell}`}>
         <div className={styles.draggableFieldCell}>{resourcesContext.messages['moveField']}</div>
