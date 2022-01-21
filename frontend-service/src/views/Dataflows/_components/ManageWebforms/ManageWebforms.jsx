@@ -125,6 +125,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     try {
       await WebformService.delete(selectedWebformId);
       setLoadingStatus('success');
+      getWebformList();
     } catch (error) {
       console.error('ManageWebforms - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
