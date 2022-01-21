@@ -1446,6 +1446,10 @@
     "copyToClipboardError": "Error copying to clipboard",
     "genericQCsHistoryButtonTooltip": "There is no history data",
     "manageWebforms": "Manage webforms",
-    "loadWebformsError": "Error loading webforms list"
+    "loadWebformsError": "Error loading webforms list",
+    "importReportingFailedNoHeadersMatchingEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Check header field names and delimiter.",
+    "importDesignFailedNoHeadersMatchingEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Check header field names and delimiter.",
+    "importReportingFailedNamefileEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Check that the file name fits the table name.",
+    "importDesignFailedNamefileEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Check that the file name fits the table name."
   }
 }
