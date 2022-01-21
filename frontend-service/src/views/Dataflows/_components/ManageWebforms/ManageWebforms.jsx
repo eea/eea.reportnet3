@@ -1,6 +1,7 @@
 import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import orderBy from 'lodash/orderBy';
 
 import styles from './ManageWebforms.module.scss';
 
@@ -56,7 +57,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
     try {
       const data = await WebformService.getAll();
-      setWebforms(data);
+      setWebforms(orderBy(data, 'id', 'desc'));
     } catch (error) {
       console.error('ManageWebforms - getWebformList.', error);
       notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
