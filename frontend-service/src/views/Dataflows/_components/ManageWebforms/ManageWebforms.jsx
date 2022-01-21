@@ -249,12 +249,12 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const getIsDisabled = () => {
     if (isNil(selectedWebformId)) {
       return (
-        isNil(webformName) || isEmpty(webformName) || isEmpty(fileRef.current.value) || loadingStatus === 'pending'
+        isNil(webformName) || isEmpty(webformName) || isEmpty(fileRef.current?.value) || loadingStatus === 'pending'
       );
     }
 
     return (
-      (isEmpty(fileRef.current.value) && (isNil(webformName) || isEmpty(webformName))) || loadingStatus === 'pending'
+      (isEmpty(fileRef.current?.value) && isNil(webformName)) || isEmpty(webformName) || loadingStatus === 'pending'
     );
   };
 
