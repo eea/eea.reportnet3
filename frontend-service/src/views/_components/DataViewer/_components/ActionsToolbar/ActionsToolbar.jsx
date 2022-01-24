@@ -12,6 +12,7 @@ import styles from './ActionsToolbar.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { ChipButton } from 'views/_components/ChipButton';
+import { DeleteDialog } from './_components/DeleteDialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { DropdownFilter } from 'views/Dataset/_components/DropdownFilter';
 import { InputText } from 'views/_components/InputText';
@@ -46,7 +47,7 @@ const ActionsToolbar = ({
   levelErrorTypesWithCorrects,
   levelErrorValidations,
   onHideSelectGroupedValidation,
-  onSetVisible,
+  onConfirmDeleteTable,
   onUpdateData,
   originalColumns,
   prevFilterValue,
@@ -56,7 +57,6 @@ const ActionsToolbar = ({
   selectedRuleMessage,
   selectedTableSchemaId,
   setColumns,
-  setDeleteDialogVisible,
   setImportTableDialogVisible,
   showGroupedValidationFilter,
   showValidationFilter,
@@ -251,21 +251,15 @@ const ActionsToolbar = ({
           ref={exportMenuRef}
         />
 
-        {(hasWritePermissions || showWriteButtons) && (
-          <Button
-            className={`p-button-rounded p-button-secondary-transparent datasetSchema-delete-table-help-step ${
-              !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
-                ? null
-                : 'p-button-animated-blink'
-            }`}
-            disabled={
-              !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
-            }
-            icon="trash"
-            label={resourcesContext.messages['deleteTable']}
-            onClick={() => onSetVisible(setDeleteDialogVisible, true)}
-          />
-        )}
+        <DeleteDialog
+          disabled={
+            !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
+          }
+          hasWritePermissions={hasWritePermissions}
+          onConfirmDeleteTable={onConfirmDeleteTable}
+          showWriteButtons={showWriteButtons}
+          tableName={tableName}
+        />
 
         <Button
           className={`p-button-rounded p-button-secondary-transparent datasetSchema-showColumn-help-step ${
