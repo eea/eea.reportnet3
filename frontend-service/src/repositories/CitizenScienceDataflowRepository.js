@@ -13,7 +13,7 @@ export const CitizenScienceDataflowRepository = {
 
   getAll: async (numberRows, pageNum) =>
     await HTTPRequester.get({
-      url: getUrl(CitizenScienceDataflowConfig.getAll, { sizePage: numberRows, numPage: pageNum })
+      url: getUrl(CitizenScienceDataflowConfig.getAll)
     }),
 
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>

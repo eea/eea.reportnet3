@@ -7,7 +7,7 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 export const ReferenceDataflowRepository = {
   getAll: async (numberRows, pageNum) =>
     await HTTPRequester.get({
-      url: getUrl(ReferenceDataflowConfig.getAll, { sizePage: numberRows, numPage: pageNum })
+      url: getUrl(ReferenceDataflowConfig.getAll)
     }),
 
   create: async (name, description, type) =>

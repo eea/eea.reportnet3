@@ -738,7 +738,7 @@ const Dataflows = () => {
   };
 
   const renderPaginator = () => {
-    if (!loadingStatus[tabId]) {
+    if (!loadingStatus[tabId] && filteredData.length !== 0) {
       return (
         <Paginator
           className="p-paginator-bottom"
