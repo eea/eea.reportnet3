@@ -356,8 +356,8 @@ export const DataflowService = {
   createEmptyDatasetSchema: async (dataflowId, datasetSchemaName) =>
     await DataflowRepository.createEmptyDatasetSchema(dataflowId, datasetSchemaName),
 
-  getPublicData: async () => {
-    const publicDataflows = await DataflowRepository.getPublicData();
+  getPublicData: async (pageNum, numberRows) => {
+    const publicDataflows = await DataflowRepository.getPublicData(pageNum, numberRows);
     const parsedPublicDataflows = DataflowUtils.parsePublicDataflowListDTO(publicDataflows.data);
     return sortBy(parsedPublicDataflows, ['name']);
   },

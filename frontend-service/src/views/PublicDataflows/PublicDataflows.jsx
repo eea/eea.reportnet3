@@ -117,8 +117,7 @@ export const PublicDataflows = () => {
     console.log('pagination :>> ', pagination);
     setIsLoading(true);
     try {
-      // ADD PAGENUM AND NUMBERROWS AND INTEGRATE WITH FILTERS
-      const publicData = await DataflowService.getPublicData();
+      const publicData = await DataflowService.getPublicData(pageNum, numberRows);
       setPublicDataflows(publicData);
     } catch (error) {
       console.error('PublicDataflows - onLoadPublicDataflows.', error);
