@@ -311,24 +311,44 @@ const Dataflows = () => {
       return dataflow;
     });
 
-  const getDataflows = async (firstRow, numberRows, pageNum) => {
+  const getDataflows = async (numberRows, pageNum) => {
     setLoading(true);
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {
-        const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const data = await DataflowService.getAll(
+          userContext.accessRole,
+          userContext.contextRoles,
+          numberRows,
+          pageNum
+        );
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'reporting' });
       } else if (TextUtils.areEquals(tabId, 'reference')) {
-        const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const data = await ReferenceDataflowService.getAll(
+          userContext.accessRole,
+          userContext.contextRoles,
+          numberRows,
+          pageNum
+        );
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'reference' });
       } else if (TextUtils.areEquals(tabId, 'business')) {
-        const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const data = await BusinessDataflowService.getAll(
+          userContext.accessRole,
+          userContext.contextRoles,
+          numberRows,
+          pageNum
+        );
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'business' });
       } else if (TextUtils.areEquals(tabId, 'citizenScience')) {
-        const data = await CitizenScienceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const data = await CitizenScienceDataflowService.getAll(
+          userContext.accessRole,
+          userContext.contextRoles,
+          numberRows,
+          pageNum
+        );
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'citizenScience' });
       }
