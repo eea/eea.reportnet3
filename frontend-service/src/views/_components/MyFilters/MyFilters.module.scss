@@ -50,7 +50,7 @@
 
 .block {
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   color: var(--font-filters);
   height: 2rem;
   font-size: 0.8333rem;
@@ -256,11 +256,11 @@
   }
 }
 
+.cloneSchemas,
 .referencingDataflows,
 .datasetsInfo,
 .userList,
 .historicReleases,
-.cloneSchemas,
 .integrationsList {
   @extend .lineItems;
 }
@@ -274,21 +274,18 @@
     }
   }
 
+  .cloneSchemas {
+    display: grid;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(7, 1fr) !important;
+  }
+
   .qcList {
     display: flex;
     flex-direction: column;
     div {
       width: 100%;
     }
-  }
-}
-
-@media (max-width: 1695px) {
-  .qcList {
-    grid-row-gap: 1.5rem;
-  }
-  .block {
-    height: 3rem;
   }
 }
 
@@ -309,5 +306,31 @@
       overflow: hidden !important;
       text-overflow: ellipsis;
     }
+  }
+
+  .cloneSchemas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+
+    .block {
+      label {
+        height: 100%;
+      }
+    }
+
+    .resetButton {
+      margin-left: 0;
+      grid-column: 1;
+    }
+  }
+}
+
+@media (max-width: 1695px) {
+  .qcList {
+    grid-row-gap: 1.5rem;
+  }
+  .block {
+    height: 3rem;
   }
 }
