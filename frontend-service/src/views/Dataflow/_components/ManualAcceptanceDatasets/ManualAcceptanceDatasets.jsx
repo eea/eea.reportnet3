@@ -184,7 +184,7 @@ export const ManualAcceptanceDatasets = ({
   ) : (
     <div className={styles.manualAcceptanceDatasets}>
       <MyFilters
-        className="lineItems"
+        className="manualAcceptanceDatasets"
         data={manualAcceptanceDatasetsState.data}
         options={filterOptions}
         viewType="manualAcceptanceDatasets"

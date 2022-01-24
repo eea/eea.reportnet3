@@ -257,6 +257,7 @@
 }
 
 .cloneSchemas,
+.manualAcceptanceDatasets,
 .referencingDataflows,
 .datasetsInfo,
 .userList,
@@ -266,10 +267,16 @@
 }
 
 @media (max-width: 640px) {
+  .block {
+    .multiselectFilter,
+    .label {
+      width: 100% !important;
+    }
+  }
+
   .lineItems {
     flex-direction: column;
     .resetButton {
-      margin-left: 0;
       margin-top: 1em;
     }
   }
@@ -285,6 +292,32 @@
     flex-direction: column;
     div {
       width: 100%;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .manualAcceptanceDatasets,
+  .historicReleases {
+    display: flex !important;
+    flex-direction: column;
+    .labelCheckbox {
+      width: 30% !important;
+    }
+    .checkbox {
+      margin: 0;
+    }
+    .block {
+      .multiselectFilter,
+      .label {
+        width: 100% !important;
+      }
+    }
+  }
+
+  .historicReleases {
+    .labelCheckbox {
+      width: 100% !important;
     }
   }
 }
@@ -320,8 +353,19 @@
     }
 
     .resetButton {
-      margin-left: 0;
       grid-column: 1;
+    }
+  }
+}
+
+@media (max-width: 1280px) {
+  .historicReleases {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    .resetButton {
+      margin-top: 1em;
+      grid-column: 3;
     }
   }
 }
