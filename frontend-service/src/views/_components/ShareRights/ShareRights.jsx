@@ -82,7 +82,6 @@ export const ShareRights = ({
     isEditingModal: false,
     isLoadingButton: false,
     loadingStatus: { isActionButtonsLoading: false, isInitialLoading: true },
-    pagination: { first: 0, page: 0, rows: 10 },
     userRight: { account: '', isNew: true, role: '' },
     userRightList: [],
     userRightToDelete: {}
@@ -159,11 +158,6 @@ export const ShareRights = ({
     ) {
       onUpdateUser(userRight);
     }
-  };
-
-  const onPaginate = event => {
-    const pagination = { first: event.first, page: event.page, rows: event.rows };
-    shareRightsDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
   };
 
   const onResetAll = () => shareRightsDispatch({ type: 'ON_RESET_ALL' });
