@@ -587,7 +587,6 @@ const FieldEditor = ({
             onSelect={onSelectCalendar}
             value={new Date(RecordUtils.getCellValue(cells, cells.field))}
             yearNavigator={true}
-            yearRange="1900:2100"
           />
         );
       case 'DATETIME':

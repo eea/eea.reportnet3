@@ -166,7 +166,6 @@ export const TimezoneCalendar = ({
         }}
         value={date}
         yearNavigator
-        yearRange="1900:2100"
       />
     );
   };

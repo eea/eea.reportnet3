@@ -418,8 +418,7 @@ const ComparisonExpression = ({
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
           value={field2}
-          yearNavigator={true}
-          yearRange="1900:2500"></Calendar>
+          yearNavigator={true}></Calendar>
       );
     }
     if (operatorType === 'day' || operatorType === 'dayDateTime') {

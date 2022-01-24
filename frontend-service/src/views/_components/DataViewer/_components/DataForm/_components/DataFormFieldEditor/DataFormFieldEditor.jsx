@@ -462,7 +462,6 @@ const DataFormFieldEditor = ({
         style={{ width: '50%' }}
         value={new Date(RecordUtils.formatDate(fieldValue, isNil(fieldValue)))}
         yearNavigator={true}
-        yearRange="1900:2100"
       />
     );
   };

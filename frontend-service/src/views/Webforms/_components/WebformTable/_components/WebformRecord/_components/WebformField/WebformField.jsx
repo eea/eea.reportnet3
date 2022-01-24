@@ -317,7 +317,6 @@ export const WebformField = ({
             }}
             value={new Date(field.value)}
             yearNavigator={true}
-            yearRange="1900:2100"
           />
         );
       case 'DATETIME':
@@ -344,7 +343,6 @@ export const WebformField = ({
             showTime={true}
             value={field.value}
             yearNavigator={true}
-            yearRange="1900:2100"
           />
         );
       case 'EXTERNAL_LINK':

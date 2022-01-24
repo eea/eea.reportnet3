@@ -230,7 +230,6 @@ export const NationalSystemsField = ({
             }
             value={new Date(field.value)}
             yearNavigator={true}
-            yearRange="1900:2100"
           />
         );
       case 'DATETIME':
@@ -246,7 +245,6 @@ export const NationalSystemsField = ({
             showTime={true}
             value={field.value}
             yearNavigator={true}
-            yearRange="1900:2100"
           />
         );
       case 'MULTISELECT_CODELIST':
