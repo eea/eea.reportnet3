@@ -254,10 +254,7 @@
 .cloneSchemas,
 .manualAcceptanceDatasets,
 .referencingDataflows,
-.datasetsInfo,
-.userList,
-.historicReleases,
-.integrationsList {
+.historicReleases {
   @extend .lineItems;
 }
 
