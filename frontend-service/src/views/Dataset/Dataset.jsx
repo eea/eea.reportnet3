@@ -62,7 +62,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const [dashDialogVisible, setDashDialogVisible] = useState(false);
   const [dataset, setDataset] = useState({});
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaName, setDatasetSchemaName] = useState();

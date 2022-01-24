@@ -61,6 +61,7 @@ const ReferenceDataflow = () => {
     isCustodian: false,
     isEditDialogVisible: false,
     isDatasetsInfoDialogVisible: false,
+    isImportingDataflow: false,
     isLoading: false,
     isManageRequestersDialogVisible: false,
     isPropertiesDialogVisible: false,
@@ -103,11 +104,17 @@ const ReferenceDataflow = () => {
       (dataflowState.isCustodian || dataflowState.isCustodianUser)
   });
 
+  const onImportSchemaIsCompleted = () => {
+    onRefreshToken();
+    refreshPage();
+  };
+
   useLeftSideBar(dataflowState, getLeftSidebarButtonsVisibility, manageDialogs);
 
   useCheckNotifications(['REFERENCE_DATAFLOW_PROCESSED_EVENT', 'COPY_DATASET_SCHEMA_COMPLETED_EVENT'], refreshPage);
   useCheckNotifications(['REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT'], setIsCreatingReferenceDatasets, false);
   useCheckNotifications(['DELETE_DATAFLOW_COMPLETED_EVENT'], goToDataflowsPage);
+  useCheckNotifications(['IMPORT_DATASET_SCHEMA_COMPLETED_EVENT'], onImportSchemaIsCompleted);
 
   function manageDialogs(dialog, value, secondDialog, secondValue) {
     dataflowDispatch({
@@ -151,6 +158,10 @@ const ReferenceDataflow = () => {
 
   function setIsCreatingReferenceDatasets(isCreatingReferenceDatasets) {
     dataflowDispatch({ type: 'SET_IS_CREATING_REFERENCE_DATASETS', payload: { isCreatingReferenceDatasets } });
+  }
+
+  function setIsImportingDataflow(isImportingDataflow) {
+    dataflowDispatch({ type: 'SET_IS_IMPORTING_DATAFLOW', payload: { isImportingDataflow } });
   }
 
   const setRightPermissionsChange = isRightPermissionsChanged => {
@@ -323,6 +334,7 @@ const ReferenceDataflow = () => {
           onSaveName={onSaveDatasetName}
           onUpdateData={refreshPage}
           setIsCreatingReferenceDatasets={setIsCreatingReferenceDatasets}
+          setIsImportingDataflow={setIsImportingDataflow}
           setUpdatedDatasetSchema={setUpdatedDatasetSchema}
         />
       </div>

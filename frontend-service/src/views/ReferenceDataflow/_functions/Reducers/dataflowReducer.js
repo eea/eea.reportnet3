@@ -47,6 +47,9 @@ export const dataflowReducer = (state, { type, payload }) => {
     case 'SET_IS_CREATING_REFERENCE_DATASETS':
       return { ...state, isCreatingReferenceDatasets: payload.isCreatingReferenceDatasets };
 
+    case 'SET_IS_IMPORTING_DATAFLOW':
+      return { ...state, isImportingDataflow: payload.isImportingDataflow };
+
     case 'SET_IS_LOADING':
       return { ...state, isLoading: payload.isLoading };
 
