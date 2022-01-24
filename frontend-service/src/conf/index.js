@@ -18,43 +18,41 @@ import theme from './theme.config.json';
 import validations from './validation.config.json';
 import webforms from './webforms.config.json';
 
-const config = {};
-config.MB_SIZE = 1024 * 1024;
-config.MAX_FILE_EXTENSION_LENGTH = 10;
-config.MAX_FILE_SIZE = 100000000;
-config.MAX_INTEGRATION_NAME_LENGTH = 50;
-config.INPUT_MAX_LENGTH = 255;
-config.DESCRIPTION_MAX_LENGTH = 10000;
-config.SYSTEM_NOTIFICATION_MAX_LENGTH = 300;
-config.GEOGRAPHICAL_LAT_COORD = { min: -90, max: 90 };
-config.GEOGRAPHICAL_LONG_COORD = { min: -180, max: 180 };
-config.GEOGRAPHICAL_LAT_COORD_3035 = { min: 32.88, max: 84.17 };
-config.GEOGRAPHICAL_LONG_COORD_3035 = { min: -16.1, max: 40.18 };
-config.SQL_SENTENCE_LOW_COST = 20;
-config.SQL_SENTENCE_HIGH_COST = 50;
+export const config = {
+  MB_SIZE: 1024 * 1024,
+  MAX_FILE_EXTENSION_LENGTH: 10,
+  MAX_FILE_SIZE: 100000000,
+  MAX_INTEGRATION_NAME_LENGTH: 50,
+  INPUT_MAX_LENGTH: 255,
+  DESCRIPTION_MAX_LENGTH: 10000,
+  SYSTEM_NOTIFICATION_MAX_LENGTH: 300,
+  GEOGRAPHICAL_LAT_COORD: { min: -90, max: 90 },
+  GEOGRAPHICAL_LONG_COORD: { min: -180, max: 180 },
+  GEOGRAPHICAL_LAT_COORD_3035: { min: 32.88, max: 84.17 },
+  GEOGRAPHICAL_LONG_COORD_3035: { min: -16.1, max: 40.18 },
+  SQL_SENTENCE_LOW_COST: 20,
+  SQL_SENTENCE_HIGH_COST: 50,
+  MAX_ATTACHMENT_SIZE: 20 * 1024 * 1024,
+  IMPORT_FILE_DELIMITER: ',',
+  IMPORT_ERROR_LIFETIME: 30000,
 
-config.MAX_ATTACHMENT_SIZE = 20 * config.MB_SIZE;
-
-config.IMPORT_FILE_DELIMITER = ',';
-
-config.avatars = avatarImages;
-config.countriesByGroup = countryByGroup;
-config.dataflowStatus = dataflowStatus;
-config.dataflowType = dataflowType;
-config.datasetType = datasetType;
-config.exportTypes = exportTypeCode;
-config.fieldType = fieldType;
-config.footer = footer;
-config.icons = primeIcons;
-config.importTypes = importTypeCode;
-config.languages = languageCode;
-config.notifications = notifications;
-config.systemNotifications = systemNotifications;
-config.permissions = permissions;
-config.storage = storage;
-config.datasetStatus = datasetStatus;
-config.theme = theme;
-config.validations = validations;
-config.webforms = webforms;
-
-export { config };
+  avatars: avatarImages,
+  countriesByGroup: countryByGroup,
+  dataflowStatus: dataflowStatus,
+  dataflowType: dataflowType,
+  datasetType: datasetType,
+  exportTypes: exportTypeCode,
+  fieldType: fieldType,
+  footer: footer,
+  icons: primeIcons,
+  importTypes: importTypeCode,
+  languages: languageCode,
+  notifications: notifications,
+  systemNotifications: systemNotifications,
+  permissions: permissions,
+  storage: storage,
+  datasetStatus: datasetStatus,
+  theme: theme,
+  validations: validations,
+  webforms: webforms
+};

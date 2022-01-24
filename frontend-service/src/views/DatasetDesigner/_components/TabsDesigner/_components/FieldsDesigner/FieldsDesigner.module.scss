@@ -214,6 +214,18 @@
   }
 }
 
+.inactiveDragAndDropItems ~ div > div:first-child {
+  svg {
+    opacity: 0.5 !important;
+  }
+}
+
+.activeDragAndDropItems ~ div > div:first-child {
+  svg {
+    cursor: pointer;
+  }
+}
+
 :global body .p-inputswitch.p-inputswitch-focus .p-inputswitch-slider {
   @include shadow-0em;
 }

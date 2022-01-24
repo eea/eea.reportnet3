@@ -732,7 +732,7 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     }
 
-    throw new EEAException("File name does not match any table name");
+    throw new EEAException(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
   }
 
   /**
@@ -761,9 +761,19 @@ public class FileTreatmentHelper implements DisposableBean {
       EventType eventType;
       DatasetTypeEnum type = datasetService.getDatasetType(datasetId);
       if (null != error) {
-        eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
-            ? EventType.IMPORT_REPORTING_FAILED_EVENT
-            : EventType.IMPORT_DESIGN_FAILED_EVENT;
+        if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(error)) {
+          eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+              ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
+              : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
+        } else if (EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING.equals(error)) {
+          eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+              ? EventType.IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT
+              : EventType.IMPORT_DESIGN_FAILED_NO_HEADERS_MATCHING_EVENT;
+        } else {
+          eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+              ? EventType.IMPORT_REPORTING_FAILED_EVENT
+              : EventType.IMPORT_DESIGN_FAILED_EVENT;
+        }
       } else {
         eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
             ? EventType.IMPORT_REPORTING_COMPLETED_EVENT

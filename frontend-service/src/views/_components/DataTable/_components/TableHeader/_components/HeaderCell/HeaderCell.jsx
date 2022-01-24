@@ -20,7 +20,7 @@ export class HeaderCell extends Component {
 
   onClick(event) {
     if (this.props.sortable) {
-      let targetNode = event.target;
+      const targetNode = event.target;
       if (
         DomHandler.hasClass(targetNode, 'p-sortable-column') ||
         DomHandler.hasClass(targetNode, 'p-column-title') ||
@@ -45,7 +45,7 @@ export class HeaderCell extends Component {
         clearTimeout(this.filterTimeout);
       }
 
-      let filterValue = e.target.value;
+      const filterValue = e.target.value;
       this.filterTimeout = setTimeout(() => {
         this.props.onFilter({
           value: filterValue,

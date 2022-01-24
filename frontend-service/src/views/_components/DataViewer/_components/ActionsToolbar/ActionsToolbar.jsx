@@ -12,6 +12,7 @@ import styles from './ActionsToolbar.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { ChipButton } from 'views/_components/ChipButton';
+import { DeleteDialog } from './_components/DeleteDialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { DropdownFilter } from 'views/Dataset/_components/DropdownFilter';
 import { InputText } from 'views/_components/InputText';
@@ -45,7 +46,7 @@ const ActionsToolbar = ({
   isLoading,
   levelErrorTypesWithCorrects,
   onHideSelectGroupedValidation,
-  onSetVisible,
+  onConfirmDeleteTable,
   onUpdateData,
   originalColumns,
   prevFilterValue,
@@ -54,7 +55,6 @@ const ActionsToolbar = ({
   selectedRuleMessage,
   selectedTableSchemaId,
   setColumns,
-  setDeleteDialogVisible,
   setImportTableDialogVisible,
   showGroupedValidationFilter,
   showValidationFilter,
@@ -84,10 +84,7 @@ const ActionsToolbar = ({
   const dropdownFilterRef = useRef();
 
   useEffect(() => {
-    const dropdownFilter = colsSchema.map(colSchema => {
-      return { label: colSchema.header, key: colSchema.field };
-    });
-
+    const dropdownFilter = colsSchema.map(colSchema => ({ label: colSchema.header, key: colSchema.field }));
     dispatchFilter({ type: 'INIT_FILTERS', payload: { dropdownFilter, levelErrors: getLevelErrorFilters() } });
   }, []);
 
@@ -155,9 +152,7 @@ const ActionsToolbar = ({
     }
   };
 
-  const createTableName = (tableName, fileType) => {
-    return `${tableName}.${fileType}`;
-  };
+  const createTableName = (tableName, fileType) => `${tableName}.${fileType}`;
 
   const getExportButtonPosition = e => {
     const exportButton = e.currentTarget;
@@ -170,29 +165,28 @@ const ActionsToolbar = ({
   };
 
   const getLevelErrorFilters = () => {
-    let filters = [];
+    const filters = [];
+
     if (!isUndefined(levelErrorTypesWithCorrects)) {
       levelErrorTypesWithCorrects.forEach(value => {
         if (!isUndefined(value) && !isNull(value)) {
-          let filter = {
+          filters.push({
             label: capitalize(value),
             key: capitalize(value)
-          };
-          filters.push(filter);
+          });
         }
       });
     }
+
     return filters;
   };
 
-  const getTooltipMessage = () => {
-    return (
-      <Fragment>
-        <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipGeometryNote']}</span>
-        <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipCaseSensitiveNote']}</span>
-      </Fragment>
-    );
-  };
+  const getTooltipMessage = () => (
+    <Fragment>
+      <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipGeometryNote']}</span>
+      <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipCaseSensitiveNote']}</span>
+    </Fragment>
+  );
 
   const showFilters = columnKeys => {
     const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId', 'providerCode'];
@@ -244,21 +238,15 @@ const ActionsToolbar = ({
           ref={exportMenuRef}
         />
 
-        {(hasWritePermissions || showWriteButtons) && (
-          <Button
-            className={`p-button-rounded p-button-secondary-transparent datasetSchema-delete-table-help-step ${
-              !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
-                ? null
-                : 'p-button-animated-blink'
-            }`}
-            disabled={
-              !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
-            }
-            icon="trash"
-            label={resourcesContext.messages['deleteTable']}
-            onClick={() => onSetVisible(setDeleteDialogVisible, true)}
-          />
-        )}
+        <DeleteDialog
+          disabled={
+            !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
+          }
+          hasWritePermissions={hasWritePermissions}
+          onConfirmDeleteTable={onConfirmDeleteTable}
+          showWriteButtons={showWriteButtons}
+          tableName={tableName}
+        />
 
         <Button
           className={`p-button-rounded p-button-secondary-transparent datasetSchema-showColumn-help-step ${

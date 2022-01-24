@@ -8,8 +8,8 @@ import { Dataset } from 'entities/Dataset';
 import { CoreUtils } from 'repositories/_utils/CoreUtils';
 
 const sortDatasetTypeByName = (a, b) => {
-  let datasetName_A = a.datasetSchemaName;
-  let datasetName_B = b.datasetSchemaName;
+  const datasetName_A = a.datasetSchemaName;
+  const datasetName_B = b.datasetSchemaName;
   return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
 };
 
@@ -39,7 +39,10 @@ const getAllLevelErrorsFromRuleValidations = rulesDTO =>
   ]);
 
 const isValidJSON = value => {
-  if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) return false;
+  if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) {
+    return false;
+  }
+
   try {
     JSON.parse(value);
   } catch (error) {
@@ -49,17 +52,15 @@ const isValidJSON = value => {
 };
 
 const tableStatisticValuesWithErrors = tableStatisticValues => {
-  let tableStatisticValuesWithSomeError = [];
-  let valuesWithValidations = CoreUtils.transposeMatrix(tableStatisticValues).map(error => {
-    return error.map(subError => {
-      return subError;
-    });
-  });
+  const valuesWithValidations = CoreUtils.transposeMatrix(tableStatisticValues);
+  const tableStatisticValuesWithSomeError = [];
+
   valuesWithValidations.forEach(item => {
     if (!isNil(item) && !item.every(value => value === 0)) {
       tableStatisticValuesWithSomeError.push(item);
     }
   });
+
   return tableStatisticValuesWithSomeError;
 };
 
