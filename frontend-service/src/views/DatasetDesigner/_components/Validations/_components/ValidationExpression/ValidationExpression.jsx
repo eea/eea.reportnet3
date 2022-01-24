@@ -250,6 +250,7 @@ const ValidationExpression = ({
           }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
+          selectableYears={100}
           value={expressionValues.expressionValue}
           yearNavigator={true}></Calendar>
       );

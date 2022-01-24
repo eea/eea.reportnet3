@@ -315,6 +315,7 @@ export const WebformField = ({
               onFillField(field, option, formatDate(event.value, isNil(event.value)));
               onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
             }}
+            selectableYears={100}
             value={new Date(field.value)}
             yearNavigator={true}
           />
@@ -339,6 +340,7 @@ export const WebformField = ({
               onFillField(field, option, formatDate(event.value, isNil(event.value)));
               onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
             }}
+            selectableYears={100}
             showSeconds={true}
             showTime={true}
             value={field.value}

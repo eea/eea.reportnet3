@@ -164,6 +164,7 @@ export const TimezoneCalendar = ({
           checkError(inputValue);
           setDate(e.value);
         }}
+        selectableYears={100}
         value={date}
         yearNavigator
       />

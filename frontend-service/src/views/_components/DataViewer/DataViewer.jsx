@@ -1049,19 +1049,13 @@ const DataViewer = ({
       }
     };
 
-    const renderTotalRowsLabel = () => {
-      return `${resourcesContext.messages['totalRecords']} ${
-        !isUndefined(records.totalRecords) ? records.totalRecords : 0
-      } `;
-    };
+    const renderTotalRowsLabel = () =>
+      `${resourcesContext.messages['totalRecords']} ${!isUndefined(records.totalRecords) ? records.totalRecords : 0} `;
 
-    const renderRowsLabel = () => {
-      if (records.totalRecords === 1) {
-        return resourcesContext.messages['record'].toLowerCase();
-      } else {
-        return resourcesContext.messages['records'].toLowerCase();
-      }
-    };
+    const renderRowsLabel = () =>
+      records.totalRecords === 1
+        ? resourcesContext.messages['record'].toLowerCase()
+        : resourcesContext.messages['records'].toLowerCase();
 
     const renderFilteredLabel = () => {
       if (

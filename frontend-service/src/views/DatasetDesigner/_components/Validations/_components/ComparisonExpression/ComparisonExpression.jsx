@@ -417,6 +417,7 @@ const ComparisonExpression = ({
           }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
+          selectableYears={100}
           value={field2}
           yearNavigator={true}></Calendar>
       );
