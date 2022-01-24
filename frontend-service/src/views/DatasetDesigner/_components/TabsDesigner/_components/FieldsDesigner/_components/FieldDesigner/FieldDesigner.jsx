@@ -120,12 +120,14 @@ export const FieldDesigner = ({
   const validationContext = useContext(ValidationContext);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [headerInitialHeight, setHeaderInitialHeight] = useState();
-
   useEffect(() => {
     const header = document.getElementById('header');
     const observer = new ResizeObserver(entries =>
       entries.forEach(entry => {
-        if (headerHeight !== entry.contentRect.height) {
+        if (
+          headerHeight !== entry.contentRect.height &&
+          (entry.contentRect.height === 180 || entry.contentRect.height === 64)
+        ) {
           setHeaderHeight(entry.contentRect.height);
         }
       })
