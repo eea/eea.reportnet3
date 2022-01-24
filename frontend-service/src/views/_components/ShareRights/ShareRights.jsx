@@ -60,7 +60,6 @@ export const ShareRights = ({
   userType
 }) => {
   const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
-  const methodTypes = { DELETE: 'delete', GET_ALL: 'getAll', UPDATE: 'update' };
   const notDeletableRolesRequester = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
   const userTypes = { REPORTER: 'reporter', REQUESTER: 'requester' };
 
@@ -200,29 +199,27 @@ export const ShareRights = ({
 
   const setUserRightId = id => shareRightsDispatch({ type: 'SET_USER_RIGHT_ID', payload: { id } });
 
-  const callEndpoint = async (method, userRight) => {
+  const getAllUserRights = () => {
     if (isReporterManagement) {
-      switch (method) {
-        case methodTypes.DELETE:
-          return await UserRightService.deleteReporter(shareRightsState.userRightToDelete, dataflowId, dataProvider);
-        case methodTypes.GET_ALL:
-          return await UserRightService.getReporters(dataflowId, dataProvider);
-        case methodTypes.UPDATE:
-          return await UserRightService.updateReporter(userRight, dataflowId, dataProvider);
-        default:
-          break;
-      }
+      return UserRightService.getReporters(dataflowId, dataProvider);
     } else {
-      switch (method) {
-        case methodTypes.DELETE:
-          return await UserRightService.deleteRequester(shareRightsState.userRightToDelete, dataflowId);
-        case methodTypes.GET_ALL:
-          return await UserRightService.getRequesters(dataflowId);
-        case methodTypes.UPDATE:
-          return await UserRightService.updateRequester(userRight, dataflowId);
-        default:
-          break;
-      }
+      return UserRightService.getRequesters(dataflowId);
+    }
+  };
+
+  const updateUserRights = userRightToUpdate => {
+    if (isReporterManagement) {
+      return UserRightService.updateReporter(userRightToUpdate, dataflowId, dataProvider);
+    } else {
+      return UserRightService.updateRequester(userRightToUpdate, dataflowId);
+    }
+  };
+
+  const deleteUserRights = () => {
+    if (isReporterManagement) {
+      return UserRightService.deleteReporter(shareRightsState.userRightToDelete, dataflowId, dataProvider);
+    } else {
+      return UserRightService.deleteRequester(shareRightsState.userRightToDelete, dataflowId);
     }
   };
 
@@ -232,8 +229,8 @@ export const ShareRights = ({
     }
 
     try {
-      const result = await callEndpoint(methodTypes.GET_ALL);
-      const userRightList = result.map(item => ({
+      const userRightsListResponse = await getAllUserRights();
+      const userRightList = userRightsListResponse.map(item => ({
         ...item,
         filteredRole: roleOptions.find(option => option.role === item.role)?.label
       }));
@@ -270,7 +267,7 @@ export const ShareRights = ({
     setActions({ isDeleting: true, isEditing: false });
 
     try {
-      await callEndpoint(methodTypes.DELETE);
+      await deleteUserRights();
       onDataChange();
     } catch (error) {
       console.error('ShareRights - onDeleteUserRight.', error);
@@ -290,7 +287,7 @@ export const ShareRights = ({
       setLoadingStatus({ isActionButtonsLoading: true, isInitialLoading: false });
 
       try {
-        await callEndpoint(methodTypes.UPDATE, userRight);
+        await updateUserRights(userRight);
         onDataChange();
         onCloseManagementDialog();
       } catch (error) {
