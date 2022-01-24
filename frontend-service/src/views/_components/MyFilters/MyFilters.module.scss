@@ -246,6 +246,7 @@
 .userList,
 .historicReleases,
 .cloneSchemas,
-.integrationsList {
+.integrationsList,
+.showValidationsList {
   @extend .lineItems;
 }

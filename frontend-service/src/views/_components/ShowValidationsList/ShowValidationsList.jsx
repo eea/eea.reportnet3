@@ -5,14 +5,15 @@ import concat from 'lodash/concat';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import sortBy from 'lodash/sortBy';
 import uniq from 'lodash/uniq';
 
 import styles from './ShowValidationsList.module.scss';
 
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
-import { Filters } from 'views/_components/Filters';
 import { LevelError } from 'views/_components/LevelError';
+import { MyFilters } from 'views/_components/MyFilters';
 import { Spinner } from 'views/_components/Spinner';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
@@ -25,6 +26,8 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 import { showValidationsReducer } from './_functions/Reducers/showValidationsReducer';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 export const ShowValidationsList = memo(
   ({
@@ -46,14 +49,14 @@ export const ShowValidationsList = memo(
     const [columns, setColumns] = useState([]);
     const [fetchedData, setFetchedData] = useState([]);
     const [fieldsTypesFilter, setFieldsTypesFilter] = useState([]);
-    const [filterBy, setFilterBy] = useState({
-      entityType: [],
-      tableSchemaName: [],
-      fieldSchemaName: [],
-      levelError: []
-    });
+    // const [filterBy, setFilterBy] = useState({
+    //   entityType: [],
+    //   tableSchemaName: [],
+    //   fieldSchemaName: [],
+    //   levelError: []
+    // });
     const [fieldValueFilter, setFieldValueFilter] = useState([]);
-    const [filtered, setFiltered] = useState(false);
+    //const [filtered, setFiltered] = useState(false);
     const [firstRow, setFirstRow] = useState(0);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
@@ -70,7 +73,8 @@ export const ShowValidationsList = memo(
     const [tablesFilter, setTablesFilter] = useState([]);
     const [typeEntitiesFilter, setTypeEntitiesFilter] = useState([]);
     const [typeEntitiesTypesFilter, setTypeEntitiesTypesFilter] = useState([]);
-    const [validationsAllTypesFilters, setValidationsAllTypesFilters] = useState([]);
+    // const [validationsAllTypesFilters, setValidationsAllTypesFilters] = useState([]);
+    const [filterOptions, setFilterOptions] = useState([]);
 
     const [validationState, validationDispatch] = useReducer(showValidationsReducer, {
       totalErrors: 0,
@@ -81,6 +85,8 @@ export const ShowValidationsList = memo(
 
     const { totalErrors, totalFilteredRecords, totalRecords } = validationState;
 
+    const { isFiltered } = useFilters('showValidationsList');
+
     useEffect(() => {
       const allTypesFilter = concat(
         levelErrorsTypesFilter,
@@ -88,7 +94,19 @@ export const ShowValidationsList = memo(
         typeEntitiesTypesFilter,
         fieldsTypesFilter
       );
-      setValidationsAllTypesFilters(allTypesFilter);
+
+      const nestedOptions = [];
+      filterOptionsInitial[0].nestedOptions.forEach(optionMultiSelect => {
+        nestedOptions.push({
+          ...optionMultiSelect,
+          multiSelectOptions: getValidationsOptionTypes(allTypesFilter, optionMultiSelect.key)
+        });
+      });
+
+      const filterOptions = [{ type: 'MULTI_SELECT', nestedOptions }];
+
+      setFilterOptions(filterOptions);
+      //setValidationsAllTypesFilters(allTypesFilter);
     }, [levelErrorsTypesFilter, originsTypesFilter, typeEntitiesTypesFilter, fieldsTypesFilter]);
 
     useEffect(() => {
@@ -219,6 +237,13 @@ export const ShowValidationsList = memo(
 
     const getRuleSchema = ruleId =>
       validationContext.rulesDescription.find(ruleDescription => ruleDescription.id === ruleId);
+
+    const getValidationsOptionTypes = (data, option) => {
+      const optionsItems = data
+        .filter(filterType => filterType.type === option)
+        .map(optionItem => ({ type: optionItem.value, value: optionItem.value }));
+      return sortBy(optionsItems, 'type');
+    };
 
     const levelErrorTemplate = recordData => (
       <div className={styles.levelErrorTemplateWrapper}>
@@ -390,30 +415,29 @@ export const ShowValidationsList = memo(
       setFieldsTypesFilter(allFieldsFilterList);
     };
 
-    const onLoadFilteredValidations = filterData => {
-      console.log('log_filterDAta: ', filterData);
-      setFirstRow(0);
-      setFieldValueFilter(filterData.fieldSchemaName);
-      setLevelErrorsFilter(filterData.levelError);
-      setTypeEntitiesFilter(filterData.entityType);
-      setTablesFilter(filterData.tableSchemaName);
+    // const onLoadFilteredValidations = filterData => {
+    //   setFirstRow(0);
+    //   setFieldValueFilter(filterData.fieldSchemaName);
+    //   setLevelErrorsFilter(filterData.levelError);
+    //   setTypeEntitiesFilter(filterData.entityType);
+    //   setTablesFilter(filterData.tableSchemaName);
 
-      onLoadErrors(
-        0,
-        numberRows,
-        sortField,
-        sortOrder,
-        filterData.fieldSchemaName,
-        filterData.levelError,
-        filterData.entityType,
-        filterData.tableSchemaName
-      );
-      setFilterBy(filterData);
-      if (!isNil(filterData)) {
-        const filterDataValues = Object.values(filterData).map(value => value.length !== 0);
-        filterDataValues.includes(true) ? setFiltered(true) : setFiltered(false);
-      }
-    };
+    //   onLoadErrors(
+    //     0,
+    //     numberRows,
+    //     sortField,
+    //     sortOrder,
+    //     filterData.fieldSchemaName,
+    //     filterData.levelError,
+    //     filterData.entityType,
+    //     filterData.tableSchemaName
+    //   );
+    //   setFilterBy(filterData);
+    //   if (!isNil(filterData)) {
+    //     const filterDataValues = Object.values(filterData).map(value => value.length !== 0);
+    //     filterDataValues.includes(true) ? setFiltered(true) : setFiltered(false);
+    //   }
+    // };
 
     const onLoadRulesDescription = async () => {
       const validationsServiceList = await ValidationService.getAll(dataflowId, datasetSchemaId, reporting);
@@ -493,14 +517,14 @@ export const ShowValidationsList = memo(
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {filtered && totalRecords !== totalFilteredRecords
+        {isFiltered && totalRecords !== totalFilteredRecords
           ? `${resourcesContext.messages['filtered']}: ${totalFilteredRecords} | `
           : ''}
         {resourcesContext.messages['totalRecords']} {totalRecords}{' '}
         {`${resourcesContext.messages['records'].toLowerCase()}${` (${resourcesContext.messages[
           'totalErrors'
         ].toLowerCase()}${totalErrors})`}`}
-        {filtered && totalRecords === totalFilteredRecords
+        {isFiltered && totalRecords === totalFilteredRecords
           ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
           : ''}
       </Fragment>
@@ -516,14 +540,44 @@ export const ShowValidationsList = memo(
       onLoadFilters();
     };
 
-    const filterOptions = [
+    // const filterOptions = [
+    //   {
+    //     type: 'multiselect',
+    //     properties: [
+    //       { name: 'entityType' },
+    //       { name: 'tableSchemaName', showInput: true },
+    //       { name: 'fieldSchemaName', showInput: true },
+    //       { name: 'levelError' }
+    //     ]
+    //   }
+    // ];
+
+    const filterOptionsInitial = [
       {
-        type: 'multiselect',
-        properties: [
-          { name: 'entityType' },
-          { name: 'tableSchemaName', showInput: true },
-          { name: 'fieldSchemaName', showInput: true },
-          { name: 'levelError' }
+        type: 'MULTI_SELECT',
+        nestedOptions: [
+          {
+            key: 'entityType',
+            label: resourcesContext.messages['entityType'],
+            multiSelectOptions: []
+          },
+          {
+            key: 'tableSchemaName',
+            label: resourcesContext.messages['table'],
+            showInput: true,
+            multiSelectOptions: []
+          },
+          {
+            key: 'fieldSchemaName',
+            label: resourcesContext.messages['fieldSchemaName'],
+            showInput: true,
+            multiSelectOptions: []
+          },
+          {
+            key: 'levelError',
+            label: resourcesContext.messages['levelError'],
+            multiSelectOptions: []
+          }
         ]
       }
     ];
@@ -539,7 +593,7 @@ export const ShowValidationsList = memo(
         );
       }
 
-      if (isEmpty(fetchedData) && !filtered) {
+      if (isEmpty(fetchedData) && !isFiltered) {
         if (!isLoadingTable) {
           return (
             <div className={styles.validationsWithoutTable}>
@@ -560,13 +614,21 @@ export const ShowValidationsList = memo(
       return (
         <div className={styles.validations}>
           <div className={styles.searchInput}>
-            <Filters
+            {/* <Filters
               data={fetchedData}
               filterByList={filterBy}
               options={filterOptions}
               sendData={onLoadFilteredValidations}
               validations
               validationsAllTypesFilters={validationsAllTypesFilters}
+            /> */}
+
+            <MyFilters
+              className="showValidationsList"
+              //data={fetchData}
+              data={[]}
+              options={filterOptions}
+              viewType="showValidationsList"
             />
           </div>
 
