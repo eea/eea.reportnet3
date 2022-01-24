@@ -1,6 +1,6 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 
-import isNil from 'lodash/isNil';
+import isEmpty from 'lodash/isEmpty';
 
 import ReactTooltip from 'react-tooltip';
 
@@ -18,7 +18,7 @@ import { DataflowService } from 'services/DataflowService';
 const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCustodian, manageDialogs }) => {
   const resourcesContext = useContext(ResourcesContext);
 
-  const [apiKey, setApiKey] = useState(null);
+  const [apiKey, setApiKey] = useState('');
   const [copyResultMessage, setCopyResultMessage] = useState('');
   const [isKeyLoading, setIsKeyLoading] = useState(true);
 
@@ -81,7 +81,7 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
       return <Spinner className={styles.spinner} />;
     }
 
-    if (isNil(apiKey)) {
+    if (isEmpty(apiKey)) {
       return <p>{resourcesContext.messages['noApiKey']}</p>;
     }
 
