@@ -34,6 +34,7 @@ export const config = {
   SQL_SENTENCE_HIGH_COST: 50,
   MAX_ATTACHMENT_SIZE: 20 * 1024 * 1024,
   IMPORT_FILE_DELIMITER: ',',
+  IMPORT_ERROR_LIFETIME: 30000,
 
   avatars: avatarImages,
   countriesByGroup: countryByGroup,
