@@ -96,7 +96,6 @@ const DataViewer = ({
   const [addDialogVisible, setAddDialogVisible] = useState(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
   const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
-  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [editDialogVisible, setEditDialogVisible] = useState(false);
   const [fetchedData, setFetchedData] = useState([]);
   const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
@@ -539,8 +538,7 @@ const DataViewer = ({
       notificationContext.add({ type: 'DELETE_TABLE_DATA_INIT' });
       await DatasetService.deleteTableData(datasetId, tableId);
       setFetchedData([]);
-      dispatchRecords({ type: 'SET_TOTAL', payload: 0 });
-      dispatchRecords({ type: 'SET_FILTERED', payload: 0 });
+      dispatchRecords({ type: 'RESET_TOTAL', payload: 0 });
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -558,8 +556,6 @@ const DataViewer = ({
           true
         );
       }
-    } finally {
-      setDeleteDialogVisible(false);
     }
   };
 
@@ -600,8 +596,6 @@ const DataViewer = ({
           true
         );
       }
-    } finally {
-      setDeleteDialogVisible(false);
     }
   };
 
@@ -1045,22 +1039,42 @@ const DataViewer = ({
     );
   };
 
-  const getPaginatorRecordsCount = () => (
-    <Fragment>
-      {(isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
-      records.totalRecords !== records.totalFilteredRecords
-        ? `${resourcesContext.messages['filtered']}: ${records.totalFilteredRecords} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {!isUndefined(records.totalRecords) ? records.totalRecords : 0}{' '}
-      {records.totalRecords === 1
+  const renderPaginatorRecordsCount = () => {
+    const renderFilteredRowsLabel = () => {
+      if (
+        (isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
+        records.totalRecords !== records.totalFilteredRecords
+      ) {
+        return `${resourcesContext.messages['filtered']}: ${records.totalFilteredRecords} | `;
+      }
+    };
+
+    const renderTotalRowsLabel = () =>
+      `${resourcesContext.messages['totalRecords']} ${!isUndefined(records.totalRecords) ? records.totalRecords : 0} `;
+
+    const renderRowsLabel = () =>
+      records.totalRecords === 1
         ? resourcesContext.messages['record'].toLowerCase()
-        : resourcesContext.messages['records'].toLowerCase()}
-      {(isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
-      records.totalRecords === records.totalFilteredRecords
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
-    </Fragment>
-  );
+        : resourcesContext.messages['records'].toLowerCase();
+
+    const renderFilteredLabel = () => {
+      if (
+        (isGroupedValidationSelected || isFilterValidationsActive || (!isNil(valueFilter) && valueFilter !== '')) &&
+        records.totalRecords === records.totalFilteredRecords
+      ) {
+        return ` (${resourcesContext.messages['filtered'].toLowerCase()})`;
+      }
+    };
+
+    return (
+      <Fragment>
+        {renderFilteredRowsLabel()}
+        {renderTotalRowsLabel()}
+        {renderRowsLabel()}
+        {renderFilteredLabel()}
+      </Fragment>
+    );
+  };
 
   const onKeyPress = event => {
     if (event.key === 'Enter' && !isSaving && !records.isSaveDisabled) {
@@ -1068,6 +1082,7 @@ const DataViewer = ({
       onSaveRecord(records.newRecord);
     }
   };
+
   const getAttachExtensions = [{ datasetSchemaId, fileExtension: records.selectedValidExtensions || [] }]
     .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
     .flat()
@@ -1084,9 +1099,53 @@ const DataViewer = ({
       : resourcesContext.messages['maxSizeNotDefined']
   }`;
 
+  const readLines = async function* (blob, encoding = 'utf-8', delimiter = /\r?\n/g) {
+    const reader = blob.stream().getReader();
+    const decoder = new TextDecoder(encoding);
+
+    try {
+      let text = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        text += decoder.decode(value, { stream: true });
+        const lines = text.split(delimiter);
+        text = lines.pop();
+        yield* lines;
+      }
+
+      yield text;
+    } finally {
+      reader.cancel();
+    }
+  };
+
   const onImportTableError = async ({ xhr }) => {
     if (xhr.status === 423) {
       notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+    }
+  };
+
+  const onValidateFile = async file => {
+    const checkFirstLine = async firstLine => {
+      const validations = [];
+      if (colsSchema?.length - 2 !== firstLine.split(',').length) {
+        validations.push({
+          severity: 'warn',
+          summary: resourcesContext.messages['importWrongFileHeader'],
+          detail: `${resourcesContext.messages['importWrongFileHeaderDetail']} ${
+            resourcesContext.messages['columnsSchemaLabel']
+          }: ${colsSchema?.length - 2} - ${resourcesContext.messages['fileColumnsLabel']}: ${
+            firstLine.split(',').length
+          }`
+        });
+      }
+      return validations;
+    };
+
+    for await (const line of readLines(file, 'utf-8', '\n')) {
+      return checkFirstLine(line);
     }
   };
 
@@ -1108,6 +1167,7 @@ const DataViewer = ({
         isGroupedValidationSelected={isGroupedValidationSelected}
         isLoading={isLoading}
         levelErrorTypesWithCorrects={levelErrorAllTypes}
+        onConfirmDeleteTable={onConfirmDeleteTable}
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onRefresh={onRefresh}
         onSetVisible={onSetVisible}
@@ -1119,7 +1179,6 @@ const DataViewer = ({
         selectedRuleMessage={selectedRuleMessage}
         selectedTableSchemaId={selectedTableSchemaId}
         setColumns={setColumns}
-        setDeleteDialogVisible={setDeleteDialogVisible}
         setImportTableDialogVisible={setImportTableDialogVisible}
         showGroupedValidationFilter={showGroupedValidationFilter}
         showValidationFilter={showValidationFilter}
@@ -1176,7 +1235,7 @@ const DataViewer = ({
           onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
           onSort={onSort}
           paginator={true}
-          paginatorRight={getPaginatorRecordsCount()}
+          paginatorRight={renderPaginatorRecordsCount()}
           ref={datatableRef}
           reorderableColumns={true}
           resizableColumns={true}
@@ -1262,6 +1321,7 @@ const DataViewer = ({
           name="file"
           onError={onImportTableError}
           onUpload={onUpload}
+          onValidateFile={onValidateFile}
           replaceCheck={true}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTable, {
             datasetId: datasetId,
@@ -1371,19 +1431,6 @@ const DataViewer = ({
             />
           </div>
         </Dialog>
-      )}
-
-      {deleteDialogVisible && (
-        <ConfirmDialog
-          classNameConfirm={'p-button-danger'}
-          header={`${resourcesContext.messages['deleteDatasetTableHeader']} (${tableName})`}
-          labelCancel={resourcesContext.messages['no']}
-          labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={onConfirmDeleteTable}
-          onHide={() => onSetVisible(setDeleteDialogVisible, false)}
-          visible={deleteDialogVisible}>
-          {resourcesContext.messages['deleteDatasetTableConfirm']}
-        </ConfirmDialog>
       )}
 
       {isDeleteAttachmentVisible && (

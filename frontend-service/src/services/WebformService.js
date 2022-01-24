@@ -6,7 +6,7 @@ export const WebformService = {
   addPamsRecords: async (datasetId, tables, pamId, type) =>
     await WebformRepository.addPamsRecords(datasetId, WebformUtils.parsePamTables(tables, pamId, type)),
 
-  create: async webform => await WebformRepository.create(webform),
+  create: async (name, jsonContent) => await WebformRepository.create(name, jsonContent),
 
   delete: async id => await WebformRepository.delete(id),
 
@@ -18,5 +18,5 @@ export const WebformService = {
 
   getWebformConfig: async webformId => await WebformRepository.getWebformConfig(webformId),
 
-  update: async (webform, id) => await WebformRepository.update(webform, id)
+  update: async (name, jsonContent, id) => await WebformRepository.update(name, jsonContent, id)
 };

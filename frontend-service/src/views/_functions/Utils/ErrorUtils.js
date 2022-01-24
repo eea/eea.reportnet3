@@ -60,13 +60,17 @@ const getGroupValidations = (recordData, blockerMessage, errorMessage, warningMe
 };
 
 const addIconLevelError = (validation, levelError, message) => {
-  if (isEmpty(validation)) return [];
+  if (isEmpty(validation)) {
+    return [];
+  }
 
   return [].concat(<IconTooltip key={levelError} levelError={levelError} message={message} />);
 };
 
 const getIconsValidationsErrors = validations => {
-  if (isNil(validations)) return [];
+  if (isNil(validations)) {
+    return [];
+  }
 
   const blockerIcon = addIconLevelError(validations.blockers, 'BLOCKER', validations.messageBlockers);
   const errorIcon = addIconLevelError(validations.errors, 'ERROR', validations.messageErrors);
@@ -84,34 +88,27 @@ const getValidationsTemplate = (data, messages) => {
     messages.warnings,
     messages.infos
   );
+
   return getIconsValidationsErrors(validationsGroup);
 };
 
 const getLevelErrorPriorityByLevelError = levelError => {
-  let levelErrorIndex = 0;
   switch (levelError) {
     case 'CORRECT':
-      levelErrorIndex = 0;
-      break;
+      return 0;
     case 'INFO':
-      levelErrorIndex = 1;
-      break;
+      return 1;
     case 'WARNING':
-      levelErrorIndex = 2;
-      break;
+      return 2;
     case 'ERROR':
-      levelErrorIndex = 3;
-      break;
+      return 3;
     case 'BLOCKER':
-      levelErrorIndex = 4;
-      break;
+      return 4;
     case '':
-      levelErrorIndex = 99;
-      break;
+      return 99;
     default:
-      levelErrorIndex = null;
+      return null;
   }
-  return levelErrorIndex;
 };
 
 const orderLevelErrors = levelErrors => {
@@ -130,9 +127,7 @@ const orderLevelErrors = levelErrors => {
     .map(orderedError => orderedError.id);
 };
 
-const parseErrorType = errorType => {
-  return `${snakeCase(errorType).toUpperCase()}_ERROR`;
-};
+const parseErrorType = errorType => `${snakeCase(errorType).toUpperCase()}_ERROR`;
 
 export const ErrorUtils = {
   getGroupValidations,

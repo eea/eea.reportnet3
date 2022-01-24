@@ -6,7 +6,8 @@ export const WebformRepository = {
   addPamsRecords: async (datasetId, pamsRecord) =>
     await HTTPRequester.post({ url: getUrl(WebformConfig.createPamsRecords, { datasetId }), data: pamsRecord }),
 
-  create: async webform => await HTTPRequester.post({ url: getUrl(WebformConfig.create), data: { webform } }),
+  create: async (name, jsonContent) =>
+    await HTTPRequester.post({ url: getUrl(WebformConfig.create), data: { name, content: jsonContent } }),
 
   delete: async id => await HTTPRequester.delete({ url: getUrl(WebformConfig.delete, { id }) }),
 
@@ -25,6 +26,20 @@ export const WebformRepository = {
     return data;
   },
 
-  update: async (webform, id) =>
-    await HTTPRequester.update({ url: getUrl(WebformConfig.getWebformConfig, { id }), data: { webform } })
+  update: async (name, jsonContent, id) => {
+    const data = { idReferenced: id };
+
+    if (jsonContent) {
+      data.content = jsonContent;
+    }
+
+    if (name) {
+      data.name = name;
+    }
+
+    return await HTTPRequester.update({
+      url: getUrl(WebformConfig.update),
+      data
+    });
+  }
 };

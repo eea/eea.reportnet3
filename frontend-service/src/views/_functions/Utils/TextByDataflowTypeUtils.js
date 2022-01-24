@@ -11,9 +11,7 @@ const getKeyByDataflowType = (dataflowType, field) => {
   }
 };
 
-const getLabelByDataflowType = (messages, dataflowType, field) => {
-  return messages[getKeyByDataflowType(dataflowType, field)];
-};
+const getLabelByDataflowType = (messages, dataflowType, field) => messages[getKeyByDataflowType(dataflowType, field)];
 
 export const TextByDataflowTypeUtils = {
   getKeyByDataflowType,
