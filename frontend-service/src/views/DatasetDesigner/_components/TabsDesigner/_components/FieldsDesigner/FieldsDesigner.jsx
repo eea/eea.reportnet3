@@ -811,7 +811,11 @@ export const FieldsDesigner = ({
   };
 
   const getContentTableClassName = () => {
-    return !isNil(fields) && fields.length < 3 ? styles.dragAndDropItems : '';
+    if (!isNil(fields) && fields.length < 2) {
+      return styles.inactiveDragAndDropItems;
+    } else {
+      return styles.activeDragAndDropItems;
+    }
   };
 
   return (
@@ -970,9 +974,9 @@ export const FieldsDesigner = ({
           </div>
         </div>
       </div>
-      <div className={`${styles.contentTable} ${getContentTableClassName()}`}>
+      <div className={styles.contentTable}>
         {!viewType['tabularData'] && (
-          <div className={styles.fieldsHeader}>
+          <div className={`${styles.fieldsHeader} ${getContentTableClassName()}`}>
             <label></label>
             <span className={styles.PKWrap}>
               <label>{resourcesContext.messages['pk']}</label>
