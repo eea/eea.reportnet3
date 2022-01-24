@@ -384,7 +384,6 @@ export const Filters = ({
             style={{ zoom: '0.95' }}
             value={filterState.filterBy[property]}
             yearNavigator={true}
-            yearRange="2015:2030"
           />
           {!isEmpty(filterState.filterBy[property]) && (
             <Button

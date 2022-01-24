@@ -4,7 +4,8 @@ import sortBy from 'lodash/sortBy';
 
 import { Integration } from 'entities/Integration';
 
-const parseExternalParameters = parameterDTO => parameterDTO.map(parameter => ({ [parameter.key]: parameter.value }));
+const parseExternalParameters = parameterDTO =>
+  parameterDTO.reduce((obj, item) => Object.assign(obj, { [item.key]: item.value }), {});
 
 const parseDatasetSchemaId = (datasetSchemaId, dataflowId) =>
   new Integration({

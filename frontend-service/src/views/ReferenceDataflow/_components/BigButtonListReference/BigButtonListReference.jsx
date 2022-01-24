@@ -5,6 +5,7 @@ import isNil from 'lodash/isNil';
 import remove from 'lodash/remove';
 
 import { config } from 'conf';
+import { DataflowConfig } from 'repositories/config/DataflowConfig';
 import { routes } from 'conf/routes';
 
 import styles from './BigButtonListReference.module.scss';
@@ -13,6 +14,7 @@ import { BigButton } from 'views/_components/BigButton';
 import { Button } from 'views/_components/Button';
 import { CloneSchemas } from 'views/Dataflow/_components/CloneSchemas';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
+import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { Dialog } from 'views/_components/Dialog';
 import { NewDatasetSchemaForm } from 'views/_components/NewDatasetSchemaForm';
 
@@ -37,6 +39,7 @@ const BigButtonListReference = ({
   onSaveName,
   onUpdateData,
   setIsCreatingReferenceDatasets,
+  setIsImportingDataflow,
   setUpdatedDatasetSchema
 }) => {
   const navigate = useNavigate();
@@ -48,13 +51,15 @@ const BigButtonListReference = ({
     dialogVisibility: {
       isCreateReference: false,
       isDeleteDataset: false,
+      isImportSchemaVisible: false,
       isNewDataset: false,
       isTableWithNoPK: false
     },
     hasDatasets: false,
-    isCloningStatus: false,
+    isCloningDataflow: false,
     isCreateReferenceEnabled: false,
-    isDesignStatus: false
+    isDesignStatus: false,
+    isImportingDataflow: false
   });
 
   useEffect(() => {
@@ -75,6 +80,12 @@ const BigButtonListReference = ({
     false
   );
 
+  useCheckNotifications(
+    ['IMPORT_DATASET_SCHEMA_COMPLETED_EVENT', 'IMPORT_DATASET_SCHEMA_FAILED_EVENT'],
+    setImportingLoading,
+    false
+  );
+
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -82,9 +93,10 @@ const BigButtonListReference = ({
     cloneDataflow,
     deleteIndex,
     dialogVisibility,
-    isCloningStatus,
+    isCloningDataflow,
     isCreateReferenceEnabled,
     isDesignStatus,
+    isImportingDataflow,
     hasDatasets
   } = referenceBigButtonsState;
 
@@ -110,8 +122,12 @@ const BigButtonListReference = ({
     referenceBigButtonsDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, isVisible } });
   };
 
+  function setImportingLoading(value) {
+    referenceBigButtonsDispatch({ type: 'IS_IMPORTING_DATAFLOW', payload: { status: value } });
+  }
+
   function setCloneLoading(value) {
-    referenceBigButtonsDispatch({ type: 'IS_CLONING_STATUS', payload: { status: value } });
+    referenceBigButtonsDispatch({ type: 'IS_CLONING_DATAFLOW', payload: { status: value } });
   }
 
   const cloneDatasetSchemas = async () => {
@@ -140,6 +156,18 @@ const BigButtonListReference = ({
 
   const getCloneDataflow = dataflow =>
     referenceBigButtonsDispatch({ type: 'GET_DATAFLOW_TO_CLONE', payload: { dataflow } });
+
+  const onImportSchema = isVisible => {
+    handleDialogs({ dialog: 'isImportSchemaVisible', isVisible });
+  };
+
+  const onImportSchemaError = async ({ xhr }) => {
+    if (xhr.status === 423) {
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+    } else {
+      notificationContext.add({ type: 'IMPORT_DATASET_SCHEMA_FAILED_EVENT' }, true);
+    }
+  };
 
   const onToggleNewDatasetDialog = isVisible => handleDialogs({ dialog: 'isNewDataset', isVisible });
 
@@ -172,6 +200,16 @@ const BigButtonListReference = ({
     } finally {
       hideLoading();
     }
+  };
+
+  const onUpload = async () => {
+    onImportSchema(false);
+    setImportingLoading(true);
+    setIsImportingDataflow(true);
+    notificationContext.add({
+      type: 'IMPORT_DATASET_SCHEMA_INIT',
+      content: { dataflowName: dataflowState.name }
+    });
   };
 
   const onCreateReferenceDatasets = async () => {
@@ -248,7 +286,11 @@ const BigButtonListReference = ({
       icon: 'clone',
       label: resourcesContext.messages['cloneSchemasFromDataflow']
     },
-    { disabled: true, icon: 'import', label: resourcesContext.messages['importSchema'] }
+    {
+      command: () => onImportSchema(true),
+      icon: 'import',
+      label: resourcesContext.messages['importSchema']
+    }
   ];
 
   const designModel = newDatasetSchema => {
@@ -326,12 +368,12 @@ const BigButtonListReference = ({
 
   const newSchemaBigButton = {
     buttonClass: 'newItem',
-    buttonIcon: isCloningStatus ? 'spinner' : 'plus',
-    buttonIconClass: isCloningStatus ? 'spinner' : 'newItemCross',
+    buttonIcon: isCloningDataflow || isImportingDataflow ? 'spinner' : 'plus',
+    buttonIconClass: isCloningDataflow || isImportingDataflow ? 'spinner' : 'newItemCross',
     caption: resourcesContext.messages['newSchema'],
     helpClassName: 'dataflow-new-schema-help-step',
-    layout: isCloningStatus ? 'defaultBigButton' : 'menuBigButton',
-    model: isCloningStatus ? [] : newSchemaModel,
+    layout: isCloningDataflow ? 'defaultBigButton' : 'menuBigButton',
+    model: isCloningDataflow ? [] : newSchemaModel,
     visibility: isDesignStatus && dataflowState.isCustodian
   };
 
@@ -386,6 +428,24 @@ const BigButtonListReference = ({
             setNewDatasetDialog={onToggleNewDatasetDialog}
           />
         </Dialog>
+      )}
+
+      {dialogVisibility.isImportSchemaVisible && (
+        <CustomFileUpload
+          accept=".zip"
+          chooseLabel={resourcesContext.messages['selectFile']}
+          className={styles.FileUpload}
+          dialogHeader={`${resourcesContext.messages['importSchema']}`}
+          dialogOnHide={() => onImportSchema(false)} //allowTypes="/(\.|\/)(csv)$/"
+          dialogVisible={dialogVisibility.isImportSchemaVisible}
+          infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .zip`}
+          invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
+          isDialog={true}
+          name="file"
+          onError={onImportSchemaError}
+          onUpload={onUpload}
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DataflowConfig.importSchema, { dataflowId })}`}
+        />
       )}
 
       {dialogVisibility.cloneDialogVisible && (
