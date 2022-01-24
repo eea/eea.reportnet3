@@ -106,7 +106,7 @@ export const IntegrationsList = ({
       {
         key: 'actions',
         header: resourcesContext.messages['actions'],
-        template: rowData => actionsTemplate(rowData),
+        template: actionsTemplate,
         className: styles.validationCol,
         style: { width: '100px' }
       }
