@@ -330,7 +330,15 @@ const Dataflows = () => {
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'reference' });
       } else if (TextUtils.areEquals(tabId, 'business')) {
-        const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const data = await BusinessDataflowService.getAll({
+          accessRoles,
+          contextRoles,
+          filterBy,
+          isAscending,
+          pageNumber,
+          pageSize,
+          sortBy
+        });
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'business' });
       } else if (TextUtils.areEquals(tabId, 'citizenScience')) {
