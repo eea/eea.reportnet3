@@ -50,7 +50,7 @@
 
 .block {
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   color: var(--font-filters);
   height: 2rem;
   font-size: 0.8333rem;
@@ -200,10 +200,6 @@
 .qcList {
   display: grid;
   grid-row-gap: 2.5rem;
-  /*grid-template-areas:
-    'area area area area button'
-    'area area area area button';
-  grid-template-columns: calc(95% / 4) calc(95% / 4) calc(95% / 4) calc(95% / 4) 5%;*/
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr;
   margin: 1rem 0;
@@ -214,7 +210,6 @@
   }
 
   .resetButton {
-    //grid-area: button;
     grid-column: 5;
     grid-row: 1 / span 2;
     margin: auto;
