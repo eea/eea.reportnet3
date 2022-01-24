@@ -55,6 +55,7 @@ import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -83,10 +84,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import io.jsonwebtoken.lang.Objects;
 
@@ -649,14 +653,45 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the public dataflows.
    *
    * @return the public dataflows
+   * @throws EEAException
    */
   @Override
-  public List<DataflowPublicVO> getPublicDataflows() {
+  public PaginatedDataflowVO getPublicDataflows(Map<String, String> filters, String orderHeader,
+      boolean asc, Integer sizePage, Integer numPage) throws EEAException {
 
-    List<DataflowPublicVO> dataflowPublicList =
-        dataflowPublicMapper.entityListToClass(dataflowRepository.findByShowPublicInfoTrue());
-    dataflowPublicList.stream().forEach(dataflow -> findObligationPublicDataflow(dataflow));
-    return dataflowPublicList;
+    // get obligations
+    try {
+      Pageable pageable = PageRequest.of(numPage, sizePage);
+      List<ObligationVO> obligations =
+          obligationControllerZull.findOpenedObligations(null, null, null, null, null);
+      ObjectMapper objectMapper = new ObjectMapper();
+
+      String arrayToJson = objectMapper.writeValueAsString(obligations);
+
+      List<Dataflow> dataflows = dataflowRepository.findPaginated(arrayToJson, pageable,
+          Boolean.TRUE, filters, orderHeader, asc);
+      List<DataflowPublicVO> dfpublic = dataflowPublicMapper.entityListToClass(dataflows);
+
+      // SET OBLIGATIONS
+      for (DataflowPublicVO dataflowPublicVO : dfpublic) {
+        for (ObligationVO obligation : obligations) {
+          if (dataflowPublicVO.getObligation().getObligationId()
+              .equals(obligation.getObligationId())) {
+            dataflowPublicVO.setObligation(obligation);
+          }
+        }
+      }
+      PaginatedDataflowVO pag = new PaginatedDataflowVO();
+      pag.setDataflows(dfpublic);
+      pag.setTotalRecords(dataflowRepository.countByShowPublicInfo(Boolean.TRUE));
+      pag.setFilteredRecords(dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.TRUE,
+          filters, orderHeader, asc));
+
+      return pag;
+
+    } catch (JsonProcessingException e) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
+    }
   }
 
   /**
@@ -679,7 +714,6 @@ public class DataflowServiceImpl implements DataflowService {
 
     List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
     setReportings(dataflowPublicList, providerId);
-
     // sort and paging
     sortPublicDataflows(dataflowPublicList, header, asc);
     dataflowPublicPaginated.setPublicDataflows(getPage(dataflowPublicList, page, pageSize));

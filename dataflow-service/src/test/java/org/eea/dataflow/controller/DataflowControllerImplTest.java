@@ -1016,11 +1016,13 @@ public class DataflowControllerImplTest {
    * Gets the public dataflows test.
    *
    * @return the public dataflows test
+   * @throws EEAException
    */
   @Test
-  public void getPublicDataflowsTest() {
-    dataflowControllerImpl.getPublicDataflows();
-    Mockito.verify(dataflowService, times(1)).getPublicDataflows();
+  public void getPublicDataflowsTest() throws EEAException {
+    dataflowControllerImpl.getPublicDataflows(null, null, false, null, null);
+    Mockito.verify(dataflowService, times(1)).getPublicDataflows(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.any(), Mockito.any());
   }
 
   /**

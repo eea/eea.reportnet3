@@ -2,6 +2,7 @@ package org.eea.interfaces.controller.dataflow;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
@@ -9,6 +10,7 @@ import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -193,8 +195,10 @@ public interface DataFlowController {
    *
    * @return the public dataflows
    */
-  @GetMapping("/getPublicDataflows")
-  List<DataflowPublicVO> getPublicDataflows();
+  @PostMapping("/getPublicDataflows")
+  PaginatedDataflowVO getPublicDataflows(@RequestBody Map<String, String> filters,
+      @RequestParam String orderHeader, @RequestParam boolean asc, @RequestParam Integer sizePage,
+      @RequestParam Integer numPage);
 
   /**
    * Gets the public dataflows.
