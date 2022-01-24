@@ -1099,9 +1099,53 @@ const DataViewer = ({
       : resourcesContext.messages['maxSizeNotDefined']
   }`;
 
+  const readLines = async function* (blob, encoding = 'utf-8', delimiter = /\r?\n/g) {
+    const reader = blob.stream().getReader();
+    const decoder = new TextDecoder(encoding);
+
+    try {
+      let text = '';
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        text += decoder.decode(value, { stream: true });
+        const lines = text.split(delimiter);
+        text = lines.pop();
+        yield* lines;
+      }
+
+      yield text;
+    } finally {
+      reader.cancel();
+    }
+  };
+
   const onImportTableError = async ({ xhr }) => {
     if (xhr.status === 423) {
       notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+    }
+  };
+
+  const onValidateFile = async file => {
+    const checkFirstLine = async firstLine => {
+      const validations = [];
+      if (colsSchema?.length - 2 !== firstLine.split(',').length) {
+        validations.push({
+          severity: 'warn',
+          summary: resourcesContext.messages['importWrongFileHeader'],
+          detail: `${resourcesContext.messages['importWrongFileHeaderDetail']} ${
+            resourcesContext.messages['columnsSchemaLabel']
+          }: ${colsSchema?.length - 2} - ${resourcesContext.messages['fileColumnsLabel']}: ${
+            firstLine.split(',').length
+          }`
+        });
+      }
+      return validations;
+    };
+
+    for await (const line of readLines(file, 'utf-8', '\n')) {
+      return checkFirstLine(line);
     }
   };
 
@@ -1277,6 +1321,7 @@ const DataViewer = ({
           name="file"
           onError={onImportTableError}
           onUpload={onUpload}
+          onValidateFile={onValidateFile}
           replaceCheck={true}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTable, {
             datasetId: datasetId,
