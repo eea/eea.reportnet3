@@ -90,7 +90,6 @@ const Dataflows = () => {
     isValidatingAllDataflowsUsers: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     pagination: { firstRow: 0, numberRows: 5, pageNum: 0 },
-    currentPage: 0,
     goToPage: 1,
     pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
     pinnedSeparatorIndex: -1,
@@ -642,7 +641,6 @@ const Dataflows = () => {
           pageNum: p
         };
         onChangePagination(newPageState);
-        setCurrentPage(p);
       }
     } else {
       setGoToPage(event.target.value);
@@ -662,12 +660,9 @@ const Dataflows = () => {
 
   const setGoToPage = value => dataflowsDispatch({ type: 'SET_GO_TO_PAGE', payload: value });
 
-  const setCurrentPage = value => dataflowsDispatch({ type: 'SET_CURRENT_PAGE', payload: value });
-
   const setPageInputTooltip = value => dataflowsDispatch({ type: 'SET_PAGE_INPUT_TOOLTIP', payload: value });
 
   const onPaginate = event => {
-    setCurrentPage(event.page);
     setGoToPage(event.page + 1);
     onChangePagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
   };
@@ -706,10 +701,6 @@ const Dataflows = () => {
       );
     }
   };
-
-  const begin = Math.max(0, Math.ceil(dataflowsState.currentPage * pagination.numberRows));
-  const end = begin + pagination.numberRows;
-  const currentPosts = filteredData.slice(begin, end);
 
   const renderPaginator = () => {
     if (!loadingStatus[tabId]) {
