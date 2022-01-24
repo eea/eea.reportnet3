@@ -101,7 +101,7 @@ export const DataflowRepository = {
     }),
 
   getPublicData: async (pageNum, numberRows) =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicData, { pageNum, numberRows }) }),
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicData, { numPage: pageNum, sizePage: numberRows }) }),
 
   get: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) }),
 
