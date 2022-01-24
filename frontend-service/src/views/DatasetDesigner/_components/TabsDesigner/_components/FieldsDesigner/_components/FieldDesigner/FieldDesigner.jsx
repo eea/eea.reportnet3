@@ -120,6 +120,7 @@ export const FieldDesigner = ({
   const validationContext = useContext(ValidationContext);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [headerInitialHeight, setHeaderInitialHeight] = useState();
+
   useEffect(() => {
     const header = document.getElementById('header');
     const observer = new ResizeObserver(entries =>
