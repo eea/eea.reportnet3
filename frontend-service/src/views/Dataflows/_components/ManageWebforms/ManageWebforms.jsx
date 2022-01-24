@@ -296,7 +296,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         className={`p-button-primary ${getIsDisabledConfirmBtn() ? '' : 'p-button-animated-blink'}`}
         disabled={getIsDisabledConfirmBtn()}
         icon={loadingStatus === 'pending' ? 'spinnerAnimate' : 'check'}
-        label={isNil(selectedWebformId) ? resourcesContext.messages['create'] : resourcesContext.messages['edit']}
+        label={isNil(selectedWebformId) ? resourcesContext.messages['create'] : resourcesContext.messages['save']}
         onClick={onConfirm}
       />
       <Button
