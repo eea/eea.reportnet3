@@ -133,7 +133,7 @@ const ActionsToolbar = ({
         fileType,
         filter.valueFilter,
         isFilterValidationsActive,
-        levelErrorValidations,
+        levelErrorValidations.map(levelError => levelError.toUpperCase()),
         selectedRuleId
       );
     } catch (error) {
