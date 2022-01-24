@@ -27,6 +27,7 @@ export const Calendar = forwardRef((props, _) => {
     placeholder,
     readOnlyInput,
     selectionMode,
+    selectableYears = 10,
     showButtonBar,
     showSeconds = false,
     showTime = false,
@@ -64,7 +65,9 @@ export const Calendar = forwardRef((props, _) => {
   };
 
   const yearRangeValue =
-    yearNavigator && isNil(yearRange) ? `${new Date().getFullYear() - 10}:${new Date().getFullYear() + 10}` : yearRange;
+    yearNavigator && isNil(yearRange)
+      ? `${new Date().getFullYear() - selectableYears}:${new Date().getFullYear() + selectableYears}`
+      : yearRange;
 
   return (
     <PrimeCalendar

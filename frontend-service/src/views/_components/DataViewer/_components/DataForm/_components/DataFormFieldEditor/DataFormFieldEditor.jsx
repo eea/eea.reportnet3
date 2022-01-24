@@ -459,10 +459,10 @@ const DataFormFieldEditor = ({
         onChange={e =>
           onChangeForm(field, RecordUtils.formatDate(e.target.value, isNil(e.target.value)), isConditional)
         }
+        selectableYears={100}
         style={{ width: '50%' }}
         value={new Date(RecordUtils.formatDate(fieldValue, isNil(fieldValue)))}
         yearNavigator={true}
-        yearRange="1900:2100"
       />
     );
   };
