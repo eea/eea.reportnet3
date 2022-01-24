@@ -401,6 +401,7 @@ const Dataflows = () => {
     }
     dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
     onChangePagination({ firstRow: 0, numberRows: 5, pageNum: 0 });
+    setGoToPage(1);
   };
 
   const onHideObligationDialog = () => {
