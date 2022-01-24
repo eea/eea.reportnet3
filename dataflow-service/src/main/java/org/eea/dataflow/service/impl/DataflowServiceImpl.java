@@ -1589,6 +1589,18 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
+   * Update data flow automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDeletion the automatic reporting deletion
+   */
+  @Override
+  public void updateDataFlowAutomaticReportingDeletion(Long dataflowId,
+      boolean automaticReportingDeletion) {
+    dataflowRepository.updateAutomaticReportingDeletion(dataflowId, automaticReportingDeletion);
+  }
+
+  /**
    * Removes the web links and documents.
    *
    * @param result the result

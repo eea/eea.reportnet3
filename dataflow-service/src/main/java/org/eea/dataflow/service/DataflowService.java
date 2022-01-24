@@ -252,6 +252,13 @@ public interface DataflowService {
    */
   void validateAllReporters(String userId) throws EEAException;
 
-
+  /**
+   * Update data flow automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDeletion the automatic reporting deletion
+   */
+  void updateDataFlowAutomaticReportingDeletion(Long dataflowId,
+      boolean automaticReportingDeletion);
 
 }

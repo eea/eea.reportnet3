@@ -990,6 +990,31 @@ public class DataflowControllerImpl implements DataFlowController {
   }
 
   /**
+   * Update data flow automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDelete the automatic reporting delete
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @PutMapping("/{dataflowId}/updateAutomaticDelete")
+  @ApiOperation(value = "Update one Dataflow Automatic Delete Data and Snapshot", hidden = false)
+  @ApiResponse(code = 500, message = "Internal Server Error")
+  public void updateDataFlowAutomaticReportingDeletion(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("AutomaticDelete") boolean automaticReportingDelete) {
+    try {
+      dataflowService.updateDataFlowAutomaticReportingDeletion(dataflowId,
+          automaticReportingDelete);
+    } catch (Exception e) {
+      LOG.error(String.format(
+          "Couldn't update the dataflow automatic delete data and snapshots with the provided dataflowId %s.",
+          dataflowId), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "Couldn't update the dataflow automatic delete data and snapshots. An unknown error happenned.");
+    }
+  }
+
+  /**
    * Checks if is user requester.
    *
    * @param dataflowId the dataflow id

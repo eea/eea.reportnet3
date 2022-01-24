@@ -272,6 +272,19 @@ public interface DataflowRepository
       @Param("showPublicInfo") boolean showPublicInfo);
 
   /**
+   * Update automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDeletion the automatic reporting deletion
+   */
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true,
+      value = "UPDATE dataflow SET automatic_reporting_deletion=:automaticReportingDeletion WHERE id=:dataflowId")
+  void updateAutomaticReportingDeletion(@Param("dataflowId") Long dataflowId,
+      @Param("automaticReportingDeletion") Boolean automaticReportingDeletion);
+
+  /**
    * The Interface IDatasetStatus.
    */
   public interface IDatasetStatus {

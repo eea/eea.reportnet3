@@ -325,4 +325,14 @@ public interface DataFlowController {
    */
   @PutMapping("/validateAllReporters")
   ResponseEntity validateAllReporters();
+
+  /**
+   * Update data flow automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDelete the automatic reporting delete
+   */
+  @PutMapping("/{dataflowId}/updateAutomaticDelete")
+  void updateDataFlowAutomaticReportingDeletion(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("AutomaticReportingDelete") boolean automaticReportingDelete);
 }

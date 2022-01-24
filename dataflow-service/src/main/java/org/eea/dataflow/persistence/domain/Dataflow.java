@@ -113,6 +113,10 @@ public class Dataflow {
   @Column(name = "FME_USER_ID")
   private Long fmeUserId;
 
+  /** The automatic reporting deletion. */
+  @Column(name = "AUTOMATIC_REPORTING_DELETION")
+  private boolean automaticReportingDeletion;
+
   /**
    * Equals.
    *
