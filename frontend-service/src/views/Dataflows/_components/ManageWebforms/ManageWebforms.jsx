@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import orderBy from 'lodash/orderBy';
@@ -101,9 +102,11 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     setLoadingStatus('pending');
 
     try {
-      isNil(selectedWebformId)
-        ? await WebformService.create(webformName, jsonContent)
-        : await WebformService.update(webformName, jsonContent, selectedWebformId);
+      if (isNil(selectedWebformId)) {
+        await WebformService.create(webformName, jsonContent);
+      } else {
+        await WebformService.update(webformName, jsonContent, selectedWebformId);
+      }
 
       setLoadingStatus('success');
       getWebformList();
@@ -114,9 +117,11 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     } catch (error) {
       console.error('ManageWebforms - onConfirm.', error);
       setLoadingStatus('error');
-      isNil(selectedWebformId)
-        ? notificationContext.add({ type: 'CREATE_WEBFORM_CONFIGURATION_ERROR' }, true)
-        : notificationContext.add({ type: 'EDIT_WEBFORM_CONFIGURATION_ERROR' }, true);
+      if (isNil(selectedWebformId)) {
+        notificationContext.add({ type: 'CREATE_WEBFORM_CONFIGURATION_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'EDIT_WEBFORM_CONFIGURATION_ERROR' }, true);
+      }
     }
   };
 
@@ -364,7 +369,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           </label>
 
           <InputFile
-            accept="application/JSON"
+            accept=".json"
             buttonTextNoFile={resourcesContext.messages['inputFileButtonNotSelected']}
             buttonTextWithFile={resourcesContext.messages['inputFileButtonSelected']}
             fileRef={fileRef}
