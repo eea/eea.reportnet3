@@ -165,7 +165,9 @@ const ValidationExpression = ({
   const checkField = (field, fieldValue) => {
     if (field === 'year') {
       const yearInt = parseInt(fieldValue);
-      if (yearInt < 1000 || yearInt > 9999) onUpdateExpressionField('expressionValue', 0);
+      if (yearInt < 1000 || yearInt > 9999) {
+        onUpdateExpressionField('expressionValue', 0);
+      }
     }
 
     if (
@@ -174,8 +176,9 @@ const ValidationExpression = ({
       fieldValue !== 'MATCH' &&
       !Number(expressionValues.expressionValue)
     ) {
-      const number = Number(fieldValue);
-      if (!number) onUpdateExpressionField('expressionValue', '');
+      if (!Number(fieldValue)) {
+        onUpdateExpressionField('expressionValue', '');
+      }
     }
 
     if ((expressionValues.operatorType === 'LEN' || expressionValues.operatorType === 'number') && field === 'number') {
@@ -247,9 +250,9 @@ const ValidationExpression = ({
           }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
+          selectableYears={100}
           value={expressionValues.expressionValue}
-          yearNavigator={true}
-          yearRange="1900:2500"></Calendar>
+          yearNavigator={true}></Calendar>
       );
     }
     if (operatorType === 'day') {
@@ -350,6 +353,7 @@ const ValidationExpression = ({
       return (
         <InputNumber
           disabled={isDisabled}
+          format={false}
           mode="decimal"
           onBlur={e => checkField('year', e.target.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
