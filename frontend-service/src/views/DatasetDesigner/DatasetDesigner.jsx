@@ -1013,7 +1013,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const renderQCsHistoryButtonTooltip = () => {
-    if (designerState.hasQCsHistory) {
+    if (!designerState.hasQCsHistory) {
       return (
         <ReactTooltip border effect="solid" id="qcHistoryTooltip" place="top">
           {resourcesContext.messages['genericQCsHistoryButtonTooltip']}
