@@ -352,18 +352,32 @@ const Dataflows = () => {
     }
   };
 
-  const getPaginatorRecordsCount = () => (
-    <Fragment>
-      {isFiltered && dataflowsState[tabId].length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {dataflowsState[tabId].length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-      {isFiltered && dataflowsState[tabId].length === filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
-    </Fragment>
-  );
+  const renderPaginatorRecordsCount = () => {
+    const renderFilteredRowsLabel = () => {
+      if (isFiltered && dataflowsState[tabId].length !== filteredData.length) {
+        return `${resourcesContext.messages['filtered']}: ${filteredData.length} | `;
+      }
+    };
+
+    const renderTotalRecordsLabel = () =>
+      `${resourcesContext.messages['totalRecords']} ${dataflowsState[tabId].length} ${' '} ${resourcesContext.messages[
+        'records'
+      ].toLowerCase()}`;
+
+    const renderFilteredLabel = () => {
+      if (isFiltered && dataflowsState[tabId].length === filteredData.length) {
+        return ` (${resourcesContext.messages['filtered'].toLowerCase()})`;
+      }
+    };
+
+    return (
+      <Fragment>
+        {renderFilteredRowsLabel()}
+        {renderTotalRecordsLabel()}
+        {renderFilteredLabel()}
+      </Fragment>
+    );
+  };
 
   const onUpdatePinnedSeparatorPosition = () => {
     const orderedFilteredData = sortDataflows(filteredData);
@@ -710,7 +724,7 @@ const Dataflows = () => {
           className="p-paginator-bottom"
           first={pagination.firstRow}
           onPageChange={onPaginate}
-          rightContent={getPaginatorRecordsCount()}
+          rightContent={renderPaginatorRecordsCount()}
           rows={pagination.numberRows}
           rowsPerPageOptions={[5, 10, 15]}
           template={currentPageTemplate}
