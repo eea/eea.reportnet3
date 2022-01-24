@@ -35,7 +35,7 @@ const { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch }
 const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
-export const MyFilters = ({ className, data = [], isStrictMode, onFilter, options = [], viewType }) => {
+export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort, options = [], viewType }) => {
   const isFilteredByBE = !isNil(onFilter);
 
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
@@ -192,10 +192,14 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
 
   const onSortData = key => {
     const sortOption = switchSortByOption(sortBy[key]);
-    const sortedData = applySort({ filteredData, order: sortOption, prevSortState: applyFilters(), sortByKey: key });
-
     setSortBy({ [key]: sortOption });
-    setFilteredData(sortedData);
+
+    if (!onSort) {
+      const sortedData = applySort({ filteredData, order: sortOption, prevSortState: applyFilters(), sortByKey: key });
+      setFilteredData(sortedData);
+    } else {
+      onSort();
+    }
   };
 
   const updateValueLabelsAnimationDate = (labelsAnimationDate, position, key, value) => {

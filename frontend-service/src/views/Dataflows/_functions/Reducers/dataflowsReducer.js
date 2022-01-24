@@ -64,9 +64,6 @@ export const dataflowsReducer = (state, { type, payload }) => {
     case 'SET_IS_VALIDATING_ALL_DATAFLOWS_USERS':
       return { ...state, isValidatingAllDataflowsUsers: payload.isValidatingAllDataflowsUsers };
 
-    case 'GET_FILTERED_DATA':
-      return { ...state, filteredData: { ...state.filteredData, [payload.type]: payload.data } };
-
     case 'SET_PINNED_INDEX':
       return { ...state, pinnedSeparatorIndex: payload.index };
 

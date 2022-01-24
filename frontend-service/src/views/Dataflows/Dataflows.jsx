@@ -142,7 +142,9 @@ const Dataflows = () => {
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
-  const { filteredData, filterBy } = useFilters(tabId);
+  const { filterBy, filteredData, sortBy } = useFilters(tabId);
+
+  console.log('sortBy :>> ', sortBy);
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -304,10 +306,23 @@ const Dataflows = () => {
 
   const getDataflows = async () => {
     setLoading(true);
+    const isAscending = true;
+    const pageNumber = 0;
+    const pageSize = 10;
+    const sortBy = 'name';
+    const { accessRole: accessRoles, contextRoles } = userContext;
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {
-        const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles, filterBy);
+        const data = await DataflowService.getAll({
+          accessRoles,
+          contextRoles,
+          filterBy,
+          isAscending,
+          pageNumber,
+          pageSize,
+          sortBy
+        });
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'reporting' });
       } else if (TextUtils.areEquals(tabId, 'reference')) {
@@ -618,7 +633,13 @@ const Dataflows = () => {
             onTabChange={event => onChangeTab(event.index, event.value)}
           />
         </div>
-        <MyFilters data={dataflowsState[tabId]} onFilter={getDataflows} options={options[tabId]} viewType={tabId} />
+        <MyFilters
+          data={dataflowsState[tabId]}
+          onFilter={getDataflows}
+          onSort={getDataflows}
+          options={options[tabId]}
+          viewType={tabId}
+        />
         <DataflowsList
           className="dataflowList-accepted-help-step"
           filteredData={filteredData}

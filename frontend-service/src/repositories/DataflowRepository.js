@@ -5,9 +5,11 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 export const DataflowRepository = {
   countByType: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.countByType) }),
 
-  getAll: async filterBy => {
-    console.log(`filterBy`, filterBy);
-    return await HTTPRequester.get({ url: getUrl(DataflowConfig.getAll) });
+  getAll: async ({ filterBy, isAscending, pageNumber, pageSize, sortBy }) => {
+    return await HTTPRequester.post({
+      url: getUrl(DataflowConfig.getAll, { isAscending, pageNumber, pageSize, sortBy }),
+      data: { ...filterBy }
+    });
   },
 
   getCloneableDataflows: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getCloneableDataflows) }),
