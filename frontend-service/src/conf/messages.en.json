@@ -1456,6 +1456,11 @@
     "createWebformConfigurationError": "Error creating webform configuration",
     "editWebformError": "Error updating webform configuration",
     "inputFileButtonNotSelected": "Select file",
-    "inputFileButtonSelected": "Update file"
+    "inputFileButtonSelected": "Update file",
+    "manageWebforms": "Manage webforms",
+    "loadWebformsError": "Error loading webforms list",
+    "automaticDeleteSideBarButton": "Automatic delete",
+    "isAutomaticReportingDeletionDialogHeader": "Automatic Delete Dataflow Dialog",
+    "isAutomaticReportingDeletionCheckboxLabel": "Are you sure you want to delete?"
   }
 }
