@@ -60,7 +60,6 @@ export const ShareRights = ({
   userType
 }) => {
   const dataProvider = isNil(representativeId) ? dataProviderId : representativeId;
-  const methodTypes = { DELETE: 'delete', GET_ALL: 'getAll', UPDATE: 'update' };
   const notDeletableRolesRequester = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
   const userTypes = { REPORTER: 'reporter', REQUESTER: 'requester' };
 
@@ -83,7 +82,6 @@ export const ShareRights = ({
     isEditingModal: false,
     isLoadingButton: false,
     loadingStatus: { isActionButtonsLoading: false, isInitialLoading: true },
-    pagination: { first: 0, page: 0, rows: 10 },
     userRight: { account: '', isNew: true, role: '' },
     userRightList: [],
     userRightToDelete: {}
@@ -162,11 +160,6 @@ export const ShareRights = ({
     }
   };
 
-  const onPaginate = event => {
-    const pagination = { first: event.first, page: event.page, rows: event.rows };
-    shareRightsDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
-  };
-
   const onResetAll = () => shareRightsDispatch({ type: 'ON_RESET_ALL' });
 
   const onRoleChange = newRole => shareRightsDispatch({ type: 'ON_ROLE_CHANGE', payload: { role: newRole } });
@@ -200,29 +193,27 @@ export const ShareRights = ({
 
   const setUserRightId = id => shareRightsDispatch({ type: 'SET_USER_RIGHT_ID', payload: { id } });
 
-  const callEndPoint = async (method, userRight) => {
+  const getAllUserRights = () => {
     if (isReporterManagement) {
-      switch (method) {
-        case methodTypes.DELETE:
-          return await UserRightService.deleteReporter(shareRightsState.userRightToDelete, dataflowId, dataProvider);
-        case methodTypes.GET_ALL:
-          return await UserRightService.getReporters(dataflowId, dataProvider);
-        case methodTypes.UPDATE:
-          return await UserRightService.updateReporter(userRight, dataflowId, dataProvider);
-        default:
-          break;
-      }
+      return UserRightService.getReporters(dataflowId, dataProvider);
     } else {
-      switch (method) {
-        case methodTypes.DELETE:
-          return await UserRightService.deleteRequester(shareRightsState.userRightToDelete, dataflowId);
-        case methodTypes.GET_ALL:
-          return await UserRightService.getRequesters(dataflowId);
-        case methodTypes.UPDATE:
-          return await UserRightService.updateRequester(userRight, dataflowId);
-        default:
-          break;
-      }
+      return UserRightService.getRequesters(dataflowId);
+    }
+  };
+
+  const updateUserRights = userRightToUpdate => {
+    if (isReporterManagement) {
+      return UserRightService.updateReporter(userRightToUpdate, dataflowId, dataProvider);
+    } else {
+      return UserRightService.updateRequester(userRightToUpdate, dataflowId);
+    }
+  };
+
+  const deleteUserRights = () => {
+    if (isReporterManagement) {
+      return UserRightService.deleteReporter(shareRightsState.userRightToDelete, dataflowId, dataProvider);
+    } else {
+      return UserRightService.deleteRequester(shareRightsState.userRightToDelete, dataflowId);
     }
   };
 
@@ -232,7 +223,8 @@ export const ShareRights = ({
     }
 
     try {
-      const userRightList = (await callEndPoint(methodTypes.GET_ALL)).map(item => ({
+      const userRightsListResponse = await getAllUserRights();
+      const userRightList = userRightsListResponse.map(item => ({
         ...item,
         filteredRole: roleOptions.find(option => option.role === item.role)?.label
       }));
@@ -269,7 +261,7 @@ export const ShareRights = ({
     setActions({ isDeleting: true, isEditing: false });
 
     try {
-      await callEndPoint(methodTypes.DELETE);
+      await deleteUserRights();
       onDataChange();
     } catch (error) {
       console.error('ShareRights - onDeleteUserRight.', error);
@@ -289,7 +281,7 @@ export const ShareRights = ({
       setLoadingStatus({ isActionButtonsLoading: true, isInitialLoading: false });
 
       try {
-        await callEndPoint(methodTypes.UPDATE, userRight);
+        await updateUserRights(userRight);
         onDataChange();
         onCloseManagementDialog();
       } catch (error) {

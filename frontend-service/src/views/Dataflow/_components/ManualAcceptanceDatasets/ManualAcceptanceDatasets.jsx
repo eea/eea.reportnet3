@@ -38,9 +38,15 @@ export const ManualAcceptanceDatasets = ({
 
   const { filteredData } = useFilters('manualAcceptanceDatasets');
 
+  const manualAcceptanceInitialState = {
+    data: [],
+    filtered: false,
+    isLoading: true
+  };
+
   const [manualAcceptanceDatasetsState, manualAcceptanceDatasetsDispatch] = useReducer(
     manualAcceptanceDatasetsReducer,
-    { data: [], filtered: false, isLoading: true }
+    manualAcceptanceInitialState
   );
 
   useEffect(() => {

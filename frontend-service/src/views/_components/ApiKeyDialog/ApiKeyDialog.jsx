@@ -1,4 +1,4 @@
-import { Fragment, useContext, useLayoutEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 
@@ -20,9 +20,9 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
 
   const [apiKey, setApiKey] = useState(null);
   const [copyResultMessage, setCopyResultMessage] = useState('');
-  const [isKeyLoading, setIsKeyLoading] = useState(false);
+  const [isKeyLoading, setIsKeyLoading] = useState(true);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     onGetApiKey();
   }, []);
 
@@ -36,7 +36,6 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
   };
 
   const onGetApiKey = async () => {
-    setIsKeyLoading(true);
     try {
       const { data } = await DataflowService.getApiKey(dataflowId, dataProviderId, isCustodian);
       setApiKey(data);
