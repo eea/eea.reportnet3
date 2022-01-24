@@ -141,24 +141,42 @@ export const PublicDataflows = () => {
     setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
   };
 
-  const renderPaginatorRecordsCount = () => (
-    // <Fragment>
-    //   {isFiltered && publicDataflows.length !== filteredData.length
-    //     ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
-    //     : ''}
-    //   {resourcesContext.messages['totalRecords']} {publicDataflows.length}{' '}
-    //   {resourcesContext.messages['records'].toLowerCase()}
-    //   {isFiltered && publicDataflows.length === filteredData.length
-    //     ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-    //     : ''}
-    // </Fragment>
-    <Fragment>
-      {resourcesContext.messages['totalRecords']} {publicDataflows.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-    </Fragment>
-  );
+  const renderPaginatorRecordsCount = () => {
+    // const renderFilteredRowsLabel = () => {
+    //   if (isFiltered && publicDataflows.length !== filteredData.length) {
+    //     return `${resourcesContext.messages['filtered']}: ${filteredData.length} | `;
+    //   }
+    // };
+
+    // const renderTotalRecordsLabel = () =>
+    //   `${resourcesContext.messages['totalRecords']} ${publicDataflows.length} ${' '} ${resourcesContext.messages[
+    //     'records'
+    //   ].toLowerCase()}`;
+
+    // const renderFilteredLabel = () => {
+    //   if (isFiltered && publicDataflows.length === filteredData.length) {
+    //     return ` (${resourcesContext.messages['filtered'].toLowerCase()})`;
+    //   }
+    // };
+
+    // return (
+    //   <Fragment>
+    //     {renderFilteredRowsLabel()}
+    //     {renderTotalRecordsLabel()}
+    //     {renderFilteredLabel()}
+    //   </Fragment>
+    // );
+
+    return (
+      <Fragment>
+        {resourcesContext.messages['totalRecords']} {publicDataflows.length}{' '}
+        {resourcesContext.messages['records'].toLowerCase()}
+      </Fragment>
+    );
+  };
 
   const renderPaginator = () => {
+    // ADD IF THERE ARE DATAFLOWS TO RENDER PAGINATOR
     if (!isLoading) {
       return (
         <Paginator
