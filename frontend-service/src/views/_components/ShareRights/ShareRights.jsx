@@ -200,7 +200,7 @@ export const ShareRights = ({
 
   const setUserRightId = id => shareRightsDispatch({ type: 'SET_USER_RIGHT_ID', payload: { id } });
 
-  const callEndPoint = async (method, userRight) => {
+  const callEndpoint = async (method, userRight) => {
     if (isReporterManagement) {
       switch (method) {
         case methodTypes.DELETE:
@@ -232,7 +232,8 @@ export const ShareRights = ({
     }
 
     try {
-      const userRightList = (await callEndPoint(methodTypes.GET_ALL)).map(item => ({
+      const result = await callEndpoint(methodTypes.GET_ALL);
+      const userRightList = result.map(item => ({
         ...item,
         filteredRole: roleOptions.find(option => option.role === item.role)?.label
       }));
@@ -269,7 +270,7 @@ export const ShareRights = ({
     setActions({ isDeleting: true, isEditing: false });
 
     try {
-      await callEndPoint(methodTypes.DELETE);
+      await callEndpoint(methodTypes.DELETE);
       onDataChange();
     } catch (error) {
       console.error('ShareRights - onDeleteUserRight.', error);
@@ -289,7 +290,7 @@ export const ShareRights = ({
       setLoadingStatus({ isActionButtonsLoading: true, isInitialLoading: false });
 
       try {
-        await callEndPoint(methodTypes.UPDATE, userRight);
+        await callEndpoint(methodTypes.UPDATE, userRight);
         onDataChange();
         onCloseManagementDialog();
       } catch (error) {
