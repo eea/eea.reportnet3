@@ -1456,6 +1456,18 @@
     "createWebformConfigurationError": "Error creating webform configuration",
     "editWebformError": "Error updating webform configuration",
     "inputFileButtonNotSelected": "Select file",
-    "inputFileButtonSelected": "Update file"
+    "inputFileButtonSelected": "Update file",
+    "manageWebforms": "Manage webforms",
+    "loadWebformsError": "Error loading webforms list",
+    "validating": "Validating",
+    "uploading": "Uploading",
+    "importWrongFileHeader": "Different number of columns.",
+    "importWrongFileHeaderDetail": "The schema and the file have different number of columns. Remember file fields must be separated by a comma.",
+    "importReportingFailedNoHeadersMatchingEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Check header field names and delimiter.",
+    "importDesignFailedNoHeadersMatchingEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Check header field names and delimiter.",
+    "importReportingFailedNamefileEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Check that the file name fits the table name.",
+    "importDesignFailedNamefileEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Check that the file name fits the table name.",
+    "columnsSchemaLabel": "Schema columns",
+    "fileColumnsLabel": "File columns"
   }
 }
