@@ -1,0 +1,27 @@
+.container {
+  display: flex;
+}
+
+.fileName {
+  margin-left: 1rem;
+}
+
+.clearButton {
+  cursor: pointer;
+  align-self: start;
+  float: 'center';
+  color: 'var(--font-color)';
+}
+
+.fileNameWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.buttonWrap {
+  flex-shrink: 0;
+}
