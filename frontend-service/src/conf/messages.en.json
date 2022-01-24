@@ -1454,8 +1454,9 @@
     "addWebformConfigurationDialogHeader": "Add webform configuration",
     "editWebformConfigurationDialogHeader": "Edit webform configuration",
     "createWebformConfigurationError": "Error creating webform configuration",
-    "editWebformError": "Error updating webform configuration",
+    "editWebformConfigurationError": "Error updating webform configuration",
     "inputFileButtonNotSelected": "Select file",
-    "inputFileButtonSelected": "Update file"
+    "inputFileButtonSelected": "Update file",
+    "fileNotSelectedError": "File not selected"
   }
 }

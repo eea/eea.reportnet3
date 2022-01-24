@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -26,6 +26,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
+  const [errors, setErrors] = useState({ webformName: false, jsonContent: false });
   const [isAddEditDialogVisible, setIsAddEditDialogVisible] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,6 +45,12 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   useEffect(() => {
     setWebformName(() => getInitialName());
   }, [selectedWebformId]);
+
+  useLayoutEffect(() => {
+    if (isAddEditDialogVisible) {
+      checkHasErrors();
+    }
+  }, [webformName, jsonContent]);
 
   const getWebformList = async () => {
     setLoadingStatus('pending');
@@ -145,6 +152,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     setSelectedWebformId(null);
     setJsonContent(null);
     setWebformName('');
+    setErrors({ webformName: false, jsonContent: false });
   };
 
   const onClickDownload = (id, name) => {
@@ -254,6 +262,9 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
   const checkNameExists = () => webforms.some(webform => webform.label === webformName);
 
+  const checkNameExistsWithoutCurrent = () =>
+    webforms.filter(webform => webform.id !== selectedWebformId).some(webform => webform.label === webformName);
+
   const getIsDisabledConfirmBtn = () => {
     if (isNil(selectedWebformId)) {
       return isEmpty(webformName) || isEmpty(jsonContent) || checkNameExists() || loadingStatus === 'pending';
@@ -263,7 +274,20 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       return getInitialName() === webformName || checkNameExists();
     }
 
-    return (isEmpty(jsonContent) && isEmpty(webformName)) || isEmpty(webformName) || loadingStatus === 'pending';
+    return (
+      (isEmpty(jsonContent) && isEmpty(webformName)) ||
+      isEmpty(webformName) ||
+      checkNameExistsWithoutCurrent() ||
+      loadingStatus === 'pending'
+    );
+  };
+
+  const checkHasErrors = () => {
+    if (isNil(selectedWebformId)) {
+      setErrors({ webformName: isEmpty(webformName) || checkNameExists(), jsonContent: isEmpty(jsonContent) });
+    } else {
+      setErrors({ webformName: isEmpty(webformName) || checkNameExistsWithoutCurrent(), jsonContent: false });
+    }
   };
 
   const addEditDialogFooter = (
@@ -360,7 +384,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           <label htmlFor="name">
             {resourcesContext.messages['name']}
             <InputText
-              className={styles.nameInput}
+              className={`${styles.nameInput} ${errors.webformName ? styles.inputError : ''}`}
               id="name"
               maxLength={50}
               onChange={event => setWebformName(event.target.value)}
@@ -373,6 +397,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
             buttonTextNoFile={resourcesContext.messages['inputFileButtonNotSelected']}
             buttonTextWithFile={resourcesContext.messages['inputFileButtonSelected']}
             fileRef={fileRef}
+            hasError={errors.jsonContent}
             onChange={onFileUpload}
             onClearFile={onClearFile}
           />
