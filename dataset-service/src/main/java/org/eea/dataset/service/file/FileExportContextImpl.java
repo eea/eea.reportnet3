@@ -5,6 +5,7 @@ import java.util.List;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 
 /**
  * The Class FileExportContextImpl.
@@ -30,15 +31,18 @@ public class FileExportContextImpl implements IFileExportContext {
    * @param partitionId the partition id
    * @param tableSchemaId the table schema id
    * @param includeCountryCode the include country code
+   * @param includeValidations the include validations
+   * @param filters the filters
    * @return the byte[]
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
   @Override
   public byte[] fileWriter(Long dataflowId, Long partitionId, String tableSchemaId,
-      boolean includeCountryCode, boolean includeValidations) throws IOException, EEAException {
+      boolean includeCountryCode, boolean includeValidations, ExportFilterVO filters)
+      throws IOException, EEAException {
     return writerStrategy.writeFile(dataflowId, partitionId, tableSchemaId, includeCountryCode,
-        includeValidations);
+        includeValidations, filters);
   }
 
   /**

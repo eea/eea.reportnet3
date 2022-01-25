@@ -30,6 +30,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -317,9 +318,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * Find by table value no order optimized.
    *
    * @param idTableSchema the id table schema
-   * 
+   *
    * @param pageable the pageable
-   * 
+   *
    * @return the list
    */
   @Override
@@ -354,16 +355,17 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param idTable the id table
    * @param datasetId the dataset id
    * @param pageable the pageable
+   * @param filters the filters
    * @return the list
    * @throws HibernateException the hibernate exception
    */
   @Override
   @Transactional
-  public List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable)
-      throws HibernateException {
+  public List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable,
+      ExportFilterVO filters) throws HibernateException {
     Session session = (Session) entityManager.getDelegate();
-    return session
-        .doReturningWork(conn -> findByTableValueOrdered(conn, idTable, datasetId, pageable));
+    return session.doReturningWork(
+        conn -> findByTableValueOrdered(conn, idTable, datasetId, pageable, filters));
   }
 
   /**
@@ -545,7 +547,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   }
 
   /**
-   * 
+   *
    * /** Compose filter by error.
    *
    * @param levelErrorList the level error list
@@ -787,28 +789,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param tableId the table id
    * @param datasetId the dataset id
    * @param pageable the pageable
+   * @param filters the filters
    * @return the list
    * @throws SQLException the SQL exception
    */
   private List<RecordValue> findByTableValueOrdered(Connection conn, Long tableId, Long datasetId,
-      Pageable pageable) throws SQLException {
-    String stringQuery =
-        "select rv.*, (select cast(json_agg(row_to_json(fieldsAux))as text )as fields "
-            + "            from ( select fv.id as id, fv.id_field_schema as \"idFieldSchema\", fv.type as type, fv.value as value  from dataset_"
-            + datasetId + ".field_value fv " + "                    where fv.id_record = rv.id "
-            + "                    order by fv.data_position ) as fieldsAux) "
-            + "            from dataset_" + datasetId + ".record_value rv where rv.id_table= "
-            + tableId + " order by rv.data_position";
-    String paginationPart = " offset %s limit %s ";
+      Pageable pageable, ExportFilterVO filters) throws SQLException {
 
-    if (null != pageable && 0 != pageable.getPageNumber() && 0 != pageable.getPageSize()) {
-      Integer offsetAux =
-          (pageable.getPageSize() * pageable.getPageNumber()) - pageable.getPageSize();
-      if (offsetAux < 0) {
-        offsetAux = 0;
-      }
-      stringQuery = stringQuery + String.format(paginationPart, offsetAux, pageable.getPageSize());
-    }
+    String stringQuery = buildQueryWithExportFilters(datasetId, tableId, pageable, filters);
+
     conn.setSchema("dataset_" + datasetId);
     List<RecordValue> records = new ArrayList<>();
     LOG.info("executing query in findByTableValueOrdered: {}", stringQuery);
@@ -835,7 +824,82 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return records;
   }
 
+  /**
+   * Builds the query with export filters.
+   *
+   * @param datasetId the dataset id
+   * @param tableId the table id
+   * @param pageable the pageable
+   * @param filters the filters
+   * @return the string
+   */
+  private String buildQueryWithExportFilters(Long datasetId, Long tableId, Pageable pageable,
+      ExportFilterVO filters) {
 
+    ErrorTypeEnum[] levelErrorsArray = filters.getLevelError();
+    StringBuilder sb = new StringBuilder();
+
+    if (levelErrorsArray != null) {
+      for (int i = 0; i < levelErrorsArray.length; i++) {
+        sb.append("'" + levelErrorsArray[i] + "'");
+        if (i < levelErrorsArray.length - 1)
+          sb.append(",");
+      }
+    }
+
+    String levelError = " level_error in (" + sb.toString() + ")";
+    String idRules = filters.getIdRules() != null && !filters.getIdRules().equals("")
+        ? " and v2.id_rule = '" + filters.getIdRules() + "')"
+        : ")";
+    String fieldValue = filters.getFieldValue() != null && !filters.getFieldValue().equals("")
+        ? " and fv.value like ('%" + filters.getFieldValue() + "%')"
+        : "";
+    String filterErrorAndLevel = filters.getLevelError() != null
+        || (filters.getIdRules() != null && !filters.getIdRules().equals(""))
+            ? " and fv.id in (select id_field from id_field_validations)"
+            : "";
+
+    String auxTables = filters.getLevelError() != null || (filters.getIdRules() != null
+        && !filters.getIdRules().equals("")) ? "with validation_aux as (select * from dataset_"
+            + datasetId + ".validation v2 where" + levelError + idRules + ", "
+            + "id_field_validations as (select id_field from validation_aux v inner join dataset_"
+            + datasetId + ".field_validation fv on v.id = fv.id_validation), "
+            + "id_record_validations as (select * from record_value rv where (rv.id in (select rval.id_record from record_validation rval where rval.id_validation in "
+            + "(select v2.id from validation_aux v2)) or rv.id in (select rvval.id from record_value rvval where rvval.id in (select id_record from field_value fv2 "
+            + "where fv2.id in (select id_field from validation v inner join dataset_" + datasetId
+            + ".field_validation fv on v.id = fv.id_validation)))))" : "";
+
+    String initialQuery = auxTables
+        + "select * from (select rv.*, (select cast(json_agg(row_to_json(fieldsAux))as text )as fields "
+        + "  from ( select fv.id as id, fv.id_field_schema as \"idFieldSchema\", fv.type as type, fv.value as value from dataset_"
+        + datasetId + ".field_value fv " + " where fv.id_record = rv.id " + fieldValue
+        + filterErrorAndLevel + " order by fv.data_position ) as fieldsAux) " + " from dataset_"
+        + datasetId + ".record_value rv where rv.id_table= " + tableId
+        + " order by rv.data_position";
+
+    String paginationPart = " offset %s limit %s ) as table_aux";
+    String filterByLevelOrError =
+        " and (id IN (select id_record_validations.id from id_record_validations) or id_table IN (select id_record_validations.id_table from id_record_validations))";
+
+    if (null != pageable && 0 != pageable.getPageNumber() && 0 != pageable.getPageSize()) {
+      Integer offsetAux =
+          (pageable.getPageSize() * pageable.getPageNumber()) - pageable.getPageSize();
+      if (offsetAux < 0) {
+        offsetAux = 0;
+      }
+
+      initialQuery =
+          initialQuery + String.format(paginationPart, offsetAux, pageable.getPageSize());
+    }
+
+    initialQuery = initialQuery + " where fields notnull";
+
+    if (filters.getLevelError() != null || filters.getIdRules() != null) {
+      initialQuery = initialQuery + filterByLevelOrError;
+    }
+
+    return initialQuery;
+  }
 
   /**
    * Returnig json with no data.

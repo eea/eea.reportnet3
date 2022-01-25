@@ -3033,8 +3033,8 @@ public class DatasetServiceTest {
     when(reportingDatasetRepository.existsById(Mockito.any())).thenReturn(true);
     when(designDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(desingDataset));
-    when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(recordDesignValues);
+    when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(recordDesignValues);
     List<FieldValue> fieldValues = new ArrayList<>();
     FieldValue field = new FieldValue();
     field.setType(DataType.ATTACHMENT);
@@ -3414,8 +3414,8 @@ public class DatasetServiceTest {
     tableSchema.setFixedNumber(Boolean.FALSE);
     when(tableRepository.countRecordsByIdTableSchema(Mockito.any())).thenReturn(1L);
     when(tableRepository.findByIdTableSchema(Mockito.any())).thenReturn(tableValue);
-    when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(recordValues);
+    when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(recordValues);
     datasetService.updateRecordsWithConditions(recordValues, 1L, tableSchema);
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
@@ -3459,8 +3459,8 @@ public class DatasetServiceTest {
     fields.add(field);
     field.setValue("");
     recordValues.get(0).setFields(fields);
-    when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(recordValues);
+    when(recordRepository.findOrderedNativeRecord(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(recordValues);
     datasetService.updateRecordsWithConditions(recordValues, 1L, tableSchema);
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
@@ -3559,7 +3559,7 @@ public class DatasetServiceTest {
     validation.setFieldName("fieldName");
     validation.setLevelError(ErrorTypeEnum.BLOCKER);
     validation.setMessage("message");
-    validation.setTableName("tableName");;
+    validation.setTableName("tableName");
     validation.setTypeEntity(EntityTypeEnum.DATASET);
     validation.setValidationDate("date");
     validation.setShortCode("code");

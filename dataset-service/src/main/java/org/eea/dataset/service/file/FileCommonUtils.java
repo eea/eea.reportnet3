@@ -24,6 +24,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -463,12 +464,13 @@ public class FileCommonUtils {
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
    * @param pageable the pageable
+   * @param filters the filters
    * @return the record values paginated
    */
   public List<RecordValue> getRecordValuesPaginated(@DatasetId Long datasetId, String idTableSchema,
-      Pageable pageable) {
+      Pageable pageable, ExportFilterVO filters) {
     return recordRepository.findOrderedNativeRecord(
-        tableRepository.findIdByIdTableSchema(idTableSchema), datasetId, pageable);
+        tableRepository.findIdByIdTableSchema(idTableSchema), datasetId, pageable, filters);
   }
 
   /**

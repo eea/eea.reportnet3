@@ -578,7 +578,7 @@ public class FileTreatmentHelperTest {
 
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-        Mockito.anyBoolean())).thenReturn("xlsx".getBytes());
+        Mockito.anyBoolean(), Mockito.any())).thenReturn("xlsx".getBytes());
     when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(dataSetMetabase);
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     List<AttachmentValue> attachments = new ArrayList<>();
@@ -626,7 +626,7 @@ public class FileTreatmentHelperTest {
 
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-        Mockito.anyBoolean())).thenReturn("xlsx".getBytes());
+        Mockito.anyBoolean(), Mockito.any())).thenReturn("xlsx".getBytes());
     when(datasetMetabaseService.findDatasetMetabase(Mockito.any())).thenReturn(dataSetMetabase);
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     List<AttachmentValue> attachments = new ArrayList<>();
@@ -890,9 +890,9 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(fileExportFactory.createContext(Mockito.anyString())).thenReturn(contextExport);
     Mockito.when(contextExport.fileWriter(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyString(),
-        Mockito.anyBoolean(), Mockito.anyBoolean())).thenReturn(file);
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any())).thenReturn(file);
 
-    fileTreatmentHelper.exportFile(1L, "csv", "tableschema", "tableName");
+    fileTreatmentHelper.exportFile(1L, "csv", "tableschema", "tableName", null);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -900,10 +900,12 @@ public class FileTreatmentHelperTest {
   @Test
   public void exportFileFailedTest() throws FileNotFoundException, EEAException, IOException {
     Mockito.when(fileExportFactory.createContext(Mockito.anyString())).thenReturn(contextExport);
-    Mockito.when(contextExport.fileWriter(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyString(),
-        Mockito.anyBoolean(), Mockito.anyBoolean())).thenThrow(EEAException.class);
+    Mockito
+        .when(contextExport.fileWriter(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyString(),
+            Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any()))
+        .thenThrow(EEAException.class);
 
-    fileTreatmentHelper.exportFile(1L, "csv", "tablesSchema", "tableName");
+    fileTreatmentHelper.exportFile(1L, "csv", "tablesSchema", "tableName", null);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -915,9 +917,9 @@ public class FileTreatmentHelperTest {
     dataset.setDataflowId(1L);
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-        Mockito.anyBoolean())).thenReturn(expectedResult);
+        Mockito.anyBoolean(), Mockito.any())).thenReturn(expectedResult);
     assertEquals("not equals", expectedResult,
-        fileTreatmentHelper.createFile(1L, FileTypeEnum.CSV.getValue(), ""));
+        fileTreatmentHelper.createFile(1L, FileTypeEnum.CSV.getValue(), "", null));
   }
 
   @Test
@@ -961,7 +963,7 @@ public class FileTreatmentHelperTest {
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     byte[] expectedResult = "".getBytes();
     when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-        Mockito.anyBoolean())).thenReturn(expectedResult);
+        Mockito.anyBoolean(), Mockito.any())).thenReturn(expectedResult);
     Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(Mockito.anyLong(),
         Mockito.anyLong())).thenReturn(datasetMetabaseList);
     DataFlowVO dataflow = new DataFlowVO();
@@ -1022,11 +1024,11 @@ public class FileTreatmentHelperTest {
     fieldValues.add(field);
 
     AttachmentValue attachment = new AttachmentValue();
-    attachment.setFieldValue(field);;
+    attachment.setFieldValue(field);
     when(fileExportFactory.createContext(Mockito.any())).thenReturn(contextExport);
     byte[] expectedResult = "".getBytes();
     when(contextExport.fileWriter(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-        Mockito.anyBoolean())).thenReturn(expectedResult);
+        Mockito.anyBoolean(), Mockito.any())).thenReturn(expectedResult);
     attachment.setContent(expectedResult);
     when(attachmentRepository.findAllByIdFieldSchemaAndValueIsNotNull(Mockito.anyString()))
         .thenReturn(Arrays.asList(attachment));
