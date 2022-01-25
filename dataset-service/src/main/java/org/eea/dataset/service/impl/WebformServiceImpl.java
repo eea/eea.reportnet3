@@ -7,6 +7,8 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.WebformMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.WebformMetabase;
 import org.eea.dataset.persistence.metabase.repository.WebformRepository;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.dataset.persistence.schemas.domain.webform.WebformConfig;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.WebformConfigRepository;
@@ -53,6 +55,7 @@ public class WebformServiceImpl implements WebformService {
   private WebformMetabaseMapper webformMetabaseMapper;
 
 
+  /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
 
@@ -138,6 +141,7 @@ public class WebformServiceImpl implements WebformService {
       }
 
       WebformConfig webform = webformConfigRepository.findByIdReferenced(id);
+      String previousName = webform.getName();
       ObjectMapper mapper = new ObjectMapper();
       mapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
       try {
@@ -151,6 +155,16 @@ public class WebformServiceImpl implements WebformService {
 
         webformConfigRepository.updateWebFormConfig(webform);
         webformRepository.save(webformMetabase);
+        // we need to update the webform name in all dataset schemas if has been changed
+        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(previousName)
+            && !previousName.equals(name)) {
+          Webform webformSearch = new Webform();
+          webformSearch.setName(previousName);
+          List<DataSetSchema> schemas = schemasRepository.findByWebform(webformSearch);
+          webformSearch.setName(name);
+          schemas.stream().forEach(s -> schemasRepository
+              .updateDatasetSchemaWebForm(s.getIdDataSetSchema().toString(), webformSearch));
+        }
         LOG.info("The webform configuration with id {} has been updated", id);
       } catch (JsonProcessingException e) {
         LOG_ERROR.error("Error processing the json to update");
