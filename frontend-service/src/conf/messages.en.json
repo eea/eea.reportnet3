@@ -1467,6 +1467,7 @@
     "importDesignFailedNamefileEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Check that the file name fits the table name.",
     "columnsSchemaLabel": "Schema columns",
     "fileColumnsLabel": "File columns",
-    "fileNotSelectedError": "File not selected"
+    "fileNotSelectedError": "File not selected",
+    "manageWebformsLeftBarButton": "Manage webforms"
   }
 }
