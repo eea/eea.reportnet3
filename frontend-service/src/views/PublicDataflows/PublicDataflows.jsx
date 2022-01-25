@@ -90,11 +90,11 @@ export const PublicDataflows = () => {
 
   const onChangeCurrentPage = event => {
     if (event.key === 'Enter' && goToPage !== '' && goToPage !== firstRow + 1) {
-      var pc = Math.ceil(publicDataflows.length / pagination.numberRows) || 1;
-      var p = Math.floor(event.target.value - 1);
+      const pc = Math.ceil(publicDataflows.length / pagination.numberRows) || 1;
+      const p = Math.floor(event.target.value - 1);
 
       if (p >= 0 && p < pc) {
-        var newPageState = {
+        const newPageState = {
           firstRow: (event.target.value - 1) * numberRows,
           numberRows: numberRows,
           pageNum: p
