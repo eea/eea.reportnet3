@@ -64,16 +64,16 @@ const DataflowsList = ({
       return <div className={styles.noDataflows}>{resourcesContext.messages[emptyDataflowsMessage[visibleTab]]}</div>;
     }
 
-    return !isEmpty(filteredData) ? (
-      filteredData.map((dataflow, i) => (
-        <Fragment key={dataflow.id}>
-          {renderDataflowItem(dataflow)}
-          {!isFilteredByPinned() && pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
-        </Fragment>
-      ))
-    ) : (
-      <div className={styles.noDataflows}>{resourcesContext.messages['noDataflowsWithSelectedParameters']}</div>
-    );
+    if (isEmpty(filteredData)) {
+      return <div className={styles.noDataflows}>{resourcesContext.messages['noDataflowsWithSelectedParameters']}</div>;
+    }
+
+    return filteredData.map((dataflow, i) => (
+      <Fragment key={dataflow.id}>
+        {renderDataflowItem(dataflow)}
+        {!isFilteredByPinned() && pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
+      </Fragment>
+    ));
   };
 
   return <div className={`${styles.wrap} ${className}`}>{renderContent()}</div>;
