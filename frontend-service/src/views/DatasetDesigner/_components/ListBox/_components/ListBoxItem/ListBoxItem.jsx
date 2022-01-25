@@ -105,5 +105,3 @@ ListBoxItem.propTypes = {
   onTouchEnd: PropTypes.func,
   template: PropTypes.func
 };
-
-export { ListBoxItem };
