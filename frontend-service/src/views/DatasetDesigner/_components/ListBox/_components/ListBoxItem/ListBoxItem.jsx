@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 
-const ListBoxItem = ({
+export const ListBoxItem = ({
   disabled = false,
   option = null,
   label = null,
@@ -33,7 +33,7 @@ const ListBoxItem = ({
   };
 
   const onKeyDownListBoxItem = event => {
-    let item = event.currentTarget;
+    const item = event.currentTarget;
 
     switch (event.which) {
       //down
@@ -63,20 +63,27 @@ const ListBoxItem = ({
   };
 
   const findNextItem = item => {
-    let nextItem = item.nextElementSibling;
-    if (nextItem) return DomHandler.hasClass(nextItem, 'p-disabled') ? findNextItem(nextItem) : nextItem;
-    else return null;
+    const nextItem = item.nextElementSibling;
+    if (nextItem) {
+      return DomHandler.hasClass(nextItem, 'p-disabled') ? findNextItem(nextItem) : nextItem;
+    } else {
+      return null;
+    }
   };
 
   const findPrevItem = item => {
-    let prevItem = item.previousElementSibling;
-    if (prevItem) return DomHandler.hasClass(prevItem, 'p-disabled') ? findPrevItem(prevItem) : prevItem;
-    else return null;
+    const prevItem = item.previousElementSibling;
+    if (prevItem) {
+      return DomHandler.hasClass(prevItem, 'p-disabled') ? findPrevItem(prevItem) : prevItem;
+    } else {
+      return null;
+    }
   };
 
   const renderListBoxItem = () => {
-    let className = classNames('p-listbox-item', { 'p-highlight': selected }, { 'p-disabled': disabled });
-    let content = template ? template(option) : label;
+    const className = classNames('p-listbox-item', { 'p-highlight': selected }, { 'p-disabled': disabled });
+    const content = template ? template(option) : label;
+
     return (
       <li
         aria-label={label}
