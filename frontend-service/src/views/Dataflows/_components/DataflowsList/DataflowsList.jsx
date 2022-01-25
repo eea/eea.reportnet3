@@ -42,17 +42,17 @@ const DataflowsList = ({
             reorderDataflows={reorderDataflows}
           />
         );
-
       case config.dataflowType.REFERENCE.key:
         return <ReferencedDataflowItem dataflow={dataflow} reorderDataflows={reorderDataflows} />;
-
       default:
         break;
     }
   };
 
   const renderContent = () => {
-    if (isLoading) return <Spinner style={{ top: 0 }} />;
+    if (isLoading) {
+      return <Spinner style={{ top: 0 }} />;
+    }
 
     if (isEmpty(data)) {
       const emptyDataflowsMessage = {
