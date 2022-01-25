@@ -251,6 +251,17 @@
   }
 }
 
+.dataflowsFilters {
+  @extend .default;
+
+  button {
+    margin-left: auto !important;
+  }
+  .resetButton {
+    margin: 0 0 0 0.5rem !important;
+  }
+}
+
 .referencingDataflows,
 .datasetsInfo,
 .userList,

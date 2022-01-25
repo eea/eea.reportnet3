@@ -793,6 +793,7 @@ export const Dataflows = () => {
           />
         </div>
         <MyFilters
+          className="dataflowsFilters"
           data={dataflowsState[tabId]}
           onFilter={getDataflows}
           onSort={getDataflows}
