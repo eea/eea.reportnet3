@@ -10,7 +10,6 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
-import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 
 import styles from './PublicCountryInformation.module.scss';
@@ -18,8 +17,8 @@ import styles from './PublicCountryInformation.module.scss';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { DownloadFile } from 'views/_components/DownloadFile';
-import { Spinner } from 'views/_components/Spinner';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
+import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
 
 import { DataflowService } from 'services/DataflowService';
@@ -33,6 +32,7 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
+import { getUrl } from 'repositories/_utils/UrlUtils';
 
 export const PublicCountryInformation = () => {
   const { countryCode } = useParams();
