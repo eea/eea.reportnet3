@@ -32,7 +32,7 @@ import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { Menu } from 'views/_components/Menu';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
-import { RepresentativesList } from './_components/RepresentativesList';
+import { ManageLeadReporters } from './_components/ManageLeadReporters';
 import { ShareRights } from 'views/_components/ShareRights';
 import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
@@ -414,21 +414,25 @@ const Dataflow = () => {
   };
 
   const shareRightsFooterDialogFooter = usersType => {
-    const isAddButtonHidden = isBusinessDataflow && !isAdmin && !isSteward;
+    const renderAddButtonShareRights = () => {
+      const isAddButtonHidden = isBusinessDataflow && usersType === usersTypes.REQUESTERS && !isAdmin && !isSteward;
 
-    return (
-      <div className={styles.buttonsRolesFooter}>
-        {isAddButtonHidden ? null : (
+      if (!isAddButtonHidden) {
+        return (
           <Button
             className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink`}
             icon="plus"
             label={resourcesContext.messages['add']}
             onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
           />
-        )}
+        );
+      }
+    };
 
+    return (
+      <div className={styles.buttonsRolesFooter}>
+        {renderAddButtonShareRights()}
         {renderValidateReportersButton(usersType)}
-
         <Button
           className={`p-button-secondary p-button-animated-blink`}
           icon="cancel"
@@ -1212,7 +1216,7 @@ const Dataflow = () => {
             onHide={() => manageDialogs('isManageRolesDialogVisible', false)}
             visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
-              <RepresentativesList
+              <ManageLeadReporters
                 dataflowId={dataflowId}
                 dataflowType={dataflowState.dataflowType}
                 representativesImport={dataflowState.representativesImport}

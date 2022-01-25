@@ -953,7 +953,7 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @ApiOperation(value = "Get a historic information about the updates of a rule", hidden = true)
   @GetMapping(value = "/historicInfo")
   public List<RuleHistoricInfoVO> getRuleHistoric(
@@ -978,7 +978,7 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @ApiOperation(value = "Get the historic information of the all rules in the dataset",
       hidden = true)
   @GetMapping(value = "/historicDatasetRules")
@@ -987,5 +987,6 @@ public class RulesControllerImpl implements RulesController {
           example = "1") @RequestParam("datasetId") long datasetId) {
     return rulesService.getRuleHistoricInfoByDatasetId(datasetId);
   }
+
 
 }

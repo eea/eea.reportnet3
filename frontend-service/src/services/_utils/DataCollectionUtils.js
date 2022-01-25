@@ -1,11 +1,10 @@
 import { DataCollection } from 'entities/DataCollection';
 
-const parseDataCollectionListDTO = dataCollectionsDTO => {
-  return dataCollectionsDTO?.map(dataCollectionDTO => parseDataCollectionDTO(dataCollectionDTO));
-};
+const parseDataCollectionListDTO = dataCollectionsDTO =>
+  dataCollectionsDTO?.map(dataCollectionDTO => parseDataCollectionDTO(dataCollectionDTO));
 
-const parseDataCollectionDTO = dataCollectionDTO => {
-  return new DataCollection({
+const parseDataCollectionDTO = dataCollectionDTO =>
+  new DataCollection({
     creationDate: dataCollectionDTO.creationDate,
     dataCollectionId: dataCollectionDTO.id,
     dataCollectionName: dataCollectionDTO.dataSetName,
@@ -14,7 +13,6 @@ const parseDataCollectionDTO = dataCollectionDTO => {
     expirationDate: dataCollectionDTO.dueDate,
     status: dataCollectionDTO.status
   });
-};
 
 export const DataCollectionUtils = {
   parseDataCollectionListDTO

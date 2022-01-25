@@ -9,4 +9,11 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  */
 public interface AuditRepository extends MongoRepository<Audit, ObjectId>, ExtendedAuditRepository {
 
+  /**
+   * Delete by dataset id.
+   *
+   * @param datasetId the dataset id
+   */
+  void deleteByDatasetId(Long datasetId);
+
 }

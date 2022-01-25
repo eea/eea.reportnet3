@@ -20,6 +20,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -49,6 +50,9 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ExcelWriterStrategy.class);
+
+  /** The Constant NO_GEOMETRY. */
+  private static final String NO_GEOMETRY = "<<GEOMETRIES ARE NOT EXPORTED>>";
 
   /** The parse common. */
   private FileCommonUtils fileCommon;
@@ -223,7 +227,10 @@ public class ExcelWriterStrategy implements WriterStrategy {
       boolean includeCountryCode, boolean includeValidations, DataSetSchemaVO dataset,
       ExportFilterVO filters) {
 
-    Sheet sheet = workbook.createSheet(table.getNameTableSchema());
+    String nameSheet = table.getNameTableSchema();
+    Sheet sheet =
+        createSheetAndHeaders(workbook, table, includeCountryCode, includeValidations, nameSheet);
+
     List<FieldSchemaVO> fieldSchemas = table.getRecordSchema().getFieldSchema();
 
     // Used to map each fieldValue with the correct fieldSchema
@@ -262,10 +269,20 @@ public class ExcelWriterStrategy implements WriterStrategy {
     cs.setWrapText(true);
     Long totalRecords = fileCommon.countRecordsByTableSchema(table.getIdTableSchema());
     int batchSize = 50000 / fieldSchemas.size();
-
+    int numSheets = 0;
     for (int numPage = 1; totalRecords >= 0; totalRecords = totalRecords - batchSize, numPage++) {
       for (RecordValue record : fileCommon.getRecordValuesPaginated(datasetId,
           table.getIdTableSchema(), PageRequest.of(numPage, batchSize), filters)) {
+        // Number max of rows allowed by excel 1,048,576. Splitting into more sheets when one it's
+        // fully
+        if (nRow % 1048575 == 0) {
+          numSheets++;
+          nameSheet = table.getNameTableSchema() + "_" + numSheets;
+          sheet = createSheetAndHeaders(workbook, table, includeCountryCode, includeValidations,
+              nameSheet);
+          nRow = 1;
+        }
+
         Row row = sheet.createRow(nRow++);
 
         List<FieldValue> fields =
@@ -283,9 +300,14 @@ public class ExcelWriterStrategy implements WriterStrategy {
           if (cellNumber == null) {
             cellNumber = nextUnknownCellNumber++;
           }
-
-          row.createCell(cellNumber).setCellValue(
-              field.getValue().startsWith("=") ? " " + field.getValue() : field.getValue());
+          String value = NO_GEOMETRY;
+          boolean geometryType = isGeometryFieldType(field);
+          if (Boolean.FALSE.equals(geometryType) && field.getValue().startsWith("=")) {
+            value = " " + field.getValue();
+          } else if (Boolean.FALSE.equals(geometryType)) {
+            value = field.getValue();
+          }
+          row.createCell(cellNumber).setCellValue(value);
           if (errorsMap != null) {
             Cell cell = row.createCell(cellNumber + 1);
             cell.setCellStyle(cs);
@@ -299,6 +321,64 @@ public class ExcelWriterStrategy implements WriterStrategy {
         }
       }
     }
+  }
+
+  /**
+   * Checks if is geometry field type.
+   *
+   * @param field the field
+   * @return true, if is geometry field type
+   */
+  private boolean isGeometryFieldType(FieldValue field) {
+    boolean geometryType = false;
+    if (DataType.GEOMETRYCOLLECTION.equals(field.getType())
+        || DataType.LINESTRING.equals(field.getType())
+        || DataType.MULTILINESTRING.equals(field.getType())
+        || DataType.MULTIPOINT.equals(field.getType())
+        || DataType.MULTIPOLYGON.equals(field.getType()) || DataType.POINT.equals(field.getType())
+        || DataType.POLYGON.equals(field.getType())) {
+      geometryType = true;
+    }
+    return geometryType;
+  }
+
+  /**
+   * Creates the sheet and headers.
+   *
+   * @param workbook the workbook
+   * @param table the table
+   * @param includeCountryCode the include country code
+   * @param includeValidations the include validations
+   * @param nameSheet the name sheet
+   * @return the sheet
+   */
+  private Sheet createSheetAndHeaders(Workbook workbook, TableSchemaVO table,
+      boolean includeCountryCode, boolean includeValidations, String nameSheet) {
+    Sheet sheet = workbook.createSheet(nameSheet);
+    List<FieldSchemaVO> fieldSchemas = table.getRecordSchema().getFieldSchema();
+    // Set headers
+    int nHeaders = 0;
+    Row rowhead = sheet.createRow(0);
+
+    if (includeCountryCode) {
+      rowhead.createCell(nHeaders).setCellValue("Country code");
+      nHeaders++;
+    }
+    Map<String, Integer> indexMap = new HashMap<>();
+
+    for (FieldSchemaVO fieldSchema : fieldSchemas) {
+      rowhead.createCell(nHeaders).setCellValue(fieldSchema.getName());
+      indexMap.put(fieldSchema.getId(), nHeaders++);
+      if (includeValidations) {
+        rowhead.createCell(nHeaders).setCellValue(fieldSchema.getName() + " validations");
+        nHeaders++;
+      }
+    }
+    if (includeValidations) {
+      rowhead.createCell(nHeaders).setCellValue("Record validations");
+      nHeaders++;
+    }
+    return sheet;
   }
 
   /**

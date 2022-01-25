@@ -20,10 +20,14 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -157,6 +161,9 @@ public class RulesServiceImpl implements RulesService {
   /** The dataset historic rule mapper. */
   @Autowired
   private DatasetHistoricRuleMapper datasetHistoricRuleMapper;
+
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
 
   /** The Constant LOG. */
@@ -434,11 +441,11 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void createNewRule(long datasetId, RuleVO ruleVO) throws EEAException {
 
-    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
-    if (datasetSchemaId == null) {
+    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    if (dataset == null || dataset.getDatasetSchema() == null) {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-
+    String datasetSchemaId = dataset.getDatasetSchema();
     if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
         && StringUtils.isBlank(ruleVO.getSqlSentence()) && !ruleVO.isAutomatic()) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
@@ -469,7 +476,10 @@ public class RulesServiceImpl implements RulesService {
       createRule(datasetSchemaId, rule);
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
-    addHistoricRuleInfo(rule, null, datasetId, null);
+    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
+    if (TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
+      addHistoricRuleInfo(rule, null, datasetId, null);
+    }
   }
 
   /**
@@ -792,10 +802,11 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void updateRule(long datasetId, RuleVO ruleVO) throws EEAException {
-    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
-    if (datasetSchemaId == null) {
+    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    if (dataset == null || dataset.getDatasetSchema() == null) {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
+    String datasetSchemaId = dataset.getDatasetSchema();
     if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
         && StringUtils.isBlank(ruleVO.getSqlSentence())) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
@@ -836,7 +847,11 @@ public class RulesServiceImpl implements RulesService {
       }
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
-    addHistoricRuleInfo(rule, ruleOriginal, datasetId, originalIntegrityVO);
+
+    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
+    if (TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
+      addHistoricRuleInfo(rule, ruleOriginal, datasetId, originalIntegrityVO);
+    }
   }
 
   /**
@@ -898,10 +913,11 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void updateAutomaticRule(long datasetId, RuleVO ruleVO) throws EEAException {
 
-    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     String ruleId = ruleVO.getRuleId();
 
-    if (null != datasetSchemaId) {
+    if (null != dataset && null != dataset.getDatasetSchema()) {
+      String datasetSchemaId = dataset.getDatasetSchema();
       if (null != ruleId && ObjectId.isValid(ruleId)) {
 
         // Find the actual rule
@@ -917,8 +933,10 @@ public class RulesServiceImpl implements RulesService {
           updateAllowedRuleProperties(ruleVO, rule);
           // Save the modified rule
           rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-
-          addHistoricRuleInfo(rule, originalRule, datasetId, null);
+          DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
+          if (TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
+            addHistoricRuleInfo(rule, originalRule, datasetId, null);
+          }
         } else {
           LOG_ERROR.error("Rule not found for datasetSchemaId {} and ruleId {}", datasetSchemaId,
               ruleId);
@@ -1662,6 +1680,25 @@ public class RulesServiceImpl implements RulesService {
     return historic;
   }
 
+  /**
+   * Gets the rule historic info by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the rule historic info by dataset id
+   */
+  @Override
+  @Transactional
+  public List<DatasetHistoricRuleVO> getRuleHistoricInfoByDatasetId(Long datasetId) {
+    List<Audit> audits = auditRepository.getAuditsByDatasetId(datasetId);
+    List<DatasetHistoricRuleVO> historic = new ArrayList<>();
+    for (Audit audit : audits) {
+      for (RuleHistoricInfo historicRuleInfo : audit.getHistoric()) {
+        historic.add(datasetHistoricRuleMapper.entityToClass(historicRuleInfo));
+      }
+    }
+    return historic;
+  }
+
 
   /**
    * Import data.
@@ -1874,20 +1911,25 @@ public class RulesServiceImpl implements RulesService {
       IntegrityVO originalIntegrityVO) throws EEAException {
     UserRepresentationVO user = userManagementControllerZuul.getUserByUserId();
     Audit audit = auditRepository.getAuditByRuleId(rule.getRuleId());
-    if (null == audit) {
-      LOG.info("Creating a new historic for the rule {}", rule.getRuleId());
-      auditRepository.createAudit(rule, user, datasetId);
-    } else {
-      LOG.info("Adding new information in the historic of the rule {}", rule.getRuleId());
-      boolean metadata = checkMetadataHasChange(rule, ruleOriginal);
-      boolean status = checkStatusHasChange(rule, ruleOriginal);
-      boolean expression = checkExpressionHasChange(rule, ruleOriginal, originalIntegrityVO);
-      try {
+    boolean metadata = false;
+    boolean status = false;
+    boolean expression = false;
+    if (null != ruleOriginal) {
+      metadata = checkMetadataHasChange(rule, ruleOriginal);
+      status = checkStatusHasChange(rule, ruleOriginal);
+      expression = checkExpressionHasChange(rule, ruleOriginal, originalIntegrityVO);
+    }
+    try {
+      if (null == audit) {
+        LOG.info("Creating a new historic for the rule {}", rule.getRuleId());
+        auditRepository.createAudit(rule, user, datasetId, status, expression, metadata);
+      } else {
+        LOG.info("Adding new information in the historic of the rule {}", rule.getRuleId());
         auditRepository.updateAudit(audit, user, rule, status, expression, metadata);
-      } catch (JsonProcessingException e) {
-        LOG.error("Error updating historic information for rule {}", rule.getRuleId());
-        throw new EEAException(EEAErrorMessage.HISTORIC_QC_UPDATE_ERROR);
       }
+    } catch (JsonProcessingException e) {
+      LOG.error("Error updating historic information for rule {}", rule.getRuleId());
+      throw new EEAException(EEAErrorMessage.HISTORIC_QC_UPDATE_ERROR);
     }
   }
 
@@ -2019,24 +2061,6 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
-  /**
-   * Gets the rule historic info by dataset id.
-   *
-   * @param datasetId the dataset id
-   * @return the rule historic info by dataset id
-   */
-  @Override
-  @Transactional
-  public List<DatasetHistoricRuleVO> getRuleHistoricInfoByDatasetId(Long datasetId) {
-    List<Audit> audits = auditRepository.getAuditsByDatasetId(datasetId);
-    List<DatasetHistoricRuleVO> historic = new ArrayList<>();
-    for (Audit audit : audits) {
-      for (RuleHistoricInfo historicRuleInfo : audit.getHistoric()) {
-        historic.add(datasetHistoricRuleMapper.entityToClass(historicRuleInfo));
-      }
-    }
-    return historic;
-  }
 
 
 }

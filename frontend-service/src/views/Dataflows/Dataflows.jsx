@@ -216,9 +216,9 @@ const Dataflows = () => {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'table',
       isVisible: isAdmin,
-      label: 'manageWebforms',
+      label: 'manageWebformsLeftBarButton',
       onClick: () => manageDialogs('isManageWebformsDialogVisible', true),
-      title: 'manageWebforms'
+      title: 'manageWebformsLeftBarButton'
     };
 
     leftSideBarContext.addModels(
