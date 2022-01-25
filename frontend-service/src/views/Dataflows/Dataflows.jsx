@@ -6,6 +6,7 @@ import isNil from 'lodash/isNil';
 import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
 import pull from 'lodash/pull';
+import ReactTooltip from 'react-tooltip';
 
 import styles from './Dataflows.module.scss';
 
@@ -26,7 +27,6 @@ import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDatafl
 import { ManageWebforms } from './_components/ManageWebforms';
 import { MyFilters } from 'views/_components/MyFilters';
 import { Paginator } from 'views/_components/DataTable/_components/Paginator';
-import ReactTooltip from 'react-tooltip';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
