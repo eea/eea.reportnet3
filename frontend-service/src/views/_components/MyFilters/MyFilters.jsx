@@ -261,7 +261,11 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
     const inputId = uniqueId();
 
     return (
-      <div className={styles.block} key={option.key}>
+      <div
+        className={`${styles.block} ${
+          filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+        }`}
+        key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <div
           className={`p-float-label ${styles.label} ${styles.elementFilter}`}
@@ -318,7 +322,10 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
     return (
       <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
-        <div className={`p-float-label ${styles.label} ${styles.elementFilter}`}>
+        <div
+          className={`p-float-label ${styles.label} ${
+            filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+          }`}>
           <InputText
             className={styles.inputFilter}
             id={`${option.key}_input`}
@@ -352,7 +359,9 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
         <MultiSelect
           ariaLabelledBy={`${option.key}_input`}
           checkAllHeader={resourcesContext.messages['checkAllFilter']}
-          className={styles.multiselectFilter}
+          className={`${styles.multiselectFilter} ${
+            filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+          }`}
           filter={option?.showInput}
           headerClassName={styles.selectHeader}
           id={option.key}
@@ -388,7 +397,10 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
     return (
       <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
-        <div className={`p-float-label ${styles.label} ${styles.elementFilter}`}>
+        <div
+          className={`p-float-label ${styles.label} ${styles.elementFilter} ${
+            searchBy.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+          }`}>
           <InputText
             className={styles.searchInput}
             id="searchInput"
