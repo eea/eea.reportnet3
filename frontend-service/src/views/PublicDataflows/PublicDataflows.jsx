@@ -31,11 +31,11 @@ export const PublicDataflows = () => {
   const themeContext = useContext(ThemeContext);
 
   const [contentStyles, setContentStyles] = useState({});
+  const [goToPage, setGoToPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [pageInputTooltip, setPageInputTooltip] = useState(resourcesContext.messages['currentPageInfoMessage']);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
   const [publicDataflows, setPublicDataflows] = useState([]);
-  const [goToPage, setGoToPage] = useState(1);
-  const [pageInputTooltip, setPageInputTooltip] = useState(resourcesContext.messages['currentPageInfoMessage']);
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOWS });
 
