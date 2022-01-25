@@ -53,6 +53,7 @@ export const Tab = ({
   leftIcon,
   newTab,
   notEmpty = true,
+  numberOfFields,
   onTabBlur,
   onTabAddCancel,
   onTabDeleteClick,
@@ -164,26 +165,34 @@ export const Tab = ({
         );
       }
     };
+
     const renderReadOnly = () => {
       if (readOnly) {
         return <p className={styles.propertyLabel}>{resourcesContext.messages['readOnly']}</p>;
       }
     };
+
     const renderPrefilled = () => {
       if (toPrefill) {
         return <p className={styles.propertyLabel}>{resourcesContext.messages['prefilled']}</p>;
       }
     };
+
     const renderFixedNumber = () => {
       if (fixedNumber) {
         return <p className={styles.propertyLabel}>{resourcesContext.messages['fixedNumber']}</p>;
       }
     };
+
     const renderNotEmpty = () => {
       if (notEmpty) {
         return <p className={styles.propertyLabel}>{resourcesContext.messages['notEmpty']}</p>;
       }
     };
+
+    const renderNumberOfFiedls = () => (
+      <p className={styles.propertyLabel}>{`${resourcesContext.messages['numberOfFields']}: ${numberOfFields}`}</p>
+    );
 
     return (
       <div className={`${styles.fieldText} ${styles.tooltipWrapper}`}>
@@ -192,6 +201,7 @@ export const Tab = ({
         {renderPrefilled()}
         {renderFixedNumber()}
         {renderNotEmpty()}
+        {renderNumberOfFiedls()}
       </div>
     );
   };

@@ -234,6 +234,7 @@ export const TabView = ({
           leftIcon={tab.props.leftIcon}
           newTab={tab.props.newTab}
           notEmpty={tab.props.notEmpty}
+          numberOfFields={tab.props.numberOfFields}
           onTabAddCancel={onTabAddCancel}
           onTabBlur={onTabBlur}
           onTabDeleteClick={onTabDeleteClicked}

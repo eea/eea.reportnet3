@@ -720,7 +720,7 @@ export const Dataflows = () => {
     if (!loadingStatus[tabId] && filteredData.length !== 0) {
       return (
         <Paginator
-          className="p-paginator-bottom"
+          className={`p-paginator-bottom ${styles.paginator}`}
           first={pagination.firstRow}
           onPageChange={onPaginate}
           rightContent={renderPaginatorRecordsCount()}
