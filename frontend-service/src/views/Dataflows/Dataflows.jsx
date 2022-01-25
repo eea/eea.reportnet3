@@ -323,10 +323,20 @@ const Dataflows = () => {
           pageSize,
           sortBy
         });
+
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'reporting' });
       } else if (TextUtils.areEquals(tabId, 'reference')) {
-        const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const data = await ReferenceDataflowService.getAll({
+          accessRoles,
+          contextRoles,
+          filterBy,
+          isAscending,
+          pageNumber,
+          pageSize,
+          sortBy
+        });
+
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'reference' });
       } else if (TextUtils.areEquals(tabId, 'business')) {
@@ -339,10 +349,20 @@ const Dataflows = () => {
           pageSize,
           sortBy
         });
+
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'business' });
       } else if (TextUtils.areEquals(tabId, 'citizenScience')) {
-        const data = await CitizenScienceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const data = await CitizenScienceDataflowService.getAll({
+          accessRoles,
+          contextRoles,
+          filterBy,
+          isAscending,
+          pageNumber,
+          pageSize,
+          sortBy
+        });
+
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'citizenScience' });
       }
