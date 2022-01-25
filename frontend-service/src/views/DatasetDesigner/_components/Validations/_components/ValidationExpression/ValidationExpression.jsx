@@ -22,7 +22,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TimezoneCalendar } from 'views/_components/TimezoneCalendar';
 
-const ValidationExpression = ({
+export const ValidationExpression = ({
   dataflowType,
   expressionValues,
   fieldType,
@@ -475,4 +475,3 @@ const ValidationExpression = ({
     </li>
   );
 };
-export { ValidationExpression };

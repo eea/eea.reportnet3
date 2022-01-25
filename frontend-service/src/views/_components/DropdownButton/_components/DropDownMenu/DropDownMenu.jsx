@@ -2,7 +2,7 @@ import { Component } from 'react';
 import style from './DropDownMenu.module.scss';
 import { Icon } from 'views/_components/Icon';
 
-class DropDownMenu extends Component {
+export class DropDownMenu extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -128,5 +128,3 @@ class DropDownMenu extends Component {
     }
   }
 }
-
-export { DropDownMenu };

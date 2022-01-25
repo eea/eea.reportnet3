@@ -7,7 +7,7 @@ import { Title } from 'views/_components/Title';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const PrivacyStatement = () => {
+export const PrivacyStatement = () => {
   const resourcesContext = useContext(ResourcesContext);
 
   const onClickAnchorLink = e => {
@@ -267,5 +267,3 @@ const PrivacyStatement = () => {
     </div>
   );
 };
-
-export { PrivacyStatement };

@@ -17,3 +17,25 @@
   padding-bottom: 1rem;
   padding-top: 1rem;
 }
+
+.bottomPaginator {
+  margin-bottom: 3rem;
+  margin-top: -2.5rem;
+}
+
+.currentPageWrapper {
+  color: var(--c-white-color);
+  margin-left: 1.5rem;
+  user-select: none;
+  .currentPageInput {
+    display: inline;
+    height: 1.75rem;
+    width: 2.5rem;
+  }
+  .currentPageLabel {
+    margin: 0 0.5rem;
+  }
+  .currentPageOf {
+    margin: 0 0 0 0.5rem;
+  }
+}

@@ -8,7 +8,7 @@ import { Button } from 'views/_components/Button';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const ActionsColumn = ({
+export const ActionsColumn = ({
   disabledButtons,
   hideDeletion = false,
   hideEdition = false,
@@ -84,5 +84,3 @@ const ActionsColumn = ({
     </div>
   );
 };
-
-export { ActionsColumn };

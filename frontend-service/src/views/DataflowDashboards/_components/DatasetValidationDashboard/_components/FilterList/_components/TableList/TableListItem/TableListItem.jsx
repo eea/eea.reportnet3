@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import styles from './TableListItem.module.scss';
 
-const TableListItem = ({ datasetSchemaId, filterDispatch, table, tableFilters }) => {
+export const TableListItem = ({ datasetSchemaId, filterDispatch, table, tableFilters }) => {
   const [isChecked, setIsChecked] = useState(true);
 
   useEffect(() => {
@@ -30,5 +30,3 @@ const TableListItem = ({ datasetSchemaId, filterDispatch, table, tableFilters })
     </div>
   );
 };
-
-export { TableListItem };

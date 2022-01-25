@@ -25,7 +25,7 @@ import { linkSelectorReducer } from './_functions/Reducers/linkSelectorReducer';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const LinkSelector = ({
+export const LinkSelector = ({
   datasetSchemaId,
   fieldId,
   fields,
@@ -536,5 +536,3 @@ const LinkSelector = ({
     )
   );
 };
-
-export { LinkSelector };

@@ -12,8 +12,9 @@ import { Spinner } from 'views/_components/Spinner';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const DataflowsList = ({
+export const DataflowsList = ({
   className,
+  data,
   filteredData,
   isAdmin,
   isCustodian,
@@ -53,7 +54,7 @@ const DataflowsList = ({
       return <Spinner style={{ top: 0 }} />;
     }
 
-    if (isEmpty(filteredData)) {
+    if (isEmpty(data)) {
       const emptyDataflowsMessage = {
         business: 'thereAreNoBusinessDataflows',
         reference: 'thereAreNoReferenceDataflows',
@@ -78,5 +79,3 @@ const DataflowsList = ({
 
   return <div className={`${styles.wrap} ${className}`}>{renderContent()}</div>;
 };
-
-export { DataflowsList };

@@ -12,7 +12,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-const Navigation = () => {
+export const Navigation = () => {
   const navigate = useNavigate();
 
   const resourcesContext = useContext(ResourcesContext);
@@ -34,5 +34,3 @@ const Navigation = () => {
     </div>
   );
 };
-
-export { Navigation };

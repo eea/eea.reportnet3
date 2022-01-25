@@ -20,7 +20,7 @@ import { useStatusFilter } from 'views/_components/StatusList/_hooks/useStatusFi
 
 import { ErrorUtils } from 'views/_functions/Utils';
 
-const Dashboard = memo(({ refresh, tableSchemaNames }) => {
+export const Dashboard = memo(({ refresh, tableSchemaNames }) => {
   const { datasetId } = useParams();
 
   const resourcesContext = useContext(ResourcesContext);
@@ -179,5 +179,3 @@ const Dashboard = memo(({ refresh, tableSchemaNames }) => {
     </Fragment>
   );
 });
-
-export { Dashboard };
