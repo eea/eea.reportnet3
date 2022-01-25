@@ -43,9 +43,44 @@
   color: var(--filter-sort-icon-color) !important;
 }
 
-.block .elementFilter {
+.multiselectFilter {
+  border: 0px !important;
+  border-radius: 0px !important;
+  border-bottom: var(--inputtext-border) !important;
+  color: var(--floating-label-color) !important;
+  font-size: 0.8333rem !important;
+  height: 2rem;
+  padding-left: 0em;
+  width: 90% !important;
+
+  label {
+    color: var(--active-filter-font) !important;
+    margin-left: 0.1rem;
+    height: 100%;
+    font-weight: bold !important;
+  }
+
+  input + label {
+    font-weight: unset !important;
+    color: var(--font-filters) !important;
+  }
+
+  li {
+    opacity: 0.8;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.elementFilter {
   display: flex;
   border-bottom: var(--inputtext-border) !important;
+
+  .searchInput:focus {
+    padding-top: 20px !important;
+  }
 }
 
 .block {
@@ -86,30 +121,6 @@
     font-size: 0.8333rem;
   }
 
-  .multiselectFilter {
-    border: 0px;
-    border-radius: 0px;
-    border-bottom: var(--inputtext-border) !important;
-    color: var(--floating-label-color) !important;
-    font-size: 0.8333rem !important;
-    height: 2rem;
-    padding-left: 0em;
-    width: 90% !important;
-
-    label {
-      color: var(--font-filters);
-      margin-left: 0.1rem;
-      height: 100%;
-    }
-
-    li {
-      opacity: 0.8;
-
-      &:hover {
-        opacity: 1;
-      }
-    }
-  }
   .selectHeader {
     border-radius: 3px;
     color: var(--floating-label-color);
@@ -206,7 +217,7 @@
   width: 100%;
 
   .label {
-    height: 100%;
+    height: auto;
   }
 
   .resetButton {
@@ -220,6 +231,7 @@
     border: 0px;
     border-radius: 0;
     width: 100%;
+    padding-top: 30px !important;
 
     &:focus,
     &:enabled:focus {
@@ -228,6 +240,10 @@
   }
   .sortButtonSize {
     display: none;
+  }
+  .elementFilterSelected {
+    display: flex !important;
+    align-items: flex-end;
   }
 }
 
@@ -251,22 +267,54 @@
   }
 }
 
-.referencingDataflows,
-.datasetsInfo,
-.userList,
-.historicReleases,
+.elementFilterSelected {
+  display: flex !important;
+  border-bottom: var(--active-filter-border) !important;
+  box-shadow: var(--active-filter-shadow);
+  button {
+    span {
+      color: var(--active-filter);
+    }
+  }
+  input {
+    font-weight: bold !important;
+    color: var(--active-filter-font) !important;
+  }
+  .searchInput {
+    padding-top: 20px !important;
+  }
+
+  .elementFilter {
+    display: flex;
+  }
+}
+
 .cloneSchemas,
-.integrationsList {
+.manualAcceptanceDatasets,
+.referencingDataflows,
+.historicReleases {
   @extend .lineItems;
 }
 
 @media (max-width: 640px) {
+  .block {
+    .multiselectFilter,
+    .label {
+      width: 100% !important;
+    }
+  }
+
   .lineItems {
     flex-direction: column;
     .resetButton {
-      margin-left: 0;
       margin-top: 1em;
     }
+  }
+
+  .cloneSchemas {
+    display: grid;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(7, 1fr) !important;
   }
 
   .qcList {
@@ -278,12 +326,29 @@
   }
 }
 
-@media (max-width: 1695px) {
-  .qcList {
-    grid-row-gap: 1.5rem;
+@media (max-width: 768px) {
+  .manualAcceptanceDatasets,
+  .historicReleases {
+    display: flex !important;
+    flex-direction: column;
+    .labelCheckbox {
+      width: 30% !important;
+    }
+    .checkbox {
+      margin: 0;
+    }
+    .block {
+      .multiselectFilter,
+      .label {
+        width: 100% !important;
+      }
+    }
   }
-  .block {
-    height: 3rem;
+
+  .historicReleases {
+    .labelCheckbox {
+      width: 100% !important;
+    }
   }
 }
 
@@ -304,5 +369,42 @@
       overflow: hidden !important;
       text-overflow: ellipsis;
     }
+  }
+
+  .cloneSchemas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+
+    .block {
+      label {
+        height: 100%;
+      }
+    }
+
+    .resetButton {
+      grid-column: 1;
+    }
+  }
+}
+
+@media (max-width: 1280px) {
+  .historicReleases {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    .resetButton {
+      margin-top: 1em;
+      grid-column: 3;
+    }
+  }
+}
+
+@media (max-width: 1695px) {
+  .qcList {
+    grid-row-gap: 1.5rem;
+  }
+  .block {
+    height: 3rem;
   }
 }

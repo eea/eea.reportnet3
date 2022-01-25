@@ -114,12 +114,7 @@ export const ReferencingDataflows = ({ referenceDataflowId }) => {
 
   return renderDialogLayout(
     <Fragment>
-      <MyFilters
-        className="referencingDataflows"
-        data={state.dataflows}
-        options={filterOptions}
-        viewType="referencingDataflows"
-      />
+      <MyFilters data={state.dataflows} options={filterOptions} viewType="referencingDataflows" />
       {renderDialogContent()}
     </Fragment>
   );
