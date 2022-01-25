@@ -78,15 +78,15 @@ public class CSVWriterStrategyTest {
     Mockito.when(fileCommon.countRecordsByTableSchema(Mockito.anyString())).thenReturn(100L);
     Mockito.when(fileCommon.getDataSetSchemaVO(Mockito.any(), Mockito.any()))
         .thenReturn(new DataSetSchemaVO());
-    Mockito.when(fileCommon.getRecordValuesPaginated(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(records);
+    Mockito.when(fileCommon.getRecordValuesPaginated(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(records);
     Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any(DataSetSchemaVO.class)))
         .thenReturn(fieldSchemas);
-    csvWriterStrategy.writeFile(1L, 1L, "", true, false);
+    csvWriterStrategy.writeFile(1L, 1L, "", true, false, null);
     Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.any(),
         Mockito.any(DataSetSchemaVO.class));
     Mockito.verify(fileCommon, times(1)).getRecordValuesPaginated(Mockito.any(), Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
   }
 
   /**
@@ -121,14 +121,14 @@ public class CSVWriterStrategyTest {
     Mockito.when(fileCommon.countRecordsByTableSchema(Mockito.anyString())).thenReturn(100L);
     Mockito.when(fileCommon.getDataSetSchemaVO(Mockito.any(), Mockito.any()))
         .thenReturn(dataSetSchemaVO);
-    Mockito.when(fileCommon.getRecordValuesPaginated(Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(records);
+    Mockito.when(fileCommon.getRecordValuesPaginated(Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any())).thenReturn(records);
     Mockito.when(fileCommon.getFieldSchemas(Mockito.any(), Mockito.any(DataSetSchemaVO.class)))
         .thenReturn(fieldSchemas);
     csvWriterStrategy.writeFileList(1L, 1L, false, false);
     Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.any(),
         Mockito.any(DataSetSchemaVO.class));
     Mockito.verify(fileCommon, times(1)).getRecordValuesPaginated(Mockito.any(), Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
   }
 }

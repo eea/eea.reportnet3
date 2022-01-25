@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -177,11 +178,12 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param mimeType the mime type
+   * @param exportFilterVO the export filter VO
    */
   @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   void exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-      @RequestParam("mimeType") String mimeType);
+      @RequestParam("mimeType") String mimeType, @RequestBody ExportFilterVO exportFilterVO);
 
   /**
    * Export file through integration.
@@ -547,8 +549,7 @@ public interface DatasetController {
    * @param updated the updated
    */
   @PutMapping("/private/viewUpdated/{datasetId}")
-  public void updateCheckView(@PathVariable("datasetId") Long datasetId,
-      @RequestParam Boolean updated);
+  void updateCheckView(@PathVariable("datasetId") Long datasetId, @RequestParam Boolean updated);
 
   /**
    * Gets the check view.
@@ -557,7 +558,7 @@ public interface DatasetController {
    * @return the check view
    */
   @GetMapping("/{datasetId}/viewUpdated")
-  public Boolean getCheckView(@PathVariable("datasetId") Long datasetId);
+  Boolean getCheckView(@PathVariable("datasetId") Long datasetId);
 
 
   /**

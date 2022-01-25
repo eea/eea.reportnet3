@@ -71,6 +71,7 @@ import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.ETLFieldVO;
 import org.eea.interfaces.vo.dataset.ETLRecordVO;
 import org.eea.interfaces.vo.dataset.ETLTableVO;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
@@ -929,6 +930,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
     Long dataflowId = datasetService.getDataFlowIdById(datasetId);
 
+    ExportFilterVO filters = new ExportFilterVO();
+
     // Look for the dataset type is EU or DC to include the countryCode
     DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
     boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
@@ -958,7 +961,7 @@ public class FileTreatmentHelper implements DisposableBean {
         }
       } else {
         byte[] dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode,
-            extension.equalsIgnoreCase(FileTypeEnum.VALIDATIONS.getValue()));
+            extension.equalsIgnoreCase(FileTypeEnum.VALIDATIONS.getValue()), filters);
         contents.put(null, dataFile);
       }
 
@@ -1437,12 +1440,13 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param mimeType the mime type
    * @param tableSchemaId the table schema id
    * @param tableName the table name
+   * @param filters the filters
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Async
-  public void exportFile(Long datasetId, String mimeType, String tableSchemaId, String tableName)
-      throws EEAException, IOException {
+  public void exportFile(Long datasetId, String mimeType, String tableSchemaId, String tableName,
+      ExportFilterVO filters) throws EEAException, IOException {
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
         .fileName(tableName).datasetSchemaId(tableSchemaId).error("Error exporting table data")
@@ -1452,7 +1456,7 @@ public class FileTreatmentHelper implements DisposableBean {
         "Failed generating file from datasetId {} with schema {}.", datasetId, tableSchemaId);
     fileFolder.mkdirs();
     try {
-      byte[] file = createFile(datasetId, mimeType, tableSchemaId);
+      byte[] file = createFile(datasetId, mimeType, tableSchemaId, filters);
       File fileWrite =
           new File(new File(pathPublicFile, "dataset-" + datasetId), tableName + "." + mimeType);
       try (OutputStream out = new FileOutputStream(fileWrite.toString());) {
@@ -1477,6 +1481,7 @@ public class FileTreatmentHelper implements DisposableBean {
   @Async
   public void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
 
+    ExportFilterVO filters = new ExportFilterVO();
     List<DesignDataset> desingDataset =
         designDatasetRepository.findByDataflowId(dataset.getDataflowId());
     // look for the name of the design dataset to put the right name to the file
@@ -1489,7 +1494,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
     try {
       // create the excel file
-      byte[] file = createFile(dataset.getId(), FileTypeEnum.XLSX.getValue(), null);
+      byte[] file = createFile(dataset.getId(), FileTypeEnum.XLSX.getValue(), null, filters);
       // we save the file in its files
       if (null != file) {
         String nameFileUnique = String.format("%s", datasetDesingName);
@@ -1563,6 +1568,7 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private void createAllDatasetFiles(Long dataflowId, Long dataProviderId) throws IOException {
 
+    ExportFilterVO filters = new ExportFilterVO();
     DataProviderVO dataProvider = representativeControllerZuul.findDataProviderById(dataProviderId);
 
     List<DataSetMetabase> datasetMetabaseList =
@@ -1586,7 +1592,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
         try {
           // 1º we create
-          byte[] file = createFile(datasetToFile.getId(), FileTypeEnum.XLSX.getValue(), null);
+          byte[] file =
+              createFile(datasetToFile.getId(), FileTypeEnum.XLSX.getValue(), null, filters);
           // we save the file in its files
           if (null != file) {
             String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
@@ -1623,13 +1630,14 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param mimeType the mime type
    * @param tableSchemaId the table schema id
+   * @param filters the filters
    * @return the byte[]
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Transactional
-  public byte[] createFile(Long datasetId, String mimeType, final String tableSchemaId)
-      throws EEAException, IOException {
+  public byte[] createFile(Long datasetId, String mimeType, final String tableSchemaId,
+      ExportFilterVO filters) throws EEAException, IOException {
     // Get the dataFlowId from the metabase
     Long idDataflow = datasetService.getDataFlowIdById(datasetId);
 
@@ -1640,8 +1648,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
     final IFileExportContext contextExport = fileExportFactory.createContext(mimeType);
     LOG.info("End of createFile");
-    return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode,
-        false);
+    return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode, false,
+        filters);
   }
 
   private void createFilesAndZip(Long dataflowId, Long dataProviderId,

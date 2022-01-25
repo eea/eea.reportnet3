@@ -10,6 +10,7 @@ import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
@@ -57,12 +58,14 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @param tableSchemaId the table schema id
    * @param includeCountryCode the include country code
    * @param includeValidations the include validations
+   * @param filters the filters
    * @return the byte[]
    * @throws EEAException the EEA exception
    */
   @Override
   public byte[] writeFile(final Long dataflowId, final Long datasetId, final String tableSchemaId,
-      boolean includeCountryCode, boolean includeValidations) throws EEAException {
+      boolean includeCountryCode, boolean includeValidations, ExportFilterVO filters)
+      throws EEAException {
     LOG.info("starting csv file writter");
 
     DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
@@ -72,7 +75,7 @@ public class CSVWriterStrategy implements WriterStrategy {
     CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
 
-    setLines(tableSchemaId, dataSetSchema, csvWriter, datasetId, includeCountryCode);
+    setLines(tableSchemaId, dataSetSchema, csvWriter, datasetId, includeCountryCode, filters);
 
     // Once read we convert it to string
     String csv = writer.getBuffer().toString();
@@ -96,6 +99,8 @@ public class CSVWriterStrategy implements WriterStrategy {
       boolean includeCountryCode, boolean includeValidations) throws EEAException {
     LOG.info("starting csv file writter");
 
+    ExportFilterVO filters = new ExportFilterVO();
+
     DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
 
     // Init the writer
@@ -106,7 +111,7 @@ public class CSVWriterStrategy implements WriterStrategy {
     List<byte[]> byteList = new ArrayList<>();
     dataSetSchema.getTableSchemas().forEach(tableSchemaVO -> {
       setLines(tableSchemaVO.getIdTableSchema(), dataSetSchema, csvWriter, datasetId,
-          includeCountryCode);
+          includeCountryCode, filters);
 
       // Once read we convert it to string
       byteList.add(writer.getBuffer().toString().getBytes());
@@ -126,9 +131,10 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @param csvWriter the csv writer
    * @param datasetId the dataset id
    * @param includeCountryCode the include country code
+   * @param filters the filters
    */
   private void setLines(final String idTableSchema, DataSetSchemaVO dataSetSchema,
-      CSVWriter csvWriter, Long datasetId, boolean includeCountryCode) {
+      CSVWriter csvWriter, Long datasetId, boolean includeCountryCode, ExportFilterVO filters) {
 
     List<FieldSchemaVO> fieldSchemas = fileCommon.getFieldSchemas(idTableSchema, dataSetSchema);
     Map<String, Integer> indexMap = new HashMap<>();
@@ -139,7 +145,8 @@ public class CSVWriterStrategy implements WriterStrategy {
       int nHeaders = setHeaders(fieldSchemas, indexMap, csvWriter, includeCountryCode);
 
       // If we don't have records, return a file only with headers.
-      setRecords(indexMap, nHeaders, csvWriter, includeCountryCode, datasetId, idTableSchema);
+      setRecords(indexMap, nHeaders, csvWriter, includeCountryCode, datasetId, idTableSchema,
+          filters);
     }
   }
 
@@ -182,9 +189,10 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @param includeCountryCode the include country code
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
+   * @param filters the filters
    */
   private void setRecords(Map<String, Integer> indexMap, int nHeaders, CSVWriter csvWriter,
-      boolean includeCountryCode, Long datasetId, String idTableSchema) {
+      boolean includeCountryCode, Long datasetId, String idTableSchema, ExportFilterVO filters) {
 
     Long totalRecords = fileCommon.countRecordsByTableSchema(idTableSchema);
     int batchSize = 50000 / nHeaders;
@@ -192,7 +200,7 @@ public class CSVWriterStrategy implements WriterStrategy {
     LOG.info("Total number of pages in export process: {}", totalPages);
     for (int numPage = 1; numPage <= totalPages; numPage++) {
       for (RecordValue record : fileCommon.getRecordValuesPaginated(datasetId, idTableSchema,
-          PageRequest.of(numPage, batchSize))) {
+          PageRequest.of(numPage, batchSize), filters)) {
         List<FieldValue> fields = record.getFields();
         List<String> unknownColumns = new ArrayList<>();
         String[] fieldsToWrite = new String[nHeaders];

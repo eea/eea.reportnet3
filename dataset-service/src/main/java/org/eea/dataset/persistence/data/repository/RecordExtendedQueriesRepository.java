@@ -5,6 +5,7 @@ import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.data.domain.Pageable;
@@ -65,7 +66,7 @@ public interface RecordExtendedQueriesRepository {
 
   /**
    * Find and generate ETL json.
-   * 
+   *
    * @param outputStream
    * @param datasetId
    *
@@ -85,7 +86,10 @@ public interface RecordExtendedQueriesRepository {
    *
    * @param idTable the id table
    * @param datasetId the dataset id
+   * @param pageable the pageable
+   * @param filters the filters
    * @return the list
    */
-  List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable);
+  List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable,
+      ExportFilterVO filters);
 }

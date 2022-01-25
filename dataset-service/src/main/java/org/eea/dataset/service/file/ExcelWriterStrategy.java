@@ -18,6 +18,7 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -93,12 +94,14 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @param tableSchemaId the table schema id
    * @param includeCountryCode the include country code
    * @param includeValidations the include validations
+   * @param filters the filters
    * @return the byte[]
    * @throws EEAException the EEA exception
    */
   @Override
   public byte[] writeFile(Long dataflowId, Long datasetId, String tableSchemaId,
-      boolean includeCountryCode, boolean includeValidations) throws EEAException {
+      boolean includeCountryCode, boolean includeValidations, ExportFilterVO filters)
+      throws EEAException {
 
     DataSetSchemaVO dataset = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
     ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -121,7 +124,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
       // Add one sheet per table
       for (TableSchemaVO tableSchema : tables) {
         writeSheet(workbook, tableSchema, datasetId, includeCountryCode, includeValidations,
-            dataset);
+            dataset, filters);
       }
 
       workbook.write(out);
@@ -149,6 +152,8 @@ public class ExcelWriterStrategy implements WriterStrategy {
   public List<byte[]> writeFileList(Long dataflowId, Long datasetId, boolean includeCountryCode,
       boolean includeValidations) throws EEAException {
 
+    ExportFilterVO filters = new ExportFilterVO();
+
     List<byte[]> byteList = new ArrayList<>();
 
     DataSetSchemaVO dataset = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
@@ -165,7 +170,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
       // Add one sheet per table
       for (TableSchemaVO tableSchema : tables) {
         writeSheet(workbook, tableSchema, datasetId, includeCountryCode, includeValidations,
-            dataset);
+            dataset, filters);
       }
 
       workbook.write(out);
@@ -212,9 +217,11 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @param includeCountryCode the include country code
    * @param includeValidations the include validations
    * @param dataset the dataset
+   * @param filters the filters
    */
   private void writeSheet(Workbook workbook, TableSchemaVO table, Long datasetId,
-      boolean includeCountryCode, boolean includeValidations, DataSetSchemaVO dataset) {
+      boolean includeCountryCode, boolean includeValidations, DataSetSchemaVO dataset,
+      ExportFilterVO filters) {
 
     Sheet sheet = workbook.createSheet(table.getNameTableSchema());
     List<FieldSchemaVO> fieldSchemas = table.getRecordSchema().getFieldSchema();
@@ -258,7 +265,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
     for (int numPage = 1; totalRecords >= 0; totalRecords = totalRecords - batchSize, numPage++) {
       for (RecordValue record : fileCommon.getRecordValuesPaginated(datasetId,
-          table.getIdTableSchema(), PageRequest.of(numPage, batchSize))) {
+          table.getIdTableSchema(), PageRequest.of(numPage, batchSize), filters)) {
         Row row = sheet.createRow(nRow++);
 
         List<FieldValue> fields =

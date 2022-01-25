@@ -35,6 +35,7 @@ import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -735,10 +736,11 @@ public class DatasetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param mimeType the mime type
+   * @param exportFilterVO the export filter VO
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/exportFile")
+  @PostMapping(value = "/exportFile")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @ApiOperation(value = "Export file with data", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully export"),
@@ -751,7 +753,8 @@ public class DatasetControllerImpl implements DatasetController {
           example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
               required = false) String tableSchemaId,
       @ApiParam(type = "String", value = "mimeType (file extension)",
-          example = "csv") @RequestParam("mimeType") String mimeType) {
+          example = "csv") @RequestParam("mimeType") String mimeType,
+      @RequestBody ExportFilterVO exportFilterVO) {
     String tableName =
         null != tableSchemaId ? datasetSchemaService.getTableSchemaName(null, tableSchemaId)
             : datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
@@ -761,7 +764,7 @@ public class DatasetControllerImpl implements DatasetController {
           EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
     try {
-      fileTreatmentHelper.exportFile(datasetId, mimeType, tableSchemaId, tableName);
+      fileTreatmentHelper.exportFile(datasetId, mimeType, tableSchemaId, tableName, exportFilterVO);
     } catch (EEAException | IOException e) {
       LOG_ERROR.info("Error exporting table data from dataset id {}.", datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
