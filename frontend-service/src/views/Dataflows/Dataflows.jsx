@@ -56,7 +56,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 const { parseDataflows, sortDataflows } = DataflowsUtils;
 const { permissions } = config;
 
-const Dataflows = () => {
+export const Dataflows = () => {
   const { errorType: dataflowsErrorType } = useParams();
 
   const resetDialogsStore = useResetRecoilState(dialogsStore);
@@ -218,9 +218,9 @@ const Dataflows = () => {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'table',
       isVisible: isAdmin,
-      label: 'manageWebformsConfiguration',
+      label: 'manageWebformsLeftBarButton',
       onClick: () => manageDialogs('isManageWebformsDialogVisible', true),
-      title: 'manageWebformsConfiguration'
+      title: 'manageWebformsLeftBarButton'
     };
 
     leftSideBarContext.addModels(
@@ -768,5 +768,3 @@ const Dataflows = () => {
     </div>
   );
 };
-
-export { Dataflows };

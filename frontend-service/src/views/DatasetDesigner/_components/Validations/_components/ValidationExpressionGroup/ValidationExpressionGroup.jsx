@@ -16,7 +16,7 @@ import { ValidationExpressionSelector } from '../ValidationExpressionSelector';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const ValidationExpressionGroup = ({
+export const ValidationExpressionGroup = ({
   expressionType,
   expressionValues,
   fieldType,
@@ -144,4 +144,3 @@ const ValidationExpressionGroup = ({
 
   return layout ? layouts[layout] : layouts['default'];
 };
-export { ValidationExpressionGroup };

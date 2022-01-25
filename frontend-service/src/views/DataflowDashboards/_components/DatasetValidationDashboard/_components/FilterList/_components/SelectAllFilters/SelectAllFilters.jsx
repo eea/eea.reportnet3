@@ -6,7 +6,7 @@ import styles from './SelectAllFilters.module.scss';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const SelectAllFilters = ({ datasetSchemaId, filterDispatch, filters, id, labels }) => {
+export const SelectAllFilters = ({ datasetSchemaId, filterDispatch, filters, id, labels }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [isChecked, setIsChecked] = useState(true);
@@ -38,5 +38,3 @@ const SelectAllFilters = ({ datasetSchemaId, filterDispatch, filters, id, labels
     </li>
   );
 };
-
-export { SelectAllFilters };

@@ -28,7 +28,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const Tab = ({
+export const Tab = ({
   addTab,
   ariaControls,
   checkEditingTabs,
@@ -612,5 +612,3 @@ const Tab = ({
     </Fragment>
   );
 };
-
-export { Tab };

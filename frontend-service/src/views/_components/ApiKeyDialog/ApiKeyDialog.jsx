@@ -15,7 +15,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { DataflowService } from 'services/DataflowService';
 
-const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCustodian, manageDialogs }) => {
+export const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCustodian, manageDialogs }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [apiKey, setApiKey] = useState('');
@@ -142,5 +142,3 @@ const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible, isCus
     </Dialog>
   );
 };
-
-export { ApiKeyDialog };

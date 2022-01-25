@@ -12,7 +12,7 @@ import { Spinner } from 'views/_components/Spinner';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const DataflowsList = ({
+export const DataflowsList = ({
   className,
   filteredData,
   isAdmin,
@@ -41,17 +41,17 @@ const DataflowsList = ({
             reorderDataflows={reorderDataflows}
           />
         );
-
       case config.dataflowType.REFERENCE.key:
         return <ReferencedDataflowItem dataflow={dataflow} reorderDataflows={reorderDataflows} />;
-
       default:
         break;
     }
   };
 
   const renderContent = () => {
-    if (isLoading) return <Spinner style={{ top: 0 }} />;
+    if (isLoading) {
+      return <Spinner style={{ top: 0 }} />;
+    }
 
     if (isEmpty(filteredData)) {
       const emptyDataflowsMessage = {
@@ -64,19 +64,17 @@ const DataflowsList = ({
       return <div className={styles.noDataflows}>{resourcesContext.messages[emptyDataflowsMessage[visibleTab]]}</div>;
     }
 
-    return !isEmpty(filteredData) ? (
-      filteredData.map((dataflow, i) => (
-        <Fragment key={dataflow.id}>
-          {renderDataflowItem(dataflow)}
-          {!isFilteredByPinned() && pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
-        </Fragment>
-      ))
-    ) : (
-      <div className={styles.noDataflows}>{resourcesContext.messages['noDataflowsWithSelectedParameters']}</div>
-    );
+    if (isEmpty(filteredData)) {
+      return <div className={styles.noDataflows}>{resourcesContext.messages['noDataflowsWithSelectedParameters']}</div>;
+    }
+
+    return filteredData.map((dataflow, i) => (
+      <Fragment key={dataflow.id}>
+        {renderDataflowItem(dataflow)}
+        {!isFilteredByPinned() && pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
+      </Fragment>
+    ));
   };
 
   return <div className={`${styles.wrap} ${className}`}>{renderContent()}</div>;
 };
-
-export { DataflowsList };
