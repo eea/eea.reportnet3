@@ -29,7 +29,7 @@ export const HTTPRequester = (() => {
 
     update: options => axios.put(`${baseURL}${options.url}`, options.data, { headers: options.headers }),
 
-    delete: options => axios.delete(`${baseURL}${options.url}`, options.data, { headers: options.headers }),
+    delete: options => axios.delete(`${baseURL}${options.url}`, { data: options.data, headers: options.headers }),
 
     postWithFiles: options => axios.post(`${baseURL}${options.url}`, options.data, { headers: options.headers }),
 
