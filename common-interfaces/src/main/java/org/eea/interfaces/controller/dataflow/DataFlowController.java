@@ -193,12 +193,17 @@ public interface DataFlowController {
   /**
    * Gets the public dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the public dataflows
    */
   @PostMapping("/getPublicDataflows")
   PaginatedDataflowVO getPublicDataflows(@RequestBody Map<String, String> filters,
-      @RequestParam String orderHeader, @RequestParam boolean asc, @RequestParam Integer sizePage,
-      @RequestParam Integer numPage);
+      @RequestParam String orderHeader, @RequestParam boolean asc, @RequestParam Integer pageSize,
+      @RequestParam Integer pageNum);
 
   /**
    * Gets the public dataflows.

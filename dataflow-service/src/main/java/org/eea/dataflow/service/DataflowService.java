@@ -148,8 +148,13 @@ public interface DataflowService {
   /**
    * Gets the public dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param sizePage the size page
+   * @param numPage the num page
    * @return the public dataflows
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   PaginatedDataflowVO getPublicDataflows(Map<String, String> filters, String orderHeader,
       boolean asc, Integer sizePage, Integer numPage) throws EEAException;

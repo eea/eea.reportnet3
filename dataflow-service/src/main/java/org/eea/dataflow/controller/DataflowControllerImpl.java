@@ -652,6 +652,11 @@ public class DataflowControllerImpl implements DataFlowController {
   /**
    * Gets the public dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the public dataflows
    */
   @Override
@@ -660,10 +665,10 @@ public class DataflowControllerImpl implements DataFlowController {
   public PaginatedDataflowVO getPublicDataflows(
       @RequestBody(required = false) Map<String, String> filters,
       @RequestParam(required = false) String orderHeader,
-      @RequestParam(required = false) boolean asc, @RequestParam Integer sizePage,
-      @RequestParam Integer numPage) {
+      @RequestParam(required = false) boolean asc, @RequestParam Integer pageSize,
+      @RequestParam Integer pageNum) {
     try {
-      return dataflowService.getPublicDataflows(filters, orderHeader, asc, sizePage, numPage);
+      return dataflowService.getPublicDataflows(filters, orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "An error happenned trying to retrieve the dataflows");

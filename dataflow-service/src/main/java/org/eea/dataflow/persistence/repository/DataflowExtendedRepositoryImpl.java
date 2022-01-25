@@ -27,18 +27,18 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   /** The Constant QUERY_JSON. */
   private static final String QUERY_JSON = "with doc as (    \r\n"
       + "select json_array_elements(asjsonconverter) as docaux from cast (:aux as json) asjsonconverter),\r\n"
-      + "obligationtable as (select (docaux ->> 'obligationId' ) as obligationId,\r\n"
-      + "(docaux ->> 'oblTitle' ) as oblTitle,\r\n"
+      + "obligationtable as (select (docaux ->> 'obligationId' ) as obligation_id,\r\n"
+      + "(docaux ->> 'oblTitle' ) as obligation,\r\n"
       + "(docaux ->> 'description' ) as description,\r\n"
       + "(docaux ->> 'validSince' ) as validSince,\r\n" + "(docaux ->> 'validTo' ) as validTo,\r\n"
       + "(docaux ->> 'comment' ) as comment,\r\n"
       + "(docaux ->> 'nextDeadline' ) as nextDeadline,\r\n"
-      + "(docaux ->> 'legalInstrument' ) as legalInstrument,\r\n"
+      + "(docaux ->> 'legalInstrument' ) as legal_instrument,\r\n"
       + "(docaux ->> 'client' ) as client,\r\n" + "(docaux ->> 'countries' ) as countries,\r\n"
       + "(docaux ->> 'issues' ) as issues,\r\n" + "(docaux ->> 'reportFreq' ) as reportFreq,\r\n"
       + "(docaux ->> 'reportFreqDetail' ) as reportFreqDetail\r\n" + "from doc)\r\n"
-      + "select d.*,ot.legalInstrument,ot.oblTitle,ot.nextDeadline from obligationtable ot inner join dataflow d \r\n"
-      + "on d.obligation_id  = cast(ot.obligationId as integer)";
+      + "select d.*,ot.legal_instrument,ot.obligation from obligationtable ot inner join dataflow d \r\n"
+      + "on d.obligation_id  = cast(ot.obligation_id as integer)";
 
   /** The Constant DATAFLOW_PUBLIC. */
   private static final String DATAFLOW_PUBLIC = " show_public_info = true";
@@ -49,8 +49,6 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   /** The Constant ORDER_BY. */
   private static final String ORDER_BY = " order by %s %s";
 
-  /** The Constant GROUP_BY. */
-  private static final String GROUP_BY = " group by d.id";
 
   /**
    * Find completed.

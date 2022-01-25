@@ -652,16 +652,21 @@ public class DataflowServiceImpl implements DataflowService {
   /**
    * Gets the public dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the public dataflows
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public PaginatedDataflowVO getPublicDataflows(Map<String, String> filters, String orderHeader,
-      boolean asc, Integer sizePage, Integer numPage) throws EEAException {
+      boolean asc, Integer pageSize, Integer pageNum) throws EEAException {
 
     // get obligations
     try {
-      Pageable pageable = PageRequest.of(numPage, sizePage);
+      Pageable pageable = PageRequest.of(pageNum, pageSize);
       List<ObligationVO> obligations =
           obligationControllerZull.findOpenedObligations(null, null, null, null, null);
       ObjectMapper objectMapper = new ObjectMapper();
