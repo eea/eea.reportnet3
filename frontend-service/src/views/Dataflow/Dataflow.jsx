@@ -414,21 +414,25 @@ const Dataflow = () => {
   };
 
   const shareRightsFooterDialogFooter = usersType => {
-    const isAddButtonHidden = isBusinessDataflow && !isAdmin && !isSteward;
+    const renderAddButtonShareRights = () => {
+      const isAddButtonHidden = isBusinessDataflow && usersType === usersTypes.REQUESTERS && !isAdmin && !isSteward;
 
-    return (
-      <div className={styles.buttonsRolesFooter}>
-        {isAddButtonHidden ? null : (
+      if (!isAddButtonHidden) {
+        return (
           <Button
             className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink`}
             icon="plus"
             label={resourcesContext.messages['add']}
             onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
           />
-        )}
+        );
+      }
+    };
 
+    return (
+      <div className={styles.buttonsRolesFooter}>
+        {renderAddButtonShareRights()}
         {renderValidateReportersButton(usersType)}
-
         <Button
           className={`p-button-secondary p-button-animated-blink`}
           icon="cancel"
