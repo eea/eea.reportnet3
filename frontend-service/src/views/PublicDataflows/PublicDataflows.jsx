@@ -34,7 +34,7 @@ export const PublicDataflows = () => {
   const [goToPage, setGoToPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [pageInputTooltip, setPageInputTooltip] = useState(resourcesContext.messages['currentPageInfoMessage']);
-  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
+  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 100, pageNum: 0 });
   const [publicDataflows, setPublicDataflows] = useState([]);
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOWS });
@@ -184,7 +184,7 @@ export const PublicDataflows = () => {
           onPageChange={onPaginate}
           rightContent={renderPaginatorRecordsCount()}
           rows={numberRows}
-          rowsPerPageOptions={[5, 10, 15]}
+          rowsPerPageOptions={[100, 150, 200]}
           template={currentPageTemplate}
           totalRecords={publicDataflows.length}
         />
