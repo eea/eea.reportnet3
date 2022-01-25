@@ -30,6 +30,7 @@ import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
@@ -651,13 +652,27 @@ public class DataflowControllerImpl implements DataFlowController {
   /**
    * Gets the public dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the public dataflows
    */
   @Override
-  @GetMapping("/getPublicDataflows")
+  @PostMapping("/getPublicDataflows")
   @ApiOperation(value = "Gets all the public dataflows", hidden = true)
-  public List<DataflowPublicVO> getPublicDataflows() {
-    return dataflowService.getPublicDataflows();
+  public PaginatedDataflowVO getPublicDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam Integer pageSize,
+      @RequestParam Integer pageNum) {
+    try {
+      return dataflowService.getPublicDataflows(filters, orderHeader, asc, pageSize, pageNum);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "An error happenned trying to retrieve the dataflows");
+    }
   }
 
   /**
