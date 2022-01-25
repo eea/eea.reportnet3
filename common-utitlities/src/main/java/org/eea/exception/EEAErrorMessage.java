@@ -697,6 +697,9 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_FILE_NO_HEADERS_MATCHING. */
   public static final String ERROR_FILE_NO_HEADERS_MATCHING = "No headers matching FieldSchemas";
 
+  /** The Constant DATAFLOW_ERROR. {@value}. */
+  public static final String DATAFLOW_GET_ERROR = "Error getting the dataflows";
+
   /**
    * Instantiates a new EEA error message.
    */

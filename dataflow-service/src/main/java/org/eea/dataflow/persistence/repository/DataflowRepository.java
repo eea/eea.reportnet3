@@ -228,6 +228,15 @@ public interface DataflowRepository
    */
   List<Dataflow> findByShowPublicInfoTrue();
 
+
+  /**
+   * Count by show public info.
+   *
+   * @param showPublicInfo the show public info
+   * @return the long
+   */
+  Long countByShowPublicInfo(@Param("showPublicInfo") boolean showPublicInfo);
+
   /**
    * Find public dataflows by country code.
    *

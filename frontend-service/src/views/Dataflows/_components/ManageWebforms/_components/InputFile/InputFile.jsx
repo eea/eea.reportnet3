@@ -43,7 +43,7 @@ export const InputFile = ({
       return (
         <div className={styles.messageWrapper}>
           <div className={styles.message}>
-            <ErrorMessage message={resourcesContext.messages['inputFileButtonSelected']} />
+            <ErrorMessage message={resourcesContext.messages['fileNotSelectedError']} />
           </div>
         </div>
       );
