@@ -19,12 +19,6 @@ export const shareRightsReducer = (state, { type, payload }) => {
     case 'ON_EDIT_USER_RIGHT':
       return { ...state, isEditingModal: payload.isEditingModal, userRight: payload.userRight };
 
-    case 'ON_LOAD_FILTERED_DATA':
-      return { ...state, filteredData: payload.userRightList };
-
-    case 'ON_PAGINATE':
-      return { ...state, pagination: payload.pagination };
-
     case 'ON_ROLE_CHANGE':
       return { ...state, userRight: { ...state.userRight, role: payload.role } };
 
