@@ -646,11 +646,11 @@ const Dataflows = () => {
 
   const onChangeCurrentPage = event => {
     if (event.key === 'Enter' && goToPage !== '' && goToPage !== pagination.first + 1) {
-      var pc = Math.ceil(filteredData.length / pagination.numberRows) || 1;
-      var p = Math.floor(event.target.value - 1);
+      const pc = Math.ceil(filteredData.length / pagination.numberRows) || 1;
+      const p = Math.floor(event.target.value - 1);
 
       if (p >= 0 && p < pc) {
-        var newPageState = {
+        const newPageState = {
           firstRow: (event.target.value - 1) * pagination.numberRows,
           numberRows: pagination.numberRows,
           pageNum: p
