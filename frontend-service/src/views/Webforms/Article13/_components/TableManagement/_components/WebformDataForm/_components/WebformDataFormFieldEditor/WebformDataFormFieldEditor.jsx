@@ -14,7 +14,7 @@ import { RecordUtils } from 'views/_functions/Utils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const WebformDataFormFieldEditor = ({
+export const WebformDataFormFieldEditor = ({
   autoFocus = false,
   column,
   field,
@@ -35,21 +35,19 @@ const WebformDataFormFieldEditor = ({
   const getId = item =>
     item.substring(item.indexOf('#') + 1, item.indexOf(' ') !== -1 ? item.indexOf(' ') : item.length);
 
-  const renderCodelistDropdown = (field, fieldValue) => {
-    return (
-      <Dropdown
-        appendTo={document.body}
-        disabled={column.readOnly}
-        onChange={e => onChangeForm(field, e.target.value.value)}
-        optionLabel="itemType"
-        options={RecordUtils.getCodelistItemsWithEmptyOption(column, resourcesContext.messages['noneCodelist'])}
-        value={RecordUtils.getCodelistValue(
-          RecordUtils.getCodelistItemsWithEmptyOption(column, resourcesContext.messages['noneCodelist']),
-          fieldValue
-        )}
-      />
-    );
-  };
+  const renderCodelistDropdown = (field, fieldValue) => (
+    <Dropdown
+      appendTo={document.body}
+      disabled={column.readOnly}
+      onChange={e => onChangeForm(field, e.target.value.value)}
+      optionLabel="itemType"
+      options={RecordUtils.getCodelistItemsWithEmptyOption(column, resourcesContext.messages['noneCodelist'])}
+      value={RecordUtils.getCodelistValue(
+        RecordUtils.getCodelistItemsWithEmptyOption(column, resourcesContext.messages['noneCodelist']),
+        fieldValue
+      )}
+    />
+  );
 
   const renderMultiselectCodelist = (field, fieldValue) => {
     if (TextUtils.areEquals(field, 'listofsinglepams') && hasSingle && !isEmpty(fieldValue)) {
@@ -60,6 +58,7 @@ const WebformDataFormFieldEditor = ({
       itemType: codelistItem,
       value: TextUtils.areEquals(field, 'listofsinglepams') ? getId(codelistItem) : codelistItem
     }));
+
     return (
       <MultiSelect
         appendTo={document.body}
@@ -110,5 +109,3 @@ const WebformDataFormFieldEditor = ({
 
   return <Fragment>{renderFieldEditor()}</Fragment>;
 };
-
-export { WebformDataFormFieldEditor };

@@ -17,7 +17,13 @@ import { MetadataUtils } from 'views/_functions/Utils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdateData, setNewDatasetDialog }) => {
+export const NewDatasetSchemaForm = ({
+  dataflowId,
+  datasetSchemaInfo,
+  onCreate,
+  onUpdateData,
+  setNewDatasetDialog
+}) => {
   const { hideLoading, showLoading } = useContext(LoadingContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -167,5 +173,3 @@ const NewDatasetSchemaForm = ({ dataflowId, datasetSchemaInfo, onCreate, onUpdat
     </form>
   );
 };
-
-export { NewDatasetSchemaForm };

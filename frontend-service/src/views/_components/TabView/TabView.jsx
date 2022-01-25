@@ -18,7 +18,7 @@ import { Tab } from './_components/Tab';
 
 import { QuerystringUtils, TabsUtils } from 'views/_functions/Utils';
 
-const TabView = ({
+export const TabView = ({
   activeIndex = -1,
   checkEditingTabs,
   children,
@@ -375,5 +375,3 @@ TabView.propTypes = {
   renderActiveOnly: PropTypes.bool,
   style: PropTypes.object
 };
-
-export { TabView };

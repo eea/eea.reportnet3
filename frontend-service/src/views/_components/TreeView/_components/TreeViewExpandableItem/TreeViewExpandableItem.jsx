@@ -10,7 +10,7 @@ import { Button } from 'views/_components/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const TreeViewExpandableItem = ({
+export const TreeViewExpandableItem = ({
   buttons,
   children,
   expanded = true,
@@ -28,10 +28,8 @@ const TreeViewExpandableItem = ({
       if (!isUndefined(onExpandTree)) {
         onExpandTree();
       }
-    } else {
-      if (!isUndefined(onCollapseTree)) {
-        onCollapseTree();
-      }
+    } else if (!isUndefined(onCollapseTree)) {
+      onCollapseTree();
     }
   }, [isOpen]);
 
@@ -41,7 +39,7 @@ const TreeViewExpandableItem = ({
 
   const renderHeader = () => {
     const width = 90 / items.length;
-    return items.map((item, i) =>
+    return items.map(item =>
       !isUndefined(item.type) && item.type === 'box' ? (
         <div className={styles.defaultHeaderItem} key={uniqueId()} style={{ width: `${width}%` }}>
           <span className={item.className}>{item.label}</span>
@@ -54,8 +52,8 @@ const TreeViewExpandableItem = ({
     );
   };
 
-  const renderButtons = () => {
-    return !isUndefined(buttons)
+  const renderButtons = () =>
+    !isUndefined(buttons)
       ? buttons.map((button, i) => (
           <Button
             className={`${button.className} ${
@@ -76,11 +74,10 @@ const TreeViewExpandableItem = ({
           />
         ))
       : null;
-  };
 
-  const renderInfoButtons = () => {
-    return !isUndefined(infoButtons)
-      ? infoButtons.map((button, i) => (
+  const renderInfoButtons = () =>
+    !isUndefined(infoButtons)
+      ? infoButtons.map(button => (
           <Button
             className={`${button.className} ${styles.defaultInfoButton}`}
             icon={button.icon}
@@ -93,7 +90,6 @@ const TreeViewExpandableItem = ({
           />
         ))
       : null;
-  };
 
   return (
     <Fragment>
@@ -120,5 +116,3 @@ const TreeViewExpandableItem = ({
     </Fragment>
   );
 };
-
-export { TreeViewExpandableItem };

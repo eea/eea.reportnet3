@@ -9,7 +9,7 @@ import { InputText } from 'views/_components/InputText';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const AttachmentEditor = ({
+export const AttachmentEditor = ({
   isAttachmentEditorVisible,
   onCancelSaveAttachment,
   onSaveAttachment,
@@ -157,5 +157,3 @@ const AttachmentEditor = ({
     )
   );
 };
-
-export { AttachmentEditor };
