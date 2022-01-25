@@ -770,6 +770,7 @@ const Dataflows = () => {
         {renderPaginator()}
         <DataflowsList
           className="dataflowList-accepted-help-step"
+          data={dataflowsState[tabId]}
           filteredData={filteredData}
           isAdmin={isAdmin}
           isCustodian={isCustodian}
