@@ -212,7 +212,6 @@ export const EUDataset = () => {
 
       const tableSchema = datasetSchema.tables.map(tableSchema => {
         tableSchemaNamesList.push(tableSchema.tableSchemaName);
-
         return {
           description: tableSchema['tableSchemaDescription'],
           fixedNumber: tableSchema['tableSchemaFixedNumber'],
@@ -223,6 +222,7 @@ export const EUDataset = () => {
           id: tableSchema['tableSchemaId'],
           name: tableSchema['tableSchemaName'],
           notEmpty: tableSchema['tableSchemaNotEmpty'],
+          numberOfFields: tableSchema.records ? tableSchema.records[0].fields?.length : 0,
           readOnly: tableSchema['tableSchemaReadOnly'],
           toPrefill: tableSchema['tableSchemaToPrefill']
         };
