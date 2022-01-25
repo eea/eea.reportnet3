@@ -14,6 +14,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const DataflowsList = ({
   className,
+  data,
   filteredData,
   isAdmin,
   isCustodian,
@@ -53,7 +54,7 @@ export const DataflowsList = ({
       return <Spinner style={{ top: 0 }} />;
     }
 
-    if (isEmpty(filteredData)) {
+    if (isEmpty(data)) {
       const emptyDataflowsMessage = {
         business: 'thereAreNoBusinessDataflows',
         reference: 'thereAreNoReferenceDataflows',
