@@ -21,10 +21,14 @@ const GoTopButton = ({ parentRef, referenceMargin }) => {
 
   useEffect(() => {
     const observer = new IntersectionObserver(callbackFunction, options);
-    if (parentRef?.current) observer.observe(parentRef.current);
+    if (parentRef?.current) {
+      observer.observe(parentRef.current);
+    }
 
     return () => {
-      if (parentRef?.current) observer.unobserve(parentRef.current);
+      if (parentRef?.current) {
+        observer.unobserve(parentRef.current);
+      }
       observer.disconnect();
     };
   }, [parentRef, options]);
