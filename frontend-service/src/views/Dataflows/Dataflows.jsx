@@ -91,7 +91,7 @@ const Dataflows = () => {
     isValidatingAllDataflowsUsers: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
-    pagination: { firstRow: 0, numberRows: 5, pageNum: 0 },
+    pagination: { firstRow: 0, numberRows: 100, pageNum: 0 },
     pinnedSeparatorIndex: -1,
     reference: [],
     reporting: []
@@ -414,7 +414,7 @@ const Dataflows = () => {
       userContext.setCurrentDataflowType(currentTabDataflowType);
     }
     dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
-    onChangePagination({ firstRow: 0, numberRows: 5, pageNum: 0 });
+    onChangePagination({ firstRow: 0, numberRows: 100, pageNum: 0 });
     setGoToPage(1);
   };
 
@@ -726,7 +726,7 @@ const Dataflows = () => {
           onPageChange={onPaginate}
           rightContent={renderPaginatorRecordsCount()}
           rows={pagination.numberRows}
-          rowsPerPageOptions={[5, 10, 15]}
+          rowsPerPageOptions={[100, 150, 200]}
           template={currentPageTemplate}
           totalRecords={filteredData.length}
         />
