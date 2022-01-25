@@ -19,7 +19,7 @@ export const BusinessDataflowRepository = {
       }
     }),
 
-  getAll: async (numberRows, pageNum) => await HTTPRequester.get({ url: getUrl(BusinessDataflowConfig.getAll) }),
+  getAll: async () => await HTTPRequester.get({ url: getUrl(BusinessDataflowConfig.getAll) }),
 
   update: async (dataflowId, description, obligationId, name, dataProviderGroupId, fmeUserId) =>
     await HTTPRequester.update({

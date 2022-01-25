@@ -7,8 +7,8 @@ import { ReferenceDataflowUtils } from 'services/_utils/ReferenceDataflowUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 export const ReferenceDataflowService = {
-  getAll: async (accessRoles, contextRoles, numberRows, pageNum) => {
-    const referenceDataflowsDTO = await ReferenceDataflowRepository.getAll(numberRows, pageNum);
+  getAll: async (accessRoles, contextRoles) => {
+    const referenceDataflowsDTO = await ReferenceDataflowRepository.getAll();
 
     const referenceDataflows = referenceDataflowsDTO.data.map(referenceDataflowDTO => {
       referenceDataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(

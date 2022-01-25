@@ -316,39 +316,19 @@ const Dataflows = () => {
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {
-        const data = await DataflowService.getAll(
-          userContext.accessRole,
-          userContext.contextRoles,
-          numberRows,
-          pageNum
-        );
+        const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'reporting' });
       } else if (TextUtils.areEquals(tabId, 'reference')) {
-        const data = await ReferenceDataflowService.getAll(
-          userContext.accessRole,
-          userContext.contextRoles,
-          numberRows,
-          pageNum
-        );
+        const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'reference' });
       } else if (TextUtils.areEquals(tabId, 'business')) {
-        const data = await BusinessDataflowService.getAll(
-          userContext.accessRole,
-          userContext.contextRoles,
-          numberRows,
-          pageNum
-        );
+        const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'business' });
       } else if (TextUtils.areEquals(tabId, 'citizenScience')) {
-        const data = await CitizenScienceDataflowService.getAll(
-          userContext.accessRole,
-          userContext.contextRoles,
-          numberRows,
-          pageNum
-        );
+        const data = await CitizenScienceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'citizenScience' });
       }

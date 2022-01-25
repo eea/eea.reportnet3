@@ -25,8 +25,8 @@ export const DataflowService = {
     return DataflowUtils.parseDataflowCount(dataflowsCountDTO.data);
   },
 
-  getAll: async (accessRoles, contextRoles, numberRows, pageNum) => {
-    const dataflowsDTO = await DataflowRepository.getAll(numberRows, pageNum);
+  getAll: async (accessRoles, contextRoles) => {
+    const dataflowsDTO = await DataflowRepository.getAll();
 
     const dataflows = dataflowsDTO.data.map(dataflowDTO => {
       dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);

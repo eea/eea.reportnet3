@@ -5,10 +5,7 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const ReferenceDataflowRepository = {
-  getAll: async (numberRows, pageNum) =>
-    await HTTPRequester.get({
-      url: getUrl(ReferenceDataflowConfig.getAll)
-    }),
+  getAll: async () => await HTTPRequester.get({ url: getUrl(ReferenceDataflowConfig.getAll) }),
 
   create: async (name, description, type) =>
     await HTTPRequester.post({ url: getUrl(DataflowConfig.createUpdate), data: { name, description, type } }),

@@ -5,7 +5,7 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 export const DataflowRepository = {
   countByType: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.countByType) }),
 
-  getAll: async (numberRows, pageNum) => await HTTPRequester.get({ url: getUrl(DataflowConfig.getAll) }),
+  getAll: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getAll) }),
 
   getCloneableDataflows: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getCloneableDataflows) }),
 
