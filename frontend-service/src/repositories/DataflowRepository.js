@@ -5,9 +5,9 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 export const DataflowRepository = {
   countByType: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.countByType) }),
 
-  getAll: async ({ filterBy, isAscending, pageNumber, pageSize, sortBy }) => {
+  getAll: async ({ filterBy, isAsc, numberRows, pageNum, sortBy }) => {
     return await HTTPRequester.get({
-      url: getUrl(DataflowConfig.getAll, { isAscending, pageNumber, pageSize, sortBy }),
+      url: getUrl(DataflowConfig.getAll, { isAsc, numberRows, pageNum, sortBy }),
       data: { ...filterBy }
     });
   },

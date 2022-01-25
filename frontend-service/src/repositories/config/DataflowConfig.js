@@ -11,7 +11,7 @@ export const DataflowConfig = {
   downloadPublicAllSchemasInfoFile: '/dataflow/downloadPublicSchemaInformation/{:dataflowId}',
   downloadUsersListFile: '/user/downloadUsersByCountry/{:dataflowId}/?fileName={:fileName}',
   exportSchemas: '/dataschema/export?dataflowId={:dataflowId}',
-  getAll: '/dataflow/getDataflows?asc={:isAscending}&numPage={:pageNumber}&orderHeader={:sortBy}&sizePage={:pageSize}',
+  getAll: '/dataflow/getDataflows?asc={:isAsc}&numPage={:pageNum}&orderHeader={:sortBy}&sizePage={:numberRows}',
   getCloneableDataflows: '/dataflow/cloneableDataflows',
   getAllDataflowsUserList: '/dataflow/getUserRolesAllDataflows',
   generateAllSchemasInfoFile: '/dataflow/exportSchemaInformation/{:dataflowId}',

@@ -25,12 +25,12 @@ export const DataflowService = {
     return DataflowUtils.parseDataflowCount(dataflowsCountDTO.data);
   },
 
-  getAll: async ({ accessRoles, contextRoles, filterBy, isAscending, pageNumber, pageSize, sortBy }) => {
+  getAll: async ({ accessRoles, contextRoles, filterBy, isAsc, numberRows, pageNum, sortBy }) => {
     const dataflowsDTO = await DataflowRepository.getAll({
       filterBy: DataflowUtils.parseRequestFilterBy(filterBy),
-      isAscending,
-      pageNumber,
-      pageSize,
+      isAsc,
+      numberRows,
+      pageNum,
       sortBy
     });
 

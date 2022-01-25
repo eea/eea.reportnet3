@@ -6,12 +6,12 @@ import { DataflowUtils } from 'services/_utils/DataflowUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 export const BusinessDataflowService = {
-  getAll: async ({ accessRoles, contextRoles, filterBy, isAscending, pageNumber, pageSize, sortBy }) => {
+  getAll: async ({ accessRoles, contextRoles, filterBy, isAsc, numberRows, pageNum, sortBy }) => {
     const businessDataflowsDTO = await BusinessDataflowRepository.getAll({
       filterBy: DataflowUtils.parseRequestFilterBy(filterBy),
-      isAscending,
-      pageNumber,
-      pageSize,
+      isAsc,
+      numberRows,
+      pageNum,
       sortBy
     });
     const businessDataflows = businessDataflowsDTO.data.map(businessDataflowDTO => {

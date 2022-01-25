@@ -5,9 +5,9 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const ReferenceDataflowRepository = {
-  getAll: async ({ filterBy, isAscending, pageNumber, pageSize, sortBy }) =>
+  getAll: async ({ filterBy, isAsc, numberRows, pageNum, sortBy }) =>
     await HTTPRequester.get({
-      url: getUrl(ReferenceDataflowConfig.getAll, { isAscending, pageNumber, pageSize, sortBy }),
+      url: getUrl(ReferenceDataflowConfig.getAll, { isAsc, numberRows, pageNum, sortBy }),
       data: { ...filterBy }
     }),
 

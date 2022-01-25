@@ -1,5 +1,4 @@
 export const ReferenceDataflowConfig = {
-  getAll:
-    '/dataflow/referenceDataflows?asc={:isAscending}&numPage={:pageNumber}&orderHeader={:sortBy}&sizePage={:pageSize}',
+  getAll: '/dataflow/referenceDataflows?asc={:isAsc}&numPage={:pageNum}&orderHeader={:sortBy}&sizePage={:numberRows}',
   getReferencingDataflows: '/referenceDataset/referenced/dataflow/{:referenceDataflowId}'
 };

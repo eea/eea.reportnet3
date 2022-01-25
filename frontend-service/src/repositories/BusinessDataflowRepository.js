@@ -19,9 +19,9 @@ export const BusinessDataflowRepository = {
       }
     }),
 
-  getAll: async ({ filterBy, isAscending, pageNumber, pageSize, sortBy }) =>
+  getAll: async ({ filterBy, isAsc, numberRows, pageNum, sortBy }) =>
     await HTTPRequester.get({
-      url: getUrl(BusinessDataflowConfig.getAll, { isAscending, pageNumber, pageSize, sortBy }),
+      url: getUrl(BusinessDataflowConfig.getAll, { isAsc, numberRows, pageNum, sortBy }),
       data: { ...filterBy }
     }),
 

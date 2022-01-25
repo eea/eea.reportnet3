@@ -7,12 +7,12 @@ import { ReferenceDataflowUtils } from 'services/_utils/ReferenceDataflowUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 export const ReferenceDataflowService = {
-  getAll: async ({ accessRoles, contextRoles, filterBy, isAscending, pageNumber, pageSize, sortBy }) => {
+  getAll: async ({ accessRoles, contextRoles, filterBy, isAsc, numberRows, pageNum, sortBy }) => {
     const referenceDataflowsDTO = await ReferenceDataflowRepository.getAll({
       filterBy: DataflowUtils.parseRequestFilterBy(filterBy),
-      isAscending,
-      pageNumber,
-      pageSize,
+      isAsc,
+      numberRows,
+      pageNum,
       sortBy
     });
 

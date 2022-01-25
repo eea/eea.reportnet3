@@ -11,9 +11,9 @@ export const CitizenScienceDataflowRepository = {
       data: { name, description, obligation: { obligationId }, releasable: true, type: 'CITIZEN_SCIENCE' }
     }),
 
-  getAll: async ({ filterBy, isAscending, pageNumber, pageSize, sortBy }) =>
+  getAll: async ({ filterBy, isAsc, numberRows, pageNum, sortBy }) =>
     await HTTPRequester.get({
-      url: getUrl(CitizenScienceDataflowConfig.getAll, { isAscending, pageNumber, pageSize, sortBy }),
+      url: getUrl(CitizenScienceDataflowConfig.getAll, { isAsc, numberRows, pageNum, sortBy }),
       data: { ...filterBy }
     }),
 

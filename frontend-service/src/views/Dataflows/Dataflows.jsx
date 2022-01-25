@@ -313,13 +313,17 @@ export const Dataflows = () => {
       return dataflow;
     });
 
-  const getDataflows = async (numberRows, pageNum) => {
+  const getDataflows = async () => {
     setLoading(true);
-    const isAscending = true;
+    const isAsc = true;
     const pageNumber = 0;
     const pageSize = 10;
     const sortBy = 'name';
+
     const { accessRole: accessRoles, contextRoles } = userContext;
+    const { numberRows, pageNum } = pagination;
+    // pageNumber === pageNum
+    // pageSize === numberRows
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {
@@ -327,9 +331,9 @@ export const Dataflows = () => {
           accessRoles,
           contextRoles,
           filterBy,
-          isAscending,
-          pageNumber,
-          pageSize,
+          isAsc,
+          numberRows,
+          pageNum,
           sortBy
         });
 
@@ -340,9 +344,9 @@ export const Dataflows = () => {
           accessRoles,
           contextRoles,
           filterBy,
-          isAscending,
-          pageNumber,
-          pageSize,
+          isAsc,
+          numberRows,
+          pageNum,
           sortBy
         });
 
@@ -353,9 +357,9 @@ export const Dataflows = () => {
           accessRoles,
           contextRoles,
           filterBy,
-          isAscending,
-          pageNumber,
-          pageSize,
+          isAsc,
+          numberRows,
+          pageNum,
           sortBy
         });
 
@@ -366,9 +370,9 @@ export const Dataflows = () => {
           accessRoles,
           contextRoles,
           filterBy,
-          isAscending,
-          pageNumber,
-          pageSize,
+          isAsc,
+          numberRows,
+          pageNum,
           sortBy
         });
 
