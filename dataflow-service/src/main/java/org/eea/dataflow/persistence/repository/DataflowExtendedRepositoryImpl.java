@@ -41,10 +41,10 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "on d.obligation_id  = cast(ot.obligation_id as integer)";
 
   /** The Constant DATAFLOW_PUBLIC. */
-  private static final String DATAFLOW_PUBLIC = " show_public_info = true";
+  private static final String DATAFLOW_PUBLIC = " show_public_info = :public ";
 
   /** The Constant LIKE. */
-  private static final String LIKE = " %s LIKE '%%%s%%'";
+  private static final String LIKE = " %s LIKE :%s ";
 
   /** The Constant ORDER_BY. */
   private static final String ORDER_BY = " order by %s %s";
@@ -89,7 +89,8 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     stringQuery.append(QUERY_JSON);
     createQuery(isPublic, filters, orderHeader, asc, stringQuery);
     Query query = entityManager.createNativeQuery(stringQuery.toString(), Dataflow.class);
-    query.setParameter("aux", json);
+    setParameters(json, isPublic, filters, query);
+
     if (null != pageable) {
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
@@ -118,8 +119,29 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     createQuery(isPublic, filters, orderHeader, asc, stringQuery);
     stringQuery.append(")select count(*) from tableaux");
     Query query = entityManager.createNativeQuery(stringQuery.toString());
-    query.setParameter("aux", json);
+    setParameters(json, isPublic, filters, query);
     return Long.valueOf(query.getResultList().get(0).toString());
+  }
+
+  /**
+   * Sets the parameters.
+   *
+   * @param json the json
+   * @param isPublic the is public
+   * @param filters the filters
+   * @param query the query
+   */
+  private void setParameters(String json, boolean isPublic, Map<String, String> filters,
+      Query query) {
+    query.setParameter("aux", json);
+    if (MapUtils.isNotEmpty(filters)) {
+      for (String key : filters.keySet()) {
+        query.setParameter(key, "%" + filters.get(key) + "%");
+      }
+    }
+    if (isPublic) {
+      query.setParameter("public", isPublic);
+    }
   }
 
   /**
@@ -141,7 +163,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       if (MapUtils.isNotEmpty(filters)) {
         for (String key : filters.keySet()) {
           addAnd(stringQuery, addAnd);
-          stringQuery.append(String.format(LIKE, key, filters.get(key)));
+          stringQuery.append(String.format(LIKE, key, key));
           addAnd = true;
         }
       }
