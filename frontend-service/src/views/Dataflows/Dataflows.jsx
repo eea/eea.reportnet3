@@ -76,6 +76,7 @@ const Dataflows = () => {
     dataflowsCount: {},
     dataflowsCountFirstLoad: false,
     filteredData: { business: [], citizenScience: [], reference: [], reporting: [] },
+    goToPage: 1,
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
     isCitizenScienceDataflowDialogVisible: false,
@@ -89,9 +90,8 @@ const Dataflows = () => {
     isUserListVisible: false,
     isValidatingAllDataflowsUsers: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
-    pagination: { firstRow: 0, numberRows: 5, pageNum: 0 },
-    goToPage: 1,
     pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
+    pagination: { firstRow: 0, numberRows: 5, pageNum: 0 },
     pinnedSeparatorIndex: -1,
     reference: [],
     reporting: []
@@ -693,14 +693,14 @@ const Dataflows = () => {
 
   const onChangePagination = pagination => dataflowsDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
 
-  const setGoToPage = value => dataflowsDispatch({ type: 'SET_GO_TO_PAGE', payload: value });
-
-  const setPageInputTooltip = value => dataflowsDispatch({ type: 'SET_PAGE_INPUT_TOOLTIP', payload: value });
-
   const onPaginate = event => {
     setGoToPage(event.page + 1);
     onChangePagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
   };
+
+  const setGoToPage = value => dataflowsDispatch({ type: 'SET_GO_TO_PAGE', payload: value });
+
+  const setPageInputTooltip = value => dataflowsDispatch({ type: 'SET_PAGE_INPUT_TOOLTIP', payload: value });
 
   const currentPageTemplate = {
     layout: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport',
@@ -753,6 +753,7 @@ const Dataflows = () => {
       );
     }
   };
+
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
