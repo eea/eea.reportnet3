@@ -5,7 +5,7 @@ import styles from './GoTopButton.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-const GoTopButton = ({ parentRef, referenceMargin }) => {
+export const GoTopButton = ({ parentRef, referenceMargin }) => {
   const [isVisible, setIsVisible] = useState(false);
 
   const callbackFunction = entries => {
@@ -43,5 +43,3 @@ const GoTopButton = ({ parentRef, referenceMargin }) => {
     </div>
   );
 };
-
-export { GoTopButton };

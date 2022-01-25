@@ -56,7 +56,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 const { parseDataflows, sortDataflows } = DataflowsUtils;
 const { permissions } = config;
 
-const Dataflows = () => {
+export const Dataflows = () => {
   const { errorType: dataflowsErrorType } = useParams();
 
   const resetDialogsStore = useResetRecoilState(dialogsStore);
@@ -719,5 +719,3 @@ const Dataflows = () => {
     </div>
   );
 };
-
-export { Dataflows };

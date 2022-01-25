@@ -62,7 +62,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const Dataflow = () => {
+export const Dataflow = () => {
   const navigate = useNavigate();
   const { dataflowId, representativeId } = useParams();
 
@@ -1579,5 +1579,3 @@ const Dataflow = () => {
     </div>
   );
 };
-
-export { Dataflow };

@@ -14,7 +14,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { MetadataUtils } from 'views/_functions/Utils';
 
-const GlobalNotifications = () => {
+export const GlobalNotifications = () => {
   const notificationContext = useContext(NotificationContext);
 
   useEffect(() => {
@@ -358,5 +358,3 @@ const GlobalNotifications = () => {
 
   return <div />;
 };
-
-export { GlobalNotifications };

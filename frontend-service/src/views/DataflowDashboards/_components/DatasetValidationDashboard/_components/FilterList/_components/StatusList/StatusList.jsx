@@ -4,7 +4,7 @@ import styles from './StatusList.module.scss';
 
 import { LevelError } from 'views/_components/LevelError';
 
-const StatusList = ({ datasetSchemaId, filterDispatch, levelErrors, statusFilters }) => {
+export const StatusList = ({ datasetSchemaId, filterDispatch, levelErrors, statusFilters }) => {
   const errorListFilters = levelErrors.map(errorLevel => {
     const errorLevelStr = errorLevel.toString();
     const errorLevelLower = errorLevelStr.toLowerCase();
@@ -30,7 +30,6 @@ const StatusList = ({ datasetSchemaId, filterDispatch, levelErrors, statusFilter
       </li>
     );
   });
+
   return <ul className={styles.list}>{errorListFilters}</ul>;
 };
-
-export { StatusList };

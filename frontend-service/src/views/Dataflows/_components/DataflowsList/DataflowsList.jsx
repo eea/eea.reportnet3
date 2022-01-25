@@ -12,7 +12,7 @@ import { Spinner } from 'views/_components/Spinner';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const DataflowsList = ({
+export const DataflowsList = ({
   className,
   filteredData,
   isAdmin,
@@ -78,5 +78,3 @@ const DataflowsList = ({
 
   return <div className={`${styles.wrap} ${className}`}>{renderContent()}</div>;
 };
-
-export { DataflowsList };
