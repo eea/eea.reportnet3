@@ -110,6 +110,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_RESTRICT_FROM_PUBLIC':
       return { ...state, restrictFromPublic: payload };
 
+    case 'SET_AUTOMATIC_REPORTING_DELETION':
+      return { ...state, automaticReportingDeletion: payload.automaticReportingDeletion };
+
     case 'RESTRICT_FROM_PUBLIC_IS_UPDATING':
       return {
         ...state,

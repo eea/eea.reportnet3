@@ -75,6 +75,7 @@ export const Dataflow = () => {
 
   const dataflowInitialState = {
     anySchemaAvailableInPublic: false,
+    automaticReportingDeletion: false,
     currentUrl: '',
     data: {},
     dataflowType: '',
@@ -315,7 +316,8 @@ export const Dataflow = () => {
         releaseableBtn: false,
         restrictFromPublicBtn: false,
         showPublicInfoBtn: false,
-        usersListBtn: false
+        usersListBtn: false,
+        automaticDeleteBtn: false
       };
     }
 
@@ -337,7 +339,8 @@ export const Dataflow = () => {
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
         isReporterOfCountry ||
-        isObserver
+        isObserver,
+      automaticDeleteBtn: !isDesign && dataflowState.data.manualAcceptance
     };
   };
 
@@ -503,6 +506,9 @@ export const Dataflow = () => {
 
   const setIsUpdatingPermissions = isUpdatingPermissions =>
     dataflowDispatch({ type: 'SET_IS_UPDATING_PERMISSIONS', payload: { isUpdatingPermissions } });
+
+  const setAutomaticReportingDeletion = automaticReportingDeletion =>
+    dataflowDispatch({ type: 'SET_AUTOMATIC_REPORTING_DELETION', payload: { automaticReportingDeletion } });
 
   useCheckNotifications(
     [
@@ -1036,6 +1042,21 @@ export const Dataflow = () => {
     }
   };
 
+  const onConfirmAutomaticReportingDeletion = async () => {
+    manageDialogs('isAutomaticReportingDeletionDialogVisible', false);
+    try {
+      dataflowDispatch({
+        type: 'SET_IS_FETCHING_DATA',
+        payload: { isFetchingData: true }
+      });
+      await DataflowService.updateAutomaticDelete(dataflowId);
+      onLoadReportingDataflow();
+    } catch (error) {
+      console.error('Dataflow - onConfirmAutomaticReportingDeletion.', error);
+      notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } }, true);
+    }
+  };
+
   const onConfirmUpdateShowPublicInfo = async () => {
     manageDialogs('isShowPublicInfoDialogVisible', false);
     try {
@@ -1069,6 +1090,16 @@ export const Dataflow = () => {
       dataflowDispatch({
         type: 'SET_SHOW_PUBLIC_INFO',
         payload: { showPublicInfo: dataflowState.data.showPublicInfo }
+      });
+    }
+  };
+
+  const onCloseAutomaticReportingDeletion = () => {
+    manageDialogs('isAutomaticReportingDeletionDialogVisible', false);
+    if (dataflowState.data.automaticReportingDeletion !== dataflowState.automaticReportingDeletion) {
+      dataflowDispatch({
+        type: 'SET_AUTOMATIC_REPORTING_DELETION',
+        payload: { automaticReportingDeletion: dataflowState.data.automaticReportingDeletion }
       });
     }
   };
@@ -1365,6 +1396,33 @@ export const Dataflow = () => {
             <label className={styles.isReleasableLabel} htmlFor="isReleasableCheckbox">
               <span className={styles.pointer} onClick={() => setIsReleaseable(!dataflowState.isReleasable)}>
                 {resourcesContext.messages['isReleasableDataflowCheckboxLabel']}
+              </span>
+            </label>
+          </ConfirmDialog>
+        )}
+
+        {dataflowState.isAutomaticReportingDeletionDialogVisible && (
+          <ConfirmDialog
+            disabledConfirm={dataflowState.automaticReportingDeletion === dataflowState.isFetchingData}
+            header={resourcesContext.messages['isAutomaticReportingDeletionDialogHeader']}
+            iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
+            labelCancel={resourcesContext.messages['cancel']}
+            labelConfirm={resourcesContext.messages['save']}
+            onConfirm={onConfirmAutomaticReportingDeletion}
+            onHide={() => onCloseAutomaticReportingDeletion()}
+            visible={dataflowState.isAutomaticReportingDeletionDialogVisible}>
+            <Checkbox
+              checked={dataflowState.automaticReportingDeletion}
+              id="isAutomaticReportingDeletionCheckbox"
+              inputId="isAutomaticReportingDeletionCheckbox"
+              onChange={() => setAutomaticReportingDeletion(!dataflowState.automaticReportingDeletion)}
+              role="checkbox"
+            />
+            <label className={styles.isAutomaticReportingDeletionLabel} htmlFor="isAutomaticReportingDeletionCheckbox">
+              <span
+                className={styles.pointer}
+                onClick={() => setAutomaticReportingDeletion(!dataflowState.automaticReportingDeletion)}>
+                {resourcesContext.messages['isAutomaticReportingDeletionCheckboxLabel']}
               </span>
             </label>
           </ConfirmDialog>
