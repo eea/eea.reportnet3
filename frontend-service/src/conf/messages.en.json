@@ -1454,11 +1454,9 @@
     "addWebformConfigurationDialogHeader": "Add webform configuration",
     "editWebformConfigurationDialogHeader": "Edit webform configuration",
     "createWebformConfigurationError": "Error creating webform configuration",
-    "editWebformError": "Error updating webform configuration",
+    "editWebformConfigurationError": "Error updating webform configuration",
     "inputFileButtonNotSelected": "Select file",
     "inputFileButtonSelected": "Update file",
-    "manageWebforms": "Manage webforms",
-    "loadWebformsError": "Error loading webforms list",
     "validating": "Validating",
     "uploading": "Uploading",
     "importWrongFileHeader": "Different number of columns.",
@@ -1468,6 +1466,8 @@
     "importReportingFailedNamefileEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Check that the file name fits the table name.",
     "importDesignFailedNamefileEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Check that the file name fits the table name.",
     "columnsSchemaLabel": "Schema columns",
-    "fileColumnsLabel": "File columns"
+    "fileColumnsLabel": "File columns",
+    "fileNotSelectedError": "File not selected",
+    "manageWebformsLeftBarButton": "Manage webforms"
   }
 }

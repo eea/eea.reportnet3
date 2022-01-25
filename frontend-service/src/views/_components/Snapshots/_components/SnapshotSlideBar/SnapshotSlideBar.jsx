@@ -19,7 +19,7 @@ import { dialogsStore } from 'views/_components/Dialog/_functions/Stores/dialogs
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
 
-const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, snapshotListData }) => {
+export const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, snapshotListData }) => {
   const openedDialogs = useRecoilValue(dialogsStore);
 
   const resourcesContext = useContext(ResourcesContext);
@@ -177,5 +177,3 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
     </Sidebar>
   );
 };
-
-export { SnapshotSlideBar };

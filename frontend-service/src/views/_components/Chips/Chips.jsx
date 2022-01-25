@@ -11,7 +11,7 @@ import Tooltip from 'primereact/tooltip';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 import classNames from 'classnames';
 
-const Chips = ({
+export const Chips = ({
   ariaLabelledBy = null,
   checkForDuplicates = false,
   className = null,
@@ -316,5 +316,3 @@ Chips.propTypes = {
   tooltipOptions: PropTypes.object,
   value: PropTypes.array
 };
-
-export { Chips };

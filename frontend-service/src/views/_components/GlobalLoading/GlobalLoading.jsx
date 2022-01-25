@@ -7,11 +7,16 @@ import { Spinner } from 'views/_components/Spinner';
 
 export const GlobalLoading = () => {
   const { loadingCount } = useContext(LoadingContext);
-  return (
-    loadingCount > 0 && (
-      <div className={styles.spinnerWrap}>
-        <Spinner className={styles.spinner} />
-      </div>
-    )
-  );
+
+  const renderSpinner = () => {
+    if (loadingCount > 0) {
+      return (
+        <div className={styles.spinnerWrap}>
+          <Spinner className={styles.spinner} />
+        </div>
+      );
+    }
+  };
+
+  return <>{renderSpinner()}</>;
 };

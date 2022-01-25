@@ -10,7 +10,7 @@ import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const ConfirmDialog = forwardRef((props, _) => {
+export const ConfirmDialog = forwardRef((props, _) => {
   const {
     children,
     className,
@@ -148,5 +148,3 @@ const ConfirmDialog = forwardRef((props, _) => {
     </div>
   );
 });
-
-export { ConfirmDialog };

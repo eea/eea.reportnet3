@@ -7,7 +7,7 @@ import styles from './Menu.module.scss';
 
 import { MenuItem } from './_components/MenuItem/MenuItem';
 
-class Menu extends Component {
+export class Menu extends Component {
   static defaultProps = {
     className: '',
     model: []
@@ -100,5 +100,3 @@ class Menu extends Component {
     );
   }
 }
-
-export { Menu };

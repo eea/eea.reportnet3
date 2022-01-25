@@ -5,7 +5,7 @@ import styles from './GoTopButton.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-const GoTopButton = ({ parentRef, referenceMargin }) => {
+export const GoTopButton = ({ parentRef, referenceMargin }) => {
   const [isVisible, setIsVisible] = useState(false);
 
   const callbackFunction = entries => {
@@ -21,10 +21,14 @@ const GoTopButton = ({ parentRef, referenceMargin }) => {
 
   useEffect(() => {
     const observer = new IntersectionObserver(callbackFunction, options);
-    if (parentRef?.current) observer.observe(parentRef.current);
+    if (parentRef?.current) {
+      observer.observe(parentRef.current);
+    }
 
     return () => {
-      if (parentRef?.current) observer.unobserve(parentRef.current);
+      if (parentRef?.current) {
+        observer.unobserve(parentRef.current);
+      }
       observer.disconnect();
     };
   }, [parentRef, options]);
@@ -39,5 +43,3 @@ const GoTopButton = ({ parentRef, referenceMargin }) => {
     </div>
   );
 };
-
-export { GoTopButton };
