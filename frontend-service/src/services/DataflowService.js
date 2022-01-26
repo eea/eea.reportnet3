@@ -377,7 +377,8 @@ export const DataflowService = {
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
     await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo),
 
-  updateAutomaticDelete: async dataflowId => await DataflowRepository.updateAutomaticDelete(dataflowId),
+  updateAutomaticDelete: async (dataflowId, automaticReportingDeletion) =>
+    await DataflowRepository.updateAutomaticDelete(dataflowId, automaticReportingDeletion),
 
   getDatasetsInfo: async dataflowId => {
     const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);
