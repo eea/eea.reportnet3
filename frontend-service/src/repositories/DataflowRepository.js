@@ -100,8 +100,7 @@ export const DataflowRepository = {
       url: getUrl(DataflowConfig.createEmptyDatasetSchema, { dataflowId, datasetSchemaName })
     }),
 
-  getPublicData: async (pageNum, numberRows) =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicData, { numPage: pageNum, sizePage: numberRows }) }),
+  getPublicData: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicData) }),
 
   get: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) }),
 

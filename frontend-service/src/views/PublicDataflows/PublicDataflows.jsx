@@ -113,10 +113,9 @@ export const PublicDataflows = () => {
   };
 
   const onLoadPublicDataflows = async () => {
-    console.log('pagination :>> ', pagination);
     setIsLoading(true);
     try {
-      const publicData = await DataflowService.getPublicData(pageNum, numberRows);
+      const publicData = await DataflowService.getPublicData();
       setPublicDataflows(publicData);
     } catch (error) {
       console.error('PublicDataflows - onLoadPublicDataflows.', error);
@@ -140,31 +139,6 @@ export const PublicDataflows = () => {
   };
 
   const renderPaginatorRecordsCount = () => {
-    // const renderFilteredRowsLabel = () => {
-    //   if (isFiltered && publicDataflows.length !== filteredData.length) {
-    //     return `${resourcesContext.messages['filtered']}: ${filteredData.length} | `;
-    //   }
-    // };
-
-    // const renderTotalRecordsLabel = () =>
-    //   `${resourcesContext.messages['totalRecords']} ${publicDataflows.length} ${' '} ${resourcesContext.messages[
-    //     'records'
-    //   ].toLowerCase()}`;
-
-    // const renderFilteredLabel = () => {
-    //   if (isFiltered && publicDataflows.length === filteredData.length) {
-    //     return ` (${resourcesContext.messages['filtered'].toLowerCase()})`;
-    //   }
-    // };
-
-    // return (
-    //   <Fragment>
-    //     {renderFilteredRowsLabel()}
-    //     {renderTotalRecordsLabel()}
-    //     {renderFilteredLabel()}
-    //   </Fragment>
-    // );
-
     return (
       <Fragment>
         {resourcesContext.messages['totalRecords']} {publicDataflows.length}{' '}
