@@ -166,7 +166,7 @@ export const PublicDataflows = () => {
 
   const renderPublicDataflowsContent = () => {
     if (isLoading) {
-      return <Spinner style={{ left: 0 }} />;
+      return <Spinner className={styles.spinner} />;
     }
 
     if (publicDataflows.length === 0) {
