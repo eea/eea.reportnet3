@@ -116,25 +116,26 @@ export const ActionsToolbar = ({
   const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => {
     const extensionsTypes = type.code.split('+');
     return {
-      command: () => onExportTableData(type.code),
+      command: () => onExportTableData(type),
       icon: extensionsTypes[0],
       label: resourcesContext.messages[type.key]
     };
   });
 
-  const onExportTableData = async fileType => {
+  const onExportTableData = async type => {
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
-      setExportTableDataName(createTableName(tableName, fileType));
+      const isExportFilteredCsv = type.key === 'exportFilteredCsv';
+      setExportTableDataName(createTableName(tableName, type.code));
       await DatasetService.exportTableData(
         datasetId,
         tableId,
-        fileType,
+        type.code,
         filter.valueFilter,
-        isFilterValidationsActive,
         levelErrorValidations.map(levelError => levelError.toUpperCase()),
-        selectedRuleId
+        selectedRuleId,
+        isExportFilteredCsv
       );
     } catch (error) {
       console.error('ActionsToolbar - onExportTableData.', error);

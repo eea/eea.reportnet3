@@ -113,19 +113,19 @@ export const DatasetRepository = {
     tableSchemaId,
     fileType,
     filterValue,
-    isFilterValidationsActive,
     levelErrorValidations,
-    selectedRuleId
+    selectedRuleId,
+    isExportFilteredCsv
   ) => {
     // if (isEmpty(filterValue) && isEmpty(selectedRuleId) && !isFilterValidationsActive && fileType !== 'csv+filters') {
-    if (fileType !== 'csv+filters') {
-      return await HTTPRequester.download({
+    if (!isExportFilteredCsv) {
+      return await HTTPRequester.post({
         url: getUrl(DatasetConfig.exportTableData, { datasetId, fileType, tableSchemaId }),
         headers: { 'Content-Type': 'application/octet-stream' }
       });
     } else {
       return await HTTPRequester.post({
-        url: getUrl(DatasetConfig.exportTableDataFiltered, { datasetId, fileType, tableSchemaId }),
+        url: getUrl(DatasetConfig.exportTableData, { datasetId, fileType, tableSchemaId }),
         data: {
           fieldValue: filterValue,
           idRules: selectedRuleId,
