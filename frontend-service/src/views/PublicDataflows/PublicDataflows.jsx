@@ -139,14 +139,12 @@ export const PublicDataflows = () => {
     setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
   };
 
-  const renderPaginatorRecordsCount = () => {
-    return (
-      <Fragment>
-        {resourcesContext.messages['totalRecords']} {publicDataflows.length}{' '}
-        {resourcesContext.messages['records'].toLowerCase()}
-      </Fragment>
-    );
-  };
+  const renderPaginatorRecordsCount = () => (
+    <Fragment>
+      {resourcesContext.messages['totalRecords']} {publicDataflows.length}{' '}
+      {resourcesContext.messages['records'].toLowerCase()}
+    </Fragment>
+  );
 
   const renderPaginator = () => {
     // ADD IF THERE ARE DATAFLOWS TO RENDER PAGINATOR
