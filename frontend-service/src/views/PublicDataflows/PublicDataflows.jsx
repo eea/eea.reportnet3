@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { config } from 'conf';
 import { routes } from 'conf/routes';
 
+import ReactTooltip from 'react-tooltip';
+
 import styles from './PublicDataflows.module.scss';
 
 import { InputText } from 'views/_components/InputText';
 import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { PublicCard } from 'views/_components/PublicCard';
-import ReactTooltip from 'react-tooltip';
 import { Spinner } from 'views/_components/Spinner';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
 
