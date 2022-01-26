@@ -6,13 +6,16 @@ import { DataflowUtils } from 'services/_utils/DataflowUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 export const BusinessDataflowService = {
-  getAll: async ({ accessRoles, contextRoles, filterBy, isAsc, numberRows, pageNum, sortBy }) => {
+  getAll: async ({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy }) => {
+    const [sortByHeader, isAsc] = Object.entries(sortBy);
+    const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
+
     const businessDataflowsDTO = await BusinessDataflowRepository.getAll({
-      filterBy: DataflowUtils.parseRequestFilterBy(filterBy),
+      filterBy: filteredFilterBy,
       isAsc,
       numberRows,
       pageNum,
-      sortBy
+      sortBy: sortByHeader
     });
     const businessDataflows = businessDataflowsDTO.data.map(businessDataflowDTO => {
       businessDataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(

@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 
 import camelCase from 'lodash/camelCase';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
@@ -16,7 +17,6 @@ import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 import { Dataflow } from 'entities/Dataflow';
 
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
-import { isEmpty } from 'lodash';
 
 const sortDataflowsByExpirationDate = dataflows =>
   dataflows.sort((a, b) => {

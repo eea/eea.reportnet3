@@ -36,7 +36,7 @@ const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
 export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort, options = [], viewType }) => {
-  const isFilteredByBE = !isNil(onFilter);
+  const isFilteredByBE = !isNil(onFilter) || !isNil(onSort);
 
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
@@ -194,7 +194,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
     const sortOption = switchSortByOption(sortBy[key]);
     setSortBy({ [key]: sortOption });
 
-    if (!onSort) {
+    if (!isFilteredByBE) {
       const sortedData = applySort({ filteredData, order: sortOption, prevSortState: applyFilters(), sortByKey: key });
       setFilteredData(sortedData);
     } else {

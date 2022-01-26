@@ -153,8 +153,6 @@ export const Dataflows = () => {
 
   const { filterBy, filteredData, sortBy, isFiltered } = useFilters(tabId);
 
-  console.log('sortBy :>> ', sortBy);
-
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
   useEffect(() => {
@@ -315,27 +313,13 @@ export const Dataflows = () => {
 
   const getDataflows = async () => {
     setLoading(true);
-    const isAsc = true;
-    const pageNumber = 0;
-    const pageSize = 10;
-    const sortBy = 'name';
 
     const { accessRole: accessRoles, contextRoles } = userContext;
     const { numberRows, pageNum } = pagination;
-    // pageNumber === pageNum
-    // pageSize === numberRows
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {
-        const data = await DataflowService.getAll({
-          accessRoles,
-          contextRoles,
-          filterBy,
-          isAsc,
-          numberRows,
-          pageNum,
-          sortBy
-        });
+        const data = await DataflowService.getAll({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy });
 
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'reporting' });
@@ -344,7 +328,6 @@ export const Dataflows = () => {
           accessRoles,
           contextRoles,
           filterBy,
-          isAsc,
           numberRows,
           pageNum,
           sortBy
@@ -357,7 +340,6 @@ export const Dataflows = () => {
           accessRoles,
           contextRoles,
           filterBy,
-          isAsc,
           numberRows,
           pageNum,
           sortBy
@@ -370,7 +352,6 @@ export const Dataflows = () => {
           accessRoles,
           contextRoles,
           filterBy,
-          isAsc,
           numberRows,
           pageNum,
           sortBy
