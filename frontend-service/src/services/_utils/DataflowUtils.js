@@ -24,7 +24,7 @@ const sortDataflowsByExpirationDate = dataflows =>
     return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
   });
 
-const parseDataflowCount = (dataflowCountDTO, dataflowType) => {
+const parseDataflowCount = dataflowCountDTO => {
   const dataflowCount = { reporting: 0, business: 0, citizenScience: 0, reference: 0 };
 
   dataflowCountDTO.forEach(dataflowType => {

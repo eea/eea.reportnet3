@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -9,8 +9,21 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Button } from 'views/_components/Button';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { ErrorMessage } from 'views/_components/ErrorMessage';
 
-export const InputFile = ({ onChange, buttonTextNoFile, buttonTextWithFile, accept, fileRef, onClearFile }) => {
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
+export const InputFile = ({
+  accept,
+  buttonTextNoFile,
+  buttonTextWithFile,
+  fileRef,
+  hasError,
+  onChange,
+  onClearFile
+}) => {
+  const resourcesContext = useContext(ResourcesContext);
+
   const [fileName, setFileName] = useState('');
 
   const onFileSelect = e => {
@@ -25,6 +38,27 @@ export const InputFile = ({ onChange, buttonTextNoFile, buttonTextWithFile, acce
     fileRef.current.value = '';
   };
 
+  const renderMessage = () => {
+    if (hasError) {
+      return (
+        <div className={styles.messageWrapper}>
+          <div className={styles.message}>
+            <ErrorMessage message={resourcesContext.messages['fileNotSelectedError']} />
+          </div>
+        </div>
+      );
+    }
+
+    if (!isEmpty(fileName)) {
+      return (
+        <div className={styles.messageWrapper}>
+          <div className={styles.message}>{fileName}</div>
+          <FontAwesomeIcon className={styles.clearButton} icon={AwesomeIcons('cross')} onClick={onFileClear} />
+        </div>
+      );
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.buttonWrap}>
@@ -36,12 +70,7 @@ export const InputFile = ({ onChange, buttonTextNoFile, buttonTextWithFile, acce
         />
       </div>
 
-      {!isEmpty(fileName) && (
-        <div className={styles.fileNameWrapper}>
-          <div className={styles.fileName}>{fileName}</div>
-          <FontAwesomeIcon className={styles.clearButton} icon={AwesomeIcons('cross')} onClick={onFileClear} />
-        </div>
-      )}
+      {renderMessage()}
 
       <input
         accept={accept}

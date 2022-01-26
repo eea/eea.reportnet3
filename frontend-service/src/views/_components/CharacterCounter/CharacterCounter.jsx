@@ -2,7 +2,7 @@ import isNil from 'lodash/isNil';
 
 import styles from './CharacterCounter.module.scss';
 
-const CharacterCounter = ({ currentLength, inputRef, maxLength, style }) => {
+export const CharacterCounter = ({ currentLength, inputRef, maxLength, style }) => {
   const getCounterClassName = () => {
     if (isNil(maxLength)) {
       return '';
@@ -25,5 +25,3 @@ const CharacterCounter = ({ currentLength, inputRef, maxLength, style }) => {
     </p>
   );
 };
-
-export { CharacterCounter };

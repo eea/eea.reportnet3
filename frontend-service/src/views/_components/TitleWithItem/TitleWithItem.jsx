@@ -11,7 +11,7 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 
 import styles from './TitleWithItem.module.scss';
 
-const TitleWithItem = memo(
+export const TitleWithItem = memo(
   ({
     hasInfoTooltip = false,
     icon,
@@ -66,5 +66,3 @@ const TitleWithItem = memo(
     );
   }
 );
-
-export { TitleWithItem };

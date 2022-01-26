@@ -14,6 +14,20 @@
           }
         },
         {
+          "key": "IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "IMPORT_REPORTING_FAILED_NAMEFILE_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
           "key": "UPDATE_RELEASABLE_FAILED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
@@ -57,6 +71,20 @@
         },
         {
           "key": "IMPORT_DESIGN_FAILED_EVENT"
+        },
+        {
+          "key": "IMPORT_DESIGN_FAILED_NO_HEADERS_MATCHING_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "IMPORT_DESIGN_FAILED_NAMEFILE_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         },
         {
           "key": "DOWNLOAD_ALL_TABS_INFO_FAILED"

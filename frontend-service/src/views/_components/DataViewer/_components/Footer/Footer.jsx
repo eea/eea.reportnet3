@@ -3,7 +3,13 @@ import { useContext } from 'react';
 import { Button } from 'views/_components/Button';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const Footer = ({ hasWritePermissions, isDataflowOpen, isDesignDatasetEditorRead, onAddClick, onPasteClick }) => {
+export const Footer = ({
+  hasWritePermissions,
+  isDataflowOpen,
+  isDesignDatasetEditorRead,
+  onAddClick,
+  onPasteClick
+}) => {
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className="p-clearfix datasetSchema-addRecordsBar-help-step" style={{ width: '100%' }}>
@@ -30,5 +36,3 @@ const Footer = ({ hasWritePermissions, isDataflowOpen, isDesignDatasetEditorRead
     </div>
   );
 };
-
-export { Footer };

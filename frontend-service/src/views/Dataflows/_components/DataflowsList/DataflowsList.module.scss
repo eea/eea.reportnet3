@@ -14,10 +14,13 @@
   }
 
   .noDataflows {
-    margin: 3rem 0.5rem;
-    font-weight: 350;
+    margin: 8rem 0.5rem;
+    text-align: center;
     color: var(--button-secondary-transparent-color-hover);
+    font-size: 1.2rem;
+    font-weight: bold;
   }
+
   .pinnedSeparator {
     border-top: 4px dashed var(--main-font-color);
     margin: 2rem 0;

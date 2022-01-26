@@ -441,7 +441,9 @@ export const ShareRights = ({
     }
   };
 
-  if (loadingStatus.isInitialLoading) return renderDialogLayout(<Spinner />);
+  if (loadingStatus.isInitialLoading) {
+    return renderDialogLayout(<Spinner />);
+  }
 
   const filterOptions = [
     { key: 'account', label: resourcesContext.messages['account'], type: 'INPUT' },
