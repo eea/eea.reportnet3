@@ -1049,7 +1049,7 @@ export const Dataflow = () => {
         type: 'SET_IS_FETCHING_DATA',
         payload: { isFetchingData: true }
       });
-      await DataflowService.updateAutomaticDelete(dataflowId);
+      await DataflowService.updateAutomaticDelete(dataflowId, dataflowState.automaticReportingDeletion);
       onLoadReportingDataflow();
     } catch (error) {
       console.error('Dataflow - onConfirmAutomaticReportingDeletion.', error);
