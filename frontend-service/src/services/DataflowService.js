@@ -26,15 +26,16 @@ export const DataflowService = {
   },
 
   getAll: async ({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy }) => {
-    const [sortByHeader, isAsc] = Object.entries(sortBy);
+    const [isAsc] = Object.values(sortBy);
+    const [sortByHeader] = Object.keys(sortBy);
     const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
 
     const dataflowsDTO = await DataflowRepository.getAll({
       filterBy: filteredFilterBy,
-      isAsc,
+      isAsc: isAsc || undefined,
       numberRows,
       pageNum,
-      sortBy: sortByHeader
+      sortBy: sortByHeader || undefined
     });
 
     const dataflows = dataflowsDTO.data.map(dataflowDTO => {
