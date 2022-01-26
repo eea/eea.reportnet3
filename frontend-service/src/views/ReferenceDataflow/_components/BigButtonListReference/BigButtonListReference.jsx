@@ -33,7 +33,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 
-const BigButtonListReference = ({
+export const BigButtonListReference = ({
   dataflowId,
   dataflowState,
   onSaveName,
@@ -518,5 +518,3 @@ const BigButtonListReference = ({
     </Fragment>
   );
 };
-
-export { BigButtonListReference };

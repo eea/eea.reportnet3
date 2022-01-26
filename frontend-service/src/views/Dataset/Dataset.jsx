@@ -731,6 +731,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               ...datasetStatistics.tables.filter(table => table.tableSchemaId === tableSchema.tableSchemaId)[0]
             }.hasErrors,
             fixedNumber: tableSchema.tableSchemaFixedNumber,
+            numberOfFields: tableSchema.records ? tableSchema.records[0].fields?.length : 0,
             readOnly: tableSchema.tableSchemaReadOnly,
             toPrefill: tableSchema.tableSchemaToPrefill
           };

@@ -11,7 +11,7 @@ import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
-const SnapshotItem = ({ itemData }) => {
+export const SnapshotItem = ({ itemData }) => {
   const snapshotContext = useContext(SnapshotContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -66,4 +66,3 @@ const SnapshotItem = ({ itemData }) => {
     </li>
   );
 };
-export { SnapshotItem };

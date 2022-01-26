@@ -56,7 +56,7 @@ import { ErrorUtils } from 'views/_functions/Utils/ErrorUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const DataViewer = ({
+export const DataViewer = ({
   dataProviderId,
   datasetSchemaId,
   hasCountryCode,
@@ -1516,5 +1516,3 @@ const DataViewer = ({
     </SnapshotContext.Provider>
   );
 };
-
-export { DataViewer };

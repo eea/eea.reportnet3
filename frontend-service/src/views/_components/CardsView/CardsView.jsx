@@ -74,7 +74,6 @@ export const CardsView = ({
 
   const currentPageTemplate = {
     layout: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport',
-    // eslint-disable-next-line react/no-multi-comp
     CurrentPageReport: options => {
       return (
         <span className={styles.currentPageWrapper}>

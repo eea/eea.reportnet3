@@ -32,7 +32,7 @@ import { mapReducer } from './_functions/Reducers/mapReducer';
 import { MapUtils, RecordUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const DataFormFieldEditor = ({
+export const DataFormFieldEditor = ({
   autoFocus,
   column,
   datasetId,
@@ -641,5 +641,3 @@ const DataFormFieldEditor = ({
     </Fragment>
   );
 };
-
-export { DataFormFieldEditor };
