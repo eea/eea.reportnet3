@@ -5,6 +5,7 @@ import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import ReactTooltip from 'react-tooltip';
 
 import { config } from 'conf';
 
@@ -17,7 +18,6 @@ import { DownloadFile } from 'views/_components/DownloadFile';
 import { DropdownFilter } from 'views/Dataset/_components/DropdownFilter';
 import { InputText } from 'views/_components/InputText';
 import { Menu } from 'views/_components/Menu';
-import ReactTooltip from 'react-tooltip';
 import { Toolbar } from 'views/_components/Toolbar';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
