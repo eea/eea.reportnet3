@@ -29,6 +29,7 @@ public class WebformConfigVO implements Serializable {
   private String name;
 
 
+  /** The content. */
   private String content;
 
   /**

@@ -24,17 +24,17 @@ export const DatasetRepository = {
   deleteData: async (datasetId, deletePrefilledTables) =>
     await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteData, { datasetId, deletePrefilledTables }) }),
 
-  deleteAttachment: async (dataflowId, datasetId, fieldId, dataProviderId = null) => {
-    const url = dataProviderId
-      ? getUrl(DatasetConfig.deleteAttachmentWithProviderId, {
-          dataflowId,
-          datasetId,
-          fieldId,
-          providerId: dataProviderId
-        })
-      : getUrl(DatasetConfig.deleteAttachment, { dataflowId, datasetId, fieldId });
-    return await HTTPRequester.delete({ url });
-  },
+  deleteAttachment: async (dataflowId, datasetId, fieldId, dataProviderId = null) =>
+    await HTTPRequester.delete({
+      url: dataProviderId
+        ? getUrl(DatasetConfig.deleteAttachmentWithProviderId, {
+            dataflowId,
+            datasetId,
+            fieldId,
+            providerId: dataProviderId
+          })
+        : getUrl(DatasetConfig.deleteAttachment, { dataflowId, datasetId, fieldId })
+    }),
 
   deleteRecord: async (datasetId, recordId, deleteInCascade = false) =>
     await HTTPRequester.delete({
@@ -63,24 +63,24 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.downloadExportDatasetFile, { datasetId, fileName })
     }),
 
-  downloadExportFile: async (datasetId, fileName, providerId = null) => {
-    const url = providerId
-      ? getUrl(DatasetConfig.downloadExportFileWithProviderId, { datasetId, fileName, providerId })
-      : getUrl(DatasetConfig.downloadExportFile, { datasetId, fileName });
-    return await HTTPRequester.download({ url });
-  },
+  downloadExportFile: async (datasetId, fileName, providerId = null) =>
+    await HTTPRequester.download({
+      url: providerId
+        ? getUrl(DatasetConfig.downloadExportFileWithProviderId, { datasetId, fileName, providerId })
+        : getUrl(DatasetConfig.downloadExportFile, { datasetId, fileName })
+    }),
 
-  downloadFileData: async (dataflowId, datasetId, fieldId, dataProviderId = null) => {
-    const url = dataProviderId
-      ? getUrl(DatasetConfig.downloadFileDataWithProviderId, {
-          dataflowId,
-          datasetId,
-          fieldId,
-          providerId: dataProviderId
-        })
-      : getUrl(DatasetConfig.downloadFileData, { dataflowId, datasetId, fieldId });
-    return await HTTPRequester.download({ url });
-  },
+  downloadFileData: async (dataflowId, datasetId, fieldId, dataProviderId = null) =>
+    await HTTPRequester.download({
+      url: dataProviderId
+        ? getUrl(DatasetConfig.downloadFileDataWithProviderId, {
+            dataflowId,
+            datasetId,
+            fieldId,
+            providerId: dataProviderId
+          })
+        : getUrl(DatasetConfig.downloadFileData, { dataflowId, datasetId, fieldId })
+    }),
 
   downloadPublicReferenceDatasetFileData: async (dataflowId, fileName) =>
     await HTTPRequester.download({

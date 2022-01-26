@@ -428,7 +428,10 @@ export const TableManagement = ({
   };
 
   const renderEmptyTable = () => (
-    <DataTable className={styles.table} value={[{ emptyContent: resourcesContext.messages['noDataInDataTable'] }]}>
+    <DataTable
+      className={styles.table}
+      summary={resourcesContext.messages['overviewEmptyTableHeader']}
+      value={[{ emptyContent: resourcesContext.messages['noDataInDataTable'] }]}>
       <Column field={'emptyContent'} header={resourcesContext.messages['overviewEmptyTableHeader']} />
     </DataTable>
   );
@@ -447,6 +450,7 @@ export const TableManagement = ({
           onRowClick={event =>
             tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: { selectedRecord: event.data } })
           }
+          summary={resourcesContext.messages['webformArticle13Title']}
           value={tableManagementState.records}>
           {renderTableColumns()}
         </DataTable>

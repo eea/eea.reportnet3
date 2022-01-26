@@ -292,7 +292,7 @@ export class DataTable extends Component {
 
   saveState() {
     const storage = this.getStorage();
-    let state = {};
+    const state = {};
 
     if (this.props.paginator) {
       state.first = this.getFirst();
@@ -343,7 +343,7 @@ export class DataTable extends Component {
     const stateString = storage.getItem(this.props.stateKey);
 
     if (stateString) {
-      let restoredState = JSON.parse(stateString);
+      const restoredState = JSON.parse(stateString);
 
       if (this.props.paginator) {
         if (this.props.onPage) {
@@ -405,8 +405,8 @@ export class DataTable extends Component {
   }
 
   saveColumnWidths(state) {
-    let widths = [];
-    let headers = DomHandler.find(this.container, '.p-datatable-thead > tr > th');
+    const widths = [];
+    const headers = DomHandler.find(this.container, '.p-datatable-thead > tr > th');
     headers.map(header => widths.push(DomHandler.getOuterWidth(header)));
     state.columnWidths = widths.join(',');
     if (this.props.columnResizeMode === 'expand') {
@@ -418,7 +418,7 @@ export class DataTable extends Component {
 
   restoreColumnWidths() {
     if (this.columnWidthsState) {
-      let widths = this.columnWidthsState.split(',');
+      const widths = this.columnWidthsState.split(',');
 
       if (this.props.columnResizeMode === 'expand' && this.tableWidthState) {
         if (this.props.scrollable) {
@@ -430,12 +430,12 @@ export class DataTable extends Component {
       }
 
       if (this.props.scrollable) {
-        let headerCols = DomHandler.find(this.container, '.p-datatable-scrollable-header-table > colgroup > col');
-        let bodyCols = DomHandler.find(this.container, '.p-datatable-scrollable-body-table > colgroup > col');
+        const headerCols = DomHandler.find(this.container, '.p-datatable-scrollable-header-table > colgroup > col');
+        const bodyCols = DomHandler.find(this.container, '.p-datatable-scrollable-body-table > colgroup > col');
         headerCols.map((col, index) => (col.style.width = widths[index] + 'px'));
         bodyCols.map((col, index) => (col.style.width = widths[index] + 'px'));
       } else {
-        let headers = DomHandler.find(this.table, '.p-datatable-thead > tr > th');
+        const headers = DomHandler.find(this.table, '.p-datatable-thead > tr > th');
         headers.map((header, index) => (header.style.width = widths[index] + 'px'));
       }
     }
@@ -492,7 +492,7 @@ export class DataTable extends Component {
   }
 
   createPaginator(position, totalRecords, data) {
-    let className = 'p-paginator-' + position;
+    const className = 'p-paginator-' + position;
 
     return (
       <Paginator
@@ -570,7 +570,7 @@ export class DataTable extends Component {
     this.columnSortFunction = event.sortFunction;
 
     if (this.props.sortMode === 'multiple') {
-      let metaKey = event.originalEvent.metaKey || event.originalEvent.ctrlKey;
+      const metaKey = event.originalEvent.metaKey || event.originalEvent.ctrlKey;
       multiSortMeta = this.getMultiSortMeta();
       if (!multiSortMeta || !metaKey) {
         multiSortMeta = [];

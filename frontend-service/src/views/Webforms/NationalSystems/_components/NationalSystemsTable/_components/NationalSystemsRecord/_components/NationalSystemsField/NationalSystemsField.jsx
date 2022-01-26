@@ -228,9 +228,9 @@ export const NationalSystemsField = ({
             onChange={event =>
               onFillField(field, fieldSchemaId, onFormatDate(event.target.value, isNil(event.target.value)))
             }
+            selectableYears={100}
             value={new Date(field.value)}
             yearNavigator={true}
-            yearRange="1900:2100"
           />
         );
       case 'DATETIME':
@@ -242,11 +242,11 @@ export const NationalSystemsField = ({
             monthNavigator={true}
             onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
             onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
+            selectableYears={100}
             showSeconds={true}
             showTime={true}
             value={field.value}
             yearNavigator={true}
-            yearRange="1900:2100"
           />
         );
       case 'MULTISELECT_CODELIST':

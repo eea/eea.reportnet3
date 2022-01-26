@@ -71,6 +71,7 @@ import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.ETLFieldVO;
 import org.eea.interfaces.vo.dataset.ETLRecordVO;
 import org.eea.interfaces.vo.dataset.ETLTableVO;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
@@ -275,6 +276,55 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
   /**
+   * Import file data V 2.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param is the is
+   * @param replace the replace
+   * @param integrationId the integration id
+   * @param delimiter the delimiter
+   * @param fileName the file name
+   * @throws EEAException the EEA exception
+   */
+  public void importFileDataV2(Long datasetId, String tableSchemaId, InputStream is,
+      boolean replace, Long integrationId, String delimiter, String fileName) throws EEAException {
+
+    if (delimiter != null && delimiter.length() > 1) {
+      LOG_ERROR.error("the size of the delimiter cannot be greater than 1");
+      throw new EEAException("The size of the delimiter cannot be greater than 1");
+    }
+
+    DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
+
+    if (null == schema) {
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(importFileData);
+      LOG_ERROR.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}",
+          datasetId, tableSchemaId, fileName);
+      throw new EEAException(
+          "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
+    }
+
+    // We add a lock to the Release process
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    Map<String, Object> mapCriteria = new HashMap<>();
+    mapCriteria.put("dataflowId", datasetMetabaseVO.getDataflowId());
+    mapCriteria.put("dataProviderId", datasetMetabaseVO.getDataProviderId());
+    if (datasetMetabaseVO.getDataProviderId() != null) {
+      datasetService.createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria,
+          SecurityContextHolder.getContext().getAuthentication().getName());
+    }
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
+    fileManagementV2(datasetId, tableSchemaId, schema, is, replace, integrationId, delimiter,
+        fileName);
+  }
+
+
+  /**
    * Release lock.
    *
    * @param datasetId the dataset id
@@ -388,6 +438,94 @@ public class FileTreatmentHelper implements DisposableBean {
       LOG_ERROR.error(
           "Unexpected exception importing file data: datasetId={}, file={}. Message: {}", datasetId,
           multipartFile.getName(), e.getMessage(), e);
+      releaseLock(datasetId);
+      throw new EEAException(e);
+    }
+  }
+
+  /**
+   * File management.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param schema the schema
+   * @param multipartFile the multipart file
+   * @param replace the replace
+   * @param integrationId the integration id
+   * @param delimiter the delimiter
+   * @throws EEAException the EEA exception
+   */
+  private void fileManagementV2(Long datasetId, String tableSchemaId, DataSetSchema schema,
+      InputStream input, boolean replace, Long integrationId, String delimiter, String fileName)
+      throws EEAException {
+    try {
+
+      // Prepare the folder where files will be stored
+      File root = new File(importPath);
+      File folder = new File(root, datasetId.toString());
+      String saveLocationPath = folder.getCanonicalPath();
+      String originalFileName = fileName;
+      String multipartFileMimeType = datasetService.getMimetype(originalFileName);
+
+      // Delete dataset temporary folder first in case that for any reason still exists before
+      // creating again
+      FileUtils.deleteQuietly(folder);
+      if (!folder.mkdirs()) {
+        releaseLock(datasetId);
+        throw new EEAException("Folder for dataset " + datasetId + " already exists");
+      }
+
+      List<File> files = new ArrayList<>();
+      IntegrationVO integrationVO;
+      if (null == integrationId) {
+        integrationVO = null;
+      } else {
+        integrationVO = getIntegrationVO(integrationId);
+        if (null == integrationVO) {
+          LOG_ERROR.error("Error. Integration {} not found", integrationId);
+        }
+      }
+      if (null == integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
+
+        try (ZipInputStream zip = new ZipInputStream(input)) {
+          files = unzipAndStore(folder, saveLocationPath, zip);
+        }
+
+        // Queue import tasks for stored files
+        if (!files.isEmpty()) {
+          LOG.info("The file: {} is stored", originalFileName);
+          /*
+           * queueImportProcess(datasetId, null, schema, files, originalFileName, integrationVO,
+           * replace, delimiter, multipartFileMimeType);
+           */
+        } else {
+          releaseLock(datasetId);
+          LOG_ERROR.error("Error trying to import a zip file into dataset {}. Empty zip file",
+              datasetId);
+          throw new EEAException("Empty zip file");
+        }
+      } else {
+        File file = new File(folder, originalFileName);
+
+        // Store the file in the persistence volume
+        try (FileOutputStream output = new FileOutputStream(file)) {
+          IOUtils.copyLarge(input, output);
+          files.add(file);
+          LOG.info("Stored file {}", file.getPath());
+        }
+
+        // Queue import task for the stored file
+        LOG.info("The file: {} is stored", originalFileName);
+        /*
+         * queueImportProcess(datasetId, tableSchemaId, schema, files, originalFileName,
+         * integrationVO, replace, delimiter, multipartFileMimeType);
+         */
+      }
+
+    } catch (EEAException | FeignException | IOException e) {
+      LOG_ERROR.error(
+          "Unexpected exception importing file data: datasetId={}, file={}. Message: {}", datasetId,
+          fileName, e.getMessage(), e);
       releaseLock(datasetId);
       throw new EEAException(e);
     }
@@ -595,7 +733,7 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     }
 
-    throw new EEAException("File name does not match any table name");
+    throw new EEAException(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
   }
 
   /**
@@ -624,9 +762,19 @@ public class FileTreatmentHelper implements DisposableBean {
       EventType eventType;
       DatasetTypeEnum type = datasetService.getDatasetType(datasetId);
       if (null != error) {
-        eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
-            ? EventType.IMPORT_REPORTING_FAILED_EVENT
-            : EventType.IMPORT_DESIGN_FAILED_EVENT;
+        if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(error)) {
+          eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+              ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
+              : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
+        } else if (EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING.equals(error)) {
+          eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+              ? EventType.IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT
+              : EventType.IMPORT_DESIGN_FAILED_NO_HEADERS_MATCHING_EVENT;
+        } else {
+          eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+              ? EventType.IMPORT_REPORTING_FAILED_EVENT
+              : EventType.IMPORT_DESIGN_FAILED_EVENT;
+        }
       } else {
         eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
             ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
@@ -792,6 +940,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
     Long dataflowId = datasetService.getDataFlowIdById(datasetId);
 
+    ExportFilterVO filters = new ExportFilterVO();
+
     // Look for the dataset type is EU or DC to include the countryCode
     DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
     boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
@@ -821,7 +971,7 @@ public class FileTreatmentHelper implements DisposableBean {
         }
       } else {
         byte[] dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode,
-            extension.equalsIgnoreCase(FileTypeEnum.VALIDATIONS.getValue()));
+            extension.equalsIgnoreCase(FileTypeEnum.VALIDATIONS.getValue()), filters);
         contents.put(null, dataFile);
       }
 
@@ -1300,12 +1450,13 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param mimeType the mime type
    * @param tableSchemaId the table schema id
    * @param tableName the table name
+   * @param filters the filters
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Async
-  public void exportFile(Long datasetId, String mimeType, String tableSchemaId, String tableName)
-      throws EEAException, IOException {
+  public void exportFile(Long datasetId, String mimeType, String tableSchemaId, String tableName,
+      ExportFilterVO filters) throws EEAException, IOException {
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
         .fileName(tableName).datasetSchemaId(tableSchemaId).error("Error exporting table data")
@@ -1315,7 +1466,7 @@ public class FileTreatmentHelper implements DisposableBean {
         "Failed generating file from datasetId {} with schema {}.", datasetId, tableSchemaId);
     fileFolder.mkdirs();
     try {
-      byte[] file = createFile(datasetId, mimeType, tableSchemaId);
+      byte[] file = createFile(datasetId, mimeType, tableSchemaId, filters);
       File fileWrite =
           new File(new File(pathPublicFile, "dataset-" + datasetId), tableName + "." + mimeType);
       try (OutputStream out = new FileOutputStream(fileWrite.toString());) {
@@ -1340,6 +1491,7 @@ public class FileTreatmentHelper implements DisposableBean {
   @Async
   public void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
 
+    ExportFilterVO filters = new ExportFilterVO();
     List<DesignDataset> desingDataset =
         designDatasetRepository.findByDataflowId(dataset.getDataflowId());
     // look for the name of the design dataset to put the right name to the file
@@ -1352,7 +1504,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
     try {
       // create the excel file
-      byte[] file = createFile(dataset.getId(), FileTypeEnum.XLSX.getValue(), null);
+      byte[] file = createFile(dataset.getId(), FileTypeEnum.XLSX.getValue(), null, filters);
       // we save the file in its files
       if (null != file) {
         String nameFileUnique = String.format("%s", datasetDesingName);
@@ -1426,6 +1578,7 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private void createAllDatasetFiles(Long dataflowId, Long dataProviderId) throws IOException {
 
+    ExportFilterVO filters = new ExportFilterVO();
     DataProviderVO dataProvider = representativeControllerZuul.findDataProviderById(dataProviderId);
 
     List<DataSetMetabase> datasetMetabaseList =
@@ -1449,7 +1602,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
         try {
           // 1º we create
-          byte[] file = createFile(datasetToFile.getId(), FileTypeEnum.XLSX.getValue(), null);
+          byte[] file =
+              createFile(datasetToFile.getId(), FileTypeEnum.XLSX.getValue(), null, filters);
           // we save the file in its files
           if (null != file) {
             String nameFileUnique = String.format(FILE_PUBLIC_DATASET_PATTERN_NAME,
@@ -1486,13 +1640,14 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param mimeType the mime type
    * @param tableSchemaId the table schema id
+   * @param filters the filters
    * @return the byte[]
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Transactional
-  public byte[] createFile(Long datasetId, String mimeType, final String tableSchemaId)
-      throws EEAException, IOException {
+  public byte[] createFile(Long datasetId, String mimeType, final String tableSchemaId,
+      ExportFilterVO filters) throws EEAException, IOException {
     // Get the dataFlowId from the metabase
     Long idDataflow = datasetService.getDataFlowIdById(datasetId);
 
@@ -1503,8 +1658,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
     final IFileExportContext contextExport = fileExportFactory.createContext(mimeType);
     LOG.info("End of createFile");
-    return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode,
-        false);
+    return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode, false,
+        filters);
   }
 
   private void createFilesAndZip(Long dataflowId, Long dataProviderId,

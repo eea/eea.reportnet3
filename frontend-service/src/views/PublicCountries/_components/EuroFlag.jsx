@@ -10,7 +10,7 @@ export const EuroFlag = ({ className }) => {
       <g data-name="Layer 1" id="Layer_1">
         <g id="s">
           <g id="c">
-            <path className={styles.stars} d="M16,7.11l-.4,1.23.61.2Z" id="t" />
+            <path className={styles.stars} d="M16,7.11l-.4,1.23.61.2Z" />
             <path className={styles.stars} d="M16,7.11l.4,1.23-.61.2Z" />
           </g>
           <g id="a">

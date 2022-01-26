@@ -5,9 +5,6 @@ import orderBy from 'lodash/orderBy';
 
 import styles from './QCSpecificHistory.module.scss';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AwesomeIcons } from 'conf/AwesomeIcons';
-
 import { Column } from 'primereact/column';
 
 import { Button } from 'views/_components/Button';
@@ -21,6 +18,8 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationService } from 'services/ValidationService';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
+
+import { ColumnTemplateUtils } from 'views/_functions/Utils/ColumnTemplateUtils';
 
 export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, validationId }) => {
   const notificationContext = useContext(NotificationContext);
@@ -85,22 +84,25 @@ export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, v
       {
         key: 'timestamp',
         header: resourcesContext.messages['timestamp'],
-        template: timestampTemplate
+        template: getTimestampTemplate
       },
       {
         key: 'expression',
         header: resourcesContext.messages['expressionText'],
-        template: checkTemplate
+        template: (rowData, column) =>
+          ColumnTemplateUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
       },
       {
         key: 'metadata',
         header: resourcesContext.messages['metadata'],
-        template: checkTemplate
+        template: (rowData, column) =>
+          ColumnTemplateUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
       },
       {
         key: 'status',
         header: resourcesContext.messages['status'],
-        template: checkTemplate
+        template: (rowData, column) =>
+          ColumnTemplateUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
       }
     ];
 
@@ -124,13 +126,7 @@ export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, v
     }
   };
 
-  const checkTemplate = (rowData, column) => (
-    <div className={styles.checkedValueColumn}>
-      {rowData[column.field] ? <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} /> : null}
-    </div>
-  );
-
-  const timestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
+  const getTimestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
 
   const dialogFooter = (
     <Button

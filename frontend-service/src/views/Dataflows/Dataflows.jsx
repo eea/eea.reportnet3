@@ -6,6 +6,7 @@ import isNil from 'lodash/isNil';
 import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
 import pull from 'lodash/pull';
+import ReactTooltip from 'react-tooltip';
 
 import styles from './Dataflows.module.scss';
 
@@ -18,11 +19,14 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'views/_components/Dialog';
 import { GoTopButton } from 'views/_components/GoTopButton';
+import { InputText } from 'views/_components/InputText';
 import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
+import { ManageWebforms } from './_components/ManageWebforms';
 import { MyFilters } from 'views/_components/MyFilters';
+import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
@@ -44,6 +48,7 @@ import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { CurrentPage } from 'views/_functions/Utils';
@@ -54,7 +59,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 const { parseDataflows, sortDataflows } = DataflowsUtils;
 const { permissions } = config;
 
-const Dataflows = () => {
+export const Dataflows = () => {
   const { errorType: dataflowsErrorType } = useParams();
 
   const resetDialogsStore = useResetRecoilState(dialogsStore);
@@ -70,22 +75,26 @@ const Dataflows = () => {
     citizenScience: [],
     dataflowsCount: {},
     dataflowsCountFirstLoad: false,
+    filteredData: { business: [], citizenScience: [], reference: [], reporting: [] },
+    goToPage: 1,
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
     isCitizenScienceDataflowDialogVisible: false,
     isCustodian: null,
+    isManageWebformsDialogVisible: false,
     isNationalCoordinator: false,
     isRecreatePermissionsDialogVisible: false,
     isReferencedDataflowDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
-    isValidatingAllDataflowsUsers: false,
     isUserListVisible: false,
+    isValidatingAllDataflowsUsers: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
+    pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
+    pagination: { firstRow: 0, numberRows: 100, pageNum: 0 },
+    pinnedSeparatorIndex: -1,
     reference: [],
-    reporting: [],
-    filteredData: { business: [], citizenScience: [], reference: [], reporting: [] },
-    pinnedSeparatorIndex: -1
+    reporting: []
   });
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
@@ -94,11 +103,12 @@ const Dataflows = () => {
   const {
     activeIndex,
     dataflowsCount,
-    filteredData,
+    goToPage,
     isAdmin,
     isCustodian,
     isNationalCoordinator,
     loadingStatus,
+    pagination,
     pinnedSeparatorIndex
   } = dataflowsState;
 
@@ -140,6 +150,8 @@ const Dataflows = () => {
         ];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
+
+  const { filteredData, isFiltered } = useFilters(tabId);
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -209,9 +221,19 @@ const Dataflows = () => {
       title: 'adminCreatePermissions'
     };
 
+    const adminManageWebformsBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'table',
+      isVisible: isAdmin,
+      label: 'manageWebformsLeftBarButton',
+      onClick: () => manageDialogs('isManageWebformsDialogVisible', true),
+      title: 'manageWebformsLeftBarButton'
+    };
+
     leftSideBarContext.addModels(
       [
         adminCreateNewPermissionsBtn,
+        adminManageWebformsBtn,
         createBusinessDataflowBtn,
         createCitizenScienceDataflowBtn,
         createReferenceDataflowBtn,
@@ -240,11 +262,15 @@ const Dataflows = () => {
     if (!isNil(userContext.contextRoles)) {
       getDataflows();
     }
-  }, [tabId]);
+  }, [tabId, pagination]);
 
   useEffect(() => {
     setActiveIndexTabOnBack();
   }, [isCustodian, isAdmin]);
+
+  useEffect(() => {
+    onUpdatePinnedSeparatorPosition();
+  }, [filteredData]);
 
   const setIsValidatingAllDataflowsUsers = isValidatingAllDataflowsUsers => {
     dataflowsDispatch({ type: 'SET_IS_VALIDATING_ALL_DATAFLOWS_USERS', payload: { isValidatingAllDataflowsUsers } });
@@ -285,7 +311,7 @@ const Dataflows = () => {
       return dataflow;
     });
 
-  const getDataflows = async () => {
+  const getDataflows = async (numberRows, pageNum) => {
     setLoading(true);
 
     try {
@@ -326,12 +352,38 @@ const Dataflows = () => {
     }
   };
 
-  const getFilteredData = data => {
-    const orderedFilteredData = sortDataflows(data);
+  const renderPaginatorRecordsCount = () => {
+    const renderFilteredRowsLabel = () => {
+      if (isFiltered && dataflowsState[tabId].length !== filteredData.length) {
+        return `${resourcesContext.messages['filtered']}: ${filteredData.length} | `;
+      }
+    };
+
+    const renderTotalRecordsLabel = () =>
+      `${resourcesContext.messages['totalRecords']} ${dataflowsState[tabId].length} ${' '} ${resourcesContext.messages[
+        'records'
+      ].toLowerCase()}`;
+
+    const renderFilteredLabel = () => {
+      if (isFiltered && dataflowsState[tabId].length === filteredData.length) {
+        return ` (${resourcesContext.messages['filtered'].toLowerCase()})`;
+      }
+    };
+
+    return (
+      <Fragment>
+        {renderFilteredRowsLabel()}
+        {renderTotalRecordsLabel()}
+        {renderFilteredLabel()}
+      </Fragment>
+    );
+  };
+
+  const onUpdatePinnedSeparatorPosition = () => {
+    const orderedFilteredData = sortDataflows(filteredData);
     const orderedPinned = orderedFilteredData.map(el => el.pinned);
 
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf('pinned'));
-    dataflowsDispatch({ type: 'GET_FILTERED_DATA', payload: { type: tabId, data } });
   };
 
   const manageDialogs = (dialog, value) => {
@@ -362,6 +414,8 @@ const Dataflows = () => {
       userContext.setCurrentDataflowType(currentTabDataflowType);
     }
     dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
+    onChangePagination({ firstRow: 0, numberRows: 100, pageNum: 0 });
+    setGoToPage(1);
   };
 
   const onHideObligationDialog = () => {
@@ -397,7 +451,7 @@ const Dataflows = () => {
     const { business, citizenScience, reference, reporting } = dataflowsState;
 
     const copyData = [...reporting, ...reference, ...business, ...citizenScience];
-    const copyFilteredData = [...filteredData[tabId]];
+    const copyFilteredData = [...filteredData];
 
     const userProperties = updateUserPropertiesPinnedDataflows({ pinnedItem, data: copyData });
 
@@ -590,6 +644,95 @@ const Dataflows = () => {
     reporting: dataflowsFilterOptions
   };
 
+  const onChangeCurrentPage = event => {
+    if (event.key === 'Enter' && goToPage !== '' && goToPage !== pagination.first + 1) {
+      const pc = Math.ceil(filteredData.length / pagination.numberRows) || 1;
+      const p = Math.floor(event.target.value - 1);
+
+      if (p >= 0 && p < pc) {
+        const newPageState = {
+          firstRow: (event.target.value - 1) * pagination.numberRows,
+          numberRows: pagination.numberRows,
+          pageNum: p
+        };
+        onChangePagination(newPageState);
+      }
+    } else {
+      setGoToPage(event.target.value);
+      if (event.target.value <= 0 || event.target.value > Math.ceil(filteredData.length / pagination.numberRows)) {
+        setPageInputTooltip(
+          `${resourcesContext.messages['currentPageErrorMessage']} ${Math.ceil(
+            filteredData.length / pagination.numberRows
+          )}`
+        );
+      } else {
+        setPageInputTooltip(resourcesContext.messages['currentPageInfoMessage']);
+      }
+    }
+  };
+
+  const onChangePagination = pagination => dataflowsDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
+
+  const onPaginate = event => {
+    setGoToPage(event.page + 1);
+    onChangePagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
+  };
+
+  const setGoToPage = value => dataflowsDispatch({ type: 'SET_GO_TO_PAGE', payload: value });
+
+  const setPageInputTooltip = value => dataflowsDispatch({ type: 'SET_PAGE_INPUT_TOOLTIP', payload: value });
+
+  const currentPageTemplate = {
+    layout: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport',
+    CurrentPageReport: options => {
+      return (
+        <span className={styles.currentPageWrapper}>
+          <label className={styles.currentPageLabel}>{resourcesContext.messages['goTo']}</label>
+          <InputText
+            className={styles.currentPageInput}
+            data-for="pageInputTooltip"
+            data-tip
+            id="currentPageInput"
+            keyfilter="pint"
+            onChange={onChangeCurrentPage}
+            onKeyDown={onChangeCurrentPage}
+            style={{
+              border: (goToPage <= 0 || goToPage > options.totalPages) && '1px solid var(--errors)',
+              boxShadow:
+                goToPage <= 0 || goToPage > options.totalPages ? 'var(--inputtext-box-shadow-focus-error)' : 'none'
+            }}
+            value={goToPage}
+          />
+          <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="bottom">
+            {dataflowsState.pageInputTooltip}
+          </ReactTooltip>
+          <label className={styles.currentPageOf}>
+            {filteredData.length > 0
+              ? `${resourcesContext.messages['of']} ${Math.ceil(filteredData.length / pagination.numberRows)}`
+              : 1}
+          </label>
+        </span>
+      );
+    }
+  };
+
+  const renderPaginator = () => {
+    if (!loadingStatus[tabId] && filteredData.length !== 0) {
+      return (
+        <Paginator
+          className={`p-paginator-bottom ${styles.paginator}`}
+          first={pagination.firstRow}
+          onPageChange={onPaginate}
+          rightContent={renderPaginatorRecordsCount()}
+          rows={pagination.numberRows}
+          rowsPerPageOptions={[100, 150, 200]}
+          template={currentPageTemplate}
+          totalRecords={filteredData.length}
+        />
+      );
+    }
+  };
+
   return renderLayout(
     <div className="rep-row">
       <div className={`${styles.container} rep-col-xs-12 rep-col-xl-12 dataflowList-help-step`}>
@@ -602,15 +745,12 @@ const Dataflows = () => {
             onTabChange={event => onChangeTab(event.index, event.value)}
           />
         </div>
-        <MyFilters
-          data={dataflowsState[tabId]}
-          getFilteredData={getFilteredData}
-          options={options[tabId]}
-          viewType={tabId}
-        />
+        <MyFilters data={dataflowsState[tabId]} options={options[tabId]} viewType={tabId} />
+        {renderPaginator()}
         <DataflowsList
           className="dataflowList-accepted-help-step"
-          filteredData={filteredData[tabId]}
+          data={dataflowsState[tabId]}
+          filteredData={filteredData}
           isAdmin={isAdmin}
           isCustodian={isCustodian}
           isLoading={loadingStatus[tabId]}
@@ -618,6 +758,7 @@ const Dataflows = () => {
           reorderDataflows={onReorderPinnedDataflows}
           visibleTab={tabId}
         />
+        <div className={styles.bottomPaginator}>{renderPaginator()}</div>
       </div>
 
       <GoTopButton parentRef={containerRef} referenceMargin={70} />
@@ -665,6 +806,13 @@ const Dataflows = () => {
         </ConfirmDialog>
       )}
 
+      {dataflowsState.isManageWebformsDialogVisible && (
+        <ManageWebforms
+          isDialogVisible={dataflowsState.isManageWebformsDialogVisible}
+          onCloseDialog={() => manageDialogs('isManageWebformsDialogVisible', false)}
+        />
+      )}
+
       {dataflowsState.isCitizenScienceDataflowDialogVisible && (
         <ManageDataflow
           isCitizenScienceDataflow
@@ -701,5 +849,3 @@ const Dataflows = () => {
     </div>
   );
 };
-
-export { Dataflows };

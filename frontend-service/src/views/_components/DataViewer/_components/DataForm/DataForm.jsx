@@ -14,7 +14,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const DataForm = ({
+export const DataForm = ({
   addDialogVisible,
   colsSchema,
   datasetId,
@@ -256,5 +256,3 @@ const DataForm = ({
 
   return formType === 'EDIT' ? editRecordForm : newRecordForm;
 };
-
-export { DataForm };

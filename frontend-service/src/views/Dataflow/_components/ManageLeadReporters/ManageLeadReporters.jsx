@@ -7,7 +7,7 @@ import isUndefined from 'lodash/isUndefined';
 import orderBy from 'lodash/orderBy';
 import uniq from 'lodash/uniq';
 
-import styles from './RepresentativesList.module.scss';
+import styles from './ManageLeadReporters.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { config } from 'conf';
@@ -35,7 +35,7 @@ import { isDuplicatedLeadReporter, isValidEmail, parseLeadReporters } from './_f
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
-const RepresentativesList = ({
+export const ManageLeadReporters = ({
   dataflowId,
   dataflowType,
   representativesImport = false,
@@ -73,7 +73,7 @@ const RepresentativesList = ({
 
   useEffect(() => {
     if (representativesImport) {
-      getInitialData(formDispatcher, dataflowId, formState);
+      getInitialData();
       setRepresentativeImport(false);
     }
   }, [representativesImport]);
@@ -175,7 +175,7 @@ const RepresentativesList = ({
 
   const getRepresentatives = async () => {
     try {
-      let responseRepresentatives = await RepresentativeService.getRepresentatives(dataflowId);
+      const responseRepresentatives = await RepresentativeService.getRepresentatives(dataflowId);
       const parsedLeadReporters = parseLeadReporters(responseRepresentatives.representatives);
 
       formDispatcher({
@@ -591,5 +591,3 @@ const RepresentativesList = ({
     </div>
   );
 };
-
-export { RepresentativesList };

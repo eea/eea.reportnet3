@@ -41,14 +41,28 @@ const checkSRID = srid => {
   }
 };
 const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
-  if (emptyIsValid && coordinates === '') return true;
-  if (coordinates === '') return false;
-  if (isNil(coordinates)) return false;
-  if (!Array.isArray(coordinates)) {
-    if (coordinates.toString().indexOf(',') === -1) return false;
-  } else {
-    if (isEmpty(coordinates)) return false;
+  if (emptyIsValid && coordinates === '') {
+    return true;
   }
+
+  if (coordinates === '') {
+    return false;
+  }
+
+  if (isNil(coordinates)) {
+    return false;
+  }
+
+  if (!Array.isArray(coordinates)) {
+    if (coordinates.toString().indexOf(',') === -1) {
+      return false;
+    }
+  } else {
+    if (isEmpty(coordinates)) {
+      return false;
+    }
+  }
+
   let isValid = true;
   const splittedCoordinates = Array.isArray(coordinates) ? coordinates : TextUtils.splitByChar(coordinates);
   if (splittedCoordinates.length < 2) {
@@ -60,16 +74,21 @@ const checkValidCoordinates = (coordinates, emptyIsValid = false) => {
       }
     });
   }
+
   return isValid;
 };
 
 const isValidJSON = value => {
-  if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) return false;
+  if (isNil(value) || value.trim() === '' || value.indexOf('{') === -1) {
+    return false;
+  }
+
   try {
     JSON.parse(value);
   } catch (error) {
     return false;
   }
+
   return true;
 };
 
@@ -143,7 +162,10 @@ const getGeometryType = json =>
 const getSrid = json => (!isNil(json) && json !== '' ? JSON.parse(json).properties.srid : 'EPSG:4326');
 
 const hasValidCRS = (fieldValue, crs) => {
-  if (fieldValue === '') return true;
+  if (fieldValue === '') {
+    return true;
+  }
+
   const parsedGeoJsonData = JSON.parse(fieldValue);
   return crs.some(crsItem => crsItem.value === parsedGeoJsonData.properties.srid);
 };

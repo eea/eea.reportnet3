@@ -7,7 +7,6 @@ import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 export const BusinessDataflowService = {
   getAll: async (accessRoles, contextRoles) => {
     const businessDataflowsDTO = await BusinessDataflowRepository.getAll();
-
     const businessDataflows = businessDataflowsDTO.data.map(businessDataflowDTO => {
       businessDataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(
         businessDataflowDTO.id,

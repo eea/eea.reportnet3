@@ -125,7 +125,10 @@ export const FieldDesigner = ({
     const header = document.getElementById('header');
     const observer = new ResizeObserver(entries =>
       entries.forEach(entry => {
-        if (headerHeight !== entry.contentRect.height) {
+        if (
+          headerHeight !== entry.contentRect.height &&
+          (entry.contentRect.height === 180 || entry.contentRect.height === 64)
+        ) {
           setHeaderHeight(entry.contentRect.height);
         }
       })
@@ -1182,48 +1185,31 @@ export const FieldDesigner = ({
   };
 
   const renderDragAndDrop = () => {
-    const renderArrows = (condition, icon, order, text) => {
-      if (condition) {
-        return (
+    const renderArrows = (icon, order, text) => (
+      <FontAwesomeIcon
+        aria-label={resourcesContext.messages[text]}
+        className={styles.moveArrows}
+        icon={AwesomeIcons(icon)}
+        onClick={() => onMoveFieldUpDown(order)}
+        style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
+      />
+    );
+
+    return (
+      <div className={`${styles.draggableFieldContentCell} ${styles.dragAndDropItemsCell}`}>
+        <div className={styles.draggableFieldCell}>{resourcesContext.messages['moveField']}</div>
+        <div className={`${styles.draggableFieldCell} ${styles.dragAndDropItems}`}>
           <FontAwesomeIcon
-            aria-label={resourcesContext.messages[text]}
-            className={styles.moveArrows}
-            icon={AwesomeIcons(icon)}
-            onClick={() => onMoveFieldUpDown(order)}
+            aria-label={resourcesContext.messages['moveField']}
+            className={styles.dragAndDropIcon}
+            icon={AwesomeIcons('move')}
             style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
           />
-        );
-      } else {
-        return <div className={styles.emptyArrow}></div>;
-      }
-    };
-
-    if (!addField) {
-      return (
-        <div className={`${styles.draggableFieldContentCell} ${styles.dragAndDropItemsCell}`}>
-          <div className={styles.draggableFieldCell}>{resourcesContext.messages['moveField']}</div>
-          <div className={`${styles.draggableFieldCell} ${styles.dragAndDropItems}`}>
-            <FontAwesomeIcon
-              aria-label={resourcesContext.messages['moveField']}
-              className={styles.dragAndDropIcon}
-              icon={AwesomeIcons('move')}
-              style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
-            />
-            {renderArrows(index > 0, 'arrowUp', -1, 'moveUp')}
-            {renderArrows(index < fields.length - 1, 'arrowDown', 2, 'moveDown')}
-          </div>
+          {renderArrows('arrowUp', -1, 'moveUp')}
+          {renderArrows('arrowDown', 2, 'moveDown')}
         </div>
-      );
-    } else {
-      return (
-        <div className={`${styles.draggableFieldContentCell} ${styles.dragAndDropItemsCell}`}>
-          <div className={styles.draggableFieldCell}>
-            {resourcesContext.messages['add']} {resourcesContext.messages['field']}
-          </div>
-          <div className={styles.draggableFieldCell}></div>
-        </div>
-      );
-    }
+      </div>
+    );
   };
 
   const duplicateButtonTooltipName = `${fieldDesignerState.fieldValue}_tooltip`;
@@ -1585,7 +1571,7 @@ export const FieldDesigner = ({
         onDragOver={onFieldDragOver}
         onDragStart={onFieldDragStart}
         onDrop={onFieldDragDrop}
-        style={{ cursor: isDataflowOpen || isDesignDatasetEditorRead ? 'default' : 'grab' }}>
+        style={{ cursor: fields?.length < 2 ? 'default' : 'grab' }}>
         {renderDragAndDrop()}
         {renderCheckboxes()}
         {renderInputs()}

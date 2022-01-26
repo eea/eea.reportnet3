@@ -126,7 +126,6 @@ export const ValidationService = {
 
   runSqlRule: async (datasetId, sqlSentence, showInternalFields) => {
     const { data } = await ValidationRepository.runSqlRule(datasetId, sqlSentence, showInternalFields);
-
     return ValidationUtils.parseSqlValidation(data);
   },
 

@@ -9,6 +9,7 @@ import styles from './MyFilters.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Calendar } from 'views/_components/Calendar';
+import { Checkbox } from 'views/_components/Checkbox';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { LevelError } from 'views/_components/LevelError';
@@ -30,19 +31,11 @@ import { ApplyFiltersUtils } from './_functions/Utils/ApplyFiltersUtils';
 import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
 
-const { applyDates, applyInputs, applyMultiSelects, applySearch } = ApplyFiltersUtils;
+const { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch } = ApplyFiltersUtils;
 const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
-export const MyFilters = ({
-  className,
-  data = [],
-  getFilteredData,
-  isStrictMode,
-  onFilter,
-  options = [],
-  viewType
-}) => {
+export const MyFilters = ({ className, data = [], isStrictMode, onFilter, options = [], viewType }) => {
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
   const [filteredData, setFilteredData] = useRecoilState(filteredDataState(viewType));
@@ -97,12 +90,6 @@ export const MyFilters = ({
     getFilterByKeys();
     getSortDefaultValues(options);
   }, [data, viewType]);
-
-  useEffect(() => {
-    if (getFilteredData) {
-      getFilteredData(filteredData);
-    }
-  }, [filteredData]);
 
   const applyFilters = () => {
     try {
@@ -171,6 +158,7 @@ export const MyFilters = ({
       item =>
         applyInputs({ filterBy, filterByKeys, item }) &&
         applyDates({ filterBy, filterByKeys, item }) &&
+        applyCheckBox({ filterBy, filterByKeys, item }) &&
         applyMultiSelects({ filterBy, filterByKeys, item }) &&
         applySearch({ filterByKeys, item, value: searchValue })
     );
@@ -216,27 +204,46 @@ export const MyFilters = ({
     return options.map(option => {
       switch (option.type) {
         case 'CHECKBOX':
-          return [];
-
+          return renderCheckbox(option);
         case 'DATE':
           return renderDate(option);
-
         case 'DROPDOWN':
           return renderDropdown(option);
-
         case 'INPUT':
           return renderInput(option);
-
         case 'MULTI_SELECT':
           return renderMultiSelect(option);
-
         case 'SEARCH':
           return renderSearch(option);
-
         default:
           throw new Error('The option type is not correct.');
       }
     });
+  };
+
+  const renderCheckbox = option => {
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(nestedOption => renderCheckbox(nestedOption));
+    }
+
+    return (
+      <div className={styles.block} key={option.key}>
+        <div className={styles.labelCheckbox}>{option.label}</div>
+        <div className={styles.checkbox}>
+          <Checkbox
+            ariaLabel={resourcesContext.messages[option.key]}
+            checked={filterBy[option.key] || false}
+            id={option.key}
+            inputId={option.key}
+            label={option.key}
+            onChange={event => onChange({ key: option.key, value: event.target.checked })}
+          />
+          <label className="srOnly" htmlFor={option.key}>
+            {resourcesContext.messages[option.key]}
+          </label>
+        </div>
+      </div>
+    );
   };
 
   const renderDate = option => {
@@ -370,7 +377,7 @@ export const MyFilters = ({
       return <LevelError type={type} />;
     }
 
-    return <span className={styles.statusBox}>{type}</span>;
+    return <span className={styles.statusBox}>{type?.toString()}</span>;
   };
 
   const renderSearch = option => {

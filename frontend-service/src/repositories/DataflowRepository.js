@@ -59,23 +59,21 @@ export const DataflowRepository = {
   exportSchemas: async dataflowId =>
     await HTTPRequester.download({ url: getUrl(DataflowConfig.exportSchemas, { dataflowId }) }),
 
-  createApiKey: async (dataflowId, dataProviderId, isCustodian) => {
-    const url = isCustodian
-      ? getUrl(DataflowConfig.createApiKeyCustodian, { dataflowId })
-      : getUrl(DataflowConfig.createApiKey, { dataflowId, dataProviderId });
-
-    return await HTTPRequester.post({ url });
-  },
+  createApiKey: async (dataflowId, dataProviderId, isCustodian) =>
+    await HTTPRequester.post({
+      url: isCustodian
+        ? getUrl(DataflowConfig.createApiKeyCustodian, { dataflowId })
+        : getUrl(DataflowConfig.createApiKey, { dataflowId, dataProviderId })
+    }),
 
   getAllDataflowsUserList: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getAllDataflowsUserList) }),
 
-  getApiKey: async (dataflowId, dataProviderId, isCustodian) => {
-    const url = isCustodian
-      ? getUrl(DataflowConfig.getApiKeyCustodian, { dataflowId })
-      : getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId });
-
-    return await HTTPRequester.get({ url });
-  },
+  getApiKey: async (dataflowId, dataProviderId, isCustodian) =>
+    await HTTPRequester.get({
+      url: isCustodian
+        ? getUrl(DataflowConfig.getApiKeyCustodian, { dataflowId })
+        : getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId })
+    }),
 
   getRepresentativesUsersList: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getRepresentativesUsersList, { dataflowId }) }),

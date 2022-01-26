@@ -12,8 +12,11 @@ export const referenceBigButtonsReducer = (state, { type, payload }) => {
     case 'GET_DATAFLOW_TO_CLONE':
       return { ...state, cloneDataflow: payload.dataflow };
 
-    case 'IS_CLONING_STATUS':
-      return { ...state, isCloningStatus: payload.status };
+    case 'IS_CLONING_DATAFLOW':
+      return { ...state, isCloningDataflow: payload.status };
+
+    case 'IS_IMPORTING_DATAFLOW':
+      return { ...state, isImportingDataflow: payload.status };
 
     case 'SET_IS_DESIGN_STATUS':
       return { ...state, isDesignStatus: payload.isDesignStatus };

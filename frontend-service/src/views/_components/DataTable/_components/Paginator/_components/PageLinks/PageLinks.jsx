@@ -29,23 +29,19 @@ export class PageLinks extends Component {
   }
 
   render() {
-    let elements = this.props.value.map((pageLink, i) => {
-      let pageClassName = classNames('p-paginator-page p-paginator-element p-link', {
-        'p-highlight': pageLink - 1 === this.props.page
-      });
-
-      return (
-        <button
-          className={pageClassName}
-          disabled={this.props.disabled}
-          key={pageLink}
-          onClick={e => this.onPageLinkClick(e, pageLink)}
-          style={{ opacity: this.props.disabled ? '0.6' : '1', pointerEvents: this.props.disabled ? 'none' : 'auto' }}
-          type="button">
-          {pageLink}
-        </button>
-      );
-    });
+    const elements = this.props.value.map(pageLink => (
+      <button
+        className={classNames('p-paginator-page p-paginator-element p-link', {
+          'p-highlight': pageLink - 1 === this.props.page
+        })}
+        disabled={this.props.disabled}
+        key={pageLink}
+        onClick={e => this.onPageLinkClick(e, pageLink)}
+        style={{ opacity: this.props.disabled ? '0.6' : '1', pointerEvents: this.props.disabled ? 'none' : 'auto' }}
+        type="button">
+        {pageLink}
+      </button>
+    ));
 
     return <span className="p-paginator-pages">{elements}</span>;
   }

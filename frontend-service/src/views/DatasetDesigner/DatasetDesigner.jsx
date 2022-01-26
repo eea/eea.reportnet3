@@ -1,5 +1,6 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import ReactTooltip from 'react-tooltip';
 
 import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
@@ -16,9 +17,10 @@ import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchem
 import { Button } from 'views/_components/Button';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
-import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
-import { Dashboard } from 'views/_components/Dashboard';
+import { DatasetDashboardDialog } from 'views/_components/DatasetDashboardDialog';
+import { DatasetDeleteDataDialog } from 'views/_components/DatasetDeleteDataDialog';
+import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputTextarea } from 'views/_components/InputTextarea';
@@ -108,6 +110,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     exportButtonsList: [],
     exportDatasetFileType: '',
     externalOperationsList: { export: [], import: [], importOtherSystems: [] },
+    hasQCsHistory: false,
     hasWritePermissions: false,
     importButtonsList: [],
     initialDatasetDescription: '',
@@ -115,7 +118,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     isConfigureWebformDialogVisible: false,
     isDataflowOpen: false,
     isDataUpdated: false,
-    isDeleteDialogVisible: false,
     isDownloadingQCRules: false,
     isDownloadingValidations: false,
     isDuplicatedToManageUnique: false,
@@ -134,7 +136,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     isUniqueConstraintCreating: false,
     isUniqueConstraintsListDialogVisible: false,
     isUniqueConstraintUpdating: false,
-    isValidateDialogVisible: false,
     isValidationsTabularView: false,
     isValidationViewerVisible: false,
     levelErrorTypes: [],
@@ -172,10 +173,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     datasetSchemaAllTables,
     dataViewerOptions,
     isDataflowOpen,
-    isDeleteDialogVisible,
     isDesignDatasetEditorRead,
     isImportOtherSystemsDialogVisible,
-    isValidateDialogVisible,
     webformOptions,
     webformOptionsLoadingStatus
   } = designerState;
@@ -206,7 +205,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     leftSideBarContext.removeModels();
     onLoadSchema();
     callSetMetaData();
-    if (isEmpty(webformOptions)) getWebformList();
+    if (isEmpty(webformOptions)) {
+      getWebformList();
+    }
   }, []);
 
   useEffect(() => {
@@ -565,7 +566,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onCloseConfigureWebformModal = () => manageDialogs('isConfigureWebformDialogVisible', false);
 
   const onConfirmValidate = async () => {
-    manageDialogs('isValidateDialogVisible', false);
     try {
       await DatasetService.validate(datasetId);
       notificationContext.add(
@@ -607,7 +607,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onConfirmDelete = async () => {
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
-      manageDialogs('isDeleteDialogVisible', false);
       await DatasetService.deleteData(datasetId, arePrefilledTablesDeleted);
       onResetDelete();
     } catch (error) {
@@ -632,7 +631,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const onHideDelete = () => {
-    manageDialogs('isDeleteDialogVisible', false);
     onResetDelete();
   };
 
@@ -738,10 +736,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const onResetDelete = () => {
-    designerDispatch({
-      type: 'SET_ARE_PREFILLED_TABLES_DELETED',
-      payload: { arePrefilledTablesDeleted: false }
-    });
+    if (arePrefilledTablesDeleted) {
+      designerDispatch({
+        type: 'SET_ARE_PREFILLED_TABLES_DELETED',
+        payload: { arePrefilledTablesDeleted: false }
+      });
+    }
   };
 
   const onKeyChange = event => {
@@ -996,48 +996,64 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     setIsHistoryDialogVisible(false);
   };
 
+  const renderQCsHistoryButton = () => {
+    if (isDataflowOpen) {
+      return (
+        <span data-for="qcHistoryTooltip" data-tip>
+          <Button
+            className={`p-button-secondary ${designerState.hasQCsHistory ? 'p-button-animated-blink' : ''}`}
+            disabled={!designerState.hasQCsHistory}
+            icon="info"
+            label={resourcesContext.messages['allQCsHistoryBtn']}
+            onClick={() => setIsHistoryDialogVisible(true)}
+          />
+        </span>
+      );
+    }
+  };
+
+  const renderQCsHistoryButtonTooltip = () => {
+    if (!designerState.hasQCsHistory) {
+      return (
+        <ReactTooltip border effect="solid" id="qcHistoryTooltip" place="top">
+          {resourcesContext.messages['genericQCsHistoryButtonTooltip']}
+        </ReactTooltip>
+      );
+    }
+  };
+
   const renderActionButtonsValidationDialog = (
-    <Fragment>
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon="info"
-        label={resourcesContext.messages['allQCsHistoryBtn']}
-        onClick={() => setIsHistoryDialogVisible(true)}
-        style={{ float: 'left' }}
-      />
+    <div className={styles.qcDialogFooterWrapper}>
+      {renderQCsHistoryButton()}
+      {renderQCsHistoryButtonTooltip()}
+
       <Button
         className="p-button-secondary p-button-animated-blink"
         disabled={designerState.isDownloadingQCRules}
         icon={designerState.isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadQCsButtonLabel']}
         onClick={() => onDownloadQCRules()}
-        style={{ float: 'left' }}
       />
-
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createFieldValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('field', 'validationsListDialog')}
-        style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createRowValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('row', 'validationsListDialog')}
-        style={{ float: 'left' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createTableValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
-        style={{ float: 'left' }}
       />
-
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary p-button-animated-blink ${styles.buttonAlignRight}`}
         icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['validateSqlRulesBtn']}
         onClick={validateQcRules}
@@ -1050,16 +1066,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         label={resourcesContext.messages['close']}
         onClick={onHideValidationsDialog}
       />
-    </Fragment>
-  );
-
-  const renderDashboardFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon="cancel"
-      label={resourcesContext.messages['close']}
-      onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
-    />
+    </div>
   );
 
   const renderImportOtherSystemsFooter = (
@@ -1292,6 +1299,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const setIsUniqueConstraintUpdating = isUniqueConstraintUpdatingValue =>
     designerDispatch({ type: 'SET_IS_CONSTRAINT_UPDATING', payload: { isUniqueConstraintUpdatingValue } });
 
+  const setHasQCsHistory = hasQCsHistory =>
+    designerDispatch({ type: 'SET_HAS_QCS_HISTORY', payload: { hasQCsHistory } });
+
   const validationsListDialog = () => {
     if (designerState.validationListDialogVisible) {
       return (
@@ -1306,6 +1316,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
+            isDataflowOpen={isDataflowOpen}
+            isDatasetDesigner
+            setHasQCsHistory={setHasQCsHistory}
           />
         </Dialog>
       );
@@ -1315,6 +1328,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const deletePrefilledDataCheckbox = (
     <div className={styles.checkboxWrapper}>
       <Checkbox
+        ariaLabelledBy="arePrefilledTablesDeleted"
         checked={arePrefilledTablesDeleted}
         id="arePrefilledTablesDeleted"
         inputId="arePrefilledTablesDeleted"
@@ -1382,6 +1396,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       }}>
       <div className={styles.noScrollDatasetDesigner}>
         <Title
+          ariaLabelledBy={designerState.datasetSchemaName}
           icon="pencilRuler"
           iconSize="3.4rem"
           subtitle={designerState.dataflowName}
@@ -1529,24 +1544,15 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 popup={true}
                 ref={exportMenuRef}
               />
-              <Button
-                className="p-button-rounded p-button-secondary-transparent p-button-animated-blink dataset-deleteDataset-help-step"
-                icon="trash"
-                label={resourcesContext.messages['deleteDatasetData']}
-                onClick={() => manageDialogs('isDeleteDialogVisible', true)}
-              />
+              <DatasetDeleteDataDialog onConfirmDelete={onConfirmDelete} onHideDelete={onHideDelete}>
+                {deletePrefilledDataCheckbox}
+              </DatasetDeleteDataDialog>
             </div>
             <div className="p-toolbar-group-right">
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent ${
-                  !isDataflowOpen && !isDesignDatasetEditorRead ? ' p-button-animated-blink' : null
-                }`}
+              <DatasetValidateDialog
                 disabled={isDataflowOpen || isDesignDatasetEditorRead}
-                icon="validate"
-                label={resourcesContext.messages['validate']}
-                onClick={() => manageDialogs('isValidateDialogVisible', true)}
+                onConfirmValidate={onConfirmValidate}
               />
-
               <Button
                 className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
                 icon="warning"
@@ -1589,18 +1595,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 label={resourcesContext.messages['externalIntegrations']}
                 onClick={() => manageDialogs('isIntegrationListDialogVisible', true)}
               />
-
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData &&
-                  !isDataflowOpen &&
-                  !isDesignDatasetEditorRead &&
-                  'p-button-animated-blink'
-                }`}
+              <DatasetDashboardDialog
                 disabled={!designerState.datasetHasData || isDataflowOpen || isDesignDatasetEditorRead}
-                icon="dashboard"
-                label={resourcesContext.messages['dashboards']}
-                onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: true })}
+                levelErrorTypes={designerState.levelErrorTypes}
+                tableSchemas={designerState.schemaTables.map(table => table.name)}
               />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
@@ -1713,47 +1711,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           setIsUniqueConstraintCreating={setIsUniqueConstraintCreating}
           setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
         />
-
-        {isValidateDialogVisible && (
-          <ConfirmDialog
-            header={resourcesContext.messages['validateDataset']}
-            labelCancel={resourcesContext.messages['no']}
-            labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={onConfirmValidate}
-            onHide={() => manageDialogs('isValidateDialogVisible', false)}
-            visible={isValidateDialogVisible}>
-            {resourcesContext.messages['validateDatasetConfirm']}
-          </ConfirmDialog>
-        )}
-
-        {isDeleteDialogVisible && (
-          <ConfirmDialog
-            classNameConfirm={'p-button-danger'}
-            header={resourcesContext.messages['deleteDatasetHeader']}
-            labelCancel={resourcesContext.messages['no']}
-            labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={onConfirmDelete}
-            onHide={onHideDelete}
-            visible={isDeleteDialogVisible}>
-            <div>{resourcesContext.messages['deleteDatasetConfirm']}</div>
-            {deletePrefilledDataCheckbox}
-          </ConfirmDialog>
-        )}
-
-        {designerState.dashDialogVisible && (
-          <Dialog
-            footer={renderDashboardFooter}
-            header={resourcesContext.messages['titleDashboard']}
-            onHide={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
-            style={{ width: '70vw' }}
-            visible={designerState.dashDialogVisible}>
-            <Dashboard
-              levelErrorTypes={designerState.levelErrorTypes}
-              refresh={designerState.dashDialogVisible}
-              tableSchemaNames={designerState.schemaTables.map(table => table.name)}
-            />
-          </Dialog>
-        )}
         {designerState.isConfigureWebformDialogVisible && (
           <Dialog
             footer={renderConfigureWebformFooter}

@@ -16,8 +16,11 @@ TabPanel.propTypes = {
   headerStyle: PropTypes.object,
   leftIcon: PropTypes.string,
   notEmpty: PropTypes.bool,
+  numberOfFields: PropTypes.number,
   readOnly: PropTypes.bool,
   rightIcon: PropTypes.string,
+  righIconClassName: PropTypes.string,
+  rightIconTooltip: PropTypes.string,
   tableSchemaId: PropTypes.string,
   toPrefill: PropTypes.bool
 };

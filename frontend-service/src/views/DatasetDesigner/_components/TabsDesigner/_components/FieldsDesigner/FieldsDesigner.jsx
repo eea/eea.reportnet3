@@ -694,6 +694,10 @@ export const FieldsDesigner = ({
               onNewFieldAdd={onFieldAdd}
               onShowDialogError={onShowDialogError}
               recordSchemaId={field.recordId}
+              setIsLoading={(loading, ref) => {
+                setRefElement(ref.element);
+                setIsLoading(loading);
+              }}
               tableSchemaId={table.tableSchemaId}
               totalFields={!isNil(fields) ? fields.length : undefined}
             />
@@ -803,6 +807,14 @@ export const FieldsDesigner = ({
   const onImportTableSchemaError = async ({ xhr }) => {
     if (xhr.status === 423) {
       notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+    }
+  };
+
+  const getContentTableClassName = () => {
+    if (!isNil(fields) && fields.length < 2) {
+      return styles.inactiveDragAndDropItems;
+    } else {
+      return styles.activeDragAndDropItems;
     }
   };
 
@@ -964,7 +976,7 @@ export const FieldsDesigner = ({
       </div>
       <div className={styles.contentTable}>
         {!viewType['tabularData'] && (
-          <div className={styles.fieldsHeader}>
+          <div className={`${styles.fieldsHeader} ${getContentTableClassName()}`}>
             <label></label>
             <span className={styles.PKWrap}>
               <label>{resourcesContext.messages['pk']}</label>

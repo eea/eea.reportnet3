@@ -252,6 +252,7 @@ export const PublicCountryInformation = () => {
                 data-for={publicFileName.fileName}
                 data-tip
                 icon={AwesomeIcons('7z')}
+                role="button"
               />
               <ReactTooltip
                 border={true}
@@ -301,6 +302,7 @@ export const PublicCountryInformation = () => {
                 data-for={referencePublicFilesName.fileName}
                 data-tip
                 icon={AwesomeIcons('7z')}
+                role="button"
               />
               <ReactTooltip
                 border={true}
@@ -357,7 +359,13 @@ export const PublicCountryInformation = () => {
     <span>
       {text}{' '}
       <a href={url} rel="noopener noreferrer" target="_blank" title={text}>
-        <FontAwesomeIcon aria-hidden={false} className="p-breadcrumb-home" icon={AwesomeIcons('externalUrl')} />
+        <FontAwesomeIcon
+          aria-hidden={false}
+          aria-label={text}
+          className="p-breadcrumb-home"
+          icon={AwesomeIcons('externalUrl')}
+          role="button"
+        />
       </a>
     </span>
   );
@@ -393,6 +401,7 @@ export const PublicCountryInformation = () => {
               sortable={true}
               sortField={sortField}
               sortOrder={sortOrder}
+              summary={resourcesContext.messages['dataflows']}
               totalRecords={totalRecords}
               value={dataflows}>
               {renderColumns(dataflows)}

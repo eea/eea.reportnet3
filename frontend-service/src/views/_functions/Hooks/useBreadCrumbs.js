@@ -44,78 +44,53 @@ export const useBreadCrumbs = ({
     representativeId
   ]);
 
-  const getDataCollectionCrumb = () => {
-    return { label: resourcesContext.messages['dataCollection'], icon: 'dataCollection' };
-  };
+  const getDataCollectionCrumb = () => ({ label: resourcesContext.messages['dataCollection'], icon: 'dataCollection' });
 
-  const getDataflowCrumb = () => {
-    return {
-      command: () => navigate(getUrl(routes.DATAFLOW, { dataflowId }, true)),
-      href: getUrl(routes.DATAFLOW, { dataflowId }, true),
-      icon: 'clone',
-      label: TextByDataflowTypeUtils.getLabelByDataflowType(resourcesContext.messages, dataflowType, 'breadCrumbs')
-    };
-  };
+  const getDataflowCrumb = () => ({
+    command: () => navigate(getUrl(routes.DATAFLOW, { dataflowId }, true)),
+    href: getUrl(routes.DATAFLOW, { dataflowId }, true),
+    icon: 'clone',
+    label: TextByDataflowTypeUtils.getLabelByDataflowType(resourcesContext.messages, dataflowType, 'breadCrumbs')
+  });
 
-  const getReferenceDataflowCrumb = () => {
-    return {
-      command: () => navigate(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true)),
-      href: getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true),
-      icon: 'clone',
-      label: resourcesContext.messages['referenceDataflowCrumbLabel']
-    };
-  };
+  const getReferenceDataflowCrumb = () => ({
+    command: () => navigate(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true)),
+    href: getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId }, true),
+    icon: 'clone',
+    label: resourcesContext.messages['referenceDataflowCrumbLabel']
+  });
 
-  const getDataflowsCrumb = () => {
-    return {
-      command: () => navigate(getUrl(routes.DATAFLOWS)),
-      href: getUrl(routes.DATAFLOWS),
-      icon: 'home',
-      label: resourcesContext.messages['dataflows']
-    };
-  };
+  const getDataflowsCrumb = () => ({
+    command: () => navigate(getUrl(routes.DATAFLOWS)),
+    href: getUrl(routes.DATAFLOWS),
+    icon: 'home',
+    label: resourcesContext.messages['dataflows']
+  });
 
-  const getDataflowDashboardsCrumb = () => {
-    return { label: resourcesContext.messages['dashboards'], icon: 'barChart' };
-  };
+  const getDataflowDashboardsCrumb = () => ({ label: resourcesContext.messages['dashboards'], icon: 'barChart' });
 
-  const getTechnicalFeedbackCrumb = () => {
-    return { label: resourcesContext.messages['technicalFeedback'], icon: 'comments' };
-  };
+  const getTechnicalFeedbackCrumb = () => ({ label: resourcesContext.messages['technicalFeedback'], icon: 'comments' });
 
-  const getDataflowHelpCrumb = () => {
-    return { label: resourcesContext.messages['dataflowHelp'], icon: 'info' };
-  };
+  const getDataflowHelpCrumb = () => ({ label: resourcesContext.messages['dataflowHelp'], icon: 'info' });
 
-  const getDatasetCrumb = () => {
-    return { label: resourcesContext.messages['dataset'], icon: 'dataset' };
-  };
+  const getDatasetCrumb = () => ({ label: resourcesContext.messages['dataset'], icon: 'dataset' });
 
-  const getDatasetDesignerCrumb = () => {
-    return { label: resourcesContext.messages['datasetDesigner'], icon: 'pencilRuler' };
-  };
+  const getDatasetDesignerCrumb = () => ({ label: resourcesContext.messages['datasetDesigner'], icon: 'pencilRuler' });
 
   const getReferenceDatasetDesignerCrumb = () => ({
     label: resourcesContext.messages['referenceDatasetDesigner'],
     icon: 'pencilRuler'
   });
 
-  const getReferenceDatasetCrumb = () => ({
-    label: resourcesContext.messages['referenceDataset'],
-    icon: 'howTo'
+  const getReferenceDatasetCrumb = () => ({ label: resourcesContext.messages['referenceDataset'], icon: 'howTo' });
+
+  const getEUDatasetCrumb = () => ({ label: resourcesContext.messages['euDataset'], icon: 'euDataset' });
+
+  const getHomeCrumb = () => ({
+    command: () => navigate(getUrl(routes.ACCESS_POINT)),
+    href: getUrl(routes.ACCESS_POINT),
+    label: resourcesContext.messages['homeBreadcrumb']
   });
-
-  const getEUDatasetCrumb = () => {
-    return { label: resourcesContext.messages['euDataset'], icon: 'euDataset' };
-  };
-
-  const getHomeCrumb = () => {
-    return {
-      command: () => navigate(getUrl(routes.ACCESS_POINT)),
-      href: getUrl(routes.ACCESS_POINT),
-      label: resourcesContext.messages['homeBreadcrumb']
-    };
-  };
 
   const getRepresentativeCrumb = () => {
     const intRepresentativeId = parseInt(representativeId);
@@ -125,9 +100,10 @@ export const useBreadCrumbs = ({
       if (intRepresentativeId === 0) {
         representativeCrumbLabel = resourcesContext.messages['testDatasetBreadcrumbs'];
       } else {
-        const representatives = dataflowStateData?.datasets.map(dataset => {
-          return { name: dataset.datasetSchemaName, dataProviderId: dataset.dataProviderId };
-        });
+        const representatives = dataflowStateData?.datasets.map(dataset => ({
+          name: dataset.datasetSchemaName,
+          dataProviderId: dataset.dataProviderId
+        }));
 
         const currentRepresentative = representatives
           .filter(representative => representative.dataProviderId === intRepresentativeId)
@@ -153,64 +129,50 @@ export const useBreadCrumbs = ({
     };
   };
 
-  const getPublicCountriesCrumb = () => {
-    return {
-      command: () => navigate(getUrl(routes.PUBLIC_COUNTRIES, {}, true)),
-      href: getUrl(routes.PUBLIC_COUNTRIES, {}, true),
-      label: resourcesContext.messages['publicCountriesBreadcrumbs']
-    };
-  };
+  const getPublicCountriesCrumb = () => ({
+    command: () => navigate(getUrl(routes.PUBLIC_COUNTRIES, {}, true)),
+    href: getUrl(routes.PUBLIC_COUNTRIES, {}, true),
+    label: resourcesContext.messages['publicCountriesBreadcrumbs']
+  });
 
-  const getPublicCountryCrumb = () => {
-    return {
-      command: () => navigate(getUrl(routes.PUBLIC_COUNTY_INFORMATION, { countryCode }, true)),
-      href: getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true),
-      label: resourcesContext.messages['publicCountryBreadcrumbs']
-    };
-  };
+  const getPublicCountryCrumb = () => ({
+    command: () => navigate(getUrl(routes.PUBLIC_COUNTY_INFORMATION, { countryCode }, true)),
+    href: getUrl(routes.PUBLIC_COUNTRY_INFORMATION, { countryCode }, true),
+    label: resourcesContext.messages['publicCountryBreadcrumbs']
+  });
 
-  const getPublicDataflowCrumb = () => {
-    return {
-      command: () => navigate(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true)),
-      href: getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true),
-      label: resourcesContext.messages['publicDataflowBreadcrumbs']
-    };
-  };
+  const getPublicDataflowCrumb = () => ({
+    command: () => navigate(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true)),
+    href: getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true),
+    label: resourcesContext.messages['publicDataflowBreadcrumbs']
+  });
 
-  const getPublicDataflowsCrumb = () => {
-    return {
-      command: () => navigate(getUrl(routes.PUBLIC_DATAFLOWS, {}, true)),
-      href: getUrl(routes.PUBLIC_DATAFLOWS, {}, true),
-      label: resourcesContext.messages['publicDataflowsBreadcrumbs']
-    };
-  };
+  const getPublicDataflowsCrumb = () => ({
+    command: () => navigate(getUrl(routes.PUBLIC_DATAFLOWS, {}, true)),
+    href: getUrl(routes.PUBLIC_DATAFLOWS, {}, true),
+    label: resourcesContext.messages['publicDataflowsBreadcrumbs']
+  });
 
-  const getPublicHomeCrumb = () => {
-    return {
-      command: () => navigate(getUrl(routes.ACCESS_POINT, {}, true)),
-      href: getUrl(routes.ACCESS_POINT, {}, true),
-      label: resourcesContext.messages['homeBreadcrumb']
-    };
-  };
+  const getPublicHomeCrumb = () => ({
+    command: () => navigate(getUrl(routes.ACCESS_POINT, {}, true)),
+    href: getUrl(routes.ACCESS_POINT, {}, true),
+    label: resourcesContext.messages['homeBreadcrumb']
+  });
 
-  const getSettingsCrumb = () => {
-    return {
-      command: () => navigate(getUrl(routes.SETTINGS)),
-      href: getUrl(routes.SETTINGS),
-      icon: 'user-profile',
-      label: resourcesContext.messages['userSettingsBreadcrumbs']
-    };
-  };
+  const getSettingsCrumb = () => ({
+    command: () => navigate(getUrl(routes.SETTINGS)),
+    href: getUrl(routes.SETTINGS),
+    icon: 'user-profile',
+    label: resourcesContext.messages['userSettingsBreadcrumbs']
+  });
 
-  const getTestDatasetsCrumb = () => {
-    return {
-      command: () =>
-        navigate(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
-      href: getUrl(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
-      icon: 'representative',
-      label: resourcesContext.messages['testDatasetBreadcrumbs']
-    };
-  };
+  const getTestDatasetsCrumb = () => ({
+    command: () =>
+      navigate(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
+    href: getUrl(getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataProviderId }, true)),
+    icon: 'representative',
+    label: resourcesContext.messages['testDatasetBreadcrumbs']
+  });
 
   const setBreadCrumbs = () => {
     switch (currentPage) {

@@ -186,9 +186,6 @@ export const designerReducer = (state, { type, payload }) => {
     case 'SET_IS_VALIDATIONS_TABULAR_VIEW':
       return { ...state, isValidationsTabularView: payload.isValidationsTabularView };
 
-    case 'TOGGLE_DASHBOARD_VISIBILITY':
-      return { ...state, dashDialogVisible: payload };
-
     case 'TOGGLE_VALIDATION_VIEWER_VISIBILITY':
       return { ...state, isValidationViewerVisible: payload };
 
@@ -215,6 +212,9 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'SET_WEBFORM_OPTIONS_LOADING_STATUS':
       return { ...state, webformOptionsLoadingStatus: payload.loadingStatus };
+
+    case 'SET_HAS_QCS_HISTORY':
+      return { ...state, hasQCsHistory: payload.hasQCsHistory };
 
     default:
       return state;
