@@ -117,14 +117,13 @@ export const DatasetRepository = {
     isExportFilteredCsv,
     isFilterValidationsActive
   ) => {
-    const data = { fieldValue: filterValue, idRules: selectedRuleId };
-    if (isExportFilteredCsv && isFilterValidationsActive) {
-      data.levelError = levelErrorValidations;
-    }
-
     return await HTTPRequester.post({
       url: getUrl(DatasetConfig.exportTableData, { datasetId, fileType, tableSchemaId }),
-      data,
+      data: {
+        fieldValue: isExportFilteredCsv ? filterValue : '',
+        idRules: isExportFilteredCsv ? selectedRuleId : '',
+        levelError: isExportFilteredCsv && isFilterValidationsActive ? levelErrorValidations : []
+      },
       headers: { 'Content-Type': 'application/json' }
     });
   },
