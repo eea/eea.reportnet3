@@ -75,7 +75,7 @@ export const Dataflow = () => {
 
   const dataflowInitialState = {
     anySchemaAvailableInPublic: false,
-    automaticReportingDeletion: false,
+    isAutomaticReportingDeletion: false,
     currentUrl: '',
     data: {},
     dataflowType: '',
@@ -507,8 +507,8 @@ export const Dataflow = () => {
   const setIsUpdatingPermissions = isUpdatingPermissions =>
     dataflowDispatch({ type: 'SET_IS_UPDATING_PERMISSIONS', payload: { isUpdatingPermissions } });
 
-  const setAutomaticReportingDeletion = automaticReportingDeletion =>
-    dataflowDispatch({ type: 'SET_AUTOMATIC_REPORTING_DELETION', payload: { automaticReportingDeletion } });
+  const setAutomaticReportingDeletion = isAutomaticReportingDeletion =>
+    dataflowDispatch({ type: 'SET_AUTOMATIC_REPORTING_DELETION', payload: { isAutomaticReportingDeletion } });
 
   useCheckNotifications(
     [
@@ -1049,7 +1049,7 @@ export const Dataflow = () => {
         type: 'SET_IS_FETCHING_DATA',
         payload: { isFetchingData: true }
       });
-      await DataflowService.updateAutomaticDelete(dataflowId, dataflowState.automaticReportingDeletion);
+      await DataflowService.updateAutomaticDelete(dataflowId, dataflowState.isAutomaticReportingDeletion);
       onLoadReportingDataflow();
     } catch (error) {
       console.error('Dataflow - onConfirmAutomaticReportingDeletion.', error);
@@ -1096,10 +1096,10 @@ export const Dataflow = () => {
 
   const onCloseAutomaticReportingDeletion = () => {
     manageDialogs('isAutomaticReportingDeletionDialogVisible', false);
-    if (dataflowState.automaticReportingDeletion) {
+    if (dataflowState.isAutomaticReportingDeletion) {
       dataflowDispatch({
         type: 'SET_AUTOMATIC_REPORTING_DELETION',
-        payload: { automaticReportingDeletion: dataflowState.automaticReportingDeletion }
+        payload: { isAutomaticReportingDeletion: dataflowState.isAutomaticReportingDeletion }
       });
     }
   };
@@ -1403,7 +1403,7 @@ export const Dataflow = () => {
 
         {dataflowState.isAutomaticReportingDeletionDialogVisible && (
           <ConfirmDialog
-            disabledConfirm={dataflowState.automaticReportingDeletion === dataflowState.isFetchingData}
+            disabledConfirm={dataflowState.isAutomaticReportingDeletion === dataflowState.isFetchingData}
             header={resourcesContext.messages['isAutomaticReportingDeletionDialogHeader']}
             iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
             labelCancel={resourcesContext.messages['cancel']}
@@ -1412,16 +1412,16 @@ export const Dataflow = () => {
             onHide={() => onCloseAutomaticReportingDeletion()}
             visible={dataflowState.isAutomaticReportingDeletionDialogVisible}>
             <Checkbox
-              checked={dataflowState.automaticReportingDeletion}
+              checked={dataflowState.isAutomaticReportingDeletion}
               id="isAutomaticReportingDeletionCheckbox"
               inputId="isAutomaticReportingDeletionCheckbox"
-              onChange={() => setAutomaticReportingDeletion(!dataflowState.automaticReportingDeletion)}
+              onChange={() => setAutomaticReportingDeletion(!dataflowState.isAutomaticReportingDeletion)}
               role="checkbox"
             />
             <label className={styles.isAutomaticReportingDeletionLabel} htmlFor="isAutomaticReportingDeletionCheckbox">
               <span
                 className={styles.pointer}
-                onClick={() => setAutomaticReportingDeletion(!dataflowState.automaticReportingDeletion)}>
+                onClick={() => setAutomaticReportingDeletion(!dataflowState.isAutomaticReportingDeletion)}>
                 {resourcesContext.messages['isAutomaticReportingDeletionCheckboxLabel']}
               </span>
             </label>
