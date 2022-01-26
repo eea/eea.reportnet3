@@ -394,6 +394,7 @@ export const TabsDesigner = ({
                   key={tab.index}
                   newTab={tab.newTab}
                   notEmpty={tab.notEmpty}
+                  numberOfFields={tab.records ? tab.records[0].fields?.length : 0}
                   readOnly={tab.readOnly}
                   rightIcon={getRightIcon(tab)}
                   rightIconTooltip={getRightIconTooltip(tab)}

@@ -19,7 +19,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const ManageDataflowForm = forwardRef(
+export const ManageDataflowForm = forwardRef(
   (
     {
       data,
@@ -236,5 +236,3 @@ const ManageDataflowForm = forwardRef(
     );
   }
 );
-
-export { ManageDataflowForm };

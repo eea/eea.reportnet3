@@ -57,12 +57,13 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
     try {
       const data = await WebformService.getAll();
-      setWebforms(orderBy(data, 'id', 'asc'));
+      setWebforms(orderBy(data, 'label', 'asc'));
+      setLoadingStatus('success');
     } catch (error) {
       console.error('ManageWebforms - getWebformList.', error);
+      setLoadingStatus('error');
       notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
     } finally {
-      setLoadingStatus('idle');
       setIsLoading(false);
     }
   };
@@ -73,14 +74,12 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
     try {
       await WebformService.delete(selectedWebformId);
-      setLoadingStatus('success');
       getWebformList();
     } catch (error) {
       console.error('ManageWebforms - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
       notificationContext.add({ type: 'DELETE_WEBFORM_CONFIGURATION_ERROR' }, true);
     } finally {
-      setLoadingStatus('idle');
       setSelectedWebformId(null);
     }
   };
@@ -194,7 +193,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         field={column.key}
         header={column.header}
         key={column.key}
-        sortable={column.key !== 'actions'}
       />
     ));
   };
@@ -239,6 +237,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     <div className={styles.footer}>
       <Button
         className="p-button-primary"
+        disabled={loadingStatus === 'pending' && isNil(selectedWebformId)}
         icon={'plus'}
         label={resourcesContext.messages['add']}
         onClick={() => setIsAddEditDialogVisible(true)}
@@ -331,6 +330,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         <DataTable
           autoLayout
           hasDefaultCurrentPage
+          loading={loadingStatus === 'pending' && isNil(selectedWebformId)}
           paginator
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
@@ -381,16 +381,14 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           modal
           onHide={onAddEditDialogClose}
           visible={isAddEditDialogVisible}>
-          <label htmlFor="name">
-            {resourcesContext.messages['name']}
-            <InputText
-              className={`${styles.nameInput} ${errors.webformName ? styles.inputError : ''}`}
-              id="name"
-              maxLength={50}
-              onChange={event => setWebformName(event.target.value)}
-              value={webformName}
-            />
-          </label>
+          <InputText
+            className={`${styles.nameInput} ${errors.webformName ? styles.inputError : ''}`}
+            id="name"
+            maxLength={50}
+            onChange={event => setWebformName(event.target.value)}
+            placeHolder={resourcesContext.messages['name']}
+            value={webformName}
+          />
 
           <InputFile
             accept=".json"

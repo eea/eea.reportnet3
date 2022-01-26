@@ -16,7 +16,7 @@ import { DocumentService } from 'services/DocumentService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const DocumentFileUpload = ({
+export const DocumentFileUpload = ({
   dataflowId,
   documentInitialValues,
   footerRef,
@@ -316,5 +316,3 @@ const DocumentFileUpload = ({
     </form>
   );
 };
-
-export { DocumentFileUpload };

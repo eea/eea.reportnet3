@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 
 import styles from './ReporterListItem.module.scss';
 
-const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterFilters }) => {
+export const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterFilters }) => {
   const [isChecked, setIsChecked] = useState(true);
 
   useEffect(() => {
@@ -30,5 +30,3 @@ const ReporterListItem = ({ datasetSchemaId, filterDispatch, reporter, reporterF
     </Fragment>
   );
 };
-
-export { ReporterListItem };
