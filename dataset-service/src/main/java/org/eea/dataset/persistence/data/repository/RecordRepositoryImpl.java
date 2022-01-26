@@ -847,39 +847,51 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       }
     }
 
-    String levelError = " level_error in (" + sb.toString() + ")";
-    String idRules = filters.getIdRules() != null && !filters.getIdRules().equals("")
-        ? " and v2.id_rule = '" + filters.getIdRules() + "')"
-        : ")";
-    String fieldValue = filters.getFieldValue() != null && !filters.getFieldValue().equals("")
-        ? " and fv.value like ('%" + filters.getFieldValue() + "%')"
+    String levelError;
+    String idRules;
+
+    if (filters.getLevelError() != null && filters.getLevelError().length > 0) {
+
+      levelError = " where level_error in (" + sb.toString() + ")";
+      idRules = filters.getIdRules() != null && !filters.getIdRules().equals("")
+          ? " and v2.id_rule = '" + filters.getIdRules() + "')"
+          : ")";
+    } else {
+      levelError = "";
+      idRules = filters.getIdRules() != null && !filters.getIdRules().equals("")
+          ? " where v2.id_rule = '" + filters.getIdRules() + "')"
+          : ")";
+    }
+
+    String filterFieldValue = filters.getFieldValue() != null && !filters.getFieldValue().equals("")
+        ? " and exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'value' LIKE '%"
+            + filters.getFieldValue() + "%')"
         : "";
-    String filterErrorAndLevel = filters.getLevelError() != null
-        || (filters.getIdRules() != null && !filters.getIdRules().equals(""))
-            ? " and fv.id in (select id_field from id_field_validations)"
-            : "";
 
     String auxTables = filters.getLevelError() != null || (filters.getIdRules() != null
         && !filters.getIdRules().equals("")) ? "with validation_aux as (select * from dataset_"
-            + datasetId + ".validation v2 where" + levelError + idRules + ", "
+            + datasetId + ".validation v2" + levelError + idRules + ", "
             + "id_field_validations as (select id_field from validation_aux v inner join dataset_"
-            + datasetId + ".field_validation fv on v.id = fv.id_validation), "
-            + "id_record_validations as (select * from record_value rv where (rv.id in (select rval.id_record from record_validation rval where rval.id_validation in "
-            + "(select v2.id from validation_aux v2)) or rv.id in (select rvval.id from record_value rvval where rvval.id in (select id_record from field_value fv2 "
-            + "where fv2.id in (select id_field from validation v inner join dataset_" + datasetId
-            + ".field_validation fv on v.id = fv.id_validation)))))" : "";
+            + datasetId + ".field_validation fval on v.id = fval.id_validation), "
+            + "id_record_validations as (select id_record from validation_aux v inner join dataset_"
+            + datasetId + ".record_validation rv on v.id = rv.id_validation), "
+            + "record_value_aux as (select * from dataset_" + datasetId
+            + ".record_value rv2 inner join id_record_validations on id_record = rv2.id),"
+            + "id_table_validations as (select id_table from validation_aux v inner join dataset_"
+            + datasetId + ".table_validation tv2 on v.id = tv2.id_validation),"
+            + "table_value_aux as (select * from dataset_" + datasetId
+            + ".table_value tv inner join id_table_validations on id_table = tv.id)" : "";
 
     String initialQuery = auxTables
         + "select * from (select rv.*, (select cast(json_agg(row_to_json(fieldsAux))as text )as fields "
         + "  from ( select fv.id as id, fv.id_field_schema as \"idFieldSchema\", fv.type as type, fv.value as value from dataset_"
-        + datasetId + ".field_value fv " + " where fv.id_record = rv.id " + fieldValue
-        + filterErrorAndLevel + " order by fv.data_position ) as fieldsAux) " + " from dataset_"
-        + datasetId + ".record_value rv where rv.id_table= " + tableId
-        + " order by rv.data_position";
+        + datasetId + ".field_value fv " + " where fv.id_record = rv.id "
+        + " order by fv.data_position ) as fieldsAux) " + " from dataset_" + datasetId
+        + ".record_value rv where rv.id_table= " + tableId + " order by rv.data_position";
 
     String paginationPart = " offset %s limit %s ) as table_aux";
     String filterByLevelOrError =
-        " and (id IN (select id_record_validations.id from id_record_validations) or id_table IN (select id_record_validations.id_table from id_record_validations))";
+        " and (exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'id' in (select id_field from id_field_validations)) or id in (select id from record_value_aux) or id_table in (select id from table_value_aux))";
 
     if (null != pageable && 0 != pageable.getPageNumber() && 0 != pageable.getPageSize()) {
       Integer offsetAux =
@@ -892,9 +904,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           initialQuery + String.format(paginationPart, offsetAux, pageable.getPageSize());
     }
 
-    initialQuery = initialQuery + " where fields notnull";
+    initialQuery = initialQuery + " where fields notnull" + filterFieldValue;
 
-    if (filters.getLevelError() != null || filters.getIdRules() != null) {
+    if (filters.getLevelError() != null
+        || (filters.getIdRules() != null && !filters.getIdRules().equals(""))) {
       initialQuery = initialQuery + filterByLevelOrError;
     }
 
