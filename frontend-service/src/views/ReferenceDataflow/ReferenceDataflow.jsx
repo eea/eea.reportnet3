@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 import { useContext, useEffect, useReducer } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
@@ -39,7 +38,7 @@ import { Dialog } from 'views/_components/Dialog';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 
-const ReferenceDataflow = () => {
+export const ReferenceDataflow = () => {
   const navigate = useNavigate();
   const { referenceDataflowId } = useParams();
 
@@ -427,5 +426,3 @@ const ReferenceDataflow = () => {
     </div>
   );
 };
-
-export { ReferenceDataflow };

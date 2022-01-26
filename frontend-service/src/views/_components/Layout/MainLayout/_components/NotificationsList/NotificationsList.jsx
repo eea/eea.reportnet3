@@ -25,7 +25,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
-const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
+export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -265,5 +265,3 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
 
   return renderNotificationsListContent();
 };
-
-export { NotificationsList };

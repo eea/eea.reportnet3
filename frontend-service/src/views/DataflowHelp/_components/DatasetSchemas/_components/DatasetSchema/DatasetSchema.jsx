@@ -27,7 +27,7 @@ import { ValidationService } from 'services/ValidationService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const DatasetSchema = ({
+export const DatasetSchema = ({
   designDataset,
   extensionsOperationsList = [],
   onGetReferencedFieldName,
@@ -547,5 +547,3 @@ const DatasetSchema = ({
     </div>
   );
 };
-
-export { DatasetSchema };

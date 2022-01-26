@@ -32,7 +32,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { MetadataUtils } from 'views/_functions/Utils';
 
-const ActionsToolbar = ({
+export const ActionsToolbar = ({
   colsSchema,
   dataflowId,
   datasetId,
@@ -390,5 +390,3 @@ const ActionsToolbar = ({
     </Toolbar>
   );
 };
-
-export { ActionsToolbar };

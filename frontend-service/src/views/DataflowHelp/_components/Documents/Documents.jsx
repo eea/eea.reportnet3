@@ -32,7 +32,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
-const Documents = ({
+export const Documents = ({
   dataflowId,
   documents,
   isDeletingDocument,
@@ -368,5 +368,3 @@ const Documents = ({
     </Fragment>
   );
 };
-
-export { Documents };
