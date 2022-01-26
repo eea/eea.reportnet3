@@ -8,7 +8,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { StatusList } from './_components/StatusList';
 import { TableList } from './_components/TableList';
 
-const FilterList = ({
+export const FilterList = ({
   color,
   datasetSchemaId,
   filterDispatch,
@@ -75,5 +75,3 @@ const FilterList = ({
     </Fragment>
   );
 };
-
-export { FilterList };

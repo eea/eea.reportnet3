@@ -8,7 +8,7 @@ import { tabularSwitchReducer } from './_functions/Reducers/tabularSwitchReducer
 
 import { TabularSwitchUtils } from './_functions/Utils/TabularSwitchUtils';
 
-const TabularSwitch = ({
+export const TabularSwitch = ({
   className = '',
   elements = [],
   id,
@@ -66,5 +66,3 @@ const TabularSwitch = ({
     </div>
   );
 };
-
-export { TabularSwitch };

@@ -12,7 +12,7 @@ const breadCrumbReducer = (state, { type, payload }) => {
   }
 };
 
-const BreadCrumbProvider = ({ children }) => {
+export const BreadCrumbProvider = ({ children }) => {
   const [state, dispatch] = useReducer(breadCrumbReducer, { model: [], isLeftSideBarOpened: false });
 
   return (
@@ -30,5 +30,3 @@ const BreadCrumbProvider = ({ children }) => {
     </BreadCrumbContext.Provider>
   );
 };
-
-export { BreadCrumbProvider };

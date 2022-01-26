@@ -22,9 +22,11 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const TreeView = ({ className = '', columnOptions = {}, expandAll = true, property, propertyName }) => {
+export const TreeView = ({ className = '', columnOptions = {}, expandAll = true, property, propertyName }) => {
   const resourcesContext = useContext(ResourcesContext);
+
   const dataTableRef = useRef();
+
   const initialTreeViewState = {
     filters: {
       automatic: [],
@@ -355,5 +357,3 @@ const typeTemplate = rowData => {
     </div>
   );
 };
-
-export { TreeView };

@@ -19,7 +19,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const UserImage = () => {
+export const UserImage = () => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -161,5 +161,3 @@ const UserImage = () => {
     </div>
   );
 };
-
-export { UserImage };

@@ -28,7 +28,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const Tab = ({
+export const Tab = ({
   addTab,
   ariaControls,
   checkEditingTabs,
@@ -53,6 +53,7 @@ const Tab = ({
   leftIcon,
   newTab,
   notEmpty = true,
+  numberOfFields,
   onTabBlur,
   onTabAddCancel,
   onTabDeleteClick,
@@ -164,26 +165,34 @@ const Tab = ({
         );
       }
     };
+
     const renderReadOnly = () => {
       if (readOnly) {
         return <p className={styles.propertyLabel}>{resourcesContext.messages['readOnly']}</p>;
       }
     };
+
     const renderPrefilled = () => {
       if (toPrefill) {
         return <p className={styles.propertyLabel}>{resourcesContext.messages['prefilled']}</p>;
       }
     };
+
     const renderFixedNumber = () => {
       if (fixedNumber) {
         return <p className={styles.propertyLabel}>{resourcesContext.messages['fixedNumber']}</p>;
       }
     };
+
     const renderNotEmpty = () => {
       if (notEmpty) {
         return <p className={styles.propertyLabel}>{resourcesContext.messages['notEmpty']}</p>;
       }
     };
+
+    const renderNumberOfFiedls = () => (
+      <p className={styles.propertyLabel}>{`${resourcesContext.messages['numberOfFields']}: ${numberOfFields}`}</p>
+    );
 
     return (
       <div className={`${styles.fieldText} ${styles.tooltipWrapper}`}>
@@ -192,6 +201,7 @@ const Tab = ({
         {renderPrefilled()}
         {renderFixedNumber()}
         {renderNotEmpty()}
+        {renderNumberOfFiedls()}
       </div>
     );
   };
@@ -612,5 +622,3 @@ const Tab = ({
     </Fragment>
   );
 };
-
-export { Tab };
