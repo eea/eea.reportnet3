@@ -54,6 +54,7 @@ import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
@@ -139,6 +140,8 @@ export const Dataflow = () => {
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
   const usersTypes = { REPORTERS: 'Reporters', REQUESTERS: 'Requesters' };
+
+  const { resetFiltersState } = useFilters('manageLeadReporters');
 
   const {
     obligation,
@@ -1213,7 +1216,10 @@ export const Dataflow = () => {
             contentStyle={{ maxHeight: '60vh' }}
             footer={manageRoleDialogFooter}
             header={resourcesContext.messages['manageRolesDialogTitle']}
-            onHide={() => manageDialogs('isManageRolesDialogVisible', false)}
+            onHide={() => {
+              manageDialogs('isManageRolesDialogVisible', false);
+              resetFiltersState();
+            }}
             visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
               <ManageLeadReporters

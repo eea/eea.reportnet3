@@ -1,4 +1,4 @@
-import { useRecoilValue } from 'recoil';
+import { useRecoilValue, useResetRecoilState } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -7,6 +7,8 @@ import { filterByState, filteredDataState } from 'views/_components/MyFilters/_f
 export const useFilters = recoilId => {
   const filterBy = useRecoilValue(filterByState(recoilId));
   const filteredData = useRecoilValue(filteredDataState(recoilId));
+
+  const resetFiltersState = useResetRecoilState(filterByState(recoilId));
 
   const checkIsFilter = () => {
     if (isEmpty(filterBy)) {
@@ -18,5 +20,5 @@ export const useFilters = recoilId => {
       .includes(false);
   };
 
-  return { filterBy, filteredData, isFiltered: checkIsFilter() };
+  return { filterBy, filteredData, isFiltered: checkIsFilter(), resetFiltersState };
 };
