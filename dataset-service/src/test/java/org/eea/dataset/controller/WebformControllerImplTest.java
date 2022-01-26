@@ -58,13 +58,14 @@ public class WebformControllerImplTest {
     webform.setIdReferenced(1L);
     webform.setName("test");
     webFormControllerImpl.insertWebformConfig(webform);
-    Mockito.verify(webformservice, times(1)).insertWebformConfig(Mockito.any(), Mockito.any());
+    Mockito.verify(webformservice, times(1)).insertWebformConfig(Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
   public void testInsertWebformConfigException() throws EEAException {
     doThrow(new EEAException()).when(webformservice).insertWebformConfig(Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
     try {
       webFormControllerImpl.insertWebformConfig(new WebformConfigVO());
     } catch (ResponseStatusException e) {
@@ -100,13 +101,13 @@ public class WebformControllerImplTest {
     webform.setName("test");
     webFormControllerImpl.updateWebformConfig(webform);
     Mockito.verify(webformservice, times(1)).updateWebformConfig(Mockito.anyLong(), Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
   public void testUpdateWebformConfigException() throws EEAException {
     doThrow(new EEAException()).when(webformservice).updateWebformConfig(Mockito.anyLong(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
     try {
       WebformConfigVO webform = new WebformConfigVO();
       webform.setContent("json");
