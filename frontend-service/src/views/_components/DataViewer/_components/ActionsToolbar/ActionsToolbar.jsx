@@ -31,6 +31,7 @@ import { filterReducer } from './_functions/Reducers/filterReducer';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 import { MetadataUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ActionsToolbar = ({
   colsSchema,
@@ -126,7 +127,7 @@ export const ActionsToolbar = ({
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
-      const isExportFilteredCsv = type.key === 'exportFilteredCsv';
+      const isExportFilteredCsv = TextUtils.areEquals(type.key, 'exportFilteredCsv');
       setExportTableDataName(createTableName(tableName, type.code));
       await DatasetService.exportTableData(
         datasetId,
