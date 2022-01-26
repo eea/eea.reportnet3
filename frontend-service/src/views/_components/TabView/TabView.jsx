@@ -18,7 +18,7 @@ import { Tab } from './_components/Tab';
 
 import { QuerystringUtils, TabsUtils } from 'views/_functions/Utils';
 
-const TabView = ({
+export const TabView = ({
   activeIndex = -1,
   checkEditingTabs,
   children,
@@ -234,6 +234,7 @@ const TabView = ({
           leftIcon={tab.props.leftIcon}
           newTab={tab.props.newTab}
           notEmpty={tab.props.notEmpty}
+          numberOfFields={tab.props.numberOfFields}
           onTabAddCancel={onTabAddCancel}
           onTabBlur={onTabBlur}
           onTabDeleteClick={onTabDeleteClicked}
@@ -375,5 +376,3 @@ TabView.propTypes = {
   renderActiveOnly: PropTypes.bool,
   style: PropTypes.object
 };
-
-export { TabView };

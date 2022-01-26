@@ -10,7 +10,7 @@ import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
-const Snapshots = ({
+export const Snapshots = ({
   isLoadingSnapshotListData,
   isSnapshotDialogVisible,
   setIsSnapshotDialogVisible,
@@ -79,5 +79,3 @@ const Snapshots = ({
     </Fragment>
   );
 };
-
-export { Snapshots };

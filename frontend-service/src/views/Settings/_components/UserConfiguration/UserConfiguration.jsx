@@ -26,7 +26,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const UserConfiguration = () => {
+export const UserConfiguration = () => {
   const notificationContext = useContext(NotificationContext);
   const userContext = useContext(UserContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -403,5 +403,3 @@ const UserConfiguration = () => {
     </div>
   );
 };
-
-export { UserConfiguration };

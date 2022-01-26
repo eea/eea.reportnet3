@@ -24,9 +24,10 @@ import { IntegrationService } from 'services/IntegrationService';
 import { UniqueConstraintService } from 'services/UniqueConstraintService';
 import { ValidationService } from 'services/ValidationService';
 
-const DatasetSchemas = ({ dataflowId, datasetsSchemas, hasCustodianPermissions, onLoadDatasetsSchemas }) => {
+export const DatasetSchemas = ({ dataflowId, datasetsSchemas, hasCustodianPermissions, onLoadDatasetsSchemas }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
+
   const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
   const [isDownloading, setIsDownloading] = useState(false);
   const [extensionsOperationsList, setExtensionsOperationsList] = useState();
@@ -427,5 +428,3 @@ const DatasetSchemas = ({ dataflowId, datasetsSchemas, hasCustodianPermissions, 
     </Fragment>
   );
 };
-
-export { DatasetSchemas };
