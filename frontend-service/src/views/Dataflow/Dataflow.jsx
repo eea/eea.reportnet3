@@ -1096,10 +1096,10 @@ export const Dataflow = () => {
 
   const onCloseAutomaticReportingDeletion = () => {
     manageDialogs('isAutomaticReportingDeletionDialogVisible', false);
-    if (dataflowState.data.automaticReportingDeletion !== dataflowState.automaticReportingDeletion) {
+    if (dataflowState.automaticReportingDeletion) {
       dataflowDispatch({
         type: 'SET_AUTOMATIC_REPORTING_DELETION',
-        payload: { automaticReportingDeletion: dataflowState.data.automaticReportingDeletion }
+        payload: { automaticReportingDeletion: dataflowState.automaticReportingDeletion }
       });
     }
   };
