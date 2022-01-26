@@ -173,7 +173,8 @@ export const DatasetService = {
     filterValue,
     levelErrorValidations,
     selectedRuleId,
-    isExportFilteredCsv
+    isExportFilteredCsv,
+    isFilterValidationsActive
   ) =>
     await DatasetRepository.exportTableData(
       datasetId,
@@ -182,7 +183,8 @@ export const DatasetService = {
       filterValue,
       levelErrorValidations,
       selectedRuleId,
-      isExportFilteredCsv
+      isExportFilteredCsv,
+      isFilterValidationsActive
     ),
 
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>

@@ -135,7 +135,8 @@ export const ActionsToolbar = ({
         filter.valueFilter,
         levelErrorValidations.map(levelError => levelError.toUpperCase()),
         selectedRuleId,
-        isExportFilteredCsv
+        isExportFilteredCsv,
+        isFilterValidationsActive
       );
     } catch (error) {
       console.error('ActionsToolbar - onExportTableData.', error);
