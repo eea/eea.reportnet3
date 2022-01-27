@@ -1460,7 +1460,7 @@
     "manageWebforms": "Manage webforms",
     "loadWebformsError": "Error loading webforms list",
     "automaticDeleteSideBarButton": "Automatic delete",
-    "isAutomaticReportingDeletionDialogHeader": "Automatic Delete Dataflow Dialog",
+    "isAutomaticReportingDeletionDialogHeader": "Automatic delete dataflow dialog",
     "isAutomaticReportingDeletionCheckboxLabel": "Are you sure you want to delete?",
     "validating": "Validating",
     "uploading": "Uploading",
