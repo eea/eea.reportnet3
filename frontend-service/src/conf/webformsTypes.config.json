@@ -1,0 +1,12 @@
+[
+  [
+    { "name": "PaMs", "value": "PAMS" },
+    { "name": "Q&A", "value": "QA" },
+    { "name": "Tables", "value": "TABLES" }
+  ],
+  {
+    "PAMS": { "name": "PaMs", "value": "PAMS" },
+    "QA": { "name": "Q&A", "value": "QA" },
+    "TABLES": { "name": "Tables", "value": "TABLES" }
+  }
+]

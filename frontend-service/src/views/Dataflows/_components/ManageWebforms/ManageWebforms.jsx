@@ -6,16 +6,19 @@ import orderBy from 'lodash/orderBy';
 
 import styles from './ManageWebforms.module.scss';
 
+import { config } from 'conf';
+
 import { Column } from 'primereact/column';
 
 import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
-import { InputFile } from './_components/InputFile';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
-import { Spinner } from 'views/_components/Spinner';
+import { Dropdown } from 'views/_components/Dropdown';
+import { InputFile } from './_components/InputFile';
 import { InputText } from 'views/_components/InputText';
+import { Spinner } from 'views/_components/Spinner';
 
 import { WebformService } from 'services/WebformService';
 
@@ -26,38 +29,38 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
-  const [errors, setErrors] = useState({ webformName: false, jsonContent: false });
+  const [errors, setErrors] = useState({ name: false, type: false, content: false });
   const [isAddEditDialogVisible, setIsAddEditDialogVisible] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [jsonContent, setJsonContent] = useState(null);
   const [loadingStatus, setLoadingStatus] = useState('idle');
-  const [selectedWebformId, setSelectedWebformId] = useState(null);
-  const [webformName, setWebformName] = useState('');
-  const [webforms, setWebforms] = useState([]);
+  const [webformConfiguration, setWebformConfiguration] = useState({ id: null, name: '', type: '', content: '' });
+  const [webformsList, setWebformsConfigurationsList] = useState([]);
 
   const fileRef = useRef(null);
+
+  const [dropdownOptions, typesKeyValues] = config.webformsTypes;
 
   useEffect(() => {
     getWebformList();
   }, []);
 
   useEffect(() => {
-    setWebformName(() => getInitialName());
-  }, [selectedWebformId]);
+    setWebformConfiguration(getInitialWebformConfiguration);
+  }, [webformConfiguration.id]);
 
   useLayoutEffect(() => {
     if (isAddEditDialogVisible) {
       checkHasErrors();
     }
-  }, [webformName, jsonContent]);
+  }, [webformConfiguration]);
 
   const getWebformList = async () => {
     setLoadingStatus('pending');
 
     try {
       const data = await WebformService.getAll();
-      setWebforms(orderBy(data, 'label', 'asc'));
+      setWebformsConfigurationsList(orderBy(data, 'name', 'asc'));
       setLoadingStatus('success');
     } catch (error) {
       console.error('ManageWebforms - getWebformList.', error);
@@ -73,16 +76,18 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     setIsDeleteDialogVisible(false);
 
     try {
-      await WebformService.delete(selectedWebformId);
+      await WebformService.delete(webformConfiguration.id);
       getWebformList();
     } catch (error) {
       console.error('ManageWebforms - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
       notificationContext.add({ type: 'DELETE_WEBFORM_CONFIGURATION_ERROR' }, true);
     } finally {
-      setSelectedWebformId(null);
+      resetWebformConfiguration();
     }
   };
+
+  const resetWebformConfiguration = () => setWebformConfiguration({ id: null, name: '', type: '', content: '' });
 
   const onDownload = async (id, name) => {
     setLoadingStatus('pending');
@@ -100,7 +105,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       setLoadingStatus('error');
       notificationContext.add({ type: 'DOWNLOAD_WEBFORM_CONFIGURATION_ERROR' }, true);
     } finally {
-      setSelectedWebformId(null);
+      resetWebformConfiguration();
     }
   };
 
@@ -108,22 +113,20 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     setLoadingStatus('pending');
 
     try {
-      if (isNil(selectedWebformId)) {
-        await WebformService.create(webformName, jsonContent);
+      if (isNil(webformConfiguration.id)) {
+        await WebformService.create(webformConfiguration);
       } else {
-        await WebformService.update(webformName, jsonContent, selectedWebformId);
+        await WebformService.update(webformConfiguration);
       }
 
       setLoadingStatus('success');
       getWebformList();
       setIsAddEditDialogVisible(false);
-      setJsonContent(null);
-      setSelectedWebformId(null);
-      setWebformName('');
+      resetWebformConfiguration();
     } catch (error) {
       console.error('ManageWebforms - onConfirm.', error);
       setLoadingStatus('error');
-      if (isNil(selectedWebformId)) {
+      if (isNil(webformConfiguration.id)) {
         notificationContext.add({ type: 'CREATE_WEBFORM_CONFIGURATION_ERROR' }, true);
       } else {
         notificationContext.add({ type: 'EDIT_WEBFORM_CONFIGURATION_ERROR' }, true);
@@ -131,32 +134,30 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     }
   };
 
-  const onShowDeleteDialog = id => {
-    setSelectedWebformId(id);
+  const onShowDeleteDialog = row => {
+    setWebformConfiguration({ ...row });
     setIsDeleteDialogVisible(true);
   };
 
   const onHideDeleteDialog = () => {
     setIsDeleteDialogVisible(false);
-    setSelectedWebformId(null);
+    resetWebformConfiguration();
   };
 
-  const onEditClick = id => {
-    setSelectedWebformId(id);
+  const onEditClick = row => {
+    setWebformConfiguration({ ...row });
     setIsAddEditDialogVisible(true);
   };
 
   const onAddEditDialogClose = () => {
     setIsAddEditDialogVisible(false);
-    setSelectedWebformId(null);
-    setJsonContent(null);
-    setWebformName('');
-    setErrors({ webformName: false, jsonContent: false });
+    resetWebformConfiguration();
+    setErrors({ name: false, content: false });
   };
 
-  const onClickDownload = (id, name) => {
-    setSelectedWebformId(id);
-    onDownload(id, name);
+  const onClickDownload = row => {
+    setWebformConfiguration({ ...row });
+    onDownload(row.id, row.name);
   };
 
   const onFileUpload = async e => {
@@ -164,19 +165,18 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       const reader = new FileReader();
       reader.onload = async e => {
         const text = e.target.result;
-        setJsonContent(text);
+        setWebformConfiguration(prev => ({ ...prev, content: text }));
       };
       reader.readAsText(e.target.files[0]);
     }
   };
 
-  const onClearFile = () => {
-    setJsonContent(null);
-  };
+  const onClearFile = () => setWebformConfiguration(prev => ({ ...prev, content: '' }));
 
   const getTableColumns = () => {
     const columns = [
-      { key: 'label', header: resourcesContext.messages['name'] },
+      { key: 'name', header: resourcesContext.messages['name'] },
+      { key: 'type', header: resourcesContext.messages['type'], template: getTypeTemplate },
       {
         key: 'actions',
         header: resourcesContext.messages['actions'],
@@ -198,11 +198,15 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   const getBtnIcon = (id, iconName) => {
-    if (id === selectedWebformId && loadingStatus === 'pending') {
+    if (id === webformConfiguration.id && loadingStatus === 'pending') {
       return 'spinnerAnimate';
     }
 
     return iconName;
+  };
+
+  const getTypeTemplate = ({ type }) => {
+    return <span>{typesKeyValues[type].name}</span>;
   };
 
   const getActionsTemplate = row => {
@@ -212,21 +216,21 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
           disabled={loadingStatus === 'pending'}
           icon={getBtnIcon(row.id, 'edit')}
-          onClick={() => onEditClick(row.id)}
+          onClick={() => onEditClick(row)}
           type="button"
         />
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
           disabled={loadingStatus === 'pending'}
           icon={getBtnIcon(row.id, 'export')}
-          onClick={() => onClickDownload(row.id, row.label)}
+          onClick={() => onClickDownload(row)}
           type="button"
         />
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
           disabled={loadingStatus === 'pending'}
           icon={getBtnIcon(row.id, 'trash')}
-          onClick={() => onShowDeleteDialog(row.id)}
+          onClick={() => onShowDeleteDialog(row)}
           type="button"
         />
       </Fragment>
@@ -237,7 +241,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     <div className={styles.footer}>
       <Button
         className="p-button-primary"
-        disabled={loadingStatus === 'pending' && isNil(selectedWebformId)}
+        disabled={loadingStatus === 'pending' && isNil(webformConfiguration.id)}
         icon={'plus'}
         label={resourcesContext.messages['add']}
         onClick={() => setIsAddEditDialogVisible(true)}
@@ -251,41 +255,59 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
-  const getInitialName = () => {
-    if (!selectedWebformId) {
-      return '';
+  const getInitialWebformConfiguration = () => {
+    if (!webformConfiguration.id) {
+      return { id: null, name: '', type: '', content: '' };
     }
 
-    return webforms.find(webform => webform.id === selectedWebformId).label;
+    const currentWebform = webformsList.find(webform => webform.id === webformConfiguration.id);
+
+    return { ...currentWebform };
   };
 
-  const checkNameExists = () => webforms.some(webform => webform.label === webformName);
+  const checkLabelExists = () => webformsList.some(webform => webform.name === webformConfiguration.name);
 
   const checkNameExistsWithoutCurrent = () =>
-    webforms.filter(webform => webform.id !== selectedWebformId).some(webform => webform.label === webformName);
+    webformsList
+      .filter(webform => webform.id !== webformConfiguration.id)
+      .some(webform => webform.name === webformConfiguration.name);
+
+  // const getIsDisabledConfirmBtn = () => Object.values(errors).includes(true) || loadingStatus === 'pending';
 
   const getIsDisabledConfirmBtn = () => {
-    if (isNil(selectedWebformId)) {
-      return isEmpty(webformName) || isEmpty(jsonContent) || checkNameExists() || loadingStatus === 'pending';
+    if (isNil(webformConfiguration.id)) {
+      return (
+        isEmpty(webformConfiguration.name) ||
+        isEmpty(webformConfiguration.content) ||
+        checkLabelExists() ||
+        loadingStatus === 'pending'
+      );
     }
 
-    if (!isEmpty(webformName) && isEmpty(jsonContent)) {
-      return getInitialName() === webformName || checkNameExists();
+    if (!isEmpty(webformConfiguration.name) && isEmpty(webformConfiguration.content)) {
+      return getInitialWebformConfiguration().name === webformConfiguration.name || checkLabelExists();
     }
 
     return (
-      (isEmpty(jsonContent) && isEmpty(webformName)) ||
-      isEmpty(webformName) ||
+      (isEmpty(webformConfiguration.content) && isEmpty(webformConfiguration.name)) ||
+      isEmpty(webformConfiguration.name) ||
       checkNameExistsWithoutCurrent() ||
       loadingStatus === 'pending'
     );
   };
 
   const checkHasErrors = () => {
-    if (isNil(selectedWebformId)) {
-      setErrors({ webformName: isEmpty(webformName) || checkNameExists(), jsonContent: isEmpty(jsonContent) });
+    if (isNil(webformConfiguration.id)) {
+      setErrors({
+        name: isEmpty(webformConfiguration.name) || checkLabelExists(),
+        type: isEmpty(webformConfiguration.type),
+        content: isEmpty(webformConfiguration.content)
+      });
     } else {
-      setErrors({ webformName: isEmpty(webformName) || checkNameExistsWithoutCurrent(), jsonContent: false });
+      setErrors({
+        name: isEmpty(webformConfiguration.name) || checkNameExistsWithoutCurrent(),
+        content: false
+      });
     }
   };
 
@@ -295,7 +317,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         className={`p-button-primary ${getIsDisabledConfirmBtn() ? '' : 'p-button-animated-blink'}`}
         disabled={getIsDisabledConfirmBtn()}
         icon={loadingStatus === 'pending' ? 'spinnerAnimate' : 'check'}
-        label={isNil(selectedWebformId) ? resourcesContext.messages['create'] : resourcesContext.messages['save']}
+        label={isNil(webformConfiguration.id) ? resourcesContext.messages['create'] : resourcesContext.messages['save']}
         onClick={onConfirm}
       />
       <Button
@@ -316,26 +338,17 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       );
     }
 
-    if (loadingStatus === 'failed') {
-      return (
-        <div className={styles.noDataContent}>
-          <p>{resourcesContext.messages['loadWebformsConfigurationError']}</p>
-          <Button label={resourcesContext.messages['refresh']} onClick={getWebformList} />
-        </div>
-      );
-    }
-
     return (
       <div className={styles.dialogContent}>
         <DataTable
           autoLayout
           hasDefaultCurrentPage
-          loading={loadingStatus === 'pending' && isNil(selectedWebformId)}
+          loading={loadingStatus === 'pending' && isNil(webformConfiguration.id)}
           paginator
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
-          totalRecords={webforms.length}
-          value={webforms}>
+          totalRecords={webformsList.length}
+          value={webformsList}>
           {getTableColumns()}
         </DataTable>
       </div>
@@ -374,7 +387,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           className={`responsiveDialog ${styles.addEditDialog}`}
           footer={addEditDialogFooter}
           header={
-            isNil(selectedWebformId)
+            isNil(webformConfiguration.id)
               ? resourcesContext.messages['addWebformConfigurationDialogHeader']
               : resourcesContext.messages['editWebformConfigurationDialogHeader']
           }
@@ -382,12 +395,27 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           onHide={onAddEditDialogClose}
           visible={isAddEditDialogVisible}>
           <InputText
-            className={`${styles.nameInput} ${errors.webformName ? styles.inputError : ''}`}
+            className={`${styles.nameInput} ${errors.name ? styles.inputError : ''}`}
             id="name"
             maxLength={50}
-            onChange={event => setWebformName(event.target.value)}
-            placeHolder={resourcesContext.messages['name']}
-            value={webformName}
+            onChange={event => {
+              event.persist();
+              setWebformConfiguration(prev => ({ ...prev, name: event.target.value }));
+            }}
+            placeholder={resourcesContext.messages['name']}
+            value={webformConfiguration.name}
+          />
+
+          <Dropdown
+            appendTo={document.body}
+            className={`${styles.typeDropdown} ${errors.type ? styles.typeError : ''}`}
+            id="errorType"
+            onChange={e => setWebformConfiguration(prev => ({ ...prev, type: e.value.value }))}
+            optionLabel="name"
+            options={dropdownOptions}
+            optionValue="value"
+            placeholder={resourcesContext.messages['webformsConfigurationsSelect']}
+            value={{ name: typesKeyValues[webformConfiguration.type]?.name, value: webformConfiguration.type }}
           />
 
           <InputFile
@@ -395,7 +423,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
             buttonTextNoFile={resourcesContext.messages['inputFileButtonNotSelected']}
             buttonTextWithFile={resourcesContext.messages['inputFileButtonSelected']}
             fileRef={fileRef}
-            hasError={errors.jsonContent}
+            hasError={errors.content}
             onChange={onFileUpload}
             onClearFile={onClearFile}
           />
