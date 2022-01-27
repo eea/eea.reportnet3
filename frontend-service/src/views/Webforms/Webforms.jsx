@@ -46,7 +46,9 @@ export const Webforms = ({
     }
   };
 
-  if (loadingStatus === 'pending') return <Spinner style={{ top: 0, margin: '1rem' }} />;
+  if (loadingStatus === 'pending') {
+    return <Spinner style={{ top: 0, margin: '1rem' }} />;
+  }
 
   if (loadingStatus === 'failed') {
     return (
