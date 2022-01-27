@@ -1,4 +1,4 @@
-export const article15Reducer = (state, { type, payload }) => {
+export const tableWebformReducer = (state, { type, payload }) => {
   switch (type) {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };

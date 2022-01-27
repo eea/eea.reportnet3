@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react';
 import styles from './Webforms.module.scss';
 
 import { PaMsWebform } from './PaMsWebform';
-import { Article15 } from './Article15';
+import { TableWebform } from './TableWebform';
 import { Button } from 'views/_components/Button';
 import { QuestionAnswerWebform } from './QuestionAnswerWebform';
 import { Spinner } from 'views/_components/Spinner';
@@ -72,9 +72,9 @@ export const Webforms = ({
           tables={selectedConfiguration.tables}
         />
       );
-    case 'MMR-ART15':
+    case 'TABLES':
       return (
-        <Article15
+        <TableWebform
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}

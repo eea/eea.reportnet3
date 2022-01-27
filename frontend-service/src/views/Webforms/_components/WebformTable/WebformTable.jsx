@@ -69,7 +69,7 @@ export const WebformTable = ({
         onLoadTableData();
       }
 
-      if (webformType === 'ARTICLE_15') {
+      if (webformType === 'TABLES') {
         isLoading(true);
         onLoadTableData();
       }
@@ -248,7 +248,7 @@ export const WebformTable = ({
     />
   );
 
-  const renderArticle15WebformRecords = isMultiple => {
+  const renderTableWebformRecords = isMultiple => {
     const { elementsRecords } = webformData;
 
     return isMultiple
@@ -262,8 +262,8 @@ export const WebformTable = ({
 
   const renderWebform = isMultiple => {
     switch (webformType) {
-      case 'ARTICLE_15':
-        return renderArticle15WebformRecords(isMultiple);
+      case 'TABLES':
+        return renderTableWebformRecords(isMultiple);
       case 'PAMS':
         return renderPaMsWebformRecords();
       default:

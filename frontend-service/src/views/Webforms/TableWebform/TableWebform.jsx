@@ -7,24 +7,24 @@ import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
 import uniqueId from 'lodash/uniqueId';
 
-import styles from './Article15.module.scss';
+import styles from './TableWebform.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
 import { WebformTable } from 'views/Webforms/_components/WebformTable';
 
-import { article15Reducer } from './_functions/Reducers/article15Reducer';
+import { tableWebformReducer } from './_functions/Reducers/tableWebformReducer';
 
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
-export const Article15 = ({ dataflowId, dataProviderId, datasetId, isReporting, state, tables = [] }) => {
+export const TableWebform = ({ dataflowId, dataProviderId, datasetId, isReporting, state, tables = [] }) => {
   const { datasetSchema } = state;
   const { getWebformTabs, onParseWebformData } = WebformsUtils;
 
   const tableSchemaNames = state.schemaTables.map(table => table.name);
 
-  const [article15State, article15Dispatch] = useReducer(article15Reducer, {
+  const [tableWebformState, tableWebformDispatch] = useReducer(tableWebformReducer, {
     data: [],
     isLoading: false,
     isVisible: {}
@@ -43,14 +43,14 @@ export const Article15 = ({ dataflowId, dataProviderId, datasetId, isReporting, 
     const allTables = tables.map(table => table.name);
     const parsedData = onLoadData();
 
-    article15Dispatch({
+    tableWebformDispatch({
       type: 'INITIAL_LOAD',
       payload: { isVisible: getWebformTabs(allTables, state.schemaTables, tables), data: parsedData }
     });
   };
 
   const onChangeWebformTab = name => {
-    const isVisible = { ...article15State.isVisible };
+    const isVisible = { ...tableWebformState.isVisible };
 
     Object.keys(isVisible).forEach(tab => {
       isVisible[tab] = false;
@@ -59,18 +59,18 @@ export const Article15 = ({ dataflowId, dataProviderId, datasetId, isReporting, 
 
     changeUrl(name);
 
-    article15Dispatch({ type: 'ON_CHANGE_TAB', payload: { isVisible } });
+    tableWebformDispatch({ type: 'ON_CHANGE_TAB', payload: { isVisible } });
   };
 
   const onLoadData = () => {
     if (!isEmpty(datasetSchema)) return onParseWebformData(datasetSchema, tables, datasetSchema.tables);
   };
 
-  const setIsLoading = value => article15Dispatch({ type: 'SET_IS_LOADING', payload: { value } });
+  const setIsLoading = value => tableWebformDispatch({ type: 'SET_IS_LOADING', payload: { value } });
 
   const renderWebFormContent = () => {
-    const visibleTitle = keys(pickBy(article15State.isVisible))[0];
-    const visibleContent = article15State.data.filter(table => table.name === visibleTitle)[0];
+    const visibleTitle = keys(pickBy(tableWebformState.isVisible))[0];
+    const visibleContent = tableWebformState.data.filter(table => table.name === visibleTitle)[0];
 
     return (
       <WebformTable
@@ -78,19 +78,19 @@ export const Article15 = ({ dataflowId, dataProviderId, datasetId, isReporting, 
         dataProviderId={dataProviderId}
         datasetId={datasetId}
         isReporting={isReporting}
-        onTabChange={article15State.isVisible}
+        onTabChange={tableWebformState.isVisible}
         setIsLoading={setIsLoading}
         webform={visibleContent}
-        webformType={'ARTICLE_15'}
+        webformType={'TABLES'}
       />
     );
   };
 
   const renderWebFormHeaders = () => {
-    const filteredTabs = article15State.data.filter(header => tableSchemaNames.includes(header.name));
+    const filteredTabs = tableWebformState.data.filter(header => tableSchemaNames.includes(header.name));
     const headers = filteredTabs.map(tab => tab.header || tab.name);
 
-    return article15State.data.map(webform => {
+    return tableWebformState.data.map(webform => {
       const isCreated = headers.includes(webform.name);
       const childHasErrors = webform.elements
         .filter(element => element.type === 'TABLE' && !isNil(element.hasErrors))
@@ -102,14 +102,14 @@ export const Article15 = ({ dataflowId, dataProviderId, datasetId, isReporting, 
         <Fragment key={uniqueId()}>
           <Button
             className={`${styles.headerButton} ${
-              article15State.isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'
+              tableWebformState.isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'
             }`}
             data-for={!isCreated ? 'TableNotExists' : ''}
             data-tip
-            disabled={article15State.isLoading}
+            disabled={tableWebformState.isLoading}
             icon={!isCreated ? 'info' : hasErrors.includes(true) ? 'warning' : 'table'}
             iconClasses={
-              !article15State.isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''
+              !tableWebformState.isVisible[webform.title] ? (hasErrors.includes(true) ? 'warning' : 'info') : ''
             }
             iconPos={!isCreated || hasErrors.includes(true) ? 'right' : 'left'}
             key={uniqueId()}
@@ -128,7 +128,7 @@ export const Article15 = ({ dataflowId, dataProviderId, datasetId, isReporting, 
     });
   };
 
-  if (isEmpty(article15State.data)) return <Spinner className={styles.spinner} />;
+  if (isEmpty(tableWebformState.data)) return <Spinner className={styles.spinner} />;
 
   return (
     <div className={styles.webform}>

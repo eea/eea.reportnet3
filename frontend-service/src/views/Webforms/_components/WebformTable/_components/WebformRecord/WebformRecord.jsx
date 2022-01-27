@@ -458,8 +458,8 @@ export const WebformRecord = ({
 
   const renderErrorMessages = content => {
     switch (webformType) {
-      case 'ARTICLE_15':
-        return renderArticle15ErrorMessages(content);
+      case 'TABLES':
+        return renderTableWebformErrorMessages(content);
       case 'PAMS':
         return renderWebformPaMsErrorMessages(content);
       default:
@@ -480,7 +480,7 @@ export const WebformRecord = ({
     return errorMessages;
   };
 
-  const renderArticle15ErrorMessages = content => {
+  const renderTableWebformErrorMessages = content => {
     const errorMessages = [];
     if (hasFields) {
       errorMessages.push(resourcesContext.messages['emptyWebformTable']);
