@@ -1070,7 +1070,8 @@ export const Dataflow = () => {
         dataflowState.data.description,
         dataflowState.obligations.obligationId,
         dataflowState.isReleasable,
-        dataflowState.showPublicInfo
+        dataflowState.showPublicInfo,
+        dataflowState.isAutomaticReportingDeletion
       );
       onLoadReportingDataflow();
     } catch (error) {
@@ -1403,7 +1404,7 @@ export const Dataflow = () => {
           </ConfirmDialog>
         )}
 
-        {dataflowState.isAutomaticReportingDeletionDialogVisible && (
+        {dataflowState && (
           <ConfirmDialog
             disabledConfirm={dataflowState.isAutomaticReportingDeletion === dataflowState.isFetchingData}
             header={resourcesContext.messages['isAutomaticReportingDeletionDialogHeader']}
