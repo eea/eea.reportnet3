@@ -222,7 +222,7 @@ export const WebformView = ({
   };
 
   const renderTable = fields => (
-    <DataTable summary={resourcesContext.messages['webformArticle13Title']} value={fields}>
+    <DataTable summary={resourcesContext.messages['webformPaMsTitle']} value={fields}>
       {renderColumns(fields)}
     </DataTable>
   );
@@ -285,7 +285,7 @@ export const WebformView = ({
         selectedTable={selectedTable}
         setIsLoading={setIsLoading}
         webform={visibleContent}
-        webformType={'ARTICLE_13'}
+        webformType={'PAMS'}
       />
     );
   };

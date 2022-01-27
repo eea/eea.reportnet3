@@ -122,4 +122,4 @@ const parseListOfSinglePams = (records = []) => {
   return options.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
 };
 
-export const Article13Utils = { checkErrors, getFieldSchemaId, getTypeList, hasErrors, parseListOfSinglePams };
+export const PaMsWebformUtils = { checkErrors, getFieldSchemaId, getTypeList, hasErrors, parseListOfSinglePams };

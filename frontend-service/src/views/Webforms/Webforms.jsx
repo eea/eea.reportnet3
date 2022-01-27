@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 
 import styles from './Webforms.module.scss';
 
-import { Article13 } from './Article13';
+import { PaMsWebform } from './PaMsWebform';
 import { Article15 } from './Article15';
 import { Button } from 'views/_components/Button';
 import { NationalSystems } from './NationalSystems';
@@ -57,10 +57,12 @@ export const Webforms = ({
     );
   }
 
+  console.log('webformType', webformType);
+
   switch (webformType) {
-    case 'MMR-ART13':
+    case 'PAMS':
       return (
-        <Article13
+        <PaMsWebform
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}

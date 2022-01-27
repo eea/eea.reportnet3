@@ -6,7 +6,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
 
-import styles from './Article13.module.scss';
+import styles from './PaMsWebform.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
@@ -21,23 +21,31 @@ import { WebformService } from 'services/WebformService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { article13Reducer } from './_functions/Reducers/article13Reducer';
+import { paMsWebformReducer } from './_functions/Reducers/paMsWebformReducer';
 
-import { Article13Utils } from './_functions/Utils/Article13Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
+import { PaMsWebformUtils } from './_functions/Utils/PaMsWebformUtils';
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, isReporting, state, tables = [] }) => {
-  const { checkErrors, getFieldSchemaId, getTypeList, hasErrors, parseListOfSinglePams } = Article13Utils;
+export const PaMsWebform = ({
+  dataflowId,
+  dataProviderId,
+  datasetId,
+  isReleasing,
+  isReporting,
+  state,
+  tables = []
+}) => {
+  const { checkErrors, getFieldSchemaId, getTypeList, hasErrors, parseListOfSinglePams } = PaMsWebformUtils;
   const { datasetSchema, datasetStatistics } = state;
   const { onParseWebformData, onParseWebformRecords, parseNewTableRecord, parsePamsRecords } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [article13State, article13Dispatch] = useReducer(article13Reducer, {
+  const [paMsWebformState, paMsWebformDispatch] = useReducer(paMsWebformReducer, {
     data: [],
     hasErrors: true,
     isAddingSingleRecord: false,
@@ -53,16 +61,16 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
     view: resourcesContext.messages['overview']
   });
 
-  const { isDataUpdated, isLoading, pamsRecords, selectedTable, selectedTableName, tableList, view } = article13State;
+  const { isDataUpdated, isLoading, pamsRecords, selectedTable, selectedTableName, tableList, view } = paMsWebformState;
 
   useEffect(() => initialLoad(), []);
 
   useEffect(() => {
-    if (!isEmpty(article13State.data)) {
+    if (!isEmpty(paMsWebformState.data)) {
       onLoadPamsData();
-      article13Dispatch({ type: 'HAS_ERRORS', payload: { value: hasErrors(article13State.data) } });
+      paMsWebformDispatch({ type: 'HAS_ERRORS', payload: { value: hasErrors(paMsWebformState.data) } });
     }
-  }, [article13State.data, isDataUpdated]);
+  }, [paMsWebformState.data, isDataUpdated]);
 
   useEffect(() => {
     setIsAddingSingleRecord(false);
@@ -70,27 +78,27 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
   }, [tableList]);
 
   useEffect(() => {
-    const { fieldId, fieldSchema } = getFieldSchemaId(article13State.data, article13State.selectedTableSchemaId);
+    const { fieldId, fieldSchema } = getFieldSchemaId(paMsWebformState.data, paMsWebformState.selectedTableSchemaId);
 
     onSelectFieldSchemaId(fieldSchema || fieldId);
-  }, [article13State.data, article13State.selectedTableSchemaId]);
+  }, [paMsWebformState.data, paMsWebformState.selectedTableSchemaId]);
 
   useEffect(() => {
     if (isDataUpdated)
-      article13Dispatch({
+      paMsWebformDispatch({
         type: 'UPDATE_DATA',
         payload: { data: onLoadData() }
       });
   }, [isDataUpdated]);
 
   const initialLoad = () => {
-    article13Dispatch({
+    paMsWebformDispatch({
       type: 'INITIAL_LOAD',
       payload: { data: onLoadData() }
     });
   };
 
-  const setIsLoading = value => article13Dispatch({ type: 'IS_LOADING', payload: { value } });
+  const setIsLoading = value => paMsWebformDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const generatePamId = pamsTableRecords => {
     if (isEmpty(pamsTableRecords)) return 1;
@@ -103,7 +111,7 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
   };
 
   const setTableSchemaId = tableSchemaId => {
-    article13Dispatch({ type: 'GET_TABLE_SCHEMA_ID', payload: { tableSchemaId } });
+    paMsWebformDispatch({ type: 'GET_TABLE_SCHEMA_ID', payload: { tableSchemaId } });
   };
 
   const getPamsTableRecords = async tableSchemaId => {
@@ -114,7 +122,7 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
         pageSize: 300,
         levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
       });
-      return onParseWebformRecords(data.records, article13State.data[0], {}, data.totalRecords) || [];
+      return onParseWebformRecords(data.records, paMsWebformState.data[0], {}, data.totalRecords) || [];
     }
 
     return [];
@@ -127,7 +135,7 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
       setIsAddingGroupRecord(true);
     }
     const filteredTables = datasetSchema.tables.filter(table => table.tableSchemaNotEmpty);
-    const tableSchemaId = article13State.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
+    const tableSchemaId = paMsWebformState.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
 
     try {
       const pamsTableRecords = await getPamsTableRecords(tableSchemaId);
@@ -137,7 +145,7 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
-        console.error('Article13 - onAddPamsRecord.', error);
+        console.error('PaMsWebform - onAddPamsRecord.', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -168,7 +176,7 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
-        console.error('Article13 - onAddTableRecord.', error);
+        console.error('PaMsWebform - onAddTableRecord.', error);
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -204,7 +212,7 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
   };
 
   const onLoadPamsData = async () => {
-    const tableSchemaId = article13State.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
+    const tableSchemaId = paMsWebformState.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
     try {
       if (!isNil(tableSchemaId[0])) {
         const data = await DatasetService.getTableData({
@@ -217,32 +225,32 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
         if (!isNil(data.records)) {
           const tableData = {};
 
-          const records = onParseWebformRecords(data.records, article13State.data[0], tableData, data.totalRecords);
+          const records = onParseWebformRecords(data.records, paMsWebformState.data[0], tableData, data.totalRecords);
           const list = getTypeList(records);
 
-          article13Dispatch({
+          paMsWebformDispatch({
             type: 'ON_LOAD_PAMS_DATA',
             payload: { records, group: list['group'], single: list['single'] }
           });
         }
       }
     } catch (error) {
-      console.error('Article13 - onLoadPamsData.', error);
+      console.error('PaMsWebform - onLoadPamsData.', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const onUpdatePamsValue = (recordId, pamsValue, fieldId, isPamTitle = false) => {
-    article13Dispatch({
+    paMsWebformDispatch({
       type: 'UPDATE_PAMS_RECORDS',
       payload: { fieldId, pamsValue, recordId, dataUpdated: !isDataUpdated, isPamTitle }
     });
   };
 
   const onSelectEditTable = (pamNumberId, tableName) => {
-    const filteredTable = article13State.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
-    const pamSchemaId = article13State.data
+    const filteredTable = paMsWebformState.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
+    const pamSchemaId = paMsWebformState.data
       .filter(table => TextUtils.areEquals(table.name, 'PAMS'))[0]
       .records[0].fields.filter(field => TextUtils.areEquals(field.name, 'ID'))[0].fieldId;
     let recordId = '';
@@ -261,26 +269,27 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
   };
 
   const onSelectFieldSchemaId = fieldSchemaId => {
-    article13Dispatch({ type: 'ON_SELECT_SCHEMA_ID', payload: { fieldSchemaId } });
+    paMsWebformDispatch({ type: 'ON_SELECT_SCHEMA_ID', payload: { fieldSchemaId } });
   };
 
   const onSelectRecord = (recordId, pamsId) => {
-    article13Dispatch({ type: 'ON_SELECT_RECORD', payload: { recordId, pamsId } });
+    paMsWebformDispatch({ type: 'ON_SELECT_RECORD', payload: { recordId, pamsId } });
   };
 
-  const onSelectTableName = name => article13Dispatch({ type: 'ON_SELECT_TABLE', payload: { name } });
+  const onSelectTableName = name => paMsWebformDispatch({ type: 'ON_SELECT_TABLE', payload: { name } });
 
-  const onToggleView = view => article13Dispatch({ type: 'ON_TOGGLE_VIEW', payload: { view } });
+  const onToggleView = view => paMsWebformDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view } });
 
-  const onUpdateData = () => article13Dispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
+  const onUpdateData = () => paMsWebformDispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
 
   const setIsAddingSingleRecord = value =>
-    article13Dispatch({ type: 'SET_IS_ADDING_SINGLE_RECORD', payload: { value } });
+    paMsWebformDispatch({ type: 'SET_IS_ADDING_SINGLE_RECORD', payload: { value } });
 
-  const setIsAddingGroupRecord = value => article13Dispatch({ type: 'SET_IS_ADDING_GROUP_RECORD', payload: { value } });
+  const setIsAddingGroupRecord = value =>
+    paMsWebformDispatch({ type: 'SET_IS_ADDING_GROUP_RECORD', payload: { value } });
 
   const renderErrorMessages = () => {
-    const missingElements = checkErrors(article13State.data);
+    const missingElements = checkErrors(paMsWebformState.data);
 
     return (
       <Fragment>
@@ -307,12 +316,12 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
 
   const renderLayout = children => (
     <Fragment>
-      <h2 className={styles.title}>{resourcesContext.messages['webformArticle13Title']}</h2>
+      <h2 className={styles.title}>{resourcesContext.messages['webformPaMsTitle']}</h2>
       {children}
     </Fragment>
   );
 
-  if (article13State.hasErrors) return renderLayout(renderErrorMessages());
+  if (paMsWebformState.hasErrors) return renderLayout(renderErrorMessages());
 
   return renderLayout(
     <Fragment>
@@ -330,7 +339,7 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
                   }`}
                   key={uniqueId()}
                   onClick={() => {
-                    article13Dispatch({ type: 'ON_REFRESH', payload: { value: !article13State.isRefresh } });
+                    paMsWebformDispatch({ type: 'ON_REFRESH', payload: { value: !paMsWebformState.isRefresh } });
                     onSelectRecord(items.recordId, items.id);
                     onToggleView(resourcesContext.messages['details']);
                   }}>
@@ -341,13 +350,13 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
             <div className={styles.addButtonWrapper}>
               <Button
                 className={styles.addButton}
-                disabled={article13State.isAddingSingleRecord || article13State.isAddingGroupRecord || isReleasing}
+                disabled={paMsWebformState.isAddingSingleRecord || paMsWebformState.isAddingGroupRecord || isReleasing}
                 icon={
                   list === 'single'
-                    ? article13State.isAddingSingleRecord
+                    ? paMsWebformState.isAddingSingleRecord
                       ? 'spinnerAnimate'
                       : 'add'
-                    : article13State.isAddingGroupRecord
+                    : paMsWebformState.isAddingGroupRecord
                     ? 'spinnerAnimate'
                     : 'add'
                 }
@@ -372,14 +381,14 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
       />
       {view === resourcesContext.messages['details'] ? (
         <WebformView
-          data={article13State.data}
+          data={paMsWebformState.data}
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
           datasetSchemaId={datasetSchema.datasetSchemaId}
           getFieldSchemaId={getFieldSchemaId}
-          isAddingPamsId={article13State.isAddingSingleRecord || article13State.isAddingGroupRecord}
-          isRefresh={article13State.isRefresh}
+          isAddingPamsId={paMsWebformState.isAddingSingleRecord || paMsWebformState.isAddingGroupRecord}
+          isRefresh={paMsWebformState.isRefresh}
           isReporting={isReporting}
           onUpdatePamsValue={onUpdatePamsValue}
           pamsRecords={pamsRecords}
@@ -393,7 +402,7 @@ export const Article13 = ({ dataflowId, dataProviderId, datasetId, isReleasing, 
         <TableManagement
           dataflowId={dataflowId}
           datasetId={datasetId}
-          isAddingPamsId={article13State.isAddingSingleRecord || article13State.isAddingGroupRecord}
+          isAddingPamsId={paMsWebformState.isAddingSingleRecord || paMsWebformState.isAddingGroupRecord}
           loading={isLoading}
           onAddTableRecord={onAddTableRecord}
           onRefresh={onUpdateData}

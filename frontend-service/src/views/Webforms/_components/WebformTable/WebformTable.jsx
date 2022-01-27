@@ -64,7 +64,7 @@ export const WebformTable = ({
     if (!isNil(webform) && isNil(webform.tableSchemaId)) isLoading(false);
 
     if (!isNil(webform) && webform.tableSchemaId) {
-      if (webformType === 'ARTICLE_13' && !isNil(selectedTable.pamsId)) {
+      if (webformType === 'PAMS' && !isNil(selectedTable.pamsId)) {
         isLoading(true);
         onLoadTableData();
       }
@@ -256,7 +256,7 @@ export const WebformTable = ({
       : renderWebformRecord(elementsRecords[0], null);
   };
 
-  const renderArticle13WebformRecords = () => {
+  const renderPaMsWebformRecords = () => {
     return renderWebformRecord(webformData.elementsRecords[0], null);
   };
 
@@ -264,8 +264,8 @@ export const WebformTable = ({
     switch (webformType) {
       case 'ARTICLE_15':
         return renderArticle15WebformRecords(isMultiple);
-      case 'ARTICLE_13':
-        return renderArticle13WebformRecords();
+      case 'PAMS':
+        return renderPaMsWebformRecords();
       default:
         return <div />;
     }

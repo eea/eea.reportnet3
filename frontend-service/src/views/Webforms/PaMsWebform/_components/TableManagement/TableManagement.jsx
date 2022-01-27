@@ -450,7 +450,7 @@ export const TableManagement = ({
           onRowClick={event =>
             tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: { selectedRecord: event.data } })
           }
-          summary={resourcesContext.messages['webformArticle13Title']}
+          summary={resourcesContext.messages['webformPaMsTitle']}
           value={tableManagementState.records}>
           {renderTableColumns()}
         </DataTable>
