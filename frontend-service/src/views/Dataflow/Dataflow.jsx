@@ -75,7 +75,6 @@ export const Dataflow = () => {
 
   const dataflowInitialState = {
     anySchemaAvailableInPublic: false,
-    isAutomaticReportingDeletion: false,
     currentUrl: '',
     data: {},
     dataflowType: '',
@@ -738,7 +737,7 @@ export const Dataflow = () => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.get(dataflowId);
-      console.log('dataflow', dataflow);
+      console.log('dataflow :>> ', dataflow);
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
       dataflowDispatch({
         type: 'INITIAL_LOAD',
@@ -967,7 +966,12 @@ export const Dataflow = () => {
   useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], onDataCollectionIsCompleted);
 
   useCheckNotifications(
-    ['UPDATE_RELEASABLE_FAILED_EVENT', 'UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT', 'UPDATE_PUBLIC_STATUS_FAILED_EVENT'],
+    [
+      'UPDATE_AUTOMATIC_REPORTING_DELETION_FAILED_EVENT',
+      'UPDATE_RELEASABLE_FAILED_EVENT',
+      'UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT',
+      'UPDATE_PUBLIC_STATUS_FAILED_EVENT'
+    ],
     setIsDataUpdated
   );
 
@@ -1056,7 +1060,10 @@ export const Dataflow = () => {
       onLoadReportingDataflow();
     } catch (error) {
       console.error('Dataflow - onConfirmAutomaticReportingDeletion.', error);
-      notificationContext.add({ type: 'UPDATE_RELEASABLE_FAILED_EVENT', content: { dataflowId } }, true);
+      notificationContext.add(
+        { type: 'UPDATE_AUTOMATIC_REPORTING_DELETION_FAILED_EVENT', content: { dataflowId } },
+        true
+      );
     }
   };
 
@@ -1103,7 +1110,7 @@ export const Dataflow = () => {
     if (dataflowState.isAutomaticReportingDeletion) {
       dataflowDispatch({
         type: 'SET_AUTOMATIC_REPORTING_DELETION',
-        payload: { isAutomaticReportingDeletion: dataflowState.isAutomaticReportingDeletion }
+        payload: { isAutomaticReportingDeletion: dataflowState.data.isAutomaticReportingDeletion }
       });
     }
   };
@@ -1407,7 +1414,10 @@ export const Dataflow = () => {
 
         {dataflowState.isAutomaticReportingDeletionDialogVisible && (
           <ConfirmDialog
-            disabledConfirm={dataflowState.isAutomaticReportingDeletion === dataflowState.isFetchingData}
+            disabledConfirm={
+              dataflowState.data.isAutomaticReportingDeletion === dataflowState.isAutomaticReportingDeletion ||
+              dataflowState.isFetchingData
+            }
             header={resourcesContext.messages['isAutomaticReportingDeletionDialogHeader']}
             iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
             labelCancel={resourcesContext.messages['cancel']}

@@ -1474,6 +1474,7 @@
     "fileColumnsLabel": "File columns",
     "fileNotSelectedError": "File not selected",
     "manageWebformsLeftBarButton": "Manage webforms",
-    "numberOfFields": "Number of fields"
+    "numberOfFields": "Number of fields",
+    "UpdateAutomaticReportingDeletionFailedEvent": "Failed deleting dataflow data"
   }
 }
