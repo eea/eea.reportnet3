@@ -806,17 +806,18 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     try (PreparedStatement stmt = conn.prepareStatement(stringQuery);) {
 
+      // Parametrize the levelError based on how many LevelErrors are in the enum
       if (filters.getLevelError() != null && filters.getLevelError().length > 0) {
         for (int i = 0; i < levelErrorsArray.length; i++) {
           stmt.setString(position, levelErrorsArray[i].getValue());
           position++;
         }
       }
-      if (filters.getIdRules() != null && !filters.getIdRules().equals("")) {
+      if (StringUtils.isNotBlank(filters.getIdRules())) {
         stmt.setString(position, filters.getIdRules());
         position++;
       }
-      if (filters.getFieldValue() != null && !filters.getFieldValue().equals("")) {
+      if (StringUtils.isNotBlank(filters.getFieldValue())) {
         stmt.setString(position, "%" + filters.getFieldValue() + "%");
       }
       LOG.info("executing query in findByTableValueOrdered: {}", stmt);
@@ -856,7 +857,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     String initialQuery = buildInitialQueryExportFilters(datasetId, tableId, pageable, filters);
 
-    String filterFieldValue = filters.getFieldValue() != null && !filters.getFieldValue().equals("")
+    String filterFieldValue = StringUtils.isNotBlank(filters.getFieldValue())
         ? " and exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'value' LIKE ?)"
         : "";
 
@@ -880,7 +881,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     initialQuery = initialQuery + " where fields notnull" + filterFieldValue;
 
     if ((filters.getLevelError() != null && filters.getLevelError().length > 0)
-        || (filters.getIdRules() != null && !filters.getIdRules().equals(""))) {
+        || (StringUtils.isNotBlank(filters.getIdRules()))) {
       initialQuery = initialQuery + filterByLevelOrError;
     }
 
@@ -908,6 +909,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
       StringBuilder sb = new StringBuilder(levelError);
 
+      // Add ? to parametrize the levelError based on how many level errors are in the enum
       for (int i = 0; i < filters.getLevelError().length; i++) {
         sb.append("?");
         if (i < filters.getLevelError().length - 1)
@@ -917,29 +919,27 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
       levelError = sb.toString();
 
-      idRules =
-          filters.getIdRules() != null && !filters.getIdRules().equals("") ? " and v2.id_rule = ?)"
-              : ")";
+      idRules = StringUtils.isNotBlank(filters.getIdRules()) ? " and v2.id_rule = ?)" : ")";
     } else {
       levelError = "";
-      idRules = filters.getIdRules() != null && !filters.getIdRules().equals("")
-          ? " where v2.id_rule = ?)"
-          : ")";
+      idRules = StringUtils.isNotBlank(filters.getIdRules()) ? " where v2.id_rule = ?)" : ")";
     }
-
-    String auxTables = filters.getLevelError() != null || (filters.getIdRules() != null
-        && !filters.getIdRules().equals("")) ? "with validation_aux as (select * from dataset_"
-            + datasetId + ".validation v2" + levelError + idRules + ", "
-            + "id_field_validations as (select id_field from validation_aux v inner join dataset_"
-            + datasetId + ".field_validation fval on v.id = fval.id_validation), "
-            + "id_record_validations as (select id_record from validation_aux v inner join dataset_"
-            + datasetId + ".record_validation rv on v.id = rv.id_validation), "
-            + "record_value_aux as (select * from dataset_" + datasetId
-            + ".record_value rv2 inner join id_record_validations on id_record = rv2.id),"
-            + "id_table_validations as (select id_table from validation_aux v inner join dataset_"
-            + datasetId + ".table_validation tv2 on v.id = tv2.id_validation),"
-            + "table_value_aux as (select * from dataset_" + datasetId
-            + ".table_value tv inner join id_table_validations on id_table = tv.id)" : "";
+    // Adds the auxiliar tables if there's a LevelError or an idRule
+    String auxTables = (filters.getLevelError() != null && filters.getLevelError().length > 0)
+        || (StringUtils.isNotBlank(filters.getIdRules()))
+            ? "with validation_aux as (select * from dataset_" + datasetId + ".validation v2"
+                + levelError + idRules + ", "
+                + "id_field_validations as (select id_field from validation_aux v inner join dataset_"
+                + datasetId + ".field_validation fval on v.id = fval.id_validation), "
+                + "id_record_validations as (select id_record from validation_aux v inner join dataset_"
+                + datasetId + ".record_validation rv on v.id = rv.id_validation), "
+                + "record_value_aux as (select * from dataset_" + datasetId
+                + ".record_value rv2 inner join id_record_validations on id_record = rv2.id),"
+                + "id_table_validations as (select id_table from validation_aux v inner join dataset_"
+                + datasetId + ".table_validation tv2 on v.id = tv2.id_validation),"
+                + "table_value_aux as (select * from dataset_" + datasetId
+                + ".table_value tv inner join id_table_validations on id_table = tv.id)"
+            : "";
 
     return auxTables
         + "select * from (select rv.*, (select cast(json_agg(row_to_json(fieldsAux))as text )as fields "
