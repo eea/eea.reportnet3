@@ -36,8 +36,6 @@ const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
 export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort, options = [], viewType }) => {
-  const isFilteredByBE = !isNil(onFilter) || !isNil(onSort);
-
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
   const [filteredData, setFilteredData] = useRecoilState(filteredDataState(viewType));
@@ -51,6 +49,8 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
   const [labelsAnimationDate, setLabelsAnimationDate] = useState([]);
 
   const calendarRefs = useRef([]);
+
+  const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
   useLayoutEffect(() => {
     if (!isEmpty(data)) {
@@ -157,7 +157,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
 
   const onApplyFilters = ({ filterBy, searchValue = searchBy }) => {
     // LEAVE THIS PART COMMENTED UNTIL WE INTEGRATE WITH BE
-    // if (isFilteredByBE) {
+    // if (hasCustomSort) {
     //   return data;
     // }
 
@@ -195,7 +195,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
     const sortOption = switchSortByOption(sortBy[key]);
     setSortBy({ [key]: sortOption });
 
-    if (!isFilteredByBE) {
+    if (!hasCustomSort) {
       const sortedData = applySort({ filteredData, order: sortOption, prevSortState: applyFilters(), sortByKey: key });
       setFilteredData(sortedData);
     } else {
@@ -439,7 +439,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
       {renderFilters()}
       {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
 
-      {isFilteredByBE && (
+      {hasCustomSort && (
         <Button
           className="p-button-primary p-button-rounded p-button-animated-blink"
           icon="filter"

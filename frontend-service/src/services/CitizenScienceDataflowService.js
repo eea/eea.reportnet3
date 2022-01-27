@@ -16,6 +16,7 @@ export const CitizenScienceDataflowService = {
       pageNum,
       sortBy: sortByHeader || undefined
     });
+
     const dataflows = dataflowsDTO.data.map(dataflowDTO => {
       dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);
       return dataflowDTO;
