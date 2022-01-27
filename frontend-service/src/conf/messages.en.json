@@ -1469,6 +1469,7 @@
     "fileColumnsLabel": "File columns",
     "fileNotSelectedError": "File not selected",
     "manageWebformsLeftBarButton": "Manage webforms",
-    "numberOfFields": "Number of fields"
+    "numberOfFields": "Number of fields",
+    "importNamefileWarningEvent": "Some tables have not imported data: table and file name were different."
   }
 }

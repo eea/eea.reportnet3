@@ -1146,6 +1146,12 @@
         { "key": "EXPORT_TABLE_DATA_START" },
         { "key": "DOWNLOAD_SCHEMAS_INFO_START" }
       ]
+    },
+    {
+      "key": "warn",
+      "lifeTime": 20000,
+      "fixed": false,
+      "types": [{ "key": "IMPORT_NAMEFILE_WARNING_EVENT" }]
     }
   ],
   "hiddenNotifications": [
