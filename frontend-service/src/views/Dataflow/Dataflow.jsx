@@ -91,6 +91,7 @@ export const Dataflow = () => {
     hasWritePermissions: false,
     id: dataflowId,
     isApiKeyDialogVisible: false,
+    isAutomaticReportingDeletion: false,
     isBusinessDataflowDialogVisible: false,
     isCopyDataCollectionToEUDatasetLoading: false,
     isDataSchemaCorrect: [],
@@ -1404,7 +1405,7 @@ export const Dataflow = () => {
           </ConfirmDialog>
         )}
 
-        {dataflowState && (
+        {dataflowState.isAutomaticReportingDeletionDialogVisible && (
           <ConfirmDialog
             disabledConfirm={dataflowState.isAutomaticReportingDeletion === dataflowState.isFetchingData}
             header={resourcesContext.messages['isAutomaticReportingDeletionDialogHeader']}
