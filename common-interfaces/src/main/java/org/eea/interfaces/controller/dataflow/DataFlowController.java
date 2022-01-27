@@ -343,5 +343,5 @@ public interface DataFlowController {
    */
   @PutMapping("/{dataflowId}/updateAutomaticDelete")
   void updateDataFlowAutomaticReportingDeletion(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("AutomaticReportingDelete") boolean automaticReportingDelete);
+      @RequestParam("automaticDelete") boolean automaticReportingDelete);
 }
