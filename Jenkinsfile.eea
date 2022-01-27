@@ -4,6 +4,8 @@ pipeline {
     tools {
         maven 'maven3'
         jdk 'Java11'
+		nodejs 'NodeJS16'
+
     }
     options {
         disableConcurrentBuilds()
