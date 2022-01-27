@@ -35,7 +35,7 @@ const { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch }
 const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
-export const MyFilters = ({ className, data = [], isStrictMode, onFilter, options = [], viewType }) => {
+export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort, options = [], viewType }) => {
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
   const [filteredData, setFilteredData] = useRecoilState(filteredDataState(viewType));
@@ -49,6 +49,8 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
   const [labelsAnimationDate, setLabelsAnimationDate] = useState([]);
 
   const calendarRefs = useRef([]);
+
+  const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
   useLayoutEffect(() => {
     if (!isEmpty(data)) {
@@ -154,6 +156,11 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
   };
 
   const onApplyFilters = ({ filterBy, searchValue = searchBy }) => {
+    // LEAVE THIS PART COMMENTED UNTIL WE INTEGRATE WITH BE
+    // if (hasCustomSort) {
+    //   return data;
+    // }
+
     return data.filter(
       item =>
         applyInputs({ filterBy, filterByKeys, item }) &&
@@ -186,10 +193,14 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
 
   const onSortData = key => {
     const sortOption = switchSortByOption(sortBy[key]);
-    const sortedData = applySort({ filteredData, order: sortOption, prevSortState: applyFilters(), sortByKey: key });
-
     setSortBy({ [key]: sortOption });
-    setFilteredData(sortedData);
+
+    if (!hasCustomSort) {
+      const sortedData = applySort({ filteredData, order: sortOption, prevSortState: applyFilters(), sortByKey: key });
+      setFilteredData(sortedData);
+    } else {
+      onSort();
+    }
   };
 
   const updateValueLabelsAnimationDate = (labelsAnimationDate, position, key, value) => {
@@ -428,7 +439,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
       {renderFilters()}
       {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
 
-      {!isNil(onFilter) && (
+      {hasCustomSort && (
         <Button
           className="p-button-primary p-button-rounded p-button-animated-blink"
           icon="filter"
