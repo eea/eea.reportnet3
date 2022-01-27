@@ -31,7 +31,7 @@ import { ApplyFiltersUtils } from './_functions/Utils/ApplyFiltersUtils';
 import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
 
-const { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch } = ApplyFiltersUtils;
+const { applyCheckBox, applyDates, applyDropdown, applyInputs, applyMultiSelects, applySearch } = ApplyFiltersUtils;
 const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
@@ -158,6 +158,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
       item =>
         applyInputs({ filterBy, filterByKeys, item }) &&
         applyDates({ filterBy, filterByKeys, item }) &&
+        applyDropdown({ filterBy, filterByKeys, item }) &&
         applyCheckBox({ filterBy, filterByKeys, item }) &&
         applyMultiSelects({ filterBy, filterByKeys, item }) &&
         applySearch({ filterByKeys, item, value: searchValue })
@@ -311,7 +312,32 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
       return option.nestedOptions.map(nestedOption => renderDropdown(nestedOption));
     }
 
-    return <Dropdown />;
+    return (
+      <div className={`${styles.block}`} key={option.key}>
+        <Dropdown
+          ariaLabel={option.key}
+          className={styles.dropdownFilter}
+          filter={option.dropdownOptions.length > 10}
+          filterPlaceholder={option.label}
+          id={`${option.key}_dropdown`}
+          inputClassName={`p-float-label ${styles.label}`}
+          inputId={option.key}
+          label={option.label}
+          onChange={event => {
+            onChange({ key: option.key, value: event.value.value });
+          }}
+          onMouseDown={event => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+          optionLabel="label"
+          options={option.dropdownOptions}
+          showClear={filterBy[option.key]}
+          showFilterClear={true}
+          value={filterBy[option.key]}
+        />
+      </div>
+    );
   };
 
   const renderInput = option => {

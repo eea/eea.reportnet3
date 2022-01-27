@@ -37,6 +37,16 @@ const applyDates = ({ filterBy, filterByKeys, item }) => {
     .reduce((previousValue, currentValue) => previousValue && currentValue);
 };
 
+const applyDropdown = ({ filterBy, filterByKeys, item }) => {
+  const filteredKeys = filterByKeys.DROPDOWN.filter(key => Object.keys(filterBy).includes(key));
+
+  console.log('filterBy :>> ', filterBy);
+
+  return filteredKeys.every(
+    filteredKey => isEmpty(filterBy[filteredKey]) || filterBy[filteredKey].includes(item[filteredKey])
+  );
+};
+
 const applyInputs = ({ filterBy, filterByKeys, item }) => {
   const filteredKeys = filterByKeys.INPUT.filter(key => Object.keys(filterBy).includes(key));
 
@@ -66,4 +76,11 @@ const applySearch = ({ filterByKeys, item, value }) => {
   );
 };
 
-export const ApplyFiltersUtils = { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch };
+export const ApplyFiltersUtils = {
+  applyCheckBox,
+  applyDates,
+  applyDropdown,
+  applyInputs,
+  applyMultiSelects,
+  applySearch
+};

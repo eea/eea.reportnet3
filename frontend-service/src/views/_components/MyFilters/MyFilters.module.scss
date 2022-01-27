@@ -9,6 +9,13 @@
   padding: 4px;
 }
 
+.label {
+  clip: auto;
+  height: auto;
+  overflow: visible;
+  width: 90%;
+}
+
 .icon {
   background-color: transparent;
   border: none;
@@ -286,6 +293,34 @@
 
   .elementFilter {
     display: flex;
+  }
+}
+
+.dropdownFilter {
+  border-bottom: var(--inputtext-border) !important;
+  border-left: 0 !important;
+  border-radius: 0 !important;
+  border-right: 0 !important;
+  border-top: 0 !important;
+  color: var(--floating-label-color) !important;
+  font-size: 10pt !important;
+  height: 2.1rem;
+  padding-left: 0em;
+  width: 80% !important;
+
+  .label {
+    color: var(--font-filters) !important;
+    margin: 0;
+    overflow: hidden;
+    position: absolute;
+    text-overflow: ellipsis;
+    top: 0;
+    white-space: nowrap;
+    width: 95%;
+  }
+
+  label {
+    color: var(--font-filters);
   }
 }
 

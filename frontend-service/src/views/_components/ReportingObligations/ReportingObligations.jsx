@@ -7,6 +7,7 @@ import styles from './ReportingObligations.module.scss';
 
 import { CardsView } from 'views/_components/CardsView';
 import { Filters } from 'views/_components/Filters';
+import { MyFilters } from 'views/_components/MyFilters';
 import { InputSwitch } from 'views/_components/InputSwitch';
 import { Spinner } from 'views/_components/Spinner';
 import { TableView } from './_components/TableView';
@@ -16,6 +17,8 @@ import { ObligationService } from 'services/ObligationService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
+
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducer';
 
@@ -27,11 +30,12 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
+  const { filteredData, filterBy } = useFilters('reportingObligations');
+
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     countries: [],
     data: [],
     filterBy: { expirationDate: [], countries: {}, issues: {}, organizations: {} },
-    filteredData: [],
     filteredSearched: false,
     isFiltered: false,
     isLoading: false,
@@ -84,14 +88,12 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
-      {reportingObligationState.filteredSearched &&
-      reportingObligationState.searchedData.length !== reportingObligationState.filteredData.length
+      {reportingObligationState.filteredSearched && reportingObligationState.searchedData.length !== filteredData.length
         ? `${resourcesContext.messages['filtered']}: ${reportingObligationState.searchedData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {reportingObligationState.data.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
-      {reportingObligationState.filteredSearched &&
-      reportingObligationState.searchedData.length === reportingObligationState.filteredData.length
+      {reportingObligationState.filteredSearched && reportingObligationState.searchedData.length === filteredData.length
         ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
@@ -133,10 +135,10 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     }
   };
 
-  const onLoadReportingObligations = async filterData => {
+  const onLoadReportingObligations = async () => {
     isLoading(true);
     try {
-      const response = await ObligationService.getOpen(filterData);
+      const response = await ObligationService.getOpen(filterBy);
       reportingObligationDispatch({
         type: 'INITIAL_LOAD',
         payload: {
@@ -147,7 +149,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
             userContext.userProps.dateFormat
           ),
           selectedObligation: obligationChecked,
-          filterBy: filterData,
+          filterBy,
           pagination: { first: 0, rows: 10, page: 0 }
         }
       });
@@ -168,16 +170,52 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     reportingObligationDispatch({ type: 'ON_SELECT_OBL', payload: { selectedObligation } });
   };
 
-  const filterOptions = [
+  /*const filterOptions = [
     { type: 'dropdown', properties: [{ name: 'countries' }, { name: 'issues' }, { name: 'organizations' }] },
     { type: 'date', properties: [{ name: 'expirationDate' }] }
+  ];*/
+
+  const parseDropdownOptions = (options = []) =>
+    options.map(dropdown => ({ label: dropdown.name, value: dropdown.id }));
+
+  const filterOptions = [
+    {
+      key: 'search',
+      label: resourcesContext.messages['search'],
+      searchBy: ['title', 'legalInstrument', 'dueDate'],
+      type: 'SEARCH'
+    },
+    {
+      nestedOptions: [
+        {
+          key: 'countries',
+          label: resourcesContext.messages['countries'],
+          isSortable: true,
+          dropdownOptions: parseDropdownOptions(reportingObligationState.countries)
+        },
+        {
+          key: 'issues',
+          label: resourcesContext.messages['issues'],
+          isSortable: true,
+          dropdownOptions: parseDropdownOptions(reportingObligationState.issues)
+        },
+        {
+          key: 'organizations',
+          label: resourcesContext.messages['organizations'],
+          isSortable: true,
+          dropdownOptions: parseDropdownOptions(reportingObligationState.organizations)
+        }
+      ],
+      type: 'DROPDOWN'
+    },
+    { key: 'expirationDate', label: resourcesContext.messages['expirationDate'], type: 'DATE' }
   ];
 
-  const parsedFilterList = {
-    countries: reportingObligationState.countries,
-    issues: reportingObligationState.issues,
-    organizations: reportingObligationState.organizations
-  };
+  // const parsedFilterList = {
+  //   countries: reportingObligationState.countries,
+  //   issues: reportingObligationState.issues,
+  //   organizations: reportingObligationState.organizations
+  // };
 
   const renderData = () =>
     userContext.userProps.listView ? (
@@ -214,12 +252,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
             : 'space-between'
       }}>
       <div className={styles.repOblTools}>
-        <Filters
-          data={reportingObligationState.filteredData}
-          getFilteredData={onLoadSearchedData}
-          getFilteredSearched={getFiltered}
-          searchAll
-        />
+        <Filters data={filteredData} getFilteredData={onLoadSearchedData} getFilteredSearched={getFiltered} searchAll />
         <div className={styles.switchDiv}>
           <label className={styles.switchTextInput}>{resourcesContext.messages['magazineView']}</label>
           <InputSwitch checked={userContext.userProps.listView} onChange={e => userContext.onToggleTypeView(e.value)} />
@@ -228,12 +261,19 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
       </div>
 
       <div className={styles.filters}>
-        <Filters
+        {/* <Filters
           data={reportingObligationState.data}
           dropDownList={parsedFilterList}
           filterByList={reportingObligationState.filterBy}
           options={filterOptions}
           sendData={onLoadReportingObligations}
+        /> */}
+        <MyFilters
+          className="lineItems"
+          data={reportingObligationState.data}
+          onFilter={onLoadReportingObligations}
+          options={filterOptions}
+          viewType="reportingObligations"
         />
       </div>
 
