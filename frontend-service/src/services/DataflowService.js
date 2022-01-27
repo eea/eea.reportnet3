@@ -25,8 +25,18 @@ export const DataflowService = {
     return DataflowUtils.parseDataflowCount(dataflowsCountDTO.data);
   },
 
-  getAll: async (accessRoles, contextRoles) => {
-    const dataflowsDTO = await DataflowRepository.getAll();
+  getAll: async ({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy }) => {
+    const [isAsc] = Object.values(sortBy);
+    const [sortByHeader] = Object.keys(sortBy);
+    const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
+
+    const dataflowsDTO = await DataflowRepository.getAll({
+      filterBy: filteredFilterBy,
+      isAsc: isAsc || undefined,
+      numberRows,
+      pageNum,
+      sortBy: sortByHeader || undefined
+    });
 
     const dataflows = dataflowsDTO.data.map(dataflowDTO => {
       dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);
