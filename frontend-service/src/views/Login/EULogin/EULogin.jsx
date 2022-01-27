@@ -13,7 +13,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 
-const EULogin = () => {
+export const EULogin = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -55,5 +55,3 @@ const EULogin = () => {
     </div>
   );
 };
-
-export { EULogin };

@@ -55,3 +55,8 @@
 .nameInput {
   margin-bottom: 1rem !important;
 }
+
+.inputError {
+  border: var(--inputtext-border-error) !important;
+  box-shadow: var(--inputtext-box-shadow-focus-error) !important;
+}

@@ -27,7 +27,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { RecordUtils } from 'views/_functions/Utils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
-const ComparisonExpression = ({
+export const ComparisonExpression = ({
   dataflowType,
   expressionValues,
   isDisabled,
@@ -669,4 +669,3 @@ const ComparisonExpression = ({
     </li>
   );
 };
-export { ComparisonExpression };

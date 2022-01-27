@@ -21,6 +21,7 @@ const parseBusinessDataflowDTO = businessDataflowDTO =>
     isReleasable: businessDataflowDTO.releasable,
     name: businessDataflowDTO.name,
     obligation: ObligationUtils.parseObligation(businessDataflowDTO.obligation),
+    reportingDatasetsStatus: businessDataflowDTO.reportingStatus,
     status: businessDataflowDTO.status,
     type: businessDataflowDTO.type,
     userRole: businessDataflowDTO.userRole
