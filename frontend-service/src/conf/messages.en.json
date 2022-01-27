@@ -1475,6 +1475,6 @@
     "fileNotSelectedError": "File not selected",
     "manageWebformsLeftBarButton": "Manage webforms",
     "numberOfFields": "Number of fields",
-    "UpdateAutomaticReportingDeletionFailedEvent": "Failed deleting dataflow data"
+    "updateAutomaticReportingDeletionFailedEvent": "Error updating dataflow automatic data deletion"
   }
 }
