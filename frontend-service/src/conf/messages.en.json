@@ -1457,6 +1457,11 @@
     "editWebformConfigurationError": "Error updating webform configuration",
     "inputFileButtonNotSelected": "Select file",
     "inputFileButtonSelected": "Update file",
+    "manageWebforms": "Manage webforms",
+    "loadWebformsError": "Error loading webforms list",
+    "automaticDeleteSideBarButton": "Automatic delete",
+    "isAutomaticReportingDeletionDialogHeader": "Automatic delete dataflow dialog",
+    "isAutomaticReportingDeletionCheckboxLabel": "Are you sure you want to delete?",
     "validating": "Validating",
     "uploading": "Uploading",
     "importWrongFileHeader": "Different number of columns.",
@@ -1470,6 +1475,7 @@
     "fileNotSelectedError": "File not selected",
     "manageWebformsLeftBarButton": "Manage webforms",
     "numberOfFields": "Number of fields",
+    "updateAutomaticReportingDeletionFailedEvent": "Error updating dataflow automatic data deletion",
     "webformsConfigurationsSelect": "Select an webform type",
     "notSelectedWebformOption": "No webform"
   }
