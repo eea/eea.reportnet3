@@ -370,44 +370,66 @@ export const PublicCountryInformation = () => {
     </span>
   );
 
+  const renderPublicCountryInformationTitle = () => {
+    if (!isEmpty(countryName)) {
+      return (
+        <Title icon="clone" iconSize={'4rem'} subtitle={resourcesContext.messages['dataflows']} title={countryName} />
+      );
+    }
+  };
+
+  const renderPublicCountryInformation = () => {
+    if (isLoading) {
+      return <Spinner className={styles.isLoading} />;
+    }
+
+    if (isEmpty(countryName)) {
+      return <div className={styles.noDataflows}>{resourcesContext.messages['wrongUrlCountryCode']}</div>;
+    }
+
+    if (isEmpty(dataflows)) {
+      return <div className={styles.noDataflows}>{resourcesContext.messages['noDataflows']}</div>;
+    }
+
+    return (
+      <div className={styles.countriesList}>
+        {renderPublicCountryTable()}
+      </div>
+    );
+  };
+
+  const renderPublicCountryTable = () => {
+    return (
+      <DataTable
+        autoLayout={true}
+        first={firstRow}
+        lazy={true}
+        onPage={onChangePage}
+        onSort={onSort}
+        paginator={true}
+        paginatorRight={
+          <span>{`${resourcesContext.messages['totalRecords']} ${totalRecords} ${resourcesContext.messages[
+            'records'
+          ].toLowerCase()}`}</span>
+        }
+        rows={numberRows}
+        rowsPerPageOptions={[5, 10, 15]}
+        sortable={true}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        summary={resourcesContext.messages['dataflows']}
+        totalRecords={totalRecords}
+        value={dataflows}>
+        {renderColumns(dataflows)}
+      </DataTable>
+    );
+  };
+
   return (
     <PublicLayout>
       <div className={`${styles.container}  rep-container`} style={contentStyles}>
-        {!isEmpty(countryName) && (
-          <Title icon="clone" iconSize={'4rem'} subtitle={resourcesContext.messages['dataflows']} title={countryName} />
-        )}
-        {isLoading ? (
-          <Spinner className={styles.isLoading} />
-        ) : isEmpty(countryName) ? (
-          <div className={styles.noDataflows}>{resourcesContext.messages['wrongUrlCountryCode']}</div>
-        ) : isEmpty(dataflows) ? (
-          <div className={styles.noDataflows}>{resourcesContext.messages['noDataflows']}</div>
-        ) : (
-          <div className={styles.countriesList}>
-            <DataTable
-              autoLayout={true}
-              first={firstRow}
-              lazy={true}
-              onPage={onChangePage}
-              onSort={onSort}
-              paginator={true}
-              paginatorRight={
-                <span>{`${resourcesContext.messages['totalRecords']} ${totalRecords} ${resourcesContext.messages[
-                  'records'
-                ].toLowerCase()}`}</span>
-              }
-              rows={numberRows}
-              rowsPerPageOptions={[5, 10, 15]}
-              sortable={true}
-              sortField={sortField}
-              sortOrder={sortOrder}
-              summary={resourcesContext.messages['dataflows']}
-              totalRecords={totalRecords}
-              value={dataflows}>
-              {renderColumns(dataflows)}
-            </DataTable>
-          </div>
-        )}
+        {renderPublicCountryInformationTitle()}
+        {renderPublicCountryInformation()}
       </div>
     </PublicLayout>
   );
