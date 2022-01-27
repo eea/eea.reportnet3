@@ -153,10 +153,10 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
     }
   };
 
-  const onApplyFilters = ({ filterBy, searchValue = searchBy }) => {
+  const onApplyFilters = ({ filterBy, searchValue = searchBy, nestedKey }) => {
     return data.filter(
       item =>
-        applyInputs({ filterBy, filterByKeys, item }) &&
+        applyInputs({ filterBy, filterByKeys, item, nestedKey }) &&
         applyDates({ filterBy, filterByKeys, item }) &&
         applyCheckBox({ filterBy, filterByKeys, item }) &&
         applyMultiSelects({ filterBy, filterByKeys, item }) &&
@@ -164,8 +164,8 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
     );
   };
 
-  const onChange = ({ key, value }) => {
-    const filteredData = onApplyFilters({ filterBy: { ...filterBy, [key]: value } });
+  const onChange = ({ key, value, nestedKey }) => {
+    const filteredData = onApplyFilters({ filterBy: { ...filterBy, [key]: value }, nestedKey });
 
     setFilterBy({ ...filterBy, [key]: value });
     setFilteredData(filteredData);
@@ -323,7 +323,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
             className={styles.inputFilter}
             id={`${option.key}_input`}
             key={option.key}
-            onChange={event => onChange({ key: option.key, value: event.target.value })}
+            onChange={event => onChange({ key: option.key, value: event.target.value, nestedKey: option?.nestedKey })}
             value={filterBy[option.key] || ''}
           />
           <label className={styles.label} htmlFor={`${option.key}_input`}>

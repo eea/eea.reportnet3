@@ -37,13 +37,25 @@ const applyDates = ({ filterBy, filterByKeys, item }) => {
     .reduce((previousValue, currentValue) => previousValue && currentValue);
 };
 
-const applyInputs = ({ filterBy, filterByKeys, item }) => {
+const applyInputs = ({ filterBy, filterByKeys, item, nestedKey }) => {
+  const checkInput = (item, filteredKey) => {
+    return item.toLowerCase().includes(filterBy[filteredKey].toLowerCase());
+  };
+
+  const checkInputArray = (itemsArray, filteredKey) => {
+    const everyCheck = itemsArray.map(itemArray => checkInput(itemArray[nestedKey], filteredKey));
+
+    return isEmpty(everyCheck) ? false : everyCheck.some(item => item);
+  };
+
   const filteredKeys = filterByKeys.INPUT.filter(key => Object.keys(filterBy).includes(key));
 
   return filteredKeys.every(
     filteredKey =>
       areEquals(filterBy[filteredKey], '') ||
-      item[filteredKey].toLowerCase().includes(filterBy[filteredKey].toLowerCase())
+      (Array.isArray(item[filteredKey])
+        ? checkInputArray(item[filteredKey], filteredKey)
+        : checkInput(item[filteredKey], filteredKey))
   );
 };
 
