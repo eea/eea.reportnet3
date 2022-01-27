@@ -130,7 +130,7 @@ export const PublicCountryInformation = () => {
       if (sortOrder === -1) {
         sortOrder = 0;
       }
-      let pageNum = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
+      let pageNum = Math.floor(firstRow / numberRows);
       const data = await DataflowService.getPublicDataflowsByCountryCode(
         countryCode,
         sortOrder,
