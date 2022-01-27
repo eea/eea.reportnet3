@@ -368,7 +368,7 @@ export const DataflowService = {
 
   getPublicData: async ({ filterBy, numberRows, pageNum, sortByOptions }) => {
     const { isAsc, sortByHeader } = sortByOptions;
-    
+
     const publicDataflows = await DataflowRepository.getPublicData({
       filterBy,
       isAsc,
@@ -376,7 +376,7 @@ export const DataflowService = {
       pageNum,
       sortByHeader
     });
-    const parsedPublicDataflows = DataflowUtils.parsePublicDataflowListDTO(publicDataflows.data);
+    const parsedPublicDataflows = DataflowUtils.parsePublicDataflowListDTO(publicDataflows.data.dataflows);
 
     return sortBy(parsedPublicDataflows, ['name']);
   },

@@ -215,7 +215,7 @@ export const PublicDataflows = () => {
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>{resourcesContext.messages['dataflows']}</h1>
-          <MyFilters data={publicDataflows} onFilter={onLoadPublicDataflows} viewType="publicDataflows" />
+          <MyFilters data={publicDataflows} onFilter={onLoadPublicDataflows} options={[]} viewType="publicDataflows" />
           <div className={styles.dataflowsList}>{renderPublicDataflowsContent()}</div>
         </div>
       </div>
