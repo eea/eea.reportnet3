@@ -1470,6 +1470,7 @@
     "fileNotSelectedError": "File not selected",
     "manageWebformsLeftBarButton": "Manage webforms",
     "numberOfFields": "Number of fields",
-    "webformsConfigurationsSelect": "Select an webform type"
+    "webformsConfigurationsSelect": "Select an webform type",
+    "notSelectedWebformOption": "No webform"
   }
 }

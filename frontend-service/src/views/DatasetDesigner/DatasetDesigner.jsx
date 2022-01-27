@@ -468,7 +468,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
     try {
       const data = await WebformService.getAll();
-      data.unshift({ id: null, label: 'No webform', value: null });
+      data.unshift({ id: null, label: resourcesContext.messages['notSelectedWebformOption'], value: null, name: null });
 
       designerDispatch({ type: 'GET_WEBFORMS', payload: { data } });
       setWebformOptionsLoadingStatus('success');
