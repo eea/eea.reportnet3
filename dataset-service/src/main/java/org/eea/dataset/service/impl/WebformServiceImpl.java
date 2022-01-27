@@ -166,16 +166,22 @@ public class WebformServiceImpl implements WebformService {
         webformConfigRepository.updateWebFormConfig(webform);
         webformRepository.save(webformMetabase);
         // we need to update the webform name in all dataset schemas if has been changed
-        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(previousName)
-            && !previousName.equals(name)) {
-          Webform webformSearch = new Webform();
-          webformSearch.setName(previousName);
-          List<DataSetSchema> schemas = schemasRepository.findByWebform(webformSearch);
-          webformSearch.setName(name);
-          schemas.stream().forEach(s -> schemasRepository
-              .updateDatasetSchemaWebForm(s.getIdDataSetSchema().toString(), webformSearch));
+        if (StringUtils.isNotBlank(name) || null != type) {
+
+          List<DataSetSchema> schemas = schemasRepository.findByWebformName(previousName);
+          schemas.stream().forEach(s -> {
+            Webform webformToChange = s.getWebform();
+            if (StringUtils.isNotBlank(name)) {
+              webformToChange.setName(name);
+            }
+            if (type != null) {
+              webformToChange.setType(type.toString());
+            }
+            schemasRepository.updateDatasetSchemaWebForm(s.getIdDataSetSchema().toString(),
+                webformToChange);
+          });
+          LOG.info("The webform configuration with id {} has been updated", id);
         }
-        LOG.info("The webform configuration with id {} has been updated", id);
       } catch (JsonProcessingException e) {
         LOG_ERROR.error("Error processing the json to update");
         throw new EEAException(EEAErrorMessage.ERROR_JSON);
