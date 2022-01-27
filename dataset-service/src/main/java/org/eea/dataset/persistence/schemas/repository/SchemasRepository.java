@@ -6,7 +6,6 @@ package org.eea.dataset.persistence.schemas.repository;
 import java.util.List;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
@@ -39,5 +38,5 @@ public interface SchemasRepository
    * @param webform the webform
    * @return the list
    */
-  List<DataSetSchema> findByWebform(Webform webform);
+  List<DataSetSchema> findByWebformName(String name);
 }

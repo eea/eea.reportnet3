@@ -15,9 +15,17 @@ import lombok.ToString;
 public class WebformVO implements Serializable {
 
   /**
+   * 
+   */
+  private static final long serialVersionUID = 377071281084102044L;
+
+  /**
    * The webFormName.
    */
   private String name;
+
+  /** The type. */
+  private String type;
 
   /**
    * Hash code.
@@ -27,7 +35,7 @@ public class WebformVO implements Serializable {
   @Override
   public int hashCode() {
 
-    return Objects.hash(name);
+    return Objects.hash(name, type);
 
   }
 
@@ -46,6 +54,6 @@ public class WebformVO implements Serializable {
       return false;
     }
     WebformVO other = (WebformVO) obj;
-    return Objects.equals(name, other.name);
+    return Objects.equals(name, other.name) && Objects.equals(type, other.type);
   }
 }
