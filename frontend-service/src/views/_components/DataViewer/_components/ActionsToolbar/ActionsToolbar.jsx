@@ -68,7 +68,6 @@ export const ActionsToolbar = ({
   tableName
 }) => {
   const [exportTableDataName, setExportTableDataName] = useState('');
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [filter, dispatchFilter] = useReducer(filterReducer, {
     groupedFilter: isGroupedValidationSelected,
     validationDropdown: [],
@@ -76,6 +75,8 @@ export const ActionsToolbar = ({
     visibilityDropdown: [],
     visibilityColumnIcon: 'eye'
   });
+  const [isFilteredByValue, setIsFilteredByValue] = useState(false);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
 
   const { groupedFilter, validationDropdown, valueFilter, visibilityDropdown, visibilityColumnIcon } = filter;
 
@@ -133,7 +134,7 @@ export const ActionsToolbar = ({
         datasetId,
         tableId,
         type.code,
-        filter.valueFilter,
+        isFilteredByValue ? filter.valueFilter : '',
         levelErrorValidations.map(levelError => levelError.toUpperCase()),
         selectedRuleId,
         isExportFilteredCsv,
@@ -164,6 +165,7 @@ export const ActionsToolbar = ({
 
   const onSearchKeyEvent = event => {
     if (event.key === 'Enter') {
+      setIsFilteredByValue(true);
       showValueFilter(encodeURIComponent(valueFilter));
     }
   };
@@ -345,7 +347,10 @@ export const ActionsToolbar = ({
                 icon="search"
                 labelClassName={styles.groupFilter}
                 levelError={selectedRuleLevelError}
-                onClick={() => showValueFilter('')}
+                onClick={() => {
+                  showValueFilter('');
+                  setIsFilteredByValue(false);
+                }}
                 value={decodeURIComponent(prevFilterValue)}
               />
             </span>
@@ -378,7 +383,10 @@ export const ActionsToolbar = ({
             <Button
               className="p-button-secondary"
               icon="search"
-              onClick={() => showValueFilter(encodeURIComponent(valueFilter))}
+              onClick={() => {
+                showValueFilter(encodeURIComponent(valueFilter));
+                setIsFilteredByValue(true);
+              }}
             />
             <label
               className={`${styles.label} ${valueFilter !== '' && styles.labelFilled}`}
