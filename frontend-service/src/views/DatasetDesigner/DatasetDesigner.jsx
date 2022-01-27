@@ -1355,7 +1355,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   );
 
   const renderWebformOptionsContent = () => {
-    const webform = webformOptions.find(option => option.value === designerState.webform);
+    const webform = webformOptions.find(option => option.name === designerState.webform?.name);
 
     if (webformOptionsLoadingStatus === 'pending') return <Spinner style={{ top: 0 }} />;
 
@@ -1631,7 +1631,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             datasetId={datasetId}
             options={webformOptions}
             state={designerState}
-            webformType={designerState.webform}
+            webform={designerState.webform}
           />
         ) : (
           <TabsDesigner

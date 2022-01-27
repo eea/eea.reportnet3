@@ -21,7 +21,7 @@ export const Webforms = ({
   isReporting = false,
   options = [],
   state,
-  webformType
+  webform
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -36,7 +36,7 @@ export const Webforms = ({
   const getWebformConfiguration = async () => {
     setLoadingStatus('pending');
     try {
-      const selectedWebform = options.find(item => item.value === webformType);
+      const selectedWebform = options.find(item => item.name === webform.name);
       setSelectedConfiguration(await WebformService.getWebformConfig(selectedWebform.id));
       setLoadingStatus('success');
     } catch (error) {
@@ -57,9 +57,9 @@ export const Webforms = ({
     );
   }
 
-  console.log('webformType', webformType);
+  console.log('webform', webform);
 
-  switch (webformType) {
+  switch (webform.type) {
     case 'PAMS':
       return (
         <PaMsWebform
