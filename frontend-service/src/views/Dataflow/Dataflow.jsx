@@ -746,6 +746,7 @@ export const Dataflow = () => {
           data: dataflow,
           dataflowType: dataflow.type,
           description: dataflow.description,
+          isAutomaticReportingDeletion: dataflow.isAutomaticReportingDeletion,
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
