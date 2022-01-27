@@ -78,6 +78,7 @@ const parseDataflowDTO = dataflowDTO =>
     fmeUserId: dataflowDTO.fmeUserId,
     fmeUserName: dataflowDTO.fmeUserName,
     id: dataflowDTO.id,
+    isAutomaticReportingDeletion: dataflowDTO.automaticReportingDeletion,
     isReleasable: dataflowDTO.releasable,
     manualAcceptance: dataflowDTO.manualAcceptance,
     name: dataflowDTO.name,

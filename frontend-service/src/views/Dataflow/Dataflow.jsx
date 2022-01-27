@@ -737,6 +737,7 @@ export const Dataflow = () => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.get(dataflowId);
+      console.log('dataflow', dataflow);
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
       dataflowDispatch({
         type: 'INITIAL_LOAD',
