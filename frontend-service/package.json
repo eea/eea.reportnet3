@@ -14,7 +14,7 @@
     "chart.js": "2.9.4",
     "classnames": "2.3.1",
     "dayjs": "1.10.7",
-    "dompurify": "2.3.4",
+    "dompurify": "2.3.5",
     "esri-leaflet-geocoder": "3.1.1",
     "esri-leaflet": "3.0.4",
     "js-file-download": "0.4.12",
