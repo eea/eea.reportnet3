@@ -28,6 +28,13 @@
           }
         },
         {
+          "key": "UPDATE_AUTOMATIC_REPORTING_DELETION_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
           "key": "UPDATE_RELEASABLE_FAILED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
