@@ -1,4 +1,4 @@
-export const nationalSystemsFieldReducer = (state, { type, payload }) => {
+export const qaWebformFieldReducer = (state, { type, payload }) => {
   switch (type) {
     case 'typeName':
       return { ...state, ...payload };

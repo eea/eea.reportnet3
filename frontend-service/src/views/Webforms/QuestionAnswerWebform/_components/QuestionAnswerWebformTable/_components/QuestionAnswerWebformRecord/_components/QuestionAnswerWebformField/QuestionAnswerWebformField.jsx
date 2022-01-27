@@ -10,7 +10,7 @@ import uniqueId from 'lodash/uniqueId';
 import { config } from 'conf';
 import { DatasetConfig } from 'repositories/config/DatasetConfig';
 
-import styles from './NationalSystemsField.module.scss';
+import styles from './QuestionAnswerWebformField.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Calendar } from 'views/_components/Calendar';
@@ -29,14 +29,14 @@ import { DatasetService } from 'services/DatasetService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { nationalSystemsFieldReducer } from './_functions/Reducers/nationalSystemsFieldReducer';
+import { qaWebformFieldReducer } from './_functions/Reducers/qaWebformFieldReducer';
 
 import { RecordUtils } from 'views/_functions/Utils';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const NationalSystemsField = ({
+export const QuestionAnswerWebformField = ({
   dataProviderId,
   dataflowId,
   datasetId,
@@ -49,12 +49,12 @@ export const NationalSystemsField = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [nationalSystemsFieldState, nationalSystemsFieldDispatch] = useReducer(nationalSystemsFieldReducer, {
+  const [questionAnswerWebformFieldState, questionAnswerWebformFieldDispatch] = useReducer(qaWebformFieldReducer, {
     field: nationalField,
     isDialogVisible: { deleteAttachment: false, uploadFile: false }
   });
 
-  const { field, isDialogVisible } = nationalSystemsFieldState;
+  const { field, isDialogVisible } = questionAnswerWebformFieldState;
 
   useEffect(() => {
     getTableErrors(!isEmpty(recordValidations) || !isEmpty(field.validations));
@@ -85,7 +85,7 @@ export const NationalSystemsField = ({
   };
 
   const handleDialogs = (dialog, value) => {
-    nationalSystemsFieldDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
+    questionAnswerWebformFieldDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
   };
 
   const onAttachFile = async value => {
@@ -99,7 +99,7 @@ export const NationalSystemsField = ({
       onFillField(field, field.fieldSchemaId, '');
       handleDialogs('deleteAttachment', false);
     } catch (error) {
-      console.error('NationalSystemsField - onConfirmDeleteAttachment.', error);
+      console.error('QuestionAnswerWebformField - onConfirmDeleteAttachment.', error);
     }
   };
 
@@ -120,7 +120,7 @@ export const NationalSystemsField = ({
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
-        console.error('NationalSystemsField - onEditorSubmitValue.', error);
+        console.error('QuestionAnswerWebformField - onEditorSubmitValue.', error);
         notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' }, true);
       }
     }
@@ -131,12 +131,12 @@ export const NationalSystemsField = ({
       const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
       DownloadFile(data, fileName);
     } catch (error) {
-      console.error('NationalSystemsField - onFileDownload.', error);
+      console.error('QuestionAnswerWebformField - onFileDownload.', error);
     }
   };
 
   const onFillField = (field, option, value) => {
-    nationalSystemsFieldDispatch({ type: 'ON_FILL_FIELD', payload: { field, option, value } });
+    questionAnswerWebformFieldDispatch({ type: 'ON_FILL_FIELD', payload: { field, option, value } });
   };
 
   const onFormatDate = (date, isInvalidDate) => {

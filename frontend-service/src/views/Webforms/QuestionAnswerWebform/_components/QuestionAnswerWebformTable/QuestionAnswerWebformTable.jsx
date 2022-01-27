@@ -5,21 +5,21 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
 
-import styles from './NationalSystemsTable.module.scss';
+import styles from './QuestionAnswerWebformTable.module.scss';
 
 import { IconTooltip } from 'views/_components/IconTooltip';
-import { NationalSystemsRecord } from './_components/NationalSystemsRecord';
+import { QuestionAnswerWebformRecord } from './_components/QuestionAnswerWebformRecord';
 import { Spinner } from 'views/_components/Spinner';
 
 import { DatasetService } from 'services/DatasetService';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { NationalSystemsTableUtils } from './_functions/Utils/NationalSystemsTableUtils';
+import { QuestionAnswerWebformTableUtils } from './_functions/Utils/QuestionAnswerWebformTableUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const NationalSystemsTable = ({
+export const QuestionAnswerWebformTable = ({
   dataProviderId,
   dataflowId,
   datasetId,
@@ -27,7 +27,7 @@ export const NationalSystemsTable = ({
   schemaTables,
   tables
 }) => {
-  const { parseData } = NationalSystemsTableUtils;
+  const { parseData } = QuestionAnswerWebformTableUtils;
   const { parseText } = TextUtils;
 
   const resourcesContext = useContext(ResourcesContext);
@@ -68,7 +68,7 @@ export const NationalSystemsTable = ({
       setData(parseData(tableData.records, tables, schemaTables));
       setSchemaData(tableData);
     } catch (error) {
-      console.error('NationalSystemsTable - onLoadTableData.', error);
+      console.error('QuestionAnswerWebformTable - onLoadTableData.', error);
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +97,7 @@ export const NationalSystemsTable = ({
 
     return data.map(record => (
       <Fragment key={uniqueId()}>
-        <NationalSystemsRecord
+        <QuestionAnswerWebformRecord
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
@@ -126,6 +126,6 @@ export const NationalSystemsTable = ({
   );
 };
 
-NationalSystemsTable.propTypes = { tables: PropTypes.shape({ name: PropTypes.string, title: PropTypes.string }) };
+QuestionAnswerWebformTable.propTypes = { tables: PropTypes.shape({ name: PropTypes.string, title: PropTypes.string }) };
 
-NationalSystemsTable.defaultProps = { tables: { name: '', title: '' } };
+QuestionAnswerWebformTable.defaultProps = { tables: { name: '', title: '' } };

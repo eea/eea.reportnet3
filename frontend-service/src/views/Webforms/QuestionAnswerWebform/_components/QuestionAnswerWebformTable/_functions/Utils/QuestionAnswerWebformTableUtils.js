@@ -60,4 +60,4 @@ const parseFields = (dataFields = [], schemaTables) => {
   });
 };
 
-export const NationalSystemsTableUtils = { parseData };
+export const QuestionAnswerWebformTableUtils = { parseData };

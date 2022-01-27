@@ -1,18 +1,18 @@
 import { Fragment } from 'react';
 import uniqueId from 'lodash/uniqueId';
 
-import styles from './NationalSystemsRecord.module.scss';
+import styles from './QuestionAnswerWebformRecord.module.scss';
 
-import { NationalSystemsField } from './_components/NationalSystemsField';
+import { QuestionAnswerWebformField } from './_components/QuestionAnswerWebformField';
 
-export const NationalSystemsRecord = ({ dataProviderId, dataflowId, datasetId, getTableErrors, record }) => (
+export const QuestionAnswerWebformRecord = ({ dataProviderId, dataflowId, datasetId, getTableErrors, record }) => (
   <div className={styles.record}>
     {record.elements.map(element => {
       const { name, title, titleSource, tooltipSource } = element;
 
       return (
         <Fragment key={uniqueId()}>
-          <NationalSystemsField
+          <QuestionAnswerWebformField
             dataflowId={dataflowId}
             dataProviderId={dataProviderId}
             datasetId={datasetId}

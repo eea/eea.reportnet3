@@ -5,7 +5,7 @@ import styles from './Webforms.module.scss';
 import { PaMsWebform } from './PaMsWebform';
 import { Article15 } from './Article15';
 import { Button } from 'views/_components/Button';
-import { NationalSystems } from './NationalSystems';
+import { QuestionAnswerWebform } from './QuestionAnswerWebform';
 import { Spinner } from 'views/_components/Spinner';
 
 import { WebformService } from 'services/WebformService';
@@ -83,9 +83,9 @@ export const Webforms = ({
           tables={selectedConfiguration.tables}
         />
       );
-    case 'NATIONAL-SYSTEMS':
+    case 'QA':
       return (
-        <NationalSystems
+        <QuestionAnswerWebform
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}

@@ -1,1 +1,0 @@
-export { NationalSystemsRecord } from './NationalSystemsRecord';

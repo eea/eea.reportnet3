@@ -2,15 +2,15 @@ import { Fragment, useContext } from 'react';
 
 import uniqueId from 'lodash/uniqueId';
 
-import styles from './NationalSystems.module.scss';
+import styles from './QuestionAnswerWebform.module.scss';
 
-import { NationalSystemsTable } from './_components/NationalSystemsTable';
+import { QuestionAnswerWebformTable } from './_components/QuestionAnswerWebformTable';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const NationalSystems = ({ dataflowId, dataProviderId, datasetId, state, tables = [] }) => {
+export const QuestionAnswerWebform = ({ dataflowId, dataProviderId, datasetId, state, tables = [] }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const { areEquals } = TextUtils;
@@ -54,13 +54,13 @@ export const NationalSystems = ({ dataflowId, dataProviderId, datasetId, state, 
   };
 
   return (
-    <div className={styles.nationalSystems}>
+    <div className={styles.questionAnswer}>
       {tables.map(table => {
         const schemaTable = schemaTables.filter(tab => areEquals(tab['tableSchemaName'], table['name']))[0];
 
         return (
           <Fragment key={uniqueId()}>
-            <NationalSystemsTable
+            <QuestionAnswerWebformTable
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
               datasetId={datasetId}
