@@ -24,6 +24,8 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
+import { MyFilters } from 'views/_components/MyFilters';
 
 export const PublicDataflows = () => {
   const navigate = useNavigate();
@@ -37,6 +39,8 @@ export const PublicDataflows = () => {
   const [pageInputTooltip, setPageInputTooltip] = useState(resourcesContext.messages['currentPageInfoMessage']);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 100, pageNum: 0 });
   const [publicDataflows, setPublicDataflows] = useState([]);
+
+  const { filterBy, filteredData, isFiltered, sortBy } = useFilters('publicDataflows');
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOWS });
 
@@ -115,8 +119,16 @@ export const PublicDataflows = () => {
 
   const onLoadPublicDataflows = async () => {
     setIsLoading(true);
+    const isAsc = true;
+    const sortByHeader = 'name';
+
     try {
-      const publicData = await DataflowService.getPublicData();
+      const publicData = await DataflowService.getPublicData({
+        filterBy,
+        numberRows,
+        pageNum,
+        sortByOptions: { isAsc, sortByHeader }
+      });
       setPublicDataflows(publicData);
     } catch (error) {
       console.error('PublicDataflows - onLoadPublicDataflows.', error);
@@ -203,6 +215,7 @@ export const PublicDataflows = () => {
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>{resourcesContext.messages['dataflows']}</h1>
+          <MyFilters data={publicDataflows} onFilter={onLoadPublicDataflows} viewType="publicDataflows" />
           <div className={styles.dataflowsList}>{renderPublicDataflowsContent()}</div>
         </div>
       </div>

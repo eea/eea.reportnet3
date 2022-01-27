@@ -366,9 +366,18 @@ export const DataflowService = {
   createEmptyDatasetSchema: async (dataflowId, datasetSchemaName) =>
     await DataflowRepository.createEmptyDatasetSchema(dataflowId, datasetSchemaName),
 
-  getPublicData: async () => {
-    const publicDataflows = await DataflowRepository.getPublicData();
+  getPublicData: async ({ filterBy, numberRows, pageNum, sortByOptions }) => {
+    const { isAsc, sortByHeader } = sortByOptions;
+    
+    const publicDataflows = await DataflowRepository.getPublicData({
+      filterBy,
+      isAsc,
+      numberRows,
+      pageNum,
+      sortByHeader
+    });
     const parsedPublicDataflows = DataflowUtils.parsePublicDataflowListDTO(publicDataflows.data);
+
     return sortBy(parsedPublicDataflows, ['name']);
   },
 

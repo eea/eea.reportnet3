@@ -23,7 +23,8 @@ export const DataflowConfig = {
   getDatasetsInfo: '/dataflow/{:dataflowId}/datasetsSummary',
   getDatasetsValidationStatistics:
     '/datasetmetabase/globalStatistics/dataflow/{:dataflowId}/dataSchema/{:datasetSchemaId}',
-  getPublicData: '/dataflow/getPublicDataflows',
+  getPublicData:
+    '/dataflow/getPublicDataflows?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}',
   getPublicDataflowData: '/dataflow/getPublicDataflow/{:dataflowId}',
   getPublicDataflowsByCountryCode:
     '/dataflow/public/country/{:country}?asc={:asc}&pageNum={:pageNum}&pageSize={:pageSize}&sortField={:sortField}',
