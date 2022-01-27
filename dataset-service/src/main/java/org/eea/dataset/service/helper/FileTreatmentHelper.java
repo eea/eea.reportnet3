@@ -27,6 +27,7 @@ import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
@@ -683,6 +684,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
     String error = null;
     boolean guessTableName = null == tableSchemaId;
+    boolean errorWrongFilename = false;
+    int numberOfWrongFiles = 0;
     for (File file : files) {
       String fileName = file.getName();
 
@@ -691,13 +694,24 @@ public class FileTreatmentHelper implements DisposableBean {
         if (guessTableName) {
           tableSchemaId = getTableSchemaIdFromFileName(datasetSchema, fileName);
         }
+        if (!guessTableName || StringUtils.isNotBlank(tableSchemaId)) {
+          LOG.info("Start RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
 
-        LOG.info("Start RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
+          processFile(datasetId, fileName, inputStream, tableSchemaId, replace, datasetSchema,
+              delimiter);
 
-        processFile(datasetId, fileName, inputStream, tableSchemaId, replace, datasetSchema,
-            delimiter);
-
-        LOG.info("Finish RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
+          LOG.info("Finish RN3-Import file: fileName={}, tableSchemaId={}", fileName,
+              tableSchemaId);
+        } else {
+          LOG_ERROR.error(
+              "RN3-Import file failed: fileName={}. There's no table with that fileName", fileName);
+          errorWrongFilename = true;
+          numberOfWrongFiles++;
+          if (numberOfWrongFiles == files.size()) {
+            errorWrongFilename = false;
+            throw new EEAException(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
+          }
+        }
       } catch (IOException | EEAException e) {
         LOG_ERROR.error("RN3-Import file failed: fileName={}, tableSchemaId={}", fileName,
             tableSchemaId, e);
@@ -706,34 +720,32 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
     if (files.size() == 1) {
-      finishImportProcess(datasetId, tableSchemaId, originalFileName, error);
+      finishImportProcess(datasetId, tableSchemaId, originalFileName, error, errorWrongFilename);
     } else {
-      finishImportProcess(datasetId, null, originalFileName, error);
+      finishImportProcess(datasetId, null, originalFileName, error, errorWrongFilename);
     }
 
   }
+
 
   /**
    * Gets the table schema id from file name.
    *
    * @param schema the schema
    * @param fileName the file name
-   *
    * @return the table schema id from file name
-   *
    * @throws EEAException the EEA exception
    */
   private String getTableSchemaIdFromFileName(DataSetSchema schema, String fileName)
       throws EEAException {
-
+    String tableSchemaId = "";
     String tableName = fileName.substring(0, fileName.lastIndexOf((".")));
     for (TableSchema tableSchema : schema.getTableSchemas()) {
       if (tableSchema.getNameTableSchema().equalsIgnoreCase(tableName)) {
-        return tableSchema.getIdTableSchema().toString();
+        tableSchemaId = tableSchema.getIdTableSchema().toString();
       }
     }
-
-    throw new EEAException(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
+    return tableSchemaId;
   }
 
   /**
@@ -743,9 +755,10 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param tableSchemaId the table schema id
    * @param originalFileName the original file name
    * @param error the error
+   * @param errorWrongFilename the error wrong filename
    */
   private void finishImportProcess(Long datasetId, String tableSchemaId, String originalFileName,
-      String error) {
+      String error, boolean errorWrongFilename) {
     try {
 
       releaseLock(datasetId);
@@ -783,6 +796,15 @@ public class FileTreatmentHelper implements DisposableBean {
       }
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
+      // If importing a zip a file doesn't match with the table and the process ignores it, we send
+      // a warning notification
+      if (errorWrongFilename) {
+        NotificationVO notificationWarning = NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .datasetId(datasetId).fileName(originalFileName).build();
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_NAMEFILE_WARNING_EVENT,
+            value, notificationWarning);
+      }
     } catch (EEAException e) {
       LOG_ERROR.error("RN3-Import file error", e);
     }
