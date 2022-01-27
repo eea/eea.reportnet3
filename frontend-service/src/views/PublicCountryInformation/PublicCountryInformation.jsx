@@ -84,19 +84,6 @@ export const PublicCountryInformation = () => {
     }
   };
 
-  const getHeader = fieldHeader => {
-    switch (fieldHeader) {
-      case 'isReleased':
-        return resourcesContext.messages['delivered'];
-      case 'publicFilesNames':
-        return resourcesContext.messages['files'];
-      case 'referencePublicFilesNames':
-        return resourcesContext.messages['referenceDatasets'];
-      default:
-        return resourcesContext.messages[fieldHeader];
-    }
-  };
-
   const onChangePage = event => {
     const isChangedPage = true;
     setNumberRows(event.rows);
@@ -192,50 +179,44 @@ export const PublicCountryInformation = () => {
     setDataflows(publicDataflows);
   };
 
-  const getOrderedColumns = dataflows => {
-    const dataflowsWithPriority = [
-      { id: 'id', index: 0 },
-      { id: 'name', index: 1 },
-      { id: 'obligation', index: 2 },
-      { id: 'legalInstrument', index: 3 },
-      { id: 'deadline', index: 4 },
-      { id: 'status', index: 5 },
-      { id: 'deliveryDate', index: 6 },
-      { id: 'deliveryStatus', index: 7 },
-      { id: 'referencePublicFilesNames', index: 8 },
-      { id: 'publicFilesNames', index: 9 }
+  const renderTableColumns = () => {
+    const columns = [
+      { key: 'name', header: resourcesContext.messages['name'], template: renderDataflowNameBodyColumn },
+      { key: 'obligation', header: resourcesContext.messages['obligation'], template: renderObligationBodyColumn },
+      {
+        key: 'legalInstrument',
+        header: resourcesContext.messages['legalInstrument'],
+        template: renderLegalInstrumentBodyColumn
+      },
+      { key: 'deadline', header: resourcesContext.messages['deadline'] },
+      { key: 'status', header: resourcesContext.messages['status'] },
+      { key: 'deliveryDate', header: resourcesContext.messages['deliveryDate'] },
+      { key: 'deliveryStatus', header: resourcesContext.messages['deliveryStatus'] },
+      {
+        key: 'referencePublicFilesNames',
+        header: resourcesContext.messages['referenceDatasets'],
+        template: renderDownloadReferenceFileBodyColumn
+      },
+      {
+        key: 'publicFilesNames',
+        header: resourcesContext.messages['files'],
+        template: renderDownloadFileBodyColumn
+      }
     ];
 
-    return dataflows
-      .map(field => dataflowsWithPriority.filter(e => field === e.id))
-      .flat()
-      .sort((a, b) => a.index - b.index)
-      .map(orderedField => orderedField.id);
-  };
-
-  const renderColumns = dataflows => {
-    const fieldColumns = getOrderedColumns(Object.keys(dataflows[0]))
-      .filter(key => !key.includes('id'))
-      .map(field => {
-        let template = null;
-        if (field === 'isReleased') template = renderIsReleasedBodyColumn;
-        if (field === 'name') template = renderDataflowNameBodyColumn;
-        if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
-        if (field === 'obligation') template = renderObligationBodyColumn;
-        if (field === 'publicFilesNames') template = renderDownloadFileBodyColumn;
-        if (field === 'referencePublicFilesNames') template = renderDownloadReferenceFileBodyColumn;
-        return (
-          <Column
-            body={template}
-            field={field}
-            header={getHeader(field)}
-            key={field}
-            sortable={field === 'publicFilesNames' || field === 'referencePublicFilesNames' ? false : true}
-          />
-        );
-      });
-
-    return fieldColumns;
+    return columns.map(column => (
+      <Column
+        body={column.template}
+        className={column.className ? column.className : ''}
+        columnResizeMode="expand"
+        editor={column.editor}
+        field={column.key}
+        header={column.header}
+        key={column.key}
+        rowEditor={column.key === 'actions'}
+        sortable={column.key === 'publicFilesNames' || column.key === 'referencePublicFilesNames' ? false : true}
+      />
+    ));
   };
 
   const renderDownloadFileBodyColumn = rowData => {
@@ -319,11 +300,6 @@ export const PublicCountryInformation = () => {
     }
   };
 
-  const renderIsReleasedBodyColumn = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {rowData.isReleased && <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />}
-    </div>
-  );
 
   const renderLegalInstrumentBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
@@ -420,7 +396,7 @@ export const PublicCountryInformation = () => {
         summary={resourcesContext.messages['dataflows']}
         totalRecords={totalRecords}
         value={dataflows}>
-        {renderColumns(dataflows)}
+        {renderTableColumns(dataflows)}
       </DataTable>
     );
   };
