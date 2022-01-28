@@ -115,14 +115,11 @@ export const ActionsToolbar = ({
   useCheckNotifications(['EXPORT_TABLE_DATA_COMPLETED_EVENT'], onDownloadTableData);
   useCheckNotifications(['EXPORT_TABLE_DATA_FAILED_EVENT'], setIsLoadingFile, false);
 
-  const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => {
-    const extensionsTypes = type.code.split('+');
-    return {
-      command: () => onExportTableData(type),
-      icon: extensionsTypes[0],
-      label: resourcesContext.messages[type.key]
-    };
-  });
+  const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
+    command: () => onExportTableData(type),
+    icon: type.code,
+    label: resourcesContext.messages[type.key]
+  }));
 
   const onExportTableData = async type => {
     setIsLoadingFile(true);

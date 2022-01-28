@@ -116,8 +116,8 @@ export const DatasetRepository = {
     selectedRuleId,
     isExportFilteredCsv,
     isFilterValidationsActive
-  ) => {
-    return await HTTPRequester.post({
+  ) =>
+    await HTTPRequester.post({
       url: getUrl(DatasetConfig.exportTableData, { datasetId, fileType, tableSchemaId }),
       data: {
         fieldValue: isExportFilteredCsv ? filterValue : '',
@@ -125,8 +125,7 @@ export const DatasetRepository = {
         levelError: isExportFilteredCsv && isFilterValidationsActive ? levelErrorValidations : []
       },
       headers: { 'Content-Type': 'application/json' }
-    });
-  },
+    }),
 
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
     await HTTPRequester.download({
