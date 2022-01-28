@@ -3,6 +3,7 @@ package org.eea.dataflow.persistence.repository;
 import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.persistence.domain.Dataflow;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -31,10 +32,13 @@ public interface DataflowExtendedRepository {
    * @param filters the filters
    * @param orderHeader the order header
    * @param asc the asc
+   * @param type the type
+   * @param dataflowIds the dataflow ids
    * @return the list
    */
   List<Dataflow> findPaginated(String json, Pageable pageable, boolean isPublic,
-      Map<String, String> filters, String orderHeader, boolean asc);
+      Map<String, String> filters, String orderHeader, boolean asc, TypeDataflowEnum type,
+      List<Long> dataflowIds);
 
 
 
@@ -47,10 +51,12 @@ public interface DataflowExtendedRepository {
    * @param filters the filters
    * @param orderHeader the order header
    * @param asc the asc
+   * @param type the type
+   * @param dataflowIds the dataflow ids
    * @return the long
    */
   Long countPaginated(String json, Pageable pageable, boolean isPublic, Map<String, String> filters,
-      String orderHeader, boolean asc);
+      String orderHeader, boolean asc, TypeDataflowEnum type, List<Long> dataflowIds);
 
 
 
