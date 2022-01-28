@@ -56,7 +56,9 @@ export const DocumentFileUpload = ({
   };
 
   useEffect(() => {
-    if (isUploadDialogVisible) inputRef.current.focus();
+    if (isUploadDialogVisible) {
+      inputRef.current.focus();
+    }
   }, [isUploadDialogVisible]);
 
   useEffect(() => {
@@ -72,31 +74,25 @@ export const DocumentFileUpload = ({
   }, [inputsChecked, isEditForm]);
 
   useEffect(() => {
-    isEditForm && setAreAllInputsChecked(true);
+    if (isEditForm) {
+      setAreAllInputsChecked(true);
+    }
   }, [isEditForm]);
 
-  const checkIsEmptyInput = inputValue => {
-    return inputValue.trim() === '';
-  };
+  const checkIsEmptyInput = inputValue => inputValue.trim() === '';
 
   const checkIsCorrectLength = inputValue => inputValue.length <= config.INPUT_MAX_LENGTH;
 
-  const checkIsEmptyFile = inputUpload => {
-    return inputUpload.files.length === 0;
-  };
+  const checkIsEmptyFile = inputUpload => inputUpload.files.length === 0;
 
-  const checkExсeedsMaxFileSize = inputUpload => {
-    if (inputUpload.files.length === 0) {
-      return false;
-    }
-    return inputUpload.files[0].size > config.MAX_FILE_SIZE;
-  };
+  const checkExсeedsMaxFileSize = inputUpload =>
+    inputUpload.files.length > 0 && inputUpload.files[0].size > config.MAX_FILE_SIZE;
 
   const checkInputForErrors = inputName => {
     let hasErrors = false;
     let message = '';
-    const inputValue = inputName === 'lang' ? inputs[inputName].value : inputs[inputName];
 
+    const inputValue = inputName === 'lang' ? inputs[inputName].value : inputs[inputName];
     const inputUpload = document.querySelector('#uploadFile');
 
     if (inputName !== 'uploadFile' && checkIsEmptyInput(inputValue)) {
@@ -110,6 +106,7 @@ export const DocumentFileUpload = ({
         message = resourcesContext.messages['tooLargeFileValidationError'];
         hasErrors = true;
       }
+
       if (!isEditForm) {
         if (checkIsEmptyFile(inputUpload)) {
           message = '';
@@ -121,20 +118,13 @@ export const DocumentFileUpload = ({
       }
     }
 
-    setErrors(previousErrors => {
-      return { ...previousErrors, [inputName]: { message, hasErrors } };
-    });
-
-    setInputsChecked(previousInputsChecked => {
-      return { ...previousInputsChecked, [inputName]: true };
-    });
+    setErrors(previousErrors => ({ ...previousErrors, [inputName]: { message, hasErrors } }));
+    setInputsChecked(previousInputsChecked => ({ ...previousInputsChecked, [inputName]: true }));
 
     return hasErrors;
   };
 
-  useImperativeHandle(footerRef, () => ({
-    onConfirm
-  }));
+  useImperativeHandle(footerRef, () => ({ onConfirm }));
 
   const onConfirm = async () => {
     checkInputForErrors('description');
@@ -154,6 +144,7 @@ export const DocumentFileUpload = ({
         type: 'DOCUMENT_UPLOADING_INIT_INFO',
         content: {}
       });
+
       try {
         if (isEditForm) {
           setIsUpdating(true);
@@ -194,10 +185,7 @@ export const DocumentFileUpload = ({
   };
 
   const getOptionTypes = () => {
-    const template = [];
-    config.languages.forEach(language => {
-      template.push({ label: language.name, value: language.code });
-    });
+    const template = config.languages.map(language => ({ label: language.name, value: language.code }));
     return sortBy(template, 'type');
   };
 
@@ -223,17 +211,15 @@ export const DocumentFileUpload = ({
             onBlur={() => checkInputForErrors('description')}
             onChange={e => {
               e.persist();
-              setInputs(previousValues => {
-                return { ...previousValues, description: e.target.value };
-              });
+              setInputs(previousValues => ({ ...previousValues, description: e.target.value }));
             }}
             onFocus={() =>
-              setErrors(previousErrors => {
-                return { ...previousErrors, description: { message: '', hasErrors: false } };
-              })
+              setErrors(previousErrors => ({ ...previousErrors, description: { message: '', hasErrors: false } }))
             }
             onKeyPress={e => {
-              if (!checkInputForErrors('description') && e.key === 'Enter') onConfirm();
+              if (!checkInputForErrors('description') && e.key === 'Enter') {
+                onConfirm();
+              }
             }}
             placeholder={resourcesContext.messages['fileDescription']}
             ref={inputRef}
@@ -254,18 +240,14 @@ export const DocumentFileUpload = ({
             id="selectLanguage"
             name="lang"
             onChange={e => {
-              setInputs(previousValues => {
-                return { ...previousValues, lang: e.target.value };
-              });
-              setErrors(previousErrors => {
-                return { ...previousErrors, lang: { message: '', hasErrors: false } };
-              });
-              setInputsChecked(previousInputsChecked => {
-                return { ...previousInputsChecked, lang: true };
-              });
+              setInputs(previousValues => ({ ...previousValues, lang: e.target.value }));
+              setErrors(previousErrors => ({ ...previousErrors, lang: { message: '', hasErrors: false } }));
+              setInputsChecked(previousInputsChecked => ({ ...previousInputsChecked, lang: true }));
             }}
             onKeyPress={e => {
-              if (e.which === 13 && !checkInputForErrors('lang')) onConfirm();
+              if (e.which === 13 && !checkInputForErrors('lang')) {
+                onConfirm();
+              }
             }}
             optionLabel="label"
             options={getOptionTypes()}
@@ -291,7 +273,9 @@ export const DocumentFileUpload = ({
               onChange={onFileUpload}
               onClearFile={onClearFile}
               onKeyPress={e => {
-                if (e.key === 'Enter' && !checkInputForErrors('uploadFile')) onConfirm();
+                if (e.key === 'Enter' && !checkInputForErrors('uploadFile')) {
+                  onConfirm();
+                }
               }}
             />
             <label className="srOnly" htmlFor="uploadFile">
@@ -310,18 +294,14 @@ export const DocumentFileUpload = ({
             id="isPublic"
             inputId="isPublic"
             onChange={() => {
-              setInputs(previousValues => {
-                return { ...previousValues, isPublic: !previousValues.isPublic };
-              });
+              setInputs(previousValues => ({ ...previousValues, isPublic: !previousValues.isPublic }));
             }}
             role="checkbox"
           />
           <label
             htmlFor="isPublic"
             onClick={() => {
-              setInputs(previousValues => {
-                return { ...previousValues, isPublic: !previousValues.isPublic };
-              });
+              setInputs(previousValues => ({ ...previousValues, isPublic: !previousValues.isPublic }));
             }}
             style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
             {resourcesContext.messages['checkboxIsPublic']}
