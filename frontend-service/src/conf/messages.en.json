@@ -1476,6 +1476,8 @@
     "manageWebformsLeftBarButton": "Manage webforms",
     "numberOfFields": "Number of fields",
     "updateAutomaticReportingDeletionFailedEvent": "Error updating dataflow automatic data deletion",
+    "importNamefileWarningEvent": "Some tables have not imported data: table and file name were different.",
+    "notificationWarnTitle": "WARNING",
     "webformsConfigurationsSelect": "Select an webform type",
     "notSelectedWebformOption": "No webform",
     "deleteWebformInUseError": "Error deleting webform that is in use.",
