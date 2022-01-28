@@ -1477,6 +1477,9 @@
     "numberOfFields": "Number of fields",
     "updateAutomaticReportingDeletionFailedEvent": "Error updating dataflow automatic data deletion",
     "webformsConfigurationsSelect": "Select an webform type",
-    "notSelectedWebformOption": "No webform"
+    "notSelectedWebformOption": "No webform",
+    "deleteWebformInUseError": "Error deleting webform that is in use.",
+    "pamsLabel": "PaMs",
+    "qaLabel": "Q&A"
   }
 }

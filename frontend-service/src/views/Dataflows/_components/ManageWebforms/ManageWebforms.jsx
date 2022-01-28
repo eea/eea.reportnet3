@@ -6,8 +6,6 @@ import orderBy from 'lodash/orderBy';
 
 import styles from './ManageWebforms.module.scss';
 
-import { config } from 'conf';
-
 import { Column } from 'primereact/column';
 
 import { Button } from 'views/_components/Button';
@@ -39,7 +37,17 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
   const fileRef = useRef(null);
 
-  const [dropdownOptions, typesKeyValues] = config.webformsTypes;
+  const dropdownOptions = [
+    { name: resourcesContext.messages['pamsLabel'], value: 'PAMS' },
+    { name: resourcesContext.messages['qaLabel'], value: 'QA' },
+    { name: resourcesContext.messages['tables'], value: 'TABLES' }
+  ];
+
+  const typesKeyValues = {
+    PAMS: resourcesContext.messages['pamsLabel'],
+    QA: resourcesContext.messages['qaLabel'],
+    TABLES: resourcesContext.messages['tables']
+  };
 
   useEffect(() => {
     getWebformList();

@@ -16,7 +16,6 @@ import storage from './storage.config.json';
 import datasetStatus from './datasetStatus.json';
 import theme from './theme.config.json';
 import validations from './validation.config.json';
-import webformsTypes from './webformsTypes.config.json';
 
 export const config = {
   MB_SIZE: 1024 * 1024,
@@ -53,6 +52,5 @@ export const config = {
   storage: storage,
   datasetStatus: datasetStatus,
   theme: theme,
-  validations: validations,
-  webformsTypes: webformsTypes
+  validations: validations
 };
