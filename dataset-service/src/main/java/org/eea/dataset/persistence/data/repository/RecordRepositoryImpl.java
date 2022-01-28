@@ -54,7 +54,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
-
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -210,6 +209,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant RECORDS: {@value}. */
   private static final String RECORDS = "records";
+
+  /** The Constant CORRECT: {@value}. */
+  private static final String CORRECT = "CORRECT";
 
 
   /** The Constant RESERVED_SQL_WORDS. */
@@ -796,9 +798,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private List<RecordValue> findByTableValueOrdered(Connection conn, Long tableId, Long datasetId,
       Pageable pageable, ExportFilterVO filters) throws SQLException {
 
-    int position = 1;
     String stringQuery = buildQueryWithExportFilters(datasetId, tableId, pageable, filters);
 
+    int parameterPosition = 1;
     ErrorTypeEnum[] levelErrorsArray = filters.getLevelError();
 
     conn.setSchema("dataset_" + datasetId);
@@ -806,19 +808,22 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     try (PreparedStatement stmt = conn.prepareStatement(stringQuery);) {
 
-      // Parametrize the levelError based on how many LevelErrors are in the enum
+      // Parametrize the levelError based on how many LevelErrors are in the enum, CORRECT mustn't
+      // be included
       if (filters.getLevelError() != null && filters.getLevelError().length > 0) {
         for (int i = 0; i < levelErrorsArray.length; i++) {
-          stmt.setString(position, levelErrorsArray[i].getValue());
-          position++;
+          if (!levelErrorsArray[i].getValue().equals(CORRECT)) {
+            stmt.setString(parameterPosition, levelErrorsArray[i].getValue());
+            parameterPosition++;
+          }
         }
       }
       if (StringUtils.isNotBlank(filters.getIdRules())) {
-        stmt.setString(position, filters.getIdRules());
-        position++;
+        stmt.setString(parameterPosition, filters.getIdRules());
+        parameterPosition++;
       }
       if (StringUtils.isNotBlank(filters.getFieldValue())) {
-        stmt.setString(position, "%" + filters.getFieldValue() + "%");
+        stmt.setString(parameterPosition, "%" + filters.getFieldValue() + "%");
       }
       LOG.info("executing query in findByTableValueOrdered: {}", stmt);
       ResultSet rs = stmt.executeQuery();
@@ -857,13 +862,27 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     String initialQuery = buildInitialQueryExportFilters(datasetId, tableId, pageable, filters);
 
+    boolean hasCorrectLevelError = false;
+
+    // Check if LevelError contains the CORRECT levelError
+    for (int i = 0; i < filters.getLevelError().length; i++) {
+      if (filters.getLevelError()[i].getValue().equals(CORRECT)) {
+        hasCorrectLevelError = true;
+      }
+    }
+
     String filterFieldValue = StringUtils.isNotBlank(filters.getFieldValue())
         ? " and exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'value' LIKE ?)"
         : "";
 
-    String filterByLevelOrError =
-        " and (exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'id' in (select id_field from id_field_validations)) or id in (select id from record_value_aux) or id_table in (select id from table_value_aux))";
+    String filterByError = filters.getLevelError().length > 0 ? " and (" : "";
 
+    String filterByLevelOrError =
+        " (exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'id' in (select id_field from id_field_validations)) or id in (select id from record_value_aux) or id_table in (select id from table_value_aux))";
+
+    String filterByCorrectLevelError = hasCorrectLevelError
+        ? "(exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'id' not in (select id_field from id_field_validations)) or (id not in (select id from record_value_aux) and id_table not in (select id from table_value_aux)))"
+        : "";
 
     String paginationPart = " offset %s limit %s ) as table_aux";
 
@@ -878,12 +897,24 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           initialQuery + String.format(paginationPart, offsetAux, pageable.getPageSize());
     }
 
-    initialQuery = initialQuery + " where fields notnull" + filterFieldValue;
+    initialQuery = initialQuery + " where fields notnull" + filterFieldValue + filterByError;
 
-    if ((filters.getLevelError() != null && filters.getLevelError().length > 0)
+    // If we have levelErrors which include the CORRECT filter, add an or to the clause, otherwise,
+    // if the filters only have a CORRECT use an and
+    if ((filters.getLevelError() != null && filters.getLevelError().length > 0
+        && !(filters.getLevelError().length == 1 && hasCorrectLevelError))
         || (StringUtils.isNotBlank(filters.getIdRules()))) {
       initialQuery = initialQuery + filterByLevelOrError;
+
+    } else if (filters.getLevelError().length == 1 && hasCorrectLevelError) {
+      initialQuery = initialQuery + filterByCorrectLevelError;
     }
+
+    if (filters.getLevelError().length > 1 && hasCorrectLevelError) {
+      initialQuery = initialQuery + " or " + filterByCorrectLevelError;
+    }
+
+    initialQuery = filters.getLevelError().length > 0 ? initialQuery + ")" : initialQuery;
 
     return initialQuery;
   }
@@ -903,7 +934,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     String levelError;
     String idRules;
 
-    if (filters.getLevelError() != null && filters.getLevelError().length > 0) {
+    if (filters.getLevelError() != null && filters.getLevelError().length > 0
+        && !(filters.getLevelError().length == 1
+            && filters.getLevelError()[0].getValue().equals(CORRECT))) {
 
       levelError = " where level_error in (";
 
@@ -911,9 +944,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
       // Add ? to parametrize the levelError based on how many level errors are in the enum
       for (int i = 0; i < filters.getLevelError().length; i++) {
-        sb.append("?");
-        if (i < filters.getLevelError().length - 1)
-          sb.append(",");
+        if (!filters.getLevelError()[i].getValue().equals(CORRECT)) {
+          sb.append("?");
+          if (i < filters.getLevelError().length - 1)
+            sb.append(",");
+        }
       }
       sb.append(")");
 
@@ -928,8 +963,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     String auxTables = (filters.getLevelError() != null && filters.getLevelError().length > 0)
         || (StringUtils.isNotBlank(filters.getIdRules()))
             ? "with validation_aux as (select * from dataset_" + datasetId + ".validation v2"
-                + levelError + idRules + ", "
-                + "id_field_validations as (select id_field from validation_aux v inner join dataset_"
+                + levelError + idRules
+                + ", id_field_validations as (select id_field from validation_aux v inner join dataset_"
                 + datasetId + ".field_validation fval on v.id = fval.id_validation), "
                 + "id_record_validations as (select id_record from validation_aux v inner join dataset_"
                 + datasetId + ".record_validation rv on v.id = rv.id_validation), "
@@ -942,11 +977,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             : "";
 
     return auxTables
-        + "select * from (select rv.*, (select cast(json_agg(row_to_json(fieldsAux))as text )as fields "
-        + "  from ( select fv.id as id, fv.id_field_schema as \"idFieldSchema\", fv.type as type, fv.value as value from dataset_"
-        + datasetId + ".field_value fv " + " where fv.id_record = rv.id "
-        + " order by fv.data_position ) as fieldsAux) " + " from dataset_" + datasetId
-        + ".record_value rv where rv.id_table= " + tableId + " order by rv.data_position";
+        + "select * from (select rv.*, (select cast(json_agg(row_to_json(fieldsAux))as text )as fields from "
+        + "( select fv.id as id, fv.id_field_schema as \"idFieldSchema\", fv.type as type, fv.value as value from dataset_"
+        + datasetId
+        + ".field_value fv where fv.id_record = rv.id order by fv.data_position ) as fieldsAux) "
+        + " from dataset_" + datasetId + ".record_value rv where rv.id_table= " + tableId
+        + " order by rv.data_position";
   }
 
   /**
