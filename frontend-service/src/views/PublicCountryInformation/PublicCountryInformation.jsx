@@ -170,10 +170,12 @@ export const PublicCountryInformation = () => {
         return {
           deadline: dataflow.expirationDate,
           id: dataflow.id,
-          isReleased: dataset.isReleased,
-          legalInstrument: dataflow.obligation?.legalInstrument,
+          legalInstrumentAlias: dataflow.obligation?.legalInstrument.alias,
+          legalInstrumentId: dataflow.obligation?.legalInstrument.id,
+          legalInstrument: dataflow.obligation?.legalInstrument.title,
           name: dataflow.name,
-          obligation: dataflow.obligation,
+          obligationId: dataflow.obligation.obligationId,
+          obligation: dataflow.obligation.title,
           publicFilesNames: publicFileNames,
           referencePublicFilesNames: referencePublicFileNames,
           deliveryDate: dataset.releaseDate,
@@ -309,18 +311,15 @@ export const PublicCountryInformation = () => {
 
   const renderLegalInstrumentBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
-      {rowData.legalInstrument?.id
-        ? renderRedirectText(
-            rowData.legalInstrument?.alias,
-            `${baseRod3Url}/instruments/${rowData.legalInstrument?.id}`
-          )
-        : rowData.legalInstrument?.alias}
+      {rowData.legalInstrumentId
+        ? renderRedirectText(rowData.legalInstrumentAlias, `${baseRod3Url}/instruments/${rowData.legalInstrumentId}`)
+        : rowData.legalInstrumentAlias}
     </div>
   );
 
   const renderDataflowNameBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
-      {rowData.obligation?.obligationId
+      {rowData.obligationId
         ? renderRedirectText(rowData.name, getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: rowData.id }, true))
         : rowData.name}
     </div>
@@ -328,12 +327,9 @@ export const PublicCountryInformation = () => {
 
   const renderObligationBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
-      {rowData.obligation?.obligationId
-        ? renderRedirectText(
-            rowData.obligation?.title,
-            `${baseRod3Url}/obligations/${rowData.obligation?.obligationId}`
-          )
-        : rowData.obligation?.title}
+      {rowData.obligationId
+        ? renderRedirectText(rowData.obligation, `${baseRod3Url}/obligations/${rowData.obligationId}`)
+        : rowData.obligation}
     </div>
   );
 
