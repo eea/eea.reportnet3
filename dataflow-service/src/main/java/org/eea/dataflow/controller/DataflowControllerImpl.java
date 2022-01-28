@@ -702,9 +702,10 @@ public class DataflowControllerImpl implements DataFlowController {
           value = "sortField: specifies the field which should be used to sort the data retrieved",
           example = "name") @RequestParam(value = "sortField", required = false) String sortField,
       @ApiParam(value = "asc: is the sorting order ascending or descending?", example = "false",
-          defaultValue = "true") @RequestParam(value = "asc", defaultValue = "true") boolean asc) {
+          defaultValue = "true") @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+      @RequestBody(required = false) Map<String, String> filters) {
     return dataflowService.getPublicDataflowsByCountry(countryCode, sortField, asc, pageNum,
-        pageSize);
+        pageSize, filters);
   }
 
   /**

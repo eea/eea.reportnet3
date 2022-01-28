@@ -196,7 +196,7 @@ public interface DataflowService {
    * @return the public dataflows by country
    */
   DataflowPublicPaginatedVO getPublicDataflowsByCountry(String countryCode, String header,
-      boolean asc, int page, int pageSize);
+      boolean asc, int page, int pageSize, Map<String, String> filters) throws EEAException;
 
 
   /**
