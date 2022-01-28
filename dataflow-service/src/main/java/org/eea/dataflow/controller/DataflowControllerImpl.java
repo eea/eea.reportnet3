@@ -683,7 +683,8 @@ public class DataflowControllerImpl implements DataFlowController {
    */
   @Override
   @PostMapping("/getPublicDataflows")
-  @ApiOperation(value = "Gets all the public dataflows", hidden = false)
+
+  @ApiOperation(value = "Gets all the public dataflows", hidden = true)
   public PaginatedDataflowVO getPublicDataflows(
       @RequestBody(required = false) Map<String, String> filters,
       @RequestParam(required = false) String orderHeader,
