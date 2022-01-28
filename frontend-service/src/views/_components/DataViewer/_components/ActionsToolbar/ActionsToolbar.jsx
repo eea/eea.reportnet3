@@ -5,6 +5,7 @@ import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import ReactTooltip from 'react-tooltip';
 
 import { config } from 'conf';
 
@@ -17,7 +18,6 @@ import { DownloadFile } from 'views/_components/DownloadFile';
 import { DropdownFilter } from 'views/Dataset/_components/DropdownFilter';
 import { InputText } from 'views/_components/InputText';
 import { Menu } from 'views/_components/Menu';
-import ReactTooltip from 'react-tooltip';
 import { Toolbar } from 'views/_components/Toolbar';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
@@ -31,6 +31,7 @@ import { filterReducer } from './_functions/Reducers/filterReducer';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 import { MetadataUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ActionsToolbar = ({
   colsSchema,
@@ -45,12 +46,14 @@ export const ActionsToolbar = ({
   isGroupedValidationSelected,
   isLoading,
   levelErrorTypesWithCorrects,
+  levelErrorValidations,
   onHideSelectGroupedValidation,
   onConfirmDeleteTable,
   onUpdateData,
   originalColumns,
   prevFilterValue,
   records,
+  selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
   selectedTableSchemaId,
@@ -65,7 +68,6 @@ export const ActionsToolbar = ({
   tableName
 }) => {
   const [exportTableDataName, setExportTableDataName] = useState('');
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [filter, dispatchFilter] = useReducer(filterReducer, {
     groupedFilter: isGroupedValidationSelected,
     validationDropdown: [],
@@ -73,6 +75,8 @@ export const ActionsToolbar = ({
     visibilityDropdown: [],
     visibilityColumnIcon: 'eye'
   });
+  const [isFilteredByValue, setIsFilteredByValue] = useState(false);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
 
   const { groupedFilter, validationDropdown, valueFilter, visibilityDropdown, visibilityColumnIcon } = filter;
 
@@ -112,17 +116,27 @@ export const ActionsToolbar = ({
   useCheckNotifications(['EXPORT_TABLE_DATA_FAILED_EVENT'], setIsLoadingFile, false);
 
   const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
-    label: resourcesContext.messages[type.key],
+    command: () => onExportTableData(type),
     icon: type.code,
-    command: () => onExportTableData(type.code)
+    label: resourcesContext.messages[type.key]
   }));
 
-  const onExportTableData = async fileType => {
+  const onExportTableData = async type => {
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
-      setExportTableDataName(createTableName(tableName, fileType));
-      await DatasetService.exportTableData(datasetId, tableId, fileType);
+      const isExportFilteredCsv = TextUtils.areEquals(type.key, 'exportFilteredCsv');
+      setExportTableDataName(createTableName(tableName, type.code));
+      await DatasetService.exportTableData(
+        datasetId,
+        tableId,
+        type.code,
+        isFilteredByValue ? filter.valueFilter : '',
+        levelErrorValidations.map(levelError => levelError.toUpperCase()),
+        selectedRuleId,
+        isExportFilteredCsv,
+        isFilterValidationsActive
+      );
     } catch (error) {
       console.error('ActionsToolbar - onExportTableData.', error);
       setIsLoadingFile(false);
@@ -148,6 +162,7 @@ export const ActionsToolbar = ({
 
   const onSearchKeyEvent = event => {
     if (event.key === 'Enter') {
+      setIsFilteredByValue(true);
       showValueFilter(encodeURIComponent(valueFilter));
     }
   };
@@ -329,7 +344,10 @@ export const ActionsToolbar = ({
                 icon="search"
                 labelClassName={styles.groupFilter}
                 levelError={selectedRuleLevelError}
-                onClick={() => showValueFilter('')}
+                onClick={() => {
+                  showValueFilter('');
+                  setIsFilteredByValue(false);
+                }}
                 value={decodeURIComponent(prevFilterValue)}
               />
             </span>
@@ -362,7 +380,10 @@ export const ActionsToolbar = ({
             <Button
               className="p-button-secondary"
               icon="search"
-              onClick={() => showValueFilter(encodeURIComponent(valueFilter))}
+              onClick={() => {
+                showValueFilter(encodeURIComponent(valueFilter));
+                setIsFilteredByValue(true);
+              }}
             />
             <label
               className={`${styles.label} ${valueFilter !== '' && styles.labelFilled}`}

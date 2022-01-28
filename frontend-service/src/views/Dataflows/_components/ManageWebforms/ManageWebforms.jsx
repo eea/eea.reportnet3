@@ -218,9 +218,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     return iconName;
   };
 
-  const getTypeTemplate = ({ type }) => {
-    return <span>{typesKeyValues[type]}</span>;
-  };
+  const getTypeTemplate = ({ type }) => <span>{typesKeyValues[type]}</span>;
 
   const getActionsTemplate = webformRow => {
     return (
@@ -278,7 +276,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     return { ...currentWebform };
   };
 
-  const checkLabelExists = () => webformsList.some(webform => webform.name === webformConfiguration.name);
+  const checkNameExists = () => webformsList.some(webform => webform.name === webformConfiguration.name);
 
   const checkNameExistsWithoutCurrent = () =>
     webformsList
@@ -291,7 +289,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         isEmpty(webformConfiguration.name) ||
         isEmpty(webformConfiguration.content) ||
         isEmpty(webformConfiguration.type) ||
-        checkLabelExists() ||
+        checkNameExists() ||
         loadingStatus === 'pending'
       );
     }
@@ -303,7 +301,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       isEmpty(webformConfiguration.content) &&
       initialWebformConfiguration.type === webformConfiguration.type
     ) {
-      return initialWebformConfiguration.name === webformConfiguration.name || checkLabelExists();
+      return initialWebformConfiguration.name === webformConfiguration.name || checkNameExists();
     }
 
     if (
@@ -325,7 +323,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const checkHasErrors = () => {
     if (isNil(webformConfiguration.id)) {
       setErrors({
-        name: isEmpty(webformConfiguration.name) || checkLabelExists(),
+        name: isEmpty(webformConfiguration.name) || checkNameExists(),
         type: isEmpty(webformConfiguration.type),
         content: isEmpty(webformConfiguration.content)
       });

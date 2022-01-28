@@ -1478,6 +1478,7 @@
     "updateAutomaticReportingDeletionFailedEvent": "Error updating dataflow automatic data deletion",
     "importNamefileWarningEvent": "Some tables have not imported data: table and file name were different.",
     "notificationWarnTitle": "WARNING",
+    "exportFilteredCsv": "CSV (.csv with filters)",
     "webformsConfigurationsSelect": "Select an webform type",
     "notSelectedWebformOption": "No webform",
     "deleteWebformInUseError": "Error deleting webform configuration. This configuration is already in use.",
