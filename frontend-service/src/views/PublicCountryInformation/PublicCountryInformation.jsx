@@ -84,6 +84,18 @@ export const PublicCountryInformation = () => {
     }
   };
 
+  const getDeliveryStatus = (dataflow, dataset) => {
+    if (!dataset.isReleased) {
+      return config.datasetStatus.PENDING.label;
+    } else {
+      if (!dataflow.manualAcceptance) {
+        return config.datasetStatus.DELIVERED.label;
+      } else {
+        return DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets.map(dataset => dataset.status));
+      }
+    }
+  };
+
   const onChangePage = event => {
     const isChangedPage = true;
     setNumberRows(event.rows);
@@ -167,11 +179,7 @@ export const PublicCountryInformation = () => {
           publicFilesNames: publicFileNames,
           referencePublicFilesNames: referencePublicFileNames,
           deliveryDate: dataset.releaseDate,
-          deliveryStatus: !dataset.isReleased
-            ? config.datasetStatus.PENDING.label
-            : !dataflow.manualAcceptance
-            ? config.datasetStatus.DELIVERED.label
-            : DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets.map(dataset => dataset.status)),
+          deliveryStatus: getDeliveryStatus(dataflow, dataset),
           restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false,
           status: resourcesContext.messages[dataflow.status]
         };
