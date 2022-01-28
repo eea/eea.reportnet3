@@ -16,6 +16,8 @@ import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 
 import { Dataflow } from 'entities/Dataflow';
 
+import { CurrentPage } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 const sortDataflowsByExpirationDate = dataflows =>
@@ -204,6 +206,27 @@ const parseRequestFilterBy = filterBy => {
   return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
 };
 
+const parseRequestPublicFilterBy = filterBy => {
+  console.log('filterBy', filterBy);
+  const replacements = {
+    name: 'name',
+    obligation: 'obligation',
+    legalInstrument: 'legal_instrument',
+    deadline: 'expiration_date',
+    status: 'status',
+    deliveryDate: 'release_date',
+    deliveryStatus: 'delivery_status'
+  };
+
+  if (isEmpty(filterBy)) {
+    return {};
+  }
+
+  const parsedFilterBy = Object.keys(filterBy).map(key => ({ [replacements[key] || key]: filterBy[key] }));
+
+  return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
+};
+
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
   parseAllDataflowsUserList,
@@ -215,6 +238,7 @@ export const DataflowUtils = {
   parsePublicDataflowDTO,
   parsePublicDataflowListDTO,
   parseRequestFilterBy,
+  parseRequestPublicFilterBy,
   parseSortedDataflowListDTO,
   parseUsersList,
   sortDataflowsByExpirationDate

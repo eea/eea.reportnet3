@@ -6,6 +6,7 @@ import ReactTooltip from 'react-tooltip';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -17,6 +18,7 @@ import styles from './PublicCountryInformation.module.scss';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { DownloadFile } from 'views/_components/DownloadFile';
+import { MyFilters } from 'views/_components/MyFilters';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
 import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
@@ -29,6 +31,8 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
+
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
@@ -70,6 +74,8 @@ export const PublicCountryInformation = () => {
       setContentStyles({});
     }
   }, [themeContext.headerCollapse]);
+
+  const { filterBy, filteredData, sortBy, isFiltered } = useFilters('publicCountryInformation');
 
   const getCountryName = () => {
     if (!isNil(config.countriesByGroup)) {
@@ -122,6 +128,7 @@ export const PublicCountryInformation = () => {
     }
   };
 
+  const onLoadPublicCountryInformation = async (sortOrder, sortField, firstRow, numberRows, sortBy) => {
     setIsLoading(true);
     try {
       if (sortOrder === -1) {
@@ -133,7 +140,8 @@ export const PublicCountryInformation = () => {
         sortOrder,
         pageNum,
         numberRows,
-        sortField
+        sortField,
+        filterBy
       );
       setTotalRecords(data.totalRecords);
       setPublicInformation(data.publicDataflows);
@@ -308,6 +316,41 @@ export const PublicCountryInformation = () => {
     }
   };
 
+  const filterOptions = [
+    {
+      type: 'INPUT',
+      nestedOptions: [
+        { key: 'name', label: resourcesContext.messages['name'] },
+        { key: 'obligation', label: resourcesContext.messages['obligation'] },
+        { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'] }
+      ]
+    },
+    { type: 'DATE', key: 'deadline', label: resourcesContext.messages['deadline'] },
+    {
+      type: 'MULTI_SELECT',
+      key: 'status',
+      label: resourcesContext.messages['status']
+    },
+    { type: 'DATE', key: 'deliveryDate', label: resourcesContext.messages['deliveryDate'] },
+    {
+      type: 'MULTI_SELECT',
+      key: 'deliveryStatus',
+      label: resourcesContext.messages['deliveryStatus']
+    }
+  ];
+
+  const renderFilters = () => {
+    return (
+      <MyFilters
+        className="publicCountryInformation"
+        data={dataflows}
+        // onFilter={onLoadPublicCountryInformation}
+        // onSort={onLoadPublicCountryInformation}
+        options={filterOptions}
+        viewType="publicCountryInformation"
+      />
+    );
+  };
 
   const renderLegalInstrumentBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
@@ -371,6 +414,7 @@ export const PublicCountryInformation = () => {
 
     return (
       <div className={styles.countriesList}>
+        {renderFilters()}
         {renderPublicCountryTable()}
       </div>
     );
@@ -397,8 +441,8 @@ export const PublicCountryInformation = () => {
         sortOrder={sortOrder}
         summary={resourcesContext.messages['dataflows']}
         totalRecords={totalRecords}
-        value={dataflows}>
-        {renderTableColumns(dataflows)}
+        value={filteredData}>
+        {renderTableColumns(filteredData)}
       </DataTable>
     );
   };
