@@ -140,6 +140,15 @@ export const useLeftSideBar = (
         title: 'restrictFromPublicSideBarButton'
       };
 
+      const automaticDeleteBtn = {
+        className: 'dataflow-showPublicInfo-help-step',
+        icon: 'delete',
+        isVisible: buttonsVisibility.automaticDeleteBtn,
+        label: 'automaticDeleteSideBarButton',
+        onClick: () => manageDialogs('isAutomaticReportingDeletionDialogVisible', true),
+        title: 'automaticDeleteSideBarButton'
+      };
+
       //DON'T SORT ALPHABETICALLY
       const allButtons = [
         propertiesBtn,
@@ -153,7 +162,8 @@ export const useLeftSideBar = (
         manageRequestersBtn,
         manageReportersBtn,
         userListBtn,
-        datasetsInfoBtn
+        datasetsInfoBtn,
+        automaticDeleteBtn
       ];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));

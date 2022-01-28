@@ -2,10 +2,10 @@ import { useContext, useEffect, useState } from 'react';
 
 import styles from './Webforms.module.scss';
 
-import { Article13 } from './Article13';
-import { Article15 } from './Article15';
+import { PaMsWebform } from './PaMsWebform';
+import { TableWebform } from './TableWebform';
 import { Button } from 'views/_components/Button';
-import { NationalSystems } from './NationalSystems';
+import { QuestionAnswerWebform } from './QuestionAnswerWebform';
 import { Spinner } from 'views/_components/Spinner';
 
 import { WebformService } from 'services/WebformService';
@@ -21,7 +21,7 @@ export const Webforms = ({
   isReporting = false,
   options = [],
   state,
-  webformType
+  webform
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -36,7 +36,7 @@ export const Webforms = ({
   const getWebformConfiguration = async () => {
     setLoadingStatus('pending');
     try {
-      const selectedWebform = options.find(item => item.value === webformType);
+      const selectedWebform = options.find(item => item.name === webform.name);
       setSelectedConfiguration(await WebformService.getWebformConfig(selectedWebform.id));
       setLoadingStatus('success');
     } catch (error) {
@@ -46,7 +46,9 @@ export const Webforms = ({
     }
   };
 
-  if (loadingStatus === 'pending') return <Spinner style={{ top: 0, margin: '1rem' }} />;
+  if (loadingStatus === 'pending') {
+    return <Spinner style={{ top: 0, margin: '1rem' }} />;
+  }
 
   if (loadingStatus === 'failed') {
     return (
@@ -57,10 +59,12 @@ export const Webforms = ({
     );
   }
 
-  switch (webformType) {
-    case 'MMR-ART13':
+  console.log('webform', webform);
+
+  switch (webform.type) {
+    case 'PAMS':
       return (
-        <Article13
+        <PaMsWebform
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
@@ -70,9 +74,9 @@ export const Webforms = ({
           tables={selectedConfiguration.tables}
         />
       );
-    case 'MMR-ART15':
+    case 'TABLES':
       return (
-        <Article15
+        <TableWebform
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
@@ -81,9 +85,9 @@ export const Webforms = ({
           tables={selectedConfiguration.tables}
         />
       );
-    case 'NATIONAL-SYSTEMS':
+    case 'QA':
       return (
-        <NationalSystems
+        <QuestionAnswerWebform
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}

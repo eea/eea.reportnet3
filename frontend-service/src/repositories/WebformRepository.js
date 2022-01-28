@@ -6,8 +6,11 @@ export const WebformRepository = {
   addPamsRecords: async (datasetId, pamsRecord) =>
     await HTTPRequester.post({ url: getUrl(WebformConfig.createPamsRecords, { datasetId }), data: pamsRecord }),
 
-  create: async (name, jsonContent) =>
-    await HTTPRequester.post({ url: getUrl(WebformConfig.create), data: { name, content: jsonContent } }),
+  create: async webformConfiguration =>
+    await HTTPRequester.post({
+      url: getUrl(WebformConfig.create),
+      data: { content: webformConfiguration.content, name: webformConfiguration.name, type: webformConfiguration.type }
+    }),
 
   delete: async id => await HTTPRequester.delete({ url: getUrl(WebformConfig.delete, { id }) }),
 
@@ -26,15 +29,19 @@ export const WebformRepository = {
     return data;
   },
 
-  update: async (name, jsonContent, id) => {
-    const data = { idReferenced: id };
+  update: async webformConfiguration => {
+    const data = { idReferenced: webformConfiguration.id };
 
-    if (jsonContent) {
-      data.content = jsonContent;
+    if (webformConfiguration.content) {
+      data.content = webformConfiguration.content;
     }
 
-    if (name) {
-      data.name = name;
+    if (webformConfiguration.name) {
+      data.name = webformConfiguration.name;
+    }
+
+    if (webformConfiguration.type) {
+      data.type = webformConfiguration.type;
     }
 
     return await HTTPRequester.update({
