@@ -107,10 +107,24 @@ export const DatasetRepository = {
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 
-  exportTableData: async (datasetId, tableSchemaId, fileType) =>
-    await HTTPRequester.download({
+  exportTableData: async (
+    datasetId,
+    tableSchemaId,
+    fileType,
+    filterValue,
+    levelErrorValidations,
+    selectedRuleId,
+    isExportFilteredCsv,
+    isFilterValidationsActive
+  ) =>
+    await HTTPRequester.post({
       url: getUrl(DatasetConfig.exportTableData, { datasetId, fileType, tableSchemaId }),
-      headers: { 'Content-Type': 'application/octet-stream' }
+      data: {
+        fieldValue: isExportFilteredCsv ? filterValue : '',
+        idRules: isExportFilteredCsv ? selectedRuleId : '',
+        levelError: isExportFilteredCsv && isFilterValidationsActive ? levelErrorValidations : []
+      },
+      headers: { 'Content-Type': 'application/json' }
     }),
 
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>

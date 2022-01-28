@@ -5,7 +5,12 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 export const DataflowRepository = {
   countByType: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.countByType) }),
 
-  getAll: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getAll) }),
+  getAll: async ({ filterBy, isAsc, numberRows, pageNum, sortBy }) => {
+    return await HTTPRequester.get({
+      url: getUrl(DataflowConfig.getAll, { isAsc, numberRows, pageNum, sortBy }),
+      data: { ...filterBy }
+    });
+  },
 
   getCloneableDataflows: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getCloneableDataflows) }),
 
@@ -118,6 +123,11 @@ export const DataflowRepository = {
         releasable: isReleasable,
         showPublicInfo
       }
+    }),
+
+  updateAutomaticDelete: async (dataflowId, isAutomaticReportingDeletion) =>
+    await HTTPRequester.update({
+      url: getUrl(DataflowConfig.updateAutomaticDelete, { dataflowId, isAutomaticReportingDeletion })
     }),
 
   getDatasetsInfo: async dataflowId =>

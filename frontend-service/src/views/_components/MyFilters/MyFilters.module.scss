@@ -186,7 +186,8 @@
   }
 }
 
-.default {
+.default,
+.dataflowsFilters {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -236,6 +237,17 @@
 
   &:hover {
     border-color: var(--general-border-color) !important;
+  }
+}
+
+.dataflowsFilters {
+  .resetButton {
+    margin: 0;
+  }
+  .filterButton {
+    margin-left: auto;
+    margin-top: 0;
+    margin-right: 1em;
   }
 }
 

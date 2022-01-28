@@ -2068,6 +2068,9 @@ body .p-messages {
   border-radius: 3px;
 }
 body .p-messages .p-messages-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 1em;
 }
 body .p-messages.p-messages-info {
@@ -2076,6 +2079,7 @@ body .p-messages.p-messages-info {
   color: #212121;
 }
 body .p-messages.p-messages-info .p-messages-icon {
+  margin-right: 0.75rem;
   color: #212121;
 }
 body .p-messages.p-messages-info .p-messages-close {
@@ -2088,6 +2092,7 @@ body .p-messages.p-messages-success {
   color: #212121;
 }
 body .p-messages.p-messages-success .p-messages-icon {
+  margin-right: 0.75rem;
   color: #212121;
 }
 body .p-messages.p-messages-success .p-messages-close {
@@ -2100,6 +2105,7 @@ body .p-messages.p-messages-warn {
   color: #212121;
 }
 body .p-messages.p-messages-warn .p-messages-icon {
+  margin-right: 0.75rem;
   color: #212121;
 }
 body .p-messages.p-messages-warn .p-messages-close {
@@ -2112,6 +2118,7 @@ body .p-messages.p-messages-error {
   color: #212121;
 }
 body .p-messages.p-messages-error .p-messages-icon {
+  margin-right: 0.75rem;
   color: #212121;
 }
 body .p-messages.p-messages-error .p-messages-close {
