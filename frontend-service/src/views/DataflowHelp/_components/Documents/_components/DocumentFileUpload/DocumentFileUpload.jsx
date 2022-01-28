@@ -1,6 +1,7 @@
 import { useContext, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import sortBy from 'lodash/sortBy';
+import isNil from 'lodash/isNil';
 
 import styles from './DocumentFileUpload.module.scss';
 
@@ -10,6 +11,7 @@ import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { Dropdown } from 'views/_components/Dropdown';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
+import { InputFile } from 'views/_components/InputFile';
 
 import { DocumentService } from 'services/DocumentService';
 
@@ -31,6 +33,8 @@ export const DocumentFileUpload = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const [fileContent, setFileContent] = useState(null);
+
   const inputRef = useRef(null);
 
   const [areAllInputsChecked, setAreAllInputsChecked] = useState(false);
@@ -46,6 +50,11 @@ export const DocumentFileUpload = ({
     lang: false,
     uploadFile: false
   });
+
+  const onClearFile = () => {
+    setFileContent(null);
+  };
+
   useEffect(() => {
     if (isUploadDialogVisible) inputRef.current.focus();
   }, [isUploadDialogVisible]);
@@ -192,6 +201,17 @@ export const DocumentFileUpload = ({
     return sortBy(template, 'type');
   };
 
+  const onFileUpload = async e => {
+    if (!isNil(e.target.files[0])) {
+      const reader = new FileReader();
+      reader.onload = async e => {
+        const text = e.target.result;
+        setFileContent(text);
+      };
+      reader.readAsText(e.target.files[0]);
+    }
+  };
+
   return (
     <form onSubmit={e => e.preventDefault()}>
       <fieldset>
@@ -262,22 +282,17 @@ export const DocumentFileUpload = ({
       <fieldset>
         <div className={`formField ${errors.uploadFile.hasErrors ? 'error' : ''}`}>
           <span>
-            <input
-              className="uploadFile"
-              id="uploadFile"
-              name="uploadFile"
-              onBlur={() => checkInputForErrors('uploadFile')}
-              onChange={e => {
-                const eventTarget = e.currentTarget;
-                setInputs(previousValues => {
-                  return { ...previousValues, uploadFile: eventTarget.files[0], isTouchedFileUpload: true };
-                });
-              }}
+            <InputFile
+              accept="*"
+              buttonTextNoFile={resourcesContext.messages['inputFileButtonNotSelected']}
+              buttonTextWithFile={resourcesContext.messages['inputFileButtonSelected']}
+              fileRef={inputRef}
+              hasError={errors.jsonContent}
+              onChange={onFileUpload}
+              onClearFile={onClearFile}
               onKeyPress={e => {
                 if (e.key === 'Enter' && !checkInputForErrors('uploadFile')) onConfirm();
               }}
-              placeholder="file upload"
-              type="file"
             />
             <label className="srOnly" htmlFor="uploadFile">
               {resourcesContext.messages['uploadDocument']}
