@@ -6,7 +6,6 @@ import isNil from 'lodash/isNil';
 import styles from './ReportingObligations.module.scss';
 
 import { CardsView } from 'views/_components/CardsView';
-import { Filters } from 'views/_components/Filters';
 import { MyFilters } from 'views/_components/MyFilters';
 import { InputSwitch } from 'views/_components/InputSwitch';
 import { Spinner } from 'views/_components/Spinner';
@@ -80,8 +79,6 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
       getFilteredSeearched(false);
     }
   }, [reportingObligationState.isSearched, reportingObligationState.isFiltered]);
-
-  const getFiltered = value => reportingObligationDispatch({ type: 'IS_FILTERED', payload: { value } });
 
   const getFilteredSeearched = value =>
     reportingObligationDispatch({ type: 'IS_FILTERED_SEARCHED', payload: { value } });
@@ -161,19 +158,12 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     }
   };
 
-  const onLoadSearchedData = data => reportingObligationDispatch({ type: 'SEARCHED_DATA', payload: { data } });
-
   const onOpenObligation = id => window.open(`${RodUrl.obligations}${id}`);
 
   const onSelectObl = rowData => {
     const selectedObligation = { id: rowData.id, title: rowData.title };
     reportingObligationDispatch({ type: 'ON_SELECT_OBL', payload: { selectedObligation } });
   };
-
-  /*const filterOptions = [
-    { type: 'dropdown', properties: [{ name: 'countries' }, { name: 'issues' }, { name: 'organizations' }] },
-    { type: 'date', properties: [{ name: 'expirationDate' }] }
-  ];*/
 
   const parseDropdownOptions = (options = []) =>
     options.map(dropdown => ({ label: dropdown.name, value: dropdown.id }));
@@ -211,12 +201,6 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     { key: 'expirationDate', label: resourcesContext.messages['expirationDate'], type: 'DATE' }
   ];
 
-  // const parsedFilterList = {
-  //   countries: reportingObligationState.countries,
-  //   issues: reportingObligationState.issues,
-  //   organizations: reportingObligationState.organizations
-  // };
-
   const renderData = () =>
     userContext.userProps.listView ? (
       <TableView
@@ -252,7 +236,6 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
             : 'space-between'
       }}>
       <div className={styles.repOblTools}>
-        <Filters data={filteredData} getFilteredData={onLoadSearchedData} getFilteredSearched={getFiltered} searchAll />
         <div className={styles.switchDiv}>
           <label className={styles.switchTextInput}>{resourcesContext.messages['magazineView']}</label>
           <InputSwitch checked={userContext.userProps.listView} onChange={e => userContext.onToggleTypeView(e.value)} />
@@ -261,16 +244,9 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
       </div>
 
       <div className={styles.filters}>
-        {/* <Filters
-          data={reportingObligationState.data}
-          dropDownList={parsedFilterList}
-          filterByList={reportingObligationState.filterBy}
-          options={filterOptions}
-          sendData={onLoadReportingObligations}
-        /> */}
         <MyFilters
-          className="lineItems"
-          data={reportingObligationState.data}
+          className="reportingObligations"
+          data={filteredData}
           onFilter={onLoadReportingObligations}
           options={filterOptions}
           viewType="reportingObligations"

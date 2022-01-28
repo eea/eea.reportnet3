@@ -364,6 +364,19 @@
   }
 }
 
+.reportingObligations {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+
+  .filterButton {
+    grid-column: 4;
+  }
+
+  .resetButton {
+    grid-column: 5;
+  }
+}
+
 .cloneSchemas,
 .manualAcceptanceDatasets,
 .referencingDataflows,

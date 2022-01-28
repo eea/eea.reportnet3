@@ -31,7 +31,7 @@ import { ApplyFiltersUtils } from './_functions/Utils/ApplyFiltersUtils';
 import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
 
-const { applyCheckBox, applyDates, applyDropdown, applyInputs, applyMultiSelects, applySearch } = ApplyFiltersUtils;
+const { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch } = ApplyFiltersUtils;
 const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
@@ -158,14 +158,13 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
   const onApplyFilters = ({ filterBy, searchValue = searchBy }) => {
     // LEAVE THIS PART COMMENTED UNTIL WE INTEGRATE WITH BE
     // if (hasCustomSort) {
-    //   return data;
+    //   return data.filter(item => applySearch({ filterByKeys, item, value: searchValue }));
     // }
 
     return data.filter(
       item =>
         applyInputs({ filterBy, filterByKeys, item }) &&
         applyDates({ filterBy, filterByKeys, item }) &&
-        applyDropdown({ filterBy, filterByKeys, item }) &&
         applyCheckBox({ filterBy, filterByKeys, item }) &&
         applyMultiSelects({ filterBy, filterByKeys, item }) &&
         applySearch({ filterByKeys, item, value: searchValue })
@@ -335,7 +334,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
           inputId={option.key}
           label={option.label}
           onChange={event => {
-            onChange({ key: option.key, value: event.value.value });
+            onChange({ key: option.key, value: event.value });
           }}
           onMouseDown={event => {
             event.preventDefault();
