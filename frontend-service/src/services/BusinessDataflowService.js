@@ -19,7 +19,7 @@ export const BusinessDataflowService = {
       sortBy: sortByHeader || undefined
     });
 
-    const businessDataflows = businessDataflowsDTO.data.map(businessDataflowDTO => {
+    const businessDataflows = businessDataflowsDTO.data.dataflows.map(businessDataflowDTO => {
       businessDataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(
         businessDataflowDTO.id,
         accessRoles,
