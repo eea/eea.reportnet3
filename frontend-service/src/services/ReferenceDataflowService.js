@@ -20,7 +20,7 @@ export const ReferenceDataflowService = {
       sortBy: sortByHeader || undefined
     });
 
-    const referenceDataflows = referenceDataflowsDTO.data.map(referenceDataflowDTO => {
+    const referenceDataflows = referenceDataflowsDTO.data.dataflows.map(referenceDataflowDTO => {
       referenceDataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(
         referenceDataflowDTO.id,
         accessRoles,
