@@ -86,7 +86,7 @@
   border-bottom: var(--inputtext-border) !important;
 
   .searchInput:focus {
-    padding-top: 20px !important;
+    padding-top: 10px !important;
   }
 }
 
@@ -142,9 +142,17 @@
   }
 }
 
+.dateBlock {
+  display: flex !important;
+}
+
 .resetButton {
   margin-left: auto;
   margin-bottom: auto;
+}
+
+.filterButton {
+  margin-top: auto;
 }
 
 .sortButtonSize {
@@ -215,6 +223,22 @@
   }
 }
 
+.searchInput {
+  background: transparent !important;
+  border: 0px !important;
+  border-radius: 0 !important;
+
+  &:focus,
+  &:enabled:focus {
+    box-shadow: 0 0 0 0 var(--c-blue-120) !important;
+    border-color: var(--general-border-color) !important;
+  }
+
+  &:hover {
+    border-color: var(--general-border-color) !important;
+  }
+}
+
 .qcList {
   display: grid;
   grid-row-gap: 2.5rem;
@@ -243,6 +267,10 @@
     &:focus,
     &:enabled:focus {
       box-shadow: 0 0 0 0 var(--c-blue-120);
+    }
+
+    &:focus {
+      padding-top: 20px !important;
     }
   }
   .sortButtonSize {
@@ -276,6 +304,7 @@
 
 .elementFilterSelected {
   display: flex !important;
+  align-items: flex-end;
   border-bottom: var(--active-filter-border) !important;
   box-shadow: var(--active-filter-shadow);
   button {
@@ -288,7 +317,7 @@
     color: var(--active-filter-font) !important;
   }
   .searchInput {
-    padding-top: 20px !important;
+    padding-top: 10px;
   }
 
   .elementFilter {
@@ -308,8 +337,7 @@
   padding-left: 0em;
   width: 80% !important;
 
-  .label {
-    color: var(--font-filters) !important;
+  > label {
     margin: 0;
     overflow: hidden;
     position: absolute;

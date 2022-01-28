@@ -269,7 +269,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
         key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <div
-          className={`p-float-label ${styles.label} ${styles.elementFilter}`}
+          className={`p-float-label ${styles.label} ${styles.dateBlock}`}
           id={`calendar_${option.key}`}
           ref={el => (calendarRefs.current[option.key] = el)}>
           <Calendar
@@ -467,12 +467,14 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
       {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
 
       {!isNil(onFilter) && (
-        <Button
-          className="p-button-primary p-button-rounded p-button-animated-blink"
-          icon="filter"
-          label={resourcesContext.messages['filter']}
-          onClick={onFilter}
-        />
+        <div className={`${styles.filterButton}`}>
+          <Button
+            className="p-button-primary p-button-rounded p-button-animated-blink"
+            icon="filter"
+            label={resourcesContext.messages['filter']}
+            onClick={onFilter}
+          />
+        </div>
       )}
 
       <div className={`${styles.resetButton}`}>
