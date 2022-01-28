@@ -708,15 +708,31 @@ public class DataflowServiceImpl implements DataflowService {
    * @param page the page
    * @param pageSize the page size
    * @return the public dataflows by country
+   * @throws EEAException
    */
   @Override
   public DataflowPublicPaginatedVO getPublicDataflowsByCountry(String countryCode, String header,
-      boolean asc, int page, int pageSize) {
+      boolean asc, int page, int pageSize, Map<String, String> filters) throws EEAException {
+
     DataflowPublicPaginatedVO dataflowPublicPaginated = new DataflowPublicPaginatedVO();
+
+    try {
+      Pageable pageable = PageRequest.of(page, pageSize);
+      List<ObligationVO> obligations =
+          obligationControllerZull.findOpenedObligations(null, null, null, null, null);
+      ObjectMapper objectMapper = new ObjectMapper();
+
+      String arrayToJson = objectMapper.writeValueAsString(obligations);
+
+    } catch (JsonProcessingException e) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
+    }
     // get the entity
     List<DataflowPublicVO> dataflowPublicList = dataflowPublicMapper
         .entityListToClass(dataflowRepository.findPublicDataflowsByCountryCode(countryCode));
 
+
+    // ok
     List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
     setReportings(dataflowPublicList, providerId);
     // sort and paging
@@ -728,6 +744,8 @@ public class DataflowServiceImpl implements DataflowService {
       dataflow.setReferenceDatasets(
           referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflow.getId()));
     });
+
+    // ok
 
     return dataflowPublicPaginated;
   }
