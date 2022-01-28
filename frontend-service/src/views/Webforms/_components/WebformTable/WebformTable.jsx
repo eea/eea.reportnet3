@@ -67,9 +67,7 @@ export const WebformTable = ({
       if (webformType === 'PAMS' && !isNil(selectedTable.pamsId)) {
         isLoading(true);
         onLoadTableData();
-      }
-
-      if (webformType === 'TABLES') {
+      } else if (webformType === 'TABLES') {
         isLoading(true);
         onLoadTableData();
       }

@@ -59,8 +59,6 @@ export const Webforms = ({
     );
   }
 
-  console.log('webform', webform);
-
   switch (webform.type) {
     case 'PAMS':
       return (

@@ -30,18 +30,14 @@ export const WebformRepository = {
   },
 
   update: async webformConfiguration => {
-    const data = { idReferenced: webformConfiguration.id };
+    const data = {
+      idReferenced: webformConfiguration.id,
+      name: webformConfiguration.name,
+      type: webformConfiguration.type
+    };
 
     if (webformConfiguration.content) {
       data.content = webformConfiguration.content;
-    }
-
-    if (webformConfiguration.name) {
-      data.name = webformConfiguration.name;
-    }
-
-    if (webformConfiguration.type) {
-      data.type = webformConfiguration.type;
     }
 
     return await HTTPRequester.update({
