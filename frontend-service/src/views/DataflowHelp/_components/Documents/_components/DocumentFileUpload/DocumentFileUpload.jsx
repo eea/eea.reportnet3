@@ -201,6 +201,17 @@ export const DocumentFileUpload = ({
     return sortBy(template, 'type');
   };
 
+  const onFileUpload = async e => {
+    if (!isNil(e.target.files[0])) {
+      const reader = new FileReader();
+      reader.onload = async e => {
+        const text = e.target.result;
+        setFileContent(text);
+      };
+      reader.readAsText(e.target.files[0]);
+    }
+  };
+
   return (
     <form onSubmit={e => e.preventDefault()}>
       <fieldset>
@@ -278,16 +289,7 @@ export const DocumentFileUpload = ({
               fileRef={inputRef}
               hasError={errors.jsonContent}
               onBlur={() => checkInputForErrors('uploadFile')}
-              onChange={e => {
-                if (!isNil(e.target.files[0])) {
-                  const reader = new FileReader();
-                  reader.onload = async e => {
-                    const text = e.target.result;
-                    setFileContent(text);
-                  };
-                  reader.readAsText(e.target.files[0]);
-                }
-              }}
+              onChange={onFileUpload}
               onClearFile={onClearFile}
               onKeyPress={e => {
                 if (e.key === 'Enter' && !checkInputForErrors('uploadFile')) onConfirm();
