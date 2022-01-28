@@ -9,6 +9,13 @@
   padding: 4px;
 }
 
+.label {
+  clip: auto;
+  height: auto;
+  overflow: visible;
+  width: 90%;
+}
+
 .icon {
   background-color: transparent;
   border: none;
@@ -79,7 +86,7 @@
   border-bottom: var(--inputtext-border) !important;
 
   .searchInput:focus {
-    padding-top: 20px !important;
+    padding-top: 10px !important;
   }
 }
 
@@ -135,9 +142,17 @@
   }
 }
 
+.dateBlock {
+  display: flex !important;
+}
+
 .resetButton {
   margin-left: auto;
   margin-bottom: auto;
+}
+
+.filterButton {
+  margin-top: auto;
 }
 
 .sortButtonSize {
@@ -171,7 +186,8 @@
   }
 }
 
-.default {
+.default,
+.dataflowsFilters {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -208,6 +224,33 @@
   }
 }
 
+.searchInput {
+  background: transparent !important;
+  border: 0px !important;
+  border-radius: 0 !important;
+
+  &:focus,
+  &:enabled:focus {
+    box-shadow: 0 0 0 0 var(--c-blue-120) !important;
+    border-color: var(--general-border-color) !important;
+  }
+
+  &:hover {
+    border-color: var(--general-border-color) !important;
+  }
+}
+
+.dataflowsFilters {
+  .resetButton {
+    margin: 0;
+  }
+  .filterButton {
+    margin-left: auto;
+    margin-top: 0;
+    margin-right: 1em;
+  }
+}
+
 .qcList {
   display: grid;
   grid-row-gap: 2.5rem;
@@ -236,6 +279,10 @@
     &:focus,
     &:enabled:focus {
       box-shadow: 0 0 0 0 var(--c-blue-120);
+    }
+
+    &:focus {
+      padding-top: 20px !important;
     }
   }
   .sortButtonSize {
@@ -269,6 +316,7 @@
 
 .elementFilterSelected {
   display: flex !important;
+  align-items: flex-end;
   border-bottom: var(--active-filter-border) !important;
   box-shadow: var(--active-filter-shadow);
   button {
@@ -281,11 +329,38 @@
     color: var(--active-filter-font) !important;
   }
   .searchInput {
-    padding-top: 20px !important;
+    padding-top: 10px;
   }
 
   .elementFilter {
     display: flex;
+  }
+}
+
+.dropdownFilter {
+  border-bottom: var(--inputtext-border) !important;
+  border-left: 0 !important;
+  border-radius: 0 !important;
+  border-right: 0 !important;
+  border-top: 0 !important;
+  color: var(--floating-label-color) !important;
+  font-size: 10pt !important;
+  height: 2.1rem;
+  padding-left: 0em;
+  width: 80% !important;
+
+  > label {
+    margin: 0;
+    overflow: hidden;
+    position: absolute;
+    text-overflow: ellipsis;
+    top: 0;
+    white-space: nowrap;
+    width: 95%;
+  }
+
+  label {
+    color: var(--font-filters);
   }
 }
 

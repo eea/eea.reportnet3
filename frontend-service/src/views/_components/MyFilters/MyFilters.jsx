@@ -452,12 +452,14 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
       {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
 
       {hasCustomSort && (
-        <Button
-          className="p-button-primary p-button-rounded p-button-animated-blink"
-          icon="filter"
-          label={resourcesContext.messages['filter']}
-          onClick={onFilter}
-        />
+        <div className={`${styles.filterButton}`}>
+          <Button
+            className="p-button-primary p-button-rounded p-button-animated-blink"
+            icon="filter"
+            label={resourcesContext.messages['filter']}
+            onClick={onFilter}
+          />
+        </div>
       )}
 
       <div className={`${styles.resetButton}`}>
