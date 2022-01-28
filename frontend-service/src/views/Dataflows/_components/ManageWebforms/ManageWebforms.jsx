@@ -89,7 +89,12 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     } catch (error) {
       console.error('ManageWebforms - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
-      notificationContext.add({ type: 'DELETE_WEBFORM_CONFIGURATION_ERROR' }, true);
+
+      if (error.response.status === 400) {
+        notificationContext.add({ type: 'DELETE_WEBFORM_IN_USE_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'DELETE_WEBFORM_CONFIGURATION_ERROR' }, true);
+      }
     } finally {
       resetWebformConfiguration();
     }
