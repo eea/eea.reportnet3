@@ -87,35 +87,70 @@ public interface DataFlowController {
   /**
    * Find dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the list
    */
-  @GetMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findDataflows();
+  @PostMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  PaginatedDataflowVO findDataflows(@RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum);
 
   /**
    * Find reference dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the list
    */
-  @GetMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findReferenceDataflows();
+  @PostMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  PaginatedDataflowVO findReferenceDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum);
 
 
   /**
    * Find business dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the list
    */
-  @GetMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findBusinessDataflows();
+  @PostMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  PaginatedDataflowVO findBusinessDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum);
 
   /**
    * Find citizen science dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the list
    */
-  @GetMapping(value = "/citizenDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findCitizenScienceDataflows();
+  @PostMapping(value = "/citizenDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  PaginatedDataflowVO findCitizenScienceDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum);
 
   /**
    * Find dataflows for clone.
