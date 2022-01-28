@@ -296,8 +296,22 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       );
     }
 
-    if (!isEmpty(webformConfiguration.name) && isEmpty(webformConfiguration.content)) {
-      return getInitialWebformConfiguration().name === webformConfiguration.name || checkLabelExists();
+    const initialWebformConfiguration = getInitialWebformConfiguration();
+
+    if (
+      !isEmpty(webformConfiguration.name) &&
+      isEmpty(webformConfiguration.content) &&
+      initialWebformConfiguration.type === webformConfiguration.type
+    ) {
+      return initialWebformConfiguration.name === webformConfiguration.name || checkLabelExists();
+    }
+
+    if (
+      initialWebformConfiguration.type !== webformConfiguration.type &&
+      isEmpty(webformConfiguration.content) &&
+      initialWebformConfiguration.name === webformConfiguration.name
+    ) {
+      return initialWebformConfiguration.type === webformConfiguration.type;
     }
 
     return (
