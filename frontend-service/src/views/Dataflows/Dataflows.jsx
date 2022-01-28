@@ -151,7 +151,7 @@ export const Dataflows = () => {
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
-  const { filteredData, isFiltered } = useFilters(tabId);
+  const { filterBy, filteredData, sortBy, isFiltered } = useFilters(tabId);
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -311,24 +311,52 @@ export const Dataflows = () => {
       return dataflow;
     });
 
-  const getDataflows = async (numberRows, pageNum) => {
+  const getDataflows = async () => {
     setLoading(true);
+
+    const { accessRole: accessRoles, contextRoles } = userContext;
+    const { numberRows, pageNum } = pagination;
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {
-        const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const data = await DataflowService.getAll({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy });
+
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'reporting' });
       } else if (TextUtils.areEquals(tabId, 'reference')) {
-        const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const data = await ReferenceDataflowService.getAll({
+          accessRoles,
+          contextRoles,
+          filterBy,
+          numberRows,
+          pageNum,
+          sortBy
+        });
+
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'reference' });
       } else if (TextUtils.areEquals(tabId, 'business')) {
-        const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const data = await BusinessDataflowService.getAll({
+          accessRoles,
+          contextRoles,
+          filterBy,
+          numberRows,
+          pageNum,
+          sortBy
+        });
+
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'business' });
       } else if (TextUtils.areEquals(tabId, 'citizenScience')) {
-        const data = await CitizenScienceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const data = await CitizenScienceDataflowService.getAll({
+          accessRoles,
+          contextRoles,
+          filterBy,
+          numberRows,
+          pageNum,
+          sortBy
+        });
+
         setStatusDataflowLabel(data);
         setDataflows({ dataflows: data, type: 'citizenScience' });
       }
@@ -745,7 +773,14 @@ export const Dataflows = () => {
             onTabChange={event => onChangeTab(event.index, event.value)}
           />
         </div>
-        <MyFilters data={dataflowsState[tabId]} options={options[tabId]} viewType={tabId} />
+        <MyFilters
+          className="dataflowsFilters"
+          data={dataflowsState[tabId]}
+          onFilter={getDataflows}
+          onSort={getDataflows}
+          options={options[tabId]}
+          viewType={tabId}
+        />
         {renderPaginator()}
         <DataflowsList
           className="dataflowList-accepted-help-step"
