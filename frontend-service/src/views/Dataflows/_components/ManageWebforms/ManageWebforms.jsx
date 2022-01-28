@@ -206,7 +206,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   const getTypeTemplate = ({ type }) => {
-    return <span>{typesKeyValues[type].name}</span>;
+    return <span>{typesKeyValues[type]}</span>;
   };
 
   const getActionsTemplate = row => {
@@ -272,13 +272,12 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       .filter(webform => webform.id !== webformConfiguration.id)
       .some(webform => webform.name === webformConfiguration.name);
 
-  // const getIsDisabledConfirmBtn = () => Object.values(errors).includes(true) || loadingStatus === 'pending';
-
   const getIsDisabledConfirmBtn = () => {
     if (isNil(webformConfiguration.id)) {
       return (
         isEmpty(webformConfiguration.name) ||
         isEmpty(webformConfiguration.content) ||
+        isEmpty(webformConfiguration.type) ||
         checkLabelExists() ||
         loadingStatus === 'pending'
       );
@@ -415,7 +414,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
             options={dropdownOptions}
             optionValue="value"
             placeholder={resourcesContext.messages['webformsConfigurationsSelect']}
-            value={{ name: typesKeyValues[webformConfiguration.type]?.name, value: webformConfiguration.type }}
+            value={{ name: typesKeyValues[webformConfiguration.type], value: webformConfiguration.type }}
           />
 
           <InputFile

@@ -5,8 +5,8 @@
     { "name": "Tables", "value": "TABLES" }
   ],
   {
-    "PAMS": { "name": "PaMs", "value": "PAMS" },
-    "QA": { "name": "Q&A", "value": "QA" },
-    "TABLES": { "name": "Tables", "value": "TABLES" }
+    "PAMS": "PaMs",
+    "QA": "Q&A",
+    "TABLES": "Tables"
   }
 ]
