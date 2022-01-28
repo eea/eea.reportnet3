@@ -1476,6 +1476,7 @@
     "manageWebformsLeftBarButton": "Manage webforms",
     "numberOfFields": "Number of fields",
     "updateAutomaticReportingDeletionFailedEvent": "Error updating dataflow automatic data deletion",
-    "importNamefileWarningEvent": "Some tables have not imported data: table and file name were different."
+    "importNamefileWarningEvent": "Some tables have not imported data: table and file name were different.",
+    "notificationWarnTitle": "WARNING"
   }
 }
