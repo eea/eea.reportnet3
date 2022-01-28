@@ -36,9 +36,7 @@ const getPamFieldValue = (fieldName, pamId, type) => {
   }
 };
 
-const parseWebformListDTO = webformsDTO => {
-  return webformsDTO.map(webform => ({ ...webform, name: webform.label }));
-};
+const parseWebformListDTO = webformsDTO => webformsDTO.map(webform => ({ ...webform, name: webform.label }));
 
 export const WebformUtils = {
   parsePamTables,
