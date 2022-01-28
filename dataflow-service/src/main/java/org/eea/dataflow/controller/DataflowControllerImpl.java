@@ -202,17 +202,22 @@ public class DataflowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
       responseContainer = "List", hidden = true)
-  public List<DataFlowVO> findDataflows() {
-    List<DataFlowVO> dataflows = new ArrayList<>();
+  public PaginatedDataflowVO findDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum) {
+    PaginatedDataflowVO dataflows = new PaginatedDataflowVO();
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REPORTING);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REPORTING, filters,
+          orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -228,17 +233,22 @@ public class DataflowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Reference Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
       responseContainer = "List", hidden = true)
-  public List<DataFlowVO> findReferenceDataflows() {
-    List<DataFlowVO> dataflows = new ArrayList<>();
+  public PaginatedDataflowVO findReferenceDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum) {
+    PaginatedDataflowVO dataflows = new PaginatedDataflowVO();
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REFERENCE);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REFERENCE, filters,
+          orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -253,17 +263,24 @@ public class DataflowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Business Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
       responseContainer = "List", hidden = true)
-  public List<DataFlowVO> findBusinessDataflows() {
-    List<DataFlowVO> dataflows = new ArrayList<>();
+  public PaginatedDataflowVO findBusinessDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum)
+
+  {
+    PaginatedDataflowVO dataflows = new PaginatedDataflowVO();
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.BUSINESS);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.BUSINESS, filters,
+          orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -280,17 +297,22 @@ public class DataflowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/citizenScienceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/citizenScienceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Citizen Science Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
       responseContainer = "List", hidden = true)
-  public List<DataFlowVO> findCitizenScienceDataflows() {
-    List<DataFlowVO> dataflows = new ArrayList<>();
+  public PaginatedDataflowVO findCitizenScienceDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum) {
+    PaginatedDataflowVO dataflows = new PaginatedDataflowVO();
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.CITIZEN_SCIENCE);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.CITIZEN_SCIENCE, filters,
+          orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -661,12 +683,12 @@ public class DataflowControllerImpl implements DataFlowController {
    */
   @Override
   @PostMapping("/getPublicDataflows")
-  @ApiOperation(value = "Gets all the public dataflows", hidden = true)
+  @ApiOperation(value = "Gets all the public dataflows", hidden = false)
   public PaginatedDataflowVO getPublicDataflows(
       @RequestBody(required = false) Map<String, String> filters,
       @RequestParam(required = false) String orderHeader,
-      @RequestParam(required = false) boolean asc, @RequestParam Integer pageSize,
-      @RequestParam Integer pageNum) {
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum) {
     try {
       return dataflowService.getPublicDataflows(filters, orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {

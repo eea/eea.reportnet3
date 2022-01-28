@@ -59,10 +59,17 @@ public interface DataflowService {
    *
    * @param userId the user id
    * @param dataflowType the dataflow type
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param sizePage the size page
+   * @param numPage the num page
    * @return the dataflows
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getDataflows(String userId, TypeDataflowEnum dataflowType) throws EEAException;
+  PaginatedDataflowVO getDataflows(String userId, TypeDataflowEnum dataflowType,
+      Map<String, String> filters, String orderHeader, boolean asc, Integer sizePage,
+      Integer numPage) throws EEAException;
 
   /**
    * Gets the cloneable dataflows.
