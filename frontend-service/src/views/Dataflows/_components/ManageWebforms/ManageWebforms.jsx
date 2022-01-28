@@ -147,8 +147,8 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     }
   };
 
-  const onShowDeleteDialog = row => {
-    setWebformConfiguration({ ...row });
+  const onShowDeleteDialog = webformRow => {
+    setWebformConfiguration(webformRow);
     setIsDeleteDialogVisible(true);
   };
 
@@ -157,20 +157,20 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     resetWebformConfiguration();
   };
 
-  const onEditClick = row => {
-    setWebformConfiguration({ ...row });
+  const onEditClick = webformRow => {
+    setWebformConfiguration(webformRow);
     setIsAddEditDialogVisible(true);
   };
 
   const onAddEditDialogClose = () => {
     setIsAddEditDialogVisible(false);
     resetWebformConfiguration();
-    setErrors({ name: false, content: false });
+    setErrors({ name: false, type: false, content: false });
   };
 
-  const onClickDownload = row => {
-    setWebformConfiguration({ ...row });
-    onDownload(row.id, row.name);
+  const onClickDownload = webformRow => {
+    setWebformConfiguration(webformRow);
+    onDownload(webformRow.id, webformRow.name);
   };
 
   const onFileUpload = async e => {
@@ -222,28 +222,28 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     return <span>{typesKeyValues[type]}</span>;
   };
 
-  const getActionsTemplate = row => {
+  const getActionsTemplate = webformRow => {
     return (
       <Fragment>
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
           disabled={loadingStatus === 'pending'}
-          icon={getBtnIcon(row.id, 'edit')}
-          onClick={() => onEditClick(row)}
+          icon={getBtnIcon(webformRow.id, 'edit')}
+          onClick={() => onEditClick(webformRow)}
           type="button"
         />
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
           disabled={loadingStatus === 'pending'}
-          icon={getBtnIcon(row.id, 'export')}
-          onClick={() => onClickDownload(row)}
+          icon={getBtnIcon(webformRow.id, 'export')}
+          onClick={() => onClickDownload(webformRow)}
           type="button"
         />
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
           disabled={loadingStatus === 'pending'}
-          icon={getBtnIcon(row.id, 'trash')}
-          onClick={() => onShowDeleteDialog(row)}
+          icon={getBtnIcon(webformRow.id, 'trash')}
+          onClick={() => onShowDeleteDialog(webformRow)}
           type="button"
         />
       </Fragment>
