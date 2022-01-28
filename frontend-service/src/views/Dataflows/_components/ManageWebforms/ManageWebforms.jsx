@@ -14,7 +14,7 @@ import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { Dropdown } from 'views/_components/Dropdown';
-import { InputFile } from './_components/InputFile';
+import { InputFile } from 'views/_components/InputFile';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
 
