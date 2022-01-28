@@ -288,7 +288,6 @@ export const DocumentFileUpload = ({
               buttonTextWithFile={resourcesContext.messages['inputFileButtonSelected']}
               fileRef={inputRef}
               hasError={errors.jsonContent}
-              onBlur={() => checkInputForErrors('uploadFile')}
               onChange={onFileUpload}
               onClearFile={onClearFile}
               onKeyPress={e => {
