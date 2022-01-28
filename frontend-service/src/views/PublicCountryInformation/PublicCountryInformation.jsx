@@ -97,10 +97,9 @@ export const PublicCountryInformation = () => {
   };
 
   const onChangePage = event => {
-    const isChangedPage = true;
     setNumberRows(event.rows);
     setFirstRow(event.first);
-    onLoadPublicCountryInformation(sortOrder, sortField, event.first, event.rows, isChangedPage);
+    onLoadPublicCountryInformation(sortOrder, sortField, event.first, event.rows);
   };
 
   const onFileDownload = async (dataflowId, dataProviderId, fileName) => {
@@ -123,7 +122,6 @@ export const PublicCountryInformation = () => {
     }
   };
 
-  const onLoadPublicCountryInformation = async (sortOrder, sortField, firstRow, numberRows, isChangedPage) => {
     setIsLoading(true);
     try {
       if (sortOrder === -1) {
