@@ -1424,7 +1424,7 @@
     "visibility": "Visibility",
     "warning": "Warning",
     "webform": "Webform",
-    "webformArticle13Title": "Webform for reporting on greenhouse gas policies and measures under the Governance Regulation (EU2018/1999)",
+    "webformPaMsTitle": "Webform for reporting on greenhouse gas policies and measures under the Governance Regulation (EU2018/1999)",
     "webformShouldBeAttachment": "The field type should be attachment",
     "webformTableCreation": "Create table",
     "webformTableEdit": "Edit table",
@@ -1478,6 +1478,11 @@
     "updateAutomaticReportingDeletionFailedEvent": "Error updating dataflow automatic data deletion",
     "importNamefileWarningEvent": "Some tables have not imported data: table and file name were different.",
     "notificationWarnTitle": "WARNING",
-    "exportFilteredCsv": "CSV (.csv with filters)"
+    "exportFilteredCsv": "CSV (.csv with filters)",
+    "webformsConfigurationsSelect": "Select an webform type",
+    "notSelectedWebformOption": "No webform",
+    "deleteWebformInUseError": "Error deleting webform configuration. This configuration is already in use.",
+    "pamsLabel": "PaMs",
+    "qaLabel": "Q&A"
   }
 }

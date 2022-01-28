@@ -6,7 +6,7 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const ReferenceDataflowRepository = {
   getAll: async ({ filterBy, isAsc, numberRows, pageNum, sortBy }) =>
-    await HTTPRequester.get({
+    await HTTPRequester.post({
       url: getUrl(ReferenceDataflowConfig.getAll, { isAsc, numberRows, pageNum, sortBy }),
       data: { ...filterBy }
     }),

@@ -305,7 +305,7 @@ export const DatasetService = {
           ? DatasetUtils.getAllLevelErrorsFromRuleValidations(rulesDTO.data)
           : [],
       referenceDataset: datasetSchemaDTO.data.referenceDataset,
-      webform: datasetSchemaDTO.data.webform ? datasetSchemaDTO.data.webform.name : null
+      webform: datasetSchemaDTO.data.webform ? datasetSchemaDTO.data.webform : null
     });
 
     const tables = datasetSchemaDTO.data.tableSchemas.map(datasetTableDTO => {

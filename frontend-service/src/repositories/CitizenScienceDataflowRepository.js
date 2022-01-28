@@ -12,7 +12,7 @@ export const CitizenScienceDataflowRepository = {
     }),
 
   getAll: async ({ filterBy, isAsc, numberRows, pageNum, sortBy }) =>
-    await HTTPRequester.get({
+    await HTTPRequester.post({
       url: getUrl(CitizenScienceDataflowConfig.getAll, { isAsc, numberRows, pageNum, sortBy }),
       data: { ...filterBy }
     }),
