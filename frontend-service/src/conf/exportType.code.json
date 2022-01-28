@@ -5,6 +5,10 @@
       "code": "csv"
     },
     {
+      "key": "exportFilteredCsv",
+      "code": "csv"
+    },
+    {
       "key": "exportXlsx",
       "code": "xlsx"
     }

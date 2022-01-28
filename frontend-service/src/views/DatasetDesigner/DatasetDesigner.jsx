@@ -468,7 +468,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
     try {
       const data = await WebformService.getAll();
-      data.unshift({ id: null, label: 'No webform', value: null });
+      data.unshift({ id: null, label: resourcesContext.messages['notSelectedWebformOption'], value: null, name: null });
 
       designerDispatch({ type: 'GET_WEBFORMS', payload: { data } });
       setWebformOptionsLoadingStatus('success');
@@ -1355,7 +1355,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   );
 
   const renderWebformOptionsContent = () => {
-    const webform = webformOptions.find(option => option.value === designerState.webform);
+    const webform = webformOptions.find(option => option.name === designerState.webform?.name);
 
     if (webformOptionsLoadingStatus === 'pending') return <Spinner style={{ top: 0 }} />;
 
@@ -1631,7 +1631,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             datasetId={datasetId}
             options={webformOptions}
             state={designerState}
-            webformType={designerState.webform}
+            webform={designerState.webform}
           />
         ) : (
           <TabsDesigner

@@ -1424,7 +1424,7 @@
     "visibility": "Visibility",
     "warning": "Warning",
     "webform": "Webform",
-    "webformArticle13Title": "Webform for reporting on greenhouse gas policies and measures under the Governance Regulation (EU2018/1999)",
+    "webformPaMsTitle": "Webform for reporting on greenhouse gas policies and measures under the Governance Regulation (EU2018/1999)",
     "webformShouldBeAttachment": "The field type should be attachment",
     "webformTableCreation": "Create table",
     "webformTableEdit": "Edit table",
@@ -1457,6 +1457,11 @@
     "editWebformConfigurationError": "Error updating webform configuration",
     "inputFileButtonNotSelected": "Select file",
     "inputFileButtonSelected": "Update file",
+    "manageWebforms": "Manage webforms",
+    "loadWebformsError": "Error loading webforms list",
+    "automaticDeleteSideBarButton": "Automatic delete",
+    "isAutomaticReportingDeletionDialogHeader": "Automatic delete dataflow dialog",
+    "isAutomaticReportingDeletionCheckboxLabel": "Are you sure you want to delete?",
     "validating": "Validating",
     "uploading": "Uploading",
     "importWrongFileHeader": "Different number of columns.",
@@ -1469,6 +1474,15 @@
     "fileColumnsLabel": "File columns",
     "fileNotSelectedError": "File not selected",
     "manageWebformsLeftBarButton": "Manage webforms",
-    "numberOfFields": "Number of fields"
+    "numberOfFields": "Number of fields",
+    "updateAutomaticReportingDeletionFailedEvent": "Error updating dataflow automatic data deletion",
+    "importNamefileWarningEvent": "Some tables have not imported data: table and file name were different.",
+    "notificationWarnTitle": "WARNING",
+    "exportFilteredCsv": "CSV (.csv with filters)",
+    "webformsConfigurationsSelect": "Select an webform type",
+    "notSelectedWebformOption": "No webform",
+    "deleteWebformInUseError": "Error deleting webform configuration. This configuration is already in use.",
+    "pamsLabel": "PaMs",
+    "qaLabel": "Q&A"
   }
 }
