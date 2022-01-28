@@ -860,7 +860,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private String buildQueryWithExportFilters(Long datasetId, Long tableId, Pageable pageable,
       ExportFilterVO filters) {
 
-    String initialQuery = buildInitialQueryExportFilters(datasetId, tableId, pageable, filters);
+    String initialQuery = buildInitialQueryExportFilters(datasetId, tableId, filters);
 
     ErrorTypeEnum[] levelErrorsArray = filters.getLevelError();
     boolean errorLevelFilterNotNull = levelErrorsArray != null;
