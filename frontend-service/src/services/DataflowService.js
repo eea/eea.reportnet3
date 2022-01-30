@@ -38,7 +38,7 @@ export const DataflowService = {
       sortBy: sortByHeader || undefined
     });
 
-    const dataflows = dataflowsDTO.data.map(dataflowDTO => {
+    const dataflows = dataflowsDTO.data.dataflows.map(dataflowDTO => {
       dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);
       return dataflowDTO;
     });
@@ -319,13 +319,17 @@ export const DataflowService = {
   getApiKey: async (dataflowId, dataProviderId, isCustodian) =>
     await DataflowRepository.getApiKey(dataflowId, dataProviderId, isCustodian),
 
-  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
+  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField, filterBy) => {
+    const filteredFilterBy = DataflowUtils.parseRequestPublicFilterBy(filterBy);
+    console.log('filteredFilterBy', filteredFilterBy);
+
     const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode(
       countryCode,
       sortOrder,
       pageNum,
       numberRows,
-      sortField
+      sortField,
+      filteredFilterBy
     );
 
     publicDataflowsByCountryCodeResponse.data.publicDataflows = DataflowUtils.parsePublicDataflowListDTO(
@@ -395,6 +399,9 @@ export const DataflowService = {
 
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
     await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo),
+
+  updateAutomaticDelete: async (dataflowId, isAutomaticReportingDeletion) =>
+    await DataflowRepository.updateAutomaticDelete(dataflowId, isAutomaticReportingDeletion),
 
   getDatasetsInfo: async dataflowId => {
     const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);

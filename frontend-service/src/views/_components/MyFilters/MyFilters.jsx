@@ -156,10 +156,9 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
   };
 
   const onApplyFilters = ({ filterBy, searchValue = searchBy }) => {
-    // LEAVE THIS PART COMMENTED UNTIL WE INTEGRATE WITH BE
-    // if (hasCustomSort) {
-    //   return data;
-    // }
+    if (hasCustomSort) {
+      return data;
+    }
 
     return data.filter(
       item =>
