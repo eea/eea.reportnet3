@@ -1178,7 +1178,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     );
   };
 
-  const renderSwitchView = () => {
+  const renderSwitchContent = () => {
     const switchView = (
       <TabularSwitch
         elements={[resourcesContext.messages['designView'], resourcesContext.messages['tabularDataView']]}
@@ -1200,13 +1200,17 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       />
     );
 
+    if (!isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead) {
+      return renderRadioButtons();
+    }
+
+    return switchView;
+  };
+
+  const renderSwitchView = () => {
     return (
       <div className={styles.switchDivInput}>
-        <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-          {!isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead
-            ? renderRadioButtons()
-            : switchView}
-        </div>
+        <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>{renderSwitchContent()}</div>
       </div>
     );
   };
