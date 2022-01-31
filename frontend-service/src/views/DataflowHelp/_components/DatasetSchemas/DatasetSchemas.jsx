@@ -136,7 +136,9 @@ export const DatasetSchemas = ({ dataflowId, datasetsSchemas, hasCustodianPermis
               if (table.tableSchemaId === referenceId)
                 additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
             } else if (TextUtils.areEquals(entityType, 'RECORD')) {
-              additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+              if (table.records?.some(record => record.recordSchemaId === referenceId)) {
+                additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+              }
             } else if (TextUtils.areEquals(entityType, 'FIELD') || TextUtils.areEquals(entityType, 'TABLE')) {
               table.records.forEach(record =>
                 record.fields.forEach(field => {
