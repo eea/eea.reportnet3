@@ -1156,36 +1156,27 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     setIsValidationsTabularView(true);
   };
 
-  const getViewModes = isWithWebform => {
-    if (isWithWebform) {
-      return { design: 'design', tabularData: 'tabularData', webform: 'webform' };
+  const renderSwitchView = () => {
+    const viewModes = { design: 'design', tabularData: 'tabularData' };
+
+    if (!isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead) {
+      viewModes.webform = 'webform';
     }
 
-    return { design: 'design', tabularData: 'tabularData' };
-  };
-
-  const onChangeViewMode = (switchView, isWithWebform) => {
-    const views = getViewModes(isWithWebform);
-
-    onChangeView(views[camelCase(switchView)]);
-    changeMode(views[camelCase(switchView)]);
-  };
-
-  const getSwitchElements = isWithWebform =>
-    Object.keys(getViewModes(isWithWebform)).map(view => resourcesContext.messages[`${view}View`]);
-
-  const renderSwitchView = () => {
-    const isWithWebform = !isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead;
+    const switchElements = Object.keys(viewModes).map(view => resourcesContext.messages[`${view}View`]);
 
     return (
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch
-            elements={getSwitchElements(isWithWebform)}
+            elements={switchElements}
             getIsTableCreated={setIsTableCreated}
             isTableCreated={designerState.isTableCreated}
             isValidationsTabularView={designerState.isValidationsTabularView}
-            onChange={switchView => onChangeViewMode(switchView, isWithWebform)}
+            onChange={switchView => {
+              onChangeView(viewModes[camelCase(switchView)]);
+              changeMode(viewModes[camelCase(switchView)]);
+            }}
             setIsValidationsTabularView={setIsValidationsTabularView}
             value={
               QuerystringUtils.getUrlParamValue('view') !== ''
