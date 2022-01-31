@@ -321,7 +321,9 @@ export const PaMsWebform = ({
     </Fragment>
   );
 
-  if (paMsWebformState.hasErrors) return renderLayout(renderErrorMessages());
+  if (paMsWebformState.hasErrors) {
+    return renderLayout(renderErrorMessages());
+  }
 
   return renderLayout(
     <Fragment>
@@ -372,7 +374,7 @@ export const PaMsWebform = ({
 
       <TabularSwitch
         className={`${styles.tabBar} ${view === resourcesContext.messages['details'] ? undefined : styles.hide}`}
-        elements={[resourcesContext.messages['overview']]}
+        elements={[{ key: 'overview', label: resourcesContext.messages['overview'] }]}
         onChange={switchView => {
           onToggleView(switchView);
           onSelectRecord(null, null);

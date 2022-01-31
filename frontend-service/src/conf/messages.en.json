@@ -1431,7 +1431,6 @@
     "webformTableWithLessRecords": "There are no records in the table",
     "webformTableWithMoreRecords": "This table should have only one record, please check it",
     "webformTableWithoutFixedNumber": "This table should have fixed number of records",
-    "webformView": "Webform",
     "webLinkDescriptionValidationMax": "Web link description is too long",
     "webLinks": "Web links",
     "writeMessagePlaceholder": "Write your message or drag here a file",
