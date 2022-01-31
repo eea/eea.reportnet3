@@ -216,6 +216,35 @@ export const ActionsToolbar = ({
     dispatchFilter({ type: 'SET_FILTER_ICON', payload: { originalColumns, currentVisibleColumns } });
   };
 
+  const renderChipButton = () => {
+    if (groupedFilter && selectedRuleMessage !== '' && tableId === selectedTableSchemaId) {
+      return (
+        <Fragment>
+          <span data-for="groupedFilterTooltip" data-tip>
+            <ChipButton
+              className={styles.chipButton}
+              hasLevelErrorIcon={true}
+              labelClassName={styles.groupFilter}
+              levelError={selectedRuleLevelError}
+              onClick={() => {
+                onHideSelectGroupedValidation();
+                showGroupedValidationFilter();
+                dispatchFilter({
+                  type: 'SET_VALIDATION_GROUPED_FILTER',
+                  payload: { groupedFilter: false }
+                });
+              }}
+              value={selectedRuleMessage}
+            />
+          </span>
+          <ReactTooltip border={true} effect="solid" id="groupedFilterTooltip" place="top">
+            {selectedRuleMessage}
+          </ReactTooltip>
+        </Fragment>
+      );
+    }
+  };
+
   return (
     <Toolbar className={`${styles.actionsToolbar} datasetSchema-table-toolbar-help-step`}>
       <div className={`${styles.toolbarLeftContent} p-toolbar-group-left`}>
@@ -310,30 +339,7 @@ export const ActionsToolbar = ({
               showFilters={showValidationFilter}
               showLevelErrorIcons={true}
             />
-            {groupedFilter && selectedRuleMessage !== '' && tableId === selectedTableSchemaId && (
-              <Fragment>
-                <span data-for="groupedFilterTooltip" data-tip>
-                  <ChipButton
-                    className={styles.chipButton}
-                    hasLevelErrorIcon={true}
-                    labelClassName={styles.groupFilter}
-                    levelError={selectedRuleLevelError}
-                    onClick={() => {
-                      onHideSelectGroupedValidation();
-                      showGroupedValidationFilter();
-                      dispatchFilter({
-                        type: 'SET_VALIDATION_GROUPED_FILTER',
-                        payload: { groupedFilter: false }
-                      });
-                    }}
-                    value={selectedRuleMessage}
-                  />
-                </span>
-                <ReactTooltip border={true} effect="solid" id="groupedFilterTooltip" place="top">
-                  {selectedRuleMessage}
-                </ReactTooltip>
-              </Fragment>
-            )}
+            {renderChipButton()}
           </Fragment>
         )}
         {prevFilterValue !== '' && (
