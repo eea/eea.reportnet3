@@ -258,7 +258,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
         key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <div
-          className={`p-float-label ${styles.label} ${styles.elementFilter}`}
+          className={`p-float-label ${styles.label} ${styles.dateBlock}`}
           id={`calendar_${option.key}`}
           ref={el => (calendarRefs.current[option.key] = el)}>
           <Calendar
@@ -301,7 +301,32 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
       return option.nestedOptions.map(nestedOption => renderDropdown(nestedOption));
     }
 
-    return <Dropdown />;
+    return (
+      <div className={`${styles.block}`} key={option.key}>
+        <Dropdown
+          ariaLabel={option.key}
+          className={styles.dropdownFilter}
+          filter={option.dropdownOptions.length > 10}
+          filterPlaceholder={option.label}
+          id={`${option.key}_dropdown`}
+          inputClassName={`p-float-label ${styles.label}`}
+          inputId={option.key}
+          label={option.label}
+          onChange={event => {
+            onChange({ key: option.key, value: event.value });
+          }}
+          onMouseDown={event => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+          optionLabel="label"
+          options={option.dropdownOptions}
+          showClear={filterBy[option.key]}
+          showFilterClear={true}
+          value={filterBy[option.key]}
+        />
+      </div>
+    );
   };
 
   const renderInput = option => {
