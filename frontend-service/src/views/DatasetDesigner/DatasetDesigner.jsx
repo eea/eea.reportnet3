@@ -1173,6 +1173,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const getSwitchElements = isWithWebform =>
     Object.keys(getViewModes(isWithWebform)).map(view => resourcesContext.messages[`${view}View`]);
+
   const renderSwitchView = () => {
     const isWithWebform = !isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead;
 
