@@ -27,11 +27,11 @@ export const useFilters = recoilId => {
       .includes(false);
   };
 
-  const resetState = () => {
+  const resetFiltersState = () => {
     resetFilterBy();
     resetFilteredData();
     resetSortBy();
   };
 
-  return { filterBy, filteredData, isFiltered: checkIsFilter(), resetState, sortBy };
+  return { filterBy, filteredData, isFiltered: checkIsFilter(), resetFiltersState, sortBy };
 };

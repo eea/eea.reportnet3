@@ -122,7 +122,7 @@ export const BigButtonList = ({
   const dataflowData = dataflowState.data;
   const isBusinessDataflow = dataflowType === config.dataflowType.BUSINESS.value;
 
-  const { resetState } = useFilters('cloneSchemas');
+  const { resetFiltersState } = useFilters('cloneSchemas');
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
@@ -389,7 +389,7 @@ export const BigButtonList = ({
 
   const onHideCloneSchemasDialog = () => {
     setCloneDialogVisible(false);
-    resetState();
+    resetFiltersState();
   };
 
   const onCopyDataCollectionToEUDataset = async () => {

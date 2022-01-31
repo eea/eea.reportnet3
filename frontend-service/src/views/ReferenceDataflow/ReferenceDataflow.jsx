@@ -31,6 +31,7 @@ import { dataflowReducer } from './_functions/Reducers/dataflowReducer';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 
 import { CurrentPage } from 'views/_functions/Utils';
@@ -89,6 +90,8 @@ export const ReferenceDataflow = () => {
       onLoadPermissions();
     }
   }, [userContext]);
+
+  const { resetFiltersState } = useFilters('datasetInfo');
 
   useBreadCrumbs({ currentPage: CurrentPage.REFERENCE_DATAFLOW, referenceDataflowId });
 
@@ -281,7 +284,10 @@ export const ReferenceDataflow = () => {
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs(modalType, false)}
+      onClick={() => {
+        manageDialogs(modalType, false);
+        resetFiltersState();
+      }}
     />
   );
 
@@ -418,7 +424,10 @@ export const ReferenceDataflow = () => {
         <Dialog
           footer={renderDialogFooterCloseBtn('isDatasetsInfoDialogVisible')}
           header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowState.data.id}`}
-          onHide={() => manageDialogs('isDatasetsInfoDialogVisible', false)}
+          onHide={() => {
+            manageDialogs('isDatasetsInfoDialogVisible', false);
+            resetFiltersState();
+          }}
           visible={dataflowState.isDatasetsInfoDialogVisible}>
           <DatasetsInfo dataflowId={referenceDataflowId} dataflowType={dataflowState.dataflowType} />
         </Dialog>

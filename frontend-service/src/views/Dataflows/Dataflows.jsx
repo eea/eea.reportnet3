@@ -49,6 +49,7 @@ import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { CurrentPage } from 'views/_functions/Utils';
@@ -157,6 +158,8 @@ export const Dataflows = () => {
 
   const filterBy = useRecoilValue(filterByState(tabId));
   const sortByOptions = useRecoilValue(sortByState(tabId));
+
+  const { resetFiltersState } = useFilters('userList');
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -557,7 +560,10 @@ export const Dataflows = () => {
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs('isUserListVisible', false)}
+      onClick={() => {
+        manageDialogs('isUserListVisible', false);
+        resetFiltersState();
+      }}
     />
   );
 
@@ -778,7 +784,10 @@ export const Dataflows = () => {
         <Dialog
           footer={renderUserListDialogFooter()}
           header={resourcesContext.messages['allDataflowsUserListHeader']}
-          onHide={() => manageDialogs('isUserListVisible', false)}
+          onHide={() => {
+            manageDialogs('isUserListVisible', false);
+            resetFiltersState();
+          }}
           visible={dataflowsState.isUserListVisible}>
           <UserList />
         </Dialog>
