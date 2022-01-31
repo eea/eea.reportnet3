@@ -429,7 +429,7 @@ export const ManageLeadReporters = ({
       if (!reporters) {
         return (
           <div key={uniqueInputId}>
-            <InputText />
+            <InputText value="" />
           </div>
         );
       }
