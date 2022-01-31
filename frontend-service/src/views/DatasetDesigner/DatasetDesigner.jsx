@@ -1156,30 +1156,30 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     setIsValidationsTabularView(true);
   };
 
-  const renderRadioButtons = () => {
-    return (
-      <TabularSwitch
-        elements={Object.keys(designerState.viewType).map(view => resourcesContext.messages[`${view}View`])}
-        getIsTableCreated={setIsTableCreated}
-        isTableCreated={designerState.isTableCreated}
-        isValidationsTabularView={designerState.isValidationsTabularView}
-        onChange={switchView => {
-          const views = { design: 'design', tabularData: 'tabularData', webform: 'webform' };
-          onChangeView(views[camelCase(switchView)]);
-          changeMode(views[camelCase(switchView)]);
-        }}
-        setIsValidationsTabularView={setIsValidationsTabularView}
-        value={
-          QuerystringUtils.getUrlParamValue('view') !== ''
-            ? resourcesContext.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
-            : resourcesContext.messages['designView']
-        }
-      />
-    );
-  };
-
   const renderSwitchContent = () => {
-    const switchView = (
+    if (!isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead) {
+      return (
+        <TabularSwitch
+          elements={Object.keys(designerState.viewType).map(view => resourcesContext.messages[`${view}View`])}
+          getIsTableCreated={setIsTableCreated}
+          isTableCreated={designerState.isTableCreated}
+          isValidationsTabularView={designerState.isValidationsTabularView}
+          onChange={switchView => {
+            const views = { design: 'design', tabularData: 'tabularData', webform: 'webform' };
+            onChangeView(views[camelCase(switchView)]);
+            changeMode(views[camelCase(switchView)]);
+          }}
+          setIsValidationsTabularView={setIsValidationsTabularView}
+          value={
+            QuerystringUtils.getUrlParamValue('view') !== ''
+              ? resourcesContext.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
+              : resourcesContext.messages['designView']
+          }
+        />
+      );
+    }
+
+    return (
       <TabularSwitch
         elements={[resourcesContext.messages['designView'], resourcesContext.messages['tabularDataView']]}
         getIsTableCreated={setIsTableCreated}
@@ -1199,12 +1199,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         }
       />
     );
-
-    if (!isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead) {
-      return renderRadioButtons();
-    }
-
-    return switchView;
   };
 
   const renderSwitchView = () => {
