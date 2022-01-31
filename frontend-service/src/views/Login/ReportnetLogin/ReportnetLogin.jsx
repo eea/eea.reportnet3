@@ -18,7 +18,7 @@ import { UserService } from 'services/UserService';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 
-const ReportnetLogin = () => {
+export const ReportnetLogin = () => {
   const navigate = useNavigate();
 
   const notificationContext = useContext(NotificationContext);
@@ -158,5 +158,3 @@ const ReportnetLogin = () => {
     </div>
   );
 };
-
-export { ReportnetLogin };

@@ -225,7 +225,7 @@ export const IntegrationsList = ({
   ) : (
     <div className={styles.integrations}>
       <MyFilters
-        className="integrationsList"
+        className="lineItems"
         data={integrationListState.data}
         options={filterOptions}
         viewType="integrationsList"

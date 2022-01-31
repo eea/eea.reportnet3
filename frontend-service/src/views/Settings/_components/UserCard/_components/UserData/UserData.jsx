@@ -9,7 +9,7 @@ import { routes } from 'conf/routes';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 import { UserImage } from './_components/UserImage';
 
-const UserData = () => {
+export const UserData = () => {
   const userContext = useContext(UserContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -40,5 +40,3 @@ const UserData = () => {
     </div>
   );
 };
-
-export { UserData };

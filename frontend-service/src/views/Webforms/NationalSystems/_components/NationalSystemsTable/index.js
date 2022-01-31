@@ -1,1 +1,0 @@
-export { NationalSystemsTable } from './NationalSystemsTable';

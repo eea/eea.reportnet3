@@ -12,7 +12,7 @@ import { ListBoxHeader } from './_components/ListBoxHeader';
 import { Spinner } from 'views/_components/Spinner';
 import Tooltip from 'primereact/tooltip';
 
-const ListBox = ({
+export const ListBox = ({
   ariaLabel = null,
   ariaLabelledBy = null,
   className = null,
@@ -295,5 +295,3 @@ ListBox.propTypes = {
   ariaLabelledBy: PropTypes.string,
   onChange: PropTypes.func
 };
-
-export { ListBox };

@@ -32,10 +32,10 @@ import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
 
 const { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch } = ApplyFiltersUtils;
-const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
+const { switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
-export const MyFilters = ({ className, data = [], isStrictMode, onFilter, options = [], viewType }) => {
+export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFilter, onSort, options, viewType }) => {
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
   const [filteredData, setFilteredData] = useRecoilState(filteredDataState(viewType));
@@ -49,6 +49,8 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
   const [labelsAnimationDate, setLabelsAnimationDate] = useState([]);
 
   const calendarRefs = useRef([]);
+
+  const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
   useLayoutEffect(() => {
     if (!isEmpty(data)) {
@@ -88,7 +90,6 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
 
   useEffect(() => {
     getFilterByKeys();
-    getSortDefaultValues(options);
   }, [data, viewType]);
 
   const applyFilters = () => {
@@ -102,20 +103,6 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
       console.error('MyFilters - applyFilters.', error);
       notificationContext.add({ type: 'FILTER_DATA_ERROR' });
     }
-  };
-
-  const getSortDefaultValues = options => {
-    options.forEach(option => {
-      if (!option) return;
-
-      if (option.isSortable && option.defaultOrder) {
-        setSortBy({ [option.key]: option.defaultOrder });
-      }
-
-      if (option.nestedOptions) {
-        getSortDefaultValues(option.nestedOptions);
-      }
-    });
   };
 
   const getFilterByKeys = () => {
@@ -139,13 +126,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
 
   const loadFilters = async () => {
     try {
-      let filteredData = await applyFilters();
-
-      if (!isEmpty(sortBy)) {
-        const [key, value] = Object.entries(sortBy)[0];
-
-        filteredData = applySort({ filteredData, order: value, prevSortState: applyFilters(), sortByKey: key });
-      }
+      const filteredData = applyFilters();
 
       setFilteredData(filteredData);
     } catch (error) {
@@ -154,6 +135,10 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
   };
 
   const onApplyFilters = ({ filterBy, searchValue = searchBy }) => {
+    if (hasCustomSort) {
+      return data;
+    }
+
     return data.filter(
       item =>
         applyInputs({ filterBy, filterByKeys, item }) &&
@@ -185,11 +170,16 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
   };
 
   const onSortData = key => {
-    const sortOption = switchSortByOption(sortBy[key]);
-    const sortedData = applySort({ filteredData, order: sortOption, prevSortState: applyFilters(), sortByKey: key });
+    setSortBy(prevSortBy => {
+      const sortByHeader = switchSortByOption(prevSortBy.sortByOption) === 'idle' ? '' : key;
+      const sortByOption = switchSortByOption(prevSortBy.sortByOption);
 
-    setSortBy({ [key]: sortOption });
-    setFilteredData(sortedData);
+      if (hasCustomSort) {
+        onSort({ sortByHeader, sortByOption });
+      }
+
+      return { sortByHeader, sortByOption };
+    });
   };
 
   const updateValueLabelsAnimationDate = (labelsAnimationDate, position, key, value) => {
@@ -261,7 +251,11 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
     const inputId = uniqueId();
 
     return (
-      <div className={styles.block} key={option.key}>
+      <div
+        className={`${styles.block} ${
+          filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+        }`}
+        key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <div
           className={`p-float-label ${styles.label} ${styles.elementFilter}`}
@@ -318,7 +312,10 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
     return (
       <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
-        <div className={`p-float-label ${styles.label} ${styles.elementFilter}`}>
+        <div
+          className={`p-float-label ${styles.label} ${
+            filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+          }`}>
           <InputText
             className={styles.inputFilter}
             id={`${option.key}_input`}
@@ -352,7 +349,9 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
         <MultiSelect
           ariaLabelledBy={`${option.key}_input`}
           checkAllHeader={resourcesContext.messages['checkAllFilter']}
-          className={styles.multiselectFilter}
+          className={`${styles.multiselectFilter} ${
+            filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+          }`}
           filter={option?.showInput}
           headerClassName={styles.selectHeader}
           id={option.key}
@@ -388,7 +387,10 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
     return (
       <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
-        <div className={`p-float-label ${styles.label} ${styles.elementFilter}`}>
+        <div
+          className={`p-float-label ${styles.label} ${styles.elementFilter} ${
+            searchBy.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+          }`}>
           <InputText
             className={styles.searchInput}
             id="searchInput"
@@ -411,15 +413,18 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
     );
   };
 
-  const renderSortButton = ({ key }) => (
-    <Button
-      className={`p-button-secondary-transparent ${styles.sortButton} ${
-        isNil(sortBy[key]) || sortBy[key] === 'idle' ? null : styles.iconActive
-      }`}
-      icon={switchSortByIcon(sortBy[key])}
-      onClick={() => onSortData(key)}
-    />
-  );
+  const renderSortButton = ({ key }) => {
+    const isSortActive = key === sortBy.sortByHeader && sortBy.sortByOption !== 'idle';
+
+    return (
+      <Button
+        className={`p-button-secondary-transparent ${styles.sortButton} ${isSortActive ? styles.iconActive : null}`}
+        disabled={isLoading}
+        icon={key === sortBy.sortByHeader ? switchSortByIcon(sortBy.sortByOption) : 'sortAlt'}
+        onClick={() => onSortData(key)}
+      />
+    );
+  };
 
   const renderSortButtonEmpty = () => <div className={styles.sortButtonSize} />;
 
@@ -428,13 +433,15 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, option
       {renderFilters()}
       {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
 
-      {!isNil(onFilter) && (
-        <Button
-          className="p-button-primary p-button-rounded p-button-animated-blink"
-          icon="filter"
-          label={resourcesContext.messages['filter']}
-          onClick={onFilter}
-        />
+      {hasCustomSort && (
+        <div className={`${styles.filterButton}`}>
+          <Button
+            className="p-button-primary p-button-rounded p-button-animated-blink"
+            icon="filter"
+            label={resourcesContext.messages['filter']}
+            onClick={onFilter}
+          />
+        </div>
       )}
 
       <div className={`${styles.resetButton}`}>

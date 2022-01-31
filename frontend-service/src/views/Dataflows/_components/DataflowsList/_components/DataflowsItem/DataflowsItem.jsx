@@ -20,7 +20,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { routes } from 'conf/routes';
 
-const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = () => {} }) => {
+export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = () => {} }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -163,5 +163,3 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
     </Fragment>
   );
 };
-
-export { DataflowsItem };

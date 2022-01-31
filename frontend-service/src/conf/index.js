@@ -16,7 +16,6 @@ import storage from './storage.config.json';
 import datasetStatus from './datasetStatus.json';
 import theme from './theme.config.json';
 import validations from './validation.config.json';
-import webforms from './webforms.config.json';
 
 export const config = {
   MB_SIZE: 1024 * 1024,
@@ -34,6 +33,7 @@ export const config = {
   SQL_SENTENCE_HIGH_COST: 50,
   MAX_ATTACHMENT_SIZE: 20 * 1024 * 1024,
   IMPORT_FILE_DELIMITER: ',',
+  IMPORT_ERROR_LIFETIME: 30000,
 
   avatars: avatarImages,
   countriesByGroup: countryByGroup,
@@ -52,6 +52,5 @@ export const config = {
   storage: storage,
   datasetStatus: datasetStatus,
   theme: theme,
-  validations: validations,
-  webforms: webforms
+  validations: validations
 };
