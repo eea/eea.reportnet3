@@ -251,14 +251,12 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     const inputId = uniqueId();
 
     return (
-      <div
-        className={`${styles.block} ${
-          filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
-        }`}
-        key={option.key}>
+      <div className={`${styles.block}`} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <div
-          className={`p-float-label ${styles.label} ${styles.dateBlock}`}
+          className={`p-float-label ${styles.label} ${styles.dateBlock} ${
+            filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+          }`}
           id={`calendar_${option.key}`}
           ref={el => (calendarRefs.current[option.key] = el)}>
           <Calendar
