@@ -28,6 +28,13 @@
           }
         },
         {
+          "key": "UPDATE_AUTOMATIC_REPORTING_DELETION_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
           "key": "UPDATE_RELEASABLE_FAILED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
@@ -851,7 +858,8 @@
         { "key": "DELETE_WEBFORM_CONFIGURATION_ERROR" },
         { "key": "DOWNLOAD_WEBFORM_CONFIGURATION_ERROR" },
         { "key": "CREATE_WEBFORM_CONFIGURATION_ERROR" },
-        { "key": "EDIT_WEBFORM_CONFIGURATION_ERROR" }
+        { "key": "EDIT_WEBFORM_CONFIGURATION_ERROR" },
+        { "key": "DELETE_WEBFORM_IN_USE_ERROR" }
       ]
     },
     {
@@ -1146,6 +1154,12 @@
         { "key": "EXPORT_TABLE_DATA_START" },
         { "key": "DOWNLOAD_SCHEMAS_INFO_START" }
       ]
+    },
+    {
+      "key": "warn",
+      "lifeTime": 20000,
+      "fixed": false,
+      "types": [{ "key": "IMPORT_NAMEFILE_WARNING_EVENT" }]
     }
   ],
   "hiddenNotifications": [

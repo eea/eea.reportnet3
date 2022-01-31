@@ -14,9 +14,10 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const DataflowsList = ({
   className,
-  filteredData,
+  data,
   isAdmin,
   isCustodian,
+  isFiltered,
   isLoading,
   pinnedSeparatorIndex,
   reorderDataflows,
@@ -25,8 +26,8 @@ export const DataflowsList = ({
   const resourcesContext = useContext(ResourcesContext);
 
   const isFilteredByPinned = () =>
-    filteredData.filter(dataflow => dataflow.pinned === 'pinned').length === filteredData.length ||
-    filteredData.filter(dataflow => dataflow.pinned === 'unpinned').length === filteredData.length;
+    data.filter(dataflow => dataflow.pinned === 'pinned').length === data.length ||
+    data.filter(dataflow => dataflow.pinned === 'unpinned').length === data.length;
 
   const renderDataflowItem = dataflow => {
     switch (visibleTab) {
@@ -53,7 +54,7 @@ export const DataflowsList = ({
       return <Spinner style={{ top: 0 }} />;
     }
 
-    if (isEmpty(filteredData)) {
+    if (isEmpty(data)) {
       const emptyDataflowsMessage = {
         business: 'thereAreNoBusinessDataflows',
         reference: 'thereAreNoReferenceDataflows',
@@ -61,17 +62,19 @@ export const DataflowsList = ({
         reporting: 'thereAreNoReportingDataflows'
       };
 
-      return <div className={styles.noDataflows}>{resourcesContext.messages[emptyDataflowsMessage[visibleTab]]}</div>;
+      if (isFiltered) {
+        return (
+          <div className={styles.noDataflows}>{resourcesContext.messages['noDataflowsWithSelectedParameters']}</div>
+        );
+      } else {
+        return <div className={styles.noDataflows}>{resourcesContext.messages[emptyDataflowsMessage[visibleTab]]}</div>;
+      }
     }
 
-    if (isEmpty(filteredData)) {
-      return <div className={styles.noDataflows}>{resourcesContext.messages['noDataflowsWithSelectedParameters']}</div>;
-    }
-
-    return filteredData.map((dataflow, i) => (
+    return data.map((dataflow, index) => (
       <Fragment key={dataflow.id}>
         {renderDataflowItem(dataflow)}
-        {!isFilteredByPinned() && pinnedSeparatorIndex === i ? <hr className={styles.pinnedSeparator} /> : null}
+        {!isFilteredByPinned() && pinnedSeparatorIndex === index ? <hr className={styles.pinnedSeparator} /> : null}
       </Fragment>
     ));
   };

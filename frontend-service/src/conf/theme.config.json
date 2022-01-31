@@ -231,7 +231,7 @@
     "growl-success-border-color": "var(--c-growl-success-darker-green)",
     "growl-success-color": "var(--c-black-color)",
     "growl-success-icon-color": "var(--c-growl-success-darker-green)",
-    "growl-warning-bg": "var(--c-corporate-yellow)",
+    "growl-warning-bg": "var(--c-corporate-yellow-lighter)",
     "growl-warning-border-color": "var(--c-growl-warning-darker-yellow)",
     "growl-warning-color": "var(--c-black-color)",
     "growl-warning-icon-color": "var(--c-growl-warning-darker-yellow)",
@@ -365,7 +365,8 @@
     "webform-table-border": "1px solid var(--c-gray-10)",
     "bg-table": "var(--c-gray-5)",
     "bg-table-button": "var(--c-white-color)",
-    "box-shadow-table": "var(--c-gray-25)"
+    "box-shadow-table": "var(--c-gray-25)",
+    "dataflows-list-paginator-bg-color": "var(--c-lilac-300)"
   },
   "dark": {
     "accent-color": "var(--accent-color-dark-mode)",
@@ -599,7 +600,7 @@
     "growl-success-border-color": "var(--c-growl-success-darker-green)",
     "growl-success-color": "var(--c-black-color)",
     "growl-success-icon-color": "var(--c-growl-success-darker-green)",
-    "growl-warning-bg": "var(--c-corporate-yellow)",
+    "growl-warning-bg": "var(--c-corporate-yellow-lighter)",
     "growl-warning-border-color": "var(--c-growl-warning-darker-yellow)",
     "growl-warning-color": "var(--c-black-color)",
     "growl-warning-icon-color": "var(--c-growl-warning-darker-yellow)",
@@ -734,7 +735,8 @@
     "webform-table-border": "1px solid var(--c-gray-75)",
     "bg-table": "var(--bg-dark-01dp)",
     "bg-table-button": "var(--bg-dark-00dp)",
-    "box-shadow-table": "var(--accent-color-dark-mode)"
+    "box-shadow-table": "var(--accent-color-dark-mode)",
+    "dataflows-list-paginator-bg-color": "var(--c-lilac-300)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,
