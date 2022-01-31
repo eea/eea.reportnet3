@@ -210,7 +210,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     if (!isNil(webformData)) {
-      setIsReportingWebform(!isNil(webformData?.name));
+      setIsReportingWebform(webformData?.type === 'PAMS');
     }
   }, [webformData]);
 
