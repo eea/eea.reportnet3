@@ -16,6 +16,7 @@ export class Paginator extends Component {
     alwaysShow: true,
     className: null,
     currentPageReportTemplate: '({currentPage} of {totalPages})',
+    dataflowsList: false,
     disabled: false,
     first: 0,
     leftContent: null,
@@ -33,6 +34,7 @@ export class Paginator extends Component {
     alwaysShow: PropTypes.bool,
     className: PropTypes.string,
     currentPageReportTemplate: PropTypes.any,
+    dataflowsList: PropTypes.bool,
     disabled: PropTypes.bool,
     first: PropTypes.number,
     leftContent: PropTypes.any,
@@ -192,6 +194,7 @@ export class Paginator extends Component {
       case 'PageLinks':
         return (
           <PageLinks
+            dataflowsList={this.props.dataflowsList}
             disabled={this.props.disabled}
             key={key}
             onClick={this.onPageLinkClick}
