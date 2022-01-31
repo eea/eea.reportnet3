@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import styles from './PageLinks.module.scss';
 
 export class PageLinks extends Component {
   static defaultProps = {
@@ -31,7 +32,7 @@ export class PageLinks extends Component {
   render() {
     const elements = this.props.value.map(pageLink => (
       <button
-        className={classNames('p-paginator-page p-paginator-element p-link', {
+        className={classNames('p-paginator-page p-paginator-element p-link', styles.buttonPageLinks, {
           'p-highlight': pageLink - 1 === this.props.page
         })}
         disabled={this.props.disabled}
