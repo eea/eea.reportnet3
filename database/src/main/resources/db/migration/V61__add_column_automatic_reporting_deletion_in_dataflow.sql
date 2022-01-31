@@ -1,0 +1,1 @@
+ALTER TABLE public.dataflow ADD automatic_reporting_deletion bool NOT NULL DEFAULT false;

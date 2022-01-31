@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { InputText } from 'views/_components/InputText';
 
-const ListBoxHeader = ({ filter = null, disabled = false, onFilter = null }) => {
+export const ListBoxHeader = ({ filter = null, disabled = false, onFilter = null }) => {
   const onFilterListBoxHeader = event => {
     if (onFilter) {
       onFilter({
@@ -25,5 +25,3 @@ ListBoxHeader.propTypes = {
   disabled: PropTypes.bool,
   onFilter: PropTypes.func
 };
-
-export { ListBoxHeader };

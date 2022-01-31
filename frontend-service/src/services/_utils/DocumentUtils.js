@@ -4,8 +4,8 @@ import { Document } from 'entities/Document';
 
 const parseDocumentListDTO = documentsDTO => documentsDTO?.map(documentDTO => parseDocumentDTO(documentDTO));
 
-const parseDocumentDTO = documentDTO => {
-  return new Document({
+const parseDocumentDTO = documentDTO =>
+  new Document({
     category: documentDTO.category,
     date: documentDTO.date,
     description: documentDTO.description,
@@ -15,6 +15,5 @@ const parseDocumentDTO = documentDTO => {
     size: documentDTO.size,
     title: documentDTO.name
   });
-};
 
 export const DocumentUtils = { parseDocumentListDTO };

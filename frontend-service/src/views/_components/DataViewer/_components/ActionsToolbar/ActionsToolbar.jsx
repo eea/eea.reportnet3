@@ -5,6 +5,7 @@ import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNull from 'lodash/isNull';
 import isUndefined from 'lodash/isUndefined';
+import ReactTooltip from 'react-tooltip';
 
 import { config } from 'conf';
 
@@ -12,11 +13,11 @@ import styles from './ActionsToolbar.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { ChipButton } from 'views/_components/ChipButton';
+import { DeleteDialog } from './_components/DeleteDialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { DropdownFilter } from 'views/Dataset/_components/DropdownFilter';
 import { InputText } from 'views/_components/InputText';
 import { Menu } from 'views/_components/Menu';
-import ReactTooltip from 'react-tooltip';
 import { Toolbar } from 'views/_components/Toolbar';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
@@ -30,8 +31,9 @@ import { filterReducer } from './_functions/Reducers/filterReducer';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
 import { MetadataUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const ActionsToolbar = ({
+export const ActionsToolbar = ({
   colsSchema,
   dataflowId,
   datasetId,
@@ -44,17 +46,18 @@ const ActionsToolbar = ({
   isGroupedValidationSelected,
   isLoading,
   levelErrorTypesWithCorrects,
+  levelErrorValidations,
   onHideSelectGroupedValidation,
-  onSetVisible,
+  onConfirmDeleteTable,
   onUpdateData,
   originalColumns,
   prevFilterValue,
   records,
+  selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
   selectedTableSchemaId,
   setColumns,
-  setDeleteDialogVisible,
   setImportTableDialogVisible,
   showGroupedValidationFilter,
   showValidationFilter,
@@ -65,7 +68,6 @@ const ActionsToolbar = ({
   tableName
 }) => {
   const [exportTableDataName, setExportTableDataName] = useState('');
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [filter, dispatchFilter] = useReducer(filterReducer, {
     groupedFilter: isGroupedValidationSelected,
     validationDropdown: [],
@@ -73,6 +75,8 @@ const ActionsToolbar = ({
     visibilityDropdown: [],
     visibilityColumnIcon: 'eye'
   });
+  const [isFilteredByValue, setIsFilteredByValue] = useState(false);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
 
   const { groupedFilter, validationDropdown, valueFilter, visibilityDropdown, visibilityColumnIcon } = filter;
 
@@ -84,10 +88,7 @@ const ActionsToolbar = ({
   const dropdownFilterRef = useRef();
 
   useEffect(() => {
-    const dropdownFilter = colsSchema.map(colSchema => {
-      return { label: colSchema.header, key: colSchema.field };
-    });
-
+    const dropdownFilter = colsSchema.map(colSchema => ({ label: colSchema.header, key: colSchema.field }));
     dispatchFilter({ type: 'INIT_FILTERS', payload: { dropdownFilter, levelErrors: getLevelErrorFilters() } });
   }, []);
 
@@ -115,17 +116,27 @@ const ActionsToolbar = ({
   useCheckNotifications(['EXPORT_TABLE_DATA_FAILED_EVENT'], setIsLoadingFile, false);
 
   const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
-    label: resourcesContext.messages[type.key],
+    command: () => onExportTableData(type),
     icon: type.code,
-    command: () => onExportTableData(type.code)
+    label: resourcesContext.messages[type.key]
   }));
 
-  const onExportTableData = async fileType => {
+  const onExportTableData = async type => {
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
-      setExportTableDataName(createTableName(tableName, fileType));
-      await DatasetService.exportTableData(datasetId, tableId, fileType);
+      const isExportFilteredCsv = TextUtils.areEquals(type.key, 'exportFilteredCsv');
+      setExportTableDataName(createTableName(tableName, type.code));
+      await DatasetService.exportTableData(
+        datasetId,
+        tableId,
+        type.code,
+        isFilteredByValue ? filter.valueFilter : '',
+        levelErrorValidations.map(levelError => levelError.toUpperCase()),
+        selectedRuleId,
+        isExportFilteredCsv,
+        isFilterValidationsActive
+      );
     } catch (error) {
       console.error('ActionsToolbar - onExportTableData.', error);
       setIsLoadingFile(false);
@@ -151,13 +162,12 @@ const ActionsToolbar = ({
 
   const onSearchKeyEvent = event => {
     if (event.key === 'Enter') {
+      setIsFilteredByValue(true);
       showValueFilter(encodeURIComponent(valueFilter));
     }
   };
 
-  const createTableName = (tableName, fileType) => {
-    return `${tableName}.${fileType}`;
-  };
+  const createTableName = (tableName, fileType) => `${tableName}.${fileType}`;
 
   const getExportButtonPosition = e => {
     const exportButton = e.currentTarget;
@@ -170,29 +180,28 @@ const ActionsToolbar = ({
   };
 
   const getLevelErrorFilters = () => {
-    let filters = [];
+    const filters = [];
+
     if (!isUndefined(levelErrorTypesWithCorrects)) {
       levelErrorTypesWithCorrects.forEach(value => {
         if (!isUndefined(value) && !isNull(value)) {
-          let filter = {
+          filters.push({
             label: capitalize(value),
             key: capitalize(value)
-          };
-          filters.push(filter);
+          });
         }
       });
     }
+
     return filters;
   };
 
-  const getTooltipMessage = () => {
-    return (
-      <Fragment>
-        <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipGeometryNote']}</span>
-        <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipCaseSensitiveNote']}</span>
-      </Fragment>
-    );
-  };
+  const getTooltipMessage = () => (
+    <Fragment>
+      <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipGeometryNote']}</span>
+      <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipCaseSensitiveNote']}</span>
+    </Fragment>
+  );
 
   const showFilters = columnKeys => {
     const mustShowColumns = ['actions', 'recordValidation', 'id', 'datasetPartitionId', 'providerCode'];
@@ -244,21 +253,15 @@ const ActionsToolbar = ({
           ref={exportMenuRef}
         />
 
-        {(hasWritePermissions || showWriteButtons) && (
-          <Button
-            className={`p-button-rounded p-button-secondary-transparent datasetSchema-delete-table-help-step ${
-              !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
-                ? null
-                : 'p-button-animated-blink'
-            }`}
-            disabled={
-              !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
-            }
-            icon="trash"
-            label={resourcesContext.messages['deleteTable']}
-            onClick={() => onSetVisible(setDeleteDialogVisible, true)}
-          />
-        )}
+        <DeleteDialog
+          disabled={
+            !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
+          }
+          hasWritePermissions={hasWritePermissions}
+          onConfirmDeleteTable={onConfirmDeleteTable}
+          showWriteButtons={showWriteButtons}
+          tableName={tableName}
+        />
 
         <Button
           className={`p-button-rounded p-button-secondary-transparent datasetSchema-showColumn-help-step ${
@@ -341,7 +344,10 @@ const ActionsToolbar = ({
                 icon="search"
                 labelClassName={styles.groupFilter}
                 levelError={selectedRuleLevelError}
-                onClick={() => showValueFilter('')}
+                onClick={() => {
+                  showValueFilter('');
+                  setIsFilteredByValue(false);
+                }}
                 value={decodeURIComponent(prevFilterValue)}
               />
             </span>
@@ -374,7 +380,10 @@ const ActionsToolbar = ({
             <Button
               className="p-button-secondary"
               icon="search"
-              onClick={() => showValueFilter(encodeURIComponent(valueFilter))}
+              onClick={() => {
+                showValueFilter(encodeURIComponent(valueFilter));
+                setIsFilteredByValue(true);
+              }}
             />
             <label
               className={`${styles.label} ${valueFilter !== '' && styles.labelFilled}`}
@@ -402,5 +411,3 @@ const ActionsToolbar = ({
     </Toolbar>
   );
 };
-
-export { ActionsToolbar };

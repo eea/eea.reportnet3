@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 
 import camelCase from 'lodash/camelCase';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
@@ -24,16 +25,17 @@ const sortDataflowsByExpirationDate = dataflows =>
     return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
   });
 
-const parseDataflowCount = (dataflowCountDTO, dataflowType) => {
+const parseDataflowCount = dataflowCountDTO => {
   const dataflowCount = { reporting: 0, business: 0, citizenScience: 0, reference: 0 };
 
   dataflowCountDTO.forEach(dataflowType => {
     dataflowCount[camelCase(dataflowType.type)] = dataflowType.amount;
   });
+
   return dataflowCount;
 };
 
-const parseDataflowListDTO = dataflowsDTO => dataflowsDTO?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
+const parseDataflowListDTO = (dataflowsDTO = []) => dataflowsDTO.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
 
 const parseSortedDataflowListDTO = dataflowDTOs => {
   const dataflows = dataflowDTOs?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
@@ -77,6 +79,7 @@ const parseDataflowDTO = dataflowDTO =>
     fmeUserId: dataflowDTO.fmeUserId,
     fmeUserName: dataflowDTO.fmeUserName,
     id: dataflowDTO.id,
+    isAutomaticReportingDeletion: dataflowDTO.automaticReportingDeletion,
     isReleasable: dataflowDTO.releasable,
     manualAcceptance: dataflowDTO.manualAcceptance,
     name: dataflowDTO.name,
@@ -97,12 +100,12 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   allDataflowsUserListDTO.forEach((dataflow, dataflowIndex) => {
     dataflow.users.forEach((user, usersIndex) => {
       user.roles.forEach((role, roleIndex) => {
-        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(
-          role
-        );
+        allDataflowsUserListDTO[dataflowIndex].users[usersIndex].roles[roleIndex] =
+          UserRoleUtils.getUserRoleLabel(role);
       });
     });
   });
+
   const usersList = [];
   allDataflowsUserListDTO.forEach(dataflow => {
     const { dataflowId, dataflowName } = dataflow;
@@ -113,6 +116,7 @@ const parseAllDataflowsUserList = allDataflowsUserListDTO => {
       });
     });
   });
+
   return usersList;
 };
 
@@ -122,6 +126,7 @@ const parseDataProvidersUserList = usersListDTO => {
       usersListDTO[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(role);
     });
   });
+
   const usersList = [];
   usersListDTO.forEach(parsedUser => {
     const { dataProviderName, email, roles } = parsedUser;
@@ -130,6 +135,7 @@ const parseDataProvidersUserList = usersListDTO => {
       usersList.push({ dataProviderName, email, role });
     });
   });
+
   usersList.forEach(user => {
     if (isNil(user.dataProviderName)) {
       user.dataProviderName = '';
@@ -145,6 +151,7 @@ const parseUsersList = usersListDTO => {
       usersListDTO[usersIndex].roles[roleIndex] = UserRoleUtils.getUserRoleLabel(role);
     });
   });
+
   const usersList = [];
   usersListDTO.forEach(parsedUser => {
     const { email, roles } = parsedUser;
@@ -152,33 +159,61 @@ const parseUsersList = usersListDTO => {
       usersList.push({ email, role });
     });
   });
+
   return usersList;
 };
 
 const getTechnicalAcceptanceStatus = (datasetsStatus = []) => {
-  if (datasetsStatus.some(status => status === config.datasetStatus.CORRECTION_REQUESTED.key))
+  if (datasetsStatus.some(status => status === config.datasetStatus.CORRECTION_REQUESTED.key)) {
     return config.datasetStatus.CORRECTION_REQUESTED.label;
-
-  if (datasetsStatus.some(status => status === config.datasetStatus.FINAL_FEEDBACK.key))
+  } else if (datasetsStatus.some(status => status === config.datasetStatus.FINAL_FEEDBACK.key)) {
     return config.datasetStatus.FINAL_FEEDBACK.label;
-
-  if (datasetsStatus.every(status => status === config.datasetStatus.TECHNICALLY_ACCEPTED.key))
+  } else if (datasetsStatus.every(status => status === config.datasetStatus.TECHNICALLY_ACCEPTED.key)) {
     return config.datasetStatus.TECHNICALLY_ACCEPTED.label;
+  }
 };
 
-const parseDatasetsInfoDTO = datasetsDTO => {
-  return datasetsDTO.map(datasetDTO => {
-    return {
-      dataProviderCode: datasetDTO.dataProviderCode,
-      dataProviderName: datasetDTO.dataProviderName,
-      id: datasetDTO.id,
-      name: datasetDTO.dataSetName,
-      type: getDatasetType(datasetDTO.datasetTypeEnum)
-    };
-  });
-};
+const parseDatasetsInfoDTO = datasetsDTO =>
+  datasetsDTO.map(datasetDTO => ({
+    dataProviderCode: datasetDTO.dataProviderCode,
+    dataProviderName: datasetDTO.dataProviderName,
+    id: datasetDTO.id,
+    name: datasetDTO.dataSetName,
+    type: getDatasetType(datasetDTO.datasetTypeEnum)
+  }));
 
 const getDatasetType = datasetType => config.datasetType.find(type => type.key === datasetType)?.value;
+
+const parseRequestFilterBy = filterBy => {
+  const replacements = {
+    creationDate: 'creation_date',
+    description: 'description',
+    expirationDate: 'deadline_date',
+    legalInstrument: 'legal_instrument',
+    name: 'name',
+    obligation: 'obligation',
+    obligationId: 'obligation_id',
+    status: 'status'
+  };
+
+  if (isEmpty(filterBy)) {
+    return {};
+  }
+
+  const parsedFilterBy = Object.keys(filterBy).map(key => ({ [replacements[key] || key]: filterBy[key] }));
+
+  return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
+};
+
+const parseRequestSortBy = sortByOptions => {
+  if (isNil(sortByOptions)) {
+    return { isAsc: undefined, sortByHeader: '' };
+  }
+
+  const replacements = { asc: true, desc: false, idle: undefined };
+
+  return { isAsc: replacements[sortByOptions.sortByOption], sortByHeader: sortByOptions.sortByHeader };
+};
 
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
@@ -190,6 +225,8 @@ export const DataflowUtils = {
   parseDatasetsInfoDTO,
   parsePublicDataflowDTO,
   parsePublicDataflowListDTO,
+  parseRequestFilterBy,
+  parseRequestSortBy,
   parseSortedDataflowListDTO,
   parseUsersList,
   sortDataflowsByExpirationDate

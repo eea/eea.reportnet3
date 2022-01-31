@@ -7,13 +7,15 @@ import styles from './UserList.module.scss';
 
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
-import { Filters } from 'views/_components/Filters';
+import { MyFilters } from 'views/_components/MyFilters';
 import { Spinner } from 'views/_components/Spinner';
 
 import { DataflowService } from 'services/DataflowService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
@@ -22,19 +24,13 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [userListData, setUserListData] = useState([]);
-  const [filteredData, setFilteredData] = useState(userListData);
-  const [isDataFiltered, setIsDataFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { filteredData, isFiltered } = useFilters('userList');
 
   useEffect(() => {
     fetchData();
   }, []);
-
-  useEffect(() => {
-    if (!isDataFiltered) {
-      setFilteredData(userListData);
-    }
-  }, [isDataFiltered]);
 
   const fetchData = async () => {
     try {
@@ -48,7 +44,6 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
         userData = await DataflowService.getUserList(dataflowId, representativeId);
       }
       setUserListData(userData);
-      setFilteredData(userData);
     } catch (error) {
       console.error('UserList - fetchData.', error);
       notificationContext.add({ type: 'LOAD_USERS_LIST_ERROR' }, true);
@@ -57,61 +52,86 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
     }
   };
 
-  const getFilteredState = value => setIsDataFiltered(value);
+  const getFilters = filterOptions => (
+    <MyFilters className="userList" data={userListData} options={filterOptions} viewType="userList" />
+  );
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
-      {isDataFiltered && userListData.length !== filteredData.length
+      {isFiltered && userListData.length !== filteredData.length
         ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {userListData.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
-      {isDataFiltered && userListData.length === filteredData.length
+      {isFiltered && userListData.length === filteredData.length
         ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
   );
 
-  const onLoadFilteredData = value => setFilteredData(value);
+  const getUserListColumns = () => {
+    const columns = [];
+
+    if (isNil(representativeId) && isNil(dataflowId)) {
+      columns.push({ key: 'dataflowName', header: resourcesContext.messages['dataflowName'] });
+    }
+
+    columns.push(
+      { key: 'role', header: resourcesContext.messages['role'] },
+      { key: 'email', header: resourcesContext.messages['user'] }
+    );
+
+    if (isNil(representativeId) && !isNil(dataflowId)) {
+      columns.push({
+        key: 'dataProviderName',
+        header: TextByDataflowTypeUtils.getLabelByDataflowType(
+          resourcesContext.messages,
+          dataflowType,
+          'userListDataProviderColumnHeader'
+        )
+      });
+    }
+
+    return columns.map(column => <Column field={column.key} header={column.header} key={column.key} sortable />);
+  };
 
   const filterOptionsWithDataflowIdRepresentativeId = [
-    { type: 'multiselect', properties: [{ name: 'role' }] },
-    { type: 'input', properties: [{ name: 'email' }] },
     {
-      type: 'multiselect',
-      properties: [
-        {
-          name: 'dataProviderName',
-          showInput: true,
-          label: TextByDataflowTypeUtils.getLabelByDataflowType(
-            resourcesContext.messages,
-            dataflowType,
-            'userListDataProviderFilterLabel'
-          )
-        }
-      ]
+      type: 'MULTI_SELECT',
+      key: 'role',
+      label: resourcesContext.messages['role']
+    },
+    { type: 'INPUT', key: 'email', label: resourcesContext.messages['email'] },
+    {
+      type: 'MULTI_SELECT',
+      key: 'dataProviderName',
+      showInput: true,
+      label: TextByDataflowTypeUtils.getLabelByDataflowType(
+        resourcesContext.messages,
+        dataflowType,
+        'userListDataProviderFilterLabel'
+      )
     }
   ];
 
   const filterOptionsNoRepresentative = [
-    { type: 'input', properties: [{ name: 'dataflowName' }] },
-    { type: 'multiselect', properties: [{ name: 'role' }] },
-    { type: 'input', properties: [{ name: 'email' }] }
+    {
+      type: 'INPUT',
+      key: 'dataflowName',
+      label: resourcesContext.messages['dataflowName']
+    },
+    { type: 'MULTI_SELECT', nestedOptions: [{ key: 'role', label: resourcesContext.messages['role'] }] },
+    {
+      type: 'INPUT',
+      key: 'email',
+      label: resourcesContext.messages['email']
+    }
   ];
 
   const filterOptionsHasRepresentativeId = [
-    { type: 'multiselect', properties: [{ name: 'role' }] },
-    { type: 'input', properties: [{ name: 'email' }] }
+    { type: 'MULTI_SELECT', nestedOptions: [{ key: 'role', label: resourcesContext.messages['role'] }] },
+    { type: 'INPUT', key: 'email', label: resourcesContext.messages['email'] }
   ];
-
-  const getFilters = filterOptions => (
-    <Filters
-      data={userListData}
-      getFilteredData={onLoadFilteredData}
-      getFilteredSearched={getFilteredState}
-      options={filterOptions}
-    />
-  );
 
   const renderFilters = () => {
     if (isNil(representativeId) && isNil(dataflowId)) {
@@ -155,22 +175,7 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
           summary="usersList"
           totalRecords={userListData.length}
           value={filteredData}>
-          {isNil(representativeId) && isNil(dataflowId) && (
-            <Column field="dataflowName" header={resourcesContext.messages['dataflowName']} sortable={true} />
-          )}
-          <Column field="role" header={resourcesContext.messages['role']} sortable={true} />
-          <Column field="email" header={resourcesContext.messages['user']} sortable={true} />
-          {isNil(representativeId) && !isNil(dataflowId) && (
-            <Column
-              field="dataProviderName"
-              header={TextByDataflowTypeUtils.getLabelByDataflowType(
-                resourcesContext.messages,
-                dataflowType,
-                'userListDataProviderColumnHeader'
-              )}
-              sortable={true}
-            />
-          )}
+          {getUserListColumns()}
         </DataTable>
       );
     }

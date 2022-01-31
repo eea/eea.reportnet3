@@ -243,7 +243,6 @@
 }
 
 .moveArrows {
-  cursor: pointer;
   width: 32px;
 }
 
@@ -388,6 +387,7 @@
   .draggableFieldDiv {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     padding: 0;
     margin: 0;
     background-color: transparent;

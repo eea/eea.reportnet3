@@ -27,7 +27,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { RecordUtils } from 'views/_functions/Utils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
-const ComparisonExpression = ({
+export const ComparisonExpression = ({
   dataflowType,
   expressionValues,
   isDisabled,
@@ -417,9 +417,9 @@ const ComparisonExpression = ({
           }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
+          selectableYears={100}
           value={field2}
-          yearNavigator={true}
-          yearRange="1900:2500"></Calendar>
+          yearNavigator={true}></Calendar>
       );
     }
     if (operatorType === 'day' || operatorType === 'dayDateTime') {
@@ -669,4 +669,3 @@ const ComparisonExpression = ({
     </li>
   );
 };
-export { ComparisonExpression };

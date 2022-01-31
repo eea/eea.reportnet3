@@ -10,19 +10,16 @@ export const DropdownItem = ({
   disabled = false,
   onClick = null
 }) => {
-  let classNamed = classNames('p-dropdown-item', {
+  const classNamed = classNames('p-dropdown-item', {
     'p-highlight': selected,
     'p-disabled': disabled,
     'p-dropdown-item-empty': !label || label.length === 0
   });
-  let content = template ? template(option) : label;
+  const content = template ? template(option) : label;
 
   const onItemClick = event => {
     if (!isNil(onClick)) {
-      onClick({
-        originalEvent: event,
-        option: option
-      });
+      onClick({ originalEvent: event, option: option });
     }
   };
 

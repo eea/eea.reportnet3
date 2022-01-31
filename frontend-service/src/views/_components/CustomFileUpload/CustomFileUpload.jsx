@@ -1,5 +1,11 @@
-import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+
+import DomHandler from 'views/_functions/PrimeReact/DomHandler';
+
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+
+import { config } from 'conf';
 
 import classNames from 'classnames';
 
@@ -17,8 +23,7 @@ import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { customFileUploadReducer } from './_functions/customFileUploadReducer';
-import DomHandler from 'views/_functions/PrimeReact/DomHandler';
+import { customFileUploadReducer } from './_functions/Reducers/customFileUploadReducer';
 
 export const CustomFileUpload = ({
   accept = undefined,
@@ -51,6 +56,7 @@ export const CustomFileUpload = ({
   onProgress = null,
   onSelect = null,
   onUpload = null,
+  onValidateFile = null,
   operation = 'POST',
   previewWidth = 50,
   replaceCheck = false,
@@ -72,6 +78,8 @@ export const CustomFileUpload = ({
     replace: false
   });
 
+  const [isValidating, setIsValidating] = useState(false);
+
   const _files = useRef([]);
   const content = useRef(null);
   const fileInput = useRef(null);
@@ -85,6 +93,7 @@ export const CustomFileUpload = ({
     if (!isNil(draggedFiles)) {
       if (draggedFiles.length > fileLimit) {
         messagesUI.current.show({
+          life: config.IMPORT_ERROR_LIFETIME,
           severity: 'error',
           summary: invalidNumberOfFilesMessageSummary
             .replace('{0}', fileLimit)
@@ -201,9 +210,10 @@ export const CustomFileUpload = ({
     return false;
   };
 
-  const validate = file => {
+  const validate = async file => {
     if (maxFileSize && file.size > maxFileSize) {
       messagesUI.current.show({
+        life: config.IMPORT_ERROR_LIFETIME,
         severity: 'error',
         summary: invalidFileSizeMessageSummary.replace('{0}', file.name),
         detail: invalidFileSizeMessageDetail.replace('{0}', formatSize(maxFileSize))
@@ -211,6 +221,29 @@ export const CustomFileUpload = ({
 
       return false;
     }
+
+    if (onValidateFile) {
+      setIsValidating(true);
+      const validations = await onValidateFile(file);
+      if (!isEmpty(validations)) {
+        let hasErrors = false;
+        validations.forEach(validation => {
+          if (validation.severity === 'error') {
+            hasErrors = true;
+          }
+          messagesUI.current.show({
+            life: config.IMPORT_ERROR_LIFETIME,
+            severity: validation.severity,
+            summary: validation.summary,
+            detail: validation.detail
+          });
+        });
+        setIsValidating(false);
+        return hasErrors;
+      }
+      setIsValidating(false);
+    }
+
     if (accept) {
       if (!checkValidExtension(file)) {
         dispatch({ type: 'UPLOAD_PROPERTY', payload: { isValid: false } });
@@ -228,7 +261,7 @@ export const CustomFileUpload = ({
     let formData = new FormData();
 
     if (onBeforeUpload) {
-      onBeforeUpload({ xhr: xhr, formData: formData });
+      onBeforeUpload({ xhr: xhr, formData: formData }, state.files);
     }
 
     for (let file of state.files) {
@@ -326,6 +359,7 @@ export const CustomFileUpload = ({
 
       if (files && files.length > fileLimit) {
         messagesUI.current.show({
+          life: config.IMPORT_ERROR_LIFETIME,
           severity: 'error',
           summary: invalidNumberOfFilesMessageSummary
             .replace('{0}', fileLimit)
@@ -500,13 +534,23 @@ export const CustomFileUpload = ({
     let uploadButton;
     let cancelButton;
 
+    const getButtonLabel = () => {
+      if (isValidating) {
+        return resourcesContext.messages['validating'];
+      } else if (state.isUploading) {
+        return resourcesContext.messages['uploading'];
+      } else {
+        return uploadLabel;
+      }
+    };
+
     if (!auto) {
       uploadButton = (
         <span data-for="invalidExtension" data-tip>
           <Button
-            disabled={disabled || !hasFiles() || checkValidExtension() || state.isUploading}
-            icon={state.isUploading ? 'spinnerAnimate' : 'upload'}
-            label={uploadLabel}
+            disabled={disabled || !hasFiles() || checkValidExtension() || state.isUploading || isValidating}
+            icon={state.isUploading || isValidating ? 'spinnerAnimate' : 'upload'}
+            label={getButtonLabel()}
             onClick={upload}
           />
         </span>

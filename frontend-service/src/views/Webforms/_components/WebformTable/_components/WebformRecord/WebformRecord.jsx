@@ -458,16 +458,16 @@ export const WebformRecord = ({
 
   const renderErrorMessages = content => {
     switch (webformType) {
-      case 'ARTICLE_15':
-        return renderArticle15ErrorMessages(content);
-      case 'ARTICLE_13':
-        return renderArticle13ErrorMessages(content);
+      case 'TABLES':
+        return renderTableWebformErrorMessages(content);
+      case 'PAMS':
+        return renderWebformPaMsErrorMessages(content);
       default:
         return [];
     }
   };
 
-  const renderArticle13ErrorMessages = content => {
+  const renderWebformPaMsErrorMessages = content => {
     const errorMessages = [];
 
     if (isEmpty(record)) errorMessages.push('PLEASE CHOOSE ONE');
@@ -480,7 +480,7 @@ export const WebformRecord = ({
     return errorMessages;
   };
 
-  const renderArticle15ErrorMessages = content => {
+  const renderTableWebformErrorMessages = content => {
     const errorMessages = [];
     if (hasFields) {
       errorMessages.push(resourcesContext.messages['emptyWebformTable']);

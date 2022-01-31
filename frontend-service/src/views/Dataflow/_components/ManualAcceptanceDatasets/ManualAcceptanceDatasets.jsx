@@ -10,7 +10,7 @@ import styles from './ManualAcceptanceDatasets.module.scss';
 import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
-import { Filters } from 'views/_components/Filters';
+import { MyFilters } from 'views/_components/MyFilters';
 import { Spinner } from 'views/_components/Spinner';
 
 import { DataflowService } from 'services/DataflowService';
@@ -19,6 +19,8 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { manualAcceptanceDatasetsReducer } from './_functions/Reducers/manualAcceptanceDatasetsReducer';
+
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -34,16 +36,22 @@ export const ManualAcceptanceDatasets = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const { filteredData } = useFilters('manualAcceptanceDatasets');
+
+  const manualAcceptanceInitialState = {
+    data: [],
+    filtered: false,
+    isLoading: true
+  };
+
   const [manualAcceptanceDatasetsState, manualAcceptanceDatasetsDispatch] = useReducer(
     manualAcceptanceDatasetsReducer,
-    { data: [], filtered: false, filteredData: [], isLoading: true }
+    manualAcceptanceInitialState
   );
 
   useEffect(() => {
     onLoadManualAcceptanceDatasets();
   }, [isUpdatedManualAcceptanceDatasets]);
-
-  const getFiltered = value => manualAcceptanceDatasetsDispatch({ type: 'IS_FILTERED', payload: { value } });
 
   const getPaginatorRecordsCount = () => (
     <Fragment>
@@ -78,8 +86,6 @@ export const ManualAcceptanceDatasets = ({
       isLoading(false);
     }
   };
-
-  const onLoadFilteredData = data => manualAcceptanceDatasetsDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
   const getOrderedValidations = datasets => {
     const datasetsWithPriority = [
@@ -123,25 +129,22 @@ export const ManualAcceptanceDatasets = ({
   );
 
   const filterOptions = [
-    { type: 'input', properties: [{ name: 'datasetName' }] },
+    { key: 'datasetName', label: resourcesContext.messages['datasetName'], type: 'INPUT' },
     {
-      type: 'multiselect',
-      properties: [
+      nestedOptions: [
         {
-          name: 'dataProviderName',
+          key: 'dataProviderName',
           label: TextByDataflowTypeUtils.getLabelByDataflowType(
             resourcesContext.messages,
             dataflowType,
             'manualAcceptanceDataProviderNameFilterLabel'
           )
         },
-        { name: 'feedbackStatus' }
-      ]
+        { key: 'feedbackStatus', label: resourcesContext.messages['feedbackStatus'] }
+      ],
+      type: 'MULTI_SELECT'
     },
-    {
-      type: 'checkbox',
-      properties: [{ name: 'isReleased', label: resourcesContext.messages['onlyReleasedCheckboxLabel'] }]
-    }
+    { key: 'isReleased', label: resourcesContext.messages['onlyReleasedCheckboxLabel'], type: 'CHECKBOX' }
   ];
 
   const renderColumns = datasets => {
@@ -186,11 +189,11 @@ export const ManualAcceptanceDatasets = ({
     </div>
   ) : (
     <div className={styles.manualAcceptanceDatasets}>
-      <Filters
+      <MyFilters
+        className="lineItems"
         data={manualAcceptanceDatasetsState.data}
-        getFilteredData={onLoadFilteredData}
-        getFilteredSearched={getFiltered}
         options={filterOptions}
+        viewType="manualAcceptanceDatasets"
       />
       {!isEmpty(manualAcceptanceDatasetsState.filteredData) ? (
         <DataTable
@@ -201,8 +204,8 @@ export const ManualAcceptanceDatasets = ({
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary={resourcesContext.messages['manualAcceptance']}
-          totalRecords={manualAcceptanceDatasetsState.filteredData.length}
-          value={manualAcceptanceDatasetsState.filteredData}>
+          totalRecords={filteredData.length}
+          value={filteredData}>
           {renderColumns(manualAcceptanceDatasetsState.filteredData)}
         </DataTable>
       ) : (

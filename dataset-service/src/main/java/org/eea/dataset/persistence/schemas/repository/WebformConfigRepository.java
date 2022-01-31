@@ -20,4 +20,11 @@ public interface WebformConfigRepository
    */
   WebformConfig findByIdReferenced(Long id);
 
+  /**
+   * Delete by id referenced.
+   *
+   * @param idReferenced the id referenced
+   */
+  void deleteByIdReferenced(Long idReferenced);
+
 }

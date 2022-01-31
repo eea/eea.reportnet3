@@ -6,17 +6,17 @@ export const WebformService = {
   addPamsRecords: async (datasetId, tables, pamId, type) =>
     await WebformRepository.addPamsRecords(datasetId, WebformUtils.parsePamTables(tables, pamId, type)),
 
-  create: async webform => await WebformRepository.create(webform),
+  create: async webformConfiguration => await WebformRepository.create(webformConfiguration),
 
   delete: async id => await WebformRepository.delete(id),
 
   download: async id => await WebformRepository.download(id),
 
-  getAll: async () => await WebformRepository.getAll(),
+  getAll: async () => WebformUtils.parseWebformListDTO(await WebformRepository.getAll()),
 
   getSinglePamData: async (datasetId, groupPaMId) => await WebformRepository.getSinglePamData(datasetId, groupPaMId),
 
   getWebformConfig: async webformId => await WebformRepository.getWebformConfig(webformId),
 
-  update: async (webform, id) => await WebformRepository.update(webform, id)
+  update: async webformConfiguration => await WebformRepository.update(webformConfiguration)
 };

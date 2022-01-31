@@ -36,6 +36,7 @@ const LeftSideBarProvider = ({ children }) => {
         target: 'body'
       }
     ];
+
     if (!isNil(config)) {
       config.steps.forEach(step =>
         steps.push({

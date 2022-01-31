@@ -44,6 +44,7 @@ const parseUserConfiguration = userConfiguration => {
           : []
         : [])
   );
+
   return userConfiguration;
 };
 

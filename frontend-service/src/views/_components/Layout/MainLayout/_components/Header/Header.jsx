@@ -35,7 +35,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
+export const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
   const navigate = useNavigate();
 
   const notificationContext = useContext(NotificationContext);
@@ -155,13 +155,7 @@ const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
     </a>
   );
 
-  const isLocalEnvironment = () => {
-    let url = window.location.href;
-    if (url.toString().includes('localhost')) {
-      return true;
-    }
-    return false;
-  };
+  const isLocalEnvironment = () => window.location.href.toString().includes('localhost');
 
   const localhostEnvironmentAlert = isLocalEnvironment() && (
     <div className={styles.localhostAlert}>
@@ -327,4 +321,3 @@ const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
     </div>
   );
 };
-export { Header };

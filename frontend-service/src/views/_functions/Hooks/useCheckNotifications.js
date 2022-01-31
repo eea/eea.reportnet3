@@ -7,8 +7,7 @@ export const useCheckNotifications = (keys, fnUseState, fnValue) => {
 
   useEffect(() => {
     keys.forEach(key => {
-      const response = notificationContext.toShow.find(notification => notification.key === key);
-      if (response) {
+      if (notificationContext.toShow.find(notification => notification.key === key)) {
         fnUseState(fnValue);
       }
     });

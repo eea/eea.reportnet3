@@ -1,12 +1,21 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+
+import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+import orderBy from 'lodash/orderBy';
 
 import styles from './ManageWebforms.module.scss';
 
 import { Column } from 'primereact/column';
 
 import { Button } from 'views/_components/Button';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
+import { DownloadFile } from 'views/_components/DownloadFile';
+import { Dropdown } from 'views/_components/Dropdown';
+import { InputFile } from 'views/_components/InputFile';
+import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
 
 import { WebformService } from 'services/WebformService';
@@ -18,45 +27,169 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
+  const [errors, setErrors] = useState({ name: false, type: false, content: false });
+  const [isAddEditDialogVisible, setIsAddEditDialogVisible] = useState(false);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [loadingStatus, setLoadingStatus] = useState('idle');
-  const [isPending, setIsPending] = useState(false);
-  const [selectedWebformId, setSelectedWebformId] = useState(null);
-  const [webforms, setWebforms] = useState([]);
+  const [webformConfiguration, setWebformConfiguration] = useState({ id: null, name: '', type: '', content: '' });
+  const [webformsList, setWebformsConfigurationsList] = useState([]);
+
+  const fileRef = useRef(null);
+
+  const dropdownOptions = [
+    { name: resourcesContext.messages['pamsLabel'], value: 'PAMS' },
+    { name: resourcesContext.messages['qaLabel'], value: 'QA' },
+    { name: resourcesContext.messages['tables'], value: 'TABLES' }
+  ];
+
+  const typesKeyValues = {
+    PAMS: resourcesContext.messages['pamsLabel'],
+    QA: resourcesContext.messages['qaLabel'],
+    TABLES: resourcesContext.messages['tables']
+  };
 
   useEffect(() => {
     getWebformList();
   }, []);
 
   useEffect(() => {
-    setIsPending(loadingStatus === 'pending');
-  }, [loadingStatus]);
+    setWebformConfiguration(getInitialWebformConfiguration);
+  }, [webformConfiguration.id]);
 
-  // TODO
-  // delete: /webform/webformConfig/{id} // Check that endpoint is correct
-  // download: /webform/webformConfig/{id} // Check that endpoint is correct
-
-  // Confirm dialog: Delete webform
-  // ADD / EDIT dialog
+  useLayoutEffect(() => {
+    if (isAddEditDialogVisible) {
+      checkHasErrors();
+    }
+  }, [webformConfiguration]);
 
   const getWebformList = async () => {
     setLoadingStatus('pending');
 
     try {
       const data = await WebformService.getAll();
-      setWebforms(data);
+      setWebformsConfigurationsList(orderBy(data, 'name', 'asc'));
       setLoadingStatus('success');
     } catch (error) {
       console.error('ManageWebforms - getWebformList.', error);
-      setLoadingStatus('failed');
-      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true); // Todo add correct notification
+      setLoadingStatus('error');
+      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
     } finally {
-      setLoadingStatus('idle');
+      setIsLoading(false);
     }
   };
 
+  const onConfirmDeleteDialog = async () => {
+    setLoadingStatus('pending');
+    setIsDeleteDialogVisible(false);
+
+    try {
+      await WebformService.delete(webformConfiguration.id);
+      getWebformList();
+    } catch (error) {
+      console.error('ManageWebforms - onConfirmDeleteDialog.', error);
+      setLoadingStatus('failed');
+
+      if (error.response.status === 400) {
+        notificationContext.add({ type: 'DELETE_WEBFORM_IN_USE_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'DELETE_WEBFORM_CONFIGURATION_ERROR' }, true);
+      }
+    } finally {
+      resetWebformConfiguration();
+    }
+  };
+
+  const resetWebformConfiguration = () => setWebformConfiguration({ id: null, name: '', type: '', content: '' });
+
+  const onDownload = async (id, name) => {
+    setLoadingStatus('pending');
+
+    try {
+      const { data } = await WebformService.download(id);
+
+      if (!isNil(data)) {
+        DownloadFile(data, `${name}.json`);
+      }
+
+      setLoadingStatus('success');
+    } catch (error) {
+      console.error('ManageWebforms - onDownload.', error);
+      setLoadingStatus('error');
+      notificationContext.add({ type: 'DOWNLOAD_WEBFORM_CONFIGURATION_ERROR' }, true);
+    } finally {
+      resetWebformConfiguration();
+    }
+  };
+
+  const onConfirm = async () => {
+    setLoadingStatus('pending');
+
+    try {
+      if (isNil(webformConfiguration.id)) {
+        await WebformService.create(webformConfiguration);
+      } else {
+        await WebformService.update(webformConfiguration);
+      }
+
+      setLoadingStatus('success');
+      getWebformList();
+      setIsAddEditDialogVisible(false);
+      resetWebformConfiguration();
+    } catch (error) {
+      console.error('ManageWebforms - onConfirm.', error);
+      setLoadingStatus('error');
+      if (isNil(webformConfiguration.id)) {
+        notificationContext.add({ type: 'CREATE_WEBFORM_CONFIGURATION_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'EDIT_WEBFORM_CONFIGURATION_ERROR' }, true);
+      }
+    }
+  };
+
+  const onShowDeleteDialog = webformRow => {
+    setWebformConfiguration(webformRow);
+    setIsDeleteDialogVisible(true);
+  };
+
+  const onHideDeleteDialog = () => {
+    setIsDeleteDialogVisible(false);
+    resetWebformConfiguration();
+  };
+
+  const onEditClick = webformRow => {
+    setWebformConfiguration(webformRow);
+    setIsAddEditDialogVisible(true);
+  };
+
+  const onAddEditDialogClose = () => {
+    setIsAddEditDialogVisible(false);
+    resetWebformConfiguration();
+    setErrors({ name: false, type: false, content: false });
+  };
+
+  const onClickDownload = webformRow => {
+    setWebformConfiguration(webformRow);
+    onDownload(webformRow.id, webformRow.name);
+  };
+
+  const onFileUpload = async e => {
+    if (!isNil(e.target.files[0])) {
+      const reader = new FileReader();
+      reader.onload = async e => {
+        const text = e.target.result;
+        setWebformConfiguration(prev => ({ ...prev, content: text }));
+      };
+      reader.readAsText(e.target.files[0]);
+    }
+  };
+
+  const onClearFile = () => setWebformConfiguration(prev => ({ ...prev, content: '' }));
+
   const getTableColumns = () => {
     const columns = [
-      { key: 'label', header: resourcesContext.messages['name'] },
+      { key: 'name', header: resourcesContext.messages['name'] },
+      { key: 'type', header: resourcesContext.messages['type'], template: getTypeTemplate },
       {
         key: 'actions',
         header: resourcesContext.messages['actions'],
@@ -73,127 +206,253 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         field={column.key}
         header={column.header}
         key={column.key}
-        sortable={column.key !== 'actions'}
       />
     ));
   };
 
   const getBtnIcon = (id, iconName) => {
-    if (id === selectedWebformId && isPending) {
+    if (id === webformConfiguration.id && loadingStatus === 'pending') {
       return 'spinnerAnimate';
     }
 
     return iconName;
   };
 
-  const onAddClick = () => {
-    //todo add Create dialog
-  };
+  const getTypeTemplate = ({ type }) => <span>{typesKeyValues[type]}</span>;
 
-  const onShowDeleteDialog = id => {
-    setSelectedWebformId(id);
-    //todo add confirmation dialog
-  };
-
-  const onEdit = id => {
-    setSelectedWebformId(id);
-    //todo add edit dialog
-  };
-
-  const onClickDownload = id => {
-    setSelectedWebformId(id);
-    //todo add download dialog
-  };
-
-  const getActionsTemplate = row => {
+  const getActionsTemplate = webformRow => {
     return (
       <Fragment>
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
-          disabled={isPending}
-          icon={getBtnIcon(row.id, 'edit')}
-          onClick={() => onEdit(row.id)}
+          disabled={loadingStatus === 'pending'}
+          icon={getBtnIcon(webformRow.id, 'edit')}
+          onClick={() => onEditClick(webformRow)}
           type="button"
         />
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.actionButton}`}
-          disabled={isPending}
-          icon={getBtnIcon(row.id, 'export')}
-          onClick={() => onClickDownload(row.id)}
+          disabled={loadingStatus === 'pending'}
+          icon={getBtnIcon(webformRow.id, 'export')}
+          onClick={() => onClickDownload(webformRow)}
           type="button"
         />
         <Button
           className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
-          disabled={isPending}
-          icon={getBtnIcon(row.id, 'trash')}
-          onClick={() => onShowDeleteDialog(row.id)}
+          disabled={loadingStatus === 'pending'}
+          icon={getBtnIcon(webformRow.id, 'trash')}
+          onClick={() => onShowDeleteDialog(webformRow)}
           type="button"
         />
       </Fragment>
     );
   };
 
-  const footer = (
-    <Fragment>
+  const dialogFooter = (
+    <div className={styles.footer}>
       <Button
         className="p-button-primary"
-        disabled={isPending}
-        icon={isPending ? 'spinnerAnimate' : 'plus'}
+        disabled={loadingStatus === 'pending' && isNil(webformConfiguration.id)}
+        icon={'plus'}
         label={resourcesContext.messages['add']}
-        onClick={onAddClick}
+        onClick={() => setIsAddEditDialogVisible(true)}
       />
       <Button
-        className="p-button-secondary p-button-right-aligned"
+        className={`p-button-secondary ${styles.buttonPushRight}`}
         icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={onCloseDialog}
+      />
+    </div>
+  );
+
+  const getInitialWebformConfiguration = () => {
+    if (!webformConfiguration.id) {
+      return { id: null, name: '', type: '', content: '' };
+    }
+
+    const currentWebform = webformsList.find(webform => webform.id === webformConfiguration.id);
+
+    return { ...currentWebform };
+  };
+
+  const checkNameExists = () => webformsList.some(webform => webform.name === webformConfiguration.name);
+
+  const checkNameExistsWithoutCurrent = () =>
+    webformsList
+      .filter(webform => webform.id !== webformConfiguration.id)
+      .some(webform => webform.name === webformConfiguration.name);
+
+  const getIsDisabledConfirmBtn = () => {
+    if (isNil(webformConfiguration.id)) {
+      return (
+        isEmpty(webformConfiguration.name) ||
+        isEmpty(webformConfiguration.content) ||
+        isEmpty(webformConfiguration.type) ||
+        checkNameExists() ||
+        loadingStatus === 'pending'
+      );
+    }
+
+    const initialWebformConfiguration = getInitialWebformConfiguration();
+
+    if (
+      !isEmpty(webformConfiguration.name) &&
+      isEmpty(webformConfiguration.content) &&
+      initialWebformConfiguration.type === webformConfiguration.type
+    ) {
+      return initialWebformConfiguration.name === webformConfiguration.name || checkNameExists();
+    }
+
+    if (
+      initialWebformConfiguration.type !== webformConfiguration.type &&
+      isEmpty(webformConfiguration.content) &&
+      initialWebformConfiguration.name === webformConfiguration.name
+    ) {
+      return initialWebformConfiguration.type === webformConfiguration.type;
+    }
+
+    return (
+      (isEmpty(webformConfiguration.content) && isEmpty(webformConfiguration.name)) ||
+      isEmpty(webformConfiguration.name) ||
+      checkNameExistsWithoutCurrent() ||
+      loadingStatus === 'pending'
+    );
+  };
+
+  const checkHasErrors = () => {
+    if (isNil(webformConfiguration.id)) {
+      setErrors({
+        name: isEmpty(webformConfiguration.name) || checkNameExists(),
+        type: isEmpty(webformConfiguration.type),
+        content: isEmpty(webformConfiguration.content)
+      });
+    } else {
+      setErrors({
+        name: isEmpty(webformConfiguration.name) || checkNameExistsWithoutCurrent(),
+        content: false
+      });
+    }
+  };
+
+  const addEditDialogFooter = (
+    <Fragment>
+      <Button
+        className={`p-button-primary ${getIsDisabledConfirmBtn() ? '' : 'p-button-animated-blink'}`}
+        disabled={getIsDisabledConfirmBtn()}
+        icon={loadingStatus === 'pending' ? 'spinnerAnimate' : 'check'}
+        label={isNil(webformConfiguration.id) ? resourcesContext.messages['create'] : resourcesContext.messages['save']}
+        onClick={onConfirm}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        icon="cancel"
+        label={resourcesContext.messages['cancel']}
+        onClick={onAddEditDialogClose}
       />
     </Fragment>
   );
 
   const renderDialogContent = () => {
-    if (isPending) {
+    if (isLoading) {
       return (
-        <div className={styles.loadingSpinner}>
+        <div className={styles.noDataContent}>
           <Spinner className={styles.spinnerPosition} />
         </div>
       );
     }
 
-    if (loadingStatus === 'failed') {
-      return (
-        <div className={styles.noDataContent}>
-          <p>{resourcesContext.messages['loadWebformsError']}</p>
-          <Button label={resourcesContext.messages['refresh']} onClick={getWebformList} />
-        </div>
-      );
-    }
-
     return (
-      <DataTable
-        autoLayout
-        className={styles.dialogContent}
-        hasDefaultCurrentPage
-        paginator
-        rows={10}
-        rowsPerPageOptions={[5, 10, 15]}
-        totalRecords={webforms.length}
-        value={webforms}>
-        {getTableColumns()}
-      </DataTable>
+      <div className={styles.dialogContent}>
+        <DataTable
+          autoLayout
+          hasDefaultCurrentPage
+          loading={loadingStatus === 'pending' && isNil(webformConfiguration.id)}
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 15]}
+          totalRecords={webformsList.length}
+          value={webformsList}>
+          {getTableColumns()}
+        </DataTable>
+      </div>
     );
   };
 
   return (
-    <Dialog
-      blockScroll={false}
-      className="responsiveDialog"
-      footer={footer}
-      header={resourcesContext.messages['manageWebforms']}
-      modal
-      onHide={onCloseDialog}
-      visible={isDialogVisible}>
-      {renderDialogContent()}
-    </Dialog>
+    <Fragment>
+      <Dialog
+        blockScroll={false}
+        className="responsiveDialog"
+        footer={dialogFooter}
+        header={resourcesContext.messages['manageWebformsConfiguration']}
+        modal
+        onHide={onCloseDialog}
+        visible={isDialogVisible}>
+        {renderDialogContent()}
+      </Dialog>
+
+      {isDeleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resourcesContext.messages['deleteWebformConfiguration']}
+          labelCancel={resourcesContext.messages['cancel']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onConfirmDeleteDialog}
+          onHide={onHideDeleteDialog}
+          visible={isDeleteDialogVisible}>
+          {resourcesContext.messages['confirmDeleteWebformConfiguration']}
+        </ConfirmDialog>
+      )}
+
+      {isAddEditDialogVisible && (
+        <Dialog
+          blockScroll={false}
+          className={`responsiveDialog ${styles.addEditDialog}`}
+          footer={addEditDialogFooter}
+          header={
+            isNil(webformConfiguration.id)
+              ? resourcesContext.messages['addWebformConfigurationDialogHeader']
+              : resourcesContext.messages['editWebformConfigurationDialogHeader']
+          }
+          modal
+          onHide={onAddEditDialogClose}
+          visible={isAddEditDialogVisible}>
+          <InputText
+            className={`${styles.nameInput} ${errors.name ? styles.inputError : ''}`}
+            id="name"
+            maxLength={50}
+            onChange={event => {
+              event.persist();
+              setWebformConfiguration(prev => ({ ...prev, name: event.target.value }));
+            }}
+            placeholder={resourcesContext.messages['name']}
+            value={webformConfiguration.name}
+          />
+
+          <Dropdown
+            appendTo={document.body}
+            className={`${styles.typeDropdown} ${errors.type ? styles.typeError : ''}`}
+            id="errorType"
+            onChange={e => setWebformConfiguration(prev => ({ ...prev, type: e.value.value }))}
+            optionLabel="name"
+            options={dropdownOptions}
+            optionValue="value"
+            placeholder={resourcesContext.messages['webformsConfigurationsSelect']}
+            value={{ name: typesKeyValues[webformConfiguration.type], value: webformConfiguration.type }}
+          />
+
+          <InputFile
+            accept=".json"
+            buttonTextNoFile={resourcesContext.messages['inputFileButtonNotSelected']}
+            buttonTextWithFile={resourcesContext.messages['inputFileButtonSelected']}
+            fileRef={fileRef}
+            hasError={errors.content}
+            onChange={onFileUpload}
+            onClearFile={onClearFile}
+          />
+        </Dialog>
+      )}
+    </Fragment>
   );
 };

@@ -30,6 +30,7 @@ import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
@@ -201,17 +202,22 @@ public class DataflowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
       responseContainer = "List", hidden = true)
-  public List<DataFlowVO> findDataflows() {
-    List<DataFlowVO> dataflows = new ArrayList<>();
+  public PaginatedDataflowVO findDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum) {
+    PaginatedDataflowVO dataflows = new PaginatedDataflowVO();
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REPORTING);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REPORTING, filters,
+          orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -227,17 +233,22 @@ public class DataflowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Reference Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
       responseContainer = "List", hidden = true)
-  public List<DataFlowVO> findReferenceDataflows() {
-    List<DataFlowVO> dataflows = new ArrayList<>();
+  public PaginatedDataflowVO findReferenceDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum) {
+    PaginatedDataflowVO dataflows = new PaginatedDataflowVO();
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REFERENCE);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REFERENCE, filters,
+          orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -252,17 +263,24 @@ public class DataflowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Business Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
       responseContainer = "List", hidden = true)
-  public List<DataFlowVO> findBusinessDataflows() {
-    List<DataFlowVO> dataflows = new ArrayList<>();
+  public PaginatedDataflowVO findBusinessDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum)
+
+  {
+    PaginatedDataflowVO dataflows = new PaginatedDataflowVO();
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.BUSINESS);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.BUSINESS, filters,
+          orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -279,17 +297,22 @@ public class DataflowControllerImpl implements DataFlowController {
   @Override
   @HystrixCommand
   @PreAuthorize("isAuthenticated()")
-  @GetMapping(value = "/citizenScienceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PostMapping(value = "/citizenScienceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Citizen Science Dataflows for the logged User",
       produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
       responseContainer = "List", hidden = true)
-  public List<DataFlowVO> findCitizenScienceDataflows() {
-    List<DataFlowVO> dataflows = new ArrayList<>();
+  public PaginatedDataflowVO findCitizenScienceDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum) {
+    PaginatedDataflowVO dataflows = new PaginatedDataflowVO();
     String userId =
         ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
             .get(AuthenticationDetails.USER_ID);
     try {
-      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.CITIZEN_SCIENCE);
+      dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.CITIZEN_SCIENCE, filters,
+          orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     }
@@ -651,13 +674,28 @@ public class DataflowControllerImpl implements DataFlowController {
   /**
    * Gets the public dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the public dataflows
    */
   @Override
-  @GetMapping("/getPublicDataflows")
+  @PostMapping("/getPublicDataflows")
+
   @ApiOperation(value = "Gets all the public dataflows", hidden = true)
-  public List<DataflowPublicVO> getPublicDataflows() {
-    return dataflowService.getPublicDataflows();
+  public PaginatedDataflowVO getPublicDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum) {
+    try {
+      return dataflowService.getPublicDataflows(filters, orderHeader, asc, pageSize, pageNum);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "An error happenned trying to retrieve the dataflows");
+    }
   }
 
   /**
@@ -987,6 +1025,31 @@ public class DataflowControllerImpl implements DataFlowController {
     }
 
     return new ResponseEntity<>(message, status);
+  }
+
+  /**
+   * Update data flow automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDelete the automatic reporting delete
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @PutMapping("/{dataflowId}/updateAutomaticDelete")
+  @ApiOperation(value = "Update one Dataflow Automatic Delete Data and Snapshot", hidden = true)
+  @ApiResponse(code = 500, message = "Internal Server Error")
+  public void updateDataFlowAutomaticReportingDeletion(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("AutomaticDelete") boolean automaticReportingDelete) {
+    try {
+      dataflowService.updateDataFlowAutomaticReportingDeletion(dataflowId,
+          automaticReportingDelete);
+    } catch (Exception e) {
+      LOG.error(String.format(
+          "Couldn't update the dataflow automatic delete data and snapshots with the provided dataflowId %s.",
+          dataflowId), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "Couldn't update the dataflow automatic delete data and snapshots. An unknown error happenned.");
+    }
   }
 
   /**
