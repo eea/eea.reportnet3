@@ -711,7 +711,7 @@ public class DataflowControllerImpl implements DataFlowController {
   @Override
   @GetMapping("/public/country/{countryCode}")
   @ApiOperation(value = "Gets all the public dataflow that use a specific Country Code",
-      hidden = true)
+      hidden = false)
   public DataflowPublicPaginatedVO getPublicDataflowsByCountry(
       @ApiParam(value = "Country Code",
           example = "AL") @PathVariable("countryCode") String countryCode,
@@ -727,8 +727,16 @@ public class DataflowControllerImpl implements DataFlowController {
       @ApiParam(value = "asc: is the sorting order ascending or descending?", example = "false",
           defaultValue = "true") @RequestParam(value = "asc", defaultValue = "true") boolean asc,
       @RequestBody(required = false) Map<String, String> filters) {
-    return dataflowService.getPublicDataflowsByCountry(countryCode, sortField, asc, pageNum,
-        pageSize, filters);
+    try {
+      return dataflowService.getPublicDataflowsByCountry(countryCode, sortField, asc, pageNum,
+          pageSize, filters);
+    } catch (EEAException e) {
+      LOG_ERROR.info(
+          String.format("There was an error retrieving the public dataflows for the country: %s",
+              countryCode),
+          e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATAFLOW_GET_ERROR);
+    }
   }
 
   /**

@@ -296,7 +296,7 @@ public class DataflowServiceImpl implements DataflowService {
         idsResources = userManagementControllerZull
             .getResourcesByUser(ResourceTypeEnum.DATAFLOW,
                 SecurityRoleEnum.fromValue(filters.get("role")))
-            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());;
+            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
         idsResourcesWithoutRole =
             userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
                 .map(ResourceAccessVO::getId).collect(Collectors.toList());
@@ -779,30 +779,14 @@ public class DataflowServiceImpl implements DataflowService {
           obligationControllerZull.findOpenedObligations(null, null, null, null, null);
       ObjectMapper objectMapper = new ObjectMapper();
 
+      List<Dataflow> publicDataflows = dataflowRepository.findPaginated(arrayToJson, pageable,
+          Boolean.TRUE, filters, orderHeader, asc, null, null);
+
       String arrayToJson = objectMapper.writeValueAsString(obligations);
 
     } catch (JsonProcessingException e) {
-      throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
+      throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR, e);
     }
-    // get the entity
-    List<DataflowPublicVO> dataflowPublicList = dataflowPublicMapper
-        .entityListToClass(dataflowRepository.findPublicDataflowsByCountryCode(countryCode));
-
-
-    // ok
-    List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
-    setReportings(dataflowPublicList, providerId);
-    // sort and paging
-    sortPublicDataflows(dataflowPublicList, header, asc);
-    dataflowPublicPaginated.setPublicDataflows(getPage(dataflowPublicList, page, pageSize));
-    dataflowPublicPaginated.setTotalRecords(Long.valueOf(dataflowPublicList.size()));
-
-    dataflowPublicPaginated.getPublicDataflows().stream().forEach(dataflow -> {
-      dataflow.setReferenceDatasets(
-          referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflow.getId()));
-    });
-
-    // ok
 
     return dataflowPublicPaginated;
   }
