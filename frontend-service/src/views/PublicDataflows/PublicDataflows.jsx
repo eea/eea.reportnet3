@@ -189,7 +189,7 @@ export const PublicDataflows = () => {
     if (!isLoading) {
       return (
         <Paginator
-          className="p-paginator-bottom"
+          className={`p-paginator-bottom ${styles.paginator}`}
           first={firstRow}
           onPageChange={onPaginate}
           rightContent={renderPaginatorRecordsCount()}
