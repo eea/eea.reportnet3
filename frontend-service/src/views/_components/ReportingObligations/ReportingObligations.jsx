@@ -29,7 +29,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const { filteredData, filterBy } = useFilters('reportingObligations');
+  const { filterBy, filteredData, isFiltered } = useFilters('reportingObligations');
 
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     countries: [],
@@ -201,8 +201,20 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     { key: 'expirationDate', label: resourcesContext.messages['expirationDate'], type: 'DATE' }
   ];
 
-  const renderData = () =>
-    userContext.userProps.listView ? (
+  const renderData = () => {
+    if (reportingObligationState.isLoading) {
+      return <Spinner className={styles.spinner} />;
+    }
+
+    if (isEmpty(reportingObligationState.data)) {
+      if (isFiltered) {
+        <h3 className={styles.noObligations}>{resourcesContext.messages['noObligationsWithSelectedParameters']}</h3>;
+      } else {
+        <h3 className={styles.noObligations}>{resourcesContext.messages['emptyObligationList']}</h3>;
+      }
+    }
+
+    return userContext.userProps.listView ? (
       <TableView
         checkedObligation={reportingObligationState.selectedObligation}
         data={reportingObligationState.searchedData}
@@ -223,6 +235,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
         paginatorRightText={getPaginatorRecordsCount()}
       />
     );
+  };
 
   return (
     <div
@@ -252,19 +265,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
           viewType="reportingObligations"
         />
       </div>
-
-      {reportingObligationState.isLoading ? (
-        <Spinner className={styles.spinner} />
-      ) : isEmpty(reportingObligationState.data) ? (
-        reportingObligationState.filteredSearched ? (
-          <h3 className={styles.noObligations}>{resourcesContext.messages['noObligationsWithSelectedParameters']}</h3>
-        ) : (
-          <h3 className={styles.noObligations}>{resourcesContext.messages['emptyObligationList']}</h3>
-        )
-      ) : (
-        renderData()
-      )}
-
+      {renderData()}
       {!reportingObligationState.isLoading && (
         <span
           className={`${styles.selectedObligation} ${
