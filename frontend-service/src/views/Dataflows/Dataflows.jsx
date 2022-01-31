@@ -159,7 +159,8 @@ export const Dataflows = () => {
   const filterBy = useRecoilValue(filterByState(tabId));
   const sortByOptions = useRecoilValue(sortByState(tabId));
 
-  const { resetFiltersState } = useFilters('userList');
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
+  const { resetFiltersState: resetReportingObligationsFiltersState } = useFilters('reportingObligations');
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -432,6 +433,7 @@ export const Dataflows = () => {
   const onHideObligationDialog = () => {
     manageDialogs('isReportingObligationsDialogVisible', false);
     setObligationToPrevious();
+    resetReportingObligationsFiltersState();
   };
 
   const onLoadPermissions = () => {
@@ -562,7 +564,7 @@ export const Dataflows = () => {
       label={resourcesContext.messages['close']}
       onClick={() => {
         manageDialogs('isUserListVisible', false);
-        resetFiltersState();
+        resetUserListFiltersState();
       }}
     />
   );
@@ -575,6 +577,7 @@ export const Dataflows = () => {
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
           setToCheckedObligation();
+          resetReportingObligationsFiltersState();
         }}
       />
       <Button
@@ -584,6 +587,7 @@ export const Dataflows = () => {
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
           setObligationToPrevious();
+          resetReportingObligationsFiltersState();
         }}
       />
     </Fragment>
@@ -786,7 +790,7 @@ export const Dataflows = () => {
           header={resourcesContext.messages['allDataflowsUserListHeader']}
           onHide={() => {
             manageDialogs('isUserListVisible', false);
-            resetFiltersState();
+            resetUserListFiltersState();
           }}
           visible={dataflowsState.isUserListVisible}>
           <UserList />

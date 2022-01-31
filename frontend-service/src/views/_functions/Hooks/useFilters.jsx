@@ -5,6 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import {
   filterByState,
   filteredDataState,
+  searchState,
   sortByState
 } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
 
@@ -15,6 +16,7 @@ export const useFilters = recoilId => {
 
   const resetFilterBy = useResetRecoilState(filterByState(recoilId));
   const resetFilteredData = useResetRecoilState(filteredDataState(recoilId));
+  const resetSearchBy = useResetRecoilState(searchState(recoilId));
   const resetSortBy = useResetRecoilState(sortByState(recoilId));
 
   const checkIsFilter = () => {
@@ -31,6 +33,7 @@ export const useFilters = recoilId => {
     resetFilterBy();
     resetFilteredData();
     resetSortBy();
+    resetSearchBy();
   };
 
   return { filterBy, filteredData, isFiltered: checkIsFilter(), resetFiltersState, sortBy };
