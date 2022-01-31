@@ -91,7 +91,8 @@ export const ReferenceDataflow = () => {
     }
   }, [userContext]);
 
-  const { resetFiltersState } = useFilters('datasetInfo');
+  const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
+  const { resetFiltersState: resetReferencingDataflowsFiltersState } = useFilters('referencingDataflows');
 
   useBreadCrumbs({ currentPage: CurrentPage.REFERENCE_DATAFLOW, referenceDataflowId });
 
@@ -286,7 +287,8 @@ export const ReferenceDataflow = () => {
       label={resourcesContext.messages['close']}
       onClick={() => {
         manageDialogs(modalType, false);
-        resetFiltersState();
+        resetDatasetInfoFiltersState();
+        resetReferencingDataflowsFiltersState();
       }}
     />
   );
@@ -387,7 +389,10 @@ export const ReferenceDataflow = () => {
         <Dialog
           footer={renderDialogFooterCloseBtn('isReferencingDataflowsDialogVisible')}
           header={resourcesContext.messages['referencingDataflowsDialogHeader']}
-          onHide={() => manageDialogs('isReferencingDataflowsDialogVisible', false)}
+          onHide={() => {
+            manageDialogs('isReferencingDataflowsDialogVisible', false);
+            resetReferencingDataflowsFiltersState();
+          }}
           visible={dataflowState.isReferencingDataflowsDialogVisible}>
           <ReferencingDataflows referenceDataflowId={referenceDataflowId} />
         </Dialog>
@@ -426,7 +431,7 @@ export const ReferenceDataflow = () => {
           header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowState.data.id}`}
           onHide={() => {
             manageDialogs('isDatasetsInfoDialogVisible', false);
-            resetFiltersState();
+            resetDatasetInfoFiltersState();
           }}
           visible={dataflowState.isDatasetsInfoDialogVisible}>
           <DatasetsInfo dataflowId={referenceDataflowId} dataflowType={dataflowState.dataflowType} />
