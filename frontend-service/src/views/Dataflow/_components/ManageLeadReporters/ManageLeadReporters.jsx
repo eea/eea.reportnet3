@@ -1,5 +1,6 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useMemo } from 'react';
 
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
@@ -20,6 +21,7 @@ import { DataTable } from 'views/_components/DataTable';
 import { Dropdown } from 'views/_components/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
+import { MyFilters } from 'views/_components/MyFilters';
 import { Spinner } from 'views/_components/Spinner';
 import ReactTooltip from 'react-tooltip';
 
@@ -33,7 +35,9 @@ import { reducer } from './_functions/Reducers/representativeReducer';
 import { isDuplicatedLeadReporter, isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 export const ManageLeadReporters = ({
   dataflowId,
@@ -70,6 +74,36 @@ export const ManageLeadReporters = ({
   const [formState, formDispatcher] = useReducer(reducer, initialState);
 
   const { isVisibleDialog } = formState;
+
+  const { filterBy, filteredData } = useFilters('manageLeadReporters');
+
+  const dataFiltersMemo = useMemo(
+    () =>
+      formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
+        ? formState.representatives.filter(representative => !isNil(representative.representativeId))
+        : formState.representatives,
+    [formState.representatives]
+  );
+
+  useEffect(() => {
+    const representatives = cloneDeep(formState.representatives);
+    if (!isEmpty(representatives)) {
+      const representativesWithLabel = representatives.map(representative => {
+        const existRepresentative = formState.allPossibleDataProviders.find(
+          item => item.dataProviderId === representative.dataProviderId
+        );
+
+        if (existRepresentative?.dataProviderId === '') {
+          return representative;
+        }
+        return { ...representative, nameRepresentative: existRepresentative.label };
+      });
+      formDispatcher({
+        type: 'UPDATE_REPRESENTATIVES_WITH_LABEL',
+        payload: { representatives: representativesWithLabel }
+      });
+    }
+  }, [formState.allPossibleDataProviders]);
 
   useEffect(() => {
     if (representativesImport) {
@@ -210,9 +244,7 @@ export const ManageLeadReporters = ({
     formDispatcher({ type: 'HANDLE_DIALOGS', payload: { dialog, isVisible } });
   };
 
-  const onAddRepresentative = async () => {
-    const { representatives } = formState;
-
+  const onAddRepresentative = async representatives => {
     const newRepresentative = representatives.filter(representative => isNil(representative.representativeId));
     if (!isEmpty(newRepresentative[0].dataProviderId)) {
       formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
@@ -244,7 +276,7 @@ export const ManageLeadReporters = ({
     formDispatcher({ type: 'CREATE_ERROR', payload: { dataProviderId, hasErrors, leadReporterId } });
   };
 
-  const onDataProviderIdChange = async (newDataProviderId, representative) => {
+  const onDataProviderIdChange = async (newDataProviderId, representative, indexColumn) => {
     if (!isNil(representative.representativeId)) {
       formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
 
@@ -254,20 +286,40 @@ export const ManageLeadReporters = ({
           parseInt(newDataProviderId)
         );
         formDispatcher({ type: 'REFRESH' });
+        if (!isNil(indexColumn) && !isEmpty(formState.representatives)) {
+          const representatives = cloneDeep(formState.representatives);
+          representatives[indexColumn].dataProviderId = newDataProviderId;
+          return representatives;
+        }
       } catch (error) {
         console.error('RepresentativesList - onDataProviderIdChange.', error);
         notificationContext.add({ type: 'UPDATE_DATA_PROVIDER_ERROR' }, true);
         formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: false } });
+        return [];
       }
     } else {
-      const { representatives } = formState;
-
+      const representatives = cloneDeep(formState.representatives);
       const [thisRepresentative] = representatives.filter(
         thisRepresentative => thisRepresentative.representativeId === representative.representativeId
       );
       thisRepresentative.dataProviderId = newDataProviderId;
 
-      formDispatcher({ type: 'ON_PROVIDER_CHANGE', payload: { representatives } });
+      formDispatcher({
+        type: 'ON_PROVIDER_CHANGE',
+        payload: { representatives }
+      });
+      // const { representatives } = formState;
+      // const index = representatives.findIndex(
+      //   thisRepresentative => thisRepresentative.representativeId === representative.representativeId
+      // );
+      // if (index > -1) {
+      //   formDispatcher({
+      //     type: 'ON_PROVIDER_CHANGE',
+      //     payload: { index, newDataProviderId }
+      //   });
+      // }
+
+      return representatives;
     }
   };
 
@@ -336,6 +388,25 @@ export const ManageLeadReporters = ({
   const setFocusedInputId = focusedInputId =>
     formDispatcher({ type: 'SET_FOCUSED_INPUT_ID', payload: { focusedInputId } });
 
+  const filterOptions = [
+    {
+      type: 'MULTI_SELECT',
+      nestedOptions: [
+        {
+          key: 'nameRepresentative',
+          //key: 'dataProviderId',
+          label: resourcesContext.messages['manageRolesDialogAccountColumn']
+        }
+      ]
+    },
+    {
+      type: 'INPUT',
+      key: 'leadReporters',
+      nestedKey: 'account',
+      label: resourcesContext.messages['manageRolesDialogAccountColumn']
+    }
+  ];
+
   const renderIsValidUserIcon = (isNewLeadReporter, leadReporter, currentInputId) => {
     if (!isNewLeadReporter && formState.focusedInputId !== currentInputId) {
       return (
@@ -366,6 +437,13 @@ export const ManageLeadReporters = ({
       const errors = formState.leadReportersErrors[dataProviderId];
       const isNewLeadReporter = TextUtils.areEquals(leadReporter.id, 'empty');
       const uniqueInputId = `${leadReporter.id}-${representativeId}`;
+      if (!reporters) {
+        return (
+          <div key={uniqueInputId}>
+            <InputText />
+          </div>
+        );
+      }
       return (
         <div
           className={`${styles.inputWrapper} ${
@@ -374,7 +452,7 @@ export const ManageLeadReporters = ({
           key={uniqueInputId}>
           <InputText
             autoComplete={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
-            autoFocus={isNewLeadReporter}
+            autoFocus={isNewLeadReporter && Object.keys(filterBy).length === 0}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             disabled={representative.hasDatasets && reporters[leadReporter.id]?.isValid}
             id={uniqueInputId}
@@ -409,7 +487,7 @@ export const ManageLeadReporters = ({
     });
   };
 
-  const renderDropdownColumnTemplate = representative => {
+  const renderDropdownColumnTemplate = (representative, column) => {
     const selectedOptionForThisSelect = formState.allPossibleDataProviders.filter(
       option => option.dataProviderId === representative.dataProviderId
     );
@@ -432,15 +510,15 @@ export const ManageLeadReporters = ({
           }
           disabled={representative.hasDatasets}
           id={labelId}
-          onChange={event => {
-            onDataProviderIdChange(event.target.value, representative);
-            onAddRepresentative();
+          onChange={async event => {
+            const representatives = await onDataProviderIdChange(event.target.value, representative, column.rowIndex);
+            onAddRepresentative(representatives);
           }}
-          onKeyDown={event => {
-            if (TextUtils.areEquals(event.key, 'Enter')) {
-              onAddRepresentative();
-            }
-          }}
+          // onKeyDown={event => {
+          //   if (TextUtils.areEquals(event.key, 'Enter')) {
+          //     onAddRepresentative();
+          //   }
+          // }}
           value={representative.dataProviderId}>
           {remainingOptionsAndSelectedOption.map((provider, i) => {
             return (
@@ -488,6 +566,19 @@ export const ManageLeadReporters = ({
     );
   };
 
+  const renderFilter = () => {
+    if (formState.isLoading) {
+      return <Spinner className={styles.spinner} />;
+    }
+    if (isNil(formState.selectedDataProviderGroup) || isEmpty(formState.allPossibleDataProviders)) {
+      return null;
+    }
+
+    return (
+      <MyFilters className="lineItems" data={dataFiltersMemo} options={filterOptions} viewType="manageLeadReporters" />
+    );
+  };
+
   const renderTable = () => {
     if (isNil(formState.selectedDataProviderGroup) || isEmpty(formState.allPossibleDataProviders)) {
       return (
@@ -500,12 +591,7 @@ export const ManageLeadReporters = ({
     return (
       <Fragment>
         {formState.isLoading && <Spinner className={styles.spinner} />}
-        <DataTable
-          value={
-            formState.representatives.length > formState.allPossibleDataProvidersNoSelect.length
-              ? formState.representatives.filter(representative => !isNil(representative.representativeId))
-              : formState.representatives
-          }>
+        <DataTable value={filteredData}>
           <Column
             body={renderDeleteBtnColumnTemplate}
             className={styles.emptyTableHeader}
@@ -554,6 +640,7 @@ export const ManageLeadReporters = ({
         </div>
       </div>
 
+      {renderFilter()}
       {renderTable()}
 
       {formState.isVisibleConfirmDeleteDialog && (
