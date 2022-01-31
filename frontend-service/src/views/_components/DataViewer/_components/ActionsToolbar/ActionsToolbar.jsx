@@ -320,7 +320,7 @@ export const ActionsToolbar = ({
                     levelError={selectedRuleLevelError}
                     onClick={() => {
                       onHideSelectGroupedValidation();
-                      showGroupedValidationFilter(false);
+                      showGroupedValidationFilter();
                       dispatchFilter({
                         type: 'SET_VALIDATION_GROUPED_FILTER',
                         payload: { groupedFilter: false }
