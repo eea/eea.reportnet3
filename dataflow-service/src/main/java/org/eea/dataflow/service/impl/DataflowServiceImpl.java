@@ -370,14 +370,16 @@ public class DataflowServiceImpl implements DataflowService {
         });
 
         // SET OBLIGATIONS
-        for (DataFlowVO dataflowVO : dataflowVOs) {
-          for (ObligationVO obligation : obligations) {
-            if (dataflowVO.getObligation().getObligationId().equals(obligation.getObligationId())) {
-              dataflowVO.setObligation(obligation);
+        if (!TypeDataflowEnum.REFERENCE.equals(dataflowType)) {
+          for (DataFlowVO dataflowVO : dataflowVOs) {
+            for (ObligationVO obligation : obligations) {
+              if (dataflowVO.getObligation().getObligationId()
+                  .equals(obligation.getObligationId())) {
+                dataflowVO.setObligation(obligation);
+              }
             }
           }
         }
-
       } else {
         paginatedDataflowVO.setFilteredRecords(Long.valueOf(0));
         if (idsResourcesWithoutRole != null) {
