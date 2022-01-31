@@ -29,7 +29,7 @@ export const BusinessDataflowService = {
 
     return {
       ...businessDataflowsDTO.data,
-      dataflows: BusinessDataflowUtils.parseSortedBusinessDataflowListDTO(businessDataflows)
+      dataflows: BusinessDataflowUtils.parseBusinessDataflows(businessDataflows)
     };
   },
 

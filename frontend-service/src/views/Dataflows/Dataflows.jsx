@@ -385,16 +385,14 @@ export const Dataflows = () => {
     }
   };
 
-  const renderPaginatorRecordsCount = () => {
-    return (
-      <Fragment>
-        {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
-        {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
-          'records'
-        ].toLowerCase()}`}
-      </Fragment>
-    );
-  };
+  const renderPaginatorRecordsCount = () => (
+    <Fragment>
+      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
+      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
+        'records'
+      ].toLowerCase()}`}
+    </Fragment>
+  );
 
   const manageDialogs = (dialog, value) => {
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });

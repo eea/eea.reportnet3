@@ -171,17 +171,14 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
 
   const onSortData = key => {
     setSortBy(prevSortBy => {
+      const sortByHeader = switchSortByOption(prevSortBy.sortByOption) === 'idle' ? '' : key;
+      const sortByOption = switchSortByOption(prevSortBy.sortByOption);
+
       if (hasCustomSort) {
-        onSort({
-          sortByHeader: switchSortByOption(prevSortBy.sortByOption) === 'idle' ? '' : key,
-          sortByOption: switchSortByOption(prevSortBy.sortByOption)
-        });
+        onSort({ sortByHeader, sortByOption });
       }
 
-      return {
-        sortByHeader: switchSortByOption(prevSortBy.sortByOption) === 'idle' ? '' : key,
-        sortByOption: switchSortByOption(prevSortBy.sortByOption)
-      };
+      return { sortByHeader, sortByOption };
     });
   };
 
