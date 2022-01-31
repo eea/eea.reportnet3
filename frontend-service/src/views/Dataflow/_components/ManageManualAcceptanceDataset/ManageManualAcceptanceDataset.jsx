@@ -1,4 +1,4 @@
-import { Fragment, useContext, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 import ReactTooltip from 'react-tooltip';
 
 import camelCase from 'lodash/camelCase';
@@ -9,6 +9,7 @@ import styles from './ManageManualAcceptanceDataset.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
+import { Icon } from 'views/_components/Icon';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { RadioButton } from 'views/_components/RadioButton';
 
@@ -22,6 +23,7 @@ import { manageManualAcceptanceDatasetReducer } from './_functions/Reducers/mana
 export const ManageManualAcceptanceDataset = ({
   dataflowId,
   dataset,
+  isAutomaticReportingDeletion = false,
   isManageManualAcceptanceDatasetDialogVisible,
   manageDialogs,
   refreshManualAcceptanceDatasets
@@ -34,14 +36,26 @@ export const ManageManualAcceptanceDataset = ({
     {
       initialDatasetMessage: '',
       datasetMessage: '',
-      datasetFeedbackStatus: dataset.feedbackStatus
+      datasetFeedbackStatus: dataset.feedbackStatus,
+      isAutomaticReportingDeletionVisible: false
     }
   );
 
   const { datasetId, datasetName } = dataset;
+  const { datasetFeedbackStatus, datasetMessage, initialDatasetMessage, isAutomaticReportingDeletionVisible } =
+    manageManualAcceptanceDatasetState;
+
+  useEffect(() => {
+    if (isAutomaticReportingDeletion) {
+      manageManualAcceptanceDatasetDispatch({
+        type: 'SET_IS_AUTOMATIC_DELETION_VISIBLE',
+        payload: datasetFeedbackStatus === resourcesContext.messages['technicallyAccepted']
+      });
+    }
+  }, [datasetFeedbackStatus]);
 
   const onChangeMessage = message => {
-    if (message !== manageManualAcceptanceDatasetState.initialDatasetMessage) {
+    if (message !== initialDatasetMessage) {
       return manageManualAcceptanceDatasetDispatch({
         type: 'ON_UPDATE_MESSAGE',
         payload: { message }
@@ -57,20 +71,13 @@ export const ManageManualAcceptanceDataset = ({
       event.preventDefault();
       const value = event.target.value;
       manageManualAcceptanceDatasetDispatch({ type: 'ON_UPDATE_MESSAGE', payload: { value } });
-      !isEmpty(manageManualAcceptanceDatasetState.datasetMessage) &&
-        !isEmpty(manageManualAcceptanceDatasetState.datasetFeedbackStatus) &&
-        onUpdateDataset();
+      !isEmpty(datasetMessage) && !isEmpty(datasetFeedbackStatus) && onUpdateDataset();
     }
   };
 
   const onUpdateDataset = async () => {
     try {
-      await DatasetService.updateDatasetFeedbackStatus(
-        dataflowId,
-        datasetId,
-        manageManualAcceptanceDatasetState.datasetMessage,
-        manageManualAcceptanceDatasetState.datasetFeedbackStatus
-      );
+      await DatasetService.updateDatasetFeedbackStatus(dataflowId, datasetId, datasetMessage, datasetFeedbackStatus);
       refreshManualAcceptanceDatasets(true);
     } catch (error) {
       console.error('ManageManualAcceptanceDataset - onUpdateDataset.', error);
@@ -85,15 +92,11 @@ export const ManageManualAcceptanceDataset = ({
       <span data-for="createTooltip" data-tip>
         <Button
           className={`p-button-primary ${
-            !isEmpty(manageManualAcceptanceDatasetState.datasetMessage) &&
-            manageManualAcceptanceDatasetState.datasetFeedbackStatus !== dataset.feedbackStatus
+            !isEmpty(datasetMessage) && datasetFeedbackStatus !== dataset.feedbackStatus
               ? 'p-button-animated-blink'
               : ''
           }`}
-          disabled={
-            isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
-            manageManualAcceptanceDatasetState.datasetFeedbackStatus === dataset.feedbackStatus
-          }
+          disabled={isEmpty(datasetMessage) || datasetFeedbackStatus === dataset.feedbackStatus}
           icon="check"
           label={resourcesContext.messages['update']}
           onClick={() => onUpdateDataset()}
@@ -105,8 +108,7 @@ export const ManageManualAcceptanceDataset = ({
         label={resourcesContext.messages['close']}
         onClick={() => manageDialogs(false)}
       />
-      {(isEmpty(manageManualAcceptanceDatasetState.datasetMessage) ||
-        manageManualAcceptanceDatasetState.datasetFeedbackStatus === dataset.feedbackStatus) && (
+      {(isEmpty(datasetMessage) || datasetFeedbackStatus === dataset.feedbackStatus) && (
         <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
           <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
         </ReactTooltip>
@@ -125,6 +127,27 @@ export const ManageManualAcceptanceDataset = ({
   );
 
   const idTextArea = uniqueId();
+
+  const renderAutomaticDeletionMessage = () => {
+    const renderIconTooltip = () => <Icon icon="warning" />;
+
+    const renderMessage = () => (
+      <div>
+        <label
+          className={styles.warningAutomaticReportingDeletionLabel}>{`${resourcesContext.messages['warning']}:`}</label>
+        {resourcesContext.messages['automaticReportingDeletionMessage']}
+      </div>
+    );
+
+    if (isAutomaticReportingDeletionVisible) {
+      return (
+        <div className={styles.isAutomaticReportingDeletionWrapper}>
+          {renderIconTooltip()}
+          {renderMessage()}
+        </div>
+      );
+    }
+  };
 
   const renderInputTextLayout = option => (
     <span>
@@ -152,7 +175,7 @@ export const ManageManualAcceptanceDataset = ({
         return (
           <div className={styles.radioButtonWrapper} key={feedbackStatus}>
             <RadioButton
-              checked={manageManualAcceptanceDatasetState.datasetFeedbackStatus === feedbackStatus}
+              checked={datasetFeedbackStatus === feedbackStatus}
               className={styles.radioButton}
               inputId={feedbackStatus}
               onChange={event => onChangeStatus(event.target.value)}
@@ -173,6 +196,7 @@ export const ManageManualAcceptanceDataset = ({
         {renderRadioButtons()}
       </div>
       <div className={styles.group}>{renderInputTextLayout('feedbackMessage')}</div>
+      <div className={styles.message}>{renderAutomaticDeletionMessage()}</div>
     </div>
   );
 };

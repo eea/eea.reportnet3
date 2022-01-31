@@ -2100,7 +2100,7 @@ body .p-messages.p-messages-success .p-messages-close {
   color: #212121;
 }
 body .p-messages.p-messages-warn {
-  background-color: #ffe399;
+  background-color: var(--growl-warning-bg);
   border: 0 none;
   color: #212121;
 }
@@ -2109,7 +2109,7 @@ body .p-messages.p-messages-warn .p-messages-icon {
   color: #212121;
 }
 body .p-messages.p-messages-warn .p-messages-close {
-  background-color: #ffe399;
+  background-color: var(--growl-warning-bg);
   color: #212121;
 }
 body .p-messages.p-messages-error {
@@ -2178,7 +2178,7 @@ body .p-message.p-message-success .p-message-icon {
   color: #212121;
 }
 body .p-message.p-message-warn {
-  background-color: #ffe399;
+  background-color: var(--growl-warning-bg);
   border: 0 none;
   color: #212121;
 }
@@ -2237,7 +2237,7 @@ body .p-toast .p-toast-item-container.p-toast-message-success .p-toast-icon-clos
   color: #212121;
 }
 body .p-toast .p-toast-item-container.p-toast-message-warn {
-  background-color: #ffe399;
+  background-color: var(--growl-warning-bg);
   border: 0 none;
   color: #212121;
 }

@@ -690,6 +690,7 @@ export const BigButtonList = ({
         <ManageManualAcceptanceDataset
           dataflowId={dataflowId}
           dataset={datasetFeedbackStatusToEdit}
+          isAutomaticReportingDeletion={dataflowState.isAutomaticReportingDeletion}
           isManageManualAcceptanceDatasetDialogVisible={isManageManualAcceptanceDatasetDialogVisible}
           manageDialogs={manageManualAcceptanceDatasetDialog}
           refreshManualAcceptanceDatasets={refreshManualAcceptanceDatasets}
