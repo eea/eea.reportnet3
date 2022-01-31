@@ -1156,55 +1156,53 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     setIsValidationsTabularView(true);
   };
 
-  const renderSwitchContent = () => {
-    if (!isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead) {
-      return (
-        <TabularSwitch
-          elements={Object.keys(designerState.viewType).map(view => resourcesContext.messages[`${view}View`])}
-          getIsTableCreated={setIsTableCreated}
-          isTableCreated={designerState.isTableCreated}
-          isValidationsTabularView={designerState.isValidationsTabularView}
-          onChange={switchView => {
-            const views = { design: 'design', tabularData: 'tabularData', webform: 'webform' };
-            onChangeView(views[camelCase(switchView)]);
-            changeMode(views[camelCase(switchView)]);
-          }}
-          setIsValidationsTabularView={setIsValidationsTabularView}
-          value={
-            QuerystringUtils.getUrlParamValue('view') !== ''
-              ? resourcesContext.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
-              : resourcesContext.messages['designView']
-          }
-        />
-      );
+  const getViewModes = isWithWebform => {
+    if (isWithWebform) {
+      return { design: 'design', tabularData: 'tabularData', webform: 'webform' };
     }
 
-    return (
-      <TabularSwitch
-        elements={[resourcesContext.messages['designView'], resourcesContext.messages['tabularDataView']]}
-        getIsTableCreated={setIsTableCreated}
-        isTableCreated={designerState.isTableCreated}
-        isValidationsTabularView={designerState.isValidationsTabularView}
-        onChange={switchView =>
-          designerDispatch({
-            type: 'SET_VIEW_MODE',
-            payload: { value: switchView === 'Design' ? 'design' : 'tabularData' }
-          })
-        }
-        setIsValidationsTabularView={setIsValidationsTabularView}
-        value={
-          QuerystringUtils.getUrlParamValue('view') !== ''
-            ? resourcesContext.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
-            : resourcesContext.messages['designView']
-        }
-      />
-    );
+    return { design: 'design', tabularData: 'tabularData' };
+  };
+
+  const onChangeViewMode = (switchView, isWithWebform) => {
+    const views = getViewModes(isWithWebform);
+
+    if (isWithWebform) {
+      onChangeView(views[camelCase(switchView)]);
+      changeMode(views[camelCase(switchView)]);
+    } else {
+      changeMode(views[camelCase(switchView)]);
+    }
+  };
+
+  const getSwitchElements = isWithWebform => {
+    if (isWithWebform) {
+      return Object.keys(designerState.viewType).map(view => resourcesContext.messages[`${view}View`]);
+    }
+
+    return [resourcesContext.messages['designView'], resourcesContext.messages['tabularDataView']];
   };
 
   const renderSwitchView = () => {
+    const isWithWebform = !isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead;
+
     return (
       <div className={styles.switchDivInput}>
-        <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>{renderSwitchContent()}</div>
+        <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
+          <TabularSwitch
+            elements={getSwitchElements(isWithWebform)}
+            getIsTableCreated={setIsTableCreated}
+            isTableCreated={designerState.isTableCreated}
+            isValidationsTabularView={designerState.isValidationsTabularView}
+            onChange={switchView => onChangeViewMode(switchView, isWithWebform)}
+            setIsValidationsTabularView={setIsValidationsTabularView}
+            value={
+              QuerystringUtils.getUrlParamValue('view') !== ''
+                ? resourcesContext.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
+                : resourcesContext.messages['designView']
+            }
+          />
+        </div>
       </div>
     );
   };
