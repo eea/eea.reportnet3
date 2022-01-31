@@ -1,5 +1,8 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
+
+import isEmpty from 'lodash/isEmpty';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
@@ -9,14 +12,17 @@ import ReactTooltip from 'react-tooltip';
 import styles from './PublicDataflows.module.scss';
 
 import { InputText } from 'views/_components/InputText';
+import { MyFilters } from 'views/_components/MyFilters';
 import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { PublicCard } from 'views/_components/PublicCard';
-import { Spinner } from 'views/_components/Spinner';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
+import { Spinner } from 'views/_components/Spinner';
 
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { DataflowService } from 'services/DataflowService';
+
+import { filterByState, sortByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -31,12 +37,17 @@ export const PublicDataflows = () => {
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
+  const filterBy = useRecoilValue(filterByState('publicDataflows'));
+  const sortByOptions = useRecoilValue(sortByState('publicDataflows'));
+
   const [contentStyles, setContentStyles] = useState({});
+  const [filteredRecords, setFilteredRecords] = useState(0);
   const [goToPage, setGoToPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [pageInputTooltip, setPageInputTooltip] = useState(resourcesContext.messages['currentPageInfoMessage']);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 100, pageNum: 0 });
   const [publicDataflows, setPublicDataflows] = useState([]);
+  const [totalRecords, setTotalRecords] = useState(0);
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOWS });
 
@@ -79,18 +90,42 @@ export const PublicDataflows = () => {
             {pageInputTooltip}
           </ReactTooltip>
           <label className={styles.currentPageOf}>
-            {publicDataflows.length > 0
-              ? `${resourcesContext.messages['of']} ${Math.ceil(publicDataflows.length / numberRows)}`
-              : 1}
+            {filteredRecords > 0 ? `${resourcesContext.messages['of']} ${Math.ceil(filteredRecords / numberRows)}` : 1}
           </label>
         </span>
       );
     }
   };
 
+  const filterOptions = [
+    {
+      nestedOptions: [
+        { key: 'name', label: resourcesContext.messages['name'], isSortable: true },
+        { key: 'description', label: resourcesContext.messages['description'], isSortable: true },
+        { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], isSortable: true },
+        { key: 'obligationTitle', label: resourcesContext.messages['obligation'], isSortable: true },
+        { key: 'obligationId', label: resourcesContext.messages['obligationId'], isSortable: true }
+      ],
+      type: 'INPUT'
+    },
+    {
+      key: 'status',
+      label: resourcesContext.messages['status'],
+      isSortable: true,
+      template: 'LevelError',
+      type: 'MULTI_SELECT'
+    },
+    {
+      key: 'expirationDate',
+      label: resourcesContext.messages['expirationDateFilterLabel'],
+      isSortable: true,
+      type: 'DATE'
+    }
+  ];
+
   const onChangeCurrentPage = event => {
     if (event.key === 'Enter' && goToPage !== '' && goToPage !== firstRow + 1) {
-      const pc = Math.ceil(publicDataflows.length / pagination.numberRows) || 1;
+      const pc = Math.ceil(filteredRecords / pagination.numberRows) || 1;
       const p = Math.floor(event.target.value - 1);
 
       if (p >= 0 && p < pc) {
@@ -103,9 +138,9 @@ export const PublicDataflows = () => {
       }
     } else {
       setGoToPage(event.target.value);
-      if (event.target.value <= 0 || event.target.value > Math.ceil(publicDataflows.length / numberRows)) {
+      if (event.target.value <= 0 || event.target.value > Math.ceil(filteredRecords / numberRows)) {
         setPageInputTooltip(
-          `${resourcesContext.messages['currentPageErrorMessage']} ${Math.ceil(publicDataflows.length / numberRows)}`
+          `${resourcesContext.messages['currentPageErrorMessage']} ${Math.ceil(filteredRecords / numberRows)}`
         );
       } else {
         setPageInputTooltip(resourcesContext.messages['currentPageInfoMessage']);
@@ -113,11 +148,15 @@ export const PublicDataflows = () => {
     }
   };
 
-  const onLoadPublicDataflows = async () => {
+  const onLoadPublicDataflows = async (sortBy = sortByOptions) => {
     setIsLoading(true);
+
     try {
-      const publicData = await DataflowService.getPublicData();
-      setPublicDataflows(publicData);
+      const publicData = await DataflowService.getPublicData({ filterBy, numberRows, pageNum, sortByOptions: sortBy });
+
+      setPublicDataflows(publicData.dataflows);
+      setFilteredRecords(publicData.filteredRecords);
+      setTotalRecords(publicData.totalRecords);
     } catch (error) {
       console.error('PublicDataflows - onLoadPublicDataflows.', error);
     } finally {
@@ -141,8 +180,7 @@ export const PublicDataflows = () => {
 
   const renderPaginatorRecordsCount = () => (
     <Fragment>
-      {resourcesContext.messages['totalRecords']} {publicDataflows.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
+      {resourcesContext.messages['totalRecords']} {totalRecords} {resourcesContext.messages['records'].toLowerCase()}
     </Fragment>
   );
 
@@ -158,7 +196,7 @@ export const PublicDataflows = () => {
           rows={numberRows}
           rowsPerPageOptions={[100, 150, 200]}
           template={currentPageTemplate}
-          totalRecords={publicDataflows.length}
+          totalRecords={totalRecords}
         />
       );
     }
@@ -169,8 +207,14 @@ export const PublicDataflows = () => {
       return <Spinner className={styles.spinner} />;
     }
 
-    if (publicDataflows.length === 0) {
-      return <div className={styles.noDataflows}>{resourcesContext.messages['noDataflows']}</div>;
+    if (isEmpty(publicDataflows)) {
+      if (totalRecords !== filteredRecords) {
+        return (
+          <div className={styles.noDataflows}>{resourcesContext.messages['noDataflowsWithSelectedParameters']}</div>
+        );
+      } else {
+        return <div className={styles.noDataflows}>{resourcesContext.messages['noDataflows']}</div>;
+      }
     }
 
     return (
@@ -203,6 +247,14 @@ export const PublicDataflows = () => {
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>{resourcesContext.messages['dataflows']}</h1>
+          <MyFilters
+            data={publicDataflows}
+            isLoading={isLoading}
+            onFilter={onLoadPublicDataflows}
+            onSort={onLoadPublicDataflows}
+            options={filterOptions}
+            viewType="publicDataflows"
+          />
           <div className={styles.dataflowsList}>{renderPublicDataflowsContent()}</div>
         </div>
       </div>

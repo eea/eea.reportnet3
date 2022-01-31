@@ -26,16 +26,15 @@ export const DataflowService = {
   },
 
   getAll: async ({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy }) => {
-    const [isAsc] = Object.values(sortBy);
-    const [sortByHeader] = Object.keys(sortBy);
+    const { isAsc, sortByHeader } = DataflowUtils.parseRequestSortBy(sortBy);
     const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
 
     const dataflowsDTO = await DataflowRepository.getAll({
       filterBy: filteredFilterBy,
-      isAsc: isAsc || undefined,
+      isAsc,
       numberRows,
       pageNum,
-      sortBy: sortByHeader || undefined
+      sortBy: sortByHeader
     });
 
     const dataflows = dataflowsDTO.data.dataflows.map(dataflowDTO => {
@@ -43,7 +42,7 @@ export const DataflowService = {
       return dataflowDTO;
     });
 
-    return DataflowUtils.parseSortedDataflowListDTO(dataflows);
+    return { ...dataflowsDTO.data, dataflows: DataflowUtils.parseDataflowListDTO(dataflows) };
   },
 
   getCloneableDataflows: async () => {
@@ -321,7 +320,6 @@ export const DataflowService = {
 
   getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField, filterBy) => {
     const filteredFilterBy = DataflowUtils.parseRequestPublicFilterBy(filterBy);
-    console.log('filteredFilterBy', filteredFilterBy);
 
     const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode(
       countryCode,
@@ -370,10 +368,20 @@ export const DataflowService = {
   createEmptyDatasetSchema: async (dataflowId, datasetSchemaName) =>
     await DataflowRepository.createEmptyDatasetSchema(dataflowId, datasetSchemaName),
 
-  getPublicData: async () => {
-    const publicDataflows = await DataflowRepository.getPublicData();
-    const parsedPublicDataflows = DataflowUtils.parsePublicDataflowListDTO(publicDataflows.data);
-    return sortBy(parsedPublicDataflows, ['name']);
+  getPublicData: async ({ filterBy, numberRows, pageNum, sortByOptions }) => {
+    const { isAsc, sortByHeader } = DataflowUtils.parseRequestSortBy(sortByOptions);
+    const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
+
+    const publicDataflows = await DataflowRepository.getPublicData({
+      filterBy: filteredFilterBy,
+      isAsc,
+      numberRows,
+      pageNum,
+      sortByHeader
+    });
+    const parsedPublicDataflows = DataflowUtils.parsePublicDataflowListDTO(publicDataflows.data.dataflows);
+
+    return { ...publicDataflows.data, dataflows: parsedPublicDataflows };
   },
 
   get: async dataflowId => {

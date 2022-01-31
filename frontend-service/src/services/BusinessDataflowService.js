@@ -7,16 +7,15 @@ import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 export const BusinessDataflowService = {
   getAll: async ({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy }) => {
-    const [isAsc] = Object.values(sortBy);
-    const [sortByHeader] = Object.keys(sortBy);
+    const { isAsc, sortByHeader } = DataflowUtils.parseRequestSortBy(sortBy);
     const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
 
     const businessDataflowsDTO = await BusinessDataflowRepository.getAll({
       filterBy: filteredFilterBy,
-      isAsc: isAsc || undefined,
+      isAsc,
       numberRows,
       pageNum,
-      sortBy: sortByHeader || undefined
+      sortBy: sortByHeader
     });
 
     const businessDataflows = businessDataflowsDTO.data.dataflows.map(businessDataflowDTO => {
@@ -28,7 +27,10 @@ export const BusinessDataflowService = {
       return businessDataflowDTO;
     });
 
-    return BusinessDataflowUtils.parseSortedBusinessDataflowListDTO(businessDataflows);
+    return {
+      ...businessDataflowsDTO.data,
+      dataflows: BusinessDataflowUtils.parseBusinessDataflows(businessDataflows)
+    };
   },
 
   create: async (name, description, obligationId, dataProviderGroupId, fmeUserId) =>

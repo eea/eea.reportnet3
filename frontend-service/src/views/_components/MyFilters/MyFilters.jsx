@@ -32,10 +32,10 @@ import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 import { SortUtils } from './_functions/Utils/SortUtils';
 
 const { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch } = ApplyFiltersUtils;
-const { applySort, switchSortByIcon, switchSortByOption } = SortUtils;
+const { switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
-export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort, options = [], viewType }) => {
+export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFilter, onSort, options, viewType }) => {
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
   const [filteredData, setFilteredData] = useRecoilState(filteredDataState(viewType));
@@ -90,7 +90,6 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
 
   useEffect(() => {
     getFilterByKeys();
-    getSortDefaultValues(options);
   }, [data, viewType]);
 
   const applyFilters = () => {
@@ -104,20 +103,6 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
       console.error('MyFilters - applyFilters.', error);
       notificationContext.add({ type: 'FILTER_DATA_ERROR' });
     }
-  };
-
-  const getSortDefaultValues = options => {
-    options.forEach(option => {
-      if (!option) return;
-
-      if (option.isSortable && option.defaultOrder) {
-        setSortBy({ [option.key]: option.defaultOrder });
-      }
-
-      if (option.nestedOptions) {
-        getSortDefaultValues(option.nestedOptions);
-      }
-    });
   };
 
   const getFilterByKeys = () => {
@@ -141,13 +126,7 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
 
   const loadFilters = async () => {
     try {
-      let filteredData = await applyFilters();
-
-      if (!isEmpty(sortBy)) {
-        const [key, value] = Object.entries(sortBy)[0];
-
-        filteredData = applySort({ filteredData, order: value, prevSortState: applyFilters(), sortByKey: key });
-      }
+      const filteredData = applyFilters();
 
       setFilteredData(filteredData);
     } catch (error) {
@@ -191,15 +170,16 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
   };
 
   const onSortData = key => {
-    const sortOption = switchSortByOption(sortBy[key]);
-    setSortBy({ [key]: sortOption });
+    setSortBy(prevSortBy => {
+      const sortByHeader = switchSortByOption(prevSortBy.sortByOption) === 'idle' ? '' : key;
+      const sortByOption = switchSortByOption(prevSortBy.sortByOption);
 
-    if (!hasCustomSort) {
-      const sortedData = applySort({ filteredData, order: sortOption, prevSortState: applyFilters(), sortByKey: key });
-      setFilteredData(sortedData);
-    } else {
-      onSort();
-    }
+      if (hasCustomSort) {
+        onSort({ sortByHeader, sortByOption });
+      }
+
+      return { sortByHeader, sortByOption };
+    });
   };
 
   const updateValueLabelsAnimationDate = (labelsAnimationDate, position, key, value) => {
@@ -421,15 +401,18 @@ export const MyFilters = ({ className, data = [], isStrictMode, onFilter, onSort
     );
   };
 
-  const renderSortButton = ({ key }) => (
-    <Button
-      className={`p-button-secondary-transparent ${styles.sortButton} ${
-        isNil(sortBy[key]) || sortBy[key] === 'idle' ? null : styles.iconActive
-      }`}
-      icon={switchSortByIcon(sortBy[key])}
-      onClick={() => onSortData(key)}
-    />
-  );
+  const renderSortButton = ({ key }) => {
+    const isSortActive = key === sortBy.sortByHeader && sortBy.sortByOption !== 'idle';
+
+    return (
+      <Button
+        className={`p-button-secondary-transparent ${styles.sortButton} ${isSortActive ? styles.iconActive : null}`}
+        disabled={isLoading}
+        icon={key === sortBy.sortByHeader ? switchSortByIcon(sortBy.sortByOption) : 'sortAlt'}
+        onClick={() => onSortData(key)}
+      />
+    );
+  };
 
   const renderSortButtonEmpty = () => <div className={styles.sortButtonSize} />;
 
