@@ -12,17 +12,26 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 import styles from './TitleWithItem.module.scss';
 
 export const TitleWithItem = memo(
-  ({
-    hasInfoTooltip = false,
-    icon,
-    iconSize,
-    imgClassName = '',
-    items,
-    subtitle,
-    title,
-    tooltipInfo = 'Info tooltip'
-  }) => {
+  ({ hasInfoTooltip = false, icon, iconSize, imgClassName = '', items, subtitle, title, tooltipInfo = '' }) => {
     const tooltipId = uniqueId();
+
+    const renderTooltip = () => {
+      if (hasInfoTooltip) {
+        return (
+          <TooltipButton
+            getContent={() =>
+              ReactDOMServer.renderToStaticMarkup(
+                <div className={styles.infoTooltipWrapper}>
+                  <span>{tooltipInfo}</span>
+                  <img alt={tooltipInfo} className={imgClassName} src={pushNotificationInfo}></img>
+                </div>
+              )
+            }
+            tooltipClassName={styles.infoTooltip}
+            uniqueIdentifier={tooltipId}></TooltipButton>
+        );
+      }
+    };
 
     return (
       <div className={styles.rowContainer}>
@@ -38,25 +47,13 @@ export const TitleWithItem = memo(
           <div className={styles.textWrap}>
             <span className={styles.title}>
               {title}
-              {hasInfoTooltip && (
-                <TooltipButton
-                  getContent={() =>
-                    ReactDOMServer.renderToStaticMarkup(
-                      <div className={styles.infoTooltipWrapper}>
-                        <span>{tooltipInfo}</span>
-                        <img alt={tooltipInfo} className={imgClassName} src={pushNotificationInfo}></img>
-                      </div>
-                    )
-                  }
-                  tooltipClassName={styles.infoTooltip}
-                  uniqueIdentifier={tooltipId}></TooltipButton>
-              )}
+              {renderTooltip()}
             </span>
             <span className={styles.subtitle}>{subtitle}</span>
           </div>
         </div>
         <div className={styles.itemsContainer}>
-          {items.map((item, i) => (
+          {items.map(item => (
             <div className={styles.itemContainer} key={uniqueId()}>
               {item}
             </div>

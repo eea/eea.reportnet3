@@ -1460,16 +1460,16 @@
     "manageWebforms": "Manage webforms",
     "loadWebformsError": "Error loading webforms list",
     "automaticDeleteSideBarButton": "Automatic delete",
-    "isAutomaticReportingDeletionDialogHeader": "Automatic delete dataflow dialog",
-    "isAutomaticReportingDeletionCheckboxLabel": "Are you sure you want to delete?",
+    "isAutomaticReportingDeletionDialogHeader": "Automatic delete",
+    "isAutomaticReportingDeletionCheckboxLabel": "Enable to automatically delete reporter data and snapshots with technical acceptance of delivery",
     "validating": "Validating",
     "uploading": "Uploading",
     "importWrongFileHeader": "Different number of columns.",
     "importWrongFileHeaderDetail": "The schema and the file have different number of columns. Reminder: fields must be separated by a comma.",
     "importReportingFailedNoHeadersMatchingEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Field names or delimiter don't match.",
     "importDesignFailedNoHeadersMatchingEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Field names or delimiter don't match.",
-    "importReportingFailedNamefileEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Some tables are not importing data: table and file name are different.",
-    "importDesignFailedNamefileEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Some tables are not importing data: table and file name are different.",
+    "importReportingFailedNamefileEvent": "Failed loading data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Table and file names are different.",
+    "importDesignFailedNamefileEvent": "Failed loading data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Table and file names are different.",
     "columnsSchemaLabel": "Schema columns",
     "fileColumnsLabel": "File columns",
     "fileNotSelectedError": "File not selected",
@@ -1483,6 +1483,7 @@
     "notSelectedWebformOption": "No webform",
     "deleteWebformInUseError": "Error deleting webform configuration. This configuration is already in use.",
     "pamsLabel": "PaMs",
-    "qaLabel": "Q&A"
+    "qaLabel": "Q&A",
+    "automaticReportingDeletionMessage": "This action will automatically delete reporter data and snapshots"
   }
 }
