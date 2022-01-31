@@ -210,7 +210,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     if (!isNil(webformData)) {
-      setIsReportingWebform(webformData === 'MMR-ART13');
+      setIsReportingWebform(!isNil(webformData?.name));
     }
   }, [webformData]);
 
@@ -281,7 +281,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           : !isEmpty(tableSchema)
           ? tableSchema[0].id
           : ''
-      }${!isNil(webformData) ? `&view=${isTableView ? 'tabularData' : 'webform'}` : ''}`
+      }${!isNil(webformData?.name) ? `&view=${isTableView ? 'tabularData' : 'webform'}` : ''}`
     );
   };
 
@@ -690,7 +690,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       setWebformData(datasetSchema.webform);
-      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.webform));
+      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.webform?.name));
       return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
@@ -925,7 +925,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   );
 
   const renderSwitchView = () =>
-    !isNil(webformData) && (
+    !isNil(webformData?.name) && (
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch

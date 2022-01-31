@@ -1203,7 +1203,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     return (
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-          {!isNil(designerState.webform) && !isDataflowOpen && !isDesignDatasetEditorRead
+          {!isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead
             ? renderRadioButtons()
             : switchView}
         </div>
