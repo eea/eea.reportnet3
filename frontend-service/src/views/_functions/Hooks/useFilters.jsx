@@ -1,4 +1,4 @@
-import { useRecoilValue } from 'recoil';
+import { useRecoilValue, useResetRecoilState } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -13,6 +13,10 @@ export const useFilters = recoilId => {
   const filteredData = useRecoilValue(filteredDataState(recoilId));
   const sortBy = useRecoilValue(sortByState(recoilId));
 
+  const resetFilterBy = useResetRecoilState(filterByState(recoilId));
+  const resetFilteredData = useResetRecoilState(filteredDataState(recoilId));
+  const resetSortBy = useResetRecoilState(sortByState(recoilId));
+
   const checkIsFilter = () => {
     if (isEmpty(filterBy)) {
       return false;
@@ -23,5 +27,11 @@ export const useFilters = recoilId => {
       .includes(false);
   };
 
-  return { filterBy, filteredData, isFiltered: checkIsFilter(), sortBy };
+  const resetState = () => {
+    resetFilterBy();
+    resetFilteredData();
+    resetSortBy();
+  };
+
+  return { filterBy, filteredData, isFiltered: checkIsFilter(), resetState, sortBy };
 };
