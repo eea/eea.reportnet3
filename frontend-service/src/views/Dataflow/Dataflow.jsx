@@ -54,6 +54,7 @@ import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
@@ -140,6 +141,9 @@ export const Dataflow = () => {
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
   const usersTypes = { REPORTERS: 'Reporters', REQUESTERS: 'Requesters' };
+
+  const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
 
   const {
     obligation,
@@ -643,7 +647,11 @@ export const Dataflow = () => {
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs(modalType, false)}
+      onClick={() => {
+        manageDialogs(modalType, false);
+        resetDatasetInfoFiltersState();
+        resetUserListFiltersState();
+      }}
     />
   );
 
@@ -1565,7 +1573,10 @@ export const Dataflow = () => {
                   )
                 : resourcesContext.messages['dataflowUsersList']
             }
-            onHide={() => manageDialogs('isUserListVisible', false)}
+            onHide={() => {
+              manageDialogs('isUserListVisible', false);
+              resetUserListFiltersState();
+            }}
             visible={dataflowState.isUserListVisible}>
             <UserList
               dataflowId={dataflowId}
@@ -1642,7 +1653,10 @@ export const Dataflow = () => {
           <Dialog
             footer={renderDialogFooterCloseBtn('isDatasetsInfoDialogVisible')}
             header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowState.id}`}
-            onHide={() => manageDialogs('isDatasetsInfoDialogVisible', false)}
+            onHide={() => {
+              manageDialogs('isDatasetsInfoDialogVisible', false);
+              resetDatasetInfoFiltersState();
+            }}
             visible={dataflowState.isDatasetsInfoDialogVisible}>
             <DatasetsInfo dataflowId={dataflowId} dataflowType={dataflowState.dataflowType} />
           </Dialog>

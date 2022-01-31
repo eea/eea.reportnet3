@@ -49,6 +49,7 @@ import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { CurrentPage } from 'views/_functions/Utils';
@@ -157,6 +158,9 @@ export const Dataflows = () => {
 
   const filterBy = useRecoilValue(filterByState(tabId));
   const sortByOptions = useRecoilValue(sortByState(tabId));
+
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
+  const { resetFiltersState: resetReportingObligationsFiltersState } = useFilters('reportingObligations');
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -429,6 +433,7 @@ export const Dataflows = () => {
   const onHideObligationDialog = () => {
     manageDialogs('isReportingObligationsDialogVisible', false);
     setObligationToPrevious();
+    resetReportingObligationsFiltersState();
   };
 
   const onLoadPermissions = () => {
@@ -557,7 +562,10 @@ export const Dataflows = () => {
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs('isUserListVisible', false)}
+      onClick={() => {
+        manageDialogs('isUserListVisible', false);
+        resetUserListFiltersState();
+      }}
     />
   );
 
@@ -569,6 +577,7 @@ export const Dataflows = () => {
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
           setToCheckedObligation();
+          resetReportingObligationsFiltersState();
         }}
       />
       <Button
@@ -578,6 +587,7 @@ export const Dataflows = () => {
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
           setObligationToPrevious();
+          resetReportingObligationsFiltersState();
         }}
       />
     </Fragment>
@@ -778,7 +788,10 @@ export const Dataflows = () => {
         <Dialog
           footer={renderUserListDialogFooter()}
           header={resourcesContext.messages['allDataflowsUserListHeader']}
-          onHide={() => manageDialogs('isUserListVisible', false)}
+          onHide={() => {
+            manageDialogs('isUserListVisible', false);
+            resetUserListFiltersState();
+          }}
           visible={dataflowsState.isUserListVisible}>
           <UserList />
         </Dialog>
