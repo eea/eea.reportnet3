@@ -924,21 +924,26 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     </Fragment>
   );
 
-  const renderSwitchView = () =>
-    !isNil(webformData?.name) && (
-      <div className={styles.switchDivInput}>
-        <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-          <TabularSwitch
-            className={styles.tabularSwitch}
-            elements={[resourcesContext.messages['tabularDataView'], resourcesContext.messages['webform']]}
-            isValidationsTabularView={isValidationsTabularView}
-            onChange={switchView => setIsTableView(switchView === resourcesContext.messages['webform'] ? false : true)}
-            setIsValidationsTabularView={setIsValidationsTabularView}
-            value={resourcesContext.messages['webform']}
-          />
+  const renderSwitchView = () => {
+    if (!isNil(webformData?.name)) {
+      return (
+        <div className={styles.switchDivInput}>
+          <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
+            <TabularSwitch
+              className={styles.tabularSwitch}
+              elements={[resourcesContext.messages['tabularDataView'], resourcesContext.messages['webform']]}
+              isValidationsTabularView={isValidationsTabularView}
+              onChange={switchView =>
+                setIsTableView(switchView === resourcesContext.messages['webform'] ? false : true)
+              }
+              setIsValidationsTabularView={setIsValidationsTabularView}
+              value={resourcesContext.messages['webform']}
+            />
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+  };
 
   const switchToTabularData = () => {
     setIsTableView(true);
