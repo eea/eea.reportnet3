@@ -37,7 +37,7 @@ const parseDataflowCount = dataflowCountDTO => {
   return dataflowCount;
 };
 
-const parseDataflowListDTO = dataflowsDTO => dataflowsDTO?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
+const parseDataflowListDTO = (dataflowsDTO = []) => dataflowsDTO.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
 
 const parseSortedDataflowListDTO = dataflowDTOs => {
   const dataflows = dataflowDTOs?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
@@ -228,6 +228,16 @@ const parseRequestPublicFilterBy = filterBy => {
   return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
 };
 
+const parseRequestSortBy = sortByOptions => {
+  if (isNil(sortByOptions)) {
+    return { isAsc: undefined, sortByHeader: '' };
+  }
+
+  const replacements = { asc: true, desc: false, idle: undefined };
+
+  return { isAsc: replacements[sortByOptions.sortByOption], sortByHeader: sortByOptions.sortByHeader };
+};
+
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
   parseAllDataflowsUserList,
@@ -240,6 +250,7 @@ export const DataflowUtils = {
   parsePublicDataflowListDTO,
   parseRequestFilterBy,
   parseRequestPublicFilterBy,
+  parseRequestSortBy,
   parseSortedDataflowListDTO,
   parseUsersList,
   sortDataflowsByExpirationDate
