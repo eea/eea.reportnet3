@@ -308,16 +308,6 @@ export const ManageLeadReporters = ({
         type: 'ON_PROVIDER_CHANGE',
         payload: { representatives }
       });
-      // const { representatives } = formState;
-      // const index = representatives.findIndex(
-      //   thisRepresentative => thisRepresentative.representativeId === representative.representativeId
-      // );
-      // if (index > -1) {
-      //   formDispatcher({
-      //     type: 'ON_PROVIDER_CHANGE',
-      //     payload: { index, newDataProviderId }
-      //   });
-      // }
 
       return representatives;
     }
@@ -394,7 +384,6 @@ export const ManageLeadReporters = ({
       nestedOptions: [
         {
           key: 'nameRepresentative',
-          //key: 'dataProviderId',
           label: resourcesContext.messages['manageRolesDialogAccountColumn']
         }
       ]
@@ -514,11 +503,6 @@ export const ManageLeadReporters = ({
             const representatives = await onDataProviderIdChange(event.target.value, representative, column.rowIndex);
             onAddRepresentative(representatives);
           }}
-          // onKeyDown={event => {
-          //   if (TextUtils.areEquals(event.key, 'Enter')) {
-          //     onAddRepresentative();
-          //   }
-          // }}
           value={representative.dataProviderId}>
           {remainingOptionsAndSelectedOption.map((provider, i) => {
             return (

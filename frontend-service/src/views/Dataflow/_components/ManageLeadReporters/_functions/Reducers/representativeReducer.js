@@ -83,16 +83,6 @@ export const reducer = (state, { type, payload }) => {
 
     case 'ON_PROVIDER_CHANGE':
       return { ...state, representatives: payload.representatives };
-    // return {
-    //   ...state,
-    //   representatives: [
-    //     ...state.representatives.slice(0, payload.index),
-    //     new Representative({
-    //       ...[...state.representatives][payload.index],
-    //       dataProviderId: payload.newDataProviderId
-    //     })
-    //   ]
-    // };
 
     case 'SELECT_PROVIDERS_TYPE':
       return { ...state, selectedDataProviderGroup: payload };
