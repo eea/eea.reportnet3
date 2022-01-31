@@ -458,27 +458,29 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
       {renderFilters()}
       {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
 
-      {hasCustomSort && (
-        <div className={`${styles.filterButton}`}>
+      <div className={styles.buttonsContainer}>
+        {hasCustomSort && (
+          <div className={`${styles.filterButton}`}>
+            <Button
+              className="p-button-primary p-button-rounded p-button-animated-blink"
+              icon="filter"
+              label={resourcesContext.messages['filter']}
+              onClick={onFilter}
+            />
+          </div>
+        )}
+
+        <div className={`${styles.resetButton}`}>
           <Button
-            className="p-button-primary p-button-rounded p-button-animated-blink"
-            icon="filter"
-            label={resourcesContext.messages['filter']}
-            onClick={onFilter}
+            className="p-button-secondary p-button-rounded p-button-animated-blink"
+            icon="undo"
+            label={resourcesContext.messages['reset']}
+            onClick={() => {
+              onResetFilters();
+              setLabelsAnimationDate(getLabelsAnimationDateInitial(options, filterBy));
+            }}
           />
         </div>
-      )}
-
-      <div className={`${styles.resetButton}`}>
-        <Button
-          className="p-button-secondary p-button-rounded p-button-animated-blink"
-          icon="undo"
-          label={resourcesContext.messages['reset']}
-          onClick={() => {
-            onResetFilters();
-            setLabelsAnimationDate(getLabelsAnimationDateInitial(options, filterBy));
-          }}
-        />
       </div>
     </div>
   );
