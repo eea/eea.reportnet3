@@ -492,7 +492,7 @@ export const DataViewer = ({
   };
 
   const onCancelRowEdit = () => {
-    let updatedValue = RecordUtils.changeRecordInTable(
+    const updatedValue = RecordUtils.changeRecordInTable(
       fetchedData,
       RecordUtils.getRecordId(fetchedData, records.selectedRecord),
       colsSchema,
