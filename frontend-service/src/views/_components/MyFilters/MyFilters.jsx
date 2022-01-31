@@ -21,6 +21,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import {
   filterByKeysState,
+  filterByNestedKeysState,
   filterByState,
   filteredDataState,
   searchState,
@@ -38,6 +39,7 @@ const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimatio
 export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFilter, onSort, options, viewType }) => {
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
+  const [filterByNestedKeys, setFilterByNestedKeys] = useRecoilState(filterByNestedKeysState(viewType));
   const [filteredData, setFilteredData] = useRecoilState(filteredDataState(viewType));
   const [searchBy, setSearchBy] = useRecoilState(searchState(viewType));
   const [sortBy, setSortBy] = useRecoilState(sortByState(viewType));
@@ -89,7 +91,8 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
   }, [calendarRefs, labelsAnimationDate, filterBy]);
 
   useEffect(() => {
-    getFilterByKeys();
+    getFilterByKeys('key');
+    getFilterByKeys('nestedKey');
   }, [data, viewType]);
 
   const applyFilters = () => {
@@ -105,7 +108,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     }
   };
 
-  const getFilterByKeys = () => {
+  const getFilterByKeys = auxKey => {
     const filterKeys = { CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [], SEARCH: [] };
 
     options.forEach(option => {
@@ -115,13 +118,17 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
         filterKeys.SEARCH = option.searchBy;
       }
 
-      filterKeys[option.type] = option.nestedOptions?.map(nestedOption => nestedOption.key) || [
+      filterKeys[option.type] = option.nestedOptions?.map(nestedOption => nestedOption[auxKey]) || [
         ...filterKeys[option.type],
-        option.key
+        option[auxKey]
       ];
     });
 
-    setFilterByKeys(filterKeys);
+    if (auxKey === 'key') {
+      setFilterByKeys(filterKeys);
+    } else {
+      setFilterByNestedKeys(filterKeys);
+    }
   };
 
   const loadFilters = async () => {
@@ -134,14 +141,14 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     }
   };
 
-  const onApplyFilters = ({ filterBy, searchValue = searchBy, nestedKey }) => {
+  const onApplyFilters = ({ filterBy, searchValue = searchBy }) => {
     if (hasCustomSort) {
       return data;
     }
 
     return data.filter(
       item =>
-        applyInputs({ filterBy, filterByKeys, item, nestedKey }) &&
+        applyInputs({ filterBy, filterByKeys, item, filterByNestedKeys }) &&
         applyDates({ filterBy, filterByKeys, item }) &&
         applyCheckBox({ filterBy, filterByKeys, item }) &&
         applyMultiSelects({ filterBy, filterByKeys, item }) &&
@@ -149,8 +156,8 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     );
   };
 
-  const onChange = ({ key, value, nestedKey }) => {
-    const filteredData = onApplyFilters({ filterBy: { ...filterBy, [key]: value }, nestedKey });
+  const onChange = ({ key, value }) => {
+    const filteredData = onApplyFilters({ filterBy: { ...filterBy, [key]: value } });
 
     setFilterBy({ ...filterBy, [key]: value });
     setFilteredData(filteredData);
@@ -313,7 +320,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
             className={styles.inputFilter}
             id={`${option.key}_input`}
             key={option.key}
-            onChange={event => onChange({ key: option.key, value: event.target.value, nestedKey: option?.nestedKey })}
+            onChange={event => onChange({ key: option.key, value: event.target.value })}
             value={filterBy[option.key] || ''}
           />
           <label className={styles.label} htmlFor={`${option.key}_input`}>
