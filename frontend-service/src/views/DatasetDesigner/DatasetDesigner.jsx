@@ -1167,22 +1167,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onChangeViewMode = (switchView, isWithWebform) => {
     const views = getViewModes(isWithWebform);
 
-    if (isWithWebform) {
-      onChangeView(views[camelCase(switchView)]);
-      changeMode(views[camelCase(switchView)]);
-    } else {
-      changeMode(views[camelCase(switchView)]);
-    }
+    onChangeView(views[camelCase(switchView)]);
+    changeMode(views[camelCase(switchView)]);
   };
 
-  const getSwitchElements = isWithWebform => {
-    if (isWithWebform) {
-      return Object.keys(designerState.viewType).map(view => resourcesContext.messages[`${view}View`]);
-    }
-
-    return [resourcesContext.messages['designView'], resourcesContext.messages['tabularDataView']];
-  };
-
+  const getSwitchElements = isWithWebform =>
+    Object.keys(getViewModes(isWithWebform)).map(view => resourcesContext.messages[`${view}View`]);
   const renderSwitchView = () => {
     const isWithWebform = !isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead;
 
