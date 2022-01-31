@@ -340,7 +340,7 @@ export const Dataflow = () => {
         isNationalCoordinatorOfCountry ||
         isReporterOfCountry ||
         isObserver,
-      automaticDeleteBtn: !isDesign && dataflowState.data.manualAcceptance
+      automaticDeleteBtn: !isDesign && isLeadDesigner && dataflowState.data.manualAcceptance
     };
   };
 

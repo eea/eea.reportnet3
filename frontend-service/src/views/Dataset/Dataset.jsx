@@ -1128,7 +1128,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             schemaTables,
             datasetStatistics: datasetStatisticsInState
           }}
-          webformType={webformData}
+          webform={webformData}
         />
       )}
 
