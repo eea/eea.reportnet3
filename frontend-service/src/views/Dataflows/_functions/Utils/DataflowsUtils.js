@@ -27,12 +27,6 @@ const parseDataflows = (data, pinnedDataflows) => {
   return sortDataflows(dataflows);
 };
 
-const sortDataflows = (dataflows = []) => {
-  return orderBy(
-    dataflows,
-    ['pinned', 'expirationDate', 'status', 'id', 'creationDate'],
-    ['asc', 'asc', 'asc', 'asc', 'asc']
-  );
-};
+const sortDataflows = (dataflows = []) => orderBy(dataflows, ['pinned'], ['asc']);
 
 export const DataflowsUtils = { getActiveTab, parseDataflows, sortDataflows };

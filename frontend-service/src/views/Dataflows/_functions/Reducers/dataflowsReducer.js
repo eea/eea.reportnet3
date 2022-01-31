@@ -23,7 +23,10 @@ export const dataflowsReducer = (state, { type, payload }) => {
         dataflowsCountFirstLoad: false,
         dataflowsCount: { ...state.dataflowsCount, [payload.type]: payload.data.length },
         activeIndex:
-          isNil(payload.contextCurrentDataflowType) && state.dataflowsCountFirstLoad ? getIndex() : state.activeIndex
+          isNil(payload.contextCurrentDataflowType) && state.dataflowsCountFirstLoad ? getIndex() : state.activeIndex,
+        filteredRecords: payload.filteredRecords,
+        isFiltered: payload.totalRecords !== payload.filteredRecords,
+        totalRecords: payload.totalRecords
       };
 
     case 'HAS_PERMISSION':
