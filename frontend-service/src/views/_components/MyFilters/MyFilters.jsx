@@ -1,5 +1,5 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -38,9 +38,10 @@ const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimatio
 export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFilter, onSort, options, viewType }) => {
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
-  const [filteredData, setFilteredData] = useRecoilState(filteredDataState(viewType));
   const [searchBy, setSearchBy] = useRecoilState(searchState(viewType));
   const [sortBy, setSortBy] = useRecoilState(sortByState(viewType));
+
+  const setFilteredData = useSetRecoilState(filteredDataState(viewType));
 
   const { userProps } = useContext(UserContext);
   const notificationContext = useContext(NotificationContext);
