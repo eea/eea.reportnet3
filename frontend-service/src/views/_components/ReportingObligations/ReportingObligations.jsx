@@ -92,8 +92,8 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
 
       reportingObligationDispatch({ type: 'ON_LOAD_DATA', payload: { data } });
     } catch (error) {
-      notificationContext.add({ type: 'LOAD_OPENED_OBLIGATION_ERROR' }, true);
       console.error('ReportingObligations - onLoadReportingObligations.', error);
+      notificationContext.add({ type: 'LOAD_OPENED_OBLIGATION_ERROR' }, true);
     } finally {
       setLoading(false);
     }

@@ -66,10 +66,4 @@ const applySearch = ({ filterByKeys, item, value }) => {
   );
 };
 
-export const ApplyFiltersUtils = {
-  applyCheckBox,
-  applyDates,
-  applyInputs,
-  applyMultiSelects,
-  applySearch
-};
+export const ApplyFiltersUtils = { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch };
