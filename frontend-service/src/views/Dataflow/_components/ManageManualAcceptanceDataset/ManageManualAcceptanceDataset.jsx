@@ -71,7 +71,9 @@ export const ManageManualAcceptanceDataset = ({
       event.preventDefault();
       const value = event.target.value;
       manageManualAcceptanceDatasetDispatch({ type: 'ON_UPDATE_MESSAGE', payload: { value } });
-      !isEmpty(datasetMessage) && !isEmpty(datasetFeedbackStatus) && onUpdateDataset();
+      if (!isEmpty(datasetMessage) && !isEmpty(datasetFeedbackStatus)) {
+        onUpdateDataset();
+      }
     }
   };
 
@@ -84,6 +86,16 @@ export const ManageManualAcceptanceDataset = ({
       notificationContext.add({ type: 'UPDATE_DATASET_FEEDBACK_STATUS_ERROR' }, true);
     } finally {
       manageDialogs(false);
+    }
+  };
+
+  const renderTooltip = () => {
+    if (isEmpty(datasetMessage) || datasetFeedbackStatus === dataset.feedbackStatus) {
+      return (
+        <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
+          <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
+        </ReactTooltip>
+      );
     }
   };
 
@@ -108,11 +120,7 @@ export const ManageManualAcceptanceDataset = ({
         label={resourcesContext.messages['close']}
         onClick={() => manageDialogs(false)}
       />
-      {(isEmpty(datasetMessage) || datasetFeedbackStatus === dataset.feedbackStatus) && (
-        <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
-          <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
-        </ReactTooltip>
-      )}
+      {renderTooltip()}
     </Fragment>
   );
   const renderDialogLayout = children => (
