@@ -636,7 +636,10 @@ export const Dataflow = () => {
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon="cancel"
         label={resourcesContext.messages['close']}
-        onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
+        onClick={() => {
+          manageDialogs('isManageRolesDialogVisible', false);
+          resetFiltersState();
+        }}
       />
     </Fragment>
   );
