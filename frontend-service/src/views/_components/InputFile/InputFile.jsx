@@ -20,7 +20,8 @@ export const InputFile = ({
   fileRef,
   hasError,
   onChange,
-  onClearFile
+  onClearFile,
+  onKeyPress
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
@@ -79,6 +80,7 @@ export const InputFile = ({
         id="fileInput"
         name="fileInput"
         onChange={onFileSelect}
+        onKeyPress={onKeyPress}
         ref={fileRef}
         type="file"
       />

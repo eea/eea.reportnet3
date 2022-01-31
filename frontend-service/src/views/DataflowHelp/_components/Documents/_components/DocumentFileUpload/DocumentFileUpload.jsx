@@ -33,9 +33,8 @@ export const DocumentFileUpload = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [fileContent, setFileContent] = useState(null);
-
   const inputRef = useRef(null);
+  const fileRef = useRef(null);
 
   const [areAllInputsChecked, setAreAllInputsChecked] = useState(false);
   const [errors, setErrors] = useState({
@@ -52,7 +51,9 @@ export const DocumentFileUpload = ({
   });
 
   const onClearFile = () => {
-    setFileContent(null);
+    setInputs(previousValues => {
+      return { ...previousValues, uploadFile: {}, isTouchedFileUpload: false };
+    });
   };
 
   useEffect(() => {
@@ -93,7 +94,7 @@ export const DocumentFileUpload = ({
     let message = '';
 
     const inputValue = inputName === 'lang' ? inputs[inputName].value : inputs[inputName];
-    const inputUpload = document.querySelector('#uploadFile');
+    const inputUpload = fileRef.current;
 
     if (inputName !== 'uploadFile' && checkIsEmptyInput(inputValue)) {
       message = '';
@@ -190,13 +191,11 @@ export const DocumentFileUpload = ({
   };
 
   const onFileUpload = async e => {
-    if (!isNil(e.target.files[0])) {
-      const reader = new FileReader();
-      reader.onload = async e => {
-        const text = e.target.result;
-        setFileContent(text);
-      };
-      reader.readAsText(e.target.files[0]);
+    const eventTarget = e.currentTarget;
+    if (!isNil(eventTarget.files[0])) {
+      setInputs(previousValues => {
+        return { ...previousValues, uploadFile: eventTarget.files[0], isTouchedFileUpload: true };
+      });
     }
   };
 
@@ -268,7 +267,7 @@ export const DocumentFileUpload = ({
               accept="*"
               buttonTextNoFile={resourcesContext.messages['inputFileButtonNotSelected']}
               buttonTextWithFile={resourcesContext.messages['inputFileButtonSelected']}
-              fileRef={inputRef}
+              fileRef={fileRef}
               hasError={errors.jsonContent}
               onChange={onFileUpload}
               onClearFile={onClearFile}
