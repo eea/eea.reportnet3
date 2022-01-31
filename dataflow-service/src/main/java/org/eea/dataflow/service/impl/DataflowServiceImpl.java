@@ -779,8 +779,8 @@ public class DataflowServiceImpl implements DataflowService {
           obligationControllerZull.findOpenedObligations(null, null, null, null, null);
       ObjectMapper objectMapper = new ObjectMapper();
 
-      List<Dataflow> publicDataflows = dataflowRepository.findPaginated(arrayToJson, pageable,
-          Boolean.TRUE, filters, orderHeader, asc, null, null);
+      List<Dataflow> publicDataflows =
+          dataflowRepository.findPublicDataflowsByCountryCode(countryCode);
 
       String arrayToJson = objectMapper.writeValueAsString(obligations);
 
