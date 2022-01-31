@@ -322,6 +322,8 @@ export const DataflowService = {
     const filteredFilterBy = DataflowUtils.parseRequestPublicFilterBy(filterBy);
     console.log('filteredFilterBy', filteredFilterBy);
 
+    console.log('filteredFilterBy', filteredFilterBy);
+
     const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode(
       countryCode,
       sortOrder,

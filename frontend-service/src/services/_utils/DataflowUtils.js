@@ -16,8 +16,6 @@ import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 
 import { Dataflow } from 'entities/Dataflow';
 
-import { CurrentPage } from 'views/_functions/Utils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 const sortDataflowsByExpirationDate = dataflows =>

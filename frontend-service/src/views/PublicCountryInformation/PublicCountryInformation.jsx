@@ -1,12 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
 
 import ReactTooltip from 'react-tooltip';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -26,13 +26,13 @@ import { Title } from 'views/_components/Title';
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
 
+import { filterByState, sortByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
+
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
-
-import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
@@ -75,7 +75,8 @@ export const PublicCountryInformation = () => {
     }
   }, [themeContext.headerCollapse]);
 
-  const { filterBy, filteredData, sortBy, isFiltered } = useFilters('publicCountryInformation');
+  const filterBy = useRecoilValue(filterByState('publicCountryInformation'));
+  const sortByOptions = useRecoilValue(sortByState('publicCountryInformation'));
 
   const getCountryName = () => {
     if (!isNil(config.countriesByGroup)) {
@@ -128,7 +129,7 @@ export const PublicCountryInformation = () => {
     }
   };
 
-  const onLoadPublicCountryInformation = async (sortOrder, sortField, firstRow, numberRows, sortBy) => {
+  const onLoadPublicCountryInformation = async (sortOrder, sortField, firstRow, numberRows) => {
     setIsLoading(true);
     try {
       if (sortOrder === -1) {
@@ -344,8 +345,8 @@ export const PublicCountryInformation = () => {
       <MyFilters
         className="publicCountryInformation"
         data={dataflows}
-        // onFilter={onLoadPublicCountryInformation}
-        // onSort={onLoadPublicCountryInformation}
+        onFilter={onLoadPublicCountryInformation}
+        onSort={onLoadPublicCountryInformation}
         options={filterOptions}
         viewType="publicCountryInformation"
       />
@@ -441,8 +442,8 @@ export const PublicCountryInformation = () => {
         sortOrder={sortOrder}
         summary={resourcesContext.messages['dataflows']}
         totalRecords={totalRecords}
-        value={filteredData}>
-        {renderTableColumns(filteredData)}
+        value={dataflows}>
+        {renderTableColumns(dataflows)}
       </DataTable>
     );
   };
