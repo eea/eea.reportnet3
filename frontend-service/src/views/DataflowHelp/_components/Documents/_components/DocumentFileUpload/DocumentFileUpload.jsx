@@ -121,10 +121,10 @@ export const DocumentFileUpload = ({
 
   const onConfirm = async () => {
     const descHasError = checkInputForErrors('description');
-    const descLangError = checkInputForErrors('lang');
-    const descFileError = checkInputForErrors('uploadFile');
+    const langHasError = checkInputForErrors('lang');
+    const fileHasError = checkInputForErrors('uploadFile');
 
-    if (areAllInputsChecked && !descHasError && !descLangError && !descFileError) {
+    if (areAllInputsChecked && !descHasError && !langHasError && !fileHasError) {
       setIsUploading(true);
       setSubmitting(true);
       setFileUpdatingId(inputs.id);
