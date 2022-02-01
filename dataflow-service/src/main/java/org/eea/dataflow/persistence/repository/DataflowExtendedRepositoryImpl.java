@@ -21,6 +21,8 @@ import org.springframework.data.domain.Pageable;
  */
 public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepository {
 
+  private static final String COUNTRY_CODE = "countryCode";
+
   /** The entity manager. */
   @PersistenceContext
   private EntityManager entityManager;
@@ -66,7 +68,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "on d.obligation_id  = cast(ot.obligationId as integer)";
 
   /** The Constant COUNTRY_CODE. */
-  private static final String COUNTRY_CODE = " dp.code = :countryCode ";
+  private static final String COUNTRY_CODE_CONDITION = " dp.code = :countryCode ";
 
   /** The Constant HAS_DATASETS. */
   private static final String HAS_DATASETS = " r.has_datasets = TRUE ";
@@ -180,10 +182,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       Map<String, String> filters, String orderHeader, boolean asc, String countryCode) {
 
     StringBuilder sb = new StringBuilder();
-    constructPublicDataflowsQuery(sb);
-    setFiltersToPublicDataflowsQuery(sb, filters, orderHeader, asc);
+    constructPublicDataflowsQuery(sb, orderHeader, asc, filters, true);
     Query query = entityManager.createNativeQuery(sb.toString(), Dataflow.class);
-    setParametersToPublicDataflowsQuery(sb, query, filters, obligationJson, countryCode);
+
+    setParameters(obligationJson, true, filters, query, null, null);
+
+    query.setParameter(COUNTRY_CODE, countryCode);
 
     if (null != pageable) {
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
@@ -210,13 +214,15 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
     StringBuilder sb = new StringBuilder();
     sb.append(" with tableAux as (");
-    constructPublicDataflowsQuery(sb);
+    constructPublicDataflowsQuery(sb, orderHeader, asc, filters, false);
     sb.append(") select count(*) from tableAux");
 
     Query query = entityManager.createNativeQuery(sb.toString());
+
     query.setParameter("aux", obligationJson);
-    query.setParameter("countryCode", countryCode);
+    query.setParameter(COUNTRY_CODE, countryCode);
     query.setParameter("public", Boolean.TRUE);
+
     return Long.valueOf(query.getResultList().get(0).toString());
   }
 
@@ -236,12 +242,16 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
     StringBuilder sb = new StringBuilder();
     sb.append(" with tableAux as (");
-    constructPublicDataflowsQuery(sb);
-    setFiltersToPublicDataflowsQuery(sb, filters, orderHeader, asc);
+    constructPublicDataflowsQuery(sb, orderHeader, asc, filters, true);
+
     sb.append(") select count(*) from tableAux");
 
     Query query = entityManager.createNativeQuery(sb.toString());
-    setParametersToPublicDataflowsQuery(sb, query, filters, obligationJson, countryCode);
+
+    setParameters(obligationJson, true, filters, query, null, null);
+
+    query.setParameter(COUNTRY_CODE, countryCode);
+
     return Long.valueOf(query.getResultList().get(0).toString());
   }
 
@@ -286,7 +296,8 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     if (MapUtils.isNotEmpty(filters)) {
       for (String key : filters.keySet()) {
         if ("creation_date_from".equals(key) || "creation_date_to".equals(key)
-            || "deadline_date_from".equals(key) || "deadline_date_to".equals(key)) {
+            || "deadline_date_from".equals(key) || "deadline_date_to".equals(key)
+            || "delivery_date_from".equals(key) || "delivery_date_to".equals(key)) {
           query.setParameter(key, new Date(Long.valueOf(filters.get(key))));
         } else {
           query.setParameter(key, "%" + filters.get(key) + "%");
@@ -404,6 +415,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       case "deadline_date_to":
         stringQuery.append(String.format(DATE_TO, "deadline_date", key));
         break;
+      case "delivery_date_from":
+        stringQuery.append(String.format(DATE_FROM, "delivery_date", key));
+        break;
+      case "delivery_date_to":
+        stringQuery.append(String.format(DATE_TO, "delivery_date", key));
+        break;
       default:
         stringQuery.append(String.format(LIKE, key, key));
         break;
@@ -427,41 +444,23 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    *
    * @param sb the sb
    */
-  private void constructPublicDataflowsQuery(StringBuilder sb) {
+  private void constructPublicDataflowsQuery(StringBuilder sb, String orderHeader, boolean asc,
+      Map<String, String> filters, boolean applyFilters) {
+
+    boolean addAnd = true;
+
     sb.append(QUERY_JSON_COUNTRY);
     sb.append(JOIN_REPRESENTATIVE_DATA_PROVIDER_AND_DATASET_AUX);
     sb.append(" where " + HAS_DATASETS);
     sb.append(AND + DATAFLOW_PUBLIC);
     sb.append(AND + DRAFT_STATUS);
-    sb.append(AND + COUNTRY_CODE);
+    sb.append(AND + COUNTRY_CODE_CONDITION);
 
-  }
+    if (MapUtils.isNotEmpty(filters) && applyFilters) {
 
-  /**
-   * Sets the filters to public dataflows query.
-   *
-   * @param sb the sb
-   * @param filters the filters
-   * @param orderHeader the order header
-   * @param asc the asc
-   */
-  private void setFiltersToPublicDataflowsQuery(StringBuilder sb, Map<String, String> filters,
-      String orderHeader, boolean asc) {
-
-    if (MapUtils.isNotEmpty(filters)) {
       for (String key : filters.keySet()) {
-        sb.append(AND);
-        switch (key) {
-          case "deadline_date_from":
-            sb.append(String.format("%s >= :%s", "deadline_date", key));
-            break;
-          case "deadline_date_to":
-            sb.append(String.format("%s <= :%s", "deadline_date", key));
-            break;
-          default:
-            sb.append(String.format(LIKE, key, key));
-            break;
-        }
+        addAnd(sb, addAnd);
+        setFilters(sb, key);
       }
     }
 
@@ -470,37 +469,5 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     } else {
       sb.append("order by status, creation_date desc");
     }
-  }
-
-  /**
-   * Sets the filters to public dataflows query.
-   *
-   * @param sb the sb
-   * @param filters the filters
-   * @param orderHeader the order header
-   * @param asc the asc
-   */
-  private void setParametersToPublicDataflowsQuery(StringBuilder sb, Query query,
-      Map<String, String> filters, String obligationJson, String countryCode) {
-
-    if (MapUtils.isNotEmpty(filters)) {
-      for (String key : filters.keySet()) {
-        switch (key) {
-          case "deadline_date_from":
-            query.setParameter(key, filters.get(key));
-            break;
-          case "deadline_date_to":
-            query.setParameter(key, filters.get(key));
-            break;
-          default:
-            query.setParameter(key, "%" + filters.get(key) + "%");
-            break;
-        }
-      }
-    }
-
-    query.setParameter("aux", obligationJson);
-    query.setParameter("public", Boolean.TRUE);
-    query.setParameter("countryCode", countryCode);
   }
 }
