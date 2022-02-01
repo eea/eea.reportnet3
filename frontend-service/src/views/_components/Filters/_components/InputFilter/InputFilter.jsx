@@ -17,7 +17,7 @@ export const InputFilter = ({ isLoading, onFilterData, onSort, option, recoilId 
     <div className={styles.block} key={option.key}>
       <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} onSort={onSort} />
       <div
-        className={`p-float-label ${styles.label} ${
+        className={`p-float-label ${
           filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
         }`}>
         <InputText

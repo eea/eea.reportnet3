@@ -33,6 +33,9 @@
   .elementFilter {
     border-bottom: var(--inputtext-border) !important;
     width: 100%;
+    label {
+      font-size: 0.8333rem;
+    }
   }
 
   .elementFilterSelected {
