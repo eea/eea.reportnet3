@@ -1,9 +1,11 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import isDate from 'lodash/isDate';
 import isEmpty from 'lodash/isEmpty';
 import uniqueId from 'lodash/uniqueId';
+
+import uniq from 'lodash/uniq';
 
 //import styles from '../../Filters.module.scss';
 import styles from './DateFilter.module.scss';
@@ -12,12 +14,15 @@ import { Button } from 'views/_components/Button';
 import { Calendar } from 'views/_components/Calendar';
 import { SortButton } from '../SortButton';
 
+import { filterByAllKeys } from '../../_functions/Stores/filterKeysStore';
 import { filterByStore } from '../../_functions/Stores/filterStore';
 
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 export const DateFilter = ({ isLoading, option, recoilId }) => {
   const { userProps } = useContext(UserContext);
+
+  const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));
 
   const [filterBy, setFilterBy] = useRecoilState(filterByStore(`${option.key}_${recoilId}`));
 
@@ -26,6 +31,10 @@ export const DateFilter = ({ isLoading, option, recoilId }) => {
   const calendarRefs = useRef([]);
 
   const inputId = uniqueId();
+
+  useEffect(() => {
+    setFilterByAllKeys(prevState => uniq([...prevState, option.key]));
+  }, []);
 
   useEffect(() => {
     const listener = event => {

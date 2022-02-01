@@ -1,6 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -11,9 +10,8 @@ import ReactTooltip from 'react-tooltip';
 
 import styles from './PublicDataflows.module.scss';
 
-import { InputText } from 'views/_components/InputText';
-import { MyFilters } from 'views/_components/MyFilters';
 import { Filters } from 'views/_components/Filters';
+import { InputText } from 'views/_components/InputText';
 import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { PublicCard } from 'views/_components/PublicCard';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
@@ -22,8 +20,6 @@ import { Spinner } from 'views/_components/Spinner';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { DataflowService } from 'services/DataflowService';
-
-import { filterByState, sortByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -39,20 +35,7 @@ export const PublicDataflows = () => {
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
-  // const filterBy = useRecoilValue(filterByState('publicDataflows'));
-  // const sortByOptions = useRecoilValue(sortByState('publicDataflows'));
-
-  const filterByKeys = [
-    'name',
-    'description',
-    'legalInstrument',
-    'obligationTitle',
-    'obligationId',
-    'status',
-    'expirationDate'
-  ];
-
-  const { getFilterBy, setData, sortByOptions } = useApplyFilters({ recoilId: 'publicDataflows', filterByKeys });
+  const { getFilterBy, setData, sortByOptions } = useApplyFilters({ recoilId: 'publicDataflows' });
 
   const [contentStyles, setContentStyles] = useState({});
   const [filteredRecords, setFilteredRecords] = useState(0);

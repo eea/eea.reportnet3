@@ -26,7 +26,6 @@ import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ManageWebforms } from './_components/ManageWebforms';
-import { MyFilters } from 'views/_components/MyFilters';
 import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
@@ -162,19 +161,7 @@ export const Dataflows = () => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
-  const filterByKeys = [
-    'name',
-    'description',
-    'legalInstrument',
-    'obligationTitle',
-    'obligationId',
-    'status',
-    'userRole',
-    'expirationDate',
-    'creationDate'
-  ];
-
-  const { getFilterBy, setData, sortByOptions } = useApplyFilters({ recoilId: tabId, filterByKeys });
+  const { getFilterBy, resetFilterState, setData, sortByOptions } = useApplyFilters({ recoilId: tabId });
 
   useEffect(() => {
     getDataflowsCount();
@@ -798,6 +785,7 @@ export const Dataflows = () => {
         </div>
         <Filters
           className="dataflowsFilters"
+          isLoading={loadingStatus[tabId]}
           onFilter={getDataflows}
           onSort={getDataflows}
           options={options[tabId]}
