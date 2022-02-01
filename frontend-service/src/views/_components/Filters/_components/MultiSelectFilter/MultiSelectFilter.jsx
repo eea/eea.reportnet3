@@ -16,7 +16,7 @@ import { useFilters } from '../../_functions/Hooks/useFilters';
 
 import { MultiSelectFilterUtils } from './_functions/Utils/MultiSelectFilterUtils';
 
-export const MultiSelectFilter = ({ onFilterData, option, recoilId }) => {
+export const MultiSelectFilter = ({ onFilterData, onSort, option, recoilId }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const data = useRecoilValue(dataStore(recoilId));
@@ -33,7 +33,7 @@ export const MultiSelectFilter = ({ onFilterData, option, recoilId }) => {
 
   return (
     <div className={`${styles.block}`} key={option.key}>
-      <SortButton id={option.key} isVisible={option.isSortable} />
+      <SortButton id={option.key} isVisible={option.isSortable} onSort={onSort} />
       <MultiSelect
         ariaLabelledBy={`${option.key}_input`}
         checkAllHeader={resourcesContext.messages['checkAllFilter']}

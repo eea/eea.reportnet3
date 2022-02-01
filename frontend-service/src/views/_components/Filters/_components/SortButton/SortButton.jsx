@@ -1,4 +1,4 @@
-import { useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 
 import styles from '../../Filters.module.scss';
 
@@ -6,12 +6,55 @@ import { Button } from 'views/_components/Button';
 
 import { sortByStore } from '../../_functions/Stores/filterStore';
 
-export const SortButton = ({ id, isLoading, isVisible, onSortData, recoilId }) => {
-  const sortBy = useRecoilValue(sortByStore(recoilId));
+export const SortButton = ({ id, isLoading, isVisible, onSort, recoilId }) => {
+  const [sortBy, setSortBy] = useRecoilState(sortByStore(recoilId));
 
   const isSortActive = id === sortBy.sortByHeader && sortBy.sortByOption !== 'idle';
 
-  const switchSortByIcon = () => {};
+  const onSortData = key => {
+    setSortBy(prevSortBy => {
+      const sortByHeader = switchSortByOption(prevSortBy.sortByOption) === 'idle' ? '' : key;
+      const sortByOption = switchSortByOption(prevSortBy.sortByOption);
+
+      if (onSort) {
+        onSort({ sortByHeader, sortByOption });
+      }
+
+      return { sortByHeader, sortByOption };
+    });
+  };
+
+  const switchSortByOption = prevSortByOption => {
+    switch (prevSortByOption) {
+      case 'idle':
+        return 'asc';
+
+      case 'asc':
+        return 'desc';
+
+      case 'desc':
+        return 'idle';
+
+      default:
+        return 'asc';
+    }
+  };
+
+  const switchSortByIcon = sortByKey => {
+    switch (sortByKey) {
+      case 'idle':
+        return 'sortAlt';
+
+      case 'asc':
+        return 'alphabeticOrderDown';
+
+      case 'desc':
+        return 'alphabeticOrderUp';
+
+      default:
+        return 'sortAlt';
+    }
+  };
 
   if (!isVisible) {
     return <div className={styles.sortButtonSize} />;

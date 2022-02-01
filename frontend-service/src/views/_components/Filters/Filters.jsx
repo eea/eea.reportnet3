@@ -96,7 +96,15 @@ export const Filters = ({ className, isStrictModeVisible, onFilter, onSort, opti
 
     const FilterComponent = components[type];
 
-    return <FilterComponent key={option.key} onFilterData={onFilterFilteredData} option={option} recoilId={recoilId} />;
+    return (
+      <FilterComponent
+        key={option.key}
+        onFilterData={onFilterFilteredData}
+        onSort={onSort}
+        option={option}
+        recoilId={recoilId}
+      />
+    );
   };
 
   return (
