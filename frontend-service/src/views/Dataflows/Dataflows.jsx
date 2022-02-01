@@ -721,7 +721,7 @@ export const Dataflows = () => {
   };
 
   const renderPaginator = () => {
-    if (!loadingStatus[tabId] && filteredRecords !== 0) {
+    if (!loadingStatus[tabId] && filteredRecords > 100) {
       return (
         <Paginator
           className={`p-paginator-bottom ${styles.paginator}`}
