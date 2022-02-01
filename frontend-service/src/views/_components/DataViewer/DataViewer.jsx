@@ -928,7 +928,7 @@ export const DataViewer = ({
       <Button
         className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
         disabled={isSaving || records.isSaveDisabled}
-        icon={isSaving === true ? 'spinnerAnimate' : 'check'}
+        icon={isSaving ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['save']}
         onClick={() => {
           try {
