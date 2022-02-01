@@ -209,10 +209,10 @@ const parseRequestPublicCountryFilterBy = filterBy => {
   const replacements = {
     name: 'name',
     obligation: 'obligation',
-    legalInstrument: 'legal_instrument',
-    deadline: 'expiration_date',
+    legalInstrument: 'ot.legal_instrument',
+    deadline: 'deadline_date',
     status: 'status',
-    deliveryDate: 'release_date',
+    deliveryDate: 'delivery_date',
     deliveryStatus: 'delivery_status'
   };
 
