@@ -503,7 +503,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
             className={styles.inputFile}
             fileRef={fileRef}
             hasError={errors.content.hasErrors}
-            onButtonFocus={() => checkHasErrors('content')}
             onChange={onFileUpload}
             onClearFile={onClearFile}
             onClick={() => checkHasErrors('content')}

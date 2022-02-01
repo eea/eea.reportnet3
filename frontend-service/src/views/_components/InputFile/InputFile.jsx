@@ -21,7 +21,6 @@ export const InputFile = ({
   errorMessage,
   fileRef,
   hasError,
-  onButtonFocus = () => {},
   onChange,
   onClearFile,
   onClick = () => {},
@@ -86,7 +85,6 @@ export const InputFile = ({
           icon="upload"
           label={isEmpty(fileName) ? buttonTextNoFile : buttonTextWithFile}
           onClick={() => fileRef.current.click()}
-          onFocus={onButtonFocus}
         />
       </div>
 
