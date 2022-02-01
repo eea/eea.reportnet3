@@ -10,6 +10,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 
 /**
@@ -20,6 +22,9 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   /** The entity manager. */
   @PersistenceContext
   private EntityManager entityManager;
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(DataflowExtendedRepositoryImpl.class);
 
   /** The Constant QUERY_FIND_COMPLETED. */
   private static final String QUERY_FIND_COMPLETED =
@@ -42,6 +47,22 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "select d.*,ot.legal_instrument,ot.obligation from obligationtable ot right join dataflow d \r\n"
       + "on d.obligation_id  = cast(ot.obligation_id as integer)";
 
+  private static final String QUERY_JSON_COUNTRY = "with doc as (    \r\n"
+      + "select json_array_elements(asjsonconverter) as docaux from cast (:aux as json) asjsonconverter),\r\n"
+      + "obligationtable as (select (docaux ->> 'obligationId' ) as obligationId,\r\n"
+      + "(docaux ->> 'oblTitle' ) as obligation,\r\n"
+      + "(docaux ->> 'description' ) as description,\r\n"
+      + "(docaux ->> 'validSince' ) as validSince,\r\n" + "(docaux ->> 'validTo' ) as validTo,\r\n"
+      + "(docaux ->> 'comment' ) as comment,\r\n"
+      + "(docaux ->> 'nextDeadline' ) as nextDeadline,\r\n"
+      + "(docaux ->> 'legalInstrument' ) as legal_Instrument,\r\n"
+      + "(docaux ->> 'client' ) as client,\r\n" + "(docaux ->> 'countries' ) as countries,\r\n"
+      + "(docaux ->> 'issues' ) as issues,\r\n" + "(docaux ->> 'reportFreq' ) as reportFreq,\r\n"
+      + "(docaux ->> 'reportFreqDetail' ) as reportFreqDetail\r\n" + "from doc),\r\n"
+      + "dataset_aux as (select dataflowid, status as delivery_status, date_released from dataset d2 inner join (select reporting_dataset_id, date_released from \"snapshot\" s2 group by reporting_dataset_id, date_released) as snapshot_aux on snapshot_aux.reporting_dataset_id = d2.id)\r\n"
+      + "select d.*,ot.legal_Instrument, ot.obligation, dataset_aux.delivery_status, dataset_aux.date_released from obligationtable ot RIGHT join dataflow d \r\n"
+      + "on d.obligation_id  = cast(ot.obligationId as integer)";
+
   /** The Constant COUNTRY_CODE. */
   private static final String COUNTRY_CODE = " dp.code = :countryCode ";
 
@@ -51,9 +72,11 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   /** The Constant SHOW_PUBLIC_INFO. */
   private static final String SHOW_PUBLIC_INFO = " d.show_public_info = TRUE ";
 
-  /** The Constant JOIN_REPRESENTATIVE_AND_DATA_PROVIDER. */
-  private static final String JOIN_REPRESENTATIVE_AND_DATA_PROVIDER =
-      " join representative r on d.id = r.dataflow_id join data_provider dp on r.data_provider_id = dp.group_id ";
+  /** The Constant JOIN_REPRESENTATIVE_DATA_PROVIDER_AND_DATASET_AUX. */
+  private static final String JOIN_REPRESENTATIVE_DATA_PROVIDER_AND_DATASET_AUX =
+      " inner join representative r on d.id = r.dataflow_id "
+          + "inner join data_provider dp on r.data_provider_id = dp.group_id "
+          + "left join dataset_aux on d.id = dataset_aux.dataflowid ";
 
   /** The Constant DRAFT_STATUS. */
   private static final String DRAFT_STATUS = " d.status = 'DRAFT'";
@@ -188,7 +211,6 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     Query query = entityManager.createNativeQuery(sb.toString());
     query.setParameter("aux", obligationJson);
     query.setParameter("countryCode", countryCode);
-    System.out.println(query.toString());
     return Long.valueOf(query.getResultList().get(0).toString());
   }
 
@@ -343,8 +365,8 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @param sb the sb
    */
   private void constructPublicDataflowsQuery(StringBuilder sb, String orderHeader, boolean asc) {
-    sb.append(QUERY_JSON);
-    sb.append(JOIN_REPRESENTATIVE_AND_DATA_PROVIDER);
+    sb.append(QUERY_JSON_COUNTRY);
+    sb.append(JOIN_REPRESENTATIVE_DATA_PROVIDER_AND_DATASET_AUX);
     sb.append(" where " + HAS_DATASETS);
     sb.append(AND + SHOW_PUBLIC_INFO);
     sb.append(AND + DRAFT_STATUS);
