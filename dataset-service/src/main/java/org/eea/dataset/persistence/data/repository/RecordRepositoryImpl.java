@@ -879,7 +879,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         " (exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'id' in (select id_field from id_field_validations)) or id in (select id from record_value_aux) or id_table in (select id from table_value_aux))";
 
     String filterByCorrectLevelError = hasCorrectLevelError
-        ? "(exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'id' not in (select id_field from id_field_validations)) or (id not in (select id from record_value_aux) and id_table not in (select id from table_value_aux)))"
+        ? "(not exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'id' in (select id_field from id_field_validations)) and (id not in (select id from record_value_aux) and id_table not in (select id from table_value_aux)))"
         : "";
 
     initialQuery = paginateExportWithFilterQuery(pageable, initialQuery);
