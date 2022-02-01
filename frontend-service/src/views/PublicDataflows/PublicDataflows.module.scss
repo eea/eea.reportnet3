@@ -14,6 +14,7 @@
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
+      justify-content: space-between;
       margin-bottom: 2rem;
       padding-bottom: 4rem;
 
@@ -66,5 +67,5 @@
 }
 
 .paginator {
-  border-radius: 5px;
+  border-radius: 10px;
 }
