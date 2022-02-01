@@ -107,7 +107,7 @@ public class KieBaseManagerTest {
     Mockito.when(rulesRepository.getActiveAndVerifiedRules(Mockito.any())).thenReturn(schemaRules);
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
-    assertNotNull(kieBaseManager.reloadRules(1L, new ObjectId().toString(), rule));
+    assertNotNull(kieBaseManager.reloadRules(1L, new ObjectId().toString(), null));
   }
 
   @Test
@@ -128,7 +128,7 @@ public class KieBaseManagerTest {
     schemaRules.setRules(rules);
     Mockito.when(rulesRepository.getActiveAndVerifiedRules(Mockito.any())).thenReturn(schemaRules);
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
-    assertNotNull(kieBaseManager.reloadRules(1L, id.toString(), rule));
+    assertNotNull(kieBaseManager.reloadRules(1L, id.toString(), null));
   }
 
   @Test
@@ -149,7 +149,7 @@ public class KieBaseManagerTest {
     schemaRules.setRules(rules);
     Mockito.when(rulesRepository.getActiveAndVerifiedRules(Mockito.any())).thenReturn(schemaRules);
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
-    assertNotNull(kieBaseManager.reloadRules(1L, id.toString(), rule));
+    assertNotNull(kieBaseManager.reloadRules(1L, id.toString(), null));
   }
 
   @Test
@@ -175,7 +175,7 @@ public class KieBaseManagerTest {
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldDocument);
-    assertNotNull(kieBaseManager.reloadRules(1L, id.toString(), rule));
+    assertNotNull(kieBaseManager.reloadRules(1L, id.toString(), null));
   }
 
   @Test
@@ -201,7 +201,7 @@ public class KieBaseManagerTest {
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldDocument);
-    assertNotNull(kieBaseManager.reloadRules(1L, id.toString(), rule));
+    assertNotNull(kieBaseManager.reloadRules(1L, id.toString(), null));
   }
 
   @Test
@@ -227,7 +227,7 @@ public class KieBaseManagerTest {
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldDocument);
-    assertNotNull(kieBaseManager.reloadRules(1L, id.toString(), rule));
+    assertNotNull(kieBaseManager.reloadRules(1L, id.toString(), null));
   }
 
   @Test
@@ -253,7 +253,7 @@ public class KieBaseManagerTest {
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldDocument);
-    assertNotNull(kieBaseManager.reloadRules(1L, id.toString(), rule));
+    assertNotNull(kieBaseManager.reloadRules(1L, id.toString(), null));
   }
 
   @Test
