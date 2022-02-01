@@ -2,7 +2,6 @@ import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'r
 import { useParams } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 
-import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -80,6 +79,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   });
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
+  const [selectedView, setSelectedView] = useState(
+    QuerystringUtils.getUrlParamValue('view') !== '' ? QuerystringUtils.getUrlParamValue('view') : 'design'
+  );
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -308,6 +310,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const changeMode = viewMode => designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: viewMode } });
 
   const changeUrl = (changeOnlyView = false) => {
+    const activedViews = Object.keys(designerState.viewType).filter(view => designerState.viewType[view]);
+    const view = activedViews.length > 0 ? activedViews[0] : 'design';
+    setSelectedView(view);
     window.history.replaceState(
       null,
       null,
@@ -316,10 +321,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             QuerystringUtils.getUrlParamValue('tab') !== ''
               ? QuerystringUtils.getUrlParamValue('tab')
               : dataViewerOptions.tableSchemaId
-          }${`&view=${Object.keys(designerState.viewType).filter(view => designerState.viewType[view] === true)}`}`
-        : `?tab=${QuerystringUtils.getUrlParamValue('tab')}${`&view=${Object.keys(designerState.viewType).filter(
-            view => designerState.viewType[view] === true
-          )}`}`
+          }${`&view=${view}`}`
+        : `?tab=${QuerystringUtils.getUrlParamValue('tab')}${`&view=${view}`}`
     );
   };
 
@@ -1156,56 +1159,27 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     setIsValidationsTabularView(true);
   };
 
-  const renderRadioButtons = () => {
-    return (
-      <TabularSwitch
-        elements={Object.keys(designerState.viewType).map(view => resourcesContext.messages[`${view}View`])}
-        getIsTableCreated={setIsTableCreated}
-        isTableCreated={designerState.isTableCreated}
-        isValidationsTabularView={designerState.isValidationsTabularView}
-        onChange={switchView => {
-          const views = { design: 'design', tabularData: 'tabularData', webform: 'webform' };
-          onChangeView(views[camelCase(switchView)]);
-          changeMode(views[camelCase(switchView)]);
-        }}
-        setIsValidationsTabularView={setIsValidationsTabularView}
-        value={
-          QuerystringUtils.getUrlParamValue('view') !== ''
-            ? resourcesContext.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
-            : resourcesContext.messages['designView']
-        }
-      />
-    );
-  };
-
   const renderSwitchView = () => {
-    const switchView = (
-      <TabularSwitch
-        elements={[resourcesContext.messages['designView'], resourcesContext.messages['tabularDataView']]}
-        getIsTableCreated={setIsTableCreated}
-        isTableCreated={designerState.isTableCreated}
-        isValidationsTabularView={designerState.isValidationsTabularView}
-        onChange={switchView =>
-          designerDispatch({
-            type: 'SET_VIEW_MODE',
-            payload: { value: switchView === 'Design' ? 'design' : 'tabularData' }
-          })
-        }
-        setIsValidationsTabularView={setIsValidationsTabularView}
-        value={
-          QuerystringUtils.getUrlParamValue('view') !== ''
-            ? resourcesContext.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
-            : resourcesContext.messages['designView']
-        }
-      />
-    );
+    const viewModes = [
+      { key: 'design', label: resourcesContext.messages['designView'] },
+      { key: 'tabularData', label: resourcesContext.messages['tabularDataView'] }
+    ];
+
+    if (!isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead) {
+      viewModes.push({ key: 'webform', label: resourcesContext.messages['webform'] });
+    }
 
     return (
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-          {!isNil(designerState.webform) && !isDataflowOpen && !isDesignDatasetEditorRead
-            ? renderRadioButtons()
-            : switchView}
+          <TabularSwitch
+            elements={viewModes}
+            onChange={switchView => {
+              onChangeView(switchView);
+              changeMode(switchView);
+            }}
+            value={selectedView}
+          />
         </div>
       </div>
     );
