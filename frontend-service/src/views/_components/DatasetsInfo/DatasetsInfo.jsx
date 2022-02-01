@@ -144,7 +144,7 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
 
   const renderFilters = () => (
     <MyFilters
-      className="datasetsInfo"
+      className="lineItems"
       data={datasetsInfo}
       options={dataflowType === config.dataflowType.REFERENCE.value ? filterReferenceDataflowOptions : filterOptions}
       viewType="datasetInfo"

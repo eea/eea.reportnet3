@@ -142,7 +142,9 @@ export const Dataflow = () => {
 
   const usersTypes = { REPORTERS: 'Reporters', REQUESTERS: 'Requesters' };
 
-  const { resetFiltersState } = useFilters('manageLeadReporters');
+  const { resetFiltersState: resetManageLeadReportersState } = useFilters('manageLeadReporters');
+  const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
 
   const {
     obligation,
@@ -343,7 +345,7 @@ export const Dataflow = () => {
         isNationalCoordinatorOfCountry ||
         isReporterOfCountry ||
         isObserver,
-      automaticDeleteBtn: !isDesign && dataflowState.data.manualAcceptance
+      automaticDeleteBtn: !isDesign && isLeadDesigner && dataflowState.data.manualAcceptance
     };
   };
 
@@ -638,7 +640,7 @@ export const Dataflow = () => {
         label={resourcesContext.messages['close']}
         onClick={() => {
           manageDialogs('isManageRolesDialogVisible', false);
-          resetFiltersState();
+          resetManageLeadReportersState();
         }}
       />
     </Fragment>
@@ -649,7 +651,11 @@ export const Dataflow = () => {
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs(modalType, false)}
+      onClick={() => {
+        manageDialogs(modalType, false);
+        resetDatasetInfoFiltersState();
+        resetUserListFiltersState();
+      }}
     />
   );
 
@@ -1263,7 +1269,7 @@ export const Dataflow = () => {
             header={resourcesContext.messages['manageRolesDialogTitle']}
             onHide={() => {
               manageDialogs('isManageRolesDialogVisible', false);
-              resetFiltersState();
+              resetManageLeadReportersState();
             }}
             visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
@@ -1574,7 +1580,10 @@ export const Dataflow = () => {
                   )
                 : resourcesContext.messages['dataflowUsersList']
             }
-            onHide={() => manageDialogs('isUserListVisible', false)}
+            onHide={() => {
+              manageDialogs('isUserListVisible', false);
+              resetUserListFiltersState();
+            }}
             visible={dataflowState.isUserListVisible}>
             <UserList
               dataflowId={dataflowId}
@@ -1651,7 +1660,10 @@ export const Dataflow = () => {
           <Dialog
             footer={renderDialogFooterCloseBtn('isDatasetsInfoDialogVisible')}
             header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowState.id}`}
-            onHide={() => manageDialogs('isDatasetsInfoDialogVisible', false)}
+            onHide={() => {
+              manageDialogs('isDatasetsInfoDialogVisible', false);
+              resetDatasetInfoFiltersState();
+            }}
             visible={dataflowState.isDatasetsInfoDialogVisible}>
             <DatasetsInfo dataflowId={dataflowId} dataflowType={dataflowState.dataflowType} />
           </Dialog>

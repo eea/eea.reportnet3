@@ -318,16 +318,13 @@ export const DataflowService = {
   getApiKey: async (dataflowId, dataProviderId, isCustodian) =>
     await DataflowRepository.getApiKey(dataflowId, dataProviderId, isCustodian),
 
-  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField, filterBy) => {
-    const filteredFilterBy = DataflowUtils.parseRequestPublicFilterBy(filterBy);
-
+  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
     const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode(
       countryCode,
       sortOrder,
       pageNum,
       numberRows,
-      sortField,
-      filteredFilterBy
+      sortField
     );
 
     publicDataflowsByCountryCodeResponse.data.publicDataflows = DataflowUtils.parsePublicDataflowListDTO(
