@@ -16,7 +16,7 @@ export class PrevPageLink extends Component {
   };
 
   render() {
-    let className = classNames('p-paginator-prev p-paginator-element p-link', { 'p-disabled': this.props.disabled });
+    const className = classNames('p-paginator-prev p-paginator-element p-link', { 'p-disabled': this.props.disabled });
 
     return (
       <button className={className} disabled={this.props.disabled} onClick={this.props.onClick} type="button">

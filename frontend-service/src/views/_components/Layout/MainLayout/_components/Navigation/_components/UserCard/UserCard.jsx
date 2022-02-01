@@ -15,9 +15,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-const UserCard = memo(() => {
+export const UserCard = memo(() => {
   const notificationContext = useContext(NotificationContext);
   const userContext = useContext(UserContext);
+
   return (
     <div className={styles.userProfileCard} id="userProfile">
       <div className={styles.userProfile}>
@@ -53,5 +54,3 @@ const UserCard = memo(() => {
     </div>
   );
 });
-
-export { UserCard };

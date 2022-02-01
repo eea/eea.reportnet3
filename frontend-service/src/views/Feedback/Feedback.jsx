@@ -50,7 +50,7 @@ export const Feedback = () => {
     dataflowType: '',
     dataProviders: [],
     draggedFiles: null,
-    hasCustodianPermissions: undefined,
+    hasCustodianPermissions: false,
     importFileDialogVisible: false,
     isAdmin: false,
     isDragging: false,
@@ -123,13 +123,13 @@ export const Feedback = () => {
         config.permissions.roles.STEWARD.key
       ]);
 
-      const isCustodianSupport = userContext.hasContextAccessPermission(
+      const isStewardSupport = userContext.hasContextAccessPermission(
         config.permissions.prefixes.DATAFLOW,
         dataflowId,
-        [config.permissions.roles.CUSTODIAN_SUPPORT.key]
+        [config.permissions.roles.STEWARD_SUPPORT.key]
       );
 
-      const hasCustodianPermissions = isCustodian || isCustodianSupport;
+      const hasCustodianPermissions = isCustodian || isStewardSupport;
 
       const isAdmin = userContext.accessRole.some(role => role === config.permissions.roles.ADMIN.key);
       dispatchFeedback({ type: 'SET_PERMISSIONS', payload: { isAdmin, hasCustodianPermissions } });

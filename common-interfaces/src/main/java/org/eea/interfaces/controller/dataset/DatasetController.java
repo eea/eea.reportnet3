@@ -1,10 +1,12 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -176,11 +178,12 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param mimeType the mime type
+   * @param exportFilterVO the export filter VO
    */
   @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   void exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-      @RequestParam("mimeType") String mimeType);
+      @RequestParam("mimeType") String mimeType, @RequestBody ExportFilterVO exportFilterVO);
 
   /**
    * Export file through integration.
@@ -546,8 +549,7 @@ public interface DatasetController {
    * @param updated the updated
    */
   @PutMapping("/private/viewUpdated/{datasetId}")
-  public void updateCheckView(@PathVariable("datasetId") Long datasetId,
-      @RequestParam Boolean updated);
+  void updateCheckView(@PathVariable("datasetId") Long datasetId, @RequestParam Boolean updated);
 
   /**
    * Gets the check view.
@@ -556,6 +558,31 @@ public interface DatasetController {
    * @return the check view
    */
   @GetMapping("/{datasetId}/viewUpdated")
-  public Boolean getCheckView(@PathVariable("datasetId") Long datasetId);
+  Boolean getCheckView(@PathVariable("datasetId") Long datasetId);
+
+
+
+  /**
+   * Stream import file data.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   * @param integrationId the integration id
+   * @param delimiter the delimiter
+   */
+  @PostMapping(path = "/v1/stream/{datasetId}/streamImportFileData",
+      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+  void streamImportFileData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId,
+      @RequestParam(value = "delimiter", required = false) String delimiter,
+      HttpServletRequest request);
 
 }

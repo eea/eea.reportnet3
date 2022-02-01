@@ -1,11 +1,12 @@
 import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { useResetRecoilState } from 'recoil';
+import { useRecoilValue, useResetRecoilState } from 'recoil';
 
 import isNil from 'lodash/isNil';
 import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
 import pull from 'lodash/pull';
+import ReactTooltip from 'react-tooltip';
 
 import styles from './Dataflows.module.scss';
 
@@ -18,11 +19,14 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'views/_components/Dialog';
 import { GoTopButton } from 'views/_components/GoTopButton';
+import { InputText } from 'views/_components/InputText';
 import { MainLayout } from 'views/_components/Layout';
 import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow';
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
+import { ManageWebforms } from './_components/ManageWebforms';
 import { MyFilters } from 'views/_components/MyFilters';
+import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
@@ -34,6 +38,7 @@ import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { UserService } from 'services/UserService';
 
 import { dialogsStore } from 'views/_components/Dialog/_functions/Stores/dialogsStore';
+import { filterByState, sortByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -44,6 +49,7 @@ import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { CurrentPage } from 'views/_functions/Utils';
@@ -51,10 +57,9 @@ import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const { parseDataflows, sortDataflows } = DataflowsUtils;
 const { permissions } = config;
 
-const Dataflows = () => {
+export const Dataflows = () => {
   const { errorType: dataflowsErrorType } = useParams();
 
   const resetDialogsStore = useResetRecoilState(dialogsStore);
@@ -70,22 +75,28 @@ const Dataflows = () => {
     citizenScience: [],
     dataflowsCount: {},
     dataflowsCountFirstLoad: false,
+    filteredRecords: 0,
+    goToPage: 1,
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
     isCitizenScienceDataflowDialogVisible: false,
     isCustodian: null,
+    isFiltered: false,
+    isManageWebformsDialogVisible: false,
     isNationalCoordinator: false,
     isRecreatePermissionsDialogVisible: false,
     isReferencedDataflowDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
-    isValidatingAllDataflowsUsers: false,
     isUserListVisible: false,
+    isValidatingAllDataflowsUsers: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
+    pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
+    pagination: { firstRow: 0, numberRows: 100, pageNum: 0 },
+    pinnedSeparatorIndex: -1,
     reference: [],
     reporting: [],
-    filteredData: { business: [], citizenScience: [], reference: [], reporting: [] },
-    pinnedSeparatorIndex: -1
+    totalRecords: 0
   });
 
   const { obligation, resetObligations, setObligationToPrevious, setCheckedObligation, setToCheckedObligation } =
@@ -94,12 +105,16 @@ const Dataflows = () => {
   const {
     activeIndex,
     dataflowsCount,
-    filteredData,
+    filteredRecords,
+    goToPage,
     isAdmin,
     isCustodian,
+    isFiltered,
     isNationalCoordinator,
     loadingStatus,
-    pinnedSeparatorIndex
+    pagination,
+    pinnedSeparatorIndex,
+    totalRecords
   } = dataflowsState;
 
   const containerRef = useRef(null);
@@ -140,6 +155,12 @@ const Dataflows = () => {
         ];
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
+
+  const filterBy = useRecoilValue(filterByState(tabId));
+  const sortByOptions = useRecoilValue(sortByState(tabId));
+
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
+  const { resetFiltersState: resetReportingObligationsFiltersState } = useFilters('reportingObligations');
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -209,9 +230,19 @@ const Dataflows = () => {
       title: 'adminCreatePermissions'
     };
 
+    const adminManageWebformsBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'table',
+      isVisible: isAdmin,
+      label: 'manageWebformsLeftBarButton',
+      onClick: () => manageDialogs('isManageWebformsDialogVisible', true),
+      title: 'manageWebformsLeftBarButton'
+    };
+
     leftSideBarContext.addModels(
       [
         adminCreateNewPermissionsBtn,
+        adminManageWebformsBtn,
         createBusinessDataflowBtn,
         createCitizenScienceDataflowBtn,
         createReferenceDataflowBtn,
@@ -240,7 +271,7 @@ const Dataflows = () => {
     if (!isNil(userContext.contextRoles)) {
       getDataflows();
     }
-  }, [tabId]);
+  }, [tabId, pagination]);
 
   useEffect(() => {
     setActiveIndexTabOnBack();
@@ -285,26 +316,58 @@ const Dataflows = () => {
       return dataflow;
     });
 
-  const getDataflows = async () => {
+  const getDataflows = async (sortBy = sortByOptions) => {
     setLoading(true);
+
+    const { accessRole: accessRoles, contextRoles } = userContext;
+    const { numberRows, pageNum } = pagination;
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {
-        const data = await DataflowService.getAll(userContext.accessRole, userContext.contextRoles);
-        setStatusDataflowLabel(data);
-        setDataflows({ dataflows: data, type: 'reporting' });
+        const data = await DataflowService.getAll({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy });
+        const { dataflows, filteredRecords, totalRecords } = data;
+
+        setStatusDataflowLabel(dataflows);
+        setDataflows({ dataflows, filteredRecords, totalRecords, type: tabId });
       } else if (TextUtils.areEquals(tabId, 'reference')) {
-        const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
-        setStatusDataflowLabel(data);
-        setDataflows({ dataflows: data, type: 'reference' });
+        const data = await ReferenceDataflowService.getAll({
+          accessRoles,
+          contextRoles,
+          filterBy,
+          numberRows,
+          pageNum,
+          sortBy
+        });
+        const { dataflows, filteredRecords, totalRecords } = data;
+
+        setStatusDataflowLabel(dataflows);
+        setDataflows({ dataflows, filteredRecords, totalRecords, type: tabId });
       } else if (TextUtils.areEquals(tabId, 'business')) {
-        const data = await BusinessDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
-        setStatusDataflowLabel(data);
-        setDataflows({ dataflows: data, type: 'business' });
+        const data = await BusinessDataflowService.getAll({
+          accessRoles,
+          contextRoles,
+          filterBy,
+          numberRows,
+          pageNum,
+          sortBy
+        });
+        const { dataflows, filteredRecords, totalRecords } = data;
+
+        setStatusDataflowLabel(dataflows);
+        setDataflows({ dataflows, filteredRecords, totalRecords, type: tabId });
       } else if (TextUtils.areEquals(tabId, 'citizenScience')) {
-        const data = await CitizenScienceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
-        setStatusDataflowLabel(data);
-        setDataflows({ dataflows: data, type: 'citizenScience' });
+        const data = await CitizenScienceDataflowService.getAll({
+          accessRoles,
+          contextRoles,
+          filterBy,
+          numberRows,
+          pageNum,
+          sortBy
+        });
+        const { dataflows, filteredRecords, totalRecords } = data;
+
+        setStatusDataflowLabel(dataflows);
+        setDataflows({ dataflows, filteredRecords, totalRecords, type: tabId });
       }
     } catch (error) {
       console.error('Dataflows - getDataflows.', error);
@@ -326,13 +389,14 @@ const Dataflows = () => {
     }
   };
 
-  const getFilteredData = data => {
-    const orderedFilteredData = sortDataflows(data);
-    const orderedPinned = orderedFilteredData.map(el => el.pinned);
-
-    setPinnedSeparatorIndex(orderedPinned.lastIndexOf('pinned'));
-    dataflowsDispatch({ type: 'GET_FILTERED_DATA', payload: { type: tabId, data } });
-  };
+  const renderPaginatorRecordsCount = () => (
+    <Fragment>
+      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
+      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
+        'records'
+      ].toLowerCase()}`}
+    </Fragment>
+  );
 
   const manageDialogs = (dialog, value) => {
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
@@ -362,11 +426,14 @@ const Dataflows = () => {
       userContext.setCurrentDataflowType(currentTabDataflowType);
     }
     dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
+    onChangePagination({ firstRow: 0, numberRows: 100, pageNum: 0 });
+    setGoToPage(1);
   };
 
   const onHideObligationDialog = () => {
     manageDialogs('isReportingObligationsDialogVisible', false);
     setObligationToPrevious();
+    resetReportingObligationsFiltersState();
   };
 
   const onLoadPermissions = () => {
@@ -397,7 +464,6 @@ const Dataflows = () => {
     const { business, citizenScience, reference, reporting } = dataflowsState;
 
     const copyData = [...reporting, ...reference, ...business, ...citizenScience];
-    const copyFilteredData = [...filteredData[tabId]];
 
     const userProperties = updateUserPropertiesPinnedDataflows({ pinnedItem, data: copyData });
 
@@ -405,9 +471,8 @@ const Dataflows = () => {
     userContext.onChangePinnedDataflows(userProperties.pinnedDataflows);
 
     const changedInitialData = onUpdatePinnedStatus({ dataflows: dataflowsState[tabId], isPinned, pinnedItem });
-    const changedFilteredData = onUpdatePinnedStatus({ dataflows: copyFilteredData, isPinned, pinnedItem });
 
-    const orderedFilteredData = sortDataflows(changedFilteredData);
+    const orderedFilteredData = DataflowsUtils.sortDataflows(changedInitialData);
     const orderedPinned = orderedFilteredData.map(el => el.pinned);
 
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf('pinned'));
@@ -416,7 +481,7 @@ const Dataflows = () => {
       type: 'SET_DATAFLOWS',
       payload: {
         contextCurrentDataflowType: userContext.currentDataflowType,
-        data: sortDataflows(changedInitialData),
+        data: DataflowsUtils.sortDataflows(changedInitialData),
         type: tabId
       }
     });
@@ -465,14 +530,20 @@ const Dataflows = () => {
     return userProperties;
   };
 
-  const setDataflows = ({ dataflows = [], type }) => {
-    const parsedDataflows = parseDataflows(dataflows, userContext.userProps.pinnedDataflows);
+  const setDataflows = ({ dataflows = [], filteredRecords, totalRecords, type }) => {
+    const parsedDataflows = DataflowsUtils.parseDataflows(dataflows, userContext.userProps.pinnedDataflows);
     const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
 
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
     dataflowsDispatch({
       type: 'SET_DATAFLOWS',
-      payload: { contextCurrentDataflowType: userContext.currentDataflowType, data: parsedDataflows, type }
+      payload: {
+        contextCurrentDataflowType: userContext.currentDataflowType,
+        data: parsedDataflows,
+        filteredRecords,
+        totalRecords,
+        type
+      }
     });
   };
 
@@ -491,7 +562,10 @@ const Dataflows = () => {
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs('isUserListVisible', false)}
+      onClick={() => {
+        manageDialogs('isUserListVisible', false);
+        resetUserListFiltersState();
+      }}
     />
   );
 
@@ -503,6 +577,7 @@ const Dataflows = () => {
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
           setToCheckedObligation();
+          resetReportingObligationsFiltersState();
         }}
       />
       <Button
@@ -512,6 +587,7 @@ const Dataflows = () => {
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
           setObligationToPrevious();
+          resetReportingObligationsFiltersState();
         }}
       />
     </Fragment>
@@ -521,25 +597,18 @@ const Dataflows = () => {
     const filters = [
       {
         nestedOptions: [
-          { key: 'name', label: resourcesContext.messages['name'], order: 0, isSortable: true },
-          { key: 'description', label: resourcesContext.messages['description'], order: 1, isSortable: true },
-          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], order: 2, isSortable: true },
-          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], order: 3, isSortable: true },
-          { key: 'obligationId', label: resourcesContext.messages['obligationId'], order: 4, isSortable: true }
+          { key: 'name', label: resourcesContext.messages['name'], isSortable: true },
+          { key: 'description', label: resourcesContext.messages['description'], isSortable: true },
+          { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], isSortable: true },
+          { key: 'obligationTitle', label: resourcesContext.messages['obligation'], isSortable: true },
+          { key: 'obligationId', label: resourcesContext.messages['obligationId'], isSortable: true }
         ],
         type: 'INPUT'
       },
       {
         nestedOptions: [
-          {
-            key: 'status',
-            label: resourcesContext.messages['status'],
-            order: 0,
-            category: 'LEVEL_ERROR',
-            isSortable: true
-          },
-          { key: 'userRole', label: resourcesContext.messages['userRole'], order: 1, isSortable: true },
-          { key: 'pinned', label: resourcesContext.messages['pinned'], order: 2 }
+          { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' },
+          { key: 'userRole', label: resourcesContext.messages['userRole'], isSortable: true }
         ],
         type: 'MULTI_SELECT'
       },
@@ -575,7 +644,7 @@ const Dataflows = () => {
     },
     {
       nestedOptions: [
-        { key: 'status', label: resourcesContext.messages['status'], category: 'LEVEL_ERROR', isSortable: true },
+        { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' },
         { key: 'pinned', label: resourcesContext.messages['pinned'], isSortable: true }
       ],
       type: 'MULTI_SELECT'
@@ -587,6 +656,95 @@ const Dataflows = () => {
     citizenScience: dataflowsFilterOptions,
     reference: referenceDataflowFilterOptions,
     reporting: dataflowsFilterOptions
+  };
+
+  const onChangeCurrentPage = event => {
+    if (event.key === 'Enter' && goToPage !== '' && goToPage !== pagination.first + 1) {
+      const pc = Math.ceil(filteredRecords / pagination.numberRows) || 1;
+      const p = Math.floor(event.target.value - 1);
+
+      if (p >= 0 && p < pc) {
+        const newPageState = {
+          firstRow: (event.target.value - 1) * pagination.numberRows,
+          numberRows: pagination.numberRows,
+          pageNum: p
+        };
+        onChangePagination(newPageState);
+      }
+    } else {
+      setGoToPage(event.target.value);
+      if (event.target.value <= 0 || event.target.value > Math.ceil(filteredRecords / pagination.numberRows)) {
+        setPageInputTooltip(
+          `${resourcesContext.messages['currentPageErrorMessage']} ${Math.ceil(
+            filteredRecords / pagination.numberRows
+          )}`
+        );
+      } else {
+        setPageInputTooltip(resourcesContext.messages['currentPageInfoMessage']);
+      }
+    }
+  };
+
+  const onChangePagination = pagination => dataflowsDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
+
+  const onPaginate = event => {
+    setGoToPage(event.page + 1);
+    onChangePagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
+  };
+
+  const setGoToPage = value => dataflowsDispatch({ type: 'SET_GO_TO_PAGE', payload: value });
+
+  const setPageInputTooltip = value => dataflowsDispatch({ type: 'SET_PAGE_INPUT_TOOLTIP', payload: value });
+
+  const currentPageTemplate = {
+    layout: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport',
+    CurrentPageReport: options => {
+      return (
+        <span className={styles.currentPageWrapper}>
+          <label className={styles.currentPageLabel}>{resourcesContext.messages['goTo']}</label>
+          <InputText
+            className={styles.currentPageInput}
+            data-for="pageInputTooltip"
+            data-tip
+            id="currentPageInput"
+            keyfilter="pint"
+            onChange={onChangeCurrentPage}
+            onKeyDown={onChangeCurrentPage}
+            style={{
+              border: (goToPage <= 0 || goToPage > options.totalPages) && '1px solid var(--errors)',
+              boxShadow:
+                goToPage <= 0 || goToPage > options.totalPages ? 'var(--inputtext-box-shadow-focus-error)' : 'none'
+            }}
+            value={goToPage}
+          />
+          <ReactTooltip border={true} effect="solid" id="pageInputTooltip" place="bottom">
+            {dataflowsState.pageInputTooltip}
+          </ReactTooltip>
+          <label className={styles.currentPageOf}>
+            {filteredRecords > 0
+              ? `${resourcesContext.messages['of']} ${Math.ceil(filteredRecords / pagination.numberRows)}`
+              : 1}
+          </label>
+        </span>
+      );
+    }
+  };
+
+  const renderPaginator = () => {
+    if (!loadingStatus[tabId] && filteredRecords !== 0) {
+      return (
+        <Paginator
+          className={`p-paginator-bottom ${styles.paginator}`}
+          first={pagination.firstRow}
+          onPageChange={onPaginate}
+          rightContent={renderPaginatorRecordsCount()}
+          rows={pagination.numberRows}
+          rowsPerPageOptions={[100, 150, 200]}
+          template={currentPageTemplate}
+          totalRecords={filteredRecords}
+        />
+      );
+    }
   };
 
   return renderLayout(
@@ -602,21 +760,26 @@ const Dataflows = () => {
           />
         </div>
         <MyFilters
+          className="dataflowsFilters"
           data={dataflowsState[tabId]}
-          getFilteredData={getFilteredData}
+          onFilter={getDataflows}
+          onSort={getDataflows}
           options={options[tabId]}
           viewType={tabId}
         />
+        {renderPaginator()}
         <DataflowsList
           className="dataflowList-accepted-help-step"
-          filteredData={filteredData[tabId]}
+          data={dataflowsState[tabId]}
           isAdmin={isAdmin}
           isCustodian={isCustodian}
+          isFiltered={isFiltered}
           isLoading={loadingStatus[tabId]}
           pinnedSeparatorIndex={pinnedSeparatorIndex}
           reorderDataflows={onReorderPinnedDataflows}
           visibleTab={tabId}
         />
+        <div className={styles.bottomPaginator}>{renderPaginator()}</div>
       </div>
 
       <GoTopButton parentRef={containerRef} referenceMargin={70} />
@@ -625,7 +788,10 @@ const Dataflows = () => {
         <Dialog
           footer={renderUserListDialogFooter()}
           header={resourcesContext.messages['allDataflowsUserListHeader']}
-          onHide={() => manageDialogs('isUserListVisible', false)}
+          onHide={() => {
+            manageDialogs('isUserListVisible', false);
+            resetUserListFiltersState();
+          }}
           visible={dataflowsState.isUserListVisible}>
           <UserList />
         </Dialog>
@@ -664,6 +830,13 @@ const Dataflows = () => {
         </ConfirmDialog>
       )}
 
+      {dataflowsState.isManageWebformsDialogVisible && (
+        <ManageWebforms
+          isDialogVisible={dataflowsState.isManageWebformsDialogVisible}
+          onCloseDialog={() => manageDialogs('isManageWebformsDialogVisible', false)}
+        />
+      )}
+
       {dataflowsState.isCitizenScienceDataflowDialogVisible && (
         <ManageDataflow
           isCitizenScienceDataflow
@@ -700,5 +873,3 @@ const Dataflows = () => {
     </div>
   );
 };
-
-export { Dataflows };

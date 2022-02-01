@@ -48,7 +48,7 @@ export const ExpressionsTab = ({
             disabled={creationFormState.isRuleAddingDisabled}
             icon="plus"
             id={`${componentName}__addExpresion`}
-            label={resourcesContext.messages.addNewRule}
+            label={resourcesContext.messages['addNewRule']}
             onClick={() => onAddNewExpression()}
             type="button"
           />

@@ -11,7 +11,7 @@ import Tooltip from 'primereact/tooltip';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 import classNames from 'classnames';
 
-const Chips = ({
+export const Chips = ({
   ariaLabelledBy = null,
   checkForDuplicates = false,
   className = null,
@@ -63,7 +63,7 @@ const Chips = ({
       case 9:
       case 13:
         if (inputValue && inputValue.trim().length && (!max || max > value.length)) {
-          let values = [...value];
+          const values = [...value];
           if (checkForDuplicates && values.indexOf(inputValue) > -1) {
             setHasErrors(true);
             return;
@@ -122,7 +122,7 @@ const Chips = ({
       : event.target.value;
 
     if (inputValue && inputValue.trim().length && (!max || max > value.length)) {
-      let values = [...value];
+      const values = [...value];
       if (checkForDuplicates && values.indexOf(inputValue) > -1) {
         setHasErrors(true);
         return;
@@ -170,7 +170,7 @@ const Chips = ({
       return;
     }
 
-    let values = [...value];
+    const values = [...value];
     const removedItem = values.splice(index, 1);
 
     if (!isNil(onRemove)) {
@@ -316,5 +316,3 @@ Chips.propTypes = {
   tooltipOptions: PropTypes.object,
   value: PropTypes.array
 };
-
-export { Chips };

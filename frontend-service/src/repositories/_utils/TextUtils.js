@@ -7,6 +7,7 @@ const parseText = (rawText = '', param = {}) => {
   }
 
   let text = rawText;
+
   if (isObject(param)) {
     Object.keys(param).forEach(key => {
       text = text.replace(
@@ -15,6 +16,7 @@ const parseText = (rawText = '', param = {}) => {
       );
     });
   }
+
   return text;
 };
 
@@ -26,6 +28,7 @@ const ellipsis = (rawText = '', limit) => {
   if (rawText.length > limit - 3) {
     return `${rawText.substring(0, limit - 3)}...`;
   }
+
   return rawText;
 };
 

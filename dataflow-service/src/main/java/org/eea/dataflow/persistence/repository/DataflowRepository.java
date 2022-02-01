@@ -228,6 +228,15 @@ public interface DataflowRepository
    */
   List<Dataflow> findByShowPublicInfoTrue();
 
+
+  /**
+   * Count by show public info.
+   *
+   * @param showPublicInfo the show public info
+   * @return the long
+   */
+  Long countByShowPublicInfo(@Param("showPublicInfo") boolean showPublicInfo);
+
   /**
    * Find public dataflows by country code.
    *
@@ -270,6 +279,19 @@ public interface DataflowRepository
       value = "update dataflow set show_public_info = :showPublicInfo where id = :dataflowId")
   void updatePublicStatus(@Param("dataflowId") Long dataflowId,
       @Param("showPublicInfo") boolean showPublicInfo);
+
+  /**
+   * Update automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDeletion the automatic reporting deletion
+   */
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true,
+      value = "UPDATE dataflow SET automatic_reporting_deletion=:automaticReportingDeletion WHERE id=:dataflowId")
+  void updateAutomaticReportingDeletion(@Param("dataflowId") Long dataflowId,
+      @Param("automaticReportingDeletion") Boolean automaticReportingDeletion);
 
   /**
    * The Interface IDatasetStatus.

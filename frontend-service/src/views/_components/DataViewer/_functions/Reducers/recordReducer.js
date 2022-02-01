@@ -86,6 +86,9 @@ export const recordReducer = (state, { type, payload }) => {
         }
       };
 
+    case 'RESET_TOTAL':
+      return { ...state, totalFilteredRecords: 0, totalRecords: 0 };
+
     case 'SET_EDITED_RECORD':
       if (!isUndefined(payload.property)) {
         let updatedRecord = RecordUtils.changeRecordValue({ ...state.editedRecord }, payload.property, payload.value);

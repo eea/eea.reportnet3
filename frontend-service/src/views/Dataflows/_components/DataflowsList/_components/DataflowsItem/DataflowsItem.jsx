@@ -20,7 +20,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { routes } from 'conf/routes';
 
-const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = () => {} }) => {
+export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = () => {} }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -69,7 +69,8 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
         </Link>
         <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>
           <FontAwesomeIcon
-            aria-label={resourcesContext.messages['pinDataflow']}
+            alt={resourcesContext.messages['pinDataflow']}
+            aria-label={itemContent.pinned}
             className={`${isPinned ? styles.pinned : styles.notPinned} ${isPinning ? 'fa-spin' : null}`}
             icon={!isPinning ? AwesomeIcons('pin') : AwesomeIcons('spinner')}
             onClick={async () => {
@@ -77,6 +78,7 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
               await reorderDataflows(itemContent, !isPinned);
               setIsPinning(false);
             }}
+            role="presentation"
           />
         </div>
       </div>
@@ -161,5 +163,3 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
     </Fragment>
   );
 };
-
-export { DataflowsItem };

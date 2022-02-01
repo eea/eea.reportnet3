@@ -25,7 +25,7 @@ import { linkSelectorReducer } from './_functions/Reducers/linkSelectorReducer';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const LinkSelector = ({
+export const LinkSelector = ({
   datasetSchemaId,
   fieldId,
   fields,
@@ -278,9 +278,9 @@ const LinkSelector = ({
 
   const getOptions = datasetSchema =>
     datasetSchema.tables.map(table => {
-      const hasPK = !isUndefined(table.records[0].fields.filter(field => field.pk === true)[0]);
+      const hasPK = !isUndefined(table.records[0].fields.filter(field => field.pk)[0]);
       if (hasPK && table.tableSchemaId !== tableSchemaId) {
-        const pkField = table.records[0].fields.filter(field => field.pk === true)[0];
+        const pkField = table.records[0].fields.filter(field => field.pk)[0];
         if (
           !['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(pkField.type)
         ) {
@@ -355,7 +355,7 @@ const LinkSelector = ({
             <Button
               className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
               icon="infoCircle"
-              tooltip={resourcesContext.messages['referenceDataflowsDraftInfo']}
+              tooltip={resourcesContext.messages['closedReferenceDataflowsInfo']}
               tooltipOptions={{ position: 'top' }}
             />
             <Dropdown
@@ -536,5 +536,3 @@ const LinkSelector = ({
     )
   );
 };
-
-export { LinkSelector };

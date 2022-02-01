@@ -2,6 +2,7 @@ package org.eea.dataflow.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
@@ -9,6 +10,7 @@ import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -57,10 +59,17 @@ public interface DataflowService {
    *
    * @param userId the user id
    * @param dataflowType the dataflow type
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param sizePage the size page
+   * @param numPage the num page
    * @return the dataflows
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getDataflows(String userId, TypeDataflowEnum dataflowType) throws EEAException;
+  PaginatedDataflowVO getDataflows(String userId, TypeDataflowEnum dataflowType,
+      Map<String, String> filters, String orderHeader, boolean asc, Integer sizePage,
+      Integer numPage) throws EEAException;
 
   /**
    * Gets the cloneable dataflows.
@@ -146,9 +155,16 @@ public interface DataflowService {
   /**
    * Gets the public dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param sizePage the size page
+   * @param numPage the num page
    * @return the public dataflows
+   * @throws EEAException the EEA exception
    */
-  List<DataflowPublicVO> getPublicDataflows();
+  PaginatedDataflowVO getPublicDataflows(Map<String, String> filters, String orderHeader,
+      boolean asc, Integer sizePage, Integer numPage) throws EEAException;
 
   /**
    * Gets the public dataflow by id.
@@ -252,6 +268,13 @@ public interface DataflowService {
    */
   void validateAllReporters(String userId) throws EEAException;
 
-
+  /**
+   * Update data flow automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDeletion the automatic reporting deletion
+   */
+  void updateDataFlowAutomaticReportingDeletion(Long dataflowId,
+      boolean automaticReportingDeletion);
 
 }

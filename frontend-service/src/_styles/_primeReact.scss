@@ -280,6 +280,7 @@ body .p-multiselect-panel {
   -webkit-box-shadow: var(--multiselect-panel-box-shadow);
   -moz-box-shadow: var(--multiselect-panel-box-shadow);
   box-shadow: var(--multiselect-panel-box-shadow);
+  z-index: 3000 !important;
 }
 body .p-multiselect-panel .p-multiselect-header {
   padding: 0.429em 0.857em 0.429em 0.857em;
@@ -756,7 +757,8 @@ body .p-fileupload-files {
   display: table-cell;
   width: 100%;
   font-size: 0.9em;
-  text-align: center;
+  word-break: break-all;
+  text-align: left;
 }
 body .p-fileupload .p-progressbar {
   top: 0;
@@ -2066,6 +2068,9 @@ body .p-messages {
   border-radius: 3px;
 }
 body .p-messages .p-messages-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 1em;
 }
 body .p-messages.p-messages-info {
@@ -2074,6 +2079,7 @@ body .p-messages.p-messages-info {
   color: #212121;
 }
 body .p-messages.p-messages-info .p-messages-icon {
+  margin-right: 0.75rem;
   color: #212121;
 }
 body .p-messages.p-messages-info .p-messages-close {
@@ -2086,6 +2092,7 @@ body .p-messages.p-messages-success {
   color: #212121;
 }
 body .p-messages.p-messages-success .p-messages-icon {
+  margin-right: 0.75rem;
   color: #212121;
 }
 body .p-messages.p-messages-success .p-messages-close {
@@ -2093,15 +2100,16 @@ body .p-messages.p-messages-success .p-messages-close {
   color: #212121;
 }
 body .p-messages.p-messages-warn {
-  background-color: #ffe399;
+  background-color: var(--growl-warning-bg);
   border: 0 none;
   color: #212121;
 }
 body .p-messages.p-messages-warn .p-messages-icon {
+  margin-right: 0.75rem;
   color: #212121;
 }
 body .p-messages.p-messages-warn .p-messages-close {
-  background-color: #ffe399;
+  background-color: var(--growl-warning-bg);
   color: #212121;
 }
 body .p-messages.p-messages-error {
@@ -2110,6 +2118,7 @@ body .p-messages.p-messages-error {
   color: #212121;
 }
 body .p-messages.p-messages-error .p-messages-icon {
+  margin-right: 0.75rem;
   color: #212121;
 }
 body .p-messages.p-messages-error .p-messages-close {
@@ -2169,7 +2178,7 @@ body .p-message.p-message-success .p-message-icon {
   color: #212121;
 }
 body .p-message.p-message-warn {
-  background-color: #ffe399;
+  background-color: var(--growl-warning-bg);
   border: 0 none;
   color: #212121;
 }
@@ -2228,7 +2237,7 @@ body .p-toast .p-toast-item-container.p-toast-message-success .p-toast-icon-clos
   color: #212121;
 }
 body .p-toast .p-toast-item-container.p-toast-message-warn {
-  background-color: #ffe399;
+  background-color: var(--growl-warning-bg);
   border: 0 none;
   color: #212121;
 }

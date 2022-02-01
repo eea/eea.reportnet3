@@ -31,23 +31,33 @@ export const ValidationRepository = {
   getAll: async (dataflowId, datasetSchemaId) =>
     await HTTPRequester.get({ url: getUrl(ValidationConfig.getAll, { dataflowId, datasetSchemaId }) }),
 
+  getAllQCsHistoricInfo: async datasetId =>
+    await HTTPRequester.get({
+      url: getUrl(ValidationConfig.getAllQCsHistoricInfo, { datasetId })
+    }),
+
+  getQcHistoricInfo: async (datasetId, ruleId) =>
+    await HTTPRequester.get({
+      url: getUrl(ValidationConfig.getQcHistoricInfo, { datasetId, ruleId })
+    }),
+
   runSqlRule: async (datasetId, sqlSentence, showInternalFields) =>
     await HTTPRequester.post({
       url: getUrl(ValidationConfig.runSqlRule, { datasetId, sqlSentence, showInternalFields }),
       data: { sqlRule: sqlSentence }
     }),
 
-  update: async (datasetId, validationRule) => {
-    let url = getUrl(ValidationConfig.update, { datasetId });
-    if (validationRule.automatic) {
-      url = getUrl(ValidationConfig.updateAutomatic, { datasetId });
-    }
-    return await HTTPRequester.update({ url: url, data: validationRule });
-  },
+  update: async (datasetId, validationRule) =>
+    await HTTPRequester.update({
+      url: getUrl(validationRule.automatic ? ValidationConfig.updateAutomatic : ValidationConfig.update, { datasetId }),
+      data: validationRule
+    }),
 
   evaluateSqlSentence: async (datasetId, sqlSentence) =>
     await HTTPRequester.post({
       url: getUrl(ValidationConfig.evaluateSqlSentence, { datasetId }),
       data: { sqlRule: sqlSentence }
-    })
+    }),
+
+  viewUpdated: async datasetId => await HTTPRequester.get({ url: getUrl(ValidationConfig.viewUpdated, { datasetId }) })
 };

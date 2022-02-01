@@ -1,5 +1,7 @@
 import { Fragment, useContext, forwardRef } from 'react';
 
+import styles from './ConfirmDialog.module.scss';
+
 import ReactTooltip from 'react-tooltip';
 
 import isUndefined from 'lodash/isUndefined';
@@ -8,7 +10,7 @@ import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const ConfirmDialog = forwardRef((props, _) => {
+export const ConfirmDialog = forwardRef((props, _) => {
   const {
     children,
     className,
@@ -48,8 +50,8 @@ const ConfirmDialog = forwardRef((props, _) => {
       isChromium !== null &&
       typeof isChromium !== 'undefined' &&
       vendorName === 'Google Inc.' &&
-      isOpera === false &&
-      isIEedge === false
+      !isOpera &&
+      !isIEedge
     ) {
       return true;
     } else {
@@ -124,7 +126,11 @@ const ConfirmDialog = forwardRef((props, _) => {
   );
 
   return (
-    <div className="confirmDialog" onKeyPress={!disabledConfirm ? onKeyPress : null} onPaste={onPaste} ref={divRef}>
+    <div
+      className={styles.confirmDialog}
+      onKeyPress={!disabledConfirm ? onKeyPress : null}
+      onPaste={onPaste}
+      ref={divRef}>
       <Dialog
         className={className}
         focusOnShow={true}
@@ -142,5 +148,3 @@ const ConfirmDialog = forwardRef((props, _) => {
     </div>
   );
 });
-
-export { ConfirmDialog };

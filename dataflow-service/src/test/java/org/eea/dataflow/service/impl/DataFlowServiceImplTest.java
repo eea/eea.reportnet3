@@ -407,14 +407,17 @@ public class DataFlowServiceImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
 
-    dataflowServiceImpl.getDataflows(Mockito.any(), TypeDataflowEnum.REPORTING);
     List<Dataflow> list = new ArrayList<>();
     list.add(new Dataflow());
-    Mockito.when(dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(Mockito.any()))
+    Mockito
+        .when(dataflowRepository.findPaginated(Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
+            Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any()))
         .thenReturn(list);
     Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dfVO);
-    assertEquals("fail", dataflowsVO,
-        dataflowServiceImpl.getDataflows(Mockito.any(), TypeDataflowEnum.REPORTING));
+    assertNotNull("fail",
+        dataflowServiceImpl
+            .getDataflows(null, TypeDataflowEnum.REPORTING, null, null, false, null, null)
+            .getDataflows());
   }
 
 
@@ -929,9 +932,10 @@ public class DataFlowServiceImplTest {
    * Gets the public dataflows test.
    *
    * @return the public dataflows test
+   * @throws EEAException
    */
   @Test
-  public void getPublicDataflowsTest() {
+  public void getPublicDataflowsTest() throws EEAException {
     DataflowPublicVO dataflow = new DataflowPublicVO();
     dataflow.setId(1L);
     ObligationVO obligation = new ObligationVO();
@@ -939,7 +943,7 @@ public class DataFlowServiceImplTest {
     dataflow.setObligation(obligation);
     Mockito.when(dataflowPublicMapper.entityListToClass(Mockito.any()))
         .thenReturn(Arrays.asList(dataflow));
-    assertNotNull(dataflowServiceImpl.getPublicDataflows());
+    assertNotNull(dataflowServiceImpl.getPublicDataflows(null, null, false, null, null));
   }
 
   /**
@@ -1093,10 +1097,6 @@ public class DataFlowServiceImplTest {
 
   @Test
   public void getReferenceDataflowsTest() throws EEAException {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
-    dataflowVO.setId(0L);
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
     resourceAccessVO.setId(0L);
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
@@ -1105,21 +1105,12 @@ public class DataFlowServiceImplTest {
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
         .thenReturn(Arrays.asList(resourceAccessVO));
-
-    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
-    Mockito
-        .when(dataflowRepository
-            .findReferenceByStatusInOrderByStatusDescCreationDateDesc(Mockito.any()))
-        .thenReturn(dataflows);
-    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.REFERENCE));
+    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.REFERENCE, null, null,
+        false, null, null));
   }
 
   @Test
   public void getBusinessDataflowsTest() throws EEAException {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
-    dataflowVO.setId(0L);
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
     resourceAccessVO.setId(0L);
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
@@ -1128,20 +1119,15 @@ public class DataFlowServiceImplTest {
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
         .thenReturn(Arrays.asList(resourceAccessVO));
-    Mockito.when(dataflowRepository.findBusinessInOrderByStatusDescCreationDateDesc())
-        .thenReturn(dataflows);
-    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
 
-    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.BUSINESS));
+    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.BUSINESS, null, null, false,
+        null, null));
   }
 
 
   @Test
   public void getCitizenScienceDataflowsTest() throws EEAException {
-    DataFlowVO dataflowVO = new DataFlowVO();
-    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-    dataflowVO.setType(TypeDataflowEnum.CITIZEN_SCIENCE);
-    dataflowVO.setId(0L);
+
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
     resourceAccessVO.setId(0L);
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
@@ -1150,11 +1136,9 @@ public class DataFlowServiceImplTest {
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
         .thenReturn(Arrays.asList(resourceAccessVO));
-    Mockito.when(dataflowRepository.findCitizenScienceInOrderByStatusDescCreationDateDesc())
-        .thenReturn(dataflows);
-    Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
 
-    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.CITIZEN_SCIENCE));
+    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.CITIZEN_SCIENCE, null, null,
+        false, null, null));
   }
 
   /**

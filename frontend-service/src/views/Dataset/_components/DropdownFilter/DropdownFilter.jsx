@@ -225,7 +225,7 @@ class DropdownFilter extends Component {
 
       fields.forEach(field => {
         if (field.key !== 'selectAll') {
-          if (field.checked === false) {
+          if (!field.checked) {
             isAnyOtherFieldUnchecked = true;
           }
         } else {
@@ -233,14 +233,14 @@ class DropdownFilter extends Component {
         }
       });
 
-      if (isSelectAllChecked === false && isAnyOtherFieldUnchecked === false) {
+      if (!isSelectAllChecked && !isAnyOtherFieldUnchecked) {
         newFields = fields.map(field => {
           if (field.key === 'selectAll') {
             field.checked = true;
           }
           return field;
         });
-      } else if (isAnyOtherFieldUnchecked === true && isSelectAllChecked === true) {
+      } else if (isAnyOtherFieldUnchecked && isSelectAllChecked) {
         newFields = fields.map(field => {
           if (field.key === 'selectAll') {
             field.checked = false;

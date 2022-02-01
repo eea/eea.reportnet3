@@ -18,7 +18,7 @@ import { UserService } from 'services/UserService';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 
-const ReportnetLogin = () => {
+export const ReportnetLogin = () => {
   const navigate = useNavigate();
 
   const notificationContext = useContext(NotificationContext);
@@ -80,6 +80,8 @@ const ReportnetLogin = () => {
       }
     }
   };
+
+  const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
   return (
     <div className="rp-container login">
@@ -146,8 +148,8 @@ const ReportnetLogin = () => {
                 id="kc-login"
                 label={resourcesContext.messages['login']}
                 layout="simple"
-                onClick={() => onLogin()}
-                type="button"
+                onClick={onLogin}
+                type={isFirefox ? 'button' : 'submit'}
               />
             </fieldset>
           </form>
@@ -156,5 +158,3 @@ const ReportnetLogin = () => {
     </div>
   );
 };
-
-export { ReportnetLogin };

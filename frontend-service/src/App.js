@@ -138,7 +138,10 @@ const App = () => {
                             />
                             <Route
                               element={
-                                <PrivateRoute component={Dataset} componentProps={{ isReferenceDataset: true }} />
+                                <PrivateRoute
+                                  component={Dataset}
+                                  componentProps={{ isReferenceDatasetReferenceDataflow: true }}
+                                />
                               }
                               exact
                               path={routes.REFERENCE_DATASET}

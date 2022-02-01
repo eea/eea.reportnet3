@@ -32,7 +32,7 @@ import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { Menu } from 'views/_components/Menu';
 import { PropertiesDialog } from './_components/PropertiesDialog';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
-import { RepresentativesList } from './_components/RepresentativesList';
+import { ManageLeadReporters } from './_components/ManageLeadReporters';
 import { ShareRights } from 'views/_components/ShareRights';
 import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
@@ -54,6 +54,7 @@ import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
@@ -62,7 +63,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const Dataflow = () => {
+export const Dataflow = () => {
   const navigate = useNavigate();
   const { dataflowId, representativeId } = useParams();
 
@@ -84,14 +85,15 @@ const Dataflow = () => {
     description: '',
     designDatasetSchemas: [],
     formHasRepresentatives: false,
+    hasCustodianPermissions: false,
     hasReporters: false,
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
     isApiKeyDialogVisible: false,
+    isAutomaticReportingDeletion: false,
     isBusinessDataflowDialogVisible: false,
     isCopyDataCollectionToEUDatasetLoading: false,
-    isCustodian: false,
     isDataSchemaCorrect: [],
     isDatasetsInfoDialogVisible: false,
     isDataUpdated: false,
@@ -140,6 +142,9 @@ const Dataflow = () => {
 
   const usersTypes = { REPORTERS: 'Reporters', REQUESTERS: 'Requesters' };
 
+  const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
+
   const {
     obligation,
     setCheckedObligation,
@@ -165,9 +170,11 @@ const Dataflow = () => {
 
   const isLeadDesigner = isSteward || isCustodian;
 
-  const isCustodianSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
-    config.permissions.roles.CUSTODIAN_SUPPORT.key
+  const isStewardSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    config.permissions.roles.STEWARD_SUPPORT.key
   ]);
+
+  const hasCustodianPermissions = isStewardSupport || isLeadDesigner;
 
   const isObserver = dataflowState.userRoles.some(userRole => userRole === config.permissions.roles.OBSERVER.key);
 
@@ -200,17 +207,15 @@ const Dataflow = () => {
   const getCountry = () => {
     if (uniqDataProviders.length === 1) {
       return uniq(map(dataflowState.data.datasets, 'datasetSchemaName'));
+    } else if (isNil(representativeId)) {
+      return null;
     } else {
-      if (isNil(representativeId)) {
-        return null;
-      } else {
-        return uniq(
-          map(
-            dataflowState.data?.datasets?.filter(d => d.dataProviderId?.toString() === representativeId),
-            'datasetSchemaName'
-          )
-        );
-      }
+      return uniq(
+        map(
+          dataflowState.data?.datasets?.filter(d => d.dataProviderId?.toString() === representativeId),
+          'datasetSchemaName'
+        )
+      );
     }
   };
 
@@ -255,7 +260,7 @@ const Dataflow = () => {
   }, [userContext, dataflowState.data]);
 
   useEffect(() => {
-    if (dataflowState.isCustodian || isCustodianSupport) {
+    if (dataflowState.hasCustodianPermissions) {
       if (isOpenStatus) {
         leftSideBarContext.addHelpSteps(DataflowDraftRequesterHelpConfig, 'dataflowRequesterDraftHelp');
       } else {
@@ -315,7 +320,8 @@ const Dataflow = () => {
         releaseableBtn: false,
         restrictFromPublicBtn: false,
         showPublicInfoBtn: false,
-        usersListBtn: false
+        usersListBtn: false,
+        automaticDeleteBtn: false
       };
     }
 
@@ -333,7 +339,12 @@ const Dataflow = () => {
         isLeadReporterOfCountry && dataflowState.showPublicInfo && isReleased && !isBusinessDataflow,
       showPublicInfoBtn: !isDesign && isLeadDesigner,
       usersListBtn:
-        isLeadReporterOfCountry || isNationalCoordinatorOfCountry || isReporterOfCountry || isLeadDesigner || isObserver
+        hasCustodianPermissions ||
+        isLeadReporterOfCountry ||
+        isNationalCoordinatorOfCountry ||
+        isReporterOfCountry ||
+        isObserver,
+      automaticDeleteBtn: !isDesign && isLeadDesigner && dataflowState.data.manualAcceptance
     };
   };
 
@@ -410,21 +421,25 @@ const Dataflow = () => {
   };
 
   const shareRightsFooterDialogFooter = usersType => {
-    const isAddButtonHidden = isBusinessDataflow && !isAdmin && !isSteward;
+    const renderAddButtonShareRights = () => {
+      const isAddButtonHidden = isBusinessDataflow && usersType === usersTypes.REQUESTERS && !isAdmin && !isSteward;
 
-    return (
-      <div className={styles.buttonsRolesFooter}>
-        {isAddButtonHidden ? null : (
+      if (!isAddButtonHidden) {
+        return (
           <Button
             className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink`}
             icon="plus"
             label={resourcesContext.messages['add']}
             onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
           />
-        )}
+        );
+      }
+    };
 
+    return (
+      <div className={styles.buttonsRolesFooter}>
+        {renderAddButtonShareRights()}
         {renderValidateReportersButton(usersType)}
-
         <Button
           className={`p-button-secondary p-button-animated-blink`}
           icon="cancel"
@@ -495,6 +510,9 @@ const Dataflow = () => {
 
   const setIsUpdatingPermissions = isUpdatingPermissions =>
     dataflowDispatch({ type: 'SET_IS_UPDATING_PERMISSIONS', payload: { isUpdatingPermissions } });
+
+  const setAutomaticReportingDeletion = isAutomaticReportingDeletion =>
+    dataflowDispatch({ type: 'SET_AUTOMATIC_REPORTING_DELETION', payload: { isAutomaticReportingDeletion } });
 
   useCheckNotifications(
     [
@@ -606,7 +624,6 @@ const Dataflow = () => {
         popup={true}
         ref={exportImportMenuRef}
       />
-
       <Button
         className={`${styles.buttonLeft} p-button-secondary ${
           !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
@@ -630,7 +647,11 @@ const Dataflow = () => {
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs(modalType, false)}
+      onClick={() => {
+        manageDialogs(modalType, false);
+        resetDatasetInfoFiltersState();
+        resetUserListFiltersState();
+      }}
     />
   );
 
@@ -680,7 +701,9 @@ const Dataflow = () => {
   );
 
   const getCurrentDatasetId = () => {
-    if (isEmpty(dataflowState.data)) return null;
+    if (isEmpty(dataflowState.data)) {
+      return null;
+    }
 
     const { datasets } = dataflowState.data;
 
@@ -710,7 +733,7 @@ const Dataflow = () => {
       type: 'LOAD_PERMISSIONS',
       payload: {
         hasWritePermissions,
-        isCustodian: isLeadDesigner,
+        hasCustodianPermissions,
         isNationalCoordinator,
         isObserver,
         isAdmin,
@@ -722,6 +745,7 @@ const Dataflow = () => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.get(dataflowId);
+
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
       dataflowDispatch({
         type: 'INITIAL_LOAD',
@@ -730,6 +754,7 @@ const Dataflow = () => {
           data: dataflow,
           dataflowType: dataflow.type,
           description: dataflow.description,
+          isAutomaticReportingDeletion: dataflow.isAutomaticReportingDeletion,
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
@@ -949,7 +974,12 @@ const Dataflow = () => {
   useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], onDataCollectionIsCompleted);
 
   useCheckNotifications(
-    ['UPDATE_RELEASABLE_FAILED_EVENT', 'UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT', 'UPDATE_PUBLIC_STATUS_FAILED_EVENT'],
+    [
+      'UPDATE_AUTOMATIC_REPORTING_DELETION_FAILED_EVENT',
+      'UPDATE_RELEASABLE_FAILED_EVENT',
+      'UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT',
+      'UPDATE_PUBLIC_STATUS_FAILED_EVENT'
+    ],
     setIsDataUpdated
   );
 
@@ -1027,6 +1057,24 @@ const Dataflow = () => {
     }
   };
 
+  const onConfirmAutomaticReportingDeletion = async () => {
+    manageDialogs('isAutomaticReportingDeletionDialogVisible', false);
+    try {
+      dataflowDispatch({
+        type: 'SET_IS_FETCHING_DATA',
+        payload: { isFetchingData: true }
+      });
+      await DataflowService.updateAutomaticDelete(dataflowId, dataflowState.isAutomaticReportingDeletion);
+      onLoadReportingDataflow();
+    } catch (error) {
+      console.error('Dataflow - onConfirmAutomaticReportingDeletion.', error);
+      notificationContext.add(
+        { type: 'UPDATE_AUTOMATIC_REPORTING_DELETION_FAILED_EVENT', content: { dataflowId } },
+        true
+      );
+    }
+  };
+
   const onConfirmUpdateShowPublicInfo = async () => {
     manageDialogs('isShowPublicInfoDialogVisible', false);
     try {
@@ -1038,7 +1086,8 @@ const Dataflow = () => {
         dataflowState.data.description,
         dataflowState.obligations.obligationId,
         dataflowState.isReleasable,
-        dataflowState.showPublicInfo
+        dataflowState.showPublicInfo,
+        dataflowState.isAutomaticReportingDeletion
       );
       onLoadReportingDataflow();
     } catch (error) {
@@ -1064,6 +1113,16 @@ const Dataflow = () => {
     }
   };
 
+  const onCloseAutomaticReportingDeletion = () => {
+    manageDialogs('isAutomaticReportingDeletionDialogVisible', false);
+    if (dataflowState.isAutomaticReportingDeletion) {
+      dataflowDispatch({
+        type: 'SET_AUTOMATIC_REPORTING_DELETION',
+        payload: { isAutomaticReportingDeletion: dataflowState.data.isAutomaticReportingDeletion }
+      });
+    }
+  };
+
   const reporterRoleOptions = [
     { label: config.permissions.roles.REPORTER_WRITE.label, role: config.permissions.roles.REPORTER_WRITE.key },
     { label: config.permissions.roles.REPORTER_READ.label, role: config.permissions.roles.REPORTER_READ.key }
@@ -1072,7 +1131,7 @@ const Dataflow = () => {
   const requesterRoleOptionsOpenStatus = [
     { label: config.permissions.roles.STEWARD.label, role: config.permissions.roles.STEWARD.key },
     { label: config.permissions.roles.CUSTODIAN.label, role: config.permissions.roles.CUSTODIAN.key },
-    { label: config.permissions.roles.CUSTODIAN_SUPPORT.label, role: config.permissions.roles.CUSTODIAN_SUPPORT.key },
+    { label: config.permissions.roles.STEWARD_SUPPORT.label, role: config.permissions.roles.STEWARD_SUPPORT.key },
     { label: config.permissions.roles.OBSERVER.label, role: config.permissions.roles.OBSERVER.key }
   ];
 
@@ -1142,7 +1201,7 @@ const Dataflow = () => {
   };
 
   const layout = children => (
-    <MainLayout leftSideBarConfig={{ isCustodian: dataflowState.isCustodian, buttons: [] }}>
+    <MainLayout leftSideBarConfig={{ hasCustodianPermissions: dataflowState.hasCustodianPermissions, buttons: [] }}>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );
@@ -1198,7 +1257,7 @@ const Dataflow = () => {
           </ConfirmDialog>
         )}
 
-        {(dataflowState.isCustodian || isCustodianSupport) && dataflowState.isManageRolesDialogVisible && (
+        {hasCustodianPermissions && dataflowState.isManageRolesDialogVisible && (
           <Dialog
             className="responsiveDialog"
             contentStyle={{ maxHeight: '60vh' }}
@@ -1207,7 +1266,7 @@ const Dataflow = () => {
             onHide={() => manageDialogs('isManageRolesDialogVisible', false)}
             visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
-              <RepresentativesList
+              <ManageLeadReporters
                 dataflowId={dataflowId}
                 dataflowType={dataflowState.dataflowType}
                 representativesImport={dataflowState.representativesImport}
@@ -1361,6 +1420,36 @@ const Dataflow = () => {
           </ConfirmDialog>
         )}
 
+        {dataflowState.isAutomaticReportingDeletionDialogVisible && (
+          <ConfirmDialog
+            disabledConfirm={
+              dataflowState.data.isAutomaticReportingDeletion === dataflowState.isAutomaticReportingDeletion ||
+              dataflowState.isFetchingData
+            }
+            header={resourcesContext.messages['isAutomaticReportingDeletionDialogHeader']}
+            iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
+            labelCancel={resourcesContext.messages['cancel']}
+            labelConfirm={resourcesContext.messages['save']}
+            onConfirm={onConfirmAutomaticReportingDeletion}
+            onHide={() => onCloseAutomaticReportingDeletion()}
+            visible={dataflowState.isAutomaticReportingDeletionDialogVisible}>
+            <Checkbox
+              checked={dataflowState.isAutomaticReportingDeletion}
+              id="isAutomaticReportingDeletionCheckbox"
+              inputId="isAutomaticReportingDeletionCheckbox"
+              onChange={() => setAutomaticReportingDeletion(!dataflowState.isAutomaticReportingDeletion)}
+              role="checkbox"
+            />
+            <label className={styles.isAutomaticReportingDeletionLabel} htmlFor="isAutomaticReportingDeletionCheckbox">
+              <span
+                className={styles.pointer}
+                onClick={() => setAutomaticReportingDeletion(!dataflowState.isAutomaticReportingDeletion)}>
+                {resourcesContext.messages['isAutomaticReportingDeletionCheckboxLabel']}
+              </span>
+            </label>
+          </ConfirmDialog>
+        )}
+
         {dataflowState.isRestrictFromPublicDialogVisible && (
           <ConfirmDialog
             confirmTooltip={resourcesContext.messages['restrictFromPublicTooltip']}
@@ -1484,7 +1573,10 @@ const Dataflow = () => {
                   )
                 : resourcesContext.messages['dataflowUsersList']
             }
-            onHide={() => manageDialogs('isUserListVisible', false)}
+            onHide={() => {
+              manageDialogs('isUserListVisible', false);
+              resetUserListFiltersState();
+            }}
             visible={dataflowState.isUserListVisible}>
             <UserList
               dataflowId={dataflowId}
@@ -1499,6 +1591,7 @@ const Dataflow = () => {
         {dataflowState.isReportingDataflowDialogVisible && (
           <ManageDataflow
             dataflowId={dataflowId}
+            isCustodian={isLeadDesigner}
             isEditForm
             isVisible={dataflowState.isReportingDataflowDialogVisible}
             manageDialogs={manageDialogs}
@@ -1551,7 +1644,7 @@ const Dataflow = () => {
             dataflowId={dataflowId}
             dataProviderId={dataProviderId}
             isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
-            isCustodian={dataflowState.isCustodian}
+            isCustodian={isLeadDesigner}
             manageDialogs={manageDialogs}
           />
         )}
@@ -1560,7 +1653,10 @@ const Dataflow = () => {
           <Dialog
             footer={renderDialogFooterCloseBtn('isDatasetsInfoDialogVisible')}
             header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowState.id}`}
-            onHide={() => manageDialogs('isDatasetsInfoDialogVisible', false)}
+            onHide={() => {
+              manageDialogs('isDatasetsInfoDialogVisible', false);
+              resetDatasetInfoFiltersState();
+            }}
             visible={dataflowState.isDatasetsInfoDialogVisible}>
             <DatasetsInfo dataflowId={dataflowId} dataflowType={dataflowState.dataflowType} />
           </Dialog>
@@ -1569,5 +1665,3 @@ const Dataflow = () => {
     </div>
   );
 };
-
-export { Dataflow };

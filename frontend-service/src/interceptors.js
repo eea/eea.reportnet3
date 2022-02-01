@@ -1,4 +1,5 @@
 import axios from 'axios';
+import isNil from 'lodash/isNil';
 
 import { UserConfig } from 'repositories/config/UserConfig';
 import { getUrl } from 'repositories/_utils/UrlUtils';
@@ -9,7 +10,7 @@ import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 axios.interceptors.request.use(
   config => {
     const tokens = LocalUserStorageUtils.getTokens();
-    if (tokens) {
+    if (!isNil(tokens)) {
       config.headers['Authorization'] = 'Bearer ' + tokens.accessToken;
     }
     // config.headers['Content-Type'] = 'application/json';
@@ -29,7 +30,13 @@ axios.interceptors.response.use(
 
     if (error?.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      const { refreshToken } = LocalUserStorageUtils.getTokens();
+      const tokens = LocalUserStorageUtils.getTokens();
+
+      if (isNil(tokens)) {
+        return;
+      }
+
+      const { refreshToken } = tokens;
 
       return HTTPRequester.post({
         url: getUrl(UserConfig.refreshToken, { refreshToken })

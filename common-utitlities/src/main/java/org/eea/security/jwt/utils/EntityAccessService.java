@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -33,9 +32,8 @@ public class EntityAccessService {
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
-  @Autowired
-  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
@@ -81,7 +79,7 @@ public class EntityAccessService {
       List<ObjectAccessRoleEnum> objectAccessRoles = List.of(ObjectAccessRoleEnum.DATASET_STEWARD,
           ObjectAccessRoleEnum.DATASET_CUSTODIAN, ObjectAccessRoleEnum.DATASET_OBSERVER,
           ObjectAccessRoleEnum.DATASET_LEAD_REPORTER, ObjectAccessRoleEnum.DATASET_REPORTER_READ,
-          ObjectAccessRoleEnum.DATASET_REPORTER_WRITE, ObjectAccessRoleEnum.DATASET_OBSERVER,
+          ObjectAccessRoleEnum.DATASET_REPORTER_WRITE,
           ObjectAccessRoleEnum.DATASET_NATIONAL_COORDINATOR,
           ObjectAccessRoleEnum.DATASCHEMA_CUSTODIAN, ObjectAccessRoleEnum.DATASCHEMA_STEWARD,
           ObjectAccessRoleEnum.DATASCHEMA_EDITOR_READ, ObjectAccessRoleEnum.DATASCHEMA_EDITOR_WRITE,
@@ -90,7 +88,8 @@ public class EntityAccessService {
           ObjectAccessRoleEnum.REFERENCEDATASET_CUSTODIAN,
           ObjectAccessRoleEnum.REFERENCEDATASET_STEWARD, ObjectAccessRoleEnum.EUDATASET_CUSTODIAN,
           ObjectAccessRoleEnum.EUDATASET_STEWARD, ObjectAccessRoleEnum.DATACOLLECTION_CUSTODIAN,
-          ObjectAccessRoleEnum.DATACOLLECTION_STEWARD,
+          ObjectAccessRoleEnum.DATACOLLECTION_STEWARD, ObjectAccessRoleEnum.DATACOLLECTION_OBSERVER,
+          ObjectAccessRoleEnum.EUDATASET_OBSERVER,
           ObjectAccessRoleEnum.DATASET_NATIONAL_COORDINATOR,
           ObjectAccessRoleEnum.DATASET_STEWARD_SUPPORT,
           ObjectAccessRoleEnum.EUDATASET_STEWARD_SUPPORT,
@@ -100,12 +99,12 @@ public class EntityAccessService {
       result = (canAccess(entityId, objectAccessRoles.toArray(ObjectAccessRoleEnum[]::new))
           || dataflowControllerZuul.accessReferenceEntity(entity, entityId));
     } else {
-      result = canAccess(entityId,
-          List.of(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN, ObjectAccessRoleEnum.DATAFLOW_OBSERVER,
-              ObjectAccessRoleEnum.DATAFLOW_STEWARD,
-              ObjectAccessRoleEnum.DATAFLOW_NATIONAL_COORDINATOR,
-              ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER,
-              ObjectAccessRoleEnum.DATAFLOW_STEWARD_SUPPORT).toArray(ObjectAccessRoleEnum[]::new))
+      result = canAccess(entityId, List.of(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN,
+          ObjectAccessRoleEnum.DATAFLOW_OBSERVER, ObjectAccessRoleEnum.DATAFLOW_STEWARD,
+          ObjectAccessRoleEnum.DATAFLOW_NATIONAL_COORDINATOR,
+          ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER, ObjectAccessRoleEnum.DATAFLOW_REPORTER_WRITE,
+          ObjectAccessRoleEnum.DATAFLOW_REPORTER_READ,
+          ObjectAccessRoleEnum.DATAFLOW_STEWARD_SUPPORT).toArray(ObjectAccessRoleEnum[]::new))
           || dataflowControllerZuul.accessReferenceEntity(entity, entityId);
     }
     return result;

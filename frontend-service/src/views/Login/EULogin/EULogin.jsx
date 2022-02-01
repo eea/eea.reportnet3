@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
@@ -13,12 +13,16 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 
-const EULogin = () => {
+export const EULogin = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [isLoading] = useState(true);
   const userContext = useContext(UserContext);
+
+  useEffect(() => {
+    onLogin();
+  }, []);
+
   const onLogin = async () => {
     try {
       const params = new URLSearchParams(location.hash);
@@ -42,16 +46,12 @@ const EULogin = () => {
       navigate(getUrl(routes.ACCESS_POINT));
     }
   };
-  useEffect(() => {
-    onLogin();
-  }, []);
+
   return (
     <div className="rp-container">
       <div className={`${styles.loginBoxContainer}`}>
-        {isLoading && <img alt="EEA logo" className={styles.logo} src={logo} />}
+        <img alt="EEA logo" className={styles.logo} src={logo} />
       </div>
     </div>
   );
 };
-
-export { EULogin };

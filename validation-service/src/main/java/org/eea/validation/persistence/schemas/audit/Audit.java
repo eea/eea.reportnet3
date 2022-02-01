@@ -23,6 +23,10 @@ public class Audit {
   @Field(value = "_id")
   private ObjectId idAudit;
 
+  /** The dataset id. */
+  @Field(value = "datasetId")
+  private Long datasetId;
+
   /** The historic. */
   @Field(value = "historic")
   private List<RuleHistoricInfo> historic;

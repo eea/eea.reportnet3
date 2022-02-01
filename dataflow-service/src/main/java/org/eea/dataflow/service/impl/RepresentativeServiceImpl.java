@@ -638,6 +638,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
           modifyLeadReporterPermissions(leadReporter.getEmail().toLowerCase(), representative,
               false);
           leadReporter.setEmail(leadReporterVO.getEmail());
+        } else if (null != representative.getLeadReporters()
+            && representative.getLeadReporters().stream()
+                .filter(reporter -> !Boolean.TRUE.equals(leadReporter.getInvalid())
+                    && leadReporterVO.getEmail().equalsIgnoreCase(reporter.getEmail()))
+                .collect(Collectors.counting()) == 0) {
+          modifyLeadReporterPermissions(leadReporterVO.getEmail(), representative, false);
+          leadReporter.setEmail(leadReporterVO.getEmail());
         }
         leadReporter.setRepresentative(representative);
       }
@@ -700,8 +707,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
 
     } catch (Exception e) {
-      LOG.error("An error was produced while validating lead reporters for dataflow {}",
-          dataflowId);
+      LOG.error("An error was produced while validating lead reporters for dataflow {}", dataflowId,
+          e);
       if (sendNotification) {
         NotificationVO notificationVO = NotificationVO.builder()
             .user(SecurityContextHolder.getContext().getAuthentication().getName())

@@ -26,7 +26,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { systemNotificationReducer } from './_functions/Reducers/systemNotificationReducer';
 
-const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotificationVisible }) => {
+export const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotificationVisible }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -79,7 +79,7 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
       }
     ];
 
-    let columnsArray = headers.map(col => (
+    const columnsArray = headers.map(col => (
       <Column
         body={col.template}
         className={col.className}
@@ -304,5 +304,3 @@ const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSystemNotif
     </Fragment>
   );
 };
-
-export { SystemNotificationsList };

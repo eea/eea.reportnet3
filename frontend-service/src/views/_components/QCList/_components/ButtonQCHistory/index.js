@@ -1,1 +1,0 @@
-export { ButtonQCHistory } from './ButtonQCHistory';

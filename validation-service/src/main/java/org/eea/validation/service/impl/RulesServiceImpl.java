@@ -20,16 +20,21 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.DatasetHistoricRuleVO;
 import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
@@ -39,6 +44,7 @@ import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.validation.mapper.DatasetHistoricRuleMapper;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleHistoricInfoMapper;
 import org.eea.validation.mapper.RuleMapper;
@@ -55,6 +61,7 @@ import org.eea.validation.persistence.schemas.IntegritySchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.UniqueConstraintSchema;
 import org.eea.validation.persistence.schemas.audit.Audit;
+import org.eea.validation.persistence.schemas.audit.RuleHistoricInfo;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RulesService;
@@ -150,6 +157,13 @@ public class RulesServiceImpl implements RulesService {
   /** The rule historic info mapper. */
   @Autowired
   private RuleHistoricInfoMapper ruleHistoricInfoMapper;
+
+  /** The dataset historic rule mapper. */
+  @Autowired
+  private DatasetHistoricRuleMapper datasetHistoricRuleMapper;
+
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
 
   /** The Constant LOG. */
@@ -427,11 +441,11 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void createNewRule(long datasetId, RuleVO ruleVO) throws EEAException {
 
-    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
-    if (datasetSchemaId == null) {
+    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    if (dataset == null || dataset.getDatasetSchema() == null) {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-
+    String datasetSchemaId = dataset.getDatasetSchema();
     if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
         && StringUtils.isBlank(ruleVO.getSqlSentence()) && !ruleVO.isAutomatic()) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
@@ -462,7 +476,10 @@ public class RulesServiceImpl implements RulesService {
       createRule(datasetSchemaId, rule);
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
-    addHistoricRuleInfo(rule, null);
+    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
+    if (TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
+      addHistoricRuleInfo(rule, null, datasetId, null);
+    }
   }
 
   /**
@@ -785,10 +802,11 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void updateRule(long datasetId, RuleVO ruleVO) throws EEAException {
-    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
-    if (datasetSchemaId == null) {
+    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    if (dataset == null || dataset.getDatasetSchema() == null) {
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
+    String datasetSchemaId = dataset.getDatasetSchema();
     if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
         && StringUtils.isBlank(ruleVO.getSqlSentence())) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
@@ -802,6 +820,11 @@ public class RulesServiceImpl implements RulesService {
         rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleVO.getRuleId()));
     if (null == ruleOriginal) {
       throw new EEAException(EEAErrorMessage.RULE_NOT_FOUND);
+    }
+    var originalIntegrityVO = new IntegrityVO();
+    if (ruleOriginal.getIntegrityConstraintId() != null) {
+      originalIntegrityVO =
+          getIntegrityConstraint(ruleOriginal.getIntegrityConstraintId().toString());
     }
     Rule rule = ruleMapper.classToEntity(ruleVO);
     rule.setAutomatic(false);
@@ -824,8 +847,11 @@ public class RulesServiceImpl implements RulesService {
       }
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
-    addHistoricRuleInfo(rule, ruleOriginal);
 
+    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
+    if (TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
+      addHistoricRuleInfo(rule, ruleOriginal, datasetId, originalIntegrityVO);
+    }
   }
 
   /**
@@ -887,22 +913,30 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void updateAutomaticRule(long datasetId, RuleVO ruleVO) throws EEAException {
 
-    String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     String ruleId = ruleVO.getRuleId();
 
-    if (null != datasetSchemaId) {
+    if (null != dataset && null != dataset.getDatasetSchema()) {
+      String datasetSchemaId = dataset.getDatasetSchema();
       if (null != ruleId && ObjectId.isValid(ruleId)) {
 
         // Find the actual rule
         Rule rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
-
         if (null != rule) {
-
+          Rule originalRule =
+              rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
+          if (null == originalRule) {
+            LOG_ERROR.error("RuleId not valid: {}", ruleId);
+            throw new EEAException(EEAErrorMessage.RULEID_INCORRECT);
+          }
           // Update only allowed properties
           updateAllowedRuleProperties(ruleVO, rule);
-
           // Save the modified rule
           rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+          DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
+          if (TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
+            addHistoricRuleInfo(rule, originalRule, datasetId, null);
+          }
         } else {
           LOG_ERROR.error("Rule not found for datasetSchemaId {} and ruleId {}", datasetSchemaId,
               ruleId);
@@ -1646,6 +1680,25 @@ public class RulesServiceImpl implements RulesService {
     return historic;
   }
 
+  /**
+   * Gets the rule historic info by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the rule historic info by dataset id
+   */
+  @Override
+  @Transactional
+  public List<DatasetHistoricRuleVO> getRuleHistoricInfoByDatasetId(Long datasetId) {
+    List<Audit> audits = auditRepository.getAuditsByDatasetId(datasetId);
+    List<DatasetHistoricRuleVO> historic = new ArrayList<>();
+    for (Audit audit : audits) {
+      for (RuleHistoricInfo historicRuleInfo : audit.getHistoric()) {
+        historic.add(datasetHistoricRuleMapper.entityToClass(historicRuleInfo));
+      }
+    }
+    return historic;
+  }
+
 
   /**
    * Import data.
@@ -1844,47 +1897,116 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
+
   /**
    * Adds the historic rule info.
    *
    * @param rule the rule
    * @param ruleOriginal the rule original
-   * @throws EEAException
+   * @param datasetId the dataset id
+   * @param originalIntegrityVO the original integrity VO
+   * @throws EEAException the EEA exception
    */
-  private void addHistoricRuleInfo(Rule rule, Rule ruleOriginal) throws EEAException {
+  private void addHistoricRuleInfo(Rule rule, Rule ruleOriginal, Long datasetId,
+      IntegrityVO originalIntegrityVO) throws EEAException {
     UserRepresentationVO user = userManagementControllerZuul.getUserByUserId();
     Audit audit = auditRepository.getAuditByRuleId(rule.getRuleId());
-    if (null == audit) {
-      LOG.info("Creating a new historic for the rule {}", rule.getRuleId());
-      auditRepository.createAudit(rule, user);
-    } else {
-      LOG.info("Adding new information in the historic of the rule {}", rule.getRuleId());
-      boolean metadata = checkMetadataHasChange(rule, ruleOriginal);
-      boolean status = checkStatusHasChange(rule, ruleOriginal);
-      boolean expression = checkExpressionHasChange(rule, ruleOriginal);
-      try {
+    boolean metadata = false;
+    boolean status = false;
+    boolean expression = false;
+    if (null != ruleOriginal) {
+      metadata = checkMetadataHasChange(rule, ruleOriginal);
+      status = checkStatusHasChange(rule, ruleOriginal);
+      expression = checkExpressionHasChange(rule, ruleOriginal, originalIntegrityVO);
+    }
+    try {
+      if (null == audit) {
+        LOG.info("Creating a new historic for the rule {}", rule.getRuleId());
+        auditRepository.createAudit(rule, user, datasetId, status, expression, metadata);
+      } else {
+        LOG.info("Adding new information in the historic of the rule {}", rule.getRuleId());
         auditRepository.updateAudit(audit, user, rule, status, expression, metadata);
-      } catch (JsonProcessingException e) {
-        LOG.error("Error updating historic information for rule {}", rule.getRuleId());
-        throw new EEAException(EEAErrorMessage.HISTORIC_QC_UPDATE_ERROR);
       }
+    } catch (JsonProcessingException e) {
+      LOG.error("Error updating historic information for rule {}", rule.getRuleId());
+      throw new EEAException(EEAErrorMessage.HISTORIC_QC_UPDATE_ERROR);
     }
   }
+
 
   /**
    * Check expression has change.
    *
    * @param ruleActual the rule actual
    * @param ruleOriginal the rule original
+   * @param originalIntegrityVO the original integrity VO
    * @return true, if successful
    */
-  private boolean checkExpressionHasChange(Rule ruleActual, Rule ruleOriginal) {
+  private boolean checkExpressionHasChange(Rule ruleActual, Rule ruleOriginal,
+      IntegrityVO originalIntegrityVO) {
+    return checkSQLSentenceHasChange(ruleActual, ruleOriginal)
+        || checkExpressionTextHasChange(ruleActual, ruleOriginal)
+        || checkDatasetComparisonHasChange(ruleActual, originalIntegrityVO);
+  }
+
+  /**
+   * Check dataset comparison has change.
+   *
+   * @param ruleActual the rule actual
+   * @param originalIntegrityVO the original integrity VO
+   * @return true, if successful
+   */
+  private boolean checkDatasetComparisonHasChange(Rule ruleActual,
+      IntegrityVO originalIntegrityVO) {
+    IntegrityVO actualIntegrityVO = null;
+    if (ruleActual.getIntegrityConstraintId() != null) {
+      actualIntegrityVO = getIntegrityConstraint(ruleActual.getIntegrityConstraintId().toString());
+    }
+    return (actualIntegrityVO != null && originalIntegrityVO != null
+        && ruleActual.getSqlSentence() == null && ruleActual.getExpressionText().equals("")
+        && (!(actualIntegrityVO.getOriginFields().equals(originalIntegrityVO.getOriginFields()))
+            || !(actualIntegrityVO.getReferencedFields()
+                .equals(originalIntegrityVO.getReferencedFields()))
+            || (actualIntegrityVO.getOriginFields().size() > originalIntegrityVO.getOriginFields()
+                .size()
+                || actualIntegrityVO.getReferencedFields().size() > originalIntegrityVO
+                    .getReferencedFields().size())));
+  }
+
+  /**
+   * Check SQL sentence has change.
+   *
+   * @param ruleActual the rule actual
+   * @param ruleOriginal the rule original
+   * @return true, if successful
+   */
+  private boolean checkSQLSentenceHasChange(Rule ruleActual, Rule ruleOriginal) {
     boolean change = false;
     if (ruleActual.getSqlSentence() == null && ruleOriginal.getSqlSentence() == null) {
       change = false;
     } else {
       if ((ruleActual.getSqlSentence() != null && ruleOriginal.getSqlSentence() == null)
           || !(ruleActual.getSqlSentence().equals(ruleOriginal.getSqlSentence()))) {
+        change = true;
+      }
+    }
+    return change;
+  }
+
+  /**
+   * Check expression text has change.
+   *
+   * @param ruleActual the rule actual
+   * @param ruleOriginal the rule original
+   * @return true, if successful
+   */
+  private boolean checkExpressionTextHasChange(Rule ruleActual, Rule ruleOriginal) {
+    boolean change = false;
+    if (ruleActual.getExpressionText() == null && ruleOriginal.getExpressionText() == null) {
+      change = false;
+    } else {
+      if ((ruleActual.getExpressionText() != null && ruleOriginal.getExpressionText() == null)
+          || !(ruleActual.getExpressionText().equals(ruleOriginal.getExpressionText()))) {
         change = true;
       }
     }
@@ -1938,4 +2060,7 @@ public class RulesServiceImpl implements RulesService {
       }
     }
   }
+
+
+
 }

@@ -4,7 +4,6 @@ import { config } from 'conf';
 import { routes } from 'conf/routes';
 
 import camelCase from 'lodash/camelCase';
-import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -24,7 +23,9 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
+import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
+
+export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -37,6 +38,8 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
     firstPageRecord: 0
   });
   const [totalRecords, setTotalRecords] = useState(0);
+
+  const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
   useEffect(() => {
     const headers = [
@@ -62,7 +65,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       }
     ];
 
-    let columnsArray = headers.map(col => (
+    const columnsArray = headers.map(col => (
       <Column body={col.template} field={col.id} header={col.header} key={col.id} style={col.style} />
     ));
 
@@ -76,14 +79,15 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   }, [columns]);
 
   const getValidUrl = (url = '') => {
-    let newUrl = window.decodeURIComponent(url);
-    newUrl = newUrl.trim().replace(/\s/g, '');
+    const newUrl = window.decodeURIComponent(url).trim().replace(/\s/g, '');
 
-    if (/^(:\/\/)/.test(newUrl)) return `http${newUrl}`;
-
-    if (!/^(f|ht)tps?:\/\//i.test(newUrl)) return `//${newUrl}`;
-
-    return newUrl;
+    if (/^(:\/\/)/.test(newUrl)) {
+      return `http${newUrl}`;
+    } else if (!/^(f|ht)tps?:\/\//i.test(newUrl)) {
+      return `//${newUrl}`;
+    } else {
+      return newUrl;
+    }
   };
 
   const linkTemplate = rowData => {
@@ -108,15 +112,12 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       }}></label>
   );
 
-  const notificationLevelTemplate = rowData => {
-    return (
-      !isNil(rowData.levelError) && (
-        <div className={styles.notificationLevelTemplateWrapper}>
-          <LevelError type={rowData.levelError.toLowerCase()} />
-        </div>
-      )
+  const notificationLevelTemplate = rowData =>
+    !isNil(rowData.levelError) && (
+      <div className={styles.notificationLevelTemplateWrapper}>
+        <LevelError type={rowData.levelError.toLowerCase()} />
+      </div>
     );
-  };
 
   const onChangePage = event => {
     setPaginationInfo({ ...paginationInfo, recordsPerPage: event.rows, firstPageRecord: event.first });
@@ -169,11 +170,7 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           key: notification.key,
           message: notification.message,
           levelError: capitalizedLevelError,
-          date: dayjs(notification.date).format(
-            `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-              userContext.userProps.amPm24h ? '' : ' A'
-            }`
-          ),
+          date: getDateTimeFormatByUserPreferences(notification.date),
 
           downloadButton: notification.onClick ? (
             <span className={styles.center}>
@@ -227,46 +224,44 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           {columns}
         </DataTable>
       );
+    } else if (isLoading) {
+      return (
+        <div className={styles.loadingSpinner}>
+          <Spinner className={styles.spinnerPosition} />
+        </div>
+      );
     } else {
-      if (isLoading) {
-        return (
-          <div className={styles.loadingSpinner}>
-            <Spinner className={styles.spinnerPosition} />
-          </div>
-        );
-      } else {
-        return (
-          <div className={styles.notificationsWithoutTable}>
-            <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
-          </div>
-        );
-      }
+      return (
+        <div className={styles.notificationsWithoutTable}>
+          <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
+        </div>
+      );
     }
   };
 
-  const newNotificationsClassName = rowData => {
-    return {
-      'p-highlight-bg': rowData.index < notificationContext.all.filter(notification => !notification.isSystem).length
-    };
+  const newNotificationsClassName = rowData => ({
+    'p-highlight-bg': rowData.index < notificationContext.all.filter(notification => !notification.isSystem).length
+  });
+
+  const renderNotificationsListContent = () => {
+    if (isNotificationVisible) {
+      return (
+        <Dialog
+          blockScroll={false}
+          className="edit-table"
+          contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
+          footer={notificationsFooter}
+          header={resourcesContext.messages['notifications']}
+          modal={true}
+          onHide={onHideNotificationsList}
+          style={{ width: '80%' }}
+          visible={isNotificationVisible}
+          zIndex={3100}>
+          {renderNotifications()}
+        </Dialog>
+      );
+    }
   };
 
-  return (
-    isNotificationVisible && (
-      <Dialog
-        blockScroll={false}
-        className="edit-table"
-        contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
-        footer={notificationsFooter}
-        header={resourcesContext.messages['notifications']}
-        modal={true}
-        onHide={onHideNotificationsList}
-        style={{ width: '80%' }}
-        visible={isNotificationVisible}
-        zIndex={3100}>
-        {renderNotifications()}
-      </Dialog>
-    )
-  );
+  return renderNotificationsListContent();
 };
-
-export { NotificationsList };

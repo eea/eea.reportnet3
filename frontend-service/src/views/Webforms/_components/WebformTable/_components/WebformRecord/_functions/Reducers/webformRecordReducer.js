@@ -28,7 +28,7 @@ export const webformRecordReducer = (state, { type, payload }) => {
                 record.fields
                   .map(field => field.fieldId)
                   .map(ids => ids.includes(payload.field.fieldId))
-                  .filter(id => id === true)
+                  .filter(id => id)
                   .indexOf(true)
               )
               .indexOf(0);

@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -48,10 +48,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
-  /** The dataset service. */
-  @Autowired
-  private DatasetService datasetService;
-
   /** The dataflow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
@@ -63,6 +59,10 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   /** The user management controller zuul. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZuul;
+
+  /** The file treatment helper. */
+  @Autowired
+  private FileTreatmentHelper fileTreatmentHelper;
 
   /**
    * The Constant LOG.
@@ -112,7 +112,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
       if (dataflowVO.isShowPublicInfo()) {
         try {
-          datasetService.savePublicFiles(dataflowVO.getId(), dataset.getDataProviderId());
+          fileTreatmentHelper.savePublicFiles(dataflowVO.getId(), dataset.getDataProviderId());
         } catch (IOException e) {
           LOG_ERROR.error("Folder not created in dataflow {} with dataprovider {} message {}",
               dataset.getDataflowId(), dataset.getDataProviderId(), e.getMessage(), e);

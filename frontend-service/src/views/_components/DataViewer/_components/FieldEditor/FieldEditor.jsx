@@ -28,7 +28,7 @@ import { MapUtils } from 'views/_functions/Utils/MapUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const FieldEditor = ({
+export const FieldEditor = ({
   cells,
   colsSchema,
   datasetId,
@@ -126,6 +126,7 @@ const FieldEditor = ({
 
   const onFilter = async filter => {
     const colSchema = colsSchema.filter(colSchema => colSchema.field === cells.field)[0];
+
     if (isNil(colSchema) || isNil(colSchema.referencedField)) {
       return;
     }
@@ -584,9 +585,9 @@ const FieldEditor = ({
             onBlur={onCalendarBlur}
             onFocus={onCalendarFocus}
             onSelect={onSelectCalendar}
+            selectableYears={100}
             value={new Date(RecordUtils.getCellValue(cells, cells.field))}
             yearNavigator={true}
-            yearRange="1900:2100"
           />
         );
       case 'DATETIME':
@@ -847,5 +848,3 @@ const FieldEditor = ({
     </span>
   );
 };
-
-export { FieldEditor };

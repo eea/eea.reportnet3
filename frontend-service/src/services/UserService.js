@@ -1,3 +1,5 @@
+import isNil from 'lodash/isNil';
+
 import { config } from 'conf/index';
 
 import { UserRepository } from 'repositories/UserRepository';
@@ -38,7 +40,7 @@ const calculateUser = async userDTO => {
   });
 
   LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
-  const userInfoDTO = await UserRepository.getUserInfo(userDTO.data.userId);
+  const userInfoDTO = await UserRepository.getUserInfo();
   user.email = userInfoDTO.data.email;
   user.firstName = userInfoDTO.data.firstName;
   user.lastName = userInfoDTO.data.lastName;
@@ -60,20 +62,11 @@ export const UserService = {
     const currentTokens = LocalUserStorageUtils.getTokens();
     LocalUserStorageUtils.remove();
 
-    if (!currentTokens) {
-      return;
+    if (isNil(currentTokens)) {
+      return null;
     }
 
     return await UserRepository.logout(currentTokens.refreshToken);
-  },
-
-  getUserInfo: async userId => {
-    const userDTO = await UserRepository.getUserInfo(userId);
-    return new User({
-      email: userDTO.email,
-      firstName: userDTO.firstName,
-      lastName: userDTO.lastName
-    });
   },
 
   getConfiguration: async () => {

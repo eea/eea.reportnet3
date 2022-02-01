@@ -107,7 +107,7 @@ export const ValidationService = {
     validationsList.rulesSchemaId = validationsListDTO.data.rulesSchemaId;
 
     if (reporting) {
-      validationsListDTO.data.rules = validationsListDTO.data.rules.filter(rule => rule.enabled === true);
+      validationsListDTO.data.rules = validationsListDTO.data.rules.filter(rule => rule.enabled);
     }
     const validationsData = ValidationUtils.parseDataValidationRulesDTO(validationsListDTO.data.rules);
     validationsList.entityTypes = validationsData.entityTypes;
@@ -116,13 +116,16 @@ export const ValidationService = {
     return validationsList;
   },
 
+  getAllQCsHistoricInfo: async datasetId => await ValidationRepository.getAllQCsHistoricInfo(datasetId),
+
+  getQcHistoricInfo: async (datasetId, ruleId) => await ValidationRepository.getQcHistoricInfo(datasetId, ruleId),
+
   generateQCRulesFile: async datasetId => await ValidationRepository.generateQCRulesFile(datasetId),
 
   generateShowValidationsFile: async datasetId => await ValidationRepository.generateShowValidationsFile(datasetId),
 
   runSqlRule: async (datasetId, sqlSentence, showInternalFields) => {
     const { data } = await ValidationRepository.runSqlRule(datasetId, sqlSentence, showInternalFields);
-
     return ValidationUtils.parseSqlValidation(data);
   },
 
@@ -218,5 +221,7 @@ export const ValidationService = {
   },
 
   evaluateSqlSentence: async (datasetId, sqlSentence) =>
-    await ValidationRepository.evaluateSqlSentence(datasetId, sqlSentence)
+    await ValidationRepository.evaluateSqlSentence(datasetId, sqlSentence),
+
+  viewUpdated: async datasetId => await ValidationRepository.viewUpdated(datasetId)
 };

@@ -1,5 +1,6 @@
 package org.eea.dataset.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import org.eea.exception.EEAException;
@@ -41,13 +42,14 @@ public interface ReferenceDatasetService {
    */
   Set<DataFlowVO> getDataflowsReferenced(Long dataflowId);
 
-
   /**
-   * Update updatable.
+   * Update updatable reference dataset.
    *
    * @param datasetId the dataset id
    * @param updatable the updatable
    * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
-  void updateUpdatable(Long datasetId, Boolean updatable) throws EEAException;
+  void updateUpdatableReferenceDataset(Long datasetId, Boolean updatable)
+      throws EEAException, IOException;
 }

@@ -14,7 +14,7 @@ export class TableFooter extends Component {
   render() {
     let content;
     if (this.props.columnGroup) {
-      let rows = Children.toArray(this.props.columnGroup.props.children);
+      const rows = Children.toArray(this.props.columnGroup.props.children);
       content = rows.map((row, i) => {
         // eslint-disable-next-line react/no-array-index-key
         return <tr key={i}>{this.createFooterCells(row)}</tr>;

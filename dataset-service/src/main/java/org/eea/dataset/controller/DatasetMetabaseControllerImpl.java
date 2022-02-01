@@ -219,7 +219,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @ApiOperation(value = "Update dataset Status", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated status"),
       @ApiResponse(code = 500, message = "Error updating status")})
-  @PreAuthorize("secondLevelAuthorize(#datasetStatusMessageVO.datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetStatusMessageVO.datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_STEWARD_SUPPORT')")
   public void updateDatasetStatus(@ApiParam(
       value = "dataset Status message object") @RequestBody DatasetStatusMessageVO datasetStatusMessageVO) {
     try {
@@ -260,7 +260,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @HystrixCommand
   @GetMapping(value = "/{datasetId}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get statistics by dataset", hidden = true)
-  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','DATASCHEMA_EDITOR_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','DATASCHEMA_EDITOR_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @PreAuthorize("isAuthenticated()")
   public StatisticsVO getStatisticsById(@ApiParam(type = "Long", value = "dataset Id",
       example = "0") @PathVariable("datasetId") Long datasetId) {

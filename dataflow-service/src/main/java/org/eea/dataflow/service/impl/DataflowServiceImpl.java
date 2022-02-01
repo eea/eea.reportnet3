@@ -5,12 +5,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPrivateMapper;
@@ -53,6 +56,7 @@ import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -81,10 +85,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import io.jsonwebtoken.lang.Objects;
 
@@ -262,79 +269,135 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataFlowVO> getDataflows(String userId, TypeDataflowEnum dataflowType)
-      throws EEAException {
+  public PaginatedDataflowVO getDataflows(String userId, TypeDataflowEnum dataflowType,
+      Map<String, String> filters, String orderHeader, boolean asc, Integer pageSize,
+      Integer pageNum) throws EEAException {
+    try {
+      List<DataFlowVO> dataflowVOs = new ArrayList<>();
+      PaginatedDataflowVO paginatedDataflowVO = new PaginatedDataflowVO();
 
-    List<DataFlowVO> dataflowVOs = new ArrayList<>();
 
-    // Get user's datasets
-    Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
-    boolean userAdmin = isAdmin();
+      // get obligations and pageable
+      List<ObligationVO> obligations =
+          obligationControllerZull.findOpenedObligations(null, null, null, null, null);
+      ObjectMapper objectMapper = new ObjectMapper();
+      String arrayToJson = objectMapper.writeValueAsString(obligations);
 
-    // Get user's dataflows sorted by status and creation date
-    List<Long> idsResources =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
-            .map(ResourceAccessVO::getId).collect(Collectors.toList());
-    if (CollectionUtils.isNotEmpty(idsResources) || userAdmin
-        || dataflowType == TypeDataflowEnum.REFERENCE) {
-      List<Dataflow> dataflows = new ArrayList<>();
-      switch (dataflowType) {
-        case REPORTING:
-          dataflows = userAdmin ? dataflowRepository.findInOrderByStatusDescCreationDateDesc()
-              : dataflowRepository.findByIdInOrderByStatusDescCreationDateDesc(idsResources);
-          break;
-        case CITIZEN_SCIENCE:
-          dataflows =
-              userAdmin ? dataflowRepository.findCitizenScienceInOrderByStatusDescCreationDateDesc()
-                  : dataflowRepository
-                      .findCitizenScienceAndIdInOrderByStatusDescCreationDateDesc(idsResources);
-          break;
-        case BUSINESS:
-          dataflows =
-              userAdmin ? dataflowRepository.findBusinessInOrderByStatusDescCreationDateDesc()
-                  : dataflowRepository
-                      .findBusinessAndIdInOrderByStatusDescCreationDateDesc(idsResources);
-          break;
-        case REFERENCE:
-          if (CollectionUtils.isNotEmpty(idsResources) || userAdmin)
+      Pageable pageable = null;
+      if (null != pageNum && null != pageSize) {
+        pageable = PageRequest.of(pageNum, pageSize);
+      }
+
+      // Get user's datasets
+      Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
+      boolean userAdmin = isAdmin();
+      List<Long> idsResources = null;
+      List<Long> idsResourcesWithoutRole = null;
+      if (MapUtils.isNotEmpty(filters) && filters.containsKey("role")) {
+        idsResources = userManagementControllerZull
+            .getResourcesByUser(ResourceTypeEnum.DATAFLOW,
+                SecurityRoleEnum.fromValue(filters.get("role")))
+            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());;
+        idsResourcesWithoutRole =
+            userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
+                .map(ResourceAccessVO::getId).collect(Collectors.toList());
+        filters.remove("role");
+      } else {
+        idsResources = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
+            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+      }
+
+      // Get user's dataflows sorted by status and creation date
+      if (CollectionUtils.isNotEmpty(idsResources) || userAdmin
+          || dataflowType == TypeDataflowEnum.REFERENCE) {
+        List<Dataflow> dataflows = new ArrayList<>();
+        switch (dataflowType) {
+          case REPORTING:
+          case CITIZEN_SCIENCE:
+          case BUSINESS:
             dataflows = userAdmin
-                ? dataflowRepository
-                    .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DESIGN)
-                : dataflowRepository.findReferenceByStatusAndIdInOrderByStatusDescCreationDateDesc(
-                    TypeStatusEnum.DESIGN, idsResources);
+                ? dataflowRepository.findPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
+                    orderHeader, asc, dataflowType, null)
+                : dataflowRepository.findPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
+                    orderHeader, asc, dataflowType, idsResources);
+            paginatedDataflowVO.setFilteredRecords(userAdmin
+                ? dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
+                    orderHeader, asc, dataflowType, null)
+                : dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
+                    orderHeader, asc, dataflowType, idsResources));
 
-          dataflows.addAll(dataflowRepository
-              .findReferenceByStatusInOrderByStatusDescCreationDateDesc(TypeStatusEnum.DRAFT));
-          break;
-        default:
-          // case for type ALL but except REFERENCE type dataflow
-          dataflows = userAdmin
-              ? dataflowRepository.findDataflowsExceptReferenceInOrderByStatusDescCreationDateDesc()
-              : dataflowRepository
-                  .findDataflowsExceptReferenceAndIdInOrderByStatusDescCreationDateDesc(
-                      idsResources);
-          break;
-      }
+            paginatedDataflowVO.setTotalRecords(userAdmin
+                ? dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null,
+                    asc, dataflowType, null)
+                : dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null,
+                    asc, dataflowType,
+                    idsResourcesWithoutRole != null ? idsResourcesWithoutRole : idsResources));
+            break;
+          case REFERENCE:
+            if (CollectionUtils.isNotEmpty(idsResources) || userAdmin) {
+              dataflows = userAdmin
+                  ? dataflowRepository.findPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
+                      orderHeader, asc, dataflowType, null)
+                  : dataflowRepository.findPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
+                      orderHeader, asc, dataflowType, idsResources);
+              paginatedDataflowVO.setFilteredRecords(userAdmin
+                  ? dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
+                      orderHeader, asc, dataflowType, null)
+                  : dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
+                      orderHeader, asc, dataflowType, idsResources));
 
+            } else {
+              paginatedDataflowVO.setFilteredRecords(Long.valueOf(0));
+            }
+            paginatedDataflowVO.setTotalRecords(userAdmin
+                ? dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null,
+                    asc, dataflowType, null)
+                : dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null,
+                    asc, dataflowType,
+                    idsResourcesWithoutRole != null ? idsResourcesWithoutRole : idsResources));
 
-      dataflows.forEach(dataflow -> {
-        DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
-        List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
-        if (!map.isEmpty() && null != datasetsStatusList) {
-          setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+            break;
+
         }
-        dataflowVOs.add(dataflowVO);
-      });
-      try {
-        getOpenedObligations(dataflowVOs);
-      } catch (FeignException e) {
-        LOG_ERROR.error(
-            "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
-            e.getMessage(), e);
-      }
-    }
 
-    return dataflowVOs;
+
+        dataflows.forEach(dataflow -> {
+          DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
+          List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
+          if (!map.isEmpty() && null != datasetsStatusList) {
+            setReportingDatasetStatus(datasetsStatusList, dataflowVO);
+          }
+          dataflowVOs.add(dataflowVO);
+        });
+
+        // SET OBLIGATIONS
+        if (!TypeDataflowEnum.REFERENCE.equals(dataflowType)) {
+          for (DataFlowVO dataflowVO : dataflowVOs) {
+            for (ObligationVO obligation : obligations) {
+              if (dataflowVO.getObligation().getObligationId()
+                  .equals(obligation.getObligationId())) {
+                dataflowVO.setObligation(obligation);
+              }
+            }
+          }
+        }
+      } else {
+        paginatedDataflowVO.setFilteredRecords(Long.valueOf(0));
+        if (idsResourcesWithoutRole != null) {
+          paginatedDataflowVO.setTotalRecords(userAdmin
+              ? dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null, asc,
+                  dataflowType, null)
+              : dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null, asc,
+                  dataflowType, idsResourcesWithoutRole));
+        } else {
+          paginatedDataflowVO.setTotalRecords(Long.valueOf(0));
+        }
+      }
+      paginatedDataflowVO.setDataflows(dataflowVOs);
+      return paginatedDataflowVO;
+    } catch (JsonProcessingException e1) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
+    }
   }
 
   /**
@@ -646,15 +709,54 @@ public class DataflowServiceImpl implements DataflowService {
   /**
    * Gets the public dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the public dataflows
+   * @throws EEAException the EEA exception
    */
   @Override
-  public List<DataflowPublicVO> getPublicDataflows() {
+  public PaginatedDataflowVO getPublicDataflows(Map<String, String> filters, String orderHeader,
+      boolean asc, Integer pageSize, Integer pageNum) throws EEAException {
 
-    List<DataflowPublicVO> dataflowPublicList =
-        dataflowPublicMapper.entityListToClass(dataflowRepository.findByShowPublicInfoTrue());
-    dataflowPublicList.stream().forEach(dataflow -> findObligationPublicDataflow(dataflow));
-    return dataflowPublicList;
+    // get obligations
+    try {
+      Pageable pageable = null;
+      if (null != pageNum && null != pageSize) {
+        pageable = PageRequest.of(pageNum, pageSize);
+      }
+      List<ObligationVO> obligations =
+          obligationControllerZull.findOpenedObligations(null, null, null, null, null);
+      ObjectMapper objectMapper = new ObjectMapper();
+
+      String arrayToJson = objectMapper.writeValueAsString(obligations);
+
+      List<Dataflow> dataflows = dataflowRepository.findPaginated(arrayToJson, pageable,
+          Boolean.TRUE, filters, orderHeader, asc, null, null);
+      List<DataflowPublicVO> dfpublic = dataflowPublicMapper.entityListToClass(dataflows);
+
+      // SET OBLIGATIONS
+      for (DataflowPublicVO dataflowPublicVO : dfpublic) {
+        for (ObligationVO obligation : obligations) {
+          if (dataflowPublicVO.getObligation().getObligationId()
+              .equals(obligation.getObligationId())) {
+            dataflowPublicVO.setObligation(obligation);
+          }
+        }
+      }
+      PaginatedDataflowVO pag = new PaginatedDataflowVO();
+      pag.setDataflows(dfpublic);
+      pag.setTotalRecords(dataflowRepository.countByShowPublicInfo(Boolean.TRUE));
+      pag.setFilteredRecords(dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.TRUE,
+          filters, orderHeader, asc, null, null));
+
+      return pag;
+
+    } catch (JsonProcessingException e) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
+    }
   }
 
   /**
@@ -677,7 +779,6 @@ public class DataflowServiceImpl implements DataflowService {
 
     List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
     setReportings(dataflowPublicList, providerId);
-
     // sort and paging
     sortPublicDataflows(dataflowPublicList, header, asc);
     dataflowPublicPaginated.setPublicDataflows(getPage(dataflowPublicList, page, pageSize));
@@ -1550,15 +1651,18 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   @Async
-  @Transactional
   public void validateAllReporters(String userId) throws EEAException {
 
     try {
       List<Representative> representativeList = representativeRepository.findAllByInvalid(true);
       List<TempUser> tempUserList = tempUserRepository.findAll();
 
+      Set<Long> dataflowsToCheck = new HashSet<>();
       for (Representative representative : representativeList) {
-        representativeService.validateLeadReporters(representative.getDataflow().getId(), false);
+        dataflowsToCheck.add(representative.getDataflow().getId());
+      }
+      for (Long dataflowId : dataflowsToCheck) {
+        representativeService.validateLeadReporters(dataflowId, false);
       }
 
       for (TempUser tempuser : tempUserList) {
@@ -1581,6 +1685,18 @@ public class DataflowServiceImpl implements DataflowService {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_ALL_REPORTERS_FAILED_EVENT,
           null, notificationVO);
     }
+  }
+
+  /**
+   * Update data flow automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDeletion the automatic reporting deletion
+   */
+  @Override
+  public void updateDataFlowAutomaticReportingDeletion(Long dataflowId,
+      boolean automaticReportingDeletion) {
+    dataflowRepository.updateAutomaticReportingDeletion(dataflowId, automaticReportingDeletion);
   }
 
   /**

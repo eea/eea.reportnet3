@@ -102,6 +102,7 @@ export const TableView = ({
       paginatorRight={paginatorRightText}
       rows={pagination.rows}
       rowsPerPageOptions={[5, 10, 15]}
+      summary={resourcesContext.messages['reportingObligations']}
       totalRecords={data.length}
       value={data}>
       {renderColumns(data)}

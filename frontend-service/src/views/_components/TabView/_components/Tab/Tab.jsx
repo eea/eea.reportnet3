@@ -21,13 +21,14 @@ import { Dialog } from 'views/_components/Dialog';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'views/_components/Icon';
 import { InputText } from 'views/_components/InputText';
+import ReactTooltip from 'react-tooltip';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const Tab = ({
+export const Tab = ({
   addTab,
   ariaControls,
   checkEditingTabs,
@@ -52,6 +53,7 @@ const Tab = ({
   leftIcon,
   newTab,
   notEmpty = true,
+  numberOfFields,
   onTabBlur,
   onTabAddCancel,
   onTabDeleteClick,
@@ -64,6 +66,7 @@ const Tab = ({
   readOnly = false,
   rightIcon,
   rightIconClass = '',
+  rightIconTooltip,
   scrollTo,
   selected,
   tableSchemaId,
@@ -130,7 +133,7 @@ const Tab = ({
     if (rowData.key === 'description') {
       return (
         <div className={styles.templateWrapper}>
-          <p className={styles.tableDescriptionTemplate}>{rowData.value || '-'}</p>
+          <label className={styles.tableDescriptionTemplate}>{rowData.value || '-'}</label>
         </div>
       );
     } else if (
@@ -162,26 +165,34 @@ const Tab = ({
         );
       }
     };
+
     const renderReadOnly = () => {
       if (readOnly) {
         return <p className={styles.propertyLabel}>{resourcesContext.messages['readOnly']}</p>;
       }
     };
+
     const renderPrefilled = () => {
       if (toPrefill) {
         return <p className={styles.propertyLabel}>{resourcesContext.messages['prefilled']}</p>;
       }
     };
+
     const renderFixedNumber = () => {
       if (fixedNumber) {
         return <p className={styles.propertyLabel}>{resourcesContext.messages['fixedNumber']}</p>;
       }
     };
+
     const renderNotEmpty = () => {
       if (notEmpty) {
         return <p className={styles.propertyLabel}>{resourcesContext.messages['notEmpty']}</p>;
       }
     };
+
+    const renderNumberOfFiedls = () => (
+      <p className={styles.propertyLabel}>{`${resourcesContext.messages['numberOfFields']}: ${numberOfFields}`}</p>
+    );
 
     return (
       <div className={`${styles.fieldText} ${styles.tooltipWrapper}`}>
@@ -190,7 +201,7 @@ const Tab = ({
         {renderPrefilled()}
         {renderFixedNumber()}
         {renderNotEmpty()}
-        <p className={styles.moreInfoLabel}>{resourcesContext.messages['detailedInfoTooltip']}</p>
+        {renderNumberOfFiedls()}
       </div>
     );
   };
@@ -362,6 +373,45 @@ const Tab = ({
       return `${styles.p_tabview_design_add} ${extraStyle} datasetSchema-created-table-help-step`;
     } else {
       return `${styles.p_tabview_noDesign} ${extraStyle}`;
+    }
+  };
+
+  const renderRightIcon = () => {
+    if (!addTab && !newTab) {
+      return (
+        <Icon
+          icon={iconToShow}
+          style={{
+            position: 'absolute',
+            top: '33%',
+            right: '6px',
+            fontSize: '1rem',
+            cursor: 'pointer ',
+            opacity: '0.7'
+          }}
+        />
+      );
+    }
+  };
+
+  const renderRightSpan = () => {
+    if (rightIcon && !editingHeader) {
+      return (
+        <span
+          className={classNames('p-tabview-right-icon ', rightIcon, rightIconClass)}
+          data-for={`${tableSchemaId}-table-info-tooltip`}
+          data-tip></span>
+      );
+    }
+  };
+
+  const renderRightSpanTooltip = () => {
+    if (!isNil(rightIconTooltip)) {
+      return (
+        <ReactTooltip border={true} effect="solid" id={`${tableSchemaId}-table-info-tooltip`} place="top">
+          {rightIconTooltip}
+        </ReactTooltip>
+      );
     }
   };
 
@@ -543,9 +593,8 @@ const Tab = ({
           ) : (
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
-          {rightIcon && !editingHeader && (
-            <span className={classNames('p-tabview-right-icon ', rightIcon, rightIconClass)}></span>
-          )}
+          {renderRightSpan()}
+          {renderRightSpanTooltip()}
           {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDatasetEditorRead ? (
             <div
               onClick={e => {
@@ -561,19 +610,7 @@ const Tab = ({
               }}
               onMouseOut={() => setIconToShow('cancel')}
               onMouseOver={() => setIconToShow('errorCircle')}>
-              {!addTab && !newTab ? (
-                <Icon
-                  icon={iconToShow}
-                  style={{
-                    position: 'absolute',
-                    top: '33%',
-                    right: '6px',
-                    fontSize: '1rem',
-                    cursor: 'pointer ',
-                    opacity: '0.7'
-                  }}
-                />
-              ) : null}
+              {renderRightIcon()}
             </div>
           ) : null}
         </a>
@@ -585,5 +622,3 @@ const Tab = ({
     </Fragment>
   );
 };
-
-export { Tab };

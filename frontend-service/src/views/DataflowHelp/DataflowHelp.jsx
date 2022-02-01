@@ -1,8 +1,8 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniqBy from 'lodash/uniqBy';
 
@@ -48,14 +48,14 @@ export const DataflowHelp = () => {
   const [dataflowType, setDataflowType] = useState('');
   const [datasetsSchemas, setDatasetsSchemas] = useState();
   const [documents, setDocuments] = useState([]);
-  const [isCustodian, setIsCustodian] = useState(false);
+  const [hasCustodianPermissions, setHasCustodianPermissions] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(true);
   const [isLoadingSchemas, setIsLoadingSchemas] = useState(true);
   const [isLoadingWebLinks, setIsLoadingWeblinks] = useState(false);
-  const [isToolbarVisible, setIsToolbarVisible] = useState(false);
+  const [isDocumentsWeblinksToolbarVisible, setIsDocumentsWeblinksToolbarVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [sortFieldDocuments, setSortFieldDocuments] = useState();
   const [sortFieldWebLinks, setSortFieldWebLinks] = useState();
@@ -70,17 +70,20 @@ export const DataflowHelp = () => {
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
       const userRoles = userContext.getUserRole(`${config.permissions.prefixes.DATAFLOW}${dataflowId}`);
-      setIsCustodian(
-        userRoles.includes(config.permissions.roles.CUSTODIAN.key) ||
-          userRoles.includes(config.permissions.roles.STEWARD.key) ||
-          userRoles.includes(config.permissions.roles.EDITOR_WRITE.key) ||
-          userRoles.includes(config.permissions.roles.EDITOR_READ.key)
-      );
 
-      setIsToolbarVisible(
+      const isLeadDesigner =
         userRoles.includes(config.permissions.roles.CUSTODIAN.key) ||
-          userRoles.includes(config.permissions.roles.STEWARD.key)
-      );
+        userRoles.includes(config.permissions.roles.STEWARD.key);
+
+      const isDesigner =
+        isLeadDesigner ||
+        userRoles.includes(config.permissions.roles.EDITOR_WRITE.key) ||
+        userRoles.includes(config.permissions.roles.EDITOR_READ.key);
+
+      const isStewardSupport = userRoles.includes(config.permissions.roles.STEWARD_SUPPORT.key);
+
+      setHasCustodianPermissions(isDesigner);
+      setIsDocumentsWeblinksToolbarVisible(isLeadDesigner || isStewardSupport);
     }
   }, [userContext]);
 
@@ -88,7 +91,7 @@ export const DataflowHelp = () => {
 
   useEffect(() => {
     leftSideBarContext.addHelpSteps(
-      isCustodian ? DataflowHelpRequesterHelpConfig : DataflowHelpReporterHelpConfig,
+      hasCustodianPermissions ? DataflowHelpRequesterHelpConfig : DataflowHelpReporterHelpConfig,
       'dataflowHelpHelp'
     );
   }, [documents, webLinks, datasetsSchemas, selectedIndex]);
@@ -99,7 +102,7 @@ export const DataflowHelp = () => {
 
   useEffect(() => {
     onLoadDatasetsSchemas();
-  }, [isCustodian]);
+  }, [hasCustodianPermissions]);
 
   useCheckNotifications(
     ['DELETE_DOCUMENT_FAILED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
@@ -134,7 +137,7 @@ export const DataflowHelp = () => {
       const datasetSchema = await DatasetService.getSchema(dataflowId, datasetId);
 
       if (!isEmpty(datasetSchema)) {
-        if (isCustodian) {
+        if (hasCustodianPermissions) {
           const datasetMetadata = await DatasetService.getMetadata(datasetId);
           datasetSchema.datasetSchemaName = datasetMetadata.datasetSchemaName;
         }
@@ -142,7 +145,7 @@ export const DataflowHelp = () => {
       }
     } catch (error) {
       console.error('DataflowHelp - onLoadDatasetSchema.', error);
-      notificationContext.add({ type: 'IMPORT_DESIGN_FAILED_EVENT' }, true);
+      notificationContext.add({ type: 'LOAD_DATASET_SCHEMA_INFO_ERROR' }, true);
     }
   };
 
@@ -151,16 +154,21 @@ export const DataflowHelp = () => {
       const data = await DataflowService.get(dataflowId);
       setDataflowType(data.type);
       setIsLoading(false);
-      if (!isCustodian) {
+      if (!hasCustodianPermissions) {
         if (!isEmpty(data.datasets)) {
-          const datasetSchemas = data.datasets.map(async datasetSchema => {
+          const datasets = [...data.datasets, ...data.referenceDatasets];
+
+          const datasetSchemas = datasets.map(async datasetSchema => {
             return await onLoadDatasetSchema(datasetSchema.datasetId);
           });
+
           Promise.all(datasetSchemas).then(completed => {
             completed.forEach(datasetSchema => {
-              datasetSchema.datasetId = data.datasets.find(
-                dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
-              ).datasetId;
+              if (!isNil(completed.datasetId)) {
+                datasetSchema.datasetId = data.datasets.find(
+                  dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
+                ).datasetId;
+              }
             });
 
             setDatasetsSchemas(uniqBy(completed, 'datasetSchemaId'));
@@ -248,7 +256,7 @@ export const DataflowHelp = () => {
               documents={documents}
               isDeletingDocument={isDeletingDocument}
               isLoading={isLoadingDocuments}
-              isToolbarVisible={isToolbarVisible}
+              isToolbarVisible={isDocumentsWeblinksToolbarVisible}
               onLoadDocuments={onLoadDocuments}
               setIsDeletingDocument={setIsDeletingDocument}
               setSortFieldDocuments={setSortFieldDocuments}
@@ -261,7 +269,7 @@ export const DataflowHelp = () => {
             <WebLinks
               dataflowId={dataflowId}
               isLoading={isLoadingWebLinks}
-              isToolbarVisible={isToolbarVisible}
+              isToolbarVisible={isDocumentsWeblinksToolbarVisible}
               onLoadWebLinks={onLoadWebLinks}
               setSortFieldWebLinks={setSortFieldWebLinks}
               setSortOrderWebLinks={setSortOrderWebLinks}
@@ -279,7 +287,7 @@ export const DataflowHelp = () => {
               dataflowId={dataflowId}
               dataflowName={dataflowName}
               datasetsSchemas={datasetsSchemas}
-              isCustodian={isCustodian}
+              hasCustodianPermissions={hasCustodianPermissions}
               onLoadDatasetsSchemas={onLoadDatasetsSchemas}
             />
           </TabPanel>

@@ -7,9 +7,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +32,7 @@ import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -64,6 +69,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -138,7 +144,7 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @GetMapping("TableValueDataset/{id}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @ApiOperation(value = "Get table data", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 400, message = "Dataset id incorrect"),
@@ -659,11 +665,12 @@ public class DatasetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param mimeType the mime type
+   * @param exportFilterVO the export filter VO
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/exportFile")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @PostMapping(value = "/exportFile")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @ApiOperation(value = "Export file with data", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully export"),
       @ApiResponse(code = 400, message = "Id table schema is incorrect"),
@@ -675,7 +682,8 @@ public class DatasetControllerImpl implements DatasetController {
           example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
               required = false) String tableSchemaId,
       @ApiParam(type = "String", value = "mimeType (file extension)",
-          example = "csv") @RequestParam("mimeType") String mimeType) {
+          example = "csv") @RequestParam("mimeType") String mimeType,
+      @RequestBody ExportFilterVO exportFilterVO) {
     String tableName =
         null != tableSchemaId ? datasetSchemaService.getTableSchemaName(null, tableSchemaId)
             : datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
@@ -685,7 +693,7 @@ public class DatasetControllerImpl implements DatasetController {
           EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
     try {
-      fileTreatmentHelper.exportFile(datasetId, mimeType, tableSchemaId, tableName);
+      fileTreatmentHelper.exportFile(datasetId, mimeType, tableSchemaId, tableName, exportFilterVO);
     } catch (EEAException | IOException e) {
       LOG_ERROR.info("Error exporting table data from dataset id {}.", datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -704,7 +712,7 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @GetMapping("/exportFileThroughIntegration")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
   @ApiOperation(value = "Export file through integration", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully exported"),
       @ApiResponse(code = 500, message = "Error exporting file")})
@@ -832,7 +840,7 @@ public class DatasetControllerImpl implements DatasetController {
   @GetMapping("/v1/{datasetId}/etlExport")
   @HystrixCommand(commandProperties = {@HystrixProperty(
       name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
   @ApiOperation(value = "Export data by dataset id",
       notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD, OBSERVER, REPORTER WRITE, REPORTER READ, LEAD REPORTER, STEWARD SUPPORT \n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE, EDITOR READ\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT\n\n Data collection: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully exported"),
@@ -888,7 +896,7 @@ public class DatasetControllerImpl implements DatasetController {
   @GetMapping("/{datasetId}/etlExport")
   @HystrixCommand(commandProperties = {@HystrixProperty(
       name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
-  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER')")
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
   @ApiOperation(value = "Export data by dataset id", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully exported"),
       @ApiResponse(code = 500, message = "Error exporting data"),
@@ -1008,7 +1016,7 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully getted"),
       @ApiResponse(code = 500, message = "Error getting attachment"),
       @ApiResponse(code = 404, message = "Error downloading attachment from dataset")})
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD')")
   public ResponseEntity<byte[]> getAttachment(
       @ApiParam(type = "Long", value = "Dataset id",
           example = "0") @PathVariable("datasetId") Long datasetId,
@@ -1052,7 +1060,7 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully getted"),
       @ApiResponse(code = 500, message = "Error getting attachments"),
       @ApiResponse(code = 404, message = "Error downloading attachment from dataset")})
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD')")
   public ResponseEntity<byte[]> getAttachmentLegacy(
       @ApiParam(type = "Long", value = "Dataset id",
           example = "0") @PathVariable("datasetId") Long datasetId,
@@ -1364,7 +1372,7 @@ public class DatasetControllerImpl implements DatasetController {
   @HystrixCommand
   @GetMapping(value = "/{datasetId}/exportDatasetFile")
   @ApiOperation(value = "Export dataset file", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   public void exportDatasetFile(
       @ApiParam(type = "Long", value = "Dataset Id",
           example = "0") @PathVariable("datasetId") Long datasetId,
@@ -1393,7 +1401,7 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @GetMapping(value = "/{datasetId}/downloadFile",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @ApiOperation(value = "Download file", hidden = true)
   public void downloadFile(
       @ApiParam(type = "Long", value = "Dataset Id", example = "0") @PathVariable Long datasetId,
@@ -1454,6 +1462,88 @@ public class DatasetControllerImpl implements DatasetController {
     return datasetService.getCheckView(datasetId);
   }
 
+  @Override
+  // Put lock
+  @PostMapping(path = "/v1/stream/{datasetId}/streamImportFileData",
+      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+  @ApiOperation(value = "Import file to dataset data",
+      notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD\n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')   OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
+      @ApiResponse(code = 400, message = "Error importing file"),
+      @ApiResponse(code = 500, message = "Error importing file")})
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+      name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
+  public void streamImportFileData(
+      @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "String", value = "Table schema id",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+              required = false) String tableSchemaId,
+      @ApiParam(type = "boolean", value = "Replace current data",
+          example = "true") @RequestParam(value = "replace", required = false) boolean replace,
+      @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
+          value = "integrationId", required = false) Long integrationId,
+      @ApiParam(type = "String", value = "File delimiter",
+          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+      HttpServletRequest request) {
+
+    boolean isMultipart = ServletFileUpload.isMultipartContent(request);
+    System.out.println("");
+    if (isMultipart) {
+      System.out.println("SOY MULTIPART");
+      String filename = "";
+      try {
+        // ServletFileUpload upload = new ServletFileUpload();
+        // // Parse the request
+        // FileItemIterator iter = upload.getItemIterator(request);
+        // System.out.println("VOY A ITERAR");
+        // while (iter.hasNext()) {
+        // FileItemStream item = iter.next();
+        // String name = item.getFieldName();
+        // try (InputStream stream = item.openStream()) {
+        // if (item.isFormField()) {
+        // System.out.println(
+        // "Form field " + name + " with value " + Streams.asString(stream) + " detected.");
+        // } else {
+        // System.out.println(
+        // "File field " + name + " with file name " + item.getName() + " detected.");
+        // fileTreatmentHelper.importFileDataV2(datasetId, tableSchemaId, stream, replace,
+        // integrationId, delimiter, name);
+        // }
+        // }
+        // }
+        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+        Set set = multipartRequest.getFileMap().entrySet();
+        Iterator i = set.iterator();
+        while (i.hasNext()) {
+          System.out.println("Proceso :)");
+          Map.Entry me = (Map.Entry) i.next();
+          MultipartFile multipartFile = (MultipartFile) me.getValue();
+          filename = multipartFile.getOriginalFilename();
+          fileTreatmentHelper.importFileDataV2(datasetId, tableSchemaId,
+              multipartFile.getInputStream(), replace, integrationId, delimiter, filename);
+        }
+        System.out.println("Me voy yendo");
+      } catch (Exception e) {
+        LOG_ERROR.error(
+            "File import failed: datasetId={}, tableSchemaId={}, fileName={}. Message: {}",
+            datasetId, tableSchemaId, filename, e.getMessage(), e);
+        Map<String, Object> importFileData = new HashMap<>();
+        importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+        importFileData.put(LiteralConstants.DATASETID, datasetId);
+        lockService.removeLockByCriteria(importFileData);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.IMPORTING_FILE_DATASET);
+      }
+    } else {
+      LOG_ERROR.error("File import failed: not multipart File");
+    }
+  }
 
   /**
    * Creates the response entity.
