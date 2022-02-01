@@ -4,7 +4,6 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 import isDate from 'lodash/isDate';
 import isEmpty from 'lodash/isEmpty';
 import uniqueId from 'lodash/uniqueId';
-
 import uniq from 'lodash/uniq';
 
 //import styles from '../../Filters.module.scss';
@@ -34,7 +33,7 @@ export const DateFilter = ({ isLoading, option, recoilId }) => {
 
   useEffect(() => {
     setFilterByAllKeys(prevState => uniq([...prevState, option.key]));
-  }, []);
+  }, [recoilId]);
 
   useEffect(() => {
     const listener = event => {

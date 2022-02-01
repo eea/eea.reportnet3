@@ -196,7 +196,7 @@ const parseRequestFilterBy = filterBy => {
     expirationDate: 'deadline_date',
     legalInstrument: 'legal_instrument',
     name: 'name',
-    obligation: 'obligation',
+    obligationTitle: 'obligation',
     obligationId: 'obligation_id',
     status: 'status',
     userRole: 'role'

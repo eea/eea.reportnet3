@@ -5,7 +5,7 @@ import isEmpty from 'lodash/isEmpty';
 import { dataStore, filterByStore, sortByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 import { filterByAllKeys } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
 
-export const useApplyFilters = ({ recoilId }) => {
+export const useApplyFilters = recoilId => {
   const sortBy = useRecoilValue(sortByStore(recoilId));
 
   const setData = useSetRecoilState(dataStore(recoilId));
@@ -20,7 +20,7 @@ export const useApplyFilters = ({ recoilId }) => {
 
         return Object.assign({}, ...response);
       },
-    []
+    [recoilId]
   );
 
   const isFiltered = async () => {
@@ -42,7 +42,7 @@ export const useApplyFilters = ({ recoilId }) => {
 
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
       },
-    []
+    [recoilId]
   );
 
   return { getFilterBy, isFiltered: isFiltered(), resetFilterState, setData, sortByOptions: sortBy };

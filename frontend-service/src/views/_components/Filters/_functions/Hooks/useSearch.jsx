@@ -15,7 +15,7 @@ export const useSearch = ({ onFilterData, option, recoilId }) => {
   useEffect(() => {
     setFilterBySearchKeys(prevState => ({ keys: option.searchBy, nestedKey: prevState?.nestedKey }));
     setFilterByAllKeys(prevState => uniq([...prevState, option.key]));
-  }, []);
+  }, [recoilId]);
 
   const onSearch = async value => {
     setSearchBy(value);
