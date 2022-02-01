@@ -1,31 +1,37 @@
-.multiSelect {
-  border-bottom: var(--inputtext-border) !important;
-  border-radius: 0px !important;
-  border: 0px !important;
-  color: var(--floating-label-color) !important;
-  font-size: 0.8333rem !important;
-  height: 2rem;
-  padding-left: 0em;
-  width: 90% !important;
+.block {
+  display: flex;
+  width: 25% !important;
 
-  label {
-    color: var(--active-filter-font) !important;
-    font-weight: bold !important;
-    height: 100%;
-    margin-left: 0.1rem;
-  }
+  .multiSelect {
+    border-radius: 0px !important;
+    border: 0px !important;
+    color: var(--floating-label-color) !important;
+    font-size: 0.8333rem !important;
+    height: 2.25rem;
+    padding-left: 0em;
+    width: 90% !important;
+    //border-bottom: var(--inputtext-border) !important;
 
-  input + label {
-    color: var(--font-filters) !important;
-    font-weight: unset !important;
-  }
-
-  li {
-    opacity: 0.8;
-
-    &:hover {
-      opacity: 1;
+    label {
+      color: var(--active-filter-font) !important;
+      font-weight: bold !important;
+      height: 100%;
+      margin-left: 0.1rem;
     }
+
+    ul > li > label > span {
+      color: var(--font-filters) !important;
+      font-weight: unset !important;
+    }
+  }
+
+  .elementFilter {
+    border-bottom: var(--inputtext-border) !important;
+  }
+
+  .elementFilterSelected {
+    border-bottom: var(--active-filter-border) !important;
+    box-shadow: var(--active-filter-shadow);
   }
 }
 
