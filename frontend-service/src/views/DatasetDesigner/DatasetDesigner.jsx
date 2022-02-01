@@ -310,7 +310,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const changeMode = viewMode => designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: viewMode } });
 
   const changeUrl = (changeOnlyView = false) => {
-    const [view] = Object.keys(designerState.viewType).filter(view => designerState.viewType[view] === true);
+    const activedViews = Object.keys(designerState.viewType).filter(view => designerState.viewType[view]);
+    const view = activedViews.length > 0 ? activedViews[0] : 'design';
     setSelectedView(view);
     window.history.replaceState(
       null,
