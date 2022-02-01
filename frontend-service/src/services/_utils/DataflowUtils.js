@@ -17,6 +17,7 @@ import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 import { Dataflow } from 'entities/Dataflow';
 
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const sortDataflowsByExpirationDate = dataflows =>
   dataflows.sort((a, b) => {
@@ -185,22 +186,49 @@ const parseDatasetsInfoDTO = datasetsDTO =>
 const getDatasetType = datasetType => config.datasetType.find(type => type.key === datasetType)?.value;
 
 const parseRequestFilterBy = filterBy => {
+  if (isEmpty(filterBy)) {
+    return {};
+  }
+
   const replacements = {
     creationDate: 'creation_date',
     description: 'description',
     expirationDate: 'deadline_date',
     legalInstrument: 'legal_instrument',
     name: 'name',
-    obligation: 'obligation',
+    obligationTitle: 'obligation',
     obligationId: 'obligation_id',
-    status: 'status'
+    status: 'status',
+    userRole: 'role'
   };
 
-  if (isEmpty(filterBy)) {
-    return {};
-  }
+  const parsedFilterBy = Object.keys(filterBy).map(key => {
+    const results = { [replacements[key] || key]: filterBy[key] };
 
-  const parsedFilterBy = Object.keys(filterBy).map(key => ({ [replacements[key] || key]: filterBy[key] }));
+    if (TextUtils.areEquals(key, 'userRole') || TextUtils.areEquals(key, 'status')) {
+      results[replacements[key] || key] = filterBy[key].value;
+    }
+
+    if (TextUtils.areEquals(key, 'creationDate') || TextUtils.areEquals(key, 'expirationDate')) {
+      let dateFrom = '';
+      let dateTo = '';
+
+      if (filterBy[key][0] && !filterBy[key][1]) {
+        dateFrom = `${filterBy[key][0]}`;
+        dateTo = `${filterBy[key][0]}`;
+      } else {
+        dateFrom = `${filterBy[key][0]}`;
+        dateTo = `${filterBy[key][1]}`;
+      }
+
+      results[`${replacements[key]}_from`] = dateFrom;
+      results[`${replacements[key]}_to`] = dateTo;
+
+      delete results[replacements[key]];
+    }
+
+    return results;
+  });
 
   return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
 };
@@ -212,7 +240,22 @@ const parseRequestSortBy = sortByOptions => {
 
   const replacements = { asc: true, desc: false, idle: undefined };
 
-  return { isAsc: replacements[sortByOptions.sortByOption], sortByHeader: sortByOptions.sortByHeader };
+  const name_replacements = {
+    creationDate: 'creation_date',
+    description: 'description',
+    expirationDate: 'deadline_date',
+    legalInstrument: 'legal_instrument',
+    name: 'name',
+    obligationTitle: 'obligation',
+    obligationId: 'obligation_id',
+    status: 'status',
+    userRole: 'role'
+  };
+
+  return {
+    isAsc: replacements[sortByOptions.sortByOption],
+    sortByHeader: name_replacements[sortByOptions.sortByHeader]
+  };
 };
 
 export const DataflowUtils = {

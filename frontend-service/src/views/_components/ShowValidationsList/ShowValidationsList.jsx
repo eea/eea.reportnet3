@@ -25,6 +25,8 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { showValidationsReducer } from './_functions/Reducers/showValidationsReducer';
 
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
+
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { useFilters } from 'views/_functions/Hooks/useFilters';
@@ -86,6 +88,7 @@ export const ShowValidationsList = memo(
     const { totalErrors, totalFilteredRecords, totalRecords } = validationState;
 
     const { isFiltered } = useFilters('showValidationsList');
+    const { getFilterBy, resetFilterState, setData } = useApplyFilters('showValidations');
 
     useEffect(() => {
       const allTypesFilter = concat(
@@ -217,6 +220,8 @@ export const ShowValidationsList = memo(
           }
         }
       }
+
+      resetFilterState();
     }, [visible, isRulesDescriptionLoaded]);
 
     const addTableSchemaId = tableErrors => {
@@ -342,6 +347,8 @@ export const ShowValidationsList = memo(
           type: 'SET_TOTALS_ERRORS',
           payload: { totalFilteredRecords: data.totalFilteredErrors, totalRecords: data.totalRecords }
         });
+
+        setData(data.errors);
         setFetchedData(data.errors);
       } catch (error) {
         console.error('ShowValidationsList - onLoadErrors.', error);
@@ -614,22 +621,7 @@ export const ShowValidationsList = memo(
       return (
         <div className={styles.validations}>
           <div className={styles.searchInput}>
-            {/* <Filters
-              data={fetchedData}
-              filterByList={filterBy}
-              options={filterOptions}
-              sendData={onLoadFilteredValidations}
-              validations
-              validationsAllTypesFilters={validationsAllTypesFilters}
-            /> */}
-
-            <MyFilters
-              className="showValidationsList"
-              //data={fetchData}
-              data={[]}
-              options={filterOptions}
-              viewType="showValidationsList"
-            />
+            <Filters onFilter={onLoadFilteredValidations} options={filterOptions} recoilId="showValidations" />
           </div>
 
           <div className={styles.validationsWrapper}>

@@ -127,9 +127,9 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
       }
     }
 
-    return (
-      <Fragment>
-        {userContext.userProps.listView ? (
+    const renderView = () => {
+      if (userContext.userProps.listView) {
+        return (
           <TableView
             checkedObligation={selectedObligation}
             data={data}
@@ -138,7 +138,9 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
             pagination={pagination}
             paginatorRightText={renderPaginationCount()}
           />
-        ) : (
+        );
+      } else {
+        return (
           <CardsView
             checkedCard={selectedObligation}
             contentType="Obligations"
@@ -149,7 +151,13 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
             pagination={pagination}
             paginatorRightText={renderPaginationCount()}
           />
-        )}
+        );
+      }
+    };
+
+    return (
+      <Fragment>
+        {renderView()}
         <span className={`${styles.selectedObligation} ${isEmpty(data) ? styles.filteredSelected : ''}`}>
           <span>{`${resourcesContext.messages['selectedObligation']}: `}</span>
           {selectedObligation.title || '-'}
@@ -210,15 +218,14 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
           <label className={styles.switchTextInput}>{resourcesContext.messages['listView']}</label>
         </div>
       </div>
-      <div className={styles.filters}>
-        <MyFilters
-          className="reportingObligations"
-          data={data}
-          onFilter={onLoadReportingObligations}
-          options={filterOptions}
-          viewType="reportingObligations"
-        />
-      </div>
+
+      <MyFilters
+        className="reportingObligations"
+        data={data}
+        onFilter={onLoadReportingObligations}
+        options={filterOptions}
+        viewType="reportingObligations"
+      />
       {renderData()}
     </div>
   );

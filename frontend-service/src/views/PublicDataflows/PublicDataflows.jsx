@@ -1,6 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -11,8 +10,8 @@ import ReactTooltip from 'react-tooltip';
 
 import styles from './PublicDataflows.module.scss';
 
+import { Filters } from 'views/_components/Filters';
 import { InputText } from 'views/_components/InputText';
-import { MyFilters } from 'views/_components/MyFilters';
 import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { PublicCard } from 'views/_components/PublicCard';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
@@ -22,11 +21,10 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { DataflowService } from 'services/DataflowService';
 
-import { filterByState, sortByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
-
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
@@ -37,8 +35,7 @@ export const PublicDataflows = () => {
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
-  const filterBy = useRecoilValue(filterByState('publicDataflows'));
-  const sortByOptions = useRecoilValue(sortByState('publicDataflows'));
+  const { getFilterBy, setData, sortByOptions } = useApplyFilters('publicDataflows');
 
   const [contentStyles, setContentStyles] = useState({});
   const [filteredRecords, setFilteredRecords] = useState(0);
@@ -113,7 +110,11 @@ export const PublicDataflows = () => {
       label: resourcesContext.messages['status'],
       isSortable: true,
       template: 'LevelError',
-      type: 'MULTI_SELECT'
+      dropdownOptions: [
+        { label: resourcesContext.messages['close'].toUpperCase(), value: config.dataflowStatus['DESIGN'] },
+        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus['OPEN'] }
+      ],
+      type: 'DROPDOWN'
     },
     {
       key: 'expirationDate',
@@ -152,9 +153,11 @@ export const PublicDataflows = () => {
     setIsLoading(true);
 
     try {
+      const filterBy = await getFilterBy();
       const publicData = await DataflowService.getPublicData({ filterBy, numberRows, pageNum, sortByOptions: sortBy });
 
       setPublicDataflows(publicData.dataflows);
+      setData(publicData.dataflows);
       setFilteredRecords(publicData.filteredRecords);
       setTotalRecords(publicData.totalRecords);
     } catch (error) {
@@ -247,13 +250,12 @@ export const PublicDataflows = () => {
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>{resourcesContext.messages['dataflows']}</h1>
-          <MyFilters
-            data={publicDataflows}
+          <Filters
             isLoading={isLoading}
             onFilter={onLoadPublicDataflows}
             onSort={onLoadPublicDataflows}
             options={filterOptions}
-            viewType="publicDataflows"
+            recoilId="publicDataflows"
           />
           <div className={styles.dataflowsList}>{renderPublicDataflowsContent()}</div>
         </div>
