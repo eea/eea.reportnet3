@@ -12,8 +12,8 @@ import styles from './ShowValidationsList.module.scss';
 
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
+import { Filters } from 'views/_components/Filters';
 import { LevelError } from 'views/_components/LevelError';
-import { MyFilters } from 'views/_components/MyFilters';
 import { Spinner } from 'views/_components/Spinner';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
@@ -28,9 +28,6 @@ import { showValidationsReducer } from './_functions/Reducers/showValidationsRed
 import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
-
-import { useFilters } from 'views/_functions/Hooks/useFilters';
-import { Filters } from 'views/_components/Filters';
 
 export const ShowValidationsList = memo(
   ({
@@ -52,14 +49,7 @@ export const ShowValidationsList = memo(
     const [columns, setColumns] = useState([]);
     const [fetchedData, setFetchedData] = useState([]);
     const [fieldsTypesFilter, setFieldsTypesFilter] = useState([]);
-    // const [filterBy, setFilterBy] = useState({
-    //   entityType: [],
-    //   tableSchemaName: [],
-    //   fieldSchemaName: [],
-    //   levelError: []
-    // });
     const [fieldValueFilter, setFieldValueFilter] = useState([]);
-    //const [filtered, setFiltered] = useState(false);
     const [firstRow, setFirstRow] = useState(0);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
@@ -76,7 +66,6 @@ export const ShowValidationsList = memo(
     const [tablesFilter, setTablesFilter] = useState([]);
     const [typeEntitiesFilter, setTypeEntitiesFilter] = useState([]);
     const [typeEntitiesTypesFilter, setTypeEntitiesTypesFilter] = useState([]);
-    // const [validationsAllTypesFilters, setValidationsAllTypesFilters] = useState([]);
     const [filterOptions, setFilterOptions] = useState([]);
 
     const [validationState, validationDispatch] = useReducer(showValidationsReducer, {
@@ -88,8 +77,7 @@ export const ShowValidationsList = memo(
 
     const { totalErrors, totalFilteredRecords, totalRecords } = validationState;
 
-    const { isFiltered } = useFilters('showValidationsList');
-    const { getFilterBy, resetFilterState, setData } = useApplyFilters('showValidations');
+    const { getFilterBy, isFiltered, resetFilterState, setData } = useApplyFilters('showValidations');
 
     useEffect(() => {
       const allTypesFilter = concat(
@@ -110,7 +98,6 @@ export const ShowValidationsList = memo(
       const filterOptions = [{ type: 'MULTI_SELECT', nestedOptions }];
 
       setFilterOptions(filterOptions);
-      //setValidationsAllTypesFilters(allTypesFilter);
     }, [levelErrorsTypesFilter, originsTypesFilter, typeEntitiesTypesFilter, fieldsTypesFilter]);
 
     useEffect(() => {
@@ -442,11 +429,6 @@ export const ShowValidationsList = memo(
         filterData.entityType,
         filterData.tableSchemaName
       );
-      // setFilterBy(filterData);
-      // if (!isNil(filterData)) {
-      //   const filterDataValues = Object.values(filterData).map(value => value.length !== 0);
-      //   filterDataValues.includes(true) ? setFiltered(true) : setFiltered(false);
-      // }
     };
 
     const onLoadRulesDescription = async () => {
@@ -549,18 +531,6 @@ export const ShowValidationsList = memo(
       setIsFilteredLevelErrors(false);
       onLoadFilters();
     };
-
-    // const filterOptions = [
-    //   {
-    //     type: 'multiselect',
-    //     properties: [
-    //       { name: 'entityType' },
-    //       { name: 'tableSchemaName', showInput: true },
-    //       { name: 'fieldSchemaName', showInput: true },
-    //       { name: 'levelError' }
-    //     ]
-    //   }
-    // ];
 
     const filterOptionsInitial = [
       {
