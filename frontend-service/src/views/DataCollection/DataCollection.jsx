@@ -184,6 +184,7 @@ export const DataCollection = () => {
             id: tableSchema['tableSchemaId'],
             name: tableSchema['tableSchemaName'],
             notEmpty: tableSchema['tableSchemaNotEmpty'],
+            numberOfFields: tableSchema.records ? tableSchema.records[0].fields?.length : 0,
             readOnly: tableSchema['tableSchemaReadOnly'],
             toPrefill: tableSchema['tableSchemaToPrefill']
           };

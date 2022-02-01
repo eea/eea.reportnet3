@@ -35,7 +35,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
+export const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
   const navigate = useNavigate();
 
   const notificationContext = useContext(NotificationContext);
@@ -321,4 +321,3 @@ const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
     </div>
   );
 };
-export { Header };

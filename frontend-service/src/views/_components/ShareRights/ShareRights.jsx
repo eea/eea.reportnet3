@@ -441,7 +441,9 @@ export const ShareRights = ({
     }
   };
 
-  if (loadingStatus.isInitialLoading) return renderDialogLayout(<Spinner />);
+  if (loadingStatus.isInitialLoading) {
+    return renderDialogLayout(<Spinner />);
+  }
 
   const filterOptions = [
     { key: 'account', label: resourcesContext.messages['account'], type: 'INPUT' },
@@ -514,9 +516,9 @@ export const ShareRights = ({
       }
     ];
 
-    return columns.map(column => {
-      return <Column body={column.template} field={column.key} header={column.header} key={column.key} sortable />;
-    });
+    return columns.map(column => (
+      <Column body={column.template} field={column.key} header={column.header} key={column.key} sortable />
+    ));
   };
 
   const getShareRightsTableStyles = () => {

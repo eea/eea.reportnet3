@@ -28,7 +28,7 @@ import { MapUtils } from 'views/_functions/Utils/MapUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const FieldEditor = ({
+export const FieldEditor = ({
   cells,
   colsSchema,
   datasetId,
@@ -848,5 +848,3 @@ const FieldEditor = ({
     </span>
   );
 };
-
-export { FieldEditor };

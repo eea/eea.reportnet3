@@ -10,7 +10,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import ReactTooltip from 'react-tooltip';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, label, onClick, style, title }) => {
+export const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, label, onClick, style, title }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -86,7 +86,7 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
           icon={AwesomeIcons(icon)}
           role="button"
         />
-        {(notificationContext.all.filter(notification => notification.isSystem === true).length > 0 ||
+        {(notificationContext.all.filter(notification => notification.isSystem).length > 0 ||
           notificationContext.refreshedAndEnabled) && <span className={styles.systemNotificationMark}>!</span>}
       </div>
       <span className={styles.leftSideBarUserText}>{resourcesContext.messages[label]}</span>
@@ -120,5 +120,3 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
     </div>
   );
 };
-
-export { LeftSideBarButton };

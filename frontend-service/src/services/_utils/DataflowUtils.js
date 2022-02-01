@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 
 import camelCase from 'lodash/camelCase';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
@@ -24,7 +25,7 @@ const sortDataflowsByExpirationDate = dataflows =>
     return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
   });
 
-const parseDataflowCount = (dataflowCountDTO, dataflowType) => {
+const parseDataflowCount = dataflowCountDTO => {
   const dataflowCount = { reporting: 0, business: 0, citizenScience: 0, reference: 0 };
 
   dataflowCountDTO.forEach(dataflowType => {
@@ -34,7 +35,7 @@ const parseDataflowCount = (dataflowCountDTO, dataflowType) => {
   return dataflowCount;
 };
 
-const parseDataflowListDTO = dataflowsDTO => dataflowsDTO?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
+const parseDataflowListDTO = (dataflowsDTO = []) => dataflowsDTO.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
 
 const parseSortedDataflowListDTO = dataflowDTOs => {
   const dataflows = dataflowDTOs?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
@@ -78,6 +79,7 @@ const parseDataflowDTO = dataflowDTO =>
     fmeUserId: dataflowDTO.fmeUserId,
     fmeUserName: dataflowDTO.fmeUserName,
     id: dataflowDTO.id,
+    isAutomaticReportingDeletion: dataflowDTO.automaticReportingDeletion,
     isReleasable: dataflowDTO.releasable,
     manualAcceptance: dataflowDTO.manualAcceptance,
     name: dataflowDTO.name,
@@ -182,6 +184,37 @@ const parseDatasetsInfoDTO = datasetsDTO =>
 
 const getDatasetType = datasetType => config.datasetType.find(type => type.key === datasetType)?.value;
 
+const parseRequestFilterBy = filterBy => {
+  const replacements = {
+    creationDate: 'creation_date',
+    description: 'description',
+    expirationDate: 'deadline_date',
+    legalInstrument: 'legal_instrument',
+    name: 'name',
+    obligation: 'obligation',
+    obligationId: 'obligation_id',
+    status: 'status'
+  };
+
+  if (isEmpty(filterBy)) {
+    return {};
+  }
+
+  const parsedFilterBy = Object.keys(filterBy).map(key => ({ [replacements[key] || key]: filterBy[key] }));
+
+  return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
+};
+
+const parseRequestSortBy = sortByOptions => {
+  if (isNil(sortByOptions)) {
+    return { isAsc: undefined, sortByHeader: '' };
+  }
+
+  const replacements = { asc: true, desc: false, idle: undefined };
+
+  return { isAsc: replacements[sortByOptions.sortByOption], sortByHeader: sortByOptions.sortByHeader };
+};
+
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
   parseAllDataflowsUserList,
@@ -192,6 +225,8 @@ export const DataflowUtils = {
   parseDatasetsInfoDTO,
   parsePublicDataflowDTO,
   parsePublicDataflowListDTO,
+  parseRequestFilterBy,
+  parseRequestSortBy,
   parseSortedDataflowListDTO,
   parseUsersList,
   sortDataflowsByExpirationDate

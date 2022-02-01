@@ -56,7 +56,7 @@ import { ErrorUtils } from 'views/_functions/Utils/ErrorUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const DataViewer = ({
+export const DataViewer = ({
   dataProviderId,
   datasetSchemaId,
   hasCountryCode,
@@ -470,10 +470,7 @@ const DataViewer = ({
     return false;
   };
 
-  const showGroupedValidationFilter = groupedBy => {
-    setIsFilterValidationsActive(groupedBy);
-    dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
-  };
+  const showGroupedValidationFilter = () => dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
 
   const showValueFilter = value => {
     setValueFilter(value);
@@ -495,7 +492,7 @@ const DataViewer = ({
   };
 
   const onCancelRowEdit = () => {
-    let updatedValue = RecordUtils.changeRecordInTable(
+    const updatedValue = RecordUtils.changeRecordInTable(
       fetchedData,
       RecordUtils.getRecordId(fetchedData, records.selectedRecord),
       colsSchema,
@@ -931,7 +928,7 @@ const DataViewer = ({
       <Button
         className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
         disabled={isSaving || records.isSaveDisabled}
-        icon={isSaving === true ? 'spinnerAnimate' : 'check'}
+        icon={isSaving ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['save']}
         onClick={() => {
           try {
@@ -1167,6 +1164,7 @@ const DataViewer = ({
         isGroupedValidationSelected={isGroupedValidationSelected}
         isLoading={isLoading}
         levelErrorTypesWithCorrects={levelErrorAllTypes}
+        levelErrorValidations={levelErrorValidations}
         onConfirmDeleteTable={onConfirmDeleteTable}
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onRefresh={onRefresh}
@@ -1175,6 +1173,7 @@ const DataViewer = ({
         originalColumns={originalColumns}
         prevFilterValue={prevFilterValue}
         records={records}
+        selectedRuleId={selectedRuleId}
         selectedRuleLevelError={selectedRuleLevelError}
         selectedRuleMessage={selectedRuleMessage}
         selectedTableSchemaId={selectedTableSchemaId}
@@ -1516,5 +1515,3 @@ const DataViewer = ({
     </SnapshotContext.Provider>
   );
 };
-
-export { DataViewer };

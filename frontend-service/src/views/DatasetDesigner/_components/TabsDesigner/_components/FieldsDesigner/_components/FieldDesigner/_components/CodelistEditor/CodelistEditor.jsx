@@ -10,7 +10,13 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveCodelist, selectedCodelist, type }) => {
+export const CodelistEditor = ({
+  isCodelistEditorVisible,
+  onCancelSaveCodelist,
+  onSaveCodelist,
+  selectedCodelist,
+  type
+}) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [codelistItems, setCodelistItems] = useState(selectedCodelist.filter(value => value.trim() !== ''));
@@ -118,5 +124,3 @@ const CodelistEditor = ({ isCodelistEditorVisible, onCancelSaveCodelist, onSaveC
     )
   );
 };
-
-export { CodelistEditor };

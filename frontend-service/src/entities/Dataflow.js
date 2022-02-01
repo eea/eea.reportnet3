@@ -14,6 +14,7 @@ export class Dataflow {
     fmeUserId,
     fmeUserName,
     id,
+    isAutomaticReportingDeletion,
     isReleasable,
     manualAcceptance,
     name,
@@ -43,6 +44,7 @@ export class Dataflow {
     this.fmeUserId = fmeUserId;
     this.fmeUserName = fmeUserName;
     this.id = id;
+    this.isAutomaticReportingDeletion = isAutomaticReportingDeletion;
     this.isReleasable = isReleasable;
     this.manualAcceptance = manualAcceptance;
     this.name = name;
