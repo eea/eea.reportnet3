@@ -384,7 +384,7 @@ export const ManageLeadReporters = ({
       nestedOptions: [
         {
           key: 'nameRepresentative',
-          label: resourcesContext.messages['manageRolesDialogAccountColumn']
+          label: resourcesContext.messages['manageRolesDialogDataProviderColumn']
         }
       ]
     },
