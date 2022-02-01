@@ -350,7 +350,7 @@ export const PublicCountryInformation = () => {
   const renderFilters = () => {
     return (
       <MyFilters
-        className="publicCountryInformation"
+        className="publicCountryInformationFilters"
         data={dataflows}
         onFilter={onLoadPublicCountryInformation}
         options={filterOptions}
