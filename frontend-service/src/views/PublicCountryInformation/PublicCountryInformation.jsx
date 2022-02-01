@@ -188,9 +188,9 @@ export const PublicCountryInformation = () => {
           publicFilesNames: publicFileNames,
           referencePublicFilesNames: referencePublicFileNames,
           deliveryDate: !isNil(dataset) ? dataset?.releaseDate : '-',
-          deliveryStatus: getDeliveryStatus(dataflow, dataset),
+          deliveryStatus: getDeliveryStatus(dataflow, dataset).toUpperCase(),
           restrictFromPublic: dataflow.datasets ? dataflow.datasets[0]?.restrictFromPublic : false,
-          status: resourcesContext.messages[dataflow.status]
+          status: resourcesContext.messages[dataflow.status].toUpperCase()
         };
       });
     setDataflows(publicDataflows);
@@ -206,9 +206,13 @@ export const PublicCountryInformation = () => {
         template: renderLegalInstrumentBodyColumn
       },
       { key: 'deadline', header: resourcesContext.messages['deadline'] },
-      { key: 'status', header: resourcesContext.messages['status'] },
+      { key: 'status', header: resourcesContext.messages['status'], template: renderStatusBodyColumn },
       { key: 'deliveryDate', header: resourcesContext.messages['deliveryDate'] },
-      { key: 'deliveryStatus', header: resourcesContext.messages['deliveryStatus'] },
+      {
+        key: 'deliveryStatus',
+        header: resourcesContext.messages['deliveryStatus'],
+        template: renderDeliveryStatusBodyColumn
+      },
       {
         key: 'referencePublicFilesNames',
         header: resourcesContext.messages['referenceDatasets'],
@@ -353,19 +357,21 @@ export const PublicCountryInformation = () => {
     );
   };
 
-  const renderLegalInstrumentBodyColumn = rowData => (
-    <div onClick={e => e.stopPropagation()}>
-      {rowData.legalInstrumentId
-        ? renderRedirectText(rowData.legalInstrumentAlias, `${baseRod3Url}/instruments/${rowData.legalInstrumentId}`)
-        : rowData.legalInstrumentAlias}
-    </div>
-  );
-
   const renderDataflowNameBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
       {rowData.obligationId
         ? renderRedirectText(rowData.name, getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: rowData.id }, true))
         : rowData.name}
+    </div>
+  );
+
+  const renderDeliveryStatusBodyColumn = rowData => <div>{capitalize(rowData.deliveryStatus)}</div>;
+
+  const renderLegalInstrumentBodyColumn = rowData => (
+    <div onClick={e => e.stopPropagation()}>
+      {rowData.legalInstrumentId
+        ? renderRedirectText(rowData.legalInstrumentAlias, `${baseRod3Url}/instruments/${rowData.legalInstrumentId}`)
+        : rowData.legalInstrumentAlias}
     </div>
   );
 
@@ -447,6 +453,8 @@ export const PublicCountryInformation = () => {
       </DataTable>
     );
   };
+
+  const renderStatusBodyColumn = rowData => <div>{capitalize(rowData.status)}</div>;
 
   return (
     <PublicLayout>
