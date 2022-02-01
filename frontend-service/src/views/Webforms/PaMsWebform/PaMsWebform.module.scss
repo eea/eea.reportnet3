@@ -18,6 +18,25 @@
   height: 55px;
   margin: 1rem 0 1rem 0;
   opacity: 1;
+  background-color: var(--tabview-bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 6px;
+  padding: 0.3rem 2.2rem !important;
+  button {
+    color: var(--tabview-highlight-color);
+    background-color: var(--bg);
+    padding: 0.3rem 2.1rem;
+    border: 0 !important;
+    border-radius: 6px;
+    font-size: 1rem !important;
+    box-shadow: 0px 2px 5px rgb(11 37 105 / 4%), 0px 1px 0px rgb(11 37 105 / 4%);
+    &:hover {
+      background-color: var(--bg) !important;
+      color: var(--tabview-highlight-color) !important;
+    }
+  }
 }
 
 .tableList {

@@ -293,14 +293,15 @@ export const PaMsWebform = ({
     }
 
     return (
-      <Button
-        className={styles.overviewButton}
-        label={resourcesContext.messages['overview']}
-        onClick={() => {
-          onToggleView('overview');
-          onSelectRecord(null, null);
-        }}
-      />
+      <div className={styles.overviewButton}>
+        <Button
+          label={resourcesContext.messages['overview']}
+          onClick={() => {
+            onToggleView('overview');
+            onSelectRecord(null, null);
+          }}
+        />
+      </div>
     );
   };
 
