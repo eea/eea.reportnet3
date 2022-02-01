@@ -30,9 +30,9 @@ export const ObligationService = {
     if (!isEmpty(filterData)) {
       const countryId = !isNil(filterData.countries) ? filterData.countries.value : '';
       const dateFrom =
-        !isNil(filterData.expirationDate) && filterData.expirationDate[0] ? filterData.expirationDate[0].getTime() : '';
+        !isNil(filterData.expirationDate) && filterData.expirationDate[0] ? filterData.expirationDate[0] : '';
       const dateTo =
-        !isNil(filterData.expirationDate) && filterData.expirationDate[1] ? filterData.expirationDate[1].getTime() : '';
+        !isNil(filterData.expirationDate) && filterData.expirationDate[1] ? filterData.expirationDate[1] : '';
       const issueId = !isNil(filterData.issues) ? filterData.issues.value : '';
       const organizationId = !isNil(filterData.organizations) ? filterData.organizations.value : '';
       const openedObligationsDTO = await ObligationRepository.getOpen(
