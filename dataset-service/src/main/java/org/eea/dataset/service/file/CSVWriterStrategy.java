@@ -102,6 +102,9 @@ public class CSVWriterStrategy implements WriterStrategy {
     LOG.info("starting csv file writter");
 
     ExportFilterVO filters = new ExportFilterVO();
+    ErrorTypeEnum[] levelErrorList = {ErrorTypeEnum.CORRECT, ErrorTypeEnum.INFO,
+        ErrorTypeEnum.WARNING, ErrorTypeEnum.BLOCKER, ErrorTypeEnum.ERROR};
+    filters.setLevelError(levelErrorList);
 
     DataSetSchemaVO dataSetSchema = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
 
