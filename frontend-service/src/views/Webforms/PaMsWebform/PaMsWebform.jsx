@@ -288,6 +288,23 @@ export const PaMsWebform = ({
   const setIsAddingGroupRecord = value =>
     paMsWebformDispatch({ type: 'SET_IS_ADDING_GROUP_RECORD', payload: { value } });
 
+  const renderOverviewButton = () => {
+    if (view !== 'details') {
+      return <div />;
+    }
+
+    return (
+      <Button
+        className={styles.overviewButton}
+        label={resourcesContext.messages['overview']}
+        onClick={() => {
+          onToggleView('overview');
+          onSelectRecord(null, null);
+        }}
+      />
+    );
+  };
+
   const renderView = () => {
     if (view === 'details') {
       return (
@@ -311,6 +328,7 @@ export const PaMsWebform = ({
         />
       );
     }
+
     return (
       <TableManagement
         dataflowId={dataflowId}
@@ -411,16 +429,7 @@ export const PaMsWebform = ({
         ))}
       </ul>
 
-      {view === 'details' && (
-        <Button
-          className={styles.tabBar}
-          label={resourcesContext.messages['overview']}
-          onClick={() => {
-            onToggleView('overview');
-            onSelectRecord(null, null);
-          }}
-        />
-      )}
+      {renderOverviewButton()}
 
       {renderView()}
     </Fragment>
