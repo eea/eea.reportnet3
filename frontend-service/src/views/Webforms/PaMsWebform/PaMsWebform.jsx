@@ -12,7 +12,6 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Button } from 'views/_components/Button';
 import { TableManagement } from './_components/TableManagement';
-import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { WebformView } from './_components/WebformView';
 
 import { DatasetService } from 'services/DatasetService';
@@ -48,8 +47,8 @@ export const PaMsWebform = ({
   const [paMsWebformState, paMsWebformDispatch] = useReducer(paMsWebformReducer, {
     data: [],
     hasErrors: true,
-    isAddingSingleRecord: false,
     isAddingGroupRecord: false,
+    isAddingSingleRecord: false,
     isDataUpdated: false,
     isLoading: true,
     isRefresh: false,
@@ -58,7 +57,7 @@ export const PaMsWebform = ({
     selectedTableName: null,
     selectedTableSchemaId: null,
     tableList: { group: [], single: [] },
-    view: resourcesContext.messages['overview']
+    view: 'overview'
   });
 
   const { isDataUpdated, isLoading, pamsRecords, selectedTable, selectedTableName, tableList, view } = paMsWebformState;
@@ -265,7 +264,7 @@ export const PaMsWebform = ({
     setTableSchemaId(filteredTable.tableSchemaId);
     onSelectRecord(recordId, pamNumberId);
     onSelectTableName(tableName);
-    onToggleView(resourcesContext.messages['details']);
+    onToggleView('details');
   };
 
   const onSelectFieldSchemaId = fieldSchemaId => {
@@ -287,6 +286,64 @@ export const PaMsWebform = ({
 
   const setIsAddingGroupRecord = value =>
     paMsWebformDispatch({ type: 'SET_IS_ADDING_GROUP_RECORD', payload: { value } });
+
+  const renderOverviewButton = () => {
+    if (view !== 'details') {
+      return <div />;
+    }
+
+    return (
+      <div className={styles.overviewButton}>
+        <Button
+          label={resourcesContext.messages['overview']}
+          onClick={() => {
+            onToggleView('overview');
+            onSelectRecord(null, null);
+          }}
+        />
+      </div>
+    );
+  };
+
+  const renderView = () => {
+    if (view === 'details') {
+      return (
+        <WebformView
+          data={paMsWebformState.data}
+          dataflowId={dataflowId}
+          dataProviderId={dataProviderId}
+          datasetId={datasetId}
+          datasetSchemaId={datasetSchema.datasetSchemaId}
+          getFieldSchemaId={getFieldSchemaId}
+          isAddingPamsId={paMsWebformState.isAddingSingleRecord || paMsWebformState.isAddingGroupRecord}
+          isRefresh={paMsWebformState.isRefresh}
+          isReporting={isReporting}
+          onUpdatePamsValue={onUpdatePamsValue}
+          pamsRecords={pamsRecords}
+          selectedTable={selectedTable}
+          selectedTableName={selectedTableName}
+          setTableSchemaId={setTableSchemaId}
+          state={state}
+          tables={tables.filter(table => table.isVisible)}
+        />
+      );
+    }
+
+    return (
+      <TableManagement
+        dataflowId={dataflowId}
+        datasetId={datasetId}
+        isAddingPamsId={paMsWebformState.isAddingSingleRecord || paMsWebformState.isAddingGroupRecord}
+        loading={isLoading}
+        onAddTableRecord={onAddTableRecord}
+        onRefresh={onUpdateData}
+        onSelectEditTable={onSelectEditTable}
+        records={pamsRecords}
+        schemaTables={datasetSchema.tables}
+        tables={tables}
+      />
+    );
+  };
 
   const renderErrorMessages = () => {
     const missingElements = checkErrors(paMsWebformState.data);
@@ -321,7 +378,9 @@ export const PaMsWebform = ({
     </Fragment>
   );
 
-  if (paMsWebformState.hasErrors) return renderLayout(renderErrorMessages());
+  if (paMsWebformState.hasErrors) {
+    return renderLayout(renderErrorMessages());
+  }
 
   return renderLayout(
     <Fragment>
@@ -341,7 +400,7 @@ export const PaMsWebform = ({
                   onClick={() => {
                     paMsWebformDispatch({ type: 'ON_REFRESH', payload: { value: !paMsWebformState.isRefresh } });
                     onSelectRecord(items.recordId, items.id);
-                    onToggleView(resourcesContext.messages['details']);
+                    onToggleView('details');
                   }}>
                   {items.id || '-'}
                 </span>
@@ -370,48 +429,9 @@ export const PaMsWebform = ({
         ))}
       </ul>
 
-      <TabularSwitch
-        className={`${styles.tabBar} ${view === resourcesContext.messages['details'] ? undefined : styles.hide}`}
-        elements={[resourcesContext.messages['overview']]}
-        onChange={switchView => {
-          onToggleView(switchView);
-          onSelectRecord(null, null);
-        }}
-        value={view}
-      />
-      {view === resourcesContext.messages['details'] ? (
-        <WebformView
-          data={paMsWebformState.data}
-          dataflowId={dataflowId}
-          dataProviderId={dataProviderId}
-          datasetId={datasetId}
-          datasetSchemaId={datasetSchema.datasetSchemaId}
-          getFieldSchemaId={getFieldSchemaId}
-          isAddingPamsId={paMsWebformState.isAddingSingleRecord || paMsWebformState.isAddingGroupRecord}
-          isRefresh={paMsWebformState.isRefresh}
-          isReporting={isReporting}
-          onUpdatePamsValue={onUpdatePamsValue}
-          pamsRecords={pamsRecords}
-          selectedTable={selectedTable}
-          selectedTableName={selectedTableName}
-          setTableSchemaId={setTableSchemaId}
-          state={state}
-          tables={tables.filter(table => table.isVisible)}
-        />
-      ) : (
-        <TableManagement
-          dataflowId={dataflowId}
-          datasetId={datasetId}
-          isAddingPamsId={paMsWebformState.isAddingSingleRecord || paMsWebformState.isAddingGroupRecord}
-          loading={isLoading}
-          onAddTableRecord={onAddTableRecord}
-          onRefresh={onUpdateData}
-          onSelectEditTable={onSelectEditTable}
-          records={pamsRecords}
-          schemaTables={datasetSchema.tables}
-          tables={tables}
-        />
-      )}
+      {renderOverviewButton()}
+
+      {renderView()}
     </Fragment>
   );
 };

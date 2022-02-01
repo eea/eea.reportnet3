@@ -137,28 +137,26 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
       }
     ];
 
-    return columns.map(column => {
-      return <Column body={column.template} field={column.key} header={column.header} key={column.key} sortable />;
-    });
+    return columns.map(column => (
+      <Column body={column.template} field={column.key} header={column.header} key={column.key} sortable />
+    ));
   };
 
-  const getActionsTemplate = rowData => {
-    return (
-      <div className={styles.editButtonWrapper}>
-        <Button
-          className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
-          disabled={validationContext.isFetchingData}
-          icon="info"
-          onClick={() => {
-            onOpenHistoryDialog(rowData.ruleId);
-          }}
-          tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
-          tooltipOptions={{ position: 'top' }}
-          type="button"
-        />
-      </div>
-    );
-  };
+  const getActionsTemplate = rowData => (
+    <div className={styles.editButtonWrapper}>
+      <Button
+        className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.editRowButton}`}
+        disabled={validationContext.isFetchingData}
+        icon="info"
+        onClick={() => {
+          onOpenHistoryDialog(rowData.ruleId);
+        }}
+        tooltip={resourcesContext.messages['qcHistoryButtonTooltip']}
+        tooltipOptions={{ position: 'top' }}
+        type="button"
+      />
+    </div>
+  );
 
   const getQcHistoryData = async () => {
     setLoadingStatus('pending');
@@ -178,15 +176,9 @@ export const QCGenericHistory = ({ datasetId, isDialogVisible, onCloseDialog }) 
   const getRuleSchema = ruleId =>
     validationContext.rulesDescription.find(ruleDescription => ruleDescription.id === ruleId);
 
-  const getNameTemplate = rowData => {
-    const currentRule = getRuleSchema(rowData.ruleId);
-    return <div>{currentRule?.name}</div>;
-  };
+  const getNameTemplate = rowData => <div>{getRuleSchema(rowData.ruleId)?.name}</div>;
 
-  const getRuleCodeTemplate = rowData => {
-    const currentRule = getRuleSchema(rowData.ruleId);
-    return <div>{currentRule?.shortCode}</div>;
-  };
+  const getRuleCodeTemplate = rowData => <div>{getRuleSchema(rowData.ruleId)?.shortCode}</div>;
 
   const getTimestampTemplate = rowData => <div>{getDateTimeFormatByUserPreferences(rowData.timestamp)}</div>;
 

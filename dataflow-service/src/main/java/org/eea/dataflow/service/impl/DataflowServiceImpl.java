@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPrivateMapper;
@@ -89,7 +90,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import io.jsonwebtoken.lang.Objects;
@@ -292,7 +292,7 @@ public class DataflowServiceImpl implements DataflowService {
       boolean userAdmin = isAdmin();
       List<Long> idsResources = null;
       List<Long> idsResourcesWithoutRole = null;
-      if (filters.containsKey("role")) {
+      if (MapUtils.isNotEmpty(filters) && filters.containsKey("role")) {
         idsResources = userManagementControllerZull
             .getResourcesByUser(ResourceTypeEnum.DATAFLOW,
                 SecurityRoleEnum.fromValue(filters.get("role")))
@@ -370,14 +370,16 @@ public class DataflowServiceImpl implements DataflowService {
         });
 
         // SET OBLIGATIONS
-        for (DataFlowVO dataflowVO : dataflowVOs) {
-          for (ObligationVO obligation : obligations) {
-            if (dataflowVO.getObligation().getObligationId().equals(obligation.getObligationId())) {
-              dataflowVO.setObligation(obligation);
+        if (!TypeDataflowEnum.REFERENCE.equals(dataflowType)) {
+          for (DataFlowVO dataflowVO : dataflowVOs) {
+            for (ObligationVO obligation : obligations) {
+              if (dataflowVO.getObligation().getObligationId()
+                  .equals(obligation.getObligationId())) {
+                dataflowVO.setObligation(obligation);
+              }
             }
           }
         }
-
       } else {
         paginatedDataflowVO.setFilteredRecords(Long.valueOf(0));
         if (idsResourcesWithoutRole != null) {
@@ -392,7 +394,7 @@ public class DataflowServiceImpl implements DataflowService {
       }
       paginatedDataflowVO.setDataflows(dataflowVOs);
       return paginatedDataflowVO;
-    } catch (JsonProcessingException e1) {
+    } catch (Exception e) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
     }
   }
@@ -751,7 +753,7 @@ public class DataflowServiceImpl implements DataflowService {
 
       return pag;
 
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
     }
   }

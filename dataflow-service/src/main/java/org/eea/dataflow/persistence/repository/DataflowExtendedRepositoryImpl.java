@@ -1,5 +1,6 @@
 package org.eea.dataflow.persistence.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
@@ -9,8 +10,11 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.persistence.domain.Dataflow;
+import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.springframework.data.domain.Pageable;
+
 
 /**
  * The Class DataflowExtendedRepositoryImpl.
@@ -48,6 +52,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   /** The Constant LIKE. */
   private static final String LIKE = " %s LIKE :%s ";
 
+  /** The Constant DATE_FROM. */
+  private static final String DATE_FROM = " %s >= :%s ";
+
+  /** The Constant DATE_TO. */
+  private static final String DATE_TO = " %s <= :%s ";
+
   /** The Constant ORDER_BY. */
   private static final String ORDER_BY = " order by %s %s";
 
@@ -63,6 +73,15 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
   /** The Constant REFERENCE_STATUS. */
   private static final String REFERENCE_STATUS = " (status = :status1 or status = :status2) ";
+
+  /** The Constant AND. */
+  private static final String AND = " AND";
+
+  /** The Constant RELEASABLE. */
+  private static final String RELEASABLE = " releasable = :releasable";
+
+  /** The Constant STATUS. */
+  private static final String STATUS = " status = :status";
 
 
   /**
@@ -97,11 +116,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @param type the type
    * @param dataflowIds the dataflow ids
    * @return the list
+   * @throws EEAException
    */
   @Override
   public List<Dataflow> findPaginated(String json, Pageable pageable, boolean isPublic,
       Map<String, String> filters, String orderHeader, boolean asc, TypeDataflowEnum type,
-      List<Long> dataflowIds) {
+      List<Long> dataflowIds) throws EEAException {
 
     StringBuilder stringQuery = new StringBuilder();
     stringQuery.append(QUERY_JSON);
@@ -129,11 +149,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @param type the type
    * @param dataflowIds the dataflow ids
    * @return the long
+   * @throws EEAException
    */
   @Override
   public Long countPaginated(String json, Pageable pageable, boolean isPublic,
       Map<String, String> filters, String orderHeader, boolean asc, TypeDataflowEnum type,
-      List<Long> dataflowIds) {
+      List<Long> dataflowIds) throws EEAException {
     StringBuilder stringQuery = new StringBuilder();
     stringQuery.append("with tableAux as (");
     stringQuery.append(QUERY_JSON);
@@ -151,13 +172,15 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @param isPublic the is public
    * @param filters the filters
    * @param query the query
+   * @param type the type
+   * @param dataflowIds the dataflow ids
    */
   private void setParameters(String json, boolean isPublic, Map<String, String> filters,
       Query query, TypeDataflowEnum type, List<Long> dataflowIds) {
     query.setParameter("aux", json);
     if (MapUtils.isNotEmpty(filters)) {
       for (String key : filters.keySet()) {
-        query.setParameter(key, "%" + filters.get(key) + "%");
+        setParametersFilters(query, key, filters.get(key));
       }
     }
     if (isPublic) {
@@ -193,19 +216,23 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @param orderHeader the order header
    * @param asc the asc
    * @param stringQuery the string query
+   * @param type the type
+   * @param dataflowIds the dataflow ids
+   * @throws EEAException
    */
   private void createQuery(boolean isPublic, Map<String, String> filters, String orderHeader,
-      boolean asc, StringBuilder stringQuery, TypeDataflowEnum type, List<Long> dataflowIds) {
+      boolean asc, StringBuilder stringQuery, TypeDataflowEnum type, List<Long> dataflowIds)
+      throws EEAException {
     boolean addAnd = false;
     if (MapUtils.isNotEmpty(filters) || StringUtils.isNotBlank(orderHeader) || isPublic
         || null != type || CollectionUtils.isNotEmpty(dataflowIds)) {
       stringQuery.append(" where ");
 
-
       if (MapUtils.isNotEmpty(filters)) {
+
         for (String key : filters.keySet()) {
           addAnd(stringQuery, addAnd);
-          stringQuery.append(String.format(LIKE, key, key));
+          setFilters(stringQuery, key, filters.get(key));
           addAnd = true;
         }
       }
@@ -251,6 +278,109 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   }
 
   /**
+   * Sets the filters.
+   *
+   * @param stringQuery the string query
+   * @param key the key
+   * @param value the value
+   * @throws EEAException
+   */
+  private void setFilters(StringBuilder stringQuery, String key, String value) throws EEAException {
+    switch (key) {
+      case "creation_date_from":
+        stringQuery.append(String.format(DATE_FROM, "creation_date", key));
+        break;
+      case "creation_date_to":
+        stringQuery.append(String.format(DATE_TO, "creation_date", key));
+        break;
+      case "deadline_date_from":
+        stringQuery.append(String.format(DATE_FROM, "deadline_date", key));
+        break;
+      case "deadline_date_to":
+        stringQuery.append(String.format(DATE_TO, "deadline_date", key));
+        break;
+      case "status":
+        switch (value) {
+          case "OPEN":
+          case "CLOSED":
+            stringQuery.append(STATUS).append(AND).append(RELEASABLE);
+            break;
+          case "DESIGN":
+            stringQuery.append(STATUS);
+            break;
+        }
+        break;
+      default:
+        stringQuery.append(String.format(LIKE, getTablePrefix(key), key));
+        break;
+    }
+  }
+
+  /**
+   * Sets the parameters filters.
+   *
+   * @param query the query
+   * @param key the key
+   * @param value the value
+   * @throws EEAException the EEA exception
+   */
+  private void setParametersFilters(Query query, String key, String value) {
+    switch (key) {
+      case "creation_date_from":
+      case "creation_date_to":
+      case "deadline_date_from":
+      case "deadline_date_to":
+        query.setParameter(key, new Date(Long.valueOf(value)));
+        break;
+      case "status":
+        switch (value) {
+          case "OPEN":
+            query.setParameter("status", "DRAFT");
+            query.setParameter("releasable", Boolean.TRUE);
+            break;
+          case "CLOSED":
+            query.setParameter("status", "DRAFT");
+            query.setParameter("releasable", Boolean.FALSE);
+            break;
+          case "DESIGN":
+            query.setParameter("status", value);
+            break;
+        }
+        break;
+      default:
+        query.setParameter(key, "%" + value + "%");
+        break;
+    }
+  }
+
+  /**
+   * Gets the table prefix.
+   *
+   * @param key the key
+   * @return the table prefix
+   * @throws EEAException the EEA exception
+   */
+  private String getTablePrefix(String key) throws EEAException {
+    StringBuilder stringPrefix = new StringBuilder();
+    switch (key) {
+      case "description":
+      case "name":
+      case "obligation_id":
+        stringPrefix.append("d.");
+        break;
+      case "obligation":
+      case "legal_instrument":
+        stringPrefix.append("ot.");
+        break;
+      default:
+        throw new EEAException(EEAErrorMessage.HEADER_NOT_VALID);
+    }
+    stringPrefix.append(key);
+
+    return stringPrefix.toString();
+  }
+
+  /**
    * Adds the and.
    *
    * @param stringQuery the string query
@@ -258,7 +388,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    */
   private void addAnd(StringBuilder stringQuery, boolean addAnd) {
     if (addAnd) {
-      stringQuery.append(" AND");
+      stringQuery.append(AND);
     }
   }
 

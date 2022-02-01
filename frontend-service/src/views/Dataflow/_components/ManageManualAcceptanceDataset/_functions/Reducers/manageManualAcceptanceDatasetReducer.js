@@ -9,6 +9,9 @@ export const manageManualAcceptanceDatasetReducer = (state, { type, payload }) =
     case 'ON_UPDATE_MESSAGE':
       return { ...state, datasetMessage: payload.message };
 
+    case 'SET_IS_AUTOMATIC_DELETION_VISIBLE':
+      return { ...state, isAutomaticReportingDeletionVisible: payload };
+
     default:
       return state;
   }
