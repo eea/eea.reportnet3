@@ -240,7 +240,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
   const renderDate = option => {
     const positionLabelAnimationDate = getPositionLabelAnimationDate(labelsAnimationDate, option.key);
     const getClassNameLabelCalendar = () => {
-      if (positionLabelAnimationDate && !labelsAnimationDate[positionLabelAnimationDate][option.key]) {
+      if (positionLabelAnimationDate && labelsAnimationDate[positionLabelAnimationDate][option.key] === false) {
         return styles.labelDown;
       } else {
         return styles.label;
