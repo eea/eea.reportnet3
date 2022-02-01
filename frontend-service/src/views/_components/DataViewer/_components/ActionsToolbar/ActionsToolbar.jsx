@@ -68,6 +68,8 @@ export const ActionsToolbar = ({
   tableName
 }) => {
   const [exportTableDataName, setExportTableDataName] = useState('');
+  const [isFilteredByValue, setIsFilteredByValue] = useState(false);
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [filter, dispatchFilter] = useReducer(filterReducer, {
     groupedFilter: isGroupedValidationSelected,
     validationDropdown: [],
@@ -75,8 +77,6 @@ export const ActionsToolbar = ({
     visibilityDropdown: [],
     visibilityColumnIcon: 'eye'
   });
-  const [isFilteredByValue, setIsFilteredByValue] = useState(false);
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
 
   const { groupedFilter, validationDropdown, valueFilter, visibilityDropdown, visibilityColumnIcon } = filter;
 
@@ -216,6 +216,127 @@ export const ActionsToolbar = ({
     dispatchFilter({ type: 'SET_FILTER_ICON', payload: { originalColumns, currentVisibleColumns } });
   };
 
+  const renderExportableButton = () => {
+    if (isExportable) {
+      return (
+        <Button
+          className={`p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step ${
+            isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
+          }`}
+          disabled={isDataflowOpen || isDesignDatasetEditorRead}
+          icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
+          id="buttonExportTable"
+          label={resourcesContext.messages['exportTable']}
+          onClick={event => {
+            onUpdateData();
+            exportMenuRef.current.show(event);
+          }}
+        />
+      );
+    }
+  };
+
+  const renderFilterableButton = () => {
+    const renderChipButton = () => {
+      if (groupedFilter && selectedRuleMessage !== '' && tableId === selectedTableSchemaId) {
+        return (
+          <Fragment>
+            <span data-for="groupedFilterTooltip" data-tip>
+              <ChipButton
+                className={styles.chipButton}
+                hasLevelErrorIcon={true}
+                labelClassName={styles.groupFilter}
+                levelError={selectedRuleLevelError}
+                onClick={() => {
+                  onHideSelectGroupedValidation();
+                  showGroupedValidationFilter();
+                  dispatchFilter({
+                    type: 'SET_VALIDATION_GROUPED_FILTER',
+                    payload: { groupedFilter: false }
+                  });
+                }}
+                value={selectedRuleMessage}
+              />
+            </span>
+            <ReactTooltip border={true} effect="solid" id="groupedFilterTooltip" place="top">
+              {selectedRuleMessage}
+            </ReactTooltip>
+          </Fragment>
+        );
+      }
+    };
+
+    if (isFilterable) {
+      return (
+        <Fragment>
+          <Button
+            className={`p-button-rounded p-button-secondary-transparent datasetSchema-validationFilter-help-step ${
+              tableHasErrors ? 'p-button-animated-blink' : null
+            }`}
+            disabled={!tableHasErrors}
+            icon="filter"
+            iconClasses={!isFilterValidationsActive ? styles.filterInactive : styles.filterActive}
+            label={resourcesContext.messages['validationFilter']}
+            onClick={event => filterMenuRef.current.show(event)}
+          />
+          <DropdownFilter
+            className={!isLoading ? 'p-button-animated-blink' : null}
+            disabled={isLoading}
+            filters={validationDropdown}
+            id="filterValidationDropdown"
+            onShow={e => {
+              getExportButtonPosition(e);
+            }}
+            popup={true}
+            ref={filterMenuRef}
+            showFilters={showValidationFilter}
+            showLevelErrorIcons={true}
+          />
+          {renderChipButton()}
+        </Fragment>
+      );
+    }
+  };
+
+  const renderFilterSearch = () => {
+    if (prevFilterValue !== '') {
+      return (
+        <Fragment>
+          <span data-for="valueFilterTooltip" data-tip>
+            <ChipButton
+              className={styles.chipButton}
+              icon="search"
+              labelClassName={styles.groupFilter}
+              levelError={selectedRuleLevelError}
+              onClick={() => {
+                showValueFilter('');
+                setIsFilteredByValue(false);
+              }}
+              value={decodeURIComponent(prevFilterValue)}
+            />
+          </span>
+          <ReactTooltip border={true} effect="solid" id="valueFilterTooltip" place="top">
+            {decodeURIComponent(prevFilterValue)}
+          </ReactTooltip>
+        </Fragment>
+      );
+    }
+  };
+
+  const renderValueFilter = () => {
+    if (isEmpty(valueFilter)) {
+      return <span style={{ width: '2.357em' }} />;
+    }
+
+    return (
+      <Button
+        className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+        icon="cancel"
+        onClick={() => dispatchFilter({ type: 'SET_VALUE_FILTER', payload: '' })}
+      />
+    );
+  };
+
   return (
     <Toolbar className={`${styles.actionsToolbar} datasetSchema-table-toolbar-help-step`}>
       <div className={`${styles.toolbarLeftContent} p-toolbar-group-left`}>
@@ -230,21 +351,7 @@ export const ActionsToolbar = ({
             onClick={() => setImportTableDialogVisible(true)}
           />
         )}
-        {isExportable && (
-          <Button
-            className={`p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step ${
-              isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
-            }`}
-            disabled={isDataflowOpen || isDesignDatasetEditorRead}
-            icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
-            id="buttonExportTable"
-            label={resourcesContext.messages['exportTable']}
-            onClick={event => {
-              onUpdateData();
-              exportMenuRef.current.show(event);
-            }}
-          />
-        )}
+        {renderExportableButton()}
         <Menu
           className={styles.menu}
           id="exportTableMenu"
@@ -252,7 +359,6 @@ export const ActionsToolbar = ({
           popup={true}
           ref={exportMenuRef}
         />
-
         <DeleteDialog
           disabled={
             !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
@@ -262,7 +368,6 @@ export const ActionsToolbar = ({
           showWriteButtons={showWriteButtons}
           tableName={tableName}
         />
-
         <Button
           className={`p-button-rounded p-button-secondary-transparent datasetSchema-showColumn-help-step ${
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
@@ -284,78 +389,8 @@ export const ActionsToolbar = ({
           ref={dropdownFilterRef}
           showFilters={showFilters}
         />
-
-        {isFilterable && (
-          <Fragment>
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent datasetSchema-validationFilter-help-step ${
-                tableHasErrors ? 'p-button-animated-blink' : null
-              }`}
-              disabled={!tableHasErrors}
-              icon="filter"
-              iconClasses={!isFilterValidationsActive ? styles.filterInactive : styles.filterActive}
-              label={resourcesContext.messages['validationFilter']}
-              onClick={event => filterMenuRef.current.show(event)}
-            />
-            <DropdownFilter
-              className={!isLoading ? 'p-button-animated-blink' : null}
-              disabled={isLoading}
-              filters={validationDropdown}
-              id="filterValidationDropdown"
-              onShow={e => {
-                getExportButtonPosition(e);
-              }}
-              popup={true}
-              ref={filterMenuRef}
-              showFilters={showValidationFilter}
-              showLevelErrorIcons={true}
-            />
-            {groupedFilter && selectedRuleMessage !== '' && tableId === selectedTableSchemaId && (
-              <Fragment>
-                <span data-for="groupedFilterTooltip" data-tip>
-                  <ChipButton
-                    className={styles.chipButton}
-                    hasLevelErrorIcon={true}
-                    labelClassName={styles.groupFilter}
-                    levelError={selectedRuleLevelError}
-                    onClick={() => {
-                      onHideSelectGroupedValidation();
-                      showGroupedValidationFilter(false);
-                      dispatchFilter({
-                        type: 'SET_VALIDATION_GROUPED_FILTER',
-                        payload: { groupedFilter: false }
-                      });
-                    }}
-                    value={selectedRuleMessage}
-                  />
-                </span>
-                <ReactTooltip border={true} effect="solid" id="groupedFilterTooltip" place="top">
-                  {selectedRuleMessage}
-                </ReactTooltip>
-              </Fragment>
-            )}
-          </Fragment>
-        )}
-        {prevFilterValue !== '' && (
-          <Fragment>
-            <span data-for="valueFilterTooltip" data-tip>
-              <ChipButton
-                className={styles.chipButton}
-                icon="search"
-                labelClassName={styles.groupFilter}
-                levelError={selectedRuleLevelError}
-                onClick={() => {
-                  showValueFilter('');
-                  setIsFilteredByValue(false);
-                }}
-                value={decodeURIComponent(prevFilterValue)}
-              />
-            </span>
-            <ReactTooltip border={true} effect="solid" id="valueFilterTooltip" place="top">
-              {decodeURIComponent(prevFilterValue)}
-            </ReactTooltip>
-          </Fragment>
-        )}
+        {renderFilterableButton()}
+        {renderFilterSearch()}
       </div>
       <div className={`p-toolbar-group-right ${styles.valueFilterWrapper}`}>
         <span className={styles.input}>
@@ -368,15 +403,7 @@ export const ActionsToolbar = ({
               onKeyDown={onSearchKeyEvent}
               value={valueFilter}
             />
-            {!isEmpty(valueFilter) ? (
-              <Button
-                className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
-                icon="cancel"
-                onClick={() => dispatchFilter({ type: 'SET_VALUE_FILTER', payload: '' })}
-              />
-            ) : (
-              <span style={{ width: '2.357em' }} />
-            )}
+            {renderValueFilter()}
             <Button
               className="p-button-secondary"
               icon="search"

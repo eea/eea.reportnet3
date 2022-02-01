@@ -347,9 +347,7 @@ export const DatasetService = {
         : null;
 
       return new DatasetTable({
-        hasPKReferenced: !isEmpty(
-          records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
-        ),
+        hasPKReferenced: !isEmpty(records.filter(record => record.fields.filter(field => field.pkReferenced)[0])),
         tableSchemaToPrefill: isNull(datasetTableDTO.toPrefill) ? false : datasetTableDTO.toPrefill,
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,

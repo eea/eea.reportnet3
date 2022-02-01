@@ -40,6 +40,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { IntegrationsUtils } from 'views/DatasetDesigner/_components/Integrations/_functions/Utils/IntegrationsUtils';
@@ -121,6 +122,9 @@ export const BigButtonList = ({
   const dataflowData = dataflowState.data;
   const isBusinessDataflow = dataflowType === config.dataflowType.BUSINESS.value;
 
+  const { resetFiltersState: resetCloneSchemasFiltersState } = useFilters('cloneSchemas');
+  const { resetFiltersState: resetManualAcceptanceDatasetsFiltersState } = useFilters('manualAcceptanceDatasets');
+
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
   useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
@@ -185,7 +189,7 @@ export const BigButtonList = ({
   );
 
   const cloneDatasetSchemas = async () => {
-    setCloneDialogVisible(false);
+    onHideCloneSchemasDialog();
 
     notificationContext.add(
       {
@@ -384,6 +388,16 @@ export const BigButtonList = ({
     setErrorDialogData({ isVisible: false, message: '' });
   };
 
+  const onHideCloneSchemasDialog = () => {
+    setCloneDialogVisible(false);
+    resetCloneSchemasFiltersState();
+  };
+
+  const onHideManualAcceptanceDatasetsDialog = () => {
+    setIsManualTechnicalAcceptanceDialogVisible(false);
+    resetManualAcceptanceDatasetsFiltersState();
+  };
+
   const onCopyDataCollectionToEUDataset = async () => {
     setIsCopyDataCollectionToEUDatasetDialogVisible(false);
     setIsCopyDataCollectionToEUDatasetLoading(true);
@@ -478,7 +492,7 @@ export const BigButtonList = ({
         label={resourcesContext.messages['close']}
         onClick={() => {
           setIsHistoricReleasesDialogVisible(false);
-          setIsManualTechnicalAcceptanceDialogVisible(false);
+          onHideManualAcceptanceDatasetsDialog();
         }}
       />
     ) : (
@@ -494,7 +508,7 @@ export const BigButtonList = ({
           className="p-button-secondary p-button-animated-blink p-button-right-aligned"
           icon="cancel"
           label={resourcesContext.messages['close']}
-          onClick={() => setCloneDialogVisible(false)}
+          onClick={onHideCloneSchemasDialog}
         />
       </Fragment>
     );
@@ -620,7 +634,7 @@ export const BigButtonList = ({
           className={styles.dialog}
           footer={renderDialogFooter}
           header={resourcesContext.messages['dataflowsList']}
-          onHide={() => setCloneDialogVisible(false)}
+          onHide={onHideCloneSchemasDialog}
           style={{ width: '95%' }}
           visible={cloneDialogVisible}>
           <CloneSchemas dataflowId={dataflowId} getCloneDataflow={getCloneDataflow} />
@@ -672,7 +686,7 @@ export const BigButtonList = ({
           className={styles.dialog}
           footer={renderDialogFooter}
           header={`${resourcesContext.messages['manualTechnicalAcceptanceHeader']} ${dataflowName}`}
-          onHide={() => setIsManualTechnicalAcceptanceDialogVisible(false)}
+          onHide={onHideManualAcceptanceDatasetsDialog}
           style={{ width: '80%' }}
           visible={isManualTechnicalAcceptanceDialogVisible}>
           <ManualAcceptanceDatasets
@@ -690,6 +704,7 @@ export const BigButtonList = ({
         <ManageManualAcceptanceDataset
           dataflowId={dataflowId}
           dataset={datasetFeedbackStatusToEdit}
+          isAutomaticReportingDeletion={dataflowState.isAutomaticReportingDeletion}
           isManageManualAcceptanceDatasetDialogVisible={isManageManualAcceptanceDatasetDialogVisible}
           manageDialogs={manageManualAcceptanceDatasetDialog}
           refreshManualAcceptanceDatasets={refreshManualAcceptanceDatasets}
