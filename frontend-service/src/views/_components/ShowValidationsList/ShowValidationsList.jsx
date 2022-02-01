@@ -24,6 +24,8 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { showValidationsReducer } from './_functions/Reducers/showValidationsReducer';
 
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
+
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ShowValidationsList = memo(
@@ -80,6 +82,8 @@ export const ShowValidationsList = memo(
     });
 
     const { totalErrors, totalFilteredRecords, totalRecords } = validationState;
+
+    const { getFilterBy, resetFilterState, setData, sortByOptions } = useApplyFilters('showValidations');
 
     useEffect(() => {
       const allTypesFilter = concat(
@@ -325,6 +329,8 @@ export const ShowValidationsList = memo(
           type: 'SET_TOTALS_ERRORS',
           payload: { totalFilteredRecords: data.totalFilteredErrors, totalRecords: data.totalRecords }
         });
+
+        setData(data.errors);
         setFetchedData(data.errors);
       } catch (error) {
         console.error('ShowValidationsList - onLoadErrors.', error);
@@ -398,7 +404,9 @@ export const ShowValidationsList = memo(
       setFieldsTypesFilter(allFieldsFilterList);
     };
 
-    const onLoadFilteredValidations = filterData => {
+    const onLoadFilteredValidations = async () => {
+      const filterData = await getFilterBy();
+
       setFirstRow(0);
       setFieldValueFilter(filterData.fieldSchemaName);
       setLevelErrorsFilter(filterData.levelError);
@@ -525,12 +533,12 @@ export const ShowValidationsList = memo(
 
     const filterOptions = [
       {
-        type: 'multiselect',
-        properties: [
-          { name: 'entityType' },
-          { name: 'tableSchemaName', showInput: true },
-          { name: 'fieldSchemaName', showInput: true },
-          { name: 'levelError' }
+        type: 'MULTI_SELECT',
+        nestedOptions: [
+          { key: 'entityType', label: resourcesContext.messages['entityType'] },
+          { key: 'tableSchemaName', label: resourcesContext.messages['tableSchemaName'] },
+          { key: 'fieldSchemaName', label: resourcesContext.messages['fieldSchemaName'] },
+          { key: 'levelError', label: resourcesContext.messages['levelError'] }
         ]
       }
     ];
@@ -567,14 +575,7 @@ export const ShowValidationsList = memo(
       return (
         <div className={styles.validations}>
           <div className={styles.searchInput}>
-            <Filters
-              data={fetchedData}
-              filterByList={filterBy}
-              options={filterOptions}
-              sendData={onLoadFilteredValidations}
-              validations
-              validationsAllTypesFilters={validationsAllTypesFilters}
-            />
+            <Filters onFilter={onLoadFilteredValidations} options={filterOptions} recoilId="showValidations" />
           </div>
 
           <div className={styles.validationsWrapper}>

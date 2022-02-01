@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { useResetRecoilState } from 'recoil';
 
 import isNil from 'lodash/isNil';
-import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
 import pull from 'lodash/pull';
 import ReactTooltip from 'react-tooltip';
