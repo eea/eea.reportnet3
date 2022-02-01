@@ -278,9 +278,9 @@ export const LinkSelector = ({
 
   const getOptions = datasetSchema =>
     datasetSchema.tables.map(table => {
-      const hasPK = !isUndefined(table.records[0].fields.filter(field => field.pk === true)[0]);
+      const hasPK = !isUndefined(table.records[0].fields.filter(field => field.pk)[0]);
       if (hasPK && table.tableSchemaId !== tableSchemaId) {
-        const pkField = table.records[0].fields.filter(field => field.pk === true)[0];
+        const pkField = table.records[0].fields.filter(field => field.pk)[0];
         if (
           !['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(pkField.type)
         ) {
