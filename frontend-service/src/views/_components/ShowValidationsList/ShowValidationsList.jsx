@@ -30,6 +30,7 @@ import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { useFilters } from 'views/_functions/Hooks/useFilters';
+import { Filters } from 'views/_components/Filters';
 
 export const ShowValidationsList = memo(
   ({
@@ -422,29 +423,31 @@ export const ShowValidationsList = memo(
       setFieldsTypesFilter(allFieldsFilterList);
     };
 
-    // const onLoadFilteredValidations = filterData => {
-    //   setFirstRow(0);
-    //   setFieldValueFilter(filterData.fieldSchemaName);
-    //   setLevelErrorsFilter(filterData.levelError);
-    //   setTypeEntitiesFilter(filterData.entityType);
-    //   setTablesFilter(filterData.tableSchemaName);
+    const onLoadFilteredValidations = async () => {
+      const filterData = await getFilterBy();
 
-    //   onLoadErrors(
-    //     0,
-    //     numberRows,
-    //     sortField,
-    //     sortOrder,
-    //     filterData.fieldSchemaName,
-    //     filterData.levelError,
-    //     filterData.entityType,
-    //     filterData.tableSchemaName
-    //   );
-    //   setFilterBy(filterData);
-    //   if (!isNil(filterData)) {
-    //     const filterDataValues = Object.values(filterData).map(value => value.length !== 0);
-    //     filterDataValues.includes(true) ? setFiltered(true) : setFiltered(false);
-    //   }
-    // };
+      setFirstRow(0);
+      setFieldValueFilter(filterData.fieldSchemaName);
+      setLevelErrorsFilter(filterData.levelError);
+      setTypeEntitiesFilter(filterData.entityType);
+      setTablesFilter(filterData.tableSchemaName);
+
+      onLoadErrors(
+        0,
+        numberRows,
+        sortField,
+        sortOrder,
+        filterData.fieldSchemaName,
+        filterData.levelError,
+        filterData.entityType,
+        filterData.tableSchemaName
+      );
+      // setFilterBy(filterData);
+      // if (!isNil(filterData)) {
+      //   const filterDataValues = Object.values(filterData).map(value => value.length !== 0);
+      //   filterDataValues.includes(true) ? setFiltered(true) : setFiltered(false);
+      // }
+    };
 
     const onLoadRulesDescription = async () => {
       const validationsServiceList = await ValidationService.getAll(dataflowId, datasetSchemaId, reporting);
