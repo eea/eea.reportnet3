@@ -1139,7 +1139,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               } p-button-animated-blink dataset-refresh-help-step`}
               icon="refresh"
               label={resourcesContext.messages['refresh']}
-              onClick={() => onLoadDatasetSchema()}
+              onClick={onLoadDatasetSchema}
             />
           </div>
         </Toolbar>
@@ -1160,7 +1160,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             datasetName={datasetName}
             datasetSchemaId={metadata?.dataset.datasetSchemaId}
             hasWritePermissions={hasWritePermissions}
-            isWebformView={!selectedView}
+            isWebformView={selectedView === 'webform'}
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
             reporting={true}
