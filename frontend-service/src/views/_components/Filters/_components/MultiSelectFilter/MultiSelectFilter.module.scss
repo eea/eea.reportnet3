@@ -10,7 +10,6 @@
     height: 2.25rem;
     padding-left: 0em;
     width: 90% !important;
-    //border-bottom: var(--inputtext-border) !important;
 
     label {
       color: var(--active-filter-font) !important;
@@ -57,7 +56,10 @@
   }
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1200px) {
+  .block {
+    width: 50% !important;
+  }
 }
 
 @media (max-width: 1695px) {
