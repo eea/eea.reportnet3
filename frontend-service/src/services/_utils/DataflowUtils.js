@@ -244,7 +244,22 @@ const parseRequestSortBy = sortByOptions => {
 
   const replacements = { asc: true, desc: false, idle: undefined };
 
-  return { isAsc: replacements[sortByOptions.sortByOption], sortByHeader: sortByOptions.sortByHeader };
+  const name_replacements = {
+    creationDate: 'creation_date',
+    description: 'description',
+    expirationDate: 'deadline_date',
+    legalInstrument: 'legal_instrument',
+    name: 'name',
+    obligationTitle: 'obligation',
+    obligationId: 'obligation_id',
+    status: 'status',
+    userRole: 'role'
+  };
+
+  return {
+    isAsc: replacements[sortByOptions.sortByOption],
+    sortByHeader: name_replacements[sortByOptions.sortByHeader]
+  };
 };
 
 export const DataflowUtils = {

@@ -14,7 +14,7 @@ export const SortButton = ({ id, isLoading, isVisible, onSort, recoilId }) => {
   const onSortData = key => {
     setSortBy(prevSortBy => {
       const sortByHeader = switchSortByOption(prevSortBy.sortByOption) === 'idle' ? '' : key;
-      const sortByOption = switchSortByOption(prevSortBy.sortByOption);
+      const sortByOption = switchSortByOption(prevSortBy.sortByHeader === key ? prevSortBy.sortByOption : 'idle');
 
       if (onSort) {
         onSort({ sortByHeader, sortByOption });
