@@ -12,7 +12,6 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Button } from 'views/_components/Button';
 import { TableManagement } from './_components/TableManagement';
-import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { WebformView } from './_components/WebformView';
 
 import { DatasetService } from 'services/DatasetService';
@@ -48,8 +47,8 @@ export const PaMsWebform = ({
   const [paMsWebformState, paMsWebformDispatch] = useReducer(paMsWebformReducer, {
     data: [],
     hasErrors: true,
-    isAddingSingleRecord: false,
     isAddingGroupRecord: false,
+    isAddingSingleRecord: false,
     isDataUpdated: false,
     isLoading: true,
     isRefresh: false,
