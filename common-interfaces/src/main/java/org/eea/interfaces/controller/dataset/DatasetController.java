@@ -134,7 +134,7 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    */
-  @DeleteMapping("/private/v1/{datasetId}/deleteDatasetData")
+  @DeleteMapping("/private/{datasetId}/deleteDatasetData")
   void privateDeleteDatasetData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId);
 

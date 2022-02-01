@@ -558,8 +558,8 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @LockMethod(removeWhenFinish = true)
-  @DeleteMapping("/private/v1/{datasetId}/deleteDatasetData")
-  @ApiOperation(value = "Private Delete dataset data")
+  @DeleteMapping("/private/{datasetId}/deleteDatasetData")
+  @ApiOperation(value = "Private Delete dataset data", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted"),
       @ApiResponse(code = 403, message = "Dataset not belong dataflow"),
       @ApiResponse(code = 401, message = "Unauthorize"),

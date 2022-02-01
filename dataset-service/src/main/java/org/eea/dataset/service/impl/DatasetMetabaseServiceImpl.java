@@ -32,7 +32,6 @@ import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -165,10 +164,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /** The eea security expression root. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
-
-  /** The snapshot repository. */
-  @Autowired
-  private SnapshotRepository snapshotRepository;
 
   /**
    * The Constant LOG.
