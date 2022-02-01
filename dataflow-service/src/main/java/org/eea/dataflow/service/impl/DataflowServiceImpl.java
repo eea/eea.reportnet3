@@ -798,8 +798,8 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowPublicPaginated.setPublicDataflows(publicDataflowsVOList);
       dataflowPublicPaginated.setTotalRecords(
           dataflowRepository.countByCountry(obligationJson, filters, header, asc, countryCode));
-      dataflowPublicPaginated.setFilteredRecords(
-          dataflowRepository.countByCountry(obligationJson, filters, header, asc, countryCode));
+      dataflowPublicPaginated.setFilteredRecords(dataflowRepository
+          .countByCountryFiltered(obligationJson, filters, header, asc, countryCode));
 
       return dataflowPublicPaginated;
 
