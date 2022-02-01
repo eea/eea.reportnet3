@@ -154,6 +154,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
         );
       }
     };
+
     return (
       <Fragment>
         {renderView()}
