@@ -55,6 +55,7 @@ import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
+import org.eea.validation.util.model.QueryVO;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -257,39 +258,60 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
   @Override
-  public TableValue retrieveTableData(String query, DataSetMetabaseVO dataSetMetabaseVO, Rule rule,
-      Boolean ischeckDC) throws EEAInvalidSQLException {
-    DataSetSchema dataschema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
+  public QueryVO retrieveTableData(String query, QueryVO queryVO, Boolean ischeckDC)
+      throws EEAInvalidSQLException {
+    DataSetSchema dataschema = schemasRepository
+        .findByIdDataSetSchema(new ObjectId(queryVO.getDataSetMetabaseVO().getDatasetSchema()));
     String entityName = "";
     Long idTable = null;
 
-    String newQuery = proccessQuery(dataSetMetabaseVO, query);
+    String newQuery = proccessQuery(queryVO.getDataSetMetabaseVO(), query);
 
-    switch (rule.getType()) {
+    switch (queryVO.getRule().getType()) {
       case FIELD:
-        entityName = retriveFieldName(dataschema, rule.getReferenceId());
-        idTable = retriveIsTableFromFieldSchema(dataschema, rule.getReferenceId(),
-            dataSetMetabaseVO.getId());
+        entityName = retriveFieldName(dataschema, queryVO.getRule().getReferenceId());
+        idTable = retriveIsTableFromFieldSchema(dataschema, queryVO.getRule().getReferenceId(),
+            queryVO.getDataSetMetabaseVO().getId());
         break;
       case TABLE:
-        entityName = retriveTableName(dataschema, rule.getReferenceId());
-        idTable = datasetRepository.getTableId(rule.getReferenceId().toString(),
-            dataSetMetabaseVO.getId());
+        entityName = retriveTableName(dataschema, queryVO.getRule().getReferenceId());
+        idTable = datasetRepository.getTableId(queryVO.getRule().getReferenceId().toString(),
+            queryVO.getDataSetMetabaseVO().getId());
         break;
       case RECORD:
-        idTable = retriveIsTableFromRecordSchema(dataschema, rule.getReferenceId(),
-            dataSetMetabaseVO.getId());
+        idTable = retriveIsTableFromRecordSchema(dataschema, queryVO.getRule().getReferenceId(),
+            queryVO.getDataSetMetabaseVO().getId());
         break;
       case DATASET:
         break;
     }
-    LOG.info("Query from ruleCode {} to be executed: {}", rule.getShortCode(), newQuery);
-    TableValue table = datasetRepository.queryRSExecution(newQuery, rule.getType(), entityName,
-        dataSetMetabaseVO.getId(), idTable);
-    if (Boolean.FALSE.equals(ischeckDC) && null != table && null != table.getRecords()
-        && !table.getRecords().isEmpty() && !EntityTypeEnum.TABLE.equals(rule.getType())) {
-      retrieveValidations(table.getRecords(), dataSetMetabaseVO.getId());
+    queryVO.setEntityName(entityName);
+    queryVO.setIdTable(idTable);
+    queryVO.setNewQuery(newQuery);
+    LOG.info("Query from ruleCode {} to be executed: {}", queryVO.getRule().getShortCode(),
+        newQuery);
+
+    return queryVO;
+  }
+
+  /**
+   * Query table.
+   *
+   * @param queryToExecute the query to execute
+   * @param queryVO the query VO
+   * @return the table value
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
+   */
+  @Override
+  public TableValue queryTable(String queryToExecute, QueryVO queryVO)
+      throws EEAInvalidSQLException {
+    TableValue table;
+    table = datasetRepository.queryRSExecution(queryToExecute, queryVO.getRule().getType(),
+        queryVO.getEntityName(), queryVO.getDataSetMetabaseVO().getId(), queryVO.getIdTable());
+    if (Boolean.FALSE.equals(queryVO.getIscheckDC()) && null != table && null != table.getRecords()
+        && !table.getRecords().isEmpty()
+        && !EntityTypeEnum.TABLE.equals(queryVO.getRule().getType())) {
+      retrieveValidations(table, queryVO.getDataSetMetabaseVO().getId());
     }
     return table;
   }
@@ -652,13 +674,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param records the records
    * @param datasetId the dataset id
    */
-  private void retrieveValidations(List<RecordValue> records, Long datasetId) {
+  private void retrieveValidations(TableValue table, Long datasetId) {
     // retrieve validations to set them into the final result
-    List<String> recordIds = records.stream().map(RecordValue::getId).collect(Collectors.toList());
+    List<String> recordIds =
+        table.getRecords().stream().map(RecordValue::getId).collect(Collectors.toList());
     Map<String, List<FieldValidation>> fieldValidations = getFieldValidations(recordIds, datasetId);
     Map<String, List<RecordValidation>> recordValidations =
         getRecordValidations(recordIds, datasetId);
-    records.stream().forEach(record -> {
+    table.getRecords().stream().forEach(record -> {
       record.getFields().stream().filter(Objects::nonNull).forEach(field -> {
         List<FieldValidation> validations = fieldValidations.get(field.getId());
         field.setFieldValidations(validations);
@@ -679,6 +702,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
                 .orElse(ErrorTypeEnum.WARNING));
       }
     });
+    recordIds.clear();
+    fieldValidations.clear();
+    recordValidations.clear();
+    System.gc();
   }
 
   /**
