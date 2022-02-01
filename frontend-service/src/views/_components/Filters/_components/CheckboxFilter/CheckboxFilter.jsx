@@ -10,7 +10,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useFilters } from '../../_functions/Hooks/useFilters';
 
-export const CheckboxFilter = ({ onFilterData, option, recoilId }) => {
+export const CheckboxFilter = ({ isLoading, onFilterData, option, recoilId }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const { filterBy, onFilter } = useFilters({ keyStore: filterByKeyCheckboxStore, onFilterData, option, recoilId });
@@ -22,6 +22,7 @@ export const CheckboxFilter = ({ onFilterData, option, recoilId }) => {
         <Checkbox
           ariaLabel={resourcesContext.messages[option.key]}
           checked={filterBy[option.key] || false}
+          disabled={isLoading}
           id={option.key}
           inputId={option.key}
           label={option.key}

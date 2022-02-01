@@ -16,7 +16,7 @@ import { filterByStore } from '../../_functions/Stores/filterStore';
 
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-export const DateFilter = ({ option, recoilId }) => {
+export const DateFilter = ({ isLoading, option, recoilId }) => {
   const { userProps } = useContext(UserContext);
 
   const [filterBy, setFilterBy] = useRecoilState(filterByStore(`${option.key}_${recoilId}`));
@@ -63,7 +63,7 @@ export const DateFilter = ({ option, recoilId }) => {
 
   return (
     <div className={styles.block} key={option.key}>
-      <SortButton id={option.key} isVisible={option.isSortable} />
+      <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} />
       <div
         className={`p-float-label ${styles.label} ${styles.dateBlock} } ${
           filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
