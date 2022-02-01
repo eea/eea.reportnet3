@@ -52,6 +52,12 @@
   }
 }
 
+@media (max-width: 1200px) {
+  .block {
+    width: 50% !important;
+  }
+}
+
 @media (max-width: 1695px) {
   .block {
     height: 3rem;

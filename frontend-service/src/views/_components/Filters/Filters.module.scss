@@ -102,17 +102,14 @@
   }
 }
 
-.dateBlock {
-  display: flex !important;
-}
-
+.filterButton,
 .resetButton {
-  margin-left: auto;
   margin-bottom: auto;
 }
 
 .filterButton {
-  margin-top: auto;
+  margin-right: 10px;
+  margin-left: auto;
 }
 
 .sortButtonSize {
@@ -154,6 +151,7 @@
   margin: 2rem 0;
   width: 100%;
   flex-wrap: wrap;
+  gap: 1em 0;
 
   @include for-phone-only {
     justify-content: flex-start;
@@ -519,8 +517,5 @@
 @media (max-width: 1695px) {
   .qcList {
     grid-row-gap: 1.5rem;
-  }
-  .block {
-    height: 3rem;
   }
 }
