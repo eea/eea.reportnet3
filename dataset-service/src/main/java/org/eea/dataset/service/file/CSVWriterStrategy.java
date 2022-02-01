@@ -2,15 +2,17 @@ package org.eea.dataset.service.file;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
-import org.eea.dataset.persistence.data.domain.FieldValue;
-import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ExportFilterVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.slf4j.Logger;
@@ -194,14 +196,19 @@ public class CSVWriterStrategy implements WriterStrategy {
   private void setRecords(Map<String, Integer> indexMap, int nHeaders, CSVWriter csvWriter,
       boolean includeCountryCode, Long datasetId, String idTableSchema, ExportFilterVO filters) {
 
+    List<ErrorTypeEnum> levelErrorList = Arrays.asList(filters.getLevelError());
+    List<String> idRulesList = Arrays.asList(filters.getIdRules());
+
     Long totalRecords = fileCommon.countRecordsByTableSchema(idTableSchema);
     int batchSize = 50000 / nHeaders;
     int totalPages = (int) Math.ceil((double) totalRecords / batchSize);
     LOG.info("Total number of pages in export process: {}", totalPages);
-    for (int numPage = 1; numPage <= totalPages; numPage++) {
-      for (RecordValue record : fileCommon.getRecordValuesPaginated(datasetId, idTableSchema,
-          PageRequest.of(numPage, batchSize), filters)) {
-        List<FieldValue> fields = record.getFields();
+    for (int numPage = 0; numPage <= totalPages; numPage++) {
+      for (RecordVO record : fileCommon.exportFileWithFilters(datasetId, idTableSchema,
+          levelErrorList, PageRequest.of(numPage, batchSize), idRulesList,
+          filters.getFieldValue())) {
+
+        List<FieldVO> fields = record.getFields();
         List<String> unknownColumns = new ArrayList<>();
         String[] fieldsToWrite = new String[nHeaders];
 
@@ -209,7 +216,7 @@ public class CSVWriterStrategy implements WriterStrategy {
           fieldsToWrite[0] = record.getDataProviderCode();
         }
         if (CollectionUtils.isNotEmpty(fields)) {
-          for (FieldValue field : fields) {
+          for (FieldVO field : fields) {
             if (null != field.getIdFieldSchema()) {
               Integer index = indexMap.get(field.getIdFieldSchema());
               fieldsToWrite[index] =
@@ -221,6 +228,7 @@ public class CSVWriterStrategy implements WriterStrategy {
           }
         }
         csvWriter.writeNext(joinOutputArray(unknownColumns, fieldsToWrite), false);
+
       }
     }
   }
