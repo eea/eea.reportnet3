@@ -252,14 +252,12 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     const inputId = uniqueId();
 
     return (
-      <div
-        className={`${styles.block} ${
-          filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
-        }`}
-        key={option.key}>
+      <div className={`${styles.block}`} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <div
-          className={`p-float-label ${styles.label} ${styles.dateBlock}`}
+          className={`p-float-label ${styles.label} ${styles.dateBlock} ${
+            filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+          }`}
           id={`calendar_${option.key}`}
           ref={el => (calendarRefs.current[option.key] = el)}>
           <Calendar
@@ -459,27 +457,29 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
       {renderFilters()}
       {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
 
-      {hasCustomSort && (
-        <div className={`${styles.filterButton}`}>
+      <div className={styles.buttonsContainer}>
+        {hasCustomSort && (
+          <div className={`${styles.filterButton}`}>
+            <Button
+              className="p-button-primary p-button-rounded p-button-animated-blink"
+              icon="filter"
+              label={resourcesContext.messages['filter']}
+              onClick={onFilter}
+            />
+          </div>
+        )}
+
+        <div className={`${styles.resetButton}`}>
           <Button
-            className="p-button-primary p-button-rounded p-button-animated-blink"
-            icon="filter"
-            label={resourcesContext.messages['filter']}
-            onClick={onFilter}
+            className="p-button-secondary p-button-rounded p-button-animated-blink"
+            icon="undo"
+            label={resourcesContext.messages['reset']}
+            onClick={() => {
+              onResetFilters();
+              setLabelsAnimationDate(getLabelsAnimationDateInitial(options, filterBy));
+            }}
           />
         </div>
-      )}
-
-      <div className={`${styles.resetButton}`}>
-        <Button
-          className="p-button-secondary p-button-rounded p-button-animated-blink"
-          icon="undo"
-          label={resourcesContext.messages['reset']}
-          onClick={() => {
-            onResetFilters();
-            setLabelsAnimationDate(getLabelsAnimationDateInitial(options, filterBy));
-          }}
-        />
       </div>
     </div>
   );

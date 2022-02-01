@@ -210,15 +210,14 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
           <label className={styles.switchTextInput}>{resourcesContext.messages['listView']}</label>
         </div>
       </div>
-      <div className={styles.filters}>
-        <MyFilters
-          className="reportingObligations"
-          data={data}
-          onFilter={onLoadReportingObligations}
-          options={filterOptions}
-          viewType="reportingObligations"
-        />
-      </div>
+
+      <MyFilters
+        className="reportingObligations"
+        data={data}
+        onFilter={onLoadReportingObligations}
+        options={filterOptions}
+        viewType="reportingObligations"
+      />
       {renderData()}
     </div>
   );
