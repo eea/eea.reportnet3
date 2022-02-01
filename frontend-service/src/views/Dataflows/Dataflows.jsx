@@ -615,6 +615,15 @@ export const Dataflows = () => {
     </Fragment>
   );
 
+  const getRolesMultiSelectOptions = () => {
+    return Object.keys(config.permissions.roles).map(role => {
+      const type = config.permissions.roles[role].label;
+      const value = config.permissions.roles[role].key;
+
+      return { type, value };
+    });
+  };
+
   const getFilterOptions = () => {
     const filters = [
       {
@@ -629,8 +638,22 @@ export const Dataflows = () => {
       },
       {
         nestedOptions: [
-          { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' },
-          { key: 'userRole', label: resourcesContext.messages['userRole'], isSortable: true }
+          {
+            key: 'status',
+            label: resourcesContext.messages['status'],
+            isSortable: true,
+            template: 'LevelError',
+            multiSelectOptions: [
+              { type: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus['DESIGN'] },
+              { type: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus['OPEN'] }
+            ]
+          },
+          {
+            key: 'userRole',
+            label: resourcesContext.messages['userRole'],
+            isSortable: true,
+            multiSelectOptions: getRolesMultiSelectOptions()
+          }
         ],
         type: 'MULTI_SELECT'
       },

@@ -17,6 +17,7 @@ import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 import { Dataflow } from 'entities/Dataflow';
 
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const sortDataflowsByExpirationDate = dataflows =>
   dataflows.sort((a, b) => {
@@ -193,14 +194,23 @@ const parseRequestFilterBy = filterBy => {
     name: 'name',
     obligation: 'obligation',
     obligationId: 'obligation_id',
-    status: 'status'
+    status: 'status',
+    userRole: 'role'
   };
 
   if (isEmpty(filterBy)) {
     return {};
   }
 
-  const parsedFilterBy = Object.keys(filterBy).map(key => ({ [replacements[key] || key]: filterBy[key] }));
+  const parsedFilterBy = Object.keys(filterBy).map(key => {
+    const results = { [replacements[key] || key]: filterBy[key] };
+
+    if (TextUtils.areEquals(key, 'status') || TextUtils.areEquals(key, 'userRole')) {
+      results[replacements[key] || key] = filterBy[key].join(',');
+    }
+
+    return results;
+  });
 
   return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
 };
