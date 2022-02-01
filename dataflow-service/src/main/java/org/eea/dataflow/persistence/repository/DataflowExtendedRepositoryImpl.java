@@ -1,5 +1,6 @@
 package org.eea.dataflow.persistence.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
@@ -11,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.springframework.data.domain.Pageable;
+
 
 /**
  * The Class DataflowExtendedRepositoryImpl.
@@ -47,6 +49,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
   /** The Constant LIKE. */
   private static final String LIKE = " %s LIKE :%s ";
+
+  /** The Constant DATE_FROM. */
+  private static final String DATE_FROM = " %s >= :%s ";
+
+  /** The Constant DATE_TO. */
+  private static final String DATE_TO = " %s <= :%s ";
 
   /** The Constant ORDER_BY. */
   private static final String ORDER_BY = " order by %s %s";
@@ -157,7 +165,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     query.setParameter("aux", json);
     if (MapUtils.isNotEmpty(filters)) {
       for (String key : filters.keySet()) {
-        query.setParameter(key, "%" + filters.get(key) + "%");
+        if ("creation_date_from".equals(key) || "creation_date_to".equals(key)
+            || "deadline_date_from".equals(key) || "deadline_date_to".equals(key)) {
+          query.setParameter(key, new Date(Long.valueOf(filters.get(key))));
+        } else {
+          query.setParameter(key, "%" + filters.get(key) + "%");
+        }
       }
     }
     if (isPublic) {
@@ -203,9 +216,10 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
 
       if (MapUtils.isNotEmpty(filters)) {
+
         for (String key : filters.keySet()) {
           addAnd(stringQuery, addAnd);
-          stringQuery.append(String.format(LIKE, key, key));
+          setFilters(stringQuery, key);
           addAnd = true;
         }
       }
@@ -247,6 +261,32 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         stringQuery.append("order by status, creation_date desc");
       }
 
+    }
+  }
+
+  /**
+   * Sets the filters.
+   *
+   * @param stringQuery the string query
+   * @param key the key
+   */
+  private void setFilters(StringBuilder stringQuery, String key) {
+    switch (key) {
+      case "creation_date_from":
+        stringQuery.append(String.format(DATE_FROM, "creation_date", key));
+        break;
+      case "creation_date_to":
+        stringQuery.append(String.format(DATE_TO, "creation_date", key));
+        break;
+      case "deadline_date_from":
+        stringQuery.append(String.format(DATE_FROM, "deadline_date", key));
+        break;
+      case "deadline_date_to":
+        stringQuery.append(String.format(DATE_TO, "deadline_date", key));
+        break;
+      default:
+        stringQuery.append(String.format(LIKE, key, key));
+        break;
     }
   }
 
