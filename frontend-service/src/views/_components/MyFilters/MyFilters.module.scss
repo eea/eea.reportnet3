@@ -202,6 +202,7 @@
       width: 100% !important;
     }
   }
+
   @include for-tablet-portrait-up {
     .block,
     .inputCheckbox {
@@ -209,12 +210,14 @@
       margin-bottom: 1.5rem;
     }
   }
+
   @include for-desktop-up {
     .block,
     .inputCheckbox {
       width: 25% !important;
     }
   }
+
   @include for-big-desktop-up {
     .block,
     .inputCheckbox {

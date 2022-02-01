@@ -252,7 +252,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     const inputId = uniqueId();
 
     return (
-      <div className={`${styles.block}`} key={option.key}>
+      <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <div
           className={`p-float-label ${styles.label} ${styles.dateBlock} ${
@@ -301,7 +301,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     }
 
     return (
-      <div className={`${styles.block}`} key={option.key}>
+      <div className={styles.block} key={option.key}>
         <Dropdown
           ariaLabel={option.key}
           className={styles.dropdownFilter}
@@ -368,7 +368,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     }
 
     return (
-      <div className={`${styles.block}`} key={option.key}>
+      <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <MultiSelect
           ariaLabelledBy={`${option.key}_input`}
@@ -459,7 +459,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
 
       <div className={styles.buttonsContainer}>
         {hasCustomSort && (
-          <div className={`${styles.filterButton}`}>
+          <div className={styles.filterButton}>
             <Button
               className="p-button-primary p-button-rounded p-button-animated-blink"
               icon="filter"
@@ -469,7 +469,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
           </div>
         )}
 
-        <div className={`${styles.resetButton}`}>
+        <div className={styles.resetButton}>
           <Button
             className="p-button-secondary p-button-rounded p-button-animated-blink"
             icon="undo"
