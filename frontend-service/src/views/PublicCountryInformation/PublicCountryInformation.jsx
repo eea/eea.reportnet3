@@ -92,7 +92,7 @@ export const PublicCountryInformation = () => {
   };
 
   const getDeliveryStatus = (dataflow, dataset) => {
-    if (!dataset.isReleased) {
+    if (!dataset?.isReleased) {
       return config.datasetStatus.PENDING.label;
     } else {
       if (!dataflow.manualAcceptance) {
@@ -187,9 +187,9 @@ export const PublicCountryInformation = () => {
           obligation: dataflow.obligation.title,
           publicFilesNames: publicFileNames,
           referencePublicFilesNames: referencePublicFileNames,
-          deliveryDate: dataset.releaseDate,
+          deliveryDate: !isNil(dataset) ? dataset?.releaseDate : '-',
           deliveryStatus: getDeliveryStatus(dataflow, dataset),
-          restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false,
+          restrictFromPublic: dataflow.datasets ? dataflow.datasets[0]?.restrictFromPublic : false,
           status: resourcesContext.messages[dataflow.status]
         };
       });
