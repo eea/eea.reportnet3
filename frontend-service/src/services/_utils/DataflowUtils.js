@@ -205,7 +205,7 @@ const parseRequestFilterBy = filterBy => {
   return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
 };
 
-const parseRequestPublicFilterBy = filterBy => {
+const parseRequestPublicCountryFilterBy = filterBy => {
   const replacements = {
     name: 'name',
     obligation: 'obligation',
@@ -246,7 +246,7 @@ export const DataflowUtils = {
   parsePublicDataflowDTO,
   parsePublicDataflowListDTO,
   parseRequestFilterBy,
-  parseRequestPublicFilterBy,
+  parseRequestPublicCountryFilterBy,
   parseRequestSortBy,
   parseSortedDataflowListDTO,
   parseUsersList,

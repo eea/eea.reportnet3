@@ -317,7 +317,7 @@ export const DataflowService = {
     await DataflowRepository.getApiKey(dataflowId, dataProviderId, isCustodian),
 
   getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField, filterBy) => {
-    const filteredFilterBy = DataflowUtils.parseRequestPublicFilterBy(filterBy);
+    const filteredFilterBy = DataflowUtils.parseRequestPublicCountryFilterBy(filterBy);
 
     const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode(
       countryCode,
