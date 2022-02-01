@@ -427,11 +427,7 @@ export const ManageLeadReporters = ({
       const isNewLeadReporter = TextUtils.areEquals(leadReporter.id, 'empty');
       const uniqueInputId = `${leadReporter.id}-${representativeId}`;
       if (!reporters) {
-        return (
-          <div key={uniqueInputId}>
-            <InputText />
-          </div>
-        );
+        return null;
       }
       return (
         <div
