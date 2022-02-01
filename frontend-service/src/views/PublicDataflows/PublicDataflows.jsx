@@ -35,7 +35,7 @@ export const PublicDataflows = () => {
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
-  const { getFilterBy, setData, sortByOptions } = useApplyFilters({ recoilId: 'publicDataflows' });
+  const { getFilterBy, setData, sortByOptions } = useApplyFilters('publicDataflows');
 
   const [contentStyles, setContentStyles] = useState({});
   const [filteredRecords, setFilteredRecords] = useState(0);

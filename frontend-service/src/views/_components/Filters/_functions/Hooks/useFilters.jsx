@@ -18,7 +18,7 @@ export const useFilters = ({ keyStore, onFilterData, option, recoilId }) => {
   useEffect(() => {
     setFilterByKeyByType(prevState => ({ keys: uniq([...prevState.keys, option.key]), nestedKey: option?.nestedKey }));
     setFilterByAllKeys(prevState => uniq([...prevState, option.key]));
-  }, []);
+  }, [recoilId]);
 
   const onFilter = async value => {
     setFilterBy({ [option.key]: value });

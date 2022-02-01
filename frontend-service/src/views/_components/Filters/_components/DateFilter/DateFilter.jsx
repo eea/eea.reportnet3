@@ -34,7 +34,7 @@ export const DateFilter = ({ isLoading, option, recoilId }) => {
 
   useEffect(() => {
     setFilterByAllKeys(prevState => uniq([...prevState, option.key]));
-  }, []);
+  }, [recoilId]);
 
   useEffect(() => {
     const listener = event => {

@@ -161,7 +161,7 @@ export const Dataflows = () => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
-  const { getFilterBy, resetFilterState, setData, sortByOptions } = useApplyFilters({ recoilId: tabId });
+  const { getFilterBy, resetFilterState, setData, sortByOptions } = useApplyFilters(tabId);
 
   useEffect(() => {
     getDataflowsCount();
@@ -329,7 +329,6 @@ export const Dataflows = () => {
         const { dataflows, filteredRecords, totalRecords } = data;
 
         setStatusDataflowLabel(dataflows);
-        setData(dataflows);
         setDataflows({ dataflows, filteredRecords, totalRecords, type: tabId });
       } else if (TextUtils.areEquals(tabId, 'reference')) {
         const data = await ReferenceDataflowService.getAll({
@@ -343,7 +342,6 @@ export const Dataflows = () => {
         const { dataflows, filteredRecords, totalRecords } = data;
 
         setStatusDataflowLabel(dataflows);
-        setData(dataflows);
         setDataflows({ dataflows, filteredRecords, totalRecords, type: tabId });
       } else if (TextUtils.areEquals(tabId, 'business')) {
         const data = await BusinessDataflowService.getAll({
@@ -357,7 +355,6 @@ export const Dataflows = () => {
         const { dataflows, filteredRecords, totalRecords } = data;
 
         setStatusDataflowLabel(dataflows);
-        setData(dataflows);
         setDataflows({ dataflows, filteredRecords, totalRecords, type: tabId });
       } else if (TextUtils.areEquals(tabId, 'citizenScience')) {
         const data = await CitizenScienceDataflowService.getAll({
@@ -539,6 +536,7 @@ export const Dataflows = () => {
     const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
 
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+    setData(parsedDataflows);
     dataflowsDispatch({
       type: 'SET_DATAFLOWS',
       payload: {
@@ -668,8 +666,7 @@ export const Dataflows = () => {
     },
     {
       nestedOptions: [
-        { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' },
-        { key: 'pinned', label: resourcesContext.messages['pinned'], isSortable: true }
+        { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' }
       ],
       type: 'MULTI_SELECT'
     }
