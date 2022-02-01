@@ -90,7 +90,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import io.jsonwebtoken.lang.Objects;
@@ -395,7 +394,7 @@ public class DataflowServiceImpl implements DataflowService {
       }
       paginatedDataflowVO.setDataflows(dataflowVOs);
       return paginatedDataflowVO;
-    } catch (JsonProcessingException e1) {
+    } catch (Exception e) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
     }
   }
@@ -754,7 +753,7 @@ public class DataflowServiceImpl implements DataflowService {
 
       return pag;
 
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
     }
   }
