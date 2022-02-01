@@ -548,7 +548,9 @@ export const ManageLeadReporters = ({
   };
 
   const renderFilter = () => {
-    if (formState.isLoading) {
+    const dataFilterWithRepresentatingLabel = dataFiltersMemo.filter(item => item?.nameRepresentative !== undefined);
+
+    if (formState.isLoading || (dataFiltersMemo.length > 1 && isEmpty(dataFilterWithRepresentatingLabel))) {
       return <Spinner className={styles.spinner} />;
     }
 
