@@ -81,10 +81,19 @@ export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, o
 
         set(filteredDataStore(recoilId), filteredData);
       },
-    []
+    [recoilId]
   );
 
-  const onResetFilters = () => {};
+  const onResetFilters = useRecoilCallback(
+    ({ snapshot, reset }) =>
+      async () => {
+        const filterByKeys = await snapshot.getPromise(filterByAllKeys(recoilId));
+
+        reset(filteredDataStore(recoilId));
+        await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
+      },
+    [recoilId]
+  );
 
   const renderFilters = () => options.map(option => renderFilter(option, option.type));
 
