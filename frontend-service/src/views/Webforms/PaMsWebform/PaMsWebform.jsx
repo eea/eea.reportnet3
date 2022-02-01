@@ -12,7 +12,6 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Button } from 'views/_components/Button';
 import { TableManagement } from './_components/TableManagement';
-import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { WebformView } from './_components/WebformView';
 
 import { DatasetService } from 'services/DatasetService';
@@ -48,8 +47,8 @@ export const PaMsWebform = ({
   const [paMsWebformState, paMsWebformDispatch] = useReducer(paMsWebformReducer, {
     data: [],
     hasErrors: true,
-    isAddingSingleRecord: false,
     isAddingGroupRecord: false,
+    isAddingSingleRecord: false,
     isDataUpdated: false,
     isLoading: true,
     isRefresh: false,
@@ -288,6 +287,23 @@ export const PaMsWebform = ({
   const setIsAddingGroupRecord = value =>
     paMsWebformDispatch({ type: 'SET_IS_ADDING_GROUP_RECORD', payload: { value } });
 
+  const renderOverviewButton = () => {
+    if (view !== 'details') {
+      return <div />;
+    }
+
+    return (
+      <Button
+        className={styles.overviewButton}
+        label={resourcesContext.messages['overview']}
+        onClick={() => {
+          onToggleView('overview');
+          onSelectRecord(null, null);
+        }}
+      />
+    );
+  };
+
   const renderView = () => {
     if (view === 'details') {
       return (
@@ -311,6 +327,7 @@ export const PaMsWebform = ({
         />
       );
     }
+
     return (
       <TableManagement
         dataflowId={dataflowId}
@@ -411,16 +428,7 @@ export const PaMsWebform = ({
         ))}
       </ul>
 
-      {view === 'details' && (
-        <Button
-          className={styles.tabBar}
-          label={resourcesContext.messages['overview']}
-          onClick={() => {
-            onToggleView('overview');
-            onSelectRecord(null, null);
-          }}
-        />
-      )}
+      {renderOverviewButton()}
 
       {renderView()}
     </Fragment>

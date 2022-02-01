@@ -366,6 +366,10 @@
     "bg-table": "var(--c-gray-5)",
     "bg-table-button": "var(--c-white-color)",
     "box-shadow-table": "var(--c-gray-25)",
+    "active-filter": "var(--c-blue-140)",
+    "active-filter-border": "1px solid var(--c-blue-140)",
+    "active-filter-font": "var(--c-corporate-blue)",
+    "active-filter-shadow": "0 4px 6px -6px var(--c-corporate-blue-lighter)",
     "dataflows-list-paginator-bg-color": "var(--c-lilac-300)"
   },
   "dark": {
@@ -736,6 +740,10 @@
     "bg-table": "var(--bg-dark-01dp)",
     "bg-table-button": "var(--bg-dark-00dp)",
     "box-shadow-table": "var(--accent-color-dark-mode)",
+    "active-filter": "var(--accent-color-dark-mode)",
+    "active-filter-border": "1px solid var(--accent-color-dark-mode)",
+    "active-filter-font": "var(--accent-color-dark-mode)",
+    "active-filter-shadow": "0 4px 6px -6px var(--c-corporate-yellow)",
     "dataflows-list-paginator-bg-color": "var(--c-lilac-300)"
   },
   "baseHeaderHeight": 180,
