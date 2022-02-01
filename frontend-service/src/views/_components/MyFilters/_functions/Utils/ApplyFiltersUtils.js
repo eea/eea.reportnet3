@@ -38,14 +38,16 @@ const applyDates = ({ filterBy, filterByKeys, item }) => {
 };
 
 const applyInputs = ({ filterBy, filterByKeys, item, filterByNestedKeys }) => {
-  const checkInput = (item, filteredKey) => {
-    return item.toLowerCase().includes(filterBy[filteredKey].toLowerCase());
-  };
+  const checkInput = (item, filteredKey) => item.toLowerCase().includes(filterBy[filteredKey].toLowerCase());
 
   const checkInputArray = (itemsArray, filteredKey, index) => {
     const everyCheck = itemsArray.map(itemArray => checkInput(itemArray[filteredNestedKeys[index]], filteredKey));
 
-    return isEmpty(everyCheck) ? false : everyCheck.some(item => item);
+    if (isEmpty(everyCheck)) {
+      return false;
+    } else {
+      return everyCheck.some(item => item);
+    }
   };
 
   const filteredKeys = filterByKeys.INPUT.filter(key => Object.keys(filterBy).includes(key));

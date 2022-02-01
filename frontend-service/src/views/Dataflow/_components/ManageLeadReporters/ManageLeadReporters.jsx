@@ -429,6 +429,7 @@ export const ManageLeadReporters = ({
       if (!reporters) {
         return null;
       }
+
       return (
         <div
           className={`${styles.inputWrapper} ${
@@ -550,6 +551,7 @@ export const ManageLeadReporters = ({
     if (formState.isLoading) {
       return <Spinner className={styles.spinner} />;
     }
+
     if (isNil(formState.selectedDataProviderGroup) || isEmpty(formState.allPossibleDataProviders)) {
       return null;
     }
