@@ -162,24 +162,19 @@ export const Dataflows = () => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
-  const {
-    getFilterBy,
-    setData,
-    sortBy: sortByOptions
-  } = useApplyFilters({
-    recoilId: tabId,
-    filterByKeys: [
-      'name',
-      'description',
-      'legalInstrument',
-      'obligationTitle',
-      'obligationId',
-      'status',
-      'userRole',
-      'expirationDate',
-      'creationDate'
-    ]
-  });
+  const filterByKeys = [
+    'name',
+    'description',
+    'legalInstrument',
+    'obligationTitle',
+    'obligationId',
+    'status',
+    'userRole',
+    'expirationDate',
+    'creationDate'
+  ];
+
+  const { getFilterBy, setData, sortByOptions } = useApplyFilters({ recoilId: tabId, filterByKeys });
 
   useEffect(() => {
     getDataflowsCount();
@@ -615,12 +610,12 @@ export const Dataflows = () => {
     </Fragment>
   );
 
-  const getRolesMultiSelectOptions = () => {
+  const getRolesDropdownOptions = () => {
     return Object.keys(config.permissions.roles).map(role => {
-      const type = config.permissions.roles[role].label;
+      const label = config.permissions.roles[role].label;
       const value = config.permissions.roles[role].key;
 
-      return { type, value };
+      return { label, value };
     });
   };
 
@@ -637,23 +632,20 @@ export const Dataflows = () => {
         type: 'INPUT'
       },
       {
-        nestedOptions: [
-          {
-            key: 'status',
-            label: resourcesContext.messages['status'],
-            isSortable: true,
-            template: 'LevelError',
-            multiSelectOptions: [
-              { type: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus['DESIGN'] },
-              { type: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus['OPEN'] }
-            ]
-          },
-          {
-            key: 'userRole',
-            label: resourcesContext.messages['userRole'],
-            isSortable: true,
-            multiSelectOptions: getRolesMultiSelectOptions()
-          }
+        key: 'userRole',
+        label: resourcesContext.messages['userRole'],
+        isSortable: true,
+        dropdownOptions: getRolesDropdownOptions(),
+        type: 'DROPDOWN'
+      },
+      {
+        key: 'status',
+        label: resourcesContext.messages['status'],
+        isSortable: true,
+        template: 'LevelError',
+        multiSelectOptions: [
+          { type: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus['DESIGN'] },
+          { type: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus['OPEN'] }
         ],
         type: 'MULTI_SELECT'
       },

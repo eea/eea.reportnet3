@@ -10,12 +10,12 @@ import { filterByKeyInputStore } from '../../_functions/Stores/filterKeysStore';
 
 import { useFilters } from '../../_functions/Hooks/useFilters';
 
-export const InputFilter = ({ onFilterData, onSort, option, recoilId }) => {
+export const InputFilter = ({ isLoading, onFilterData, onSort, option, recoilId }) => {
   const { filterBy, onFilter } = useFilters({ keyStore: filterByKeyInputStore, onFilterData, option, recoilId });
 
   return (
     <div className={styles.block} key={option.key}>
-      <SortButton id={option.key} isVisible={option.isSortable} onSort={onSort} />
+      <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} onSort={onSort} />
       <div
         className={`p-float-label ${styles.label} ${
           filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter

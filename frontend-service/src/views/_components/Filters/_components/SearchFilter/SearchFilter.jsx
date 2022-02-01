@@ -6,12 +6,12 @@ import { SortButton } from '../SortButton';
 
 import { useSearch } from '../../_functions/Hooks/useSearch';
 
-export const SearchFilter = ({ onFilterData, option, recoilId }) => {
+export const SearchFilter = ({ isLoading, onFilterData, option, recoilId }) => {
   const { searchBy, onSearch } = useSearch({ onFilterData, option, recoilId });
 
   return (
     <div className={styles.block} key={option.key}>
-      <SortButton id={option.key} isVisible={option.isSortable} />
+      <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} />
       <div
         className={`p-float-label ${styles.label} ${styles.elementFilter} ${
           searchBy.length > 0 ? styles.elementFilterSelected : styles.elementFilter

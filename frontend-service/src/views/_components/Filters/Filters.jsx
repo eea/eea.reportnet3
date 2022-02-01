@@ -43,7 +43,7 @@ const components = {
   SEARCH: SearchFilter
 };
 
-export const Filters = ({ className, isStrictModeVisible, onFilter, onSort, options = [], recoilId }) => {
+export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, onSort, options = [], recoilId }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
@@ -73,7 +73,6 @@ export const Filters = ({ className, isStrictModeVisible, onFilter, onSort, opti
         const filteredData = data.filter(item => {
           return (
             FiltersUtils.applyInputs({ filterBy, filteredKeys: inputKeys.keys, item }) &&
-            // FiltersUtils.applyDates({ filterBy, filteredKeys, item }) &&
             FiltersUtils.applyCheckBox({ filterBy, filteredKeys: checkboxKeys.keys, item }) &&
             FiltersUtils.applyMultiSelects({ filterBy, filteredKeys: multiSelectKeys.keys, isStrictMode, item }) &&
             FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: newData.searchValue || searchValue })
@@ -98,6 +97,7 @@ export const Filters = ({ className, isStrictModeVisible, onFilter, onSort, opti
 
     return (
       <FilterComponent
+        isLoading={isLoading}
         key={option.key}
         onFilterData={onFilterFilteredData}
         onSort={onSort}
@@ -116,6 +116,7 @@ export const Filters = ({ className, isStrictModeVisible, onFilter, onSort, opti
         <div className={`${styles.filterButton}`}>
           <Button
             className="p-button-primary p-button-rounded p-button-animated-blink"
+            disabled={isLoading}
             icon="filter"
             label={resourcesContext.messages['filter']}
             onClick={onFilter}
@@ -126,6 +127,7 @@ export const Filters = ({ className, isStrictModeVisible, onFilter, onSort, opti
       <div className={`${styles.resetButton}`}>
         <Button
           className="p-button-secondary p-button-rounded p-button-animated-blink"
+          disabled={isLoading}
           icon="undo"
           label={resourcesContext.messages['reset']}
           onClick={onResetFilters}

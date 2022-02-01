@@ -34,5 +34,5 @@ export const useApplyFilters = ({ filterByKeys = [], recoilId }) => {
 
   const resetFilterState = () => {};
 
-  return { getFilterBy, isFiltered: isFiltered(), resetFilterState, setData, sortBy };
+  return { getFilterBy, isFiltered: isFiltered(), resetFilterState, setData, sortByOptions: sortBy };
 };

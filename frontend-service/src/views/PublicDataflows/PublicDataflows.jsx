@@ -13,6 +13,7 @@ import styles from './PublicDataflows.module.scss';
 
 import { InputText } from 'views/_components/InputText';
 import { MyFilters } from 'views/_components/MyFilters';
+import { Filters } from 'views/_components/Filters';
 import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { PublicCard } from 'views/_components/PublicCard';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
@@ -27,6 +28,7 @@ import { filterByState, sortByState } from 'views/_components/MyFilters/_functio
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
@@ -37,8 +39,20 @@ export const PublicDataflows = () => {
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
-  const filterBy = useRecoilValue(filterByState('publicDataflows'));
-  const sortByOptions = useRecoilValue(sortByState('publicDataflows'));
+  // const filterBy = useRecoilValue(filterByState('publicDataflows'));
+  // const sortByOptions = useRecoilValue(sortByState('publicDataflows'));
+
+  const filterByKeys = [
+    'name',
+    'description',
+    'legalInstrument',
+    'obligationTitle',
+    'obligationId',
+    'status',
+    'expirationDate'
+  ];
+
+  const { getFilterBy, setData, sortByOptions } = useApplyFilters({ recoilId: 'publicDataflows', filterByKeys });
 
   const [contentStyles, setContentStyles] = useState({});
   const [filteredRecords, setFilteredRecords] = useState(0);
@@ -113,7 +127,11 @@ export const PublicDataflows = () => {
       label: resourcesContext.messages['status'],
       isSortable: true,
       template: 'LevelError',
-      type: 'MULTI_SELECT'
+      type: 'MULTI_SELECT',
+      multiSelectOptions: [
+        { type: resourcesContext.messages['close'].toUpperCase(), value: config.dataflowStatus['DESIGN'] },
+        { type: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus['OPEN'] }
+      ]
     },
     {
       key: 'expirationDate',
@@ -152,9 +170,11 @@ export const PublicDataflows = () => {
     setIsLoading(true);
 
     try {
+      const filterBy = await getFilterBy();
       const publicData = await DataflowService.getPublicData({ filterBy, numberRows, pageNum, sortByOptions: sortBy });
 
       setPublicDataflows(publicData.dataflows);
+      setData(publicData.dataflows);
       setFilteredRecords(publicData.filteredRecords);
       setTotalRecords(publicData.totalRecords);
     } catch (error) {
@@ -247,13 +267,12 @@ export const PublicDataflows = () => {
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>{resourcesContext.messages['dataflows']}</h1>
-          <MyFilters
-            data={publicDataflows}
+          <Filters
             isLoading={isLoading}
             onFilter={onLoadPublicDataflows}
             onSort={onLoadPublicDataflows}
             options={filterOptions}
-            viewType="publicDataflows"
+            recoilId="publicDataflows"
           />
           <div className={styles.dataflowsList}>{renderPublicDataflowsContent()}</div>
         </div>

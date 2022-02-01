@@ -2,14 +2,16 @@ import { useRecoilState } from 'recoil';
 import styles from '../../Filters.module.scss';
 
 import { Dropdown } from 'views/_components/Dropdown';
+import { SortButton } from '../SortButton';
 
 import { filterByStore } from '../../_functions/Stores/filterStore';
 
-export const DropdownFilter = ({ option, recoilId }) => {
+export const DropdownFilter = ({ isLoading, option, recoilId }) => {
   const [filterBy, setFilterBy] = useRecoilState(filterByStore(`${option.key}_${recoilId}`));
 
   return (
     <div className={`${styles.block}`} key={option.key}>
+      <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} />
       <Dropdown
         ariaLabel={option.key}
         className={styles.dropdownFilter}

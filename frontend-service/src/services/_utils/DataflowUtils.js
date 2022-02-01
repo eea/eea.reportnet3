@@ -186,6 +186,10 @@ const parseDatasetsInfoDTO = datasetsDTO =>
 const getDatasetType = datasetType => config.datasetType.find(type => type.key === datasetType)?.value;
 
 const parseRequestFilterBy = filterBy => {
+  if (isEmpty(filterBy)) {
+    return {};
+  }
+
   const replacements = {
     creationDate: 'creation_date',
     description: 'description',
@@ -198,15 +202,33 @@ const parseRequestFilterBy = filterBy => {
     userRole: 'role'
   };
 
-  if (isEmpty(filterBy)) {
-    return {};
-  }
-
   const parsedFilterBy = Object.keys(filterBy).map(key => {
     const results = { [replacements[key] || key]: filterBy[key] };
 
-    if (TextUtils.areEquals(key, 'status') || TextUtils.areEquals(key, 'userRole')) {
+    if (TextUtils.areEquals(key, 'status')) {
       results[replacements[key] || key] = filterBy[key].join(',');
+    }
+
+    if (TextUtils.areEquals(key, 'userRole')) {
+      results[replacements[key] || key] = filterBy[key].value;
+    }
+
+    if (TextUtils.areEquals(key, 'creationDate') || TextUtils.areEquals(key, 'expirationDate')) {
+      let dateFrom = '';
+      let dateTo = '';
+
+      if (filterBy[key][0] && !filterBy[key][1]) {
+        dateFrom = `${filterBy[key][0]}`;
+        dateTo = `${filterBy[key][0]}`;
+      } else {
+        dateFrom = `${filterBy[key][0]}`;
+        dateTo = `${filterBy[key][1]}`;
+      }
+
+      results[`${replacements[key]}_from`] = dateFrom;
+      results[`${replacements[key]}_to`] = dateTo;
+
+      delete results[replacements[key]];
     }
 
     return results;
