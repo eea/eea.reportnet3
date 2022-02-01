@@ -110,11 +110,11 @@ export const PublicDataflows = () => {
       label: resourcesContext.messages['status'],
       isSortable: true,
       template: 'LevelError',
-      type: 'MULTI_SELECT',
-      multiSelectOptions: [
-        { type: resourcesContext.messages['close'].toUpperCase(), value: config.dataflowStatus['DESIGN'] },
-        { type: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus['OPEN'] }
-      ]
+      dropdownOptions: [
+        { label: resourcesContext.messages['close'].toUpperCase(), value: config.dataflowStatus['DESIGN'] },
+        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus['OPEN'] }
+      ],
+      type: 'DROPDOWN'
     },
     {
       key: 'expirationDate',

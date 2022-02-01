@@ -12,7 +12,7 @@ import { SortButton } from '../SortButton';
 import { filterByStore } from '../../_functions/Stores/filterStore';
 import { filterByAllKeys } from '../../_functions/Stores/filterKeysStore';
 
-export const DropdownFilter = ({ isLoading, option, recoilId }) => {
+export const DropdownFilter = ({ isLoading, onSort, option, recoilId }) => {
   const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));
 
   const [filterBy, setFilterBy] = useRecoilState(filterByStore(`${option.key}_${recoilId}`));
@@ -23,7 +23,7 @@ export const DropdownFilter = ({ isLoading, option, recoilId }) => {
 
   return (
     <div className={`${styles.block}`} key={option.key}>
-      <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} />
+      <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} onSort={onSort} />
       <Dropdown
         ariaLabel={option.key}
         className={`${styles.dropdownFilter} ${

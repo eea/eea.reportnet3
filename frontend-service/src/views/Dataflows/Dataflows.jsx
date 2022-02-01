@@ -515,10 +515,7 @@ export const Dataflows = () => {
 
   const updateUserPropertiesPinnedDataflows = ({ data = [], pinnedItem }) => {
     const userProperties = { ...userContext.userProps };
-    const pinnedDataflows = intersection(
-      userProperties.pinnedDataflows,
-      data.map(data => data.id.toString())
-    );
+    const pinnedDataflows = userProperties.pinnedDataflows;
 
     if (!isEmpty(pinnedDataflows) && pinnedDataflows.includes(pinnedItem.id.toString())) {
       pull(pinnedDataflows, pinnedItem.id.toString());
@@ -628,11 +625,11 @@ export const Dataflows = () => {
         label: resourcesContext.messages['status'],
         isSortable: true,
         template: 'LevelError',
-        multiSelectOptions: [
-          { type: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus['DESIGN'] },
-          { type: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus['OPEN'] }
+        dropdownOptions: [
+          { label: resourcesContext.messages['close'].toUpperCase(), value: config.dataflowStatus['DESIGN'] },
+          { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus['OPEN'] }
         ],
-        type: 'MULTI_SELECT'
+        type: 'DROPDOWN'
       },
       {
         isSortable: true,

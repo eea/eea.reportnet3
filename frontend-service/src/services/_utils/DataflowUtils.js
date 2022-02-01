@@ -205,11 +205,7 @@ const parseRequestFilterBy = filterBy => {
   const parsedFilterBy = Object.keys(filterBy).map(key => {
     const results = { [replacements[key] || key]: filterBy[key] };
 
-    if (TextUtils.areEquals(key, 'status')) {
-      results[replacements[key] || key] = filterBy[key].join(',');
-    }
-
-    if (TextUtils.areEquals(key, 'userRole')) {
+    if (TextUtils.areEquals(key, 'userRole') || TextUtils.areEquals(key, 'status')) {
       results[replacements[key] || key] = filterBy[key].value;
     }
 
