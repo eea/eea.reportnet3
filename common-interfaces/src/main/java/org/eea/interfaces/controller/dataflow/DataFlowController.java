@@ -278,7 +278,7 @@ public interface DataFlowController {
    * @param asc the asc
    * @return the public dataflows by country
    */
-  @GetMapping("/public/country/{countryCode}")
+  @PostMapping("/public/country/{countryCode}")
   DataflowPublicPaginatedVO getPublicDataflowsByCountry(
       @PathVariable("countryCode") String countryCode,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,

@@ -60,4 +60,35 @@ public interface DataflowExtendedRepository {
 
 
 
+  /**
+   * Find paginated by country.
+   *
+   * @param obligationJson the obligation json
+   * @param pageable the pageable
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the list
+   */
+  List<Dataflow> findPaginatedByCountry(String obligationJson, Pageable pageable,
+      Map<String, String> filters, String orderHeader, boolean asc, String countryCode);
+
+
+
+  /**
+   * Count paginated by country.
+   *
+   * @param obligationJson the obligation json
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the long
+   */
+  Long countByCountry(String obligationJson, Map<String, String> filters, String orderHeader,
+      boolean asc, String countryCode);
+
+
+
 }

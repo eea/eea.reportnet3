@@ -15,4 +15,7 @@ public class DataflowPublicPaginatedVO {
   /** The total records. */
   private Long totalRecords;
 
+  /** The filtered records. */
+  private Long filteredRecords;
+
 }

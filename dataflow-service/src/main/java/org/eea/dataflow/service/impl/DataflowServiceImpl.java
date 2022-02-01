@@ -771,24 +771,42 @@ public class DataflowServiceImpl implements DataflowService {
   public DataflowPublicPaginatedVO getPublicDataflowsByCountry(String countryCode, String header,
       boolean asc, int page, int pageSize, Map<String, String> filters) throws EEAException {
 
-    DataflowPublicPaginatedVO dataflowPublicPaginated = new DataflowPublicPaginatedVO();
-
     try {
       Pageable pageable = PageRequest.of(page, pageSize);
       List<ObligationVO> obligations =
           obligationControllerZull.findOpenedObligations(null, null, null, null, null);
       ObjectMapper objectMapper = new ObjectMapper();
 
-      List<Dataflow> publicDataflows =
-          dataflowRepository.findPublicDataflowsByCountryCode(countryCode);
+      String obligationJson = objectMapper.writeValueAsString(obligations);
 
-      String arrayToJson = objectMapper.writeValueAsString(obligations);
+      List<Dataflow> publicDataflows = dataflowRepository.findPaginatedByCountry(obligationJson,
+          pageable, filters, header, asc, countryCode);
+
+      List<DataflowPublicVO> publicDataflowsVOList =
+          dataflowPublicMapper.entityListToClass(publicDataflows);
+
+      // SET OBLIGATIONS
+      for (DataflowPublicVO dataflowPublicVO : publicDataflowsVOList) {
+        for (ObligationVO obligation : obligations) {
+          if (dataflowPublicVO.getObligation().getObligationId()
+              .equals(obligation.getObligationId())) {
+            dataflowPublicVO.setObligation(obligation);
+          }
+        }
+      }
+      DataflowPublicPaginatedVO dataflowPublicPaginated = new DataflowPublicPaginatedVO();
+      dataflowPublicPaginated.setPublicDataflows(publicDataflowsVOList);
+      dataflowPublicPaginated.setTotalRecords(
+          dataflowRepository.countByCountry(obligationJson, filters, header, asc, countryCode));
+      dataflowPublicPaginated.setFilteredRecords(
+          dataflowRepository.countByCountry(obligationJson, filters, header, asc, countryCode));
+
+      return dataflowPublicPaginated;
+
 
     } catch (JsonProcessingException e) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR, e);
     }
-
-    return dataflowPublicPaginated;
   }
 
 

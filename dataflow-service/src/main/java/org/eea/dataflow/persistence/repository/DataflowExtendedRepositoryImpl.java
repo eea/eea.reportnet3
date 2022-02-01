@@ -42,6 +42,25 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "select d.*,ot.legal_instrument,ot.obligation from obligationtable ot right join dataflow d \r\n"
       + "on d.obligation_id  = cast(ot.obligation_id as integer)";
 
+  /** The Constant COUNTRY_CODE. */
+  private static final String COUNTRY_CODE = " dp.code = :countryCode ";
+
+  /** The Constant HAS_DATASETS. */
+  private static final String HAS_DATASETS = " r.has_datasets = TRUE ";
+
+  /** The Constant SHOW_PUBLIC_INFO. */
+  private static final String SHOW_PUBLIC_INFO = " d.show_public_info = TRUE ";
+
+  /** The Constant JOIN_REPRESENTATIVE_AND_DATA_PROVIDER. */
+  private static final String JOIN_REPRESENTATIVE_AND_DATA_PROVIDER =
+      " join representative r on d.id = r.dataflow_id join data_provider dp on r.data_provider_id = dp.group_id ";
+
+  /** The Constant DRAFT_STATUS. */
+  private static final String DRAFT_STATUS = " d.status = 'DRAFT'";
+
+  /** The Constant AND. */
+  private static final String AND = " and ";
+
   /** The Constant DATAFLOW_PUBLIC. */
   private static final String DATAFLOW_PUBLIC = " show_public_info = :public ";
 
@@ -113,8 +132,64 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
     }
-    return (List<Dataflow>) query.getResultList();
+    return query.getResultList();
 
+  }
+
+  /**
+   * Find paginated by country.
+   *
+   * @param obligationJson the obligation json
+   * @param pageable the pageable
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the list
+   */
+  @Override
+  public List<Dataflow> findPaginatedByCountry(String obligationJson, Pageable pageable,
+      Map<String, String> filters, String orderHeader, boolean asc, String countryCode) {
+
+    StringBuilder sb = new StringBuilder();
+    constructPublicDataflowsQuery(sb, orderHeader, asc);
+    Query query = entityManager.createNativeQuery(sb.toString(), Dataflow.class);
+
+    if (null != pageable) {
+      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+      query.setMaxResults(pageable.getPageSize());
+
+    }
+    query.setParameter("aux", obligationJson);
+    query.setParameter("countryCode", countryCode);
+    return query.getResultList();
+  }
+
+  /**
+   * Count paginated by country.
+   *
+   * @param obligationJson the obligation json
+   * @param pageable the pageable
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the long
+   */
+  @Override
+  public Long countByCountry(String obligationJson, Map<String, String> filters, String orderHeader,
+      boolean asc, String countryCode) {
+
+    StringBuilder sb = new StringBuilder();
+    sb.append(" with tableAux as (");
+    constructPublicDataflowsQuery(sb, orderHeader, asc);
+    sb.append(") select count(*) from tableAux");
+
+    Query query = entityManager.createNativeQuery(sb.toString());
+    query.setParameter("aux", obligationJson);
+    query.setParameter("countryCode", countryCode);
+    System.out.println(query.toString());
+    return Long.valueOf(query.getResultList().get(0).toString());
   }
 
   /**
@@ -262,5 +337,23 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     }
   }
 
+  /**
+   * Construct public dataflows query.
+   *
+   * @param sb the sb
+   */
+  private void constructPublicDataflowsQuery(StringBuilder sb, String orderHeader, boolean asc) {
+    sb.append(QUERY_JSON);
+    sb.append(JOIN_REPRESENTATIVE_AND_DATA_PROVIDER);
+    sb.append(" where " + HAS_DATASETS);
+    sb.append(AND + SHOW_PUBLIC_INFO);
+    sb.append(AND + DRAFT_STATUS);
+    sb.append(AND + COUNTRY_CODE);
 
+    if (StringUtils.isNotBlank(orderHeader)) {
+      sb.append(String.format(ORDER_BY, orderHeader, asc ? "asc" : "desc"));
+    } else {
+      sb.append("order by status, creation_date desc");
+    }
+  }
 }

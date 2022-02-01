@@ -709,7 +709,7 @@ public class DataflowControllerImpl implements DataFlowController {
    * @return the public dataflows by country
    */
   @Override
-  @GetMapping("/public/country/{countryCode}")
+  @PostMapping("/public/country/{countryCode}")
   @ApiOperation(value = "Gets all the public dataflow that use a specific Country Code",
       hidden = false)
   public DataflowPublicPaginatedVO getPublicDataflowsByCountry(
