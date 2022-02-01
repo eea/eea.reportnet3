@@ -1,15 +1,18 @@
 .block {
   display: flex;
-  width: 25% !important;
   margin-bottom: 1.5rem;
+  align-items: flex-end;
+  width: 100%;
 
   .dateBlock {
+    display: flex;
+    align-items: flex-end;
     position: relative;
     border-radius: 0px !important;
     border: 0px !important;
     color: var(--floating-label-color) !important;
     font-size: 0.8333rem !important;
-    height: 2.25rem;
+    height: 100%;
     padding-left: 0em;
     width: 100%;
 
@@ -18,6 +21,7 @@
       height: auto;
       overflow: visible;
       width: 90%;
+      top: 0.25em;
     }
 
     input {
@@ -29,6 +33,10 @@
       &:enabled:focus {
         box-shadow: 0 0 0 0 var(--c-blue-120) !important;
       }
+    }
+
+    span {
+      width: 100%;
     }
   }
   .elementFilter {
@@ -52,7 +60,7 @@
   }
 }
 
-@media (max-width: 1200px) {
+@media (min-width: 600px) {
   .block {
     width: 50% !important;
   }

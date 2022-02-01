@@ -1,6 +1,6 @@
 import isEmpty from 'lodash/isEmpty';
 
-import styles from '../../Filters.module.scss';
+import styles from './InputFilter.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { InputText } from 'views/_components/InputText';
