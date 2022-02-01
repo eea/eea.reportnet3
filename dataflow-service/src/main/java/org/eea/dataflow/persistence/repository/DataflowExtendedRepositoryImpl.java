@@ -128,7 +128,6 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     createQuery(isPublic, filters, orderHeader, asc, stringQuery, type, dataflowIds);
     Query query = entityManager.createNativeQuery(stringQuery.toString(), Dataflow.class);
     setParameters(json, isPublic, filters, query, type, dataflowIds);
-    System.out.println(stringQuery.toString());
 
     if (null != pageable) {
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
