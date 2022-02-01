@@ -240,14 +240,16 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
   const renderDate = option => {
     const positionLabelAnimationDate = getPositionLabelAnimationDate(labelsAnimationDate, option.key);
     const getClassNameLabelCalendar = () => {
-      if (positionLabelAnimationDate && labelsAnimationDate[positionLabelAnimationDate][option.key] === false) {
+      if (positionLabelAnimationDate && !labelsAnimationDate[positionLabelAnimationDate][option.key]) {
         return styles.labelDown;
       } else {
         return styles.label;
       }
     };
 
-    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderDate(nestedOption));
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(nestedOption => renderDate(nestedOption));
+    }
 
     const inputId = uniqueId();
 

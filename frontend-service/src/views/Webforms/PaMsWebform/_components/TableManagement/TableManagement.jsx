@@ -96,7 +96,7 @@ export const TableManagement = ({
       <Button
         className={!isSaving && 'p-button-animated-blink'}
         disabled={isSaving}
-        icon={isSaving === true ? 'spinnerAnimate' : 'check'}
+        icon={isSaving ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['save']}
         onClick={() => onSaveRecord(selectedRecord)}
       />
