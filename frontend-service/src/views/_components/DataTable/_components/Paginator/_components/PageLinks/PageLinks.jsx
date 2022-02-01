@@ -5,8 +5,8 @@ import styles from './PageLinks.module.scss';
 
 export class PageLinks extends Component {
   static defaultProps = {
-    dataflowsList: false,
     disabled: false,
+    isDataflowsList: false,
     links: null,
     page: null,
     value: null
@@ -36,7 +36,7 @@ export class PageLinks extends Component {
         className={classNames(
           'p-paginator-page p-paginator-element p-link',
           `${
-            this.props.dataflowsList &&
+            this.props.isDataflowsList &&
             (pageLink - 1 === this.props.page ? styles.buttonPageLinks : styles.notHighlightButtonPageLinks)
           } `,
           {

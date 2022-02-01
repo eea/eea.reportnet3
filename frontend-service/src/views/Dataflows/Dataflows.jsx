@@ -725,8 +725,8 @@ export const Dataflows = () => {
       return (
         <Paginator
           className={`p-paginator-bottom ${styles.paginator}`}
-          dataflowsList={true}
           first={pagination.firstRow}
+          isDataflowsList={true}
           onPageChange={onPaginate}
           rightContent={renderPaginatorRecordsCount()}
           rows={pagination.numberRows}
