@@ -106,9 +106,9 @@ export const QCSpecificHistory = ({ datasetId, isDialogVisible, onCloseDialog, v
       }
     ];
 
-    return columns.map(column => {
-      return <Column body={column.template} field={column.key} header={column.header} key={column.key} sortable />;
-    });
+    return columns.map(column => (
+      <Column body={column.template} field={column.key} header={column.header} key={column.key} sortable />
+    ));
   };
 
   const getQcHistoryData = async () => {
