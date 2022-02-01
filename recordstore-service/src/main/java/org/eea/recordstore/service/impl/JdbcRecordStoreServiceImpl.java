@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -165,6 +166,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The path snapshot. */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
+
+  /** The path snapshot disabled. */
+  @Value("${pathSnapshotDisabled}")
+  private String pathSnapshotDisabled;
 
   /** The time to wait before releasing notification. */
   @Value("${dataset.creation.notification.ms}")
@@ -986,6 +991,39 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void updateSnapshotDisabled(Long datasetId) {
+    List<SnapshotVO> listSnapshotVO =
+        dataSetSnapshotControllerZuul.getSnapshotsEnabledByIdDataset(datasetId);
+
+    dataSetSnapshotControllerZuul.updateSnapshotDisabled(datasetId);
+    File directory = new File(pathSnapshotDisabled);
+    directory.mkdir();
+
+    File snapshotFolder = new File(pathSnapshot);
+    File[] matchingFiles = snapshotFolder.listFiles(new FilenameFilter() {
+      public boolean accept(File dir, String name) {
+        boolean exists = false;
+        for (SnapshotVO snapshotVO : listSnapshotVO) {
+          if (name.startsWith("snapshot_" + snapshotVO.getId())) {
+            exists = true;
+          }
+        }
+        return exists;
+      }
+    });
+
+    for (File file : matchingFiles) {
+      file.renameTo(new File(pathSnapshotDisabled + file.getName()));
+    }
+    Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
+    datasetControllerZuul.privateDeleteDatasetData(datasetId, dataflowId);
+  }
 
   /**
    * Modify snapshot file.

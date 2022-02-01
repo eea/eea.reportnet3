@@ -16,6 +16,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.recordstore.service.impl.JdbcRecordStoreServiceImpl;
 import org.eea.recordstore.service.impl.SnapshotHelper;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
@@ -69,6 +70,10 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(RecordStoreControllerImpl.class);
+
+  /** The jdbc record store service impl. */
+  @Autowired
+  private JdbcRecordStoreServiceImpl jdbcRecordStoreServiceImpl;
 
   /**
    * Creates the empty dataset.
@@ -371,5 +376,18 @@ public class RecordStoreControllerImpl implements RecordStoreController {
         dictionaryOriginTargetObjectId, partitionDatasetTarget, tableSchemasIdPrefill);
   }
 
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/updateSnapshotDisabled/{datasetId}")
+  @ApiOperation(value = "Private operation to update snapshot, disable and move the files",
+      hidden = true)
+  public void updateSnapshotDisabled(@PathVariable("datasetId") Long datasetId) {
+    jdbcRecordStoreServiceImpl.updateSnapshotDisabled(datasetId);
+  }
 
 }

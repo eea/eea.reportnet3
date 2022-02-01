@@ -32,6 +32,7 @@ import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -165,6 +166,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
+  /** The snapshot repository. */
+  @Autowired
+  private SnapshotRepository snapshotRepository;
+
   /**
    * The Constant LOG.
    */
@@ -297,6 +302,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     String messageStatus = "";
     if (DatasetStatusEnum.TECHNICALLY_ACCEPTED.equals(datasetStatusMessageVO.getStatus())) {
       messageStatus = STATUS_TECHNICALLY_ACCEPTED;
+
+      DataFlowVO dfVO =
+          dataflowControllerZuul.getMetabaseById(datasetStatusMessageVO.getDataflowId());
+      if (dfVO.isAutomaticReportingDeletion()) {
+        recordStoreControllerZuul.updateSnapshotDisabled(datasetStatusMessageVO.getDatasetId());
+      }
     } else if (DatasetStatusEnum.CORRECTION_REQUESTED.equals(datasetStatusMessageVO.getStatus())) {
       messageStatus = STATUS_CORRECTION_REQUESTED;
     } else {
