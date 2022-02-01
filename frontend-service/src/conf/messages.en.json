@@ -381,7 +381,6 @@
     "designSchemaTabNoFields": "No fields to add QC",
     "designView": "Design",
     "detailedInfoTooltip": "Click to show detailed info",
-    "details": "Details",
     "disabled": "Disabled",
     "disabledCreateDataCollectionNoProviders": "You haven't assigned reporter/s to the dataflow yet",
     "disabledCreateDataCollectionSchemas": "There is already a data collection created",
