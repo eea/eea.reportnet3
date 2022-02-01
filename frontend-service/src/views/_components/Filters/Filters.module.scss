@@ -50,46 +50,6 @@
   color: var(--filter-sort-icon-color) !important;
 }
 
-.multiselectFilter {
-  border: 0px !important;
-  border-radius: 0px !important;
-  border-bottom: var(--inputtext-border) !important;
-  color: var(--floating-label-color) !important;
-  font-size: 0.8333rem !important;
-  height: 2rem;
-  padding-left: 0em;
-  width: 90% !important;
-
-  label {
-    color: var(--active-filter-font) !important;
-    margin-left: 0.1rem;
-    height: 100%;
-    font-weight: bold !important;
-  }
-
-  input + label {
-    font-weight: unset !important;
-    color: var(--font-filters) !important;
-  }
-
-  li {
-    opacity: 0.8;
-
-    &:hover {
-      opacity: 1;
-    }
-  }
-}
-
-.elementFilter {
-  display: flex;
-  border-bottom: var(--inputtext-border) !important;
-
-  .searchInput:focus {
-    padding-top: 10px !important;
-  }
-}
-
 .block {
   display: flex;
   align-items: flex-end;
@@ -318,6 +278,15 @@
   }
 }
 
+.elementFilter {
+  display: flex !important;
+  border-bottom: var(--inputtext-border) !important;
+
+  .searchInput:focus {
+    padding-top: 10px !important;
+  }
+}
+
 .elementFilterSelected {
   display: flex !important;
   align-items: flex-end;
@@ -408,13 +377,6 @@
 }
 
 @media (max-width: 640px) {
-  .block {
-    .multiselectFilter,
-    .label {
-      width: 100% !important;
-    }
-  }
-
   .lineItems {
     flex-direction: column;
     .resetButton {

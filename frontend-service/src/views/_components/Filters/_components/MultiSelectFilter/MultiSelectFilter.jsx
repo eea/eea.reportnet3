@@ -1,7 +1,7 @@
 import { useContext } from 'react';
 import { useRecoilValue } from 'recoil';
 
-import styles from '../../Filters.module.scss';
+import styles from './MultiSelectFilter.module.scss';
 
 import { LevelError } from 'views/_components/LevelError';
 import { MultiSelect } from 'views/_components/MultiSelect';
