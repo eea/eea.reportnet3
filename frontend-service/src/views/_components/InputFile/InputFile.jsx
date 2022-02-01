@@ -17,6 +17,7 @@ export const InputFile = ({
   accept,
   buttonTextNoFile,
   buttonTextWithFile,
+  errorMessage,
   fileRef,
   hasError,
   onChange,
@@ -44,7 +45,7 @@ export const InputFile = ({
       return (
         <div className={styles.messageWrapper}>
           <div className={styles.message}>
-            <ErrorMessage message={resourcesContext.messages['fileNotSelectedError']} />
+            <ErrorMessage message={errorMessage || resourcesContext.messages['fileNotSelectedError']} />
           </div>
         </div>
       );

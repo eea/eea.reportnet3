@@ -10,7 +10,6 @@ import { config } from 'conf';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { Dropdown } from 'views/_components/Dropdown';
-import { ErrorMessage } from 'views/_components/ErrorMessage';
 import { InputFile } from 'views/_components/InputFile';
 
 import { DocumentService } from 'services/DocumentService';
@@ -103,19 +102,12 @@ export const DocumentFileUpload = ({
       message = resourcesContext.messages['documentDescriptionValidationMax'];
       hasErrors = true;
     } else if (inputName === 'uploadFile') {
-      if (isEditForm && checkExсeedsMaxFileSize(inputUpload)) {
+      if (checkExсeedsMaxFileSize(inputUpload)) {
         message = resourcesContext.messages['tooLargeFileValidationError'];
         hasErrors = true;
-      }
-
-      if (!isEditForm) {
-        if (checkIsEmptyFile(inputUpload)) {
-          message = '';
-          hasErrors = true;
-        } else if (checkExсeedsMaxFileSize(inputUpload)) {
-          message = resourcesContext.messages['tooLargeFileValidationError'];
-          hasErrors = true;
-        }
+      } else if (checkIsEmptyFile(inputUpload)) {
+        message = '';
+        hasErrors = true;
       }
     }
 
@@ -128,16 +120,11 @@ export const DocumentFileUpload = ({
   useImperativeHandle(footerRef, () => ({ onConfirm }));
 
   const onConfirm = async () => {
-    checkInputForErrors('description');
-    checkInputForErrors('lang');
-    checkInputForErrors('uploadFile');
+    const descHasError = checkInputForErrors('description');
+    const descLangError = checkInputForErrors('lang');
+    const descFileError = checkInputForErrors('uploadFile');
 
-    if (
-      areAllInputsChecked &&
-      !errors.description.hasErrors &&
-      !errors.lang.hasErrors &&
-      !errors.uploadFile.hasErrors
-    ) {
+    if (areAllInputsChecked && !descHasError && !descLangError && !descFileError) {
       setIsUploading(true);
       setSubmitting(true);
       setFileUpdatingId(inputs.id);
@@ -204,7 +191,7 @@ export const DocumentFileUpload = ({
       <fieldset>
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <input
-            id={'descriptionDocumentFileUpload'}
+            id="descriptionDocumentFileUpload"
             maxLength={config.INPUT_MAX_LENGTH}
             name={resourcesContext.messages['description']}
             onBlur={() => checkInputForErrors('description')}
@@ -229,7 +216,6 @@ export const DocumentFileUpload = ({
           <label className="srOnly" htmlFor="descriptionDocumentFileUpload">
             {resourcesContext.messages['description']}
           </label>
-          {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
         </div>
 
         <div className={`formField ${errors.lang.hasErrors ? 'error' : ''}`}>
@@ -267,8 +253,9 @@ export const DocumentFileUpload = ({
               accept="*"
               buttonTextNoFile={resourcesContext.messages['inputFileButtonNotSelected']}
               buttonTextWithFile={resourcesContext.messages['inputFileButtonSelected']}
+              errorMessage={errors.uploadFile.message}
               fileRef={fileRef}
-              hasError={errors.jsonContent}
+              hasError={errors.uploadFile.hasErrors}
               onChange={onFileUpload}
               onClearFile={onClearFile}
               onKeyPress={e => {
@@ -281,7 +268,6 @@ export const DocumentFileUpload = ({
               {resourcesContext.messages['uploadDocument']}
             </label>
           </span>
-          {errors.uploadFile.message !== '' && <ErrorMessage message={errors.uploadFile.message} />}
         </div>
       </fieldset>
 
@@ -301,8 +287,7 @@ export const DocumentFileUpload = ({
             htmlFor="isPublic"
             onClick={() => {
               setInputs(previousValues => ({ ...previousValues, isPublic: !previousValues.isPublic }));
-            }}
-            style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
+            }}>
             {resourcesContext.messages['checkboxIsPublic']}
           </label>
         </div>
