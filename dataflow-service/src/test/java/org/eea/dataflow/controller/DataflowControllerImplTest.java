@@ -1363,6 +1363,19 @@ public class DataflowControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void getPublicDataflowsException() throws EEAException {
+    try {
+      Mockito.doThrow(new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND)).when(dataflowService)
+          .getPublicDataflows(Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(),
+              Mockito.any());
+      dataflowControllerImpl.getPublicDataflows(null, null, false, null, null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
   @Test
   public void findReferenceDataflowsExceptionTest() throws EEAException {
     Map<String, String> details = new HashMap<>();
