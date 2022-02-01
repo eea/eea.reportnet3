@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -25,6 +26,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.Updates;
 import com.mongodb.client.result.UpdateResult;
 
 /**
@@ -434,9 +436,11 @@ public class ExtendedSchemaRepositoryImpl implements ExtendedSchemaRepository {
    */
   @Override
   public void updateDatasetSchemaWebForm(String datasetSchemaId, Webform webform) {
-    mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA).updateOne(
-        new Document("_id", new ObjectId(datasetSchemaId)),
-        new Document("$set", new Document("webform.name", webform.getName())));
+
+    Bson updates = Updates.combine(Updates.set("webform.name", webform.getName()),
+        Updates.set("webform.type", webform.getType()));
+    mongoDatabase.getCollection(LiteralConstants.DATASET_SCHEMA)
+        .updateOne(new Document("_id", new ObjectId(datasetSchemaId)), updates);
 
   }
 

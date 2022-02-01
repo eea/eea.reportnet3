@@ -22,5 +22,5 @@ export const searchState = atomFamily({
 
 export const sortByState = atomFamily({
   key: 'sortByState',
-  default: () => ({})
+  default: () => ({ sortByHeader: '', sortByOption: 'idle' })
 });

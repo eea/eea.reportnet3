@@ -50,8 +50,8 @@ export const ConfirmDialog = forwardRef((props, _) => {
       isChromium !== null &&
       typeof isChromium !== 'undefined' &&
       vendorName === 'Google Inc.' &&
-      isOpera === false &&
-      isIEedge === false
+      !isOpera &&
+      !isIEedge
     ) {
       return true;
     } else {

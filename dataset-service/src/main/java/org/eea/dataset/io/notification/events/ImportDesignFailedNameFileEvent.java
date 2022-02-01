@@ -2,6 +2,7 @@ package org.eea.dataset.io.notification.events;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.exception.EEAException;
@@ -66,7 +67,7 @@ public class ImportDesignFailedNameFileEvent implements NotificableEventHandler 
     String tableSchemaId = notificationVO.getTableSchemaId();
     String tableSchemaName = notificationVO.getTableSchemaName();
 
-    if (null == tableSchemaName && null != tableSchemaId) {
+    if (StringUtils.isBlank(tableSchemaName) && StringUtils.isNotBlank(tableSchemaId)) {
       tableSchemaName =
           dataschemaService.getTableSchemaName(datasetVO.getDatasetSchema(), tableSchemaId);
     }

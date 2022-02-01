@@ -571,6 +571,7 @@ public interface DatasetController {
   Boolean getCheckView(@PathVariable("datasetId") Long datasetId);
 
 
+
   /**
    * Stream import file data.
    *
@@ -583,7 +584,7 @@ public interface DatasetController {
    * @param integrationId the integration id
    * @param delimiter the delimiter
    */
-  @PostMapping(path = "/v1/{datasetId}/streamImportFileData",
+  @PostMapping(path = "/v1/stream/{datasetId}/streamImportFileData",
       consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
   void streamImportFileData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
@@ -592,5 +593,6 @@ public interface DatasetController {
       @RequestParam(value = "replace", required = false) boolean replace,
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
-      @RequestBody HttpServletRequest request);
+      HttpServletRequest request);
+
 }

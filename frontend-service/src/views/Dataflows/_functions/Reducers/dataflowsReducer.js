@@ -23,7 +23,10 @@ export const dataflowsReducer = (state, { type, payload }) => {
         dataflowsCountFirstLoad: false,
         dataflowsCount: { ...state.dataflowsCount, [payload.type]: payload.data.length },
         activeIndex:
-          isNil(payload.contextCurrentDataflowType) && state.dataflowsCountFirstLoad ? getIndex() : state.activeIndex
+          isNil(payload.contextCurrentDataflowType) && state.dataflowsCountFirstLoad ? getIndex() : state.activeIndex,
+        filteredRecords: payload.filteredRecords,
+        isFiltered: payload.totalRecords !== payload.filteredRecords,
+        totalRecords: payload.totalRecords
       };
 
     case 'HAS_PERMISSION':
@@ -66,9 +69,6 @@ export const dataflowsReducer = (state, { type, payload }) => {
 
     case 'SET_IS_VALIDATING_ALL_DATAFLOWS_USERS':
       return { ...state, isValidatingAllDataflowsUsers: payload.isValidatingAllDataflowsUsers };
-
-    case 'GET_FILTERED_DATA':
-      return { ...state, filteredData: { ...state.filteredData, [payload.type]: payload.data } };
 
     case 'SET_PINNED_INDEX':
       return { ...state, pinnedSeparatorIndex: payload.index };

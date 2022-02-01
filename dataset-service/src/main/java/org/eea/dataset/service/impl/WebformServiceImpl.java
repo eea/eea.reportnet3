@@ -15,6 +15,7 @@ import org.eea.dataset.persistence.schemas.repository.WebformConfigRepository;
 import org.eea.dataset.service.WebformService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.enums.WebformTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,11 +76,13 @@ public class WebformServiceImpl implements WebformService {
    *
    * @param name the name
    * @param content the content
-   * @throws EEAException
+   * @param type the type
+   * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void insertWebformConfig(String name, String content) throws EEAException {
+  public void insertWebformConfig(String name, String content, WebformTypeEnum type)
+      throws EEAException {
 
     List<WebformMetabaseVO> existingWebforms = getListWebforms();
     Boolean nameRepeated = existingWebforms.stream().anyMatch(w -> w.getLabel().equals(name));
@@ -96,6 +99,7 @@ public class WebformServiceImpl implements WebformService {
         WebformMetabase webformMetabase = new WebformMetabase();
         webformMetabase.setLabel(name);
         webformMetabase.setValue(name);
+        webformMetabase.setType(type);
         webformRepository.save(webformMetabase);
         webform.setIdReferenced(webformMetabase.getId());
         webformConfigRepository.save(webform);
@@ -118,11 +122,13 @@ public class WebformServiceImpl implements WebformService {
    * @param id the id
    * @param name the name
    * @param content the content
+   * @param type the type
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public void updateWebformConfig(Long id, String name, String content) throws EEAException {
+  public void updateWebformConfig(Long id, String name, String content, WebformTypeEnum type)
+      throws EEAException {
 
     WebformMetabase webformMetabase = webformRepository.findById(id).orElse(null);
     if (null != webformMetabase) {
@@ -138,6 +144,10 @@ public class WebformServiceImpl implements WebformService {
       if (StringUtils.isNotBlank(name)) {
         webformMetabase.setLabel(name);
         webformMetabase.setValue(name);
+      }
+
+      if (type != null) {
+        webformMetabase.setType(type);
       }
 
       WebformConfig webform = webformConfigRepository.findByIdReferenced(id);
@@ -156,16 +166,22 @@ public class WebformServiceImpl implements WebformService {
         webformConfigRepository.updateWebFormConfig(webform);
         webformRepository.save(webformMetabase);
         // we need to update the webform name in all dataset schemas if has been changed
-        if (StringUtils.isNotBlank(name) && StringUtils.isNotBlank(previousName)
-            && !previousName.equals(name)) {
-          Webform webformSearch = new Webform();
-          webformSearch.setName(previousName);
-          List<DataSetSchema> schemas = schemasRepository.findByWebform(webformSearch);
-          webformSearch.setName(name);
-          schemas.stream().forEach(s -> schemasRepository
-              .updateDatasetSchemaWebForm(s.getIdDataSetSchema().toString(), webformSearch));
+        if (StringUtils.isNotBlank(name) || null != type) {
+
+          List<DataSetSchema> schemas = schemasRepository.findByWebformName(previousName);
+          schemas.stream().forEach(s -> {
+            Webform webformToChange = s.getWebform();
+            if (StringUtils.isNotBlank(name)) {
+              webformToChange.setName(name);
+            }
+            if (type != null) {
+              webformToChange.setType(type.toString());
+            }
+            schemasRepository.updateDatasetSchemaWebForm(s.getIdDataSetSchema().toString(),
+                webformToChange);
+          });
+          LOG.info("The webform configuration with id {} has been updated", id);
         }
-        LOG.info("The webform configuration with id {} has been updated", id);
       } catch (JsonProcessingException e) {
         LOG_ERROR.error("Error processing the json to update");
         throw new EEAException(EEAErrorMessage.ERROR_JSON);

@@ -54,6 +54,7 @@ import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
@@ -90,6 +91,7 @@ export const Dataflow = () => {
     hasWritePermissions: false,
     id: dataflowId,
     isApiKeyDialogVisible: false,
+    isAutomaticReportingDeletion: false,
     isBusinessDataflowDialogVisible: false,
     isCopyDataCollectionToEUDatasetLoading: false,
     isDataSchemaCorrect: [],
@@ -139,6 +141,9 @@ export const Dataflow = () => {
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
 
   const usersTypes = { REPORTERS: 'Reporters', REQUESTERS: 'Requesters' };
+
+  const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
 
   const {
     obligation,
@@ -315,7 +320,8 @@ export const Dataflow = () => {
         releaseableBtn: false,
         restrictFromPublicBtn: false,
         showPublicInfoBtn: false,
-        usersListBtn: false
+        usersListBtn: false,
+        automaticDeleteBtn: false
       };
     }
 
@@ -337,7 +343,8 @@ export const Dataflow = () => {
         isLeadReporterOfCountry ||
         isNationalCoordinatorOfCountry ||
         isReporterOfCountry ||
-        isObserver
+        isObserver,
+      automaticDeleteBtn: !isDesign && isLeadDesigner && dataflowState.data.manualAcceptance
     };
   };
 
@@ -504,6 +511,9 @@ export const Dataflow = () => {
   const setIsUpdatingPermissions = isUpdatingPermissions =>
     dataflowDispatch({ type: 'SET_IS_UPDATING_PERMISSIONS', payload: { isUpdatingPermissions } });
 
+  const setAutomaticReportingDeletion = isAutomaticReportingDeletion =>
+    dataflowDispatch({ type: 'SET_AUTOMATIC_REPORTING_DELETION', payload: { isAutomaticReportingDeletion } });
+
   useCheckNotifications(
     [
       'VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT',
@@ -637,7 +647,11 @@ export const Dataflow = () => {
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs(modalType, false)}
+      onClick={() => {
+        manageDialogs(modalType, false);
+        resetDatasetInfoFiltersState();
+        resetUserListFiltersState();
+      }}
     />
   );
 
@@ -731,6 +745,7 @@ export const Dataflow = () => {
   const onLoadReportingDataflow = async () => {
     try {
       const dataflow = await DataflowService.get(dataflowId);
+
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
       dataflowDispatch({
         type: 'INITIAL_LOAD',
@@ -739,6 +754,7 @@ export const Dataflow = () => {
           data: dataflow,
           dataflowType: dataflow.type,
           description: dataflow.description,
+          isAutomaticReportingDeletion: dataflow.isAutomaticReportingDeletion,
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,
           obligations: dataflow.obligation,
@@ -958,7 +974,12 @@ export const Dataflow = () => {
   useCheckNotifications(['ADD_DATACOLLECTION_COMPLETED_EVENT'], onDataCollectionIsCompleted);
 
   useCheckNotifications(
-    ['UPDATE_RELEASABLE_FAILED_EVENT', 'UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT', 'UPDATE_PUBLIC_STATUS_FAILED_EVENT'],
+    [
+      'UPDATE_AUTOMATIC_REPORTING_DELETION_FAILED_EVENT',
+      'UPDATE_RELEASABLE_FAILED_EVENT',
+      'UPDATE_RESTRICT_FROM_PUBLIC_FAILED_EVENT',
+      'UPDATE_PUBLIC_STATUS_FAILED_EVENT'
+    ],
     setIsDataUpdated
   );
 
@@ -1036,6 +1057,24 @@ export const Dataflow = () => {
     }
   };
 
+  const onConfirmAutomaticReportingDeletion = async () => {
+    manageDialogs('isAutomaticReportingDeletionDialogVisible', false);
+    try {
+      dataflowDispatch({
+        type: 'SET_IS_FETCHING_DATA',
+        payload: { isFetchingData: true }
+      });
+      await DataflowService.updateAutomaticDelete(dataflowId, dataflowState.isAutomaticReportingDeletion);
+      onLoadReportingDataflow();
+    } catch (error) {
+      console.error('Dataflow - onConfirmAutomaticReportingDeletion.', error);
+      notificationContext.add(
+        { type: 'UPDATE_AUTOMATIC_REPORTING_DELETION_FAILED_EVENT', content: { dataflowId } },
+        true
+      );
+    }
+  };
+
   const onConfirmUpdateShowPublicInfo = async () => {
     manageDialogs('isShowPublicInfoDialogVisible', false);
     try {
@@ -1047,7 +1086,8 @@ export const Dataflow = () => {
         dataflowState.data.description,
         dataflowState.obligations.obligationId,
         dataflowState.isReleasable,
-        dataflowState.showPublicInfo
+        dataflowState.showPublicInfo,
+        dataflowState.isAutomaticReportingDeletion
       );
       onLoadReportingDataflow();
     } catch (error) {
@@ -1069,6 +1109,16 @@ export const Dataflow = () => {
       dataflowDispatch({
         type: 'SET_SHOW_PUBLIC_INFO',
         payload: { showPublicInfo: dataflowState.data.showPublicInfo }
+      });
+    }
+  };
+
+  const onCloseAutomaticReportingDeletion = () => {
+    manageDialogs('isAutomaticReportingDeletionDialogVisible', false);
+    if (dataflowState.isAutomaticReportingDeletion) {
+      dataflowDispatch({
+        type: 'SET_AUTOMATIC_REPORTING_DELETION',
+        payload: { isAutomaticReportingDeletion: dataflowState.data.isAutomaticReportingDeletion }
       });
     }
   };
@@ -1370,6 +1420,36 @@ export const Dataflow = () => {
           </ConfirmDialog>
         )}
 
+        {dataflowState.isAutomaticReportingDeletionDialogVisible && (
+          <ConfirmDialog
+            disabledConfirm={
+              dataflowState.data.isAutomaticReportingDeletion === dataflowState.isAutomaticReportingDeletion ||
+              dataflowState.isFetchingData
+            }
+            header={resourcesContext.messages['isAutomaticReportingDeletionDialogHeader']}
+            iconConfirm={dataflowState.isFetchingData && 'spinnerAnimate'}
+            labelCancel={resourcesContext.messages['cancel']}
+            labelConfirm={resourcesContext.messages['save']}
+            onConfirm={onConfirmAutomaticReportingDeletion}
+            onHide={() => onCloseAutomaticReportingDeletion()}
+            visible={dataflowState.isAutomaticReportingDeletionDialogVisible}>
+            <Checkbox
+              checked={dataflowState.isAutomaticReportingDeletion}
+              id="isAutomaticReportingDeletionCheckbox"
+              inputId="isAutomaticReportingDeletionCheckbox"
+              onChange={() => setAutomaticReportingDeletion(!dataflowState.isAutomaticReportingDeletion)}
+              role="checkbox"
+            />
+            <label className={styles.isAutomaticReportingDeletionLabel} htmlFor="isAutomaticReportingDeletionCheckbox">
+              <span
+                className={styles.pointer}
+                onClick={() => setAutomaticReportingDeletion(!dataflowState.isAutomaticReportingDeletion)}>
+                {resourcesContext.messages['isAutomaticReportingDeletionCheckboxLabel']}
+              </span>
+            </label>
+          </ConfirmDialog>
+        )}
+
         {dataflowState.isRestrictFromPublicDialogVisible && (
           <ConfirmDialog
             confirmTooltip={resourcesContext.messages['restrictFromPublicTooltip']}
@@ -1493,7 +1573,10 @@ export const Dataflow = () => {
                   )
                 : resourcesContext.messages['dataflowUsersList']
             }
-            onHide={() => manageDialogs('isUserListVisible', false)}
+            onHide={() => {
+              manageDialogs('isUserListVisible', false);
+              resetUserListFiltersState();
+            }}
             visible={dataflowState.isUserListVisible}>
             <UserList
               dataflowId={dataflowId}
@@ -1570,7 +1653,10 @@ export const Dataflow = () => {
           <Dialog
             footer={renderDialogFooterCloseBtn('isDatasetsInfoDialogVisible')}
             header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowState.id}`}
-            onHide={() => manageDialogs('isDatasetsInfoDialogVisible', false)}
+            onHide={() => {
+              manageDialogs('isDatasetsInfoDialogVisible', false);
+              resetDatasetInfoFiltersState();
+            }}
             visible={dataflowState.isDatasetsInfoDialogVisible}>
             <DatasetsInfo dataflowId={dataflowId} dataflowType={dataflowState.dataflowType} />
           </Dialog>

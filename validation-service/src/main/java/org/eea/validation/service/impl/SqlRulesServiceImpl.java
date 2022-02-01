@@ -1126,7 +1126,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   private List<String> checkDatasetFromReferenceDataflow(List<String> ids) {
 
     List<String> referenceDatasetsId = new ArrayList<>();
-    List<DataFlowVO> referencesDataflow = dataFlowController.findReferenceDataflows();
+    List<DataFlowVO> referencesDataflow = (List<DataFlowVO>) dataFlowController
+        .findReferenceDataflows(null, null, false, null, null).getDataflows();
 
     for (DataFlowVO referenceDataflow : referencesDataflow) {
       List<ReferenceDatasetVO> referenceDatasets =

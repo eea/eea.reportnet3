@@ -7,15 +7,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.fileupload.FileUploadException;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -72,6 +69,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -279,75 +277,6 @@ public class DatasetControllerImpl implements DatasetController {
       lockService.removeLockByCriteria(importFileData);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IMPORTING_FILE_DATASET);
-    }
-  }
-
-
-  @Override
-  @HystrixCommand
-  // Put lock
-  @PostMapping(path = "/v1/{datasetId}/streamImportFileData",
-      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-  @ApiOperation(value = "Import file to dataset data",
-      notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD\n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
-  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
-      @ApiResponse(code = 400, message = "Error importing file"),
-      @ApiResponse(code = 500, message = "Error importing file")})
-  public void streamImportFileData(
-      @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
-          name = "datasetId") @PathVariable("datasetId") Long datasetId,
-      @ApiParam(type = "Long", value = "Dataflow id",
-          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @ApiParam(type = "Long", value = "Provider id",
-          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
-      @ApiParam(type = "String", value = "Table schema id",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
-              required = false) String tableSchemaId,
-      @ApiParam(type = "boolean", value = "Replace current data",
-          example = "true") @RequestParam(value = "replace", required = false) boolean replace,
-      @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
-          value = "integrationId", required = false) Long integrationId,
-      @ApiParam(type = "String", value = "File delimiter",
-          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
-      @RequestBody HttpServletRequest request) {
-
-    boolean isMultipart = ServletFileUpload.isMultipartContent(request);
-
-    if (isMultipart) {
-      FileItemFactory factory = new DiskFileItemFactory();
-      // Create a new file upload handler
-      ServletFileUpload upload = new ServletFileUpload(factory);
-      String filename = "";
-      try {
-
-
-
-        // Parse the request
-        FileItemIterator iter = upload.getItemIterator(request);
-        while (iter.hasNext()) {
-          FileItemStream item = iter.next();
-          try (InputStream stream = item.openStream()) {
-            if (!item.isFormField()) {
-              filename = item.getName();
-              fileTreatmentHelper.importFileDataV2(datasetId, tableSchemaId, stream, replace,
-                  integrationId, delimiter, filename);
-            }
-          }
-        }
-      } catch (EEAException | IOException | FileUploadException e) {
-        LOG_ERROR.error(
-            "File import failed: datasetId={}, tableSchemaId={}, fileName={}. Message: {}",
-            datasetId, tableSchemaId, filename, e.getMessage(), e);
-        Map<String, Object> importFileData = new HashMap<>();
-        importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
-        importFileData.put(LiteralConstants.DATASETID, datasetId);
-        lockService.removeLockByCriteria(importFileData);
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.IMPORTING_FILE_DATASET);
-      }
-    } else {
-      LOG_ERROR.error("File import failed: not multipart File");
     }
   }
 
@@ -1571,6 +1500,88 @@ public class DatasetControllerImpl implements DatasetController {
     return datasetService.getCheckView(datasetId);
   }
 
+  @Override
+  // Put lock
+  @PostMapping(path = "/v1/stream/{datasetId}/streamImportFileData",
+      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+  @ApiOperation(value = "Import file to dataset data",
+      notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD\n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')   OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
+      @ApiResponse(code = 400, message = "Error importing file"),
+      @ApiResponse(code = 500, message = "Error importing file")})
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+      name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
+  public void streamImportFileData(
+      @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "String", value = "Table schema id",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+              required = false) String tableSchemaId,
+      @ApiParam(type = "boolean", value = "Replace current data",
+          example = "true") @RequestParam(value = "replace", required = false) boolean replace,
+      @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
+          value = "integrationId", required = false) Long integrationId,
+      @ApiParam(type = "String", value = "File delimiter",
+          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+      HttpServletRequest request) {
+
+    boolean isMultipart = ServletFileUpload.isMultipartContent(request);
+    System.out.println("");
+    if (isMultipart) {
+      System.out.println("SOY MULTIPART");
+      String filename = "";
+      try {
+        // ServletFileUpload upload = new ServletFileUpload();
+        // // Parse the request
+        // FileItemIterator iter = upload.getItemIterator(request);
+        // System.out.println("VOY A ITERAR");
+        // while (iter.hasNext()) {
+        // FileItemStream item = iter.next();
+        // String name = item.getFieldName();
+        // try (InputStream stream = item.openStream()) {
+        // if (item.isFormField()) {
+        // System.out.println(
+        // "Form field " + name + " with value " + Streams.asString(stream) + " detected.");
+        // } else {
+        // System.out.println(
+        // "File field " + name + " with file name " + item.getName() + " detected.");
+        // fileTreatmentHelper.importFileDataV2(datasetId, tableSchemaId, stream, replace,
+        // integrationId, delimiter, name);
+        // }
+        // }
+        // }
+        MultipartHttpServletRequest multipartRequest = (MultipartHttpServletRequest) request;
+        Set set = multipartRequest.getFileMap().entrySet();
+        Iterator i = set.iterator();
+        while (i.hasNext()) {
+          System.out.println("Proceso :)");
+          Map.Entry me = (Map.Entry) i.next();
+          MultipartFile multipartFile = (MultipartFile) me.getValue();
+          filename = multipartFile.getOriginalFilename();
+          fileTreatmentHelper.importFileDataV2(datasetId, tableSchemaId,
+              multipartFile.getInputStream(), replace, integrationId, delimiter, filename);
+        }
+        System.out.println("Me voy yendo");
+      } catch (Exception e) {
+        LOG_ERROR.error(
+            "File import failed: datasetId={}, tableSchemaId={}, fileName={}. Message: {}",
+            datasetId, tableSchemaId, filename, e.getMessage(), e);
+        Map<String, Object> importFileData = new HashMap<>();
+        importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+        importFileData.put(LiteralConstants.DATASETID, datasetId);
+        lockService.removeLockByCriteria(importFileData);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            EEAErrorMessage.IMPORTING_FILE_DATASET);
+      }
+    } else {
+      LOG_ERROR.error("File import failed: not multipart File");
+    }
+  }
 
   /**
    * Creates the response entity.

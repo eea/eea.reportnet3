@@ -32,6 +32,7 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -298,9 +299,11 @@ public class DataflowControllerImplTest {
     Mockito.when(authentication.getDetails()).thenReturn(details);
     SecurityContextHolder.setContext(securityContext);
 
-    when(dataflowService.getDataflows(Mockito.any(), Mockito.any())).thenThrow(EEAException.class);
-    dataflowControllerImpl.findDataflows();
-    Mockito.verify(dataflowService, times(1)).getDataflows(Mockito.any(), Mockito.any());
+    when(dataflowService.getDataflows(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.any(), Mockito.any())).thenThrow(EEAException.class);
+    dataflowControllerImpl.findDataflows(null, null, false, null, null);
+    Mockito.verify(dataflowService, times(1)).getDataflows(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -317,11 +320,11 @@ public class DataflowControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getDetails()).thenReturn(details);
     SecurityContextHolder.setContext(securityContext);
-
-    when(dataflowService.getDataflows(Mockito.any(), Mockito.any())).thenReturn(new ArrayList<>());
-    dataflowControllerImpl.findDataflows();
-    assertEquals("fail", new ArrayList<>(),
-        dataflowService.getDataflows(Mockito.any(), Mockito.any()));
+    PaginatedDataflowVO result = new PaginatedDataflowVO();
+    when(dataflowService.getDataflows(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.any(), Mockito.any())).thenReturn(result);
+    assertEquals("fail", result,
+        dataflowControllerImpl.findDataflows(null, null, false, null, null));
   }
 
   /**
@@ -1103,13 +1106,12 @@ public class DataflowControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getDetails()).thenReturn(details);
     SecurityContextHolder.setContext(securityContext);
-
-    when(dataflowService.getDataflows(Mockito.any(), Mockito.any(TypeDataflowEnum.class)))
-        .thenReturn(new ArrayList<>());
+    PaginatedDataflowVO result = new PaginatedDataflowVO();
+    when(dataflowService.getDataflows(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.any(), Mockito.any())).thenReturn(result);
     when(authentication.getDetails()).thenReturn(details);
-    dataflowControllerImpl.findReferenceDataflows();
-    assertEquals("fail", new ArrayList<>(),
-        dataflowService.getDataflows(Mockito.any(), Mockito.any(TypeDataflowEnum.class)));
+    assertEquals("fail", result,
+        dataflowControllerImpl.findReferenceDataflows(null, null, false, null, null));
 
   }
 
@@ -1123,11 +1125,12 @@ public class DataflowControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getDetails()).thenReturn(details);
     SecurityContextHolder.setContext(securityContext);
-
+    PaginatedDataflowVO result = new PaginatedDataflowVO();
     when(authentication.getDetails()).thenReturn(details);
-    when(dataflowService.getDataflows(Mockito.any(), Mockito.any(TypeDataflowEnum.class)))
-        .thenReturn(new ArrayList<>());
-    assertEquals("fail", new ArrayList<>(), dataflowControllerImpl.findBusinessDataflows());
+    when(dataflowService.getDataflows(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.any(), Mockito.any())).thenReturn(result);
+    assertEquals("fail", result,
+        dataflowControllerImpl.findBusinessDataflows(null, null, false, null, null));
   }
 
   @Test
@@ -1143,9 +1146,10 @@ public class DataflowControllerImplTest {
 
     when(authentication.getDetails()).thenReturn(details);
 
-    doThrow(new EEAException()).when(dataflowService).getDataflows(Mockito.any(),
-        Mockito.any(TypeDataflowEnum.class));
-    assertEquals("fail", new ArrayList<>(), dataflowControllerImpl.findBusinessDataflows());
+    doThrow(new EEAException()).when(dataflowService).getDataflows(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
+    assertNotNull("fail",
+        dataflowControllerImpl.findBusinessDataflows(null, null, false, null, null));
   }
 
 
@@ -1159,11 +1163,12 @@ public class DataflowControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getDetails()).thenReturn(details);
     SecurityContextHolder.setContext(securityContext);
-
+    PaginatedDataflowVO result = new PaginatedDataflowVO();
     when(authentication.getDetails()).thenReturn(details);
-    when(dataflowService.getDataflows(Mockito.any(), Mockito.any(TypeDataflowEnum.class)))
-        .thenReturn(new ArrayList<>());
-    assertEquals("fail", new ArrayList<>(), dataflowControllerImpl.findCitizenScienceDataflows());
+    when(dataflowService.getDataflows(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.any(), Mockito.any())).thenReturn(result);
+    assertEquals("fail", result,
+        dataflowControllerImpl.findCitizenScienceDataflows(null, null, false, null, null));
   }
 
   @Test
@@ -1179,9 +1184,10 @@ public class DataflowControllerImplTest {
 
     when(authentication.getDetails()).thenReturn(details);
 
-    doThrow(new EEAException()).when(dataflowService).getDataflows(Mockito.any(),
-        Mockito.any(TypeDataflowEnum.class));
-    assertEquals("fail", new ArrayList<>(), dataflowControllerImpl.findCitizenScienceDataflows());
+    doThrow(new EEAException()).when(dataflowService).getDataflows(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
+    assertNotNull("fail",
+        dataflowControllerImpl.findCitizenScienceDataflows(details, null, false, null, null));
   }
 
   @Test
@@ -1357,9 +1363,21 @@ public class DataflowControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void getPublicDataflowsException() throws EEAException {
+    try {
+      Mockito.doThrow(new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND)).when(dataflowService)
+          .getPublicDataflows(Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(),
+              Mockito.any());
+      dataflowControllerImpl.getPublicDataflows(null, null, false, null, null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
   @Test
   public void findReferenceDataflowsExceptionTest() throws EEAException {
-    List<DataFlowVO> dataflows = new ArrayList<>();
     Map<String, String> details = new HashMap<>();
     details.put(AuthenticationDetails.USER_ID, "1");
     Authentication authentication = Mockito.mock(Authentication.class);
@@ -1367,10 +1385,12 @@ public class DataflowControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getDetails()).thenReturn(details);
     SecurityContextHolder.setContext(securityContext);
-    Mockito.doThrow(EEAException.class).when(dataflowService).getDataflows(Mockito.anyString(),
+    Mockito.doThrow(EEAException.class).when(dataflowService).getDataflows(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(),
         Mockito.any());
-    dataflows = dataflowControllerImpl.findReferenceDataflows();
-    Mockito.verify(dataflowService, times(1)).getDataflows(Mockito.anyString(), Mockito.any());
+    dataflowControllerImpl.findReferenceDataflows(null, null, false, null, null);
+    Mockito.verify(dataflowService, times(1)).getDataflows(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
   }
 
   @Test

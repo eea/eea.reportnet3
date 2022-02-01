@@ -24,6 +24,10 @@ public class Webform implements Serializable {
   @Field(value = "name")
   private String name;
 
+  /** The type. */
+  @Field(value = "type")
+  private String type;
+
   /**
    * Hash code.
    *
@@ -32,7 +36,7 @@ public class Webform implements Serializable {
   @Override
   public int hashCode() {
 
-    return Objects.hash(name);
+    return Objects.hash(name, type);
 
   }
 
@@ -51,6 +55,6 @@ public class Webform implements Serializable {
       return false;
     }
     Webform other = (Webform) obj;
-    return Objects.equals(name, other.name);
+    return Objects.equals(name, other.name) && Objects.equals(type, other.type);
   }
 }
