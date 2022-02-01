@@ -318,9 +318,6 @@ export const DataflowService = {
 
   getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField, filterBy) => {
     const filteredFilterBy = DataflowUtils.parseRequestPublicFilterBy(filterBy);
-    console.log('filteredFilterBy', filteredFilterBy);
-
-    console.log('filteredFilterBy', filteredFilterBy);
 
     const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode(
       countryCode,

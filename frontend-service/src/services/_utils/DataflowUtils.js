@@ -206,7 +206,6 @@ const parseRequestFilterBy = filterBy => {
 };
 
 const parseRequestPublicFilterBy = filterBy => {
-  console.log('filterBy', filterBy);
   const replacements = {
     name: 'name',
     obligation: 'obligation',

@@ -7,6 +7,7 @@ import ReactTooltip from 'react-tooltip';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
