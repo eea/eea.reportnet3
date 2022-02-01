@@ -43,6 +43,14 @@ public interface DatasetSnapshotService {
    */
   List<SnapshotVO> getSnapshotsByIdDataset(Long datasetId) throws EEAException;
 
+  /**
+   * Gets the snapshots enabled by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots enabled by id dataset
+   * @throws EEAException the EEA exception
+   */
+  List<SnapshotVO> getSnapshotsEnabledByIdDataset(Long datasetId) throws EEAException;
 
   /**
    * Adds the snapshot.
@@ -235,4 +243,11 @@ public interface DatasetSnapshotService {
    */
   PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
       throws EEAException;
+
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  public void updateSnapshotDisabled(Long datasetId);
 }

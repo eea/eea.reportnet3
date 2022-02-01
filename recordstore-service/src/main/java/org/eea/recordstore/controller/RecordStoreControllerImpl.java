@@ -371,5 +371,18 @@ public class RecordStoreControllerImpl implements RecordStoreController {
         dictionaryOriginTargetObjectId, partitionDatasetTarget, tableSchemasIdPrefill);
   }
 
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/updateSnapshotDisabled/{datasetId}")
+  @ApiOperation(value = "Private operation to update snapshot, disable and move the files",
+      hidden = true)
+  public void updateSnapshotDisabled(@PathVariable("datasetId") Long datasetId) {
+    recordStoreService.updateSnapshotDisabled(datasetId);
+  }
 
 }

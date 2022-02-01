@@ -872,18 +872,20 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         ? " and exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'value' LIKE ?)"
         : "";
 
-    String filterByError = errorLevelFilterNotNull && levelErrorsArray.length > 0 ? " and (" : "";
+    String filterByErrorOrIdRule = (errorLevelFilterNotNull && levelErrorsArray.length > 0)
+        || StringUtils.isNotBlank(filters.getIdRules()) ? " and " : "";
 
     String filterByLevelOrError =
         " (exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'id' in (select id_field from id_field_validations)) or id in (select id from record_value_aux) or id_table in (select id from table_value_aux))";
 
     String filterByCorrectLevelError = hasCorrectLevelError
-        ? "(exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'id' not in (select id_field from id_field_validations)) or (id not in (select id from record_value_aux) and id_table not in (select id from table_value_aux)))"
+        ? "(not exists (select * from (select jsonb_array_elements as field from jsonb_array_elements(cast(fields as jsonb))) as json_aux where field ->> 'id' in (select id_field from id_field_validations)) and (id not in (select id from record_value_aux) and id_table not in (select id from table_value_aux)))"
         : "";
 
     initialQuery = paginateExportWithFilterQuery(pageable, initialQuery);
 
-    initialQuery = initialQuery + " where fields notnull" + filterFieldValue + filterByError;
+    initialQuery =
+        initialQuery + " where fields notnull" + filterFieldValue + filterByErrorOrIdRule;
 
     // If we have levelErrors which include the CORRECT filter, add an or to the clause, otherwise,
     // if the filters only have a CORRECT use an and
@@ -899,9 +901,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     if (errorLevelFilterNotNull && levelErrorsArray.length > 1 && hasCorrectLevelError) {
       initialQuery = initialQuery + " or " + filterByCorrectLevelError;
     }
-
-    initialQuery =
-        errorLevelFilterNotNull && levelErrorsArray.length > 0 ? initialQuery + ")" : initialQuery;
 
     return initialQuery;
   }

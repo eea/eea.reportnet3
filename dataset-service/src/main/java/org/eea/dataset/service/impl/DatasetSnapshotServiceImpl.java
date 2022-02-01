@@ -274,6 +274,21 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     return snapshotMapper.entityListToClass(snapshots);
   }
 
+  /**
+   * Gets the snapshots enabled by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots enabled by id dataset
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<SnapshotVO> getSnapshotsEnabledByIdDataset(Long datasetId) throws EEAException {
+
+    List<Snapshot> snapshots =
+        snapshotRepository.findByReportingDatasetIdAndEnabledTrueOrderByCreationDateDesc(datasetId);
+
+    return snapshotMapper.entityListToClass(snapshots);
+  }
 
   /**
    * Adds the snapshot.
@@ -312,6 +327,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setDataSetName("snapshot from dataset_" + idDataset);
       snap.setDcReleased(createSnapshotVO.getReleased());
       snap.setEuReleased(false);
+      snap.setEnabled(true);
 
       Long dataflowId = metabaseRepository.findDataflowIdById(idDataset);
       if (snap.getReportingDataset() != null
@@ -1172,6 +1188,16 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     lockService.removeLockByCriteria(populateEuDataset);
     lockService.removeLockByCriteria(releaseSnapshots);
+  }
+
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void updateSnapshotDisabled(Long datasetId) {
+    snapshotRepository.updateSnapshotEnabledFalse(datasetId);
   }
 
   /**
