@@ -17,10 +17,12 @@ export const InputFile = ({
   accept,
   buttonTextNoFile,
   buttonTextWithFile,
+  errorMessage,
   fileRef,
   hasError,
   onChange,
-  onClearFile
+  onClearFile,
+  onKeyPress
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
@@ -43,7 +45,7 @@ export const InputFile = ({
       return (
         <div className={styles.messageWrapper}>
           <div className={styles.message}>
-            <ErrorMessage message={resourcesContext.messages['fileNotSelectedError']} />
+            <ErrorMessage message={errorMessage || resourcesContext.messages['fileNotSelectedError']} />
           </div>
         </div>
       );
@@ -79,6 +81,7 @@ export const InputFile = ({
         id="fileInput"
         name="fileInput"
         onChange={onFileSelect}
+        onKeyPress={onKeyPress}
         ref={fileRef}
         type="file"
       />
