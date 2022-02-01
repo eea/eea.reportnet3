@@ -107,7 +107,7 @@ export const ValidationService = {
     validationsList.rulesSchemaId = validationsListDTO.data.rulesSchemaId;
 
     if (reporting) {
-      validationsListDTO.data.rules = validationsListDTO.data.rules.filter(rule => rule.enabled === true);
+      validationsListDTO.data.rules = validationsListDTO.data.rules.filter(rule => rule.enabled);
     }
     const validationsData = ValidationUtils.parseDataValidationRulesDTO(validationsListDTO.data.rules);
     validationsList.entityTypes = validationsData.entityTypes;

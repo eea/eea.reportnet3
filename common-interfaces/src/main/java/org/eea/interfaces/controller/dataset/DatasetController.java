@@ -129,6 +129,16 @@ public interface DatasetController {
           required = false) Boolean deletePrefilledTables);
 
   /**
+   * Private delete dataset data.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   */
+  @DeleteMapping("/private/{datasetId}/deleteDatasetData")
+  void privateDeleteDatasetData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId);
+
+  /**
    * Delete import data legacy.
    *
    * @param datasetId the dataset id
@@ -561,6 +571,7 @@ public interface DatasetController {
   Boolean getCheckView(@PathVariable("datasetId") Long datasetId);
 
 
+
   /**
    * Stream import file data.
    *
@@ -573,7 +584,7 @@ public interface DatasetController {
    * @param integrationId the integration id
    * @param delimiter the delimiter
    */
-  @PostMapping(path = "/v1/{datasetId}/streamImportFileData",
+  @PostMapping(path = "/v1/stream/{datasetId}/streamImportFileData",
       consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
   void streamImportFileData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
@@ -582,5 +593,6 @@ public interface DatasetController {
       @RequestParam(value = "replace", required = false) boolean replace,
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
-      @RequestBody HttpServletRequest request);
+      HttpServletRequest request);
+
 }

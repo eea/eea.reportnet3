@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPrivateMapper;
@@ -292,7 +293,7 @@ public class DataflowServiceImpl implements DataflowService {
       boolean userAdmin = isAdmin();
       List<Long> idsResources = null;
       List<Long> idsResourcesWithoutRole = null;
-      if (filters.containsKey("role")) {
+      if (MapUtils.isNotEmpty(filters) && filters.containsKey("role")) {
         idsResources = userManagementControllerZull
             .getResourcesByUser(ResourceTypeEnum.DATAFLOW,
                 SecurityRoleEnum.fromValue(filters.get("role")))
@@ -370,14 +371,16 @@ public class DataflowServiceImpl implements DataflowService {
         });
 
         // SET OBLIGATIONS
-        for (DataFlowVO dataflowVO : dataflowVOs) {
-          for (ObligationVO obligation : obligations) {
-            if (dataflowVO.getObligation().getObligationId().equals(obligation.getObligationId())) {
-              dataflowVO.setObligation(obligation);
+        if (!TypeDataflowEnum.REFERENCE.equals(dataflowType)) {
+          for (DataFlowVO dataflowVO : dataflowVOs) {
+            for (ObligationVO obligation : obligations) {
+              if (dataflowVO.getObligation().getObligationId()
+                  .equals(obligation.getObligationId())) {
+                dataflowVO.setObligation(obligation);
+              }
             }
           }
         }
-
       } else {
         paginatedDataflowVO.setFilteredRecords(Long.valueOf(0));
         if (idsResourcesWithoutRole != null) {

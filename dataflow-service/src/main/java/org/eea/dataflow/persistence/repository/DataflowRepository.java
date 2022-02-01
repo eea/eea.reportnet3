@@ -297,6 +297,7 @@ public interface DataflowRepository
    */
   @Modifying
   @Transactional
+  @CacheEvict(value = "dataflowVO", key = "#dataflowId")
   @Query(nativeQuery = true,
       value = "UPDATE dataflow SET automatic_reporting_deletion=:automaticReportingDeletion WHERE id=:dataflowId")
   void updateAutomaticReportingDeletion(@Param("dataflowId") Long dataflowId,

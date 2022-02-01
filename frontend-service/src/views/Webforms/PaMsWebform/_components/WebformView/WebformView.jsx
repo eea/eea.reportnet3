@@ -183,25 +183,28 @@ export const WebformView = ({
 
   const setIsLoading = value => webformViewDispatch({ type: 'SET_IS_LOADING', payload: { value } });
 
-  const renderColumns = fields =>
-    !isNil(fields[0]) &&
-    Object.keys(fields[0]).map(field => (
-      <Column
-        columnResizeMode="expand"
-        field={field}
-        filter={true}
-        filterMatchMode="contains"
-        header={resourcesContext.messages[field]}
-        key={field}
-        sortable={true}
-      />
-    ));
+  const renderColumns = fields => {
+    if (!isNil(fields[0])) {
+      return Object.keys(fields[0]).map(field => (
+        <Column
+          columnResizeMode="expand"
+          field={field}
+          filter={true}
+          filterMatchMode="contains"
+          header={resourcesContext.messages[field]}
+          key={field}
+          sortable={true}
+        />
+      ));
+    }
+  };
 
   const tableFieldRender = (fieldName, columnFields) => {
     const combinatedTableValues = [];
     singlesCalculatedData.forEach(singleRecord => {
       const singleRecordValue =
         singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
+
       if (!isNil(singleRecordValue)) {
         const columnFieldsValues = {
           pamsId: singleRecord['id'],
@@ -218,6 +221,7 @@ export const WebformView = ({
         combinatedTableValues.push(columnFieldsValues);
       }
     });
+
     return renderTable(combinatedTableValues);
   };
 
@@ -290,7 +294,9 @@ export const WebformView = ({
     );
   };
 
-  if (isAddingPamsId) return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
+  if (isAddingPamsId) {
+    return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
+  }
 
   return (
     <div className={styles.webform}>

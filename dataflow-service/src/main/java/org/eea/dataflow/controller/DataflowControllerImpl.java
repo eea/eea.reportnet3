@@ -1048,7 +1048,7 @@ public class DataflowControllerImpl implements DataFlowController {
   @ApiOperation(value = "Update one Dataflow Automatic Delete Data and Snapshot", hidden = true)
   @ApiResponse(code = 500, message = "Internal Server Error")
   public void updateDataFlowAutomaticReportingDeletion(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("AutomaticDelete") boolean automaticReportingDelete) {
+      @RequestParam("automaticDelete") boolean automaticReportingDelete) {
     try {
       dataflowService.updateDataFlowAutomaticReportingDeletion(dataflowId,
           automaticReportingDelete);
