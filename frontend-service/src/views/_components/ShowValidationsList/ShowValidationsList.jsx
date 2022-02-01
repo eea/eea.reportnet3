@@ -83,7 +83,7 @@ export const ShowValidationsList = memo(
 
     const { totalErrors, totalFilteredRecords, totalRecords } = validationState;
 
-    const { getFilterBy, resetFilterState, setData, sortByOptions } = useApplyFilters('showValidations');
+    const { getFilterBy, resetFilterState, setData } = useApplyFilters('showValidations');
 
     useEffect(() => {
       const allTypesFilter = concat(
@@ -211,6 +211,8 @@ export const ShowValidationsList = memo(
           }
         }
       }
+
+      resetFilterState();
     }, [visible, isRulesDescriptionLoaded]);
 
     const addTableSchemaId = tableErrors => {
