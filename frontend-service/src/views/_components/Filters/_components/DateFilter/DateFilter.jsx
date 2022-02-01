@@ -6,7 +6,6 @@ import isEmpty from 'lodash/isEmpty';
 import uniqueId from 'lodash/uniqueId';
 import uniq from 'lodash/uniq';
 
-//import styles from '../../Filters.module.scss';
 import styles from './DateFilter.module.scss';
 
 import { Button } from 'views/_components/Button';

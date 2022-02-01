@@ -4,7 +4,7 @@
   align-items: flex-end;
   width: 100%;
 
-  .multiSelect {
+  .dropdownFilter {
     display: flex;
     align-items: flex-end;
     position: relative;
@@ -23,22 +23,7 @@
       width: 90%;
       top: 0.25em;
     }
-
-    ul > li > label > span {
-      color: var(--font-filters) !important;
-      font-weight: unset !important;
-    }
-
-    div:nth-child(2) {
-      display: flex;
-      align-items: flex-end;
-      height: 100%;
-      label {
-        height: 2.5em;
-      }
-    }
   }
-
   .elementFilter {
     border-bottom: var(--inputtext-border) !important;
   }
@@ -52,25 +37,6 @@
 @media (min-width: 600px) {
   .block {
     width: 50% !important;
-  }
-}
-
-@media (max-width: 640px) {
-  .block {
-    .multiselectFilter,
-    .label {
-      width: 100% !important;
-    }
-  }
-}
-
-@media (max-width: 935px) {
-  .block {
-    label {
-      white-space: nowrap;
-      overflow: hidden !important;
-      text-overflow: ellipsis;
-    }
   }
 }
 

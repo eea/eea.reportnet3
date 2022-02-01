@@ -3,7 +3,8 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import uniq from 'lodash/uniq';
 
-import styles from '../../Filters.module.scss';
+//import styles from '../../Filters.module.scss';
+import styles from './DropdownFilter.module.scss';
 
 import { Dropdown } from 'views/_components/Dropdown';
 import { SortButton } from '../SortButton';
@@ -25,7 +26,9 @@ export const DropdownFilter = ({ isLoading, option, recoilId }) => {
       <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} />
       <Dropdown
         ariaLabel={option.key}
-        className={styles.dropdownFilter}
+        className={`${styles.dropdownFilter} ${
+          filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+        }`}
         filter={option.dropdownOptions.length > 10}
         filterPlaceholder={option.label}
         id={`${option.key}_dropdown`}
