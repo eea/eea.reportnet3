@@ -1,0 +1,59 @@
+.block {
+  display: flex;
+  width: 25% !important;
+  margin-bottom: 1.5rem;
+
+  .dateBlock {
+    position: relative;
+    border-radius: 0px !important;
+    border: 0px !important;
+    color: var(--floating-label-color) !important;
+    font-size: 0.8333rem !important;
+    height: 2.25rem;
+    padding-left: 0em;
+    width: 100%;
+
+    .label {
+      clip: auto;
+      height: auto;
+      overflow: visible;
+      width: 90%;
+    }
+
+    input {
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+
+      &:focus,
+      &:enabled:focus {
+        box-shadow: 0 0 0 0 var(--c-blue-120) !important;
+      }
+    }
+  }
+  .elementFilter {
+    border-bottom: var(--inputtext-border) !important;
+    label {
+      position: absolute;
+      font-size: 0.8333rem !important;
+      top: 50% !important;
+      color: var(--font-filters);
+    }
+  }
+
+  .elementFilterSelected {
+    border-bottom: var(--active-filter-border) !important;
+    box-shadow: var(--active-filter-shadow);
+
+    input {
+      font-weight: bold !important;
+      color: var(--active-filter-font) !important;
+    }
+  }
+}
+
+@media (max-width: 1695px) {
+  .block {
+    height: 3rem;
+  }
+}

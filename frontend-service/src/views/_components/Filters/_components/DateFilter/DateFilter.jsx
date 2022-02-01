@@ -5,7 +5,8 @@ import isDate from 'lodash/isDate';
 import isEmpty from 'lodash/isEmpty';
 import uniqueId from 'lodash/uniqueId';
 
-import styles from '../../Filters.module.scss';
+//import styles from '../../Filters.module.scss';
+import styles from './DateFilter.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Calendar } from 'views/_components/Calendar';
@@ -61,14 +62,12 @@ export const DateFilter = ({ option, recoilId }) => {
   };
 
   return (
-    <div
-      className={`${styles.block} ${
-        filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
-      }`}
-      key={option.key}>
+    <div className={styles.block} key={option.key}>
       <SortButton id={option.key} isVisible={option.isSortable} />
       <div
-        className={`p-float-label ${styles.label} ${styles.dateBlock}`}
+        className={`p-float-label ${styles.label} ${styles.dateBlock} } ${
+          filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+        }`}
         id={`calendar_${option.key}`}
         ref={el => (calendarRefs.current[option.key] = el)}>
         <Calendar
