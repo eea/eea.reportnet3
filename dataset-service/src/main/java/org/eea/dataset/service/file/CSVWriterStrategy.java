@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ExportFilterVO;
@@ -199,24 +200,27 @@ public class CSVWriterStrategy implements WriterStrategy {
   private void setRecords(Map<String, Integer> indexMap, int nHeaders, CSVWriter csvWriter,
       boolean includeCountryCode, Long datasetId, String idTableSchema, ExportFilterVO filters) {
 
+    List<String> idRulesList = null;
     List<ErrorTypeEnum> levelErrorList = Arrays.asList(filters.getLevelError());
-    List<String> idRulesList = Arrays.asList(filters.getIdRules());
+    if (StringUtils.isNotBlank(filters.getIdRules())) {
+      idRulesList = Arrays.asList(filters.getIdRules());
+    }
 
     Long totalRecords = fileCommon.countRecordsByTableSchema(idTableSchema);
     int batchSize = 50000 / nHeaders;
     int totalPages = (int) Math.ceil((double) totalRecords / batchSize);
     LOG.info("Total number of pages in export process: {}", totalPages);
     for (int numPage = 0; numPage <= totalPages; numPage++) {
-      for (RecordVO record : fileCommon.exportFileWithFilters(datasetId, idTableSchema,
+      for (RecordVO recordVO : fileCommon.exportFileWithFilters(datasetId, idTableSchema,
           levelErrorList, PageRequest.of(numPage, batchSize), idRulesList,
           filters.getFieldValue())) {
 
-        List<FieldVO> fields = record.getFields();
+        List<FieldVO> fields = recordVO.getFields();
         List<String> unknownColumns = new ArrayList<>();
         String[] fieldsToWrite = new String[nHeaders];
 
         if (includeCountryCode) {
-          fieldsToWrite[0] = record.getDataProviderCode();
+          fieldsToWrite[0] = recordVO.getDataProviderCode();
         }
         if (CollectionUtils.isNotEmpty(fields)) {
           for (FieldVO field : fields) {
