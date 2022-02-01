@@ -27,7 +27,7 @@ import { Title } from 'views/_components/Title';
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
 
-import { filterByState, sortByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
+import { filterByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -51,18 +51,17 @@ export const PublicCountryInformation = () => {
   const [contentStyles, setContentStyles] = useState({});
   const [countryName, setCountryName] = useState('');
   const [dataflows, setDataflows] = useState([]);
-  const [firstRow, setFirstRow] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  const [numberRows, setNumberRows] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
+  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
   const [sortField, setSortField] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
+  const [totalRecords, setTotalRecords] = useState(0);
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode });
 
   useEffect(() => {
-    onLoadPublicCountryInformation(sortOrder, sortField, firstRow, numberRows);
-  }, []);
+    onLoadPublicCountryInformation();
+  }, [pagination, sortOrder, sortField]);
 
   useEffect(() => {
     !isNil(countryCode) && getCountryName();
@@ -76,8 +75,9 @@ export const PublicCountryInformation = () => {
     }
   }, [themeContext.headerCollapse]);
 
+  const { firstRow, numberRows, pageNum } = pagination;
+
   const filterBy = useRecoilValue(filterByState('publicCountryInformation'));
-  const sortByOptions = useRecoilValue(sortByState('publicCountryInformation'));
 
   const getCountryName = () => {
     if (!isNil(config.countriesByGroup)) {
@@ -104,11 +104,8 @@ export const PublicCountryInformation = () => {
     }
   };
 
-  const onChangePage = event => {
-    setNumberRows(event.rows);
-    setFirstRow(event.first);
-    onLoadPublicCountryInformation(sortOrder, sortField, event.first, event.rows);
-  };
+  const onChangePage = event =>
+    setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: Math.floor(event.first / event.rows) });
 
   const onFileDownload = async (dataflowId, dataProviderId, fileName) => {
     try {
@@ -130,16 +127,12 @@ export const PublicCountryInformation = () => {
     }
   };
 
-  const onLoadPublicCountryInformation = async (sortOrder, sortField, firstRow, numberRows) => {
+  const onLoadPublicCountryInformation = async () => {
     setIsLoading(true);
     try {
-      if (sortOrder === -1) {
-        sortOrder = 0;
-      }
-      let pageNum = Math.floor(firstRow / numberRows);
       const data = await DataflowService.getPublicDataflowsByCountryCode(
         countryCode,
-        sortOrder,
+        sortOrder === -1 ? 0 : sortOrder,
         pageNum,
         numberRows,
         sortField,
@@ -158,7 +151,6 @@ export const PublicCountryInformation = () => {
   const onSort = event => {
     setSortOrder(event.sortOrder);
     setSortField(event.sortField);
-    onLoadPublicCountryInformation(event.sortOrder, event.sortField, firstRow, numberRows);
   };
 
   const setPublicInformation = dataflows => {
@@ -351,7 +343,6 @@ export const PublicCountryInformation = () => {
         className="publicCountryInformation"
         data={dataflows}
         onFilter={onLoadPublicCountryInformation}
-        onSort={onLoadPublicCountryInformation}
         options={filterOptions}
         viewType="publicCountryInformation"
       />
