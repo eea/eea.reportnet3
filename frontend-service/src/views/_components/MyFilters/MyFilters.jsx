@@ -1,6 +1,7 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
+import { cloneDeep } from 'lodash';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
@@ -96,7 +97,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     getFilterByKeys('nestedKey');
   }, [data, viewType]);
 
-  const applyFilters = () => {
+  const applyFilters = filterBy => {
     try {
       if (isEmpty(filterBy)) {
         return data;
@@ -107,6 +108,29 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
       console.error('MyFilters - applyFilters.', error);
       notificationContext.add({ type: 'FILTER_DATA_ERROR' });
     }
+  };
+
+  const clearFilterByMultiselectDueToChangesData = () => {
+    const cloneFilterBy = cloneDeep(filterBy);
+
+    if (!isEmpty(data) && !isEmpty(Object.keys(filterBy)) && !isEmpty(Object.keys(filterByKeys))) {
+      const filteredKeysMultiSelect = filterByKeys.MULTI_SELECT.filter(key => Object.keys(filterBy).includes(key));
+      filteredKeysMultiSelect.forEach(key => {
+        if (filterBy[key] && !isEmpty(filterBy[key])) {
+          const dataByKey = data.map(itemData => itemData[key]).filter(itemValue => itemValue !== undefined);
+          const dataItemsByKey = [];
+
+          filterBy[key].forEach(itemFilterBy => {
+            if (dataByKey.includes(itemFilterBy)) {
+              dataItemsByKey.push(itemFilterBy);
+            }
+          });
+          cloneFilterBy[key] = dataItemsByKey;
+        }
+      });
+    }
+
+    return cloneFilterBy;
   };
 
   const getFilterByKeys = auxKey => {
@@ -134,8 +158,10 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
 
   const loadFilters = async () => {
     try {
-      const filteredData = applyFilters();
+      const clearFilterby = clearFilterByMultiselectDueToChangesData();
+      const filteredData = applyFilters(clearFilterby);
 
+      setFilterBy(clearFilterby);
       setFilteredData(filteredData);
     } catch (error) {
       console.error('MyFilters - loadFilters.', error);
