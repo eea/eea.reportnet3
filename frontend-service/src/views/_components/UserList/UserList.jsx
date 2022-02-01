@@ -53,7 +53,7 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   };
 
   const getFilters = filterOptions => (
-    <MyFilters className="userList" data={userListData} options={filterOptions} viewType="userList" />
+    <MyFilters className="lineItems" data={userListData} options={filterOptions} viewType="userList" />
   );
 
   const getPaginatorRecordsCount = () => (
