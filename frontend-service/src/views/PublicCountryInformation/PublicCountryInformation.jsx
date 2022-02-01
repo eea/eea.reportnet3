@@ -127,12 +127,22 @@ export const PublicCountryInformation = () => {
     }
   };
 
+  const getSortOrder = () => {
+    if (sortOrder === -1) {
+      return 0;
+    } else if (isNil(sortOrder)) {
+      return undefined;
+    } else {
+      return sortOrder;
+    }
+  };
+
   const onLoadPublicCountryInformation = async () => {
     setIsLoading(true);
     try {
       const data = await DataflowService.getPublicDataflowsByCountryCode(
         countryCode,
-        sortOrder === -1 ? 0 : sortOrder,
+        getSortOrder(),
         pageNum,
         numberRows,
         sortField,
