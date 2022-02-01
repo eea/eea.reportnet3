@@ -1,5 +1,6 @@
 package org.eea.dataflow.persistence.repository;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,10 @@ import org.springframework.data.domain.Pageable;
  */
 public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepository {
 
+  /** The Constant DELIVERY_STATUS. */
+  private static final String DELIVERY_STATUS = "delivery_status";
+
+  /** The Constant COUNTRY_CODE. */
   private static final String COUNTRY_CODE = "countryCode";
 
   /** The entity manager. */
@@ -51,6 +56,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "select d.*,ot.legal_instrument,ot.obligation from obligationtable ot right join dataflow d \r\n"
       + "on d.obligation_id  = cast(ot.obligation_id as integer)";
 
+  /** The Constant QUERY_JSON_COUNTRY. */
   private static final String QUERY_JSON_COUNTRY = "with doc as (    \r\n"
       + "select json_array_elements(asjsonconverter) as docaux from cast (:aux as json) asjsonconverter),\r\n"
       + "obligationtable as (select (docaux ->> 'obligationId' ) as obligationId,\r\n"
@@ -112,6 +118,9 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
   /** The Constant REFERENCE_STATUS. */
   private static final String REFERENCE_STATUS = " (status = :status1 or status = :status2) ";
+
+  /** The Constant DELIVERY_STATUS_IN. */
+  private static final String DELIVERY_STATUS_IN = " %s IN :%s ";
 
 
   /**
@@ -299,6 +308,9 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
             || "deadline_date_from".equals(key) || "deadline_date_to".equals(key)
             || "delivery_date_from".equals(key) || "delivery_date_to".equals(key)) {
           query.setParameter(key, new Date(Long.valueOf(filters.get(key))));
+        } else if (DELIVERY_STATUS.equals(key)) {
+          List<String> deliveryStatusList = Arrays.asList(filters.get(key).split(","));
+          query.setParameter(key, deliveryStatusList);
         } else {
           query.setParameter(key, "%" + filters.get(key) + "%");
         }
@@ -420,6 +432,9 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         break;
       case "delivery_date_to":
         stringQuery.append(String.format(DATE_TO, "delivery_date", key));
+        break;
+      case DELIVERY_STATUS:
+        stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key));
         break;
       default:
         stringQuery.append(String.format(LIKE, key, key));
