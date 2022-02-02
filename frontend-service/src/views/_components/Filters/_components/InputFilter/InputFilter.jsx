@@ -1,5 +1,6 @@
 import isEmpty from 'lodash/isEmpty';
 
+import sharedStyles from 'views/_components/Filters/Filters.module.scss';
 import styles from './InputFilter.module.scss';
 
 import { Button } from 'views/_components/Button';
@@ -18,7 +19,7 @@ export const InputFilter = ({ isLoading, onFilterData, onSort, option, recoilId 
       <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} onSort={onSort} />
       <div
         className={`p-float-label ${
-          filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+          filterBy[option.key]?.length > 0 ? sharedStyles.elementFilterSelected : sharedStyles.elementFilter
         }`}>
         <InputText
           className={styles.inputFilter}
