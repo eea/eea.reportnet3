@@ -1017,8 +1017,6 @@ public class DataFlowServiceImplTest {
     DataProviderVO dataprovider = new DataProviderVO();
     Mockito.when(dataflowPublicMapper.entityListToClass(Mockito.any()))
         .thenReturn(Arrays.asList(dataflowPublicVO));
-    Mockito.when(representativeService.findDataProvidersByCode("FR"))
-        .thenReturn(Arrays.asList(dataprovider));
     assertNotNull("assertion error",
         dataflowServiceImpl.getPublicDataflowsByCountry("FR", "name", false, 0, 12, null));
   }
