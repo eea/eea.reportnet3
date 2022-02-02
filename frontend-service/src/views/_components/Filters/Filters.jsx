@@ -166,19 +166,21 @@ export const Filters = ({
   };
 
   return (
-    <div className={`${className ? styles[className] : styles.default} ${styles.stricMode}`}>
+    <div className={`${className ? styles[className] : styles.default}`}>
       {renderFilters()}
       {renderStrictModeToggle()}
-      {renderCustomFiltersButton()}
 
-      <div className={`${styles.resetButton}`}>
-        <Button
-          className="p-button-secondary p-button-rounded p-button-animated-blink"
-          disabled={isLoading}
-          icon="undo"
-          label={resourcesContext.messages['reset']}
-          onClick={onResetFilters}
-        />
+      <div>
+        {renderCustomFiltersButton()}
+        <div className={`${styles.resetButton}`}>
+          <Button
+            className="p-button-secondary p-button-rounded p-button-animated-blink"
+            disabled={isLoading}
+            icon="undo"
+            label={resourcesContext.messages['reset']}
+            onClick={onResetFilters}
+          />
+        </div>
       </div>
     </div>
   );

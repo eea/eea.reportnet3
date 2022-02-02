@@ -76,7 +76,7 @@ export const DateFilter = ({ isLoading, onSort, option, recoilId }) => {
     <div className={styles.block} key={option.key}>
       <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} onSort={onSort} />
       <div
-        className={`p-float-label ${styles.label} ${styles.dateBlock} } ${
+        className={`p-float-label ${styles.dateBlock} ${
           filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
         }`}
         id={`calendar_${option.key}`}

@@ -57,7 +57,7 @@ export const SortButton = ({ id, isLoading, isVisible, onSort, recoilId }) => {
   };
 
   if (!isVisible) {
-    return <div className={styles.sortButtonSize} />;
+    return null;
   }
 
   return (

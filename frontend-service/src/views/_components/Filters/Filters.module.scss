@@ -143,6 +143,17 @@
   }
 }
 
+.dataflowsFilters > div {
+  width: 33.33% !important;
+}
+
+.dataflowsFilters > div:last-child {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  width: auto;
+}
+
 .default,
 .dataflowsFilters {
   align-items: center;
@@ -250,10 +261,10 @@
   .sortButtonSize {
     display: none;
   }
-  .elementFilterSelected {
-    display: flex !important;
-    align-items: flex-end;
-  }
+  // .elementFilterSelected {
+  //   display: flex !important;
+  //   align-items: flex-end;
+  // }
 }
 
 .lineItems {
@@ -277,30 +288,14 @@
   }
 }
 
-.stricMode > span {
-  display: flex;
-  align-items: center;
-  font-size: 12pt !important;
-  width: 25%;
-}
-
-.stricMode > span > button {
-  position: relative;
-  &:hover {
-    background-color: transparent !important;
-  }
-}
-
-.stricMode > span > button > span:first-child {
-  position: absolute;
-  color: var(--datatable-header-info-button-color) !important;
-  left: 0.5em;
-  top: 0.5em !important;
-}
-
 .elementFilter {
+  width: 100%;
   display: flex !important;
   border-bottom: var(--inputtext-border) !important;
+
+  label {
+    font-size: 0.8333rem !important;
+  }
 
   .searchInput:focus {
     padding-top: 10px !important;
@@ -308,18 +303,17 @@
 }
 
 .elementFilterSelected {
+  width: 100%;
   display: flex !important;
   align-items: flex-end;
   border-bottom: var(--active-filter-border) !important;
   box-shadow: var(--active-filter-shadow);
+
   button {
+    background-color: transparent !important;
     span {
       color: var(--active-filter);
     }
-  }
-  input {
-    font-weight: bold !important;
-    color: var(--active-filter-font) !important;
   }
   .searchInput {
     padding-top: 10px;
@@ -397,10 +391,6 @@
 }
 
 @media (max-width: 640px) {
-  .stricMode > span {
-    width: 100%;
-  }
-
   .lineItems {
     flex-direction: column;
     .resetButton {

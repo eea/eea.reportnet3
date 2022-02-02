@@ -10,6 +10,7 @@ import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
 import { filterByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 import { filterByAllKeys } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
+import { isNil } from 'lodash';
 
 export const DropdownFilter = ({ isLoading, onSort, option, recoilId }) => {
   const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));
@@ -25,13 +26,13 @@ export const DropdownFilter = ({ isLoading, onSort, option, recoilId }) => {
       <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} onSort={onSort} />
       <Dropdown
         ariaLabel={option.key}
-        className={`${styles.dropdownFilter} ${
-          filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+        className={`p-float-label ${styles.dropdownFilter} ${
+          !isNil(filterBy[option.key]) ? styles.elementFilterSelected : styles.elementFilter
         }`}
         filter={option.dropdownOptions.length > 10}
         filterPlaceholder={option.label}
         id={`${option.key}_dropdown`}
-        inputClassName={`p-float-label ${styles.label}`}
+        inputClassName={styles.label}
         inputId={option.key}
         label={option.label}
         onChange={event => setFilterBy({ [option.key]: event.target.value })}
@@ -41,7 +42,7 @@ export const DropdownFilter = ({ isLoading, onSort, option, recoilId }) => {
         }}
         optionLabel="label"
         options={option.dropdownOptions}
-        showClear={filterBy[option.key]}
+        showClear={isNil(filterBy[option.key])}
         showFilterClear={true}
         value={filterBy[option.key]}
       />

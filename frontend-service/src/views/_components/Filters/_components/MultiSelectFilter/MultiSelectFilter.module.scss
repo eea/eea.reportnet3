@@ -5,7 +5,6 @@
   width: 100%;
 
   .multiSelect {
-    border-bottom: var(--inputtext-border) !important;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -31,25 +30,28 @@
       color: var(--font-filters) !important;
       font-weight: bold !important;
     }
-
-    /*div:nth-child(2) {
-      display: flex;
-      align-items: flex-end;
-      height: 100%;
-      label {
-        height: 2.5em;
-      }
-    }*/
   }
+}
 
-  .elementFilter {
-    border-bottom: var(--inputtext-border) !important;
-  }
+.block + span {
+  display: flex;
+  align-items: center;
+  font-size: 12pt !important;
+  width: 25%;
+}
 
-  .elementFilterSelected {
-    border-bottom: var(--active-filter-border) !important;
-    box-shadow: var(--active-filter-shadow);
+.block + span > button {
+  position: relative;
+  &:hover {
+    background-color: transparent !important;
   }
+}
+
+.block + span > button > span:first-child {
+  position: absolute;
+  color: var(--datatable-header-info-button-color) !important;
+  left: 0.5em;
+  top: 0.5em !important;
 }
 
 @media (min-width: 600px) {
@@ -59,6 +61,9 @@
 }
 
 @media (max-width: 640px) {
+  .block + span {
+    width: 100%;
+  }
   .block {
     .multiselectFilter,
     .label {
