@@ -78,6 +78,9 @@ export const reducer = (state, { type, payload }) => {
         selectedDataProviderGroup: getSelectedProviderGroup()
       };
 
+    case 'UPDATE_REPRESENTATIVES_WITH_LABEL':
+      return { ...state, representatives: payload.representatives };
+
     case 'ON_PROVIDER_CHANGE':
       return { ...state, representatives: payload.representatives };
 

@@ -16,8 +16,8 @@ import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 
 import { Dataflow } from 'entities/Dataflow';
 
-import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 const sortDataflowsByExpirationDate = dataflows =>
   dataflows.sort((a, b) => {
@@ -227,6 +227,42 @@ const parseRequestFilterBy = filterBy => {
   return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
 };
 
+const parseRequestPublicCountryFilterBy = filterBy => {
+  if (isEmpty(filterBy)) {
+    return {};
+  }
+
+  const replacements = {
+    name: 'name',
+    obligation: 'obligation',
+    legalInstrument: 'legal_instrument',
+    deadline: 'deadline_date',
+    status: 'status',
+    deliveryDate: 'delivery_date',
+    deliveryStatus: 'delivery_status'
+  };
+
+  const parsedFilterBy = Object.keys(filterBy).map(key => {
+    const results = { [replacements[key] || key]: filterBy[key] };
+
+    if (TextUtils.areEquals(key, 'deadline') || TextUtils.areEquals(key, 'deliveryDate')) {
+      if (filterBy[key][0] && !filterBy[key][1]) {
+        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_to`] = `${filterBy[key][0]}`;
+      } else {
+        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
+      }
+
+      delete results[replacements[key]];
+    }
+
+    return results;
+  });
+
+  return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
+};
+
 const parseRequestSortBy = sortByOptions => {
   if (isNil(sortByOptions)) {
     return { isAsc: undefined, sortByHeader: '' };
@@ -251,6 +287,7 @@ export const DataflowUtils = {
   parsePublicDataflowDTO,
   parsePublicDataflowListDTO,
   parseRequestFilterBy,
+  parseRequestPublicCountryFilterBy,
   parseRequestSortBy,
   parseSortedDataflowListDTO,
   parseUsersList,
