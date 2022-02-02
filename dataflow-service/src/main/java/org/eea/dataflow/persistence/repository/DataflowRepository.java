@@ -247,6 +247,15 @@ public interface DataflowRepository
   List<Dataflow> findPublicDataflowsByCountryCode(@Param("countryCode") String countryCode);
 
   /**
+   * Find public dataflows by country code.
+   *
+   * @param countryCode the country code
+   * @return the list
+   */
+  @Query("select count(*) from Representative r where r.dataflow.showPublicInfo= true and r.dataProvider.code= :countryCode and r.dataflow.status='DRAFT' and r.hasDatasets=true")
+  Long countPublicDataflowsByCountryCode(@Param("countryCode") String countryCode);
+
+  /**
    * Find dataflows by dataprovider ids and dataflow ids.
    *
    * @param dataflowIds the dataflow ids

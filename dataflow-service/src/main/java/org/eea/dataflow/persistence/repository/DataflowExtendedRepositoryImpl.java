@@ -1,5 +1,6 @@
 package org.eea.dataflow.persistence.repository;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,15 @@ import org.springframework.data.domain.Pageable;
  * The Class DataflowExtendedRepositoryImpl.
  */
 public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepository {
+
+  /** The Constant DATE_RELEASED. */
+  private static final String DATE_RELEASED = "date_released";
+
+  /** The Constant DELIVERY_STATUS. */
+  private static final String DELIVERY_STATUS = "delivery_status";
+
+  /** The Constant COUNTRY_CODE. */
+  private static final String COUNTRY_CODE = "countryCode";
 
   /** The entity manager. */
   @PersistenceContext
@@ -45,6 +55,38 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "(docaux ->> 'reportFreqDetail' ) as reportFreqDetail\r\n" + "from doc)\r\n"
       + "select d.*,ot.legal_instrument,ot.obligation from obligationtable ot right join dataflow d \r\n"
       + "on d.obligation_id  = cast(ot.obligation_id as integer)";
+
+  /** The Constant QUERY_JSON_COUNTRY. */
+  private static final String QUERY_JSON_COUNTRY = "with doc as (    \r\n"
+      + "select json_array_elements(asjsonconverter) as docaux from cast (:aux as json) asjsonconverter),\r\n"
+      + "obligationtable as (select (docaux ->> 'obligationId' ) as obligationId,\r\n"
+      + "(docaux ->> 'oblTitle' ) as obligation,\r\n"
+      + "(docaux ->> 'description' ) as description,\r\n"
+      + "(docaux ->> 'validSince' ) as validSince,\r\n" + "(docaux ->> 'validTo' ) as validTo,\r\n"
+      + "(docaux ->> 'comment' ) as comment,\r\n"
+      + "(docaux ->> 'nextDeadline' ) as nextDeadline,\r\n"
+      + "cast((docaux ->> 'legalInstrument' )as json)->>'sourceTitle' as legal_Instrument,\r\n"
+      + "(docaux ->> 'client' ) as client,\r\n" + "(docaux ->> 'countries' ) as countries,\r\n"
+      + "(docaux ->> 'issues' ) as issues,\r\n" + "(docaux ->> 'reportFreq' ) as reportFreq,\r\n"
+      + "(docaux ->> 'reportFreqDetail' ) as reportFreqDetail\r\n" + "from doc),\r\n"
+      + "dataset_aux as (select dataflowid, status as delivery_status, date_released from dataset d2 inner join (select reporting_dataset_id, date_released from \"snapshot\" s2 group by reporting_dataset_id, date_released) as snapshot_aux on snapshot_aux.reporting_dataset_id = d2.id)\r\n"
+      + "select d.*,ot.legal_Instrument, ot.obligation, dataset_aux.delivery_status, dataset_aux.date_released from obligationtable ot RIGHT join dataflow d \r\n"
+      + "on d.obligation_id  = cast(ot.obligationId as integer)";
+
+  /** The Constant COUNTRY_CODE. */
+  private static final String COUNTRY_CODE_CONDITION = " dp.code = :countryCode ";
+
+  /** The Constant HAS_DATASETS. */
+  private static final String HAS_DATASETS = " r.has_datasets = TRUE ";
+
+  /** The Constant JOIN_REPRESENTATIVE_DATA_PROVIDER_AND_DATASET_AUX. */
+  private static final String JOIN_REPRESENTATIVE_DATA_PROVIDER_AND_DATASET_AUX =
+      " inner join representative r on d.id = r.dataflow_id "
+          + "inner join data_provider dp on r.data_provider_id = dp.group_id "
+          + "left join dataset_aux on d.id = dataset_aux.dataflowid ";
+
+  /** The Constant AND. */
+  private static final String AND = " and ";
 
   /** The Constant DATAFLOW_PUBLIC. */
   private static final String DATAFLOW_PUBLIC = " show_public_info = :public ";
@@ -74,8 +116,8 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   /** The Constant REFERENCE_STATUS. */
   private static final String REFERENCE_STATUS = " (status = :status1 or status = :status2) ";
 
-  /** The Constant AND. */
-  private static final String AND = " AND";
+  /** The Constant DELIVERY_STATUS_IN. */
+  private static final String DELIVERY_STATUS_IN = " %s IN :%s ";
 
   /** The Constant RELEASABLE. */
   private static final String RELEASABLE = " releasable = :releasable";
@@ -133,8 +175,101 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
     }
-    return (List<Dataflow>) query.getResultList();
+    return query.getResultList();
 
+  }
+
+  /**
+   * Find paginated by country.
+   *
+   * @param obligationJson the obligation json
+   * @param pageable the pageable
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the list
+   * @throws EEAException
+   */
+  @Override
+  public List<Dataflow> findPaginatedByCountry(String obligationJson, Pageable pageable,
+      Map<String, String> filters, String orderHeader, boolean asc, String countryCode)
+      throws EEAException {
+
+    StringBuilder sb = new StringBuilder();
+    constructPublicDataflowsQuery(sb, orderHeader, asc, filters, true);
+    Query query = entityManager.createNativeQuery(sb.toString(), Dataflow.class);
+
+    setParameters(obligationJson, true, filters, query, null, null);
+
+    query.setParameter(COUNTRY_CODE, countryCode);
+
+    if (null != pageable) {
+      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+      query.setMaxResults(pageable.getPageSize());
+
+    }
+    return query.getResultList();
+  }
+
+  /**
+   * Count paginated by country.
+   *
+   * @param obligationJson the obligation json
+   * @param pageable the pageable
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the long
+   * @throws EEAException
+   */
+  @Override
+  public Long countByCountry(String obligationJson, Map<String, String> filters, String orderHeader,
+      boolean asc, String countryCode) throws EEAException {
+
+    StringBuilder sb = new StringBuilder();
+    sb.append(" with tableAux as (");
+    constructPublicDataflowsQuery(sb, orderHeader, asc, filters, false);
+    sb.append(") select count(*) from tableAux");
+
+    Query query = entityManager.createNativeQuery(sb.toString());
+
+    query.setParameter("aux", obligationJson);
+    query.setParameter(COUNTRY_CODE, countryCode);
+    query.setParameter("public", Boolean.TRUE);
+
+    return Long.valueOf(query.getResultList().get(0).toString());
+  }
+
+  /**
+   * Count by country filtered.
+   *
+   * @param obligationJson the obligation json
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the long
+   * @throws EEAException
+   */
+  @Override
+  public Long countByCountryFiltered(String obligationJson, Map<String, String> filters,
+      String orderHeader, boolean asc, String countryCode) throws EEAException {
+
+    StringBuilder sb = new StringBuilder();
+    sb.append(" with tableAux as (");
+    constructPublicDataflowsQuery(sb, orderHeader, asc, filters, true);
+
+    sb.append(") select count(*) from tableAux");
+
+    Query query = entityManager.createNativeQuery(sb.toString());
+
+    setParameters(obligationJson, true, filters, query, null, null);
+
+    query.setParameter(COUNTRY_CODE, countryCode);
+
+    return Long.valueOf(query.getResultList().get(0).toString());
   }
 
   /**
@@ -299,6 +434,15 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       case "deadline_date_to":
         stringQuery.append(String.format(DATE_TO, "deadline_date", key));
         break;
+      case "delivery_date_from":
+        stringQuery.append(String.format(DATE_FROM, DATE_RELEASED, key));
+        break;
+      case "delivery_date_to":
+        stringQuery.append(String.format(DATE_TO, DATE_RELEASED, key));
+        break;
+      case DELIVERY_STATUS:
+        stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key));
+        break;
       case "status":
         switch (value) {
           case "OPEN":
@@ -330,7 +474,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       case "creation_date_to":
       case "deadline_date_from":
       case "deadline_date_to":
+      case "delivery_date_from":
+      case "delivery_date_to":
         query.setParameter(key, new Date(Long.valueOf(value)));
+        break;
+      case DELIVERY_STATUS:
+        query.setParameter(key, Arrays.asList(value.split(",")));
         break;
       case "status":
         switch (value) {
@@ -392,5 +541,38 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     }
   }
 
+  /**
+   * Construct public dataflows query.
+   *
+   * @param sb the sb
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param filters the filters
+   * @param applyFilters the apply filters
+   * @throws EEAException the EEA exception
+   */
+  private void constructPublicDataflowsQuery(StringBuilder sb, String orderHeader, boolean asc,
+      Map<String, String> filters, boolean applyFilters) throws EEAException {
 
+    boolean addAnd = true;
+
+    sb.append(QUERY_JSON_COUNTRY);
+    sb.append(JOIN_REPRESENTATIVE_DATA_PROVIDER_AND_DATASET_AUX);
+    sb.append(" where " + HAS_DATASETS);
+    sb.append(AND + DATAFLOW_PUBLIC);
+    sb.append(AND + COUNTRY_CODE_CONDITION);
+
+    if (MapUtils.isNotEmpty(filters) && applyFilters) {
+      for (String key : filters.keySet()) {
+        addAnd(sb, addAnd);
+        setFilters(sb, key, filters.get(key));
+      }
+    }
+
+    if (StringUtils.isNotBlank(orderHeader)) {
+      sb.append(String.format(ORDER_BY, orderHeader, asc ? "asc" : "desc"));
+    } else {
+      sb.append(" order by status, creation_date desc ");
+    }
+  }
 }
