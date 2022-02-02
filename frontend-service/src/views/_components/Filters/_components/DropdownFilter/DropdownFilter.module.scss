@@ -1,0 +1,47 @@
+.block {
+  display: flex;
+  margin-bottom: 1.5rem;
+  align-items: flex-end;
+  width: 100%;
+
+  .dropdownFilter {
+    display: flex;
+    align-items: flex-end;
+    position: relative;
+    border-radius: 0px !important;
+    border: 0px !important;
+    color: var(--floating-label-color) !important;
+    font-size: 0.8333rem !important;
+    height: 100%;
+    padding-left: 0em;
+    width: 100%;
+
+    .label {
+      clip: auto;
+      height: auto;
+      overflow: visible;
+      width: 90%;
+      top: 0.25em;
+    }
+  }
+  .elementFilter {
+    border-bottom: var(--inputtext-border) !important;
+  }
+
+  .elementFilterSelected {
+    border-bottom: var(--active-filter-border) !important;
+    box-shadow: var(--active-filter-shadow);
+  }
+}
+
+@media (min-width: 600px) {
+  .block {
+    width: 50% !important;
+  }
+}
+
+@media (max-width: 1695px) {
+  .block {
+    height: 3rem;
+  }
+}

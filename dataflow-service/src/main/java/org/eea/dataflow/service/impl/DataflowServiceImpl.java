@@ -53,7 +53,6 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
-import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
@@ -297,7 +296,7 @@ public class DataflowServiceImpl implements DataflowService {
         idsResources = userManagementControllerZull
             .getResourcesByUser(ResourceTypeEnum.DATAFLOW,
                 SecurityRoleEnum.fromValue(filters.get("role")))
-            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());;
+            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
         idsResourcesWithoutRole =
             userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
                 .map(ResourceAccessVO::getId).collect(Collectors.toList());
@@ -395,7 +394,7 @@ public class DataflowServiceImpl implements DataflowService {
       }
       paginatedDataflowVO.setDataflows(dataflowVOs);
       return paginatedDataflowVO;
-    } catch (JsonProcessingException e1) {
+    } catch (Exception e) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
     }
   }
@@ -754,7 +753,7 @@ public class DataflowServiceImpl implements DataflowService {
 
       return pag;
 
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
     }
   }
@@ -768,28 +767,48 @@ public class DataflowServiceImpl implements DataflowService {
    * @param page the page
    * @param pageSize the page size
    * @return the public dataflows by country
+   * @throws EEAException
    */
   @Override
-  public DataflowPublicPaginatedVO getPublicDataflowsByCountry(String countryCode, String header,
-      boolean asc, int page, int pageSize) {
-    DataflowPublicPaginatedVO dataflowPublicPaginated = new DataflowPublicPaginatedVO();
-    // get the entity
-    List<DataflowPublicVO> dataflowPublicList = dataflowPublicMapper
-        .entityListToClass(dataflowRepository.findPublicDataflowsByCountryCode(countryCode));
+  public PaginatedDataflowVO getPublicDataflowsByCountry(String countryCode, String header,
+      boolean asc, int page, int pageSize, Map<String, String> filters) throws EEAException {
 
-    List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
-    setReportings(dataflowPublicList, providerId);
-    // sort and paging
-    sortPublicDataflows(dataflowPublicList, header, asc);
-    dataflowPublicPaginated.setPublicDataflows(getPage(dataflowPublicList, page, pageSize));
-    dataflowPublicPaginated.setTotalRecords(Long.valueOf(dataflowPublicList.size()));
+    try {
+      Pageable pageable = PageRequest.of(page, pageSize);
+      List<ObligationVO> obligations =
+          obligationControllerZull.findOpenedObligations(null, null, null, null, null);
+      ObjectMapper objectMapper = new ObjectMapper();
 
-    dataflowPublicPaginated.getPublicDataflows().stream().forEach(dataflow -> {
-      dataflow.setReferenceDatasets(
-          referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflow.getId()));
-    });
+      String obligationJson = objectMapper.writeValueAsString(obligations);
 
-    return dataflowPublicPaginated;
+      List<Dataflow> publicDataflows = dataflowRepository.findPaginatedByCountry(obligationJson,
+          pageable, filters, header, asc, countryCode);
+
+      List<DataflowPublicVO> publicDataflowsVOList =
+          dataflowPublicMapper.entityListToClass(publicDataflows);
+
+      // SET OBLIGATIONS
+      for (DataflowPublicVO dataflowPublicVO : publicDataflowsVOList) {
+        for (ObligationVO obligation : obligations) {
+          if (dataflowPublicVO.getObligation().getObligationId()
+              .equals(obligation.getObligationId())) {
+            dataflowPublicVO.setObligation(obligation);
+          }
+        }
+      }
+      PaginatedDataflowVO dataflowPublicPaginated = new PaginatedDataflowVO();
+      dataflowPublicPaginated.setDataflows(publicDataflowsVOList);
+      dataflowPublicPaginated.setTotalRecords(
+          dataflowRepository.countByCountry(obligationJson, filters, header, asc, countryCode));
+      dataflowPublicPaginated.setFilteredRecords(dataflowRepository
+          .countByCountryFiltered(obligationJson, filters, header, asc, countryCode));
+
+      return dataflowPublicPaginated;
+
+
+    } catch (JsonProcessingException e) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR, e);
+    }
   }
 
 
