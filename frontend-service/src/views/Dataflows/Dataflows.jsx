@@ -591,14 +591,11 @@ export const Dataflows = () => {
     </Fragment>
   );
 
-  const getRolesDropdownOptions = () => {
-    return Object.keys(config.permissions.roles).map(role => {
-      const label = config.permissions.roles[role].label;
-      const value = config.permissions.roles[role].key;
-
-      return { label, value };
-    });
-  };
+  const getRolesDropdownOptions = () =>
+    Object.keys(config.permissions.roles).map(role => ({
+      label: config.permissions.roles[role].label,
+      value: config.permissions.roles[role].key
+    }));
 
   const getFilterOptions = () => {
     const filters = [

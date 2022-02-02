@@ -105,7 +105,7 @@ export const ShowValidationsList = memo(
     }, []);
 
     useEffect(() => {
-      const headers = [
+      const columns = [
         {
           key: 'entityType',
           header: resourcesContext.messages['entity'],
@@ -171,7 +171,7 @@ export const ShowValidationsList = memo(
         }
       ];
 
-      const columnsArr = headers.map(column => (
+      const columnsArr = columns.map(column => (
         <Column
           body={column?.template}
           className={column?.className}

@@ -9,6 +9,20 @@ import { useSearch } from 'views/_components/Filters/_functions/Hooks/useSearch'
 export const SearchFilter = ({ isLoading, onFilterData, option, recoilId }) => {
   const { searchBy, onSearch } = useSearch({ onFilterData, option, recoilId });
 
+  const renderCleanInputButton = () => {
+    if (!searchBy) {
+      return null;
+    }
+
+    return (
+      <Button
+        className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+        icon="cancel"
+        onClick={() => onSearch('')}
+      />
+    );
+  };
+
   return (
     <div className={styles.block} key={option.key}>
       <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} />
@@ -22,13 +36,7 @@ export const SearchFilter = ({ isLoading, onFilterData, option, recoilId }) => {
           onChange={event => onSearch(event.target.value)}
           value={searchBy}
         />
-        {searchBy && (
-          <Button
-            className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
-            icon="cancel"
-            onClick={() => onSearch('')}
-          />
-        )}
+        {renderCleanInputButton()}
 
         <label className={styles.label} htmlFor={'searchInput'}>
           {option.label}

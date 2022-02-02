@@ -3,7 +3,6 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import uniq from 'lodash/uniq';
 
-//import styles from '../../Filters.module.scss';
 import styles from './DropdownFilter.module.scss';
 
 import { Dropdown } from 'views/_components/Dropdown';

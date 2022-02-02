@@ -210,19 +210,13 @@ const parseRequestFilterBy = filterBy => {
     }
 
     if (TextUtils.areEquals(key, 'creationDate') || TextUtils.areEquals(key, 'expirationDate')) {
-      let dateFrom = '';
-      let dateTo = '';
-
       if (filterBy[key][0] && !filterBy[key][1]) {
-        dateFrom = `${filterBy[key][0]}`;
-        dateTo = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_to`] = `${filterBy[key][0]}`;
       } else {
-        dateFrom = `${filterBy[key][0]}`;
-        dateTo = `${filterBy[key][1]}`;
+        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
       }
-
-      results[`${replacements[key]}_from`] = dateFrom;
-      results[`${replacements[key]}_to`] = dateTo;
 
       delete results[replacements[key]];
     }

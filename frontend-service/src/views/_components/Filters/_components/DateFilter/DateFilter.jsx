@@ -64,7 +64,11 @@ export const DateFilter = ({ isLoading, onSort, option, recoilId }) => {
         return null;
       }
 
-      return isDate(value) ? value.getTime() : new Date(value);
+      if (isDate(value)) {
+        return value.getTime();
+      }
+
+      return new Date(value);
     });
   };
 
