@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
+import isNil from 'lodash/isNil';
 
 import uniq from 'lodash/uniq';
 
@@ -10,7 +11,6 @@ import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
 import { filterByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 import { filterByAllKeys } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
-import { isNil } from 'lodash';
 
 export const DropdownFilter = ({ isLoading, onFilterData, onSort, option, recoilId }) => {
   const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));
