@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
-import isNil from 'lodash/isNil';
 
+import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 
 import styles from './DropdownFilter.module.scss';
