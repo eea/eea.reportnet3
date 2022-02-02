@@ -206,7 +206,7 @@ const parseRequestFilterBy = filterBy => {
     const results = { [replacements[key] || key]: filterBy[key] };
 
     if (TextUtils.areEquals(key, 'userRole') || TextUtils.areEquals(key, 'status')) {
-      results[replacements[key] || key] = filterBy[key].value;
+      results[replacements[key] || key] = filterBy[key]?.value;
     }
 
     if (TextUtils.areEquals(key, 'creationDate') || TextUtils.areEquals(key, 'expirationDate')) {

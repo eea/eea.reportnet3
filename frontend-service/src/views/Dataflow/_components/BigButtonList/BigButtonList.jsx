@@ -716,7 +716,7 @@ export const BigButtonList = ({
           header={resourcesContext.messages['updateDataCollectionHeader']}
           labelCancel={resourcesContext.messages['close']}
           labelConfirm={resourcesContext.messages['create']}
-          onConfirm={() => onUpdateDataCollection()}
+          onConfirm={onUpdateDataCollection}
           onHide={() => setIsUpdateDataCollectionDialogVisible(false)}
           visible={isUpdateDataCollectionDialogVisible}>
           <p>{resourcesContext.messages['updateDataCollectionMessage']}</p>
@@ -765,7 +765,7 @@ export const BigButtonList = ({
           header={resourcesContext.messages['copyDataCollectionToEUDatasetHeader']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onCopyDataCollectionToEUDataset()}
+          onConfirm={onCopyDataCollectionToEUDataset}
           onHide={() => setIsCopyDataCollectionToEUDatasetDialogVisible(false)}
           visible={isCopyDataCollectionToEUDatasetDialogVisible}>
           <p>{resourcesContext.messages['copyDataCollectionToEUDatasetMessage']}</p>
@@ -777,7 +777,7 @@ export const BigButtonList = ({
           header={resourcesContext.messages['exportEUDatasetHeader']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onExportEUDataset()}
+          onConfirm={onExportEUDataset}
           onHide={() => setIsExportEUDatasetDialogVisible(false)}
           visible={isExportEUDatasetDialogVisible}>
           <p>{resourcesContext.messages['exportEUDatasetMessage']}</p>
@@ -790,7 +790,7 @@ export const BigButtonList = ({
           header={resourcesContext.messages['createDataCollection']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onCreateDataCollections()}
+          onConfirm={onCreateDataCollections}
           onHide={() => {
             setIsConfirmCollectionDialog(false);
             onResetRadioButtonOptions();
@@ -810,7 +810,7 @@ export const BigButtonList = ({
           header={resourcesContext.messages['notValidQCWarningTitle']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onCreateDataCollectionsWithNotValids()}
+          onConfirm={onCreateDataCollectionsWithNotValids}
           onHide={() => {
             notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
             setIsQCsNotValidWarningVisible(false);

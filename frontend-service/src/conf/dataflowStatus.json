@@ -1,4 +1,6 @@
 {
   "DESIGN": "DESIGN",
-  "OPEN": "DRAFT"
+  "OPEN": "DRAFT",
+  "OPEN_FE": "OPEN",
+  "CLOSED": "CLOSED"
 }
