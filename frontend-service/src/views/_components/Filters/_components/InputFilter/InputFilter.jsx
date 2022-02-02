@@ -16,7 +16,13 @@ export const InputFilter = ({ isLoading, onFilterData, onSort, option, recoilId 
 
   return (
     <div className={styles.block} key={option.key}>
-      <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} onSort={onSort} />
+      <SortButton
+        id={option.key}
+        isLoading={isLoading}
+        isVisible={option.isSortable}
+        onSort={onSort}
+        recoilId={recoilId}
+      />
       <div
         className={`p-float-label ${
           filterBy[option.key]?.length > 0 ? sharedStyles.elementFilterSelected : sharedStyles.elementFilter
