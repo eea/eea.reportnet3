@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { noWait, useRecoilCallback } from 'recoil';
+import { noWait, useRecoilCallback, useRecoilValue } from 'recoil';
 
 import isNil from 'lodash/isNil';
 
@@ -55,6 +55,8 @@ export const Filters = ({
   recoilId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
+
+  const isFiltered = useRecoilValue(isFilteredStore(recoilId));
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
@@ -113,7 +115,6 @@ export const Filters = ({
         reset(filteredDataStore(recoilId));
         reset(isFilteredStore(recoilId));
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
-        await onReset();
       },
     [recoilId]
   );
@@ -173,11 +174,14 @@ export const Filters = ({
 
       <div className={`${styles.resetButton}`}>
         <Button
-          className="p-button-secondary p-button-rounded p-button-animated-blink"
+          className={`p-button-secondary p-button-rounded ${isFiltered ? 'p-button-animated-blink' : ''}`}
           disabled={isLoading}
           icon="undo"
           label={resourcesContext.messages['reset']}
-          onClick={onResetFilters}
+          onClick={async () => {
+            onReset();
+            await onResetFilters();
+          }}
         />
       </div>
     </div>
