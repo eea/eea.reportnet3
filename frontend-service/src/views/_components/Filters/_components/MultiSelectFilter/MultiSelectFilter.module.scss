@@ -5,38 +5,41 @@
   width: 100%;
 
   .multiSelect {
+    border-bottom: var(--inputtext-border) !important;
     display: flex;
-    align-items: flex-end;
-    position: relative;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100% !important;
     border-radius: 0px !important;
     border: 0px !important;
     color: var(--floating-label-color) !important;
     font-size: 0.8333rem !important;
-    height: 100%;
-    padding-left: 0em;
-    width: 100%;
 
     .label {
       clip: auto;
       height: auto;
       overflow: visible;
       width: 90%;
-      top: 0.25em;
+    }
+
+    ul > li {
+      margin: 0.7em 0 !important;
+      text-transform: uppercase;
     }
 
     ul > li > label > span {
       color: var(--font-filters) !important;
-      font-weight: unset !important;
+      font-weight: bold !important;
     }
 
-    div:nth-child(2) {
+    /*div:nth-child(2) {
       display: flex;
       align-items: flex-end;
       height: 100%;
       label {
         height: 2.5em;
       }
-    }
+    }*/
   }
 
   .elementFilter {

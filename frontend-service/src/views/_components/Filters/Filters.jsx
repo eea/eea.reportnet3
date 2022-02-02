@@ -166,7 +166,7 @@ export const Filters = ({
   };
 
   return (
-    <div className={className ? styles[className] : styles.default}>
+    <div className={`${className ? styles[className] : styles.default} ${styles.stricMode}`}>
       {renderFilters()}
       {renderStrictModeToggle()}
       {renderCustomFiltersButton()}
