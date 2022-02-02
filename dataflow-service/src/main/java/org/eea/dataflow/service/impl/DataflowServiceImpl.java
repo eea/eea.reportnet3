@@ -1,7 +1,6 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -92,7 +91,6 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
-import io.jsonwebtoken.lang.Objects;
 
 /**
  * The Class DataflowServiceImpl.
@@ -796,7 +794,17 @@ public class DataflowServiceImpl implements DataflowService {
           }
         }
       }
+
+      List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
+      setReportings(publicDataflowsVOList, providerId);
+
+      publicDataflowsVOList.stream().forEach(dataflow -> {
+        dataflow.setReferenceDatasets(referenceDatasetControllerZuul
+            .findReferenceDataSetPublicByDataflowId(dataflow.getId()));
+      });
+
       PaginatedDataflowVO dataflowPublicPaginated = new PaginatedDataflowVO();
+
       dataflowPublicPaginated.setDataflows(publicDataflowsVOList);
       dataflowPublicPaginated.setTotalRecords(
           dataflowRepository.countByCountry(obligationJson, filters, header, asc, countryCode));
@@ -1038,106 +1046,6 @@ public class DataflowServiceImpl implements DataflowService {
         }
       }
     });
-  }
-
-  /**
-   * Sort public dataflows.
-   *
-   * @param dataflowPublicList the dataflow public list
-   * @param header the header
-   * @param asc the asc
-   */
-  private void sortPublicDataflows(List<DataflowPublicVO> dataflowPublicList, String header,
-      boolean asc) {
-    Comparator<DataflowPublicVO> compare = null;
-    // get compare
-    if (null != header) {
-      switch (header) {
-        case "name":
-          compare = Comparator.comparing(DataflowPublicVO::getName,
-              Comparator.nullsFirst(Comparator.naturalOrder()));
-          break;
-        case "obligation":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
-            return comparator(o1.getObligation().getOblTitle(), o2.getObligation().getOblTitle());
-          };
-          break;
-        case "legalInstrument":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
-            return comparator(o1.getObligation().getLegalInstrument().getSourceAlias(),
-                o2.getObligation().getLegalInstrument().getSourceAlias());
-          };
-          break;
-        case "status":
-          compare = Comparator.comparing(DataflowPublicVO::isReleasable,
-              Comparator.nullsFirst(Comparator.naturalOrder()));
-          break;
-        case "deadline":
-          compare = Comparator.comparing(DataflowPublicVO::getDeadlineDate,
-              Comparator.nullsFirst(Comparator.naturalOrder()));
-          break;
-        case "isReleased":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
-            return comparator(o1.getReportingDatasets().get(0).getIsReleased(),
-                o2.getReportingDatasets().get(0).getIsReleased());
-          };
-          break;
-        case "releaseDate":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
-            return comparator(o1.getReportingDatasets().get(0).getDateReleased(),
-                o2.getReportingDatasets().get(0).getDateReleased());
-          };
-          break;
-
-      }
-      // order by
-      if (null != compare && asc) {
-        Collections.sort(dataflowPublicList, compare);
-      } else if (null != compare && !asc) {
-        Collections.sort(dataflowPublicList, compare.reversed());
-      }
-    }
-  }
-
-  /**
-   * Comparator.
-   *
-   * @param <T> the generic type
-   * @param o1 the o 1
-   * @param o2 the o 2
-   * @return the int
-   */
-  private <T> int comparator(T o1, T o2) {
-    if (Objects.nullSafeHashCode(o1) > Objects.nullSafeHashCode(o2)) {
-      return 1;
-    } else if (Objects.nullSafeHashCode(o1) == Objects.nullSafeHashCode(o2)) {
-      return 0;
-    } else {
-      return -1;
-    }
-  }
-
-  /**
-   * Gets the page.
-   *
-   * @param <T> the generic type
-   * @param sourceList the source list
-   * @param page the page
-   * @param pageSize the page size
-   * @return the page
-   */
-  private static <T> List<T> getPage(List<T> sourceList, int page, int pageSize) {
-    if (pageSize <= 0 || page < 0) {
-      throw new IllegalArgumentException("invalid page size or PageNum: " + pageSize + "-" + page);
-    }
-
-    int fromIndex = (page) * pageSize;
-    if (sourceList == null || sourceList.size() <= fromIndex) {
-      return Collections.emptyList();
-    }
-
-    // toIndex exclusive
-    return sourceList.subList(fromIndex, Math.min(fromIndex + pageSize, sourceList.size()));
   }
 
   /**
