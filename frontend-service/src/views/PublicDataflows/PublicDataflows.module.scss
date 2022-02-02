@@ -33,6 +33,17 @@
         width: 100%;
       }
     }
+
+    > div:nth-child(2) > div:nth-child(n + 1):nth-child(-n + 7) {
+      width: 33.33% !important;
+    }
+
+    > div > div:nth-child(8) {
+      margin-left: auto;
+      display: flex;
+      flex-wrap: wrap;
+      width: auto !important;
+    }
   }
 }
 

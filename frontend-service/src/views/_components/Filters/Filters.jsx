@@ -156,7 +156,7 @@ export const Filters = ({
     return (
       <div className={`${styles.filterButton}`}>
         <Button
-          className="p-button-primary p-button-rounded p-button-animated-blink"
+          className={`p-button-${isFiltered ? 'primary' : 'secondary'} p-button-rounded p-button-animated-blink`}
           disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}
@@ -167,22 +167,24 @@ export const Filters = ({
   };
 
   return (
-    <div className={className ? styles[className] : styles.default}>
+    <div className={`${className ? styles[className] : styles.default}`}>
       {renderFilters()}
       {renderStrictModeToggle()}
-      {renderCustomFiltersButton()}
 
-      <div className={`${styles.resetButton}`}>
-        <Button
-          className={`p-button-secondary p-button-rounded ${isFiltered ? 'p-button-animated-blink' : ''}`}
-          disabled={isLoading}
-          icon="undo"
-          label={resourcesContext.messages['reset']}
-          onClick={async () => {
-            onReset();
-            await onResetFilters();
-          }}
-        />
+      <div>
+        {renderCustomFiltersButton()}
+        <div className={`${styles.resetButton}`}>
+          <Button
+            className="p-button-secondary p-button-rounded p-button-animated-blink"
+            disabled={isLoading}
+            icon="undo"
+            label={resourcesContext.messages['reset']}
+            onClick={async () => {
+              onReset();
+              await onResetFilters();
+            }}
+          />
+        </div>
       </div>
     </div>
   );
