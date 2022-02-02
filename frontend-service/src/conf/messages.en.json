@@ -874,6 +874,7 @@
     "noHistoricReleases": "There are no historic releases yet",
     "noHistoricReleasesWithSelectedParameters": "There are no historic releases with the selected parameters",
     "noHistoryData": "There are no historic changes",
+    "noLeadReportersWithSelectedParameters": "There are no lead reporters with the selected parameters",
     "noIntegrations": "No integrations to show",
     "noIntegrationsWithSelectedParameters": "There are no integrations with the selected parameters",
     "noMessages": "You have no messages",
