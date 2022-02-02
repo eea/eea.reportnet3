@@ -1459,7 +1459,7 @@
     "loadWebformsError": "Error loading webforms list",
     "automaticDeleteSideBarButton": "Automatic delete",
     "isAutomaticReportingDeletionDialogHeader": "Automatic delete",
-    "isAutomaticReportingDeletionCheckboxLabel": "Enable to automatically delete reporter data and snapshots with technical acceptance of delivery",
+    "isAutomaticReportingDeletionCheckboxLabel": "Enable to automatically delete reporter data and snapshots with technical acceptance of delivery. This does not affect the data delivered to the data collection.",
     "validating": "Validating",
     "uploading": "Uploading",
     "importWrongFileHeader": "Different number of columns.",
