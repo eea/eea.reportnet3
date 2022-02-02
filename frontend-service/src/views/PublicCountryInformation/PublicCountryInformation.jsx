@@ -142,14 +142,14 @@ export const PublicCountryInformation = () => {
   const onLoadPublicCountryInformation = async () => {
     setIsLoading(true);
     try {
-      const data = await DataflowService.getPublicDataflowsByCountryCode(
+      const data = await DataflowService.getPublicDataflowsByCountryCode({
         countryCode,
-        getSortOrder(),
+        sortOrder: getSortOrder(),
         pageNum,
         numberRows,
         sortField,
         filterBy
-      );
+      });
       setTotalRecords(data.totalRecords);
       setPublicInformation(data.publicDataflows);
       setFilteredRecords(data.filteredRecords);
