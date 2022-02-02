@@ -86,7 +86,7 @@ export const DataflowRepository = {
   getPublicDataflowData: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicDataflowData, { dataflowId }) }),
 
-  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField) =>
+  getPublicDataflowsByCountryCode: async ({ countryCode, sortOrder, pageNum, numberRows, sortField, filterBy }) =>
     await HTTPRequester.get({
       url: getUrl(DataflowConfig.getPublicDataflowsByCountryCode, {
         country: countryCode,
@@ -94,7 +94,8 @@ export const DataflowRepository = {
         pageSize: numberRows,
         sortField,
         asc: sortOrder
-      })
+      }),
+      data: { ...filterBy }
     }),
 
   getUserList: async (dataflowId, representativeId) =>

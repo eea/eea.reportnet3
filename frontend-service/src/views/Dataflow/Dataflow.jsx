@@ -142,6 +142,7 @@ export const Dataflow = () => {
 
   const usersTypes = { REPORTERS: 'Reporters', REQUESTERS: 'Requesters' };
 
+  const { resetFiltersState: resetManageLeadReportersState } = useFilters('manageLeadReporters');
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
 
@@ -637,7 +638,10 @@ export const Dataflow = () => {
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon="cancel"
         label={resourcesContext.messages['close']}
-        onClick={() => manageDialogs('isManageRolesDialogVisible', false)}
+        onClick={() => {
+          manageDialogs('isManageRolesDialogVisible', false);
+          resetManageLeadReportersState();
+        }}
       />
     </Fragment>
   );
@@ -1263,7 +1267,10 @@ export const Dataflow = () => {
             contentStyle={{ maxHeight: '60vh' }}
             footer={manageRoleDialogFooter}
             header={resourcesContext.messages['manageRolesDialogTitle']}
-            onHide={() => manageDialogs('isManageRolesDialogVisible', false)}
+            onHide={() => {
+              manageDialogs('isManageRolesDialogVisible', false);
+              resetManageLeadReportersState();
+            }}
             visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
               <ManageLeadReporters
