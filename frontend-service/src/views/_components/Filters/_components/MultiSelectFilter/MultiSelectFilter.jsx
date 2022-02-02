@@ -38,7 +38,13 @@ export const MultiSelectFilter = ({ isLoading, onFilterData, onSort, option, rec
         filterBy[option.key]?.length > 0 ? sharedStyles.elementFilterSelected : sharedStyles.elementFilter
       }`}
       key={option.key}>
-      <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} onSort={onSort} />
+      <SortButton
+        id={option.key}
+        isLoading={isLoading}
+        isVisible={option.isSortable}
+        onSort={onSort}
+        recoilId={recoilId}
+      />
       <MultiSelect
         ariaLabelledBy={`${option.key}_input`}
         checkAllHeader={resourcesContext.messages['checkAllFilter']}
