@@ -287,7 +287,9 @@ export const DataflowService = {
           : null;
 
         return new DatasetTable({
-          hasPKReferenced: !isEmpty(records.filter(record => record.fields.filter(field => field.pkReferenced)[0])),
+          hasPKReferenced: !isEmpty(
+            records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
+          ),
           records: records,
           recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null,
           tableSchemaDescription: datasetTableDTO.description,
@@ -316,14 +318,17 @@ export const DataflowService = {
   getApiKey: async (dataflowId, dataProviderId, isCustodian) =>
     await DataflowRepository.getApiKey(dataflowId, dataProviderId, isCustodian),
 
-  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
-    const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode(
+  getPublicDataflowsByCountryCode: async ({ countryCode, sortOrder, pageNum, numberRows, sortField, filterBy }) => {
+    const filteredFilterBy = DataflowUtils.parseRequestPublicCountryFilterBy(filterBy);
+
+    const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode({
       countryCode,
       sortOrder,
       pageNum,
       numberRows,
-      sortField
-    );
+      sortField,
+      filterBy: filteredFilterBy
+    });
 
     publicDataflowsByCountryCodeResponse.data.publicDataflows = DataflowUtils.parsePublicDataflowListDTO(
       publicDataflowsByCountryCodeResponse.data.publicDataflows

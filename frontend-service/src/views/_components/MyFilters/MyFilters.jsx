@@ -1,6 +1,7 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
@@ -21,6 +22,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import {
   filterByKeysState,
+  filterByNestedKeysState,
   filterByState,
   filteredDataState,
   searchState,
@@ -38,6 +40,7 @@ const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimatio
 export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFilter, onSort, options, viewType }) => {
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
+  const [filterByNestedKeys, setFilterByNestedKeys] = useRecoilState(filterByNestedKeysState(viewType));
   const [searchBy, setSearchBy] = useRecoilState(searchState(viewType));
   const [sortBy, setSortBy] = useRecoilState(sortByState(viewType));
 
@@ -90,10 +93,11 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
   }, [calendarRefs, labelsAnimationDate, filterBy]);
 
   useEffect(() => {
-    getFilterByKeys();
+    getFilterByKeys('key');
+    getFilterByKeys('nestedKey');
   }, [data, viewType]);
 
-  const applyFilters = () => {
+  const applyFilters = filterBy => {
     try {
       if (isEmpty(filterBy)) {
         return data;
@@ -106,7 +110,30 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     }
   };
 
-  const getFilterByKeys = () => {
+  const clearFilterByMultiselectDueToChangesData = () => {
+    const cloneFilterBy = cloneDeep(filterBy);
+
+    if (!isEmpty(data) && !isEmpty(Object.keys(filterBy)) && !isEmpty(Object.keys(filterByKeys))) {
+      const filteredKeysMultiSelect = filterByKeys.MULTI_SELECT.filter(key => Object.keys(filterBy).includes(key));
+      filteredKeysMultiSelect.forEach(key => {
+        if (filterBy[key] && !isEmpty(filterBy[key])) {
+          const dataByKey = data.map(itemData => itemData[key]).filter(itemValue => itemValue !== undefined);
+          const dataItemsByKey = [];
+
+          filterBy[key].forEach(itemFilterBy => {
+            if (dataByKey.includes(itemFilterBy)) {
+              dataItemsByKey.push(itemFilterBy);
+            }
+          });
+          cloneFilterBy[key] = dataItemsByKey;
+        }
+      });
+    }
+
+    return cloneFilterBy;
+  };
+
+  const getFilterByKeys = auxKey => {
     const filterKeys = { CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [], SEARCH: [] };
 
     options.forEach(option => {
@@ -116,19 +143,25 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
         filterKeys.SEARCH = option.searchBy;
       }
 
-      filterKeys[option.type] = option.nestedOptions?.map(nestedOption => nestedOption.key) || [
+      filterKeys[option.type] = option.nestedOptions?.map(nestedOption => nestedOption[auxKey]) || [
         ...filterKeys[option.type],
-        option.key
+        option[auxKey]
       ];
     });
 
-    setFilterByKeys(filterKeys);
+    if (auxKey === 'key') {
+      setFilterByKeys(filterKeys);
+    } else {
+      setFilterByNestedKeys(filterKeys);
+    }
   };
 
   const loadFilters = async () => {
     try {
-      const filteredData = applyFilters();
+      const clearFilterby = clearFilterByMultiselectDueToChangesData();
+      const filteredData = applyFilters(clearFilterby);
 
+      setFilterBy(clearFilterby);
       setFilteredData(filteredData);
     } catch (error) {
       console.error('MyFilters - loadFilters.', error);
@@ -142,7 +175,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
 
     return data.filter(
       item =>
-        applyInputs({ filterBy, filterByKeys, item }) &&
+        applyInputs({ filterBy, filterByKeys, item, filterByNestedKeys }) &&
         applyDates({ filterBy, filterByKeys, item }) &&
         applyCheckBox({ filterBy, filterByKeys, item }) &&
         applyMultiSelects({ filterBy, filterByKeys, item }) &&
@@ -240,7 +273,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
   const renderDate = option => {
     const positionLabelAnimationDate = getPositionLabelAnimationDate(labelsAnimationDate, option.key);
     const getClassNameLabelCalendar = () => {
-      if (positionLabelAnimationDate && !labelsAnimationDate[positionLabelAnimationDate][option.key]) {
+      if (positionLabelAnimationDate && labelsAnimationDate[positionLabelAnimationDate][option.key] === false) {
         return styles.labelDown;
       } else {
         return styles.label;

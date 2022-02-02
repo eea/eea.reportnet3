@@ -48,6 +48,7 @@ import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.eea.validation.util.model.QueryVO;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -525,15 +526,12 @@ public class SqlRulesServiceImplTest {
     dataset.setDatasetSchema("5ce524fad31fc52540abae73");
     when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
 
-    when(datasetRepository.queryRSExecution(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(tableValue);
     DataSetSchema datasetSchema = new DataSetSchema();
     datasetSchema.setTableSchemas(new ArrayList<>());
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
-    sqlRulesServiceImpl.retrieveTableData("", dataset, rule, Boolean.FALSE);
-
-    Mockito.verify(datasetRepository, times(1)).queryRSExecution(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+    QueryVO queryVO = new QueryVO(rule.getSqlSentence(), rule, EntityTypeEnum.TABLE.toString(),
+        dataset, 1L, Boolean.FALSE);
+    assertEquals(queryVO, sqlRulesServiceImpl.retrieveTableData("", queryVO, Boolean.FALSE));
 
   }
 
@@ -579,21 +577,15 @@ public class SqlRulesServiceImplTest {
     rule.setType(EntityTypeEnum.DATASET);
     rule.setReferenceId(new ObjectId());
 
-    when(datasetRepository.queryRSExecution(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any())).thenReturn(tableValue);
 
-    when(datasetRepository.queryFieldValidationExecution(Mockito.anyString()))
-        .thenReturn(fieldsValidations);
-    when(datasetRepository.queryRecordValidationExecution(Mockito.anyString()))
-        .thenReturn(recordsValidation);
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
     dataset.setId(1L);
     dataset.setDatasetSchema("5ce524fad31fc52540abae73");
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(new DataSetSchema());
-    sqlRulesServiceImpl.retrieveTableData("", dataset, rule, Boolean.FALSE);
+    QueryVO queryVO = new QueryVO(rule.getSqlSentence(), rule, EntityTypeEnum.DATASET.toString(),
+        dataset, 1L, Boolean.FALSE);
 
-    Mockito.verify(datasetRepository, times(1)).queryRSExecution(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+    assertEquals(queryVO, sqlRulesServiceImpl.retrieveTableData("", queryVO, Boolean.FALSE));
 
   }
 
@@ -770,8 +762,8 @@ public class SqlRulesServiceImplTest {
   public void runSQLRuleTest() throws EEAException {
 
     String sqlRule = "SELECT * from dataset_1.table_value";
-    List<String> datasetIds = new ArrayList<>();
-    List<String> fields = new ArrayList<>();
+    new ArrayList<>();
+    new ArrayList<>();
 
 
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
@@ -840,7 +832,7 @@ public class SqlRulesServiceImplTest {
   public void evaluateSQLRuleTest() throws EEAException, ParseException {
 
     String sqlRule = "SELECT * FROM dataset_1.table_value";
-    JSONArray jsonArray = new JSONArray();
+    new JSONArray();
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
     datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
