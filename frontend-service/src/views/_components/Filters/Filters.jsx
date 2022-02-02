@@ -131,7 +131,7 @@ export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, o
   };
 
   return (
-    <div className={className ? styles[className] : styles.default}>
+    <div className={`${className ? styles[className] : styles.default} ${styles.stricMode}`}>
       {renderFilters()}
       {isStrictModeVisible ? (
         <StrictModeToggle onFilter={onFilterFilteredData} onToggle={onFilterFilteredData} />
