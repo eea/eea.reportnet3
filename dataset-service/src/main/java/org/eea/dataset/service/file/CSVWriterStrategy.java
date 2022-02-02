@@ -210,7 +210,7 @@ public class CSVWriterStrategy implements WriterStrategy {
     int batchSize = 50000 / nHeaders;
     int totalPages = (int) Math.ceil((double) totalRecords / batchSize);
     LOG.info("Total number of pages in export process: {}", totalPages);
-    for (int numPage = 0; numPage <= totalPages; numPage++) {
+    for (int numPage = 0; numPage < totalPages; numPage++) {
       for (RecordVO recordVO : fileCommon.exportFileWithFilters(datasetId, idTableSchema,
           levelErrorList, PageRequest.of(numPage, batchSize), idRulesList,
           filters.getFieldValue())) {
