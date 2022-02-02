@@ -162,7 +162,7 @@ export const Filters = ({
           disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}
-          onClick={onFilter}
+          onClick={() => onFilter()}
         />
       </div>
     );
