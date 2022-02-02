@@ -1,4 +1,4 @@
 export const CitizenScienceDataflowConfig = {
   getAll:
-    '/dataflow/citizenScienceDataflows?asc={:isAsc}&numPage={:pageNum}&orderHeader={:sortBy}&sizePage={:numberRows}'
+    '/dataflow/citizenScienceDataflows?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}'
 };
