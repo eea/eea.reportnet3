@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
@@ -64,6 +65,9 @@ public class RulesControllerImplTest {
 
   @Mock
   private NotificationControllerZuul notificationControllerZuul;
+
+  @Mock
+  private HttpServletResponse httpServletResponse;
 
   /** The security context. */
   SecurityContext securityContext;
@@ -712,6 +716,14 @@ public class RulesControllerImplTest {
     Mockito.verify(rulesService, times(1)).exportQCCSV(Mockito.anyLong());
   }
 
+  @Test
+  public void exportQCCSVExceptionTest() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+    Mockito.doThrow(EEAException.class).when(rulesService).exportQCCSV(Mockito.anyLong());
+    rulesControllerImpl.exportQCCSV(1L);
+  }
+
   @Test(expected = ResponseStatusException.class)
   public void evaluateSqlRuleParseExceptionTest() throws EEAException, ParseException {
     Mockito.doThrow(ParseException.class).when(sqlRulesService).evaluateSqlRule(Mockito.anyLong(),
@@ -810,6 +822,18 @@ public class RulesControllerImplTest {
       sql.setSqlRule("sql");
       rulesControllerImpl.runSqlRule(1L, sql, false);
     } catch (StringIndexOutOfBoundsException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void downloadQCCSVExceptionTest() throws IOException {
+    try {
+      Mockito.doThrow(IOException.class).when(rulesService).downloadQCCSV(Mockito.anyLong(),
+          Mockito.any());
+      rulesControllerImpl.downloadQCCSV(1L, "FILENAME", null);
+    } catch (IOException e) {
       assertNotNull(e);
       throw e;
     }
