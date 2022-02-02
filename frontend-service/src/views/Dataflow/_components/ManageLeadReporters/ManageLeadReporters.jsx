@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useMemo } from 'react';
+import { Fragment, useContext, useEffect, useMemo, useReducer } from 'react';
 
 import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
@@ -34,10 +34,10 @@ import { reducer } from './_functions/Reducers/representativeReducer';
 
 import { isDuplicatedLeadReporter, isValidEmail, parseLeadReporters } from './_functions/Utils/representativeUtils';
 
-import { TextUtils } from 'repositories/_utils/TextUtils';
-
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageLeadReporters = ({
   dataflowId,
