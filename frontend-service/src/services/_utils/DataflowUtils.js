@@ -16,6 +16,7 @@ import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 
 import { Dataflow } from 'entities/Dataflow';
 
+import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 const sortDataflowsByExpirationDate = dataflows =>
@@ -206,6 +207,10 @@ const parseRequestFilterBy = filterBy => {
 };
 
 const parseRequestPublicCountryFilterBy = filterBy => {
+  if (isEmpty(filterBy)) {
+    return {};
+  }
+
   const replacements = {
     name: 'name',
     obligation: 'obligation',
@@ -216,11 +221,29 @@ const parseRequestPublicCountryFilterBy = filterBy => {
     deliveryStatus: 'delivery_status'
   };
 
-  if (isEmpty(filterBy)) {
-    return {};
-  }
+  const parsedFilterBy = Object.keys(filterBy).map(key => {
+    const results = { [replacements[key] || key]: filterBy[key] };
 
-  const parsedFilterBy = Object.keys(filterBy).map(key => ({ [replacements[key] || key]: filterBy[key] }));
+    if (TextUtils.areEquals(key, 'deadline') || TextUtils.areEquals(key, 'deliveryDate')) {
+      let dateFrom = '';
+      let dateTo = '';
+
+      if (filterBy[key][0] && !filterBy[key][1]) {
+        dateFrom = `${filterBy[key][0]}`;
+        dateTo = `${filterBy[key][0]}`;
+      } else {
+        dateFrom = `${filterBy[key][0]}`;
+        dateTo = `${filterBy[key][1]}`;
+      }
+
+      results[`${replacements[key]}_from`] = dateFrom;
+      results[`${replacements[key]}_to`] = dateTo;
+
+      delete results[replacements[key]];
+    }
+
+    return results;
+  });
 
   return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
 };
