@@ -14,8 +14,6 @@ import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 
 
@@ -36,9 +34,6 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   /** The entity manager. */
   @PersistenceContext
   private EntityManager entityManager;
-
-  /** The Constant LOG. */
-  private static final Logger LOG = LoggerFactory.getLogger(DataflowExtendedRepositoryImpl.class);
 
   /** The Constant QUERY_FIND_COMPLETED. */
   private static final String QUERY_FIND_COMPLETED =
