@@ -573,6 +573,14 @@ export const ManageLeadReporters = ({
       );
     }
 
+    if (isEmpty(filteredData)) {
+      return (
+        <div className={styles.emptyFilteredData}>
+          {resourcesContext.messages['noLeadReportersWithSelectedParameters']}
+        </div>
+      );
+    }
+
     return (
       <Fragment>
         {formState.isLoading && <Spinner className={styles.spinner} />}
