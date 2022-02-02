@@ -183,7 +183,7 @@ export const Filters = ({
             label={resourcesContext.messages['reset']}
             onClick={async () => {
               await onResetFilters();
-              await onReset();
+              await onReset({ sortByHeader: '', sortByOption: 'idle' });
             }}
           />
         </div>

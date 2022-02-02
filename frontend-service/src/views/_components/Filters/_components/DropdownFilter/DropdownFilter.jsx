@@ -7,6 +7,7 @@ import uniq from 'lodash/uniq';
 import styles from './DropdownFilter.module.scss';
 
 import { Dropdown } from 'views/_components/Dropdown';
+import { LevelError } from 'views/_components/LevelError';
 import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
 import { filterByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
@@ -24,6 +25,14 @@ export const DropdownFilter = ({ isLoading, onFilterData, onSort, option, recoil
   const onFilter = async value => {
     setFilterBy({ [option.key]: value });
     await onFilterData({ key: option.key, value, type: option.type });
+  };
+
+  const renderTemplate = (template, type) => {
+    if (template === 'LevelError') {
+      return <LevelError type={type} />;
+    }
+
+    return <span className={styles.statusBox}>{type?.toString()}</span>;
   };
 
   return (
@@ -45,6 +54,7 @@ export const DropdownFilter = ({ isLoading, onFilterData, onSort, option, recoil
         id={`${option.key}_dropdown`}
         inputClassName={styles.label}
         inputId={option.key}
+        itemTemplate={item => renderTemplate(option.template, item.label)}
         label={option.label}
         onChange={event => onFilter(event.target.value)}
         onMouseDown={event => {

@@ -658,10 +658,16 @@ export const Dataflows = () => {
       type: 'INPUT'
     },
     {
-      nestedOptions: [
-        { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' }
+      key: 'status',
+      label: resourcesContext.messages['status'],
+      isSortable: true,
+      template: 'LevelError',
+      dropdownOptions: [
+        { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+        { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
       ],
-      type: 'MULTI_SELECT'
+      type: 'DROPDOWN'
     }
   ];
 
