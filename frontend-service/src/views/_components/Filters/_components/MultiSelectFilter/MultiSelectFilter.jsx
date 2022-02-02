@@ -5,14 +5,14 @@ import styles from './MultiSelectFilter.module.scss';
 
 import { LevelError } from 'views/_components/LevelError';
 import { MultiSelect } from 'views/_components/MultiSelect';
-import { SortButton } from '../SortButton';
+import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
-import { dataStore } from '../../_functions/Stores/filterStore';
-import { filterByKeyMultiSelectStore } from '../../_functions/Stores/filterKeysStore';
+import { dataStore } from 'views/_components/Filters/_functions/Stores/filterStore';
+import { filterByKeyMultiSelectStore } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { useFilters } from '../../_functions/Hooks/useFilters';
+import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilters';
 
 import { MultiSelectFilterUtils } from './_functions/Utils/MultiSelectFilterUtils';
 

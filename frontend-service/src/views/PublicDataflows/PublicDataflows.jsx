@@ -253,6 +253,7 @@ export const PublicDataflows = () => {
           <Filters
             isLoading={isLoading}
             onFilter={onLoadPublicDataflows}
+            onReset={onLoadPublicDataflows}
             onSort={onLoadPublicDataflows}
             options={filterOptions}
             recoilId="publicDataflows"

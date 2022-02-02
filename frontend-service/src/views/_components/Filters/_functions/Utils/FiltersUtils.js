@@ -45,8 +45,6 @@ const applyInputs = ({ filterBy, filteredKeys = [], item }) => {
 };
 
 const applyMultiSelects = ({ filterBy, filteredKeys = [], isStrictMode, item }) => {
-  // return filteredKeys.every(key => isEmpty(filterBy[key]) || filterBy[key].includes(item[key]));
-
   return filteredKeys.every(filteredKey => {
     if (isEmpty(filterBy[filteredKey])) {
       return true;

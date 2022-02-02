@@ -6,7 +6,7 @@ import styles from '../../Filters.module.scss';
 import { Button } from 'views/_components/Button';
 import { Checkbox } from 'views/_components/Checkbox';
 
-import { isStrictModeStore } from '../../_functions/Stores/filterStore';
+import { isStrictModeStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 

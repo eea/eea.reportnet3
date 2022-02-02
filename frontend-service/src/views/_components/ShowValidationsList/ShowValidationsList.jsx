@@ -509,16 +509,12 @@ export const ShowValidationsList = memo(
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {isFiltered && totalRecords !== totalFilteredRecords
-          ? `${resourcesContext.messages['filtered']}: ${totalFilteredRecords} | `
-          : ''}
+        {isFiltered ? `${resourcesContext.messages['filtered']}: ${totalFilteredRecords} | ` : ''}
         {resourcesContext.messages['totalRecords']} {totalRecords}{' '}
         {`${resourcesContext.messages['records'].toLowerCase()}${` (${resourcesContext.messages[
           'totalErrors'
         ].toLowerCase()}${totalErrors})`}`}
-        {isFiltered && totalRecords === totalFilteredRecords
-          ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-          : ''}
+        {isFiltered ? ` (${resourcesContext.messages['filtered'].toLowerCase()})` : ''}
       </Fragment>
     );
 

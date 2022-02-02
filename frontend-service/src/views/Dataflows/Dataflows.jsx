@@ -160,7 +160,7 @@ export const Dataflows = () => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
-  const { getFilterBy, resetFilterState, setData, sortByOptions } = useApplyFilters(tabId);
+  const { getFilterBy, setData, sortByOptions } = useApplyFilters(tabId);
 
   useEffect(() => {
     getDataflowsCount();
@@ -780,6 +780,7 @@ export const Dataflows = () => {
           className="dataflowsFilters"
           isLoading={loadingStatus[tabId]}
           onFilter={getDataflows}
+          onReset={getDataflows}
           onSort={getDataflows}
           options={options[tabId]}
           recoilId={tabId}

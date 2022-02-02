@@ -44,7 +44,16 @@ const components = {
   SEARCH: SearchFilter
 };
 
-export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, onSort, options = [], recoilId }) => {
+export const Filters = ({
+  className,
+  isLoading,
+  isStrictModeVisible,
+  onFilter,
+  onReset = () => {},
+  onSort,
+  options = [],
+  recoilId
+}) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
@@ -105,6 +114,7 @@ export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, o
         reset(filteredDataStore(recoilId));
         reset(isFilteredStore(recoilId));
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
+        await onReset();
       },
     [recoilId]
   );

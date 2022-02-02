@@ -7,10 +7,10 @@ import uniq from 'lodash/uniq';
 import styles from './DropdownFilter.module.scss';
 
 import { Dropdown } from 'views/_components/Dropdown';
-import { SortButton } from '../SortButton';
+import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
-import { filterByStore } from '../../_functions/Stores/filterStore';
-import { filterByAllKeys } from '../../_functions/Stores/filterKeysStore';
+import { filterByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
+import { filterByAllKeys } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
 
 export const DropdownFilter = ({ isLoading, onSort, option, recoilId }) => {
   const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));

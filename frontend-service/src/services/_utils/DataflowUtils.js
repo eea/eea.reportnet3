@@ -185,22 +185,22 @@ const parseDatasetsInfoDTO = datasetsDTO =>
 
 const getDatasetType = datasetType => config.datasetType.find(type => type.key === datasetType)?.value;
 
+const replacements = {
+  creationDate: 'creation_date',
+  description: 'description',
+  expirationDate: 'deadline_date',
+  legalInstrument: 'legal_instrument',
+  name: 'name',
+  obligationTitle: 'obligation',
+  obligationId: 'obligation_id',
+  status: 'status',
+  userRole: 'role'
+};
+
 const parseRequestFilterBy = filterBy => {
   if (isEmpty(filterBy)) {
     return {};
   }
-
-  const replacements = {
-    creationDate: 'creation_date',
-    description: 'description',
-    expirationDate: 'deadline_date',
-    legalInstrument: 'legal_instrument',
-    name: 'name',
-    obligationTitle: 'obligation',
-    obligationId: 'obligation_id',
-    status: 'status',
-    userRole: 'role'
-  };
 
   const parsedFilterBy = Object.keys(filterBy).map(key => {
     const results = { [replacements[key] || key]: filterBy[key] };
@@ -238,23 +238,11 @@ const parseRequestSortBy = sortByOptions => {
     return { isAsc: undefined, sortByHeader: '' };
   }
 
-  const replacements = { asc: true, desc: false, idle: undefined };
-
-  const name_replacements = {
-    creationDate: 'creation_date',
-    description: 'description',
-    expirationDate: 'deadline_date',
-    legalInstrument: 'legal_instrument',
-    name: 'name',
-    obligationTitle: 'obligation',
-    obligationId: 'obligation_id',
-    status: 'status',
-    userRole: 'role'
-  };
+  const sortByReplacements = { asc: true, desc: false, idle: undefined };
 
   return {
-    isAsc: replacements[sortByOptions.sortByOption],
-    sortByHeader: name_replacements[sortByOptions.sortByHeader]
+    isAsc: sortByReplacements[sortByOptions.sortByOption],
+    sortByHeader: replacements[sortByOptions.sortByHeader]
   };
 };
 

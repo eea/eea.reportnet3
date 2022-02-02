@@ -2,9 +2,9 @@ import styles from '../../Filters.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { InputText } from 'views/_components/InputText';
-import { SortButton } from '../SortButton';
+import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
-import { useSearch } from '../../_functions/Hooks/useSearch';
+import { useSearch } from 'views/_components/Filters/_functions/Hooks/useSearch';
 
 export const SearchFilter = ({ isLoading, onFilterData, option, recoilId }) => {
   const { searchBy, onSearch } = useSearch({ onFilterData, option, recoilId });

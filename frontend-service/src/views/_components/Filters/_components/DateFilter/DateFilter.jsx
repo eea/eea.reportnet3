@@ -10,10 +10,10 @@ import styles from './DateFilter.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Calendar } from 'views/_components/Calendar';
-import { SortButton } from '../SortButton';
+import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
-import { filterByAllKeys } from '../../_functions/Stores/filterKeysStore';
-import { filterByStore } from '../../_functions/Stores/filterStore';
+import { filterByAllKeys } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
+import { filterByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
