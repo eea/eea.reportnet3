@@ -40,6 +40,7 @@ export const PublicDataflows = () => {
   const [contentStyles, setContentStyles] = useState({});
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [goToPage, setGoToPage] = useState(1);
+  const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [pageInputTooltip, setPageInputTooltip] = useState(resourcesContext.messages['currentPageInfoMessage']);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 100, pageNum: 0 });
@@ -160,6 +161,7 @@ export const PublicDataflows = () => {
       setData(publicData.dataflows);
       setFilteredRecords(publicData.filteredRecords);
       setTotalRecords(publicData.totalRecords);
+      setIsFiltered(publicData.filteredRecords !== publicData.totalRecords);
     } catch (error) {
       console.error('PublicDataflows - onLoadPublicDataflows.', error);
     } finally {
@@ -183,7 +185,10 @@ export const PublicDataflows = () => {
 
   const renderPaginatorRecordsCount = () => (
     <Fragment>
-      {resourcesContext.messages['totalRecords']} {totalRecords} {resourcesContext.messages['records'].toLowerCase()}
+      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
+      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
+        'records'
+      ].toLowerCase()}`}
     </Fragment>
   );
 
