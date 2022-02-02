@@ -96,6 +96,7 @@ export const ManageLeadReporters = ({
         if (existRepresentative?.dataProviderId === '') {
           return representative;
         }
+
         return { ...representative, nameRepresentative: existRepresentative.label };
       });
       formDispatcher({
@@ -438,7 +439,7 @@ export const ManageLeadReporters = ({
           key={uniqueInputId}>
           <InputText
             autoComplete={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
-            autoFocus={isNewLeadReporter && Object.keys(filterBy).length === 0}
+            autoFocus={isNewLeadReporter && isEmpty(Object.keys(filterBy))}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             disabled={representative.hasDatasets && reporters[leadReporter.id]?.isValid}
             id={uniqueInputId}
