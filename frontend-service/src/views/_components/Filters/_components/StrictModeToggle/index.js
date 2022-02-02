@@ -1,0 +1,1 @@
+export { StrictModeToggle } from './StrictModeToggle';
