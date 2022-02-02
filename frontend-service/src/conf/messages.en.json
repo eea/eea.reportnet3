@@ -381,7 +381,6 @@
     "designSchemaTabNoFields": "No fields to add QC",
     "designView": "Design",
     "detailedInfoTooltip": "Click to show detailed info",
-    "details": "Details",
     "disabled": "Disabled",
     "disabledCreateDataCollectionNoProviders": "You haven't assigned reporter/s to the dataflow yet",
     "disabledCreateDataCollectionSchemas": "There is already a data collection created",
@@ -1431,7 +1430,6 @@
     "webformTableWithLessRecords": "There are no records in the table",
     "webformTableWithMoreRecords": "This table should have only one record, please check it",
     "webformTableWithoutFixedNumber": "This table should have fixed number of records",
-    "webformView": "Webform",
     "webLinkDescriptionValidationMax": "Web link description is too long",
     "webLinks": "Web links",
     "writeMessagePlaceholder": "Write your message or drag here a file",
@@ -1479,11 +1477,14 @@
     "importNamefileWarningEvent": "Some tables have not imported data: table and file name were different.",
     "notificationWarnTitle": "WARNING",
     "exportFilteredCsv": "CSV (.csv with filters)",
-    "webformsConfigurationsSelect": "Select an webform type",
+    "webformsConfigurationsSelect": "Select a webform type",
     "notSelectedWebformOption": "No webform",
     "deleteWebformInUseError": "Error deleting webform configuration. This configuration is already in use.",
     "pamsLabel": "PaMs",
     "qaLabel": "Q&A",
-    "automaticReportingDeletionMessage": "This action will automatically delete reporter data and snapshots"
+    "automaticReportingDeletionMessage": "This action will automatically delete reporter data and snapshots",
+    "typeNotSelectedError": "Type not selected",
+    "nameExistsError": "Name is repeated",
+    "nameIsEmptyError": "Name is empty"
   }
 }

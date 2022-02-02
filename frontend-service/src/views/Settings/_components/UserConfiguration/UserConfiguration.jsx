@@ -229,7 +229,7 @@ export const UserConfiguration = () => {
           }
         }}
         tooltip={
-          userContext.userProps.notificationSound === true
+          userContext.userProps.pushNotifications === true
             ? resourcesContext.messages['togglePushNotificationOff']
             : resourcesContext.messages['togglePushNotificationOn']
         }

@@ -280,7 +280,9 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
       }
     };
 
-    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderDate(nestedOption));
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(nestedOption => renderDate(nestedOption));
+    }
 
     const inputId = uniqueId();
 
