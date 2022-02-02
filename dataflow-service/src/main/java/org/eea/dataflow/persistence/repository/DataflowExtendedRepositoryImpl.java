@@ -1,5 +1,6 @@
 package org.eea.dataflow.persistence.repository;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -483,7 +484,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         query.setParameter(key, new Date(Long.valueOf(value)));
         break;
       case DELIVERY_STATUS:
-        query.setParameter(key, List.of(value.split(",")));
+        query.setParameter(key, Arrays.asList(value.split(",")));
         break;
       case "status":
         switch (value) {
