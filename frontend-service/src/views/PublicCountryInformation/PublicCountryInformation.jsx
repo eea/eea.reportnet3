@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
@@ -51,6 +51,8 @@ export const PublicCountryInformation = () => {
   const [contentStyles, setContentStyles] = useState({});
   const [countryName, setCountryName] = useState('');
   const [dataflows, setDataflows] = useState([]);
+  const [filteredRecords, setFilteredRecords] = useState(0);
+  const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
   const [sortField, setSortField] = useState('');
@@ -150,6 +152,8 @@ export const PublicCountryInformation = () => {
       );
       setTotalRecords(data.totalRecords);
       setPublicInformation(data.publicDataflows);
+      setFilteredRecords(data.filteredRecords);
+      setIsFiltered(data.filteredRecords !== data.totalRecords);
     } catch (error) {
       console.error('PublicCountryInformation - onLoadPublicCountryInformation.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' }, true);
@@ -400,6 +404,15 @@ export const PublicCountryInformation = () => {
     </span>
   );
 
+  const renderPaginatorRecordsCount = () => (
+    <Fragment>
+      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
+      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
+        'records'
+      ].toLowerCase()}`}
+    </Fragment>
+  );
+
   const renderPublicCountryInformationTitle = () => {
     if (!isEmpty(countryName)) {
       return (
@@ -438,11 +451,7 @@ export const PublicCountryInformation = () => {
         onPage={onChangePage}
         onSort={onSort}
         paginator={true}
-        paginatorRight={
-          <span>{`${resourcesContext.messages['totalRecords']} ${totalRecords} ${resourcesContext.messages[
-            'records'
-          ].toLowerCase()}`}</span>
-        }
+        paginatorRight={renderPaginatorRecordsCount()}
         rows={numberRows}
         rowsPerPageOptions={[5, 10, 15]}
         sortable={true}
