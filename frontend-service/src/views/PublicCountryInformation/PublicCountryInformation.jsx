@@ -338,7 +338,6 @@ export const PublicCountryInformation = () => {
       ]
     },
     { type: 'DATE', key: 'deadline', label: resourcesContext.messages['deadline'] },
-
     {
       key: 'status',
       label: resourcesContext.messages['status'],
