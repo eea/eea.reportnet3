@@ -193,8 +193,7 @@ export const PublicDataflows = () => {
   );
 
   const renderPaginator = () => {
-    // ADD IF THERE ARE DATAFLOWS TO RENDER PAGINATOR
-    if (!isLoading) {
+    if (!isLoading && filteredRecords > 100) {
       return (
         <Paginator
           className={`p-paginator-bottom ${styles.paginator}`}
