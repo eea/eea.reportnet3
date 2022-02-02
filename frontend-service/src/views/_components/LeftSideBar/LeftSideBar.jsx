@@ -233,7 +233,7 @@ export const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationV
                 header={resourcesContext.messages['logout']}
                 labelCancel={resourcesContext.messages['no']}
                 labelConfirm={resourcesContext.messages['yes']}
-                onConfirm={() => userLogout()}
+                onConfirm={userLogout}
                 onHide={() => setLogoutConfirmVisible(false)}
                 visible={logoutConfirmVisible}>
                 {resourcesContext.messages['userLogout']}
