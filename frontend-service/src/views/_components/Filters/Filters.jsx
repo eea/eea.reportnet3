@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { noWait, useRecoilCallback } from 'recoil';
+import { noWait, useRecoilCallback, useRecoilValue } from 'recoil';
 
 import isNil from 'lodash/isNil';
 
@@ -55,6 +55,8 @@ export const Filters = ({
   recoilId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
+
+  const isFiltered = useRecoilValue(isFilteredStore(recoilId));
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
@@ -155,7 +157,7 @@ export const Filters = ({
     return (
       <div className={`${styles.filterButton}`}>
         <Button
-          className="p-button-primary p-button-rounded p-button-animated-blink"
+          className={`p-button-${isFiltered ? 'primary' : 'secondary'} p-button-rounded p-button-animated-blink`}
           disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}
@@ -166,19 +168,21 @@ export const Filters = ({
   };
 
   return (
-    <div className={className ? styles[className] : styles.default}>
+    <div className={`${className ? styles[className] : styles.default}`}>
       {renderFilters()}
       {renderStrictModeToggle()}
-      {renderCustomFiltersButton()}
 
-      <div className={`${styles.resetButton}`}>
-        <Button
-          className="p-button-secondary p-button-rounded p-button-animated-blink"
-          disabled={isLoading}
-          icon="undo"
-          label={resourcesContext.messages['reset']}
-          onClick={onResetFilters}
-        />
+      <div>
+        {renderCustomFiltersButton()}
+        <div className={`${styles.resetButton}`}>
+          <Button
+            className="p-button-secondary p-button-rounded p-button-animated-blink"
+            disabled={isLoading}
+            icon="undo"
+            label={resourcesContext.messages['reset']}
+            onClick={onResetFilters}
+          />
+        </div>
       </div>
     </div>
   );
