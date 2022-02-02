@@ -151,7 +151,7 @@ export const PublicCountryInformation = () => {
         filterBy
       });
       setTotalRecords(data.totalRecords);
-      setPublicInformation(data.publicDataflows);
+      setPublicInformation(data.dataflows);
       setFilteredRecords(data.filteredRecords);
       setIsFiltered(data.filteredRecords !== data.totalRecords);
     } catch (error) {
@@ -339,9 +339,15 @@ export const PublicCountryInformation = () => {
     },
     { type: 'DATE', key: 'deadline', label: resourcesContext.messages['deadline'] },
     {
-      type: 'MULTI_SELECT',
       key: 'status',
-      label: resourcesContext.messages['status']
+      label: resourcesContext.messages['status'],
+      template: 'LevelError',
+      dropdownOptions: [
+        { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+        { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
+      ],
+      type: 'DROPDOWN'
     },
     { type: 'DATE', key: 'deliveryDate', label: resourcesContext.messages['deliveryDate'] },
     {

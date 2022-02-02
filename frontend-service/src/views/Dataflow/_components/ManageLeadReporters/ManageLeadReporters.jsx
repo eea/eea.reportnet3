@@ -573,6 +573,14 @@ export const ManageLeadReporters = ({
       );
     }
 
+    if (isEmpty(filteredData)) {
+      return (
+        <div className={styles.emptyFilteredData}>
+          {resourcesContext.messages['noLeadReportersWithSelectedParameters']}
+        </div>
+      );
+    }
+
     return (
       <Fragment>
         {formState.isLoading && <Spinner className={styles.spinner} />}
@@ -636,7 +644,7 @@ export const ManageLeadReporters = ({
           iconConfirm={formState.isDeleting ? 'spinnerAnimate' : undefined}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onDeleteConfirm()}
+          onConfirm={onDeleteConfirm}
           onHide={() => formDispatcher({ type: 'HIDE_CONFIRM_DIALOG' })}
           visible={formState.isVisibleConfirmDeleteDialog}>
           <p>{resourcesContext.messages['manageRolesDialogConfirmDeleteProviderQuestion']}</p>
@@ -651,7 +659,7 @@ export const ManageLeadReporters = ({
           iconConfirm={formState.isDeleting ? 'spinnerAnimate' : undefined}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onDeleteLeadReporter()}
+          onConfirm={onDeleteLeadReporter}
           onHide={() => {
             handleDialogs('deleteLeadReporter', false);
             formDispatcher({ type: 'LEAD_REPORTER_DELETE_ID', payload: { id: null } });

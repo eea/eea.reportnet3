@@ -330,8 +330,8 @@ export const DataflowService = {
       filterBy: filteredFilterBy
     });
 
-    publicDataflowsByCountryCodeResponse.data.publicDataflows = DataflowUtils.parsePublicDataflowListDTO(
-      publicDataflowsByCountryCodeResponse.data.publicDataflows
+    publicDataflowsByCountryCodeResponse.data.dataflows = DataflowUtils.parsePublicDataflowListDTO(
+      publicDataflowsByCountryCodeResponse.data.dataflows
     );
 
     return publicDataflowsByCountryCodeResponse.data;

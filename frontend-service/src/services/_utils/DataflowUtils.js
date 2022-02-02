@@ -206,7 +206,7 @@ const parseRequestFilterBy = filterBy => {
     const results = { [replacements[key] || key]: filterBy[key] };
 
     if (TextUtils.areEquals(key, 'userRole') || TextUtils.areEquals(key, 'status')) {
-      results[replacements[key] || key] = filterBy[key].value;
+      results[replacements[key] || key] = filterBy[key]?.value;
     }
 
     if (TextUtils.areEquals(key, 'creationDate') || TextUtils.areEquals(key, 'expirationDate')) {
@@ -244,6 +244,14 @@ const parseRequestPublicCountryFilterBy = filterBy => {
 
   const parsedFilterBy = Object.keys(filterBy).map(key => {
     const results = { [replacements[key] || key]: filterBy[key] };
+
+    if (TextUtils.areEquals(key, 'status')) {
+      results[replacements[key] || key] = filterBy[key]?.value;
+    }
+
+    if (TextUtils.areEquals(key, 'deliveryStatus')) {
+      results[replacements[key] || key] = filterBy[key]?.join(',');
+    }
 
     if (TextUtils.areEquals(key, 'deadline') || TextUtils.areEquals(key, 'deliveryDate')) {
       if (filterBy[key][0] && !filterBy[key][1]) {

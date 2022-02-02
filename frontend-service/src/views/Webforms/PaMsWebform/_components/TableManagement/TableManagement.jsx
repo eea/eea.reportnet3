@@ -462,7 +462,7 @@ export const TableManagement = ({
           header={resourcesContext.messages['deleteTabHeader']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onDeleteRow()}
+          onConfirm={onDeleteRow}
           onHide={() => manageDialogs('delete', false)}
           visible={isDialogVisible.delete}>
           {resourcesContext.messages['confirmDeleteRow']}
