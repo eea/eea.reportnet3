@@ -235,7 +235,7 @@ const parseRequestPublicCountryFilterBy = filterBy => {
   const replacements = {
     name: 'name',
     obligation: 'obligation',
-    legalInstrument: 'ot.legal_instrument',
+    legalInstrument: 'legal_instrument',
     deadline: 'deadline_date',
     status: 'status',
     deliveryDate: 'delivery_date',
@@ -246,19 +246,13 @@ const parseRequestPublicCountryFilterBy = filterBy => {
     const results = { [replacements[key] || key]: filterBy[key] };
 
     if (TextUtils.areEquals(key, 'deadline') || TextUtils.areEquals(key, 'deliveryDate')) {
-      let dateFrom = '';
-      let dateTo = '';
-
       if (filterBy[key][0] && !filterBy[key][1]) {
-        dateFrom = `${filterBy[key][0]}`;
-        dateTo = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_to`] = `${filterBy[key][0]}`;
       } else {
-        dateFrom = `${filterBy[key][0]}`;
-        dateTo = `${filterBy[key][1]}`;
+        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
       }
-
-      results[`${replacements[key]}_from`] = dateFrom;
-      results[`${replacements[key]}_to`] = dateTo;
 
       delete results[replacements[key]];
     }
