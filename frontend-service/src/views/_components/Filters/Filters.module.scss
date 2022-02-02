@@ -151,7 +151,7 @@
   margin-left: auto;
   display: flex;
   flex-wrap: wrap;
-  width: auto;
+  width: auto !important;
 }
 
 .default,
@@ -261,10 +261,6 @@
   .sortButtonSize {
     display: none;
   }
-  // .elementFilterSelected {
-  //   display: flex !important;
-  //   align-items: flex-end;
-  // }
 }
 
 .lineItems {
@@ -391,6 +387,9 @@
 }
 
 @media (max-width: 640px) {
+  .dataflowsFilters > div {
+    width: 100% !important;
+  }
   .lineItems {
     flex-direction: column;
     .resetButton {
