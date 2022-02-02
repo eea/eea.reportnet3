@@ -18,7 +18,6 @@ import { Dataflow } from 'entities/Dataflow';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const sortDataflowsByExpirationDate = dataflows =>
   dataflows.sort((a, b) => {
