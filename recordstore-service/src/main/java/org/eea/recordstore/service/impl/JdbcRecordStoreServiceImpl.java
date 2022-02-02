@@ -1001,6 +1001,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     List<SnapshotVO> listSnapshotVO =
         dataSetSnapshotControllerZuul.getSnapshotsEnabledByIdDataset(datasetId);
 
+    dataSetSnapshotControllerZuul.deleteSnapshotByDatasetIdAndDcReleasedFalse(datasetId);
     dataSetSnapshotControllerZuul.updateSnapshotDisabled(datasetId);
     File directory = new File(pathSnapshotDisabled);
     directory.mkdir();
@@ -1021,8 +1022,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     for (File file : matchingFiles) {
       file.renameTo(new File(pathSnapshotDisabled + file.getName()));
     }
+    LOG.info("Snapshot files moved to disabled folder: {}, from dataset: {}", pathSnapshotDisabled,
+        datasetId);
     Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
     datasetControllerZuul.privateDeleteDatasetData(datasetId, dataflowId);
+    LOG.info("Deleted dataset data from dataset: {}, dataflow: {}", datasetId, dataflowId);
   }
 
   /**

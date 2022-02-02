@@ -722,4 +722,19 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   public void updateSnapshotDisabled(@PathVariable("datasetId") Long datasetId) {
     datasetSnapshotService.updateSnapshotDisabled(datasetId);
   }
+
+  /**
+   * Delete snapshot by dataset id and dc released false.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/private/deleteSnapshotByDatasetIdAndDcReleasedFalse/{datasetId}")
+  @ApiOperation(value = "Private operation to delete snapshot wheren dcRelease equals false",
+      hidden = true)
+  public void deleteSnapshotByDatasetIdAndDcReleasedFalse(
+      @PathVariable("datasetId") Long datasetId) {
+    datasetSnapshotService.deleteSnapshotByDatasetIdAndDcReleasedFalse(datasetId);
+  }
 }
