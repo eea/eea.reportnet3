@@ -570,6 +570,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     }
 
     if (StringUtils.isNotBlank(orderHeader)) {
+      orderHeader = orderHeader.equals("delivery_date") ? DATE_RELEASED : orderHeader;
       sb.append(String.format(ORDER_BY, orderHeader, asc ? "asc" : "desc"));
     } else {
       sb.append(" order by status, creation_date desc ");
