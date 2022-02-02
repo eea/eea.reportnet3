@@ -493,7 +493,7 @@ export const BigButtonListReference = ({
           header={resourcesContext.messages['tableWithNoPKWarningTitle']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onCreateReferenceDatasetsWithNoPKs()}
+          onConfirm={onCreateReferenceDatasetsWithNoPKs}
           onHide={() => {
             handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false });
             notificationContext.removeHiddenByKey('NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT');

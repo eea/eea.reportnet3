@@ -1410,7 +1410,7 @@ export const Dataflow = () => {
             labelCancel={resourcesContext.messages['cancel']}
             labelConfirm={resourcesContext.messages['save']}
             onConfirm={onConfirmUpdateIsReleaseable}
-            onHide={() => onCloseIsReleaseableDialog()}
+            onHide={onCloseIsReleaseableDialog}
             visible={dataflowState.isReleaseableDialogVisible}>
             <Checkbox
               checked={dataflowState.isReleasable}
@@ -1438,7 +1438,7 @@ export const Dataflow = () => {
             labelCancel={resourcesContext.messages['cancel']}
             labelConfirm={resourcesContext.messages['save']}
             onConfirm={onConfirmAutomaticReportingDeletion}
-            onHide={() => onCloseAutomaticReportingDeletion()}
+            onHide={onCloseAutomaticReportingDeletion}
             visible={dataflowState.isAutomaticReportingDeletionDialogVisible}>
             <Checkbox
               checked={dataflowState.isAutomaticReportingDeletion}
@@ -1513,7 +1513,7 @@ export const Dataflow = () => {
             labelCancel={resourcesContext.messages['cancel']}
             labelConfirm={resourcesContext.messages['save']}
             onConfirm={onConfirmUpdateShowPublicInfo}
-            onHide={() => onCloseIsShowPublicInfoDialog()}
+            onHide={onCloseIsShowPublicInfoDialog}
             visible={dataflowState.isShowPublicInfoDialogVisible}>
             <Checkbox
               checked={dataflowState.showPublicInfo}

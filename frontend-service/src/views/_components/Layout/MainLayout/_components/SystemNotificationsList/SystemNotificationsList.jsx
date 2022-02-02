@@ -295,7 +295,7 @@ export const SystemNotificationsList = ({ isSystemNotificationVisible, setIsSyst
           iconConfirm={isDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onDelete()}
+          onConfirm={onDelete}
           onHide={() => onToggleDeleteVisibility(false)}
           visible={isDeleteDialogVisible}>
           {resourcesContext.messages['deleteSystemNotificationConfirm']}
