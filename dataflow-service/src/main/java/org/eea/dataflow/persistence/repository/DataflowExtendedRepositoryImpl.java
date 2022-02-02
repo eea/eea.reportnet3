@@ -39,7 +39,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "(docaux ->> 'validSince' ) as validSince,\r\n" + "(docaux ->> 'validTo' ) as validTo,\r\n"
       + "(docaux ->> 'comment' ) as comment,\r\n"
       + "(docaux ->> 'nextDeadline' ) as nextDeadline,\r\n"
-      + "cast((docaux ->> 'legalInstrument' )as json)->>'sourceTitle' as legal_Instrument,\r\n"
+      + "cast((docaux ->> 'legalInstrument' )as json)->>'sourceTitle' as legal_instrument,\r\n"
       + "(docaux ->> 'client' ) as client,\r\n" + "(docaux ->> 'countries' ) as countries,\r\n"
       + "(docaux ->> 'issues' ) as issues,\r\n" + "(docaux ->> 'reportFreq' ) as reportFreq,\r\n"
       + "(docaux ->> 'reportFreqDetail' ) as reportFreqDetail\r\n" + "from doc)\r\n"
