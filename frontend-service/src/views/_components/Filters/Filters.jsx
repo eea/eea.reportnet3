@@ -18,6 +18,7 @@ import {
   dataStore,
   filterByStore,
   filteredDataStore,
+  isFilteredStore,
   isStrictModeStore,
   searchByStore
 } from './_functions/Stores/filterStore';
@@ -53,13 +54,20 @@ export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, o
       async newData => {
         const data = await snapshot.getPromise(dataStore(recoilId));
         const allKeys = await snapshot.getPromise(filterByAllKeys(recoilId));
-        const multiSelectKeys = await snapshot.getPromise(filterByKeyMultiSelectStore(recoilId));
-        const inputKeys = await snapshot.getPromise(filterByKeyInputStore(recoilId));
-        const searchKeys = await snapshot.getPromise(filterByKeySearchStore(recoilId));
-        const checkboxKeys = await snapshot.getPromise(filterByKeyCheckboxStore(recoilId));
+
+        const keys = [
+          filterByKeyCheckboxStore(recoilId),
+          filterByKeyInputStore(recoilId),
+          filterByKeyMultiSelectStore(recoilId),
+          filterByKeySearchStore(recoilId)
+        ];
+
+        const [checkboxKeys, inputKeys, multiSelectKeys, searchKeys] = await Promise.all(
+          keys.map(key => snapshot.getPromise(key))
+        );
 
         const searchValue = await snapshot.getPromise(searchByStore(recoilId));
-        const isStrictMode = await snapshot.getPromise(isStrictModeStore);
+        let isStrictMode = await snapshot.getPromise(isStrictModeStore);
 
         const response = await Promise.all(
           allKeys.map(key => snapshot.getPromise(noWait(filterByStore(`${key}_${recoilId}`))))
@@ -68,6 +76,10 @@ export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, o
 
         if (newData.type !== 'SEARCH' || newData.type !== 'STRICT_MODE') {
           filterBy[newData.key] = newData.value;
+        }
+
+        if (newData.type === 'STRICT_MODE') {
+          isStrictMode = newData.isStrictMode;
         }
 
         const filteredData = data.filter(item => {
@@ -79,6 +91,7 @@ export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, o
           );
         });
 
+        set(isFilteredStore(recoilId), FiltersUtils.getIsFiltered(filterBy));
         set(filteredDataStore(recoilId), filteredData);
       },
     [recoilId]
@@ -90,6 +103,7 @@ export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, o
         const filterByKeys = await snapshot.getPromise(filterByAllKeys(recoilId));
 
         reset(filteredDataStore(recoilId));
+        reset(isFilteredStore(recoilId));
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
       },
     [recoilId]
@@ -119,7 +133,9 @@ export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, o
   return (
     <div className={className ? styles[className] : styles.default}>
       {renderFilters()}
-      {isStrictModeVisible ? <StrictModeToggle onToggle={onFilterFilteredData} /> : null}
+      {isStrictModeVisible ? (
+        <StrictModeToggle onFilter={onFilterFilteredData} onToggle={onFilterFilteredData} />
+      ) : null}
 
       {hasCustomSort && (
         <div className={`${styles.filterButton}`}>

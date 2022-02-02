@@ -10,14 +10,16 @@ import { isStrictModeStore } from '../../_functions/Stores/filterStore';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const StrictModeToggle = ({ onToggle }) => {
+export const StrictModeToggle = ({ onFilter, onToggle }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [isStrictMode, setIStrictMode] = useRecoilState(isStrictModeStore);
 
-  const onToggleStrictMode = () => {
+  const onToggleStrictMode = async () => {
     setIStrictMode(prevState => !prevState);
+
     onToggle({ type: 'STRICT_MODE' });
+    await onFilter({ type: 'STRICT_MODE', isStrictMode: !isStrictMode });
   };
 
   return (

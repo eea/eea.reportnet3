@@ -35,3 +35,8 @@ export const isStrictModeStore = atom({
   key: 'isStrictModeStore',
   default: false
 });
+
+export const isFilteredStore = atomFamily({
+  key: 'isFilteredStore',
+  default: () => false
+});

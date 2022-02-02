@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -13,8 +14,12 @@ import { Spinner } from 'views/_components/Spinner';
 
 import { UniqueConstraintService } from 'services/UniqueConstraintService';
 
+import { filteredDataStore } from 'views/_components/Filters/_functions/Stores/filterStore';
+
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 import { constraintsReducer } from './_functions/Reducers/constraintsReducer';
 
@@ -36,6 +41,8 @@ export const UniqueConstraints = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const filteredData = useRecoilValue(filteredDataStore('uniqueConstraints'));
+
   const {
     datasetSchemaId,
     datasetSchemaAllTables,
@@ -47,13 +54,13 @@ export const UniqueConstraints = ({
 
   const [constraintsState, constraintsDispatch] = useReducer(constraintsReducer, {
     data: [],
-    filtered: false,
-    filteredData: [],
     isDataUpdated: false,
     isDeleteDialogVisible: false,
     isLoading: true,
     isDeleting: false
   });
+
+  const { isFiltered, setData } = useApplyFilters('uniqueConstraints');
 
   useEffect(() => {
     if (!designerState.isManageUniqueConstraintDialogVisible && needsRefresh) {
@@ -77,16 +84,14 @@ export const UniqueConstraints = ({
     />
   );
 
-  const getFilteredState = value => constraintsDispatch({ type: 'IS_FILTERED', payload: { value } });
-
   const getPaginatorRecordsCount = () => (
     <Fragment>
-      {constraintsState.filtered && constraintsState.data.length !== constraintsState.filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${constraintsState.filteredData.length} | `
+      {isFiltered && constraintsState.data.length !== filteredData.length
+        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {constraintsState.data.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
-      {constraintsState.filtered && constraintsState.data.length === constraintsState.filteredData.length
+      {isFiltered && constraintsState.data.length === filteredData.length
         ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
         : ''}
     </Fragment>
@@ -122,7 +127,9 @@ export const UniqueConstraints = ({
       }
       const uniqueConstraintList = await UniqueConstraintService.getAll(dataflowId, datasetSchemaId);
       const uniques = UniqueConstraintsUtils.parseConstraintsList(uniqueConstraintList, datasetSchemaAllTables);
-      constraintsDispatch({ type: 'INITIAL_LOAD', payload: { data: uniques, filteredData: uniques } });
+
+      constraintsDispatch({ type: 'INITIAL_LOAD', payload: { data: uniques } });
+      setData(uniques);
       setIsDuplicatedToManageUnique(false);
       refreshList(false);
     } catch (error) {
@@ -135,8 +142,6 @@ export const UniqueConstraints = ({
       setIsUniqueConstraintUpdating(false);
     }
   };
-
-  const onLoadFilteredData = data => constraintsDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
   const onUpdateData = () => isDataUpdated(!constraintsState.isDataUpdated);
 
@@ -169,7 +174,20 @@ export const UniqueConstraints = ({
 
   const renderFieldBody = rowData => rowData.fieldData.map(field => field.name).join(', ');
 
-  const filterOptions = [{ type: 'multiselect', properties: [{ name: 'tableSchemaName' }, { name: 'fieldData' }] }];
+  const filterOptions = [
+    {
+      nestedOptions: [
+        { key: 'tableSchemaName', label: resourcesContext.messages['tableSchemaName'] },
+        {
+          key: 'fieldData',
+          nestedKey: 'fieldId',
+          label: resourcesContext.messages['fieldData'],
+          multiSelectOptions: UniqueConstraintsUtils.getFieldsOptions(constraintsState.data)
+        }
+      ],
+      type: 'MULTI_SELECT'
+    }
+  ];
 
   if (constraintsState.isLoading)
     return (
@@ -186,17 +204,9 @@ export const UniqueConstraints = ({
     </div>
   ) : (
     <div className={styles.constraints}>
-      <Filters
-        className="uniqueConstraints"
-        data={constraintsState.data}
-        getFilteredData={onLoadFilteredData}
-        getFilteredSearched={getFilteredState}
-        matchMode={true}
-        options={filterOptions}
-        selectList={{ fieldData: UniqueConstraintsUtils.getFieldsOptions(constraintsState.data) }}
-      />
+      <Filters className="lineItems" isStrictModeVisible={true} options={filterOptions} recoilId="uniqueConstraints" />
 
-      {!isEmpty(constraintsState.filteredData) ? (
+      {!isEmpty(filteredData) ? (
         <DataTable
           autoLayout={true}
           onRowClick={event => getManageUniqueConstraint(event.data)}
@@ -205,9 +215,9 @@ export const UniqueConstraints = ({
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary={resourcesContext.messages['uniqueConstraints']}
-          totalRecords={constraintsState.filteredData.length}
-          value={constraintsState.filteredData}>
-          {renderColumns(constraintsState.filteredData)}
+          totalRecords={filteredData.length}
+          value={filteredData}>
+          {renderColumns(filteredData)}
         </DataTable>
       ) : (
         <div className={styles.emptyFilteredData}>

@@ -76,4 +76,14 @@ const applySearch = ({ filteredKeys = [], item, value }) => {
   });
 };
 
-export const FiltersUtils = { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch };
+const getIsFiltered = filterBy => {
+  if (isEmpty(filterBy)) {
+    return false;
+  }
+
+  return Object.values(filterBy)
+    .map(key => isEmpty(key))
+    .includes(false);
+};
+
+export const FiltersUtils = { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch, getIsFiltered };
