@@ -20,7 +20,8 @@ import {
   filteredDataStore,
   isFilteredStore,
   isStrictModeStore,
-  searchByStore
+  searchByStore,
+  sortByStore
 } from './_functions/Stores/filterStore';
 
 import {
@@ -112,6 +113,7 @@ export const Filters = ({
       async () => {
         const filterByKeys = await snapshot.getPromise(filterByAllKeys(recoilId));
 
+        reset(sortByStore(recoilId));
         reset(filteredDataStore(recoilId));
         reset(isFilteredStore(recoilId));
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));

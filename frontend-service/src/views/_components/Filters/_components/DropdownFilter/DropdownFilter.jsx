@@ -28,7 +28,13 @@ export const DropdownFilter = ({ isLoading, onFilterData, onSort, option, recoil
 
   return (
     <div className={`${styles.block}`} key={option.key}>
-      <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} onSort={onSort} />
+      <SortButton
+        id={option.key}
+        isLoading={isLoading}
+        isVisible={option.isSortable}
+        onSort={onSort}
+        recoilId={recoilId}
+      />
       <Dropdown
         ariaLabel={option.key}
         className={`p-float-label ${styles.dropdownFilter} ${
