@@ -246,7 +246,7 @@ export const UniqueConstraints = ({
           iconConfirm={constraintsState.isDeleting ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onDeleteConstraint()}
+          onConfirm={onDeleteConstraint}
           onHide={() => isDeleteDialogVisible(false)}
           visible={constraintsState.isDeleteDialogVisible}>
           {resourcesContext.messages['deleteUniqueConstraintConfirm']}

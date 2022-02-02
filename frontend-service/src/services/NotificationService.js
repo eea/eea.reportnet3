@@ -38,7 +38,7 @@ export const NotificationService = {
     delete content.customContent;
 
     if (type === 'UPDATED_DATASET_STATUS') {
-      content.datasetStatus = capitalize(content.datasetStatus.split('_').join(' '));
+      content.datasetStatus = capitalize(content?.datasetStatus?.split('_').join(' '));
     }
 
     const notificationDTO = {};
