@@ -1,12 +1,12 @@
 import uniqBy from 'lodash/uniqBy';
 
 const getFieldsOptions = data => {
-  const parsedFields = data.map(unique => unique.fieldData.map(item => ({ id: item.fieldId, name: item.name })));
+  const parsedFields = data.map(unique => unique.fieldData.map(item => ({ type: item.name, value: item.fieldId })));
   const allFields = [];
   for (let index = 0; index < parsedFields.length; index++) {
     allFields.push(...parsedFields[index]);
   }
-  return uniqBy(allFields, 'id');
+  return uniqBy(allFields, 'value');
 };
 
 const parseConstraintsList = (constraintsData, tableData) => {

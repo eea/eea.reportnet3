@@ -26,6 +26,8 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
@@ -38,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -550,6 +553,29 @@ public class FileCommonUtils {
       datasetService.storeRecords(datasetId, dataset.getTableValues().get(0).getRecords(),
           connectionDataVO);
     }
+  }
+
+  /**
+   * Export file with filters.
+   *
+   * @param datasetId the dataset id
+   * @param idTableSchema the id table schema
+   * @param levelErrorList the level error list
+   * @param pageable the pageable
+   * @param idRulesList the id rules list
+   * @param fieldValue the field value
+   * @return the list
+   */
+  @Transactional
+  public List<RecordVO> exportFileWithFilters(Long datasetId, String idTableSchema,
+      List<ErrorTypeEnum> levelErrorList, Pageable pageable, List<String> idRulesList,
+      String fieldValue) {
+    levelErrorList = levelErrorList.isEmpty()
+        ? List.of(ErrorTypeEnum.CORRECT, ErrorTypeEnum.INFO, ErrorTypeEnum.WARNING,
+            ErrorTypeEnum.ERROR, ErrorTypeEnum.BLOCKER)
+        : levelErrorList;
+    return recordRepository.findByTableValueWithOrder(datasetId, idTableSchema, levelErrorList,
+        pageable, idRulesList, null, fieldValue, null).getRecords();
   }
 
   /**

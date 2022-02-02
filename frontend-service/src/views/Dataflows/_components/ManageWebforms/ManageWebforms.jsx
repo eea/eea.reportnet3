@@ -3,6 +3,7 @@ import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import orderBy from 'lodash/orderBy';
+import ReactTooltip from 'react-tooltip';
 
 import styles from './ManageWebforms.module.scss';
 
@@ -61,6 +62,12 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   useEffect(() => {
     setWebformConfiguration(getInitialWebformConfiguration);
   }, [webformConfiguration.id]);
+
+  useEffect(() => {
+    if (isAddEditDialogVisible) {
+      checkHasErrors('content');
+    }
+  }, [webformConfiguration.content]);
 
   const getWebformList = async () => {
     setLoadingStatus('pending');
@@ -373,15 +380,32 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     setErrors(prevErrors => ({ ...prevErrors, [field]: { hasErrors, message } }));
   };
 
+  const renderTooltip = () => {
+    if (isNil(webformConfiguration.id) && getIsDisabledConfirmBtn() && isEmpty(webformConfiguration.content)) {
+      return (
+        <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="confirmBtn" place="top">
+          {resourcesContext.messages['fileNotSelectedError']}
+        </ReactTooltip>
+      );
+    }
+  };
+
   const addEditDialogFooter = (
     <Fragment>
-      <Button
-        className={`p-button-primary ${getIsDisabledConfirmBtn() ? '' : 'p-button-animated-blink'}`}
-        disabled={getIsDisabledConfirmBtn()}
-        icon={loadingStatus === 'pending' ? 'spinnerAnimate' : 'check'}
-        label={isNil(webformConfiguration.id) ? resourcesContext.messages['create'] : resourcesContext.messages['save']}
-        onClick={onConfirm}
-      />
+      <span data-for="confirmBtn" data-tip>
+        <Button
+          className={`p-button-primary ${getIsDisabledConfirmBtn() ? '' : 'p-button-animated-blink'}`}
+          disabled={getIsDisabledConfirmBtn()}
+          icon={loadingStatus === 'pending' ? 'spinnerAnimate' : 'check'}
+          label={
+            isNil(webformConfiguration.id) ? resourcesContext.messages['create'] : resourcesContext.messages['save']
+          }
+          onClick={onConfirm}
+        />
+      </span>
+
+      {renderTooltip()}
+
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon="cancel"
