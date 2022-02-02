@@ -180,8 +180,8 @@ export const Filters = ({
             icon="undo"
             label={resourcesContext.messages['reset']}
             onClick={async () => {
-              onReset();
               await onResetFilters();
+              await onReset();
             }}
           />
         </div>

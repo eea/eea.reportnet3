@@ -56,14 +56,16 @@ export const SortButton = ({ id, isLoading, isVisible, onSort, recoilId }) => {
     }
   };
 
-  if (isVisible) {
-    return (
-      <Button
-        className={`p-button-secondary-transparent ${styles.sortButton} ${isSortActive ? styles.iconActive : null}`}
-        disabled={isLoading}
-        icon={id === sortBy.sortByHeader ? switchSortByIcon(sortBy.sortByOption) : 'sortAlt'}
-        onClick={() => onSortData(id)}
-      />
-    );
+  if (!isVisible) {
+    return null;
   }
+
+  return (
+    <Button
+      className={`p-button-secondary-transparent ${styles.sortButton} ${isSortActive ? styles.iconActive : null}`}
+      disabled={isLoading}
+      icon={id === sortBy.sortByHeader ? switchSortByIcon(sortBy.sortByOption) : 'sortAlt'}
+      onClick={() => onSortData(id)}
+    />
+  );
 };

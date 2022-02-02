@@ -612,7 +612,6 @@ export const Dataflows = () => {
       {
         key: 'userRole',
         label: resourcesContext.messages['userRole'],
-        isSortable: true,
         dropdownOptions: getRolesDropdownOptions(),
         type: 'DROPDOWN'
       },
