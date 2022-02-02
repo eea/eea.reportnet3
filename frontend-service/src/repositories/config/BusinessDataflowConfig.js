@@ -1,3 +1,3 @@
 export const BusinessDataflowConfig = {
-  getAll: '/dataflow/businessDataflows?asc={:isAsc}&numPage={:pageNum}&orderHeader={:sortBy}&sizePage={:numberRows}'
+  getAll: '/dataflow/businessDataflows?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}'
 };
