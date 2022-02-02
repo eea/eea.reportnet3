@@ -60,39 +60,15 @@ export const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }
 
   useEffect(() => {
     if (headerOpened) {
-      setGlobanElementStyle({
-        marginTop: '0',
-        transition: '0.5s'
-      });
-      setEuHeaderElementStyle({
-        marginTop: '0',
-        transition: '0.5s'
-      });
-      setHeaderElementStyle({
-        ...headerElementStyle,
-        height: '180px'
-      });
-      onMainContentStyleChange({
-        marginTop: '180px',
-        transition: '0.5s'
-      });
+      setGlobanElementStyle({ marginTop: '0', transition: '0.5s' });
+      setEuHeaderElementStyle({ marginTop: '0', transition: '0.5s' });
+      setHeaderElementStyle({ ...headerElementStyle, height: '180px' });
+      onMainContentStyleChange({ marginTop: '180px', transition: '0.5s' });
     } else {
-      setGlobanElementStyle({
-        marginTop: '-100px',
-        transition: '0.5s'
-      });
-      setEuHeaderElementStyle({
-        marginTop: '-16px',
-        transition: '0.5s'
-      });
-      setHeaderElementStyle({
-        ...headerElementStyle,
-        height: '64px'
-      });
-      onMainContentStyleChange({
-        marginTop: '64px',
-        transition: '0.5s'
-      });
+      setGlobanElementStyle({ marginTop: '-100px', transition: '0.5s' });
+      setEuHeaderElementStyle({ marginTop: '-16px', transition: '0.5s' });
+      setHeaderElementStyle({ ...headerElementStyle, height: '64px' });
+      onMainContentStyleChange({ marginTop: '64px', transition: '0.5s' });
     }
   }, [headerOpened]);
 
@@ -101,11 +77,7 @@ export const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }
       const innerWidth = window.innerWidth;
       const currentScrollPos = window.pageYOffset;
       if (innerWidth > 768 && themeContext.headerCollapse) {
-        if (currentScrollPos === 0) {
-          setHeaderOpened(true);
-        } else {
-          setHeaderOpened(false);
-        }
+        setHeaderOpened(currentScrollPos === 0);
       }
     };
     if (!themeContext.headerCollapse) {
