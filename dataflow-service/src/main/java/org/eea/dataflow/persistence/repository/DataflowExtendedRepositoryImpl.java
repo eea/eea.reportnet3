@@ -23,6 +23,9 @@ import org.springframework.data.domain.Pageable;
  */
 public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepository {
 
+  /** The Constant DATE_RELEASED. */
+  private static final String DATE_RELEASED = "date_released";
+
   /** The Constant DELIVERY_STATUS. */
   private static final String DELIVERY_STATUS = "delivery_status";
 
@@ -66,7 +69,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "(docaux ->> 'validSince' ) as validSince,\r\n" + "(docaux ->> 'validTo' ) as validTo,\r\n"
       + "(docaux ->> 'comment' ) as comment,\r\n"
       + "(docaux ->> 'nextDeadline' ) as nextDeadline,\r\n"
-      + "(docaux ->> 'legalInstrument' ) as legal_Instrument,\r\n"
+      + "cast((docaux ->> 'legalInstrument' )as json)->>'sourceTitle' as legal_Instrument,\r\n"
       + "(docaux ->> 'client' ) as client,\r\n" + "(docaux ->> 'countries' ) as countries,\r\n"
       + "(docaux ->> 'issues' ) as issues,\r\n" + "(docaux ->> 'reportFreq' ) as reportFreq,\r\n"
       + "(docaux ->> 'reportFreqDetail' ) as reportFreqDetail\r\n" + "from doc),\r\n"
@@ -85,9 +88,6 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       " inner join representative r on d.id = r.dataflow_id "
           + "inner join data_provider dp on r.data_provider_id = dp.group_id "
           + "left join dataset_aux on d.id = dataset_aux.dataflowid ";
-
-  /** The Constant DRAFT_STATUS. */
-  private static final String DRAFT_STATUS = " d.status = 'DRAFT'";
 
   /** The Constant AND. */
   private static final String AND = " and ";
@@ -439,10 +439,10 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         stringQuery.append(String.format(DATE_TO, "deadline_date", key));
         break;
       case "delivery_date_from":
-        stringQuery.append(String.format(DATE_FROM, "delivery_date", key));
+        stringQuery.append(String.format(DATE_FROM, DATE_RELEASED, key));
         break;
       case "delivery_date_to":
-        stringQuery.append(String.format(DATE_TO, "delivery_date", key));
+        stringQuery.append(String.format(DATE_TO, DATE_RELEASED, key));
         break;
       case DELIVERY_STATUS:
         stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key));
@@ -564,11 +564,9 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     sb.append(JOIN_REPRESENTATIVE_DATA_PROVIDER_AND_DATASET_AUX);
     sb.append(" where " + HAS_DATASETS);
     sb.append(AND + DATAFLOW_PUBLIC);
-    sb.append(AND + DRAFT_STATUS);
     sb.append(AND + COUNTRY_CODE_CONDITION);
 
     if (MapUtils.isNotEmpty(filters) && applyFilters) {
-
       for (String key : filters.keySet()) {
         addAnd(sb, addAnd);
         setFilters(sb, key, filters.get(key));
@@ -578,7 +576,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     if (StringUtils.isNotBlank(orderHeader)) {
       sb.append(String.format(ORDER_BY, orderHeader, asc ? "asc" : "desc"));
     } else {
-      sb.append("order by status, creation_date desc");
+      sb.append(" order by status, creation_date desc ");
     }
   }
 }

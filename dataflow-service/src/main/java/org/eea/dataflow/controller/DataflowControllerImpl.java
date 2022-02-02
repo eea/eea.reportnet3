@@ -27,7 +27,6 @@ import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
-import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
@@ -712,7 +711,7 @@ public class DataflowControllerImpl implements DataFlowController {
   @PostMapping("/public/country/{countryCode}")
   @ApiOperation(value = "Gets all the public dataflow that use a specific Country Code",
       hidden = false)
-  public DataflowPublicPaginatedVO getPublicDataflowsByCountry(
+  public PaginatedDataflowVO getPublicDataflowsByCountry(
       @ApiParam(value = "Country Code",
           example = "AL") @PathVariable("countryCode") String countryCode,
       @ApiParam(value = "pageNum: page number to show", example = "0",

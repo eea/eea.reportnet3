@@ -7,7 +7,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
-import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
@@ -202,8 +201,8 @@ public interface DataflowService {
    * @param pageSize the page size
    * @return the public dataflows by country
    */
-  DataflowPublicPaginatedVO getPublicDataflowsByCountry(String countryCode, String header,
-      boolean asc, int page, int pageSize, Map<String, String> filters) throws EEAException;
+  PaginatedDataflowVO getPublicDataflowsByCountry(String countryCode, String header, boolean asc,
+      int page, int pageSize, Map<String, String> filters) throws EEAException;
 
 
   /**

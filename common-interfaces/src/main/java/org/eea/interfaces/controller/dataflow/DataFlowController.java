@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
-import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
@@ -279,8 +278,7 @@ public interface DataFlowController {
    * @return the public dataflows by country
    */
   @PostMapping("/public/country/{countryCode}")
-  DataflowPublicPaginatedVO getPublicDataflowsByCountry(
-      @PathVariable("countryCode") String countryCode,
+  PaginatedDataflowVO getPublicDataflowsByCountry(@PathVariable("countryCode") String countryCode,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
       @RequestParam(value = "sortField", required = false) String sortField,

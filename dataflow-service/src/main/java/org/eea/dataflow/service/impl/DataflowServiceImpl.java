@@ -53,7 +53,6 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
-import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
@@ -771,7 +770,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException
    */
   @Override
-  public DataflowPublicPaginatedVO getPublicDataflowsByCountry(String countryCode, String header,
+  public PaginatedDataflowVO getPublicDataflowsByCountry(String countryCode, String header,
       boolean asc, int page, int pageSize, Map<String, String> filters) throws EEAException {
 
     try {
@@ -797,8 +796,8 @@ public class DataflowServiceImpl implements DataflowService {
           }
         }
       }
-      DataflowPublicPaginatedVO dataflowPublicPaginated = new DataflowPublicPaginatedVO();
-      dataflowPublicPaginated.setPublicDataflows(publicDataflowsVOList);
+      PaginatedDataflowVO dataflowPublicPaginated = new PaginatedDataflowVO();
+      dataflowPublicPaginated.setDataflows(publicDataflowsVOList);
       dataflowPublicPaginated.setTotalRecords(
           dataflowRepository.countByCountry(obligationJson, filters, header, asc, countryCode));
       dataflowPublicPaginated.setFilteredRecords(dataflowRepository
