@@ -395,7 +395,7 @@ public class DataflowServiceImpl implements DataflowService {
       }
       paginatedDataflowVO.setDataflows(dataflowVOs);
       return paginatedDataflowVO;
-    } catch (JsonProcessingException e1) {
+    } catch (Exception e) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
     }
   }
@@ -754,7 +754,7 @@ public class DataflowServiceImpl implements DataflowService {
 
       return pag;
 
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
     }
   }

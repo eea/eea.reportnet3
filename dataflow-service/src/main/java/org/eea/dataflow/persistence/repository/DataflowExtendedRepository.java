@@ -3,6 +3,7 @@ package org.eea.dataflow.persistence.repository;
 import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.persistence.domain.Dataflow;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.springframework.data.domain.Pageable;
 
@@ -35,10 +36,11 @@ public interface DataflowExtendedRepository {
    * @param type the type
    * @param dataflowIds the dataflow ids
    * @return the list
+   * @throws EEAException
    */
   List<Dataflow> findPaginated(String json, Pageable pageable, boolean isPublic,
       Map<String, String> filters, String orderHeader, boolean asc, TypeDataflowEnum type,
-      List<Long> dataflowIds);
+      List<Long> dataflowIds) throws EEAException;
 
 
 
@@ -54,9 +56,11 @@ public interface DataflowExtendedRepository {
    * @param type the type
    * @param dataflowIds the dataflow ids
    * @return the long
+   * @throws EEAException the EEA exception
    */
   Long countPaginated(String json, Pageable pageable, boolean isPublic, Map<String, String> filters,
-      String orderHeader, boolean asc, TypeDataflowEnum type, List<Long> dataflowIds);
+      String orderHeader, boolean asc, TypeDataflowEnum type, List<Long> dataflowIds)
+      throws EEAException;
 
 
 
@@ -72,7 +76,8 @@ public interface DataflowExtendedRepository {
    * @return the list
    */
   List<Dataflow> findPaginatedByCountry(String obligationJson, Pageable pageable,
-      Map<String, String> filters, String orderHeader, boolean asc, String countryCode);
+      Map<String, String> filters, String orderHeader, boolean asc, String countryCode)
+      throws EEAException;
 
 
 
@@ -87,7 +92,7 @@ public interface DataflowExtendedRepository {
    * @return the long
    */
   Long countByCountry(String obligationJson, Map<String, String> filters, String orderHeader,
-      boolean asc, String countryCode);
+      boolean asc, String countryCode) throws EEAException;
 
   /**
    * Count by country filtered.
@@ -100,7 +105,7 @@ public interface DataflowExtendedRepository {
    * @return the long
    */
   Long countByCountryFiltered(String obligationJson, Map<String, String> filters,
-      String orderHeader, boolean asc, String countryCode);
+      String orderHeader, boolean asc, String countryCode) throws EEAException;
 
 
 
