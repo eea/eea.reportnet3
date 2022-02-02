@@ -17,10 +17,13 @@ export const InputFile = ({
   accept,
   buttonTextNoFile,
   buttonTextWithFile,
+  className,
+  errorMessage,
   fileRef,
   hasError,
   onChange,
   onClearFile,
+  onClick = () => {},
   onKeyPress
 }) => {
   const resourcesContext = useContext(ResourcesContext);
@@ -29,6 +32,7 @@ export const InputFile = ({
 
   const onFileSelect = e => {
     e.preventDefault();
+    fileInputClicked();
     setFileName(e.target?.files[0]?.name ? e.target.files[0].name : '');
     onChange(e);
   };
@@ -39,12 +43,25 @@ export const InputFile = ({
     fileRef.current.value = '';
   };
 
+  const fileInputClicked = () => {
+    window.removeEventListener('focus', handleFocusBack);
+  };
+
+  const handleFocusBack = () => {
+    window.removeEventListener('focus', handleFocusBack);
+    onClick();
+  };
+
+  const clickFileInput = () => {
+    window.addEventListener('focus', handleFocusBack);
+  };
+
   const renderMessage = () => {
     if (hasError) {
       return (
         <div className={styles.messageWrapper}>
           <div className={styles.message}>
-            <ErrorMessage message={resourcesContext.messages['fileNotSelectedError']} />
+            <ErrorMessage message={errorMessage || resourcesContext.messages['fileNotSelectedError']} />
           </div>
         </div>
       );
@@ -61,7 +78,7 @@ export const InputFile = ({
   };
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${className ? className : ''}`}>
       <div className={styles.buttonWrap}>
         <Button
           className="p-button p-component p-button-primary p-button-animated-blink p-button-text-icon-left"
@@ -80,6 +97,7 @@ export const InputFile = ({
         id="fileInput"
         name="fileInput"
         onChange={onFileSelect}
+        onClick={clickFileInput}
         onKeyPress={onKeyPress}
         ref={fileRef}
         type="file"
