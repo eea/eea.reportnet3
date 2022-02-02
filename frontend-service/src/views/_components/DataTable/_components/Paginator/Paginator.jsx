@@ -18,6 +18,7 @@ export class Paginator extends Component {
     currentPageReportTemplate: '({currentPage} of {totalPages})',
     disabled: false,
     first: 0,
+    hasDataflows: false,
     isDataflowsList: false,
     leftContent: null,
     onPageChange: null,
@@ -36,6 +37,7 @@ export class Paginator extends Component {
     currentPageReportTemplate: PropTypes.any,
     disabled: PropTypes.bool,
     first: PropTypes.number,
+    hasDataflows: PropTypes.bool,
     isDataflowsList: PropTypes.bool,
     leftContent: PropTypes.any,
     onPageChange: PropTypes.func,
@@ -221,37 +223,33 @@ export class Paginator extends Component {
   }
 
   renderElements() {
-    const template = this.props.template;
+    if (this.props.hasDataflows) {
+      const template = this.props.template;
 
-    if (template) {
-      if (typeof template === 'object') {
-        return template.layout
-          ? template.layout.split(' ').map(value => {
-              const key = value.trim();
-              return this.renderElement(key, template[key]);
-            })
-          : Object.entries(template).map(([key, _template]) => {
-              return this.renderElement(key, _template);
-            });
+      if (template) {
+        if (typeof template === 'object') {
+          return template.layout
+            ? template.layout.split(' ').map(value => {
+                const key = value.trim();
+                return this.renderElement(key, template[key]);
+              })
+            : Object.entries(template).map(([key, _template]) => {
+                return this.renderElement(key, _template);
+              });
+        }
+
+        return template.split(' ').map(value => {
+          return this.renderElement(value.trim());
+        });
       }
-
-      return template.split(' ').map(value => {
-        return this.renderElement(value.trim());
-      });
     }
 
     return null;
   }
 
-  render() {
-    if (!this.props.alwaysShow && this.getPageCount() === 1) {
-      return null;
-    }
-
-    return (
-      <div
-        className={classNames('p-paginator p-component p-unselectable-text', this.props.className)}
-        style={this.props.style}>
+  renderRowsPerPageDropdown() {
+    if (this.props.hasDataflows) {
+      return (
         <div className="p-paginator-left-content-rowsPerPage">
           <RowsPerPageDropdown
             disabled={this.props.disabled}
@@ -263,6 +261,20 @@ export class Paginator extends Component {
           />
           {this.props.leftContent && <div className="p-paginator-left-content">{this.props.leftContent}</div>}
         </div>
+      );
+    }
+  }
+
+  render() {
+    if (!this.props.alwaysShow && this.getPageCount() === 1) {
+      return null;
+    }
+
+    return (
+      <div
+        className={classNames('p-paginator p-component p-unselectable-text', this.props.className)}
+        style={this.props.style}>
+        {this.renderRowsPerPageDropdown()}
         <div className="p-paginator-middle-content">{this.renderElements()}</div>
         <div>
           {this.props.rightContent && <div className="p-paginator-right-content">{this.props.rightContent}</div>}
