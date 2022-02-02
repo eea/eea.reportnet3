@@ -309,9 +309,7 @@ export const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }
             header={resourcesContext.messages['logout']}
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={() => {
-              userLogout();
-            }}
+            onConfirm={userLogout}
             onHide={() => setConfirmVisible(false)}
             visible={confirmvisible}>
             {resourcesContext.messages['userLogout']}
