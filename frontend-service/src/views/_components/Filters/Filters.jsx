@@ -173,7 +173,7 @@ export const Filters = ({
       {renderFilters()}
       {renderStrictModeToggle()}
 
-      <div>
+      <div className={styles.buttonWrapper}>
         {renderCustomFiltersButton()}
         <div className={`${styles.resetButton}`}>
           <Button
