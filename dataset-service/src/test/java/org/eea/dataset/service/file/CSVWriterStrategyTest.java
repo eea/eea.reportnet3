@@ -92,7 +92,7 @@ public class CSVWriterStrategyTest {
     csvWriterStrategy.writeFile(1L, 1L, "", true, false, filters);
     Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.any(),
         Mockito.any(DataSetSchemaVO.class));
-    Mockito.verify(fileCommon, times(2)).exportFileWithFilters(Mockito.any(), Mockito.any(),
+    Mockito.verify(fileCommon, times(1)).exportFileWithFilters(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
@@ -136,7 +136,7 @@ public class CSVWriterStrategyTest {
     csvWriterStrategy.writeFileList(1L, 1L, false, false);
     Mockito.verify(fileCommon, times(1)).getFieldSchemas(Mockito.any(),
         Mockito.any(DataSetSchemaVO.class));
-    Mockito.verify(fileCommon, times(2)).exportFileWithFilters(Mockito.any(), Mockito.any(),
+    Mockito.verify(fileCommon, times(1)).exportFileWithFilters(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 }
