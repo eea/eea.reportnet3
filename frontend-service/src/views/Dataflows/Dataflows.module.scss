@@ -42,4 +42,7 @@
 
 .paginator {
   background-color: var(--dataflows-list-paginator-bg-color) !important;
+  border-radius: 5px;
+  border: none !important;
+  box-shadow: var(--paginator-dataflows-pages-highlight-box-shadow) !important;
 }
