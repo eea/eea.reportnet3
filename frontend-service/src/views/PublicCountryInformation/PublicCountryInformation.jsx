@@ -151,7 +151,7 @@ export const PublicCountryInformation = () => {
         filterBy
       });
       setTotalRecords(data.totalRecords);
-      setPublicInformation(data.publicDataflows);
+      setPublicInformation(data.dataflows);
       setFilteredRecords(data.filteredRecords);
       setIsFiltered(data.filteredRecords !== data.totalRecords);
     } catch (error) {
