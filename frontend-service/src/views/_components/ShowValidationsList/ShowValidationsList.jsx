@@ -509,12 +509,10 @@ export const ShowValidationsList = memo(
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {isFiltered ? `${resourcesContext.messages['filtered']}: ${totalFilteredRecords} | ` : ''}
         {resourcesContext.messages['totalRecords']} {totalRecords}{' '}
         {`${resourcesContext.messages['records'].toLowerCase()}${` (${resourcesContext.messages[
           'totalErrors'
         ].toLowerCase()}${totalErrors})`}`}
-        {isFiltered ? ` (${resourcesContext.messages['filtered'].toLowerCase()})` : ''}
       </Fragment>
     );
 
@@ -590,7 +588,12 @@ export const ShowValidationsList = memo(
       return (
         <div className={styles.validations}>
           <div className={styles.searchInput}>
-            <Filters onFilter={onLoadFilteredValidations} options={filterOptions} recoilId="showValidations" />
+            <Filters
+              className="showValidations"
+              onFilter={onLoadFilteredValidations}
+              options={filterOptions}
+              recoilId="showValidations"
+            />
           </div>
 
           <div className={styles.validationsWrapper}>

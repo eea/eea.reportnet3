@@ -2,6 +2,7 @@ import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
+import isNumber from 'lodash/isNumber';
 import isUndefined from 'lodash/isUndefined';
 
 import { DatasetRepository } from 'repositories/DatasetRepository';
@@ -247,8 +248,8 @@ export const DatasetService = {
       datasetId,
       pageNum,
       pageSize,
-      sortField,
-      asc,
+      sortField || '',
+      isNumber(asc) ? asc : '',
       fieldValueFilter,
       levelErrorsFilter,
       typeEntitiesFilter,

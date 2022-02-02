@@ -386,6 +386,19 @@
   @extend .lineItems;
 }
 
+.showValidations {
+  @extend .lineItems;
+
+  .buttonWrapper {
+    flex-wrap: nowrap !important;
+    justify-content: center;
+
+    .resetButton {
+      margin-top: 0;
+    }
+  }
+}
+
 @media (max-width: 640px) {
   .dataflowsFilters > div {
     width: 100% !important;
