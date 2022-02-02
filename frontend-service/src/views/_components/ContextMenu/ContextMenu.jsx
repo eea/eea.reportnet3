@@ -26,7 +26,7 @@ class ContextMenuSub extends Component {
     };
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(nextProps) {
     if (nextProps.resetMenu === true) {
       return {
         activeItem: null

@@ -30,15 +30,13 @@ export const PrivacyStatement = () => {
     });
   };
 
-  const layout = children => {
-    return (
-      <PublicLayout>
-        <div className>
-          <div className="rep-container">{children}</div>
-        </div>
-      </PublicLayout>
-    );
-  };
+  const layout = children => (
+    <PublicLayout>
+      <div className>
+        <div className="rep-container">{children}</div>
+      </div>
+    </PublicLayout>
+  );
 
   return layout(
     <div className="rep-row">
