@@ -105,7 +105,7 @@ export const ShowValidationsList = memo(
     }, []);
 
     useEffect(() => {
-      const headers = [
+      const columns = [
         {
           key: 'entityType',
           header: resourcesContext.messages['entity'],
@@ -171,7 +171,7 @@ export const ShowValidationsList = memo(
         }
       ];
 
-      const columnsArr = headers.map(column => (
+      const columnsArr = columns.map(column => (
         <Column
           body={column?.template}
           className={column?.className}
@@ -509,16 +509,12 @@ export const ShowValidationsList = memo(
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {isFiltered && totalRecords !== totalFilteredRecords
-          ? `${resourcesContext.messages['filtered']}: ${totalFilteredRecords} | `
-          : ''}
+        {isFiltered ? `${resourcesContext.messages['filtered']}: ${totalFilteredRecords} | ` : ''}
         {resourcesContext.messages['totalRecords']} {totalRecords}{' '}
         {`${resourcesContext.messages['records'].toLowerCase()}${` (${resourcesContext.messages[
           'totalErrors'
         ].toLowerCase()}${totalErrors})`}`}
-        {isFiltered && totalRecords === totalFilteredRecords
-          ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-          : ''}
+        {isFiltered ? ` (${resourcesContext.messages['filtered'].toLowerCase()})` : ''}
       </Fragment>
     );
 

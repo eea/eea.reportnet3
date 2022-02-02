@@ -3,8 +3,8 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import uniq from 'lodash/uniq';
 
-import { filterByAllKeys } from '../Stores/filterKeysStore';
-import { filterByStore } from '../Stores/filterStore';
+import { filterByAllKeys } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
+import { filterByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 
 export const useFilters = ({ keyStore, onFilterData, option, recoilId }) => {
   const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));

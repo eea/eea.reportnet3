@@ -189,7 +189,32 @@ export const UniqueConstraints = ({
     }
   ];
 
-  if (constraintsState.isLoading)
+  const renderContent = () => {
+    if (isEmpty(filteredData)) {
+      return (
+        <div className={styles.emptyFilteredData}>
+          {resourcesContext.messages['noConstraintsWithSelectedParameters']}
+        </div>
+      );
+    }
+
+    return (
+      <DataTable
+        autoLayout={true}
+        onRowClick={event => getManageUniqueConstraint(event.data)}
+        paginator={true}
+        paginatorRight={getPaginatorRecordsCount()}
+        rows={10}
+        rowsPerPageOptions={[5, 10, 15]}
+        summary={resourcesContext.messages['uniqueConstraints']}
+        totalRecords={filteredData.length}
+        value={filteredData}>
+        {renderColumns(filteredData)}
+      </DataTable>
+    );
+  };
+
+  if (constraintsState.isLoading) {
     return (
       <div className={styles.constraintsWithoutTable}>
         <div className={styles.spinner}>
@@ -197,33 +222,21 @@ export const UniqueConstraints = ({
         </div>
       </div>
     );
+  }
 
-  return isEmpty(constraintsState.data) ? (
-    <div className={styles.constraintsWithoutTable}>
-      <div className={styles.noConstraints}>{resourcesContext.messages['noConstraints']}</div>
-    </div>
-  ) : (
+  if (isEmpty(constraintsState.data)) {
+    return (
+      <div className={styles.constraintsWithoutTable}>
+        <div className={styles.noConstraints}>{resourcesContext.messages['noConstraints']}</div>
+      </div>
+    );
+  }
+
+  return (
     <div className={styles.constraints}>
       <Filters className="lineItems" isStrictModeVisible={true} options={filterOptions} recoilId="uniqueConstraints" />
 
-      {!isEmpty(filteredData) ? (
-        <DataTable
-          autoLayout={true}
-          onRowClick={event => getManageUniqueConstraint(event.data)}
-          paginator={true}
-          paginatorRight={getPaginatorRecordsCount()}
-          rows={10}
-          rowsPerPageOptions={[5, 10, 15]}
-          summary={resourcesContext.messages['uniqueConstraints']}
-          totalRecords={filteredData.length}
-          value={filteredData}>
-          {renderColumns(filteredData)}
-        </DataTable>
-      ) : (
-        <div className={styles.emptyFilteredData}>
-          {resourcesContext.messages['noConstraintsWithSelectedParameters']}
-        </div>
-      )}
+      {renderContent()}
 
       {constraintsState.isDeleteDialogVisible && (
         <ConfirmDialog

@@ -5,11 +5,8 @@ import isNil from 'lodash/isNil';
 const getEndOfDay = date => new Date(dayjs(date).endOf('day').format()).getTime();
 const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getTime();
 
-const applyCheckBox = ({ filterBy, filteredKeys = [], item }) => {
-  return filteredKeys.every(key => {
-    return !filterBy[key] || item[key]?.toString().includes(filterBy[key]?.toString());
-  });
-};
+const applyCheckBox = ({ filterBy, filteredKeys = [], item }) =>
+  filteredKeys.every(key => !filterBy[key] || item[key]?.toString().includes(filterBy[key]?.toString()));
 
 const applyDates = ({ filterBy, filteredKeys = [], item }) => {
   if (isEmpty(filteredKeys)) {
@@ -34,20 +31,17 @@ const applyDates = ({ filterBy, filteredKeys = [], item }) => {
     .reduce((previousValue, currentValue) => previousValue && currentValue);
 };
 
-const applyInputs = ({ filterBy, filteredKeys = [], item }) => {
-  return filteredKeys.every(key => {
+const applyInputs = ({ filterBy, filteredKeys = [], item }) =>
+  filteredKeys.every(key => {
     if (isEmpty(filterBy[key])) {
       return true;
     }
 
     return item[key].toLowerCase().includes(filterBy[key].toLowerCase());
   });
-};
 
-const applyMultiSelects = ({ filterBy, filteredKeys = [], isStrictMode, item }) => {
-  // return filteredKeys.every(key => isEmpty(filterBy[key]) || filterBy[key].includes(item[key]));
-
-  return filteredKeys.every(filteredKey => {
+const applyMultiSelects = ({ filterBy, filteredKeys = [], isStrictMode, item }) =>
+  filteredKeys.every(filteredKey => {
     if (isEmpty(filterBy[filteredKey])) {
       return true;
     }
@@ -64,16 +58,15 @@ const applyMultiSelects = ({ filterBy, filteredKeys = [], isStrictMode, item }) 
 
     return filterBy[filteredKey].includes(item[filteredKey]);
   });
-};
 
 const applySearch = ({ filteredKeys = [], item, value }) => {
   if (isEmpty(filteredKeys)) {
     return true;
   }
 
-  return filteredKeys.some(key => {
-    return isEmpty(value) || (!isNil(item[key]) && item[key].toLowerCase().includes(value.toLowerCase()));
-  });
+  return filteredKeys.some(
+    key => isEmpty(value) || (!isNil(item[key]) && item[key].toLowerCase().includes(value.toLowerCase()))
+  );
 };
 
 const getIsFiltered = filterBy => {

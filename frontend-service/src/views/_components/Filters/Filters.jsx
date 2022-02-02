@@ -44,7 +44,16 @@ const components = {
   SEARCH: SearchFilter
 };
 
-export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, onSort, options = [], recoilId }) => {
+export const Filters = ({
+  className,
+  isLoading,
+  isStrictModeVisible,
+  onFilter,
+  onReset = () => {},
+  onSort,
+  options = [],
+  recoilId
+}) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
@@ -82,14 +91,13 @@ export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, o
           isStrictMode = newData.isStrictMode;
         }
 
-        const filteredData = data.filter(item => {
-          return (
+        const filteredData = data.filter(
+          item =>
             FiltersUtils.applyInputs({ filterBy, filteredKeys: inputKeys.keys, item }) &&
             FiltersUtils.applyCheckBox({ filterBy, filteredKeys: checkboxKeys.keys, item }) &&
             FiltersUtils.applyMultiSelects({ filterBy, filteredKeys: multiSelectKeys.keys, isStrictMode, item }) &&
             FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: newData.searchValue || searchValue })
-          );
-        });
+        );
 
         set(isFilteredStore(recoilId), FiltersUtils.getIsFiltered(filterBy));
         set(filteredDataStore(recoilId), filteredData);
@@ -105,6 +113,7 @@ export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, o
         reset(filteredDataStore(recoilId));
         reset(isFilteredStore(recoilId));
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
+        await onReset();
       },
     [recoilId]
   );
@@ -130,24 +139,37 @@ export const Filters = ({ className, isLoading, isStrictModeVisible, onFilter, o
     );
   };
 
+  const renderStrictModeToggle = () => {
+    if (!isStrictModeVisible) {
+      return null;
+    }
+
+    return <StrictModeToggle onFilter={onFilterFilteredData} onToggle={onFilterFilteredData} />;
+  };
+
+  const renderCustomFiltersButton = () => {
+    if (!hasCustomSort) {
+      return null;
+    }
+
+    return (
+      <div className={`${styles.filterButton}`}>
+        <Button
+          className="p-button-primary p-button-rounded p-button-animated-blink"
+          disabled={isLoading}
+          icon="filter"
+          label={resourcesContext.messages['filter']}
+          onClick={onFilter}
+        />
+      </div>
+    );
+  };
+
   return (
     <div className={`${className ? styles[className] : styles.default} ${styles.stricMode}`}>
       {renderFilters()}
-      {isStrictModeVisible ? (
-        <StrictModeToggle onFilter={onFilterFilteredData} onToggle={onFilterFilteredData} />
-      ) : null}
-
-      {hasCustomSort && (
-        <div className={`${styles.filterButton}`}>
-          <Button
-            className="p-button-primary p-button-rounded p-button-animated-blink"
-            disabled={isLoading}
-            icon="filter"
-            label={resourcesContext.messages['filter']}
-            onClick={onFilter}
-          />
-        </div>
-      )}
+      {renderStrictModeToggle()}
+      {renderCustomFiltersButton()}
 
       <div className={`${styles.resetButton}`}>
         <Button

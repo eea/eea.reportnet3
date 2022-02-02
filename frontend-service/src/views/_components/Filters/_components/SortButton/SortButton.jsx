@@ -4,7 +4,7 @@ import styles from '../../Filters.module.scss';
 
 import { Button } from 'views/_components/Button';
 
-import { sortByStore } from '../../_functions/Stores/filterStore';
+import { sortByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 
 export const SortButton = ({ id, isLoading, isVisible, onSort, recoilId }) => {
   const [sortBy, setSortBy] = useRecoilState(sortByStore(recoilId));

@@ -2,12 +2,26 @@ import styles from '../../Filters.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { InputText } from 'views/_components/InputText';
-import { SortButton } from '../SortButton';
+import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
-import { useSearch } from '../../_functions/Hooks/useSearch';
+import { useSearch } from 'views/_components/Filters/_functions/Hooks/useSearch';
 
 export const SearchFilter = ({ isLoading, onFilterData, option, recoilId }) => {
   const { searchBy, onSearch } = useSearch({ onFilterData, option, recoilId });
+
+  const renderCleanInputButton = () => {
+    if (!searchBy) {
+      return null;
+    }
+
+    return (
+      <Button
+        className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
+        icon="cancel"
+        onClick={() => onSearch('')}
+      />
+    );
+  };
 
   return (
     <div className={styles.block} key={option.key}>
@@ -22,13 +36,7 @@ export const SearchFilter = ({ isLoading, onFilterData, option, recoilId }) => {
           onChange={event => onSearch(event.target.value)}
           value={searchBy}
         />
-        {searchBy && (
-          <Button
-            className={`p-button-secondary-transparent ${styles.icon} ${styles.cancelIcon}`}
-            icon="cancel"
-            onClick={() => onSearch('')}
-          />
-        )}
+        {renderCleanInputButton()}
 
         <label className={styles.label} htmlFor={'searchInput'}>
           {option.label}

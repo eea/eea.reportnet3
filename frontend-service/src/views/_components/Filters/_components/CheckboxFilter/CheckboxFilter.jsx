@@ -4,11 +4,11 @@ import styles from '../../Filters.module.scss';
 
 import { Checkbox } from 'views/_components/Checkbox';
 
-import { filterByKeyCheckboxStore } from '../../_functions/Stores/filterKeysStore';
+import { filterByKeyCheckboxStore } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { useFilters } from '../../_functions/Hooks/useFilters';
+import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilters';
 
 export const CheckboxFilter = ({ isLoading, onFilterData, option, recoilId }) => {
   const resourcesContext = useContext(ResourcesContext);

@@ -4,11 +4,11 @@ import styles from './InputFilter.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { InputText } from 'views/_components/InputText';
-import { SortButton } from '../SortButton';
+import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
-import { filterByKeyInputStore } from '../../_functions/Stores/filterKeysStore';
+import { filterByKeyInputStore } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
 
-import { useFilters } from '../../_functions/Hooks/useFilters';
+import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilters';
 
 export const InputFilter = ({ isLoading, onFilterData, onSort, option, recoilId }) => {
   const { filterBy, onFilter } = useFilters({ keyStore: filterByKeyInputStore, onFilterData, option, recoilId });
