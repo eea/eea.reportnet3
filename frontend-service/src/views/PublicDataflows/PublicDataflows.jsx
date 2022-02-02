@@ -40,6 +40,7 @@ export const PublicDataflows = () => {
   const [contentStyles, setContentStyles] = useState({});
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [goToPage, setGoToPage] = useState(1);
+  const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [pageInputTooltip, setPageInputTooltip] = useState(resourcesContext.messages['currentPageInfoMessage']);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 100, pageNum: 0 });
@@ -111,8 +112,9 @@ export const PublicDataflows = () => {
       isSortable: true,
       template: 'LevelError',
       dropdownOptions: [
-        { label: resourcesContext.messages['close'].toUpperCase(), value: config.dataflowStatus['DESIGN'] },
-        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus['OPEN'] }
+        { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+        { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
       ],
       type: 'DROPDOWN'
     },
@@ -160,6 +162,7 @@ export const PublicDataflows = () => {
       setData(publicData.dataflows);
       setFilteredRecords(publicData.filteredRecords);
       setTotalRecords(publicData.totalRecords);
+      setIsFiltered(publicData.filteredRecords !== publicData.totalRecords);
     } catch (error) {
       console.error('PublicDataflows - onLoadPublicDataflows.', error);
     } finally {
@@ -183,16 +186,18 @@ export const PublicDataflows = () => {
 
   const renderPaginatorRecordsCount = () => (
     <Fragment>
-      {resourcesContext.messages['totalRecords']} {totalRecords} {resourcesContext.messages['records'].toLowerCase()}
+      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
+      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
+        'records'
+      ].toLowerCase()}`}
     </Fragment>
   );
 
   const renderPaginator = () => {
-    // ADD IF THERE ARE DATAFLOWS TO RENDER PAGINATOR
-    if (!isLoading) {
+    if (!isLoading && filteredRecords > 100) {
       return (
         <Paginator
-          className="p-paginator-bottom"
+          className={`p-paginator-bottom ${styles.paginator}`}
           first={firstRow}
           onPageChange={onPaginate}
           rightContent={renderPaginatorRecordsCount()}

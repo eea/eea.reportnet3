@@ -622,8 +622,9 @@ export const Dataflows = () => {
         isSortable: true,
         template: 'LevelError',
         dropdownOptions: [
-          { label: resourcesContext.messages['close'].toUpperCase(), value: config.dataflowStatus['DESIGN'] },
-          { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus['OPEN'] }
+          { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+          { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+          { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
         ],
         type: 'DROPDOWN'
       },
@@ -745,11 +746,12 @@ export const Dataflows = () => {
   };
 
   const renderPaginator = () => {
-    if (!loadingStatus[tabId] && filteredRecords !== 0) {
+    if (!loadingStatus[tabId] && filteredRecords > 100) {
       return (
         <Paginator
           className={`p-paginator-bottom ${styles.paginator}`}
           first={pagination.firstRow}
+          isDataflowsList={true}
           onPageChange={onPaginate}
           rightContent={renderPaginatorRecordsCount()}
           rows={pagination.numberRows}
