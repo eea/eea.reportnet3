@@ -11,7 +11,7 @@ import { SortButton } from 'views/_components/Filters/_components/SortButton';
 import { filterByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 import { filterByAllKeys } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
 
-export const DropdownFilter = ({ isLoading, onSort, option, recoilId }) => {
+export const DropdownFilter = ({ isLoading, onFilterData, onSort, option, recoilId }) => {
   const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));
 
   const [filterBy, setFilterBy] = useRecoilState(filterByStore(`${option.key}_${recoilId}`));
@@ -19,6 +19,11 @@ export const DropdownFilter = ({ isLoading, onSort, option, recoilId }) => {
   useEffect(() => {
     setFilterByAllKeys(prevState => uniq([...prevState, option.key]));
   }, [recoilId]);
+
+  const onFilter = async value => {
+    setFilterBy({ [option.key]: value });
+    await onFilterData({ key: option.key, value, type: option.type });
+  };
 
   return (
     <div className={`${styles.block}`} key={option.key}>
@@ -34,7 +39,7 @@ export const DropdownFilter = ({ isLoading, onSort, option, recoilId }) => {
         inputClassName={`p-float-label ${styles.label}`}
         inputId={option.key}
         label={option.label}
-        onChange={event => setFilterBy({ [option.key]: event.target.value })}
+        onChange={event => onFilter(event.target.value)}
         onMouseDown={event => {
           event.preventDefault();
           event.stopPropagation();
