@@ -54,6 +54,7 @@ export const PublicCountryInformation = () => {
   const [countryName, setCountryName] = useState('');
   const [dataflows, setDataflows] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState(0);
+  const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isReset, setIsReset] = useState(false);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
@@ -62,8 +63,6 @@ export const PublicCountryInformation = () => {
   const [totalRecords, setTotalRecords] = useState(0);
 
   const filterBy = useRecoilValue(filterByState('publicCountryInformation'));
-
-  const { isFiltered: areFiltersFilled } = useApplyFilters('publicCountryInformation');
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode });
 
@@ -84,8 +83,6 @@ export const PublicCountryInformation = () => {
   }, [themeContext.headerCollapse]);
 
   const { firstRow, numberRows, pageNum } = pagination;
-
-  const { isFiltered } = useFilters('publicCountryInformation');
 
   const getCountryName = () => {
     if (!isNil(config.countriesByGroup)) {
@@ -159,8 +156,8 @@ export const PublicCountryInformation = () => {
       setTotalRecords(data.totalRecords);
       setPublicInformation(data.dataflows);
       setFilteredRecords(data.filteredRecords);
-      // setIsFiltered(data.filteredRecords !== data.totalRecords);
-      setIsReset(false);
+      setIsFiltered(Object.keys(filterBy).lenght !== 0 && data.filteredRecords !== data.totalRecords);
+      // setIsReset(false);
     } catch (error) {
       console.error('PublicCountryInformation - onLoadPublicCountryInformation.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' }, true);
@@ -370,7 +367,7 @@ export const PublicCountryInformation = () => {
         className="publicCountryInformationFilters"
         data={dataflows}
         onFilter={() => {
-          if (areFiltersFilled) {
+          if (isFiltered) {
             setPagination({ firstRow: 0, numberRows: 100, pageNum: 0 });
           } else {
             onLoadPublicCountryInformation();
