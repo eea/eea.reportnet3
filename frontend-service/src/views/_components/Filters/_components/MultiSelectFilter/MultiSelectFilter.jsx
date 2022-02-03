@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { useRecoilValue } from 'recoil';
 
+import sharedStyles from 'views/_components/Filters/Filters.module.scss';
 import styles from './MultiSelectFilter.module.scss';
 
 import { LevelError } from 'views/_components/LevelError';
@@ -32,14 +33,22 @@ export const MultiSelectFilter = ({ isLoading, onFilterData, onSort, option, rec
   };
 
   return (
-    <div className={`${styles.block}`} key={option.key}>
-      <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} onSort={onSort} />
+    <div
+      className={`${styles.block} ${
+        filterBy[option.key]?.length > 0 ? sharedStyles.elementFilterSelected : sharedStyles.elementFilter
+      }`}
+      key={option.key}>
+      <SortButton
+        id={option.key}
+        isLoading={isLoading}
+        isVisible={option.isSortable}
+        onSort={onSort}
+        recoilId={recoilId}
+      />
       <MultiSelect
         ariaLabelledBy={`${option.key}_input`}
         checkAllHeader={resourcesContext.messages['checkAllFilter']}
-        className={`${styles.multiSelect} ${
-          filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
-        }`}
+        className={styles.multiSelect}
         filter={option?.showInput}
         headerClassName={styles.selectHeader}
         id={option.key}
