@@ -34,7 +34,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
-
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { CurrentPage } from 'views/_functions/Utils';
@@ -62,6 +62,8 @@ export const PublicCountryInformation = () => {
   const [totalRecords, setTotalRecords] = useState(0);
 
   const filterBy = useRecoilValue(filterByState('publicCountryInformation'));
+
+  const { isFiltered: areFiltersFilled } = useApplyFilters('publicCountryInformation');
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode });
 
@@ -367,7 +369,13 @@ export const PublicCountryInformation = () => {
       <MyFilters
         className="publicCountryInformationFilters"
         data={dataflows}
-        onFilter={onLoadPublicCountryInformation}
+        onFilter={() => {
+          if (areFiltersFilled) {
+            setPagination({ firstRow: 0, numberRows: 100, pageNum: 0 });
+          } else {
+            onLoadPublicCountryInformation();
+          }
+        }}
         onReset={setIsReset}
         options={filterOptions}
         viewType="publicCountryInformation"
