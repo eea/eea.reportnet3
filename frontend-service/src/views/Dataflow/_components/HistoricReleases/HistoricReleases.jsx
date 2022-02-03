@@ -50,10 +50,6 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     onLoadHistoricReleases();
   }, []);
 
-  const existFilter = () => {
-    return historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset';
-  };
-
   const getDataProviderCode = historicReleases => {
     const dataProviderCodes = uniq(historicReleases.map(historicRelease => historicRelease.dataProviderCode));
     historicReleasesDispatch({ type: 'GET_DATA_PROVIDER_CODES', payload: { dataProviderCodes } });
@@ -241,23 +237,18 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     }
   ];
 
-  const getFilters = filterOptions => {
-    return (
-      <MyFilters
-        className="historicReleases"
-        data={historicReleasesState.data}
-        options={filterOptions}
-        viewType="historicReleases"
-      />
-    );
-  };
-
+  const getFilters = filterOptions => (
+    <MyFilters
+      className="historicReleases"
+      data={historicReleasesState.data}
+      options={filterOptions}
+      viewType="historicReleases"
+    />
+  );
   const renderFilters = () => {
     if (historicReleasesView === 'dataCollection') {
       return getFilters(filterOptionsDataCollection);
-    }
-
-    if (historicReleasesView === 'EUDataset') {
+    } else if (historicReleasesView === 'EUDataset') {
       return getFilters(filterOptionsEUDataset);
     }
   };
@@ -271,7 +262,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       }
     };
 
-    if (isEmpty(filteredData) && existFilter()) {
+    if (isEmpty(filteredData)) {
       return (
         <div className={styles.emptyFilteredData}>
           {resourcesContext.messages['noHistoricReleasesWithSelectedParameters']}
