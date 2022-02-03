@@ -139,6 +139,7 @@ export const Filters = ({
       <FilterComponent
         isLoading={isLoading}
         key={option.key}
+        onCustomFilter={onFilter}
         onFilterData={onFilterFilteredData}
         onSort={onSort}
         option={option}
