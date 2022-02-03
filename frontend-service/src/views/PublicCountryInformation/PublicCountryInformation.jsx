@@ -421,7 +421,6 @@ export const PublicCountryInformation = () => {
     </span>
   );
 
-  console.log('isFiltered :>> ', isFiltered);
   const renderPaginatorRecordsCount = () => (
     <Fragment>
       {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}

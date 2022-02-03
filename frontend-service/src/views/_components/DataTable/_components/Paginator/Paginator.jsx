@@ -1,6 +1,7 @@
 import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import styles from './Paginator.module.scss';
 import { FirstPageLink } from './_components/FirstPageLink';
 import { NextPageLink } from './_components/NextPageLink';
 import { PrevPageLink } from './_components/PrevPageLink';
@@ -62,8 +63,6 @@ export class Paginator extends Component {
     this.changePageToLast = this.changePageToLast.bind(this);
     this.onRowsChange = this.onRowsChange.bind(this);
     this.onPageLinkClick = this.onPageLinkClick.bind(this);
-
-    console.log('this.props.hasFewerDataflows :>> ', this.props.hasFewerDataflows);
   }
 
   isFirstPage() {
@@ -272,7 +271,11 @@ export class Paginator extends Component {
 
     return (
       <div
-        className={classNames('p-paginator p-component p-unselectable-text', this.props.className)}
+        className={classNames(
+          'p-paginator p-component p-unselectable-text',
+          this.props.className,
+          `${!this.props.areComponentsVisible && styles.paginatorContainer} `
+        )}
         style={this.props.style}>
         {this.props.areComponentsVisible && (
           <Fragment>
