@@ -245,6 +245,14 @@ const parseRequestPublicCountryFilterBy = filterBy => {
   const parsedFilterBy = Object.keys(filterBy).map(key => {
     const results = { [replacements[key] || key]: filterBy[key] };
 
+    if (TextUtils.areEquals(key, 'status')) {
+      results[replacements[key] || key] = filterBy[key]?.value;
+    }
+
+    if (TextUtils.areEquals(key, 'deliveryStatus')) {
+      results[replacements[key] || key] = filterBy[key]?.join(',');
+    }
+
     if (TextUtils.areEquals(key, 'deadline') || TextUtils.areEquals(key, 'deliveryDate')) {
       if (filterBy[key][0] && !filterBy[key][1]) {
         results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;

@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { noWait, useRecoilCallback } from 'recoil';
+import { noWait, useRecoilCallback, useRecoilValue } from 'recoil';
 
 import isNil from 'lodash/isNil';
 
@@ -20,7 +20,8 @@ import {
   filteredDataStore,
   isFilteredStore,
   isStrictModeStore,
-  searchByStore
+  searchByStore,
+  sortByStore
 } from './_functions/Stores/filterStore';
 
 import {
@@ -55,6 +56,8 @@ export const Filters = ({
   recoilId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
+
+  const isFiltered = useRecoilValue(isFilteredStore(recoilId));
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
@@ -110,10 +113,10 @@ export const Filters = ({
       async () => {
         const filterByKeys = await snapshot.getPromise(filterByAllKeys(recoilId));
 
+        reset(sortByStore(recoilId));
         reset(filteredDataStore(recoilId));
         reset(isFilteredStore(recoilId));
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
-        await onReset();
       },
     [recoilId]
   );
@@ -155,30 +158,35 @@ export const Filters = ({
     return (
       <div className={`${styles.filterButton}`}>
         <Button
-          className="p-button-primary p-button-rounded p-button-animated-blink"
+          className={`p-button-${isFiltered ? 'primary' : 'secondary'} p-button-rounded p-button-animated-blink`}
           disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}
-          onClick={onFilter}
+          onClick={() => onFilter()}
         />
       </div>
     );
   };
 
   return (
-    <div className={className ? styles[className] : styles.default}>
+    <div className={`${className ? styles[className] : styles.default}`}>
       {renderFilters()}
       {renderStrictModeToggle()}
-      {renderCustomFiltersButton()}
 
-      <div className={`${styles.resetButton}`}>
-        <Button
-          className="p-button-secondary p-button-rounded p-button-animated-blink"
-          disabled={isLoading}
-          icon="undo"
-          label={resourcesContext.messages['reset']}
-          onClick={onResetFilters}
-        />
+      <div className={styles.buttonWrapper}>
+        {renderCustomFiltersButton()}
+        <div className={`${styles.resetButton}`}>
+          <Button
+            className="p-button-secondary p-button-rounded p-button-animated-blink"
+            disabled={isLoading}
+            icon="undo"
+            label={resourcesContext.messages['reset']}
+            onClick={async () => {
+              await onResetFilters();
+              await onReset({ sortByHeader: '', sortByOption: 'idle' });
+            }}
+          />
+        </div>
       </div>
     </div>
   );

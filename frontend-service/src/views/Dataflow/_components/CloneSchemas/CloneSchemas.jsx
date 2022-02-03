@@ -70,7 +70,8 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
     try {
       let data;
       if (isReferenceDataflow) {
-        data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        const response = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+        data = response.dataflows;
       } else {
         data = await DataflowService.getCloneableDataflows();
       }

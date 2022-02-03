@@ -124,6 +124,7 @@ export const BigButtonList = ({
 
   const { resetFiltersState: resetCloneSchemasFiltersState } = useFilters('cloneSchemas');
   const { resetFiltersState: resetManualAcceptanceDatasetsFiltersState } = useFilters('manualAcceptanceDatasets');
+  const { resetFiltersState: resetHistoricReleasesFiltersState } = useFilters('historicReleases');
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
@@ -493,6 +494,7 @@ export const BigButtonList = ({
         onClick={() => {
           setIsHistoricReleasesDialogVisible(false);
           onHideManualAcceptanceDatasetsDialog();
+          resetHistoricReleasesFiltersState();
         }}
       />
     ) : (
@@ -669,7 +671,10 @@ export const BigButtonList = ({
           className={styles.dialog}
           footer={renderDialogFooter}
           header={`${resourcesContext.messages['historicReleasesContextMenu']} ${historicReleasesDialogHeader}`}
-          onHide={() => setIsHistoricReleasesDialogVisible(false)}
+          onHide={() => {
+            setIsHistoricReleasesDialogVisible(false);
+            resetHistoricReleasesFiltersState();
+          }}
           visible={isHistoricReleasesDialogVisible}>
           <HistoricReleases
             dataflowId={dataflowId}
