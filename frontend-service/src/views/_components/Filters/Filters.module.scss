@@ -165,8 +165,16 @@
   padding-left: 2.5em;
 }
 
+.publicDataflows {
+  div:nth-child(6),
+  div:nth-child(7) {
+    margin-bottom: 0 !important;
+  }
+}
+
 .default,
-.dataflowsFilters {
+.dataflowsFilters,
+.publicDataflows {
   align-items: center;
   display: flex;
   flex-direction: row;
