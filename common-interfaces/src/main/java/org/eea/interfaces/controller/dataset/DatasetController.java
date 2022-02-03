@@ -447,6 +447,30 @@ public interface DatasetController {
   void insertRecordsMultiTable(@PathVariable("datasetId") Long datasetId,
       @RequestBody List<TableVO> tableRecords);
 
+
+  /**
+   * Import big file data.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   * @param integrationId the integration id
+   * @param delimiter the delimiter
+   */
+  @PostMapping("/v2/importFileData/{datasetId}")
+  void importBigFileData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId,
+      @RequestParam(value = "delimiter", required = false) String delimiter);
+
+
   /**
    * Import file data.
    *
@@ -459,7 +483,7 @@ public interface DatasetController {
    * @param integrationId the integration id
    * @param delimiter the delimiter
    */
-  @PostMapping("/v1/importFileData/{datasetId}")
+  @PostMapping("/v1/{datasetId}/importFileData")
   void importFileData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
@@ -481,7 +505,7 @@ public interface DatasetController {
    * @param integrationId the integration id
    * @param delimiter the delimiter
    */
-  @PostMapping("/importFileData/{datasetId}")
+  @PostMapping("/{datasetId}/importFileData")
   void importFileDataLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
