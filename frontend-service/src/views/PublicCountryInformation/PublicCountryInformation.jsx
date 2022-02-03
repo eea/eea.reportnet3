@@ -54,16 +54,19 @@ export const PublicCountryInformation = () => {
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isReset, setIsReset] = useState(false);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
   const [sortField, setSortField] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
 
+  const filterBy = useRecoilValue(filterByState('publicCountryInformation'));
+
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode });
 
   useEffect(() => {
     onLoadPublicCountryInformation();
-  }, [pagination, sortOrder, sortField]);
+  }, [pagination, sortOrder, sortField, isReset]);
 
   useEffect(() => {
     !isNil(countryCode) && getCountryName();
@@ -78,8 +81,6 @@ export const PublicCountryInformation = () => {
   }, [themeContext.headerCollapse]);
 
   const { firstRow, numberRows, pageNum } = pagination;
-
-  const filterBy = useRecoilValue(filterByState('publicCountryInformation'));
 
   const getCountryName = () => {
     if (!isNil(config.countriesByGroup)) {
@@ -154,6 +155,7 @@ export const PublicCountryInformation = () => {
       setPublicInformation(data.dataflows);
       setFilteredRecords(data.filteredRecords);
       setIsFiltered(data.filteredRecords !== data.totalRecords);
+      setIsReset(false);
     } catch (error) {
       console.error('PublicCountryInformation - onLoadPublicCountryInformation.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' }, true);
@@ -363,6 +365,7 @@ export const PublicCountryInformation = () => {
         className="publicCountryInformationFilters"
         data={dataflows}
         onFilter={onLoadPublicCountryInformation}
+        onReset={setIsReset}
         options={filterOptions}
         viewType="publicCountryInformation"
       />
