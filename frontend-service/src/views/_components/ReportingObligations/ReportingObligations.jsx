@@ -94,7 +94,6 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
       const filterBy = await getFilterBy();
       const response = await ObligationService.getOpen(filterBy);
       const data = ReportingObligationUtils.initialValues(response, userContext.userProps.dateFormat);
-      console.log('data in :>> ', data);
 
       reportingObligationDispatch({ type: 'ON_LOAD_DATA', payload: { data } });
       setData(data);
@@ -120,8 +119,6 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   const parseDropdownOptions = (options = []) => options.map(({ name, id }) => ({ label: name, value: id }));
 
   const setLoading = status => reportingObligationDispatch({ type: 'SET_LOADING', payload: { status } });
-
-  console.log('data :>> ', data);
 
   const renderData = () => {
     if (isLoading) {
