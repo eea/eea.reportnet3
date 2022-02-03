@@ -29,6 +29,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { referenceBigButtonsReducer } from './_functions/Reducers/referenceBigButtonsReducer';
 
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
@@ -61,6 +62,8 @@ export const BigButtonListReference = ({
     isDesignStatus: false,
     isImportingDataflow: false
   });
+
+  const { resetFiltersState: resetCloneSchemasFiltersState } = useFilters('cloneSchemas');
 
   useEffect(() => {
     setIsDesignStatus(dataflowState.status === config.dataflowStatus.DESIGN);
@@ -464,12 +467,18 @@ export const BigButtonListReference = ({
                 className="p-button-secondary p-button-animated-blink p-button-right-aligned"
                 icon="cancel"
                 label={resourcesContext.messages['close']}
-                onClick={() => handleDialogs({ dialog: 'cloneDialogVisible', isVisible: false })}
+                onClick={() => {
+                  handleDialogs({ dialog: 'cloneDialogVisible', isVisible: false });
+                  resetCloneSchemasFiltersState();
+                }}
               />
             </Fragment>
           }
           header={resourcesContext.messages['dataflowsList']}
-          onHide={() => handleDialogs({ dialog: 'cloneDialogVisible', isVisible: false })}
+          onHide={() => {
+            handleDialogs({ dialog: 'cloneDialogVisible', isVisible: false });
+            resetCloneSchemasFiltersState();
+          }}
           style={{ width: '95%' }}
           visible={dialogVisibility.cloneDialogVisible}>
           <CloneSchemas dataflowId={dataflowId} getCloneDataflow={getCloneDataflow} isReferenceDataflow />

@@ -17,7 +17,7 @@ import { filterByStore } from 'views/_components/Filters/_functions/Stores/filte
 
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-export const DateFilter = ({ isLoading, onSort, option, recoilId }) => {
+export const DateFilter = ({ isLoading, onFilterData, onSort, option, recoilId }) => {
   const { userProps } = useContext(UserContext);
 
   const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));
@@ -54,6 +54,11 @@ export const DateFilter = ({ isLoading, onSort, option, recoilId }) => {
     };
   }, [calendarRefs, isLabelAnimated, filterBy]);
 
+  const onFilter = async value => {
+    setFilterBy({ [option.key]: value });
+    await onFilterData({ key: option.key, value, type: option.type });
+  };
+
   const parseDateValues = values => {
     if (!values) {
       return [];
@@ -74,9 +79,15 @@ export const DateFilter = ({ isLoading, onSort, option, recoilId }) => {
 
   return (
     <div className={styles.block} key={option.key}>
-      <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} onSort={onSort} />
+      <SortButton
+        id={option.key}
+        isLoading={isLoading}
+        isVisible={option.isSortable}
+        onSort={onSort}
+        recoilId={recoilId}
+      />
       <div
-        className={`p-float-label ${styles.label} ${styles.dateBlock} } ${
+        className={`p-float-label ${styles.dateBlock} ${
           filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
         }`}
         id={`calendar_${option.key}`}
@@ -87,7 +98,7 @@ export const DateFilter = ({ isLoading, onSort, option, recoilId }) => {
           inputClassName={styles.inputFilter}
           inputId={inputId}
           monthNavigator={true}
-          onChange={event => setFilterBy({ [option.key]: parseDateValues(event.target.value) })}
+          onChange={event => onFilter(parseDateValues(event.target.value))}
           onFocus={() => setIsLabelAnimated(true)}
           readOnlyInput={true}
           selectionMode="range"
@@ -106,6 +117,7 @@ export const DateFilter = ({ isLoading, onSort, option, recoilId }) => {
             onClick={() => {
               setFilterBy({});
               setIsLabelAnimated(false);
+              document.getElementById(inputId).value = '';
             }}
           />
         )}

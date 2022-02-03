@@ -143,6 +143,22 @@
   }
 }
 
+.dataflowsFilters > div {
+  width: 20% !important;
+}
+
+.dataflowsFilters > .buttonWrapper {
+  margin-left: auto;
+  margin-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  width: auto !important;
+}
+
+.dataflowsFilters > div:nth-child(6) {
+  padding-left: 2.5em;
+}
+
 .default,
 .dataflowsFilters {
   align-items: center;
@@ -250,10 +266,6 @@
   .sortButtonSize {
     display: none;
   }
-  .elementFilterSelected {
-    display: flex !important;
-    align-items: flex-end;
-  }
 }
 
 .lineItems {
@@ -261,6 +273,7 @@
   flex-direction: row;
   margin: 2rem 0;
   width: 100% !important;
+  gap: 2em;
 
   .block {
     width: 100% !important;
@@ -272,13 +285,18 @@
 
   .resetButton {
     margin-bottom: 0;
-    margin-top: auto;
+    margin-top: 1.1em;
   }
 }
 
 .elementFilter {
+  width: 100%;
   display: flex !important;
   border-bottom: var(--inputtext-border) !important;
+
+  label {
+    font-size: 0.8333rem !important;
+  }
 
   .searchInput:focus {
     padding-top: 10px !important;
@@ -286,18 +304,17 @@
 }
 
 .elementFilterSelected {
+  width: 100%;
   display: flex !important;
   align-items: flex-end;
   border-bottom: var(--active-filter-border) !important;
   box-shadow: var(--active-filter-shadow);
+
   button {
+    background-color: transparent !important;
     span {
       color: var(--active-filter);
     }
-  }
-  input {
-    font-weight: bold !important;
-    color: var(--active-filter-font) !important;
   }
   .searchInput {
     padding-top: 10px;
@@ -337,27 +354,26 @@
 
 .reportingObligations {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  grid-row-gap: 2em;
-  padding: 2em 0;
-  margin-top: -7em;
-
-  .block > .sortButtonSize {
-    display: none;
-  }
+  grid-template-columns: repeat(4, 0.25fr);
+  grid-template-rows: auto;
 
   .block:first-child {
     grid-column: 1 / span 5;
     width: 30%;
+    margin-bottom: 1.5rem;
   }
 
-  .filterButton {
-    margin-top: auto;
+  .buttonWrapper {
+    align-items: center;
+    display: flex;
   }
 
-  .resetButton {
-    margin-top: auto;
+  > div:nth-child(n + 2):nth-child(-n + 5) {
+    width: 95% !important;
+  }
+
+  .buttonWrapper {
+    margin-top: 0.5em;
   }
 }
 
@@ -374,7 +390,23 @@
   @extend .lineItems;
 }
 
+.showValidations {
+  @extend .lineItems;
+
+  .buttonWrapper {
+    flex-wrap: nowrap !important;
+    justify-content: center;
+
+    .resetButton {
+      margin-top: 0;
+    }
+  }
+}
+
 @media (max-width: 640px) {
+  .dataflowsFilters > div {
+    width: 100% !important;
+  }
   .lineItems {
     flex-direction: column;
     .resetButton {
@@ -393,28 +425,6 @@
     flex-direction: column;
     div {
       width: 100%;
-    }
-  }
-
-  .reportingObligations {
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 0px !important;
-    padding-top: 0px !important;
-    justify-content: space-between;
-
-    .block {
-      width: 46% !important;
-    }
-
-    .buttonsContainer {
-      grid-row: auto;
-      grid-column: auto;
-      margin-left: 0;
-    }
-
-    .dropdownFilter {
-      width: 100% !important;
     }
   }
 }
@@ -441,6 +451,28 @@
   .historicReleases {
     .labelCheckbox {
       width: 100% !important;
+    }
+  }
+
+  .reportingObligations {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 0px !important;
+    padding-top: 0px !important;
+    justify-content: space-between;
+
+    .block {
+      width: 46% !important;
+    }
+
+    .buttonsContainer {
+      grid-row: auto;
+      grid-column: auto;
+      margin-left: 0;
+    }
+
+    .buttonWrapper {
+      margin: 0 0 1em 0;
     }
   }
 }
@@ -481,23 +513,11 @@
   }
 }
 
-@media (max-width: 990px) {
-  .reportingObligations {
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-
-    .buttonsContainer {
-      grid-row: 3;
-      grid-column: 1 / span 2;
-      margin-left: 0;
-
-      .filterButton {
-        margin-left: 0;
-      }
-
-      .resetButton {
-        margin-right: auto;
-      }
+@media (max-width: 979px) {
+  .dataflowsFilters {
+    .buttonWrapper {
+      margin-left: 2.5em !important;
+      margin-right: auto !important;
     }
   }
 }
@@ -517,5 +537,11 @@
 @media (max-width: 1695px) {
   .qcList {
     grid-row-gap: 1.5rem;
+  }
+
+  .reportingObligations {
+    .buttonWrapper {
+      margin-top: 1em;
+    }
   }
 }

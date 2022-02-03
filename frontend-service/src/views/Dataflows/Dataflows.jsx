@@ -160,6 +160,7 @@ export const Dataflows = () => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
+  const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
   const { getFilterBy, setData, sortByOptions } = useApplyFilters(tabId);
 
   useEffect(() => {
@@ -432,6 +433,7 @@ export const Dataflows = () => {
 
   const onHideObligationDialog = () => {
     manageDialogs('isReportingObligationsDialogVisible', false);
+    resetObligationsFilterState();
     setObligationToPrevious();
     resetReportingObligationsFiltersState();
   };
@@ -574,6 +576,7 @@ export const Dataflows = () => {
         label={resourcesContext.messages['ok']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
+          resetObligationsFilterState();
           setToCheckedObligation();
           resetReportingObligationsFiltersState();
         }}
@@ -584,6 +587,7 @@ export const Dataflows = () => {
         label={resourcesContext.messages['cancel']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
+          resetObligationsFilterState();
           setObligationToPrevious();
           resetReportingObligationsFiltersState();
         }}
@@ -612,7 +616,6 @@ export const Dataflows = () => {
       {
         key: 'userRole',
         label: resourcesContext.messages['userRole'],
-        isSortable: true,
         dropdownOptions: getRolesDropdownOptions(),
         type: 'DROPDOWN'
       },
@@ -659,10 +662,16 @@ export const Dataflows = () => {
       type: 'INPUT'
     },
     {
-      nestedOptions: [
-        { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' }
+      key: 'status',
+      label: resourcesContext.messages['status'],
+      isSortable: true,
+      template: 'LevelError',
+      dropdownOptions: [
+        { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+        { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
       ],
-      type: 'MULTI_SELECT'
+      type: 'DROPDOWN'
     }
   ];
 

@@ -18,6 +18,7 @@ import { ConfirmationReceiptService } from 'services/ConfirmationReceiptService'
 import { bigButtonListRepresentativeReducer } from './_functions/Reducers/bigButtonListRepresentativeReducer';
 
 import { useBigButtonListRepresentative } from './_functions/Hooks/useBigButtonListRepresentative';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 export const BigButtonListRepresentative = ({
   dataflowState,
@@ -46,6 +47,8 @@ export const BigButtonListRepresentative = ({
   );
 
   const receiptBtnRef = useRef(null);
+
+  const { resetFiltersState: resetHistoricReleasesFiltersState } = useFilters('historicReleases');
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
@@ -94,7 +97,10 @@ export const BigButtonListRepresentative = ({
       className="p-button-secondary p-button-animated-blink p-button-right-aligned"
       icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => onCloseHistoricReleasesDialogVisible(false)}
+      onClick={() => {
+        onCloseHistoricReleasesDialogVisible(false);
+        resetHistoricReleasesFiltersState();
+      }}
     />
   );
 
@@ -130,7 +136,10 @@ export const BigButtonListRepresentative = ({
           className={styles.dialog}
           footer={renderDialogFooter}
           header={`${resourcesContext.messages['historicReleases']} ${bigButtonListRepresentativeState.historicReleasesDialogHeader}`}
-          onHide={() => onCloseHistoricReleasesDialogVisible(false)}
+          onHide={() => {
+            onCloseHistoricReleasesDialogVisible(false);
+            resetHistoricReleasesFiltersState();
+          }}
           visible={bigButtonListRepresentativeState.isHistoricReleasesDialogVisible}>
           <HistoricReleases
             dataProviderId={bigButtonListRepresentativeState.dataProviderId}
