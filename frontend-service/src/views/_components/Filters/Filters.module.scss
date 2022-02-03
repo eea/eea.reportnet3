@@ -330,6 +330,10 @@
   .elementFilter {
     display: flex;
   }
+
+  input {
+    color: var(--inputtext-color);
+  }
 }
 
 .dropdownFilter {

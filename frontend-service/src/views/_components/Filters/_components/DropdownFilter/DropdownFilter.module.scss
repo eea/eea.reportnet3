@@ -10,7 +10,6 @@
     position: relative;
     border-radius: 0px !important;
     border: 0px !important;
-    color: var(--font-filters) !important;
     font-size: 0.8333rem !important;
     height: 3em;
     padding-left: 0em;
@@ -36,9 +35,16 @@
 
   .elementFilterSelected {
     border-bottom: var(--active-filter-border) !important;
-    box-shadow: var(--active-filter-shadow);
+    box-shadow: var(--active-filter-shadow) !important;
     label {
       padding-left: 0 !important;
+      span {
+        color: var(--inputtext-color);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        display: block;
+      }
     }
   }
 }
