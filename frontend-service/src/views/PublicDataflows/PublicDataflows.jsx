@@ -197,9 +197,9 @@ export const PublicDataflows = () => {
     if (!isLoading && totalRecords > 100) {
       return (
         <Paginator
+          areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
           className={`p-paginator-bottom ${styles.paginator}`}
           first={firstRow}
-          areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
           onPageChange={onPaginate}
           rightContent={renderPaginatorRecordsCount()}
           rows={numberRows}

@@ -34,8 +34,6 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
-import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
-import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
@@ -68,7 +66,15 @@ export const PublicCountryInformation = () => {
 
   useEffect(() => {
     onLoadPublicCountryInformation();
-  }, [pagination, sortOrder, sortField, isReset]);
+  }, [pagination, sortOrder, sortField]);
+
+  useEffect(() => {
+    if (isReset) {
+      setPagination({ firstRow: 0, numberRows: 10, pageNum: 0 });
+    }
+  }, [isReset]);
+
+  console.log('isReset :>> ', isReset);
 
   useEffect(() => {
     !isNil(countryCode) && getCountryName();
@@ -156,8 +162,8 @@ export const PublicCountryInformation = () => {
       setTotalRecords(data.totalRecords);
       setPublicInformation(data.dataflows);
       setFilteredRecords(data.filteredRecords);
-      setIsFiltered(Object.keys(filterBy).lenght !== 0 && data.filteredRecords !== data.totalRecords);
-      // setIsReset(false);
+      setIsFiltered(Object.keys(filterBy).length !== 0 && data.filteredRecords !== data.totalRecords);
+      setIsReset(false);
     } catch (error) {
       console.error('PublicCountryInformation - onLoadPublicCountryInformation.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' }, true);
@@ -368,7 +374,7 @@ export const PublicCountryInformation = () => {
         data={dataflows}
         onFilter={() => {
           if (isFiltered) {
-            setPagination({ firstRow: 0, numberRows: 100, pageNum: 0 });
+            setPagination({ firstRow: 0, numberRows: 10, pageNum: 0 });
           } else {
             onLoadPublicCountryInformation();
           }

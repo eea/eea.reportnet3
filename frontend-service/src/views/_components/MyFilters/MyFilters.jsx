@@ -43,7 +43,7 @@ export const MyFilters = ({
   isLoading,
   isStrictMode,
   onFilter,
-  onReset,
+  onReset = () => {},
   onSort,
   options,
   viewType
@@ -204,7 +204,6 @@ export const MyFilters = ({
     setFilterBy({});
     setFilteredData(data);
     setSearchBy('');
-    onReset(true);
   };
 
   const onSearch = value => {
@@ -523,6 +522,7 @@ export const MyFilters = ({
             onClick={() => {
               onResetFilters();
               setLabelsAnimationDate(getLabelsAnimationDateInitial(options, filterBy));
+              onReset(true);
             }}
           />
         </div>
