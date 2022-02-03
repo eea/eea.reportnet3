@@ -72,7 +72,7 @@ export const PublicCountryInformation = () => {
 
   useEffect(() => {
     if (isReset) {
-      setPagination({ firstRow: 0, numberRows: numberRows, pageNum: pageNum });
+      setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
     }
   }, [isReset]);
 
@@ -372,7 +372,7 @@ export const PublicCountryInformation = () => {
         data={dataflows}
         onFilter={() => {
           if (isFiltered) {
-            setPagination({ firstRow: 0, numberRows: numberRows, pageNum: pageNum });
+            setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
           } else {
             onLoadPublicCountryInformation();
           }

@@ -793,18 +793,17 @@ export const Dataflows = () => {
               onChangePagination({
                 firstRow: 0,
                 numberRows: dataflowsState.pagination.numberRows,
-                pageNum: dataflowsState.pagination.pageNum
+                pageNum: 0
               });
             } else {
               getDataflows();
             }
           }}
           onReset={() => {
-            console.log('dataflowsState.pageNum :>> ', dataflowsState.pagination.pageNum);
             onChangePagination({
               firstRow: 0,
               numberRows: dataflowsState.pagination.numberRows,
-              pageNum: dataflowsState.pagination.pageNum
+              pageNum: 0
             });
           }}
           onSort={getDataflows}

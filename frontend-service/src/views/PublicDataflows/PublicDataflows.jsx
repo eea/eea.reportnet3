@@ -266,12 +266,12 @@ export const PublicDataflows = () => {
             isLoading={isLoading}
             onFilter={() => {
               if (areFiltersFilled) {
-                setPagination({ firstRow: 0, numberRows: numberRows, pageNum: pageNum });
+                setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
               } else {
                 onLoadPublicDataflows();
               }
             }}
-            onReset={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: pageNum })}
+            onReset={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 })}
             onSort={onLoadPublicDataflows}
             options={filterOptions}
             recoilId="publicDataflows"
