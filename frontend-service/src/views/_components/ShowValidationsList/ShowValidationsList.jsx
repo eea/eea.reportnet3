@@ -552,7 +552,8 @@ export const ShowValidationsList = memo(
           {
             key: 'levelError',
             label: resourcesContext.messages['levelError'],
-            multiSelectOptions: []
+            multiSelectOptions: [],
+            template: 'LevelError'
           }
         ]
       }

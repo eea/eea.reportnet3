@@ -1,4 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import sharedStyles from 'views/_components/Filters/Filters.module.scss';
 import styles from './InputFilter.module.scss';
@@ -11,7 +12,7 @@ import { filterByKeyInputStore } from 'views/_components/Filters/_functions/Stor
 
 import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilters';
 
-export const InputFilter = ({ isLoading, onFilterData, onSort, option, recoilId }) => {
+export const InputFilter = ({ isLoading, onCustomFilter, onFilterData, onSort, option, recoilId }) => {
   const { filterBy, onFilter } = useFilters({ keyStore: filterByKeyInputStore, onFilterData, option, recoilId });
 
   return (
@@ -32,6 +33,12 @@ export const InputFilter = ({ isLoading, onFilterData, onSort, option, recoilId 
           id={`${option.key}_input`}
           key={option.key}
           onChange={event => onFilter(event.target.value)}
+          onKeyPress={event => {
+            if (event.key === 'Enter' && !isNil(onCustomFilter)) {
+              onFilter(event.target.value);
+              onCustomFilter();
+            }
+          }}
           value={filterBy[option.key] || ''}
         />
         <label className={styles.label} htmlFor={`${option.key}_input`}>

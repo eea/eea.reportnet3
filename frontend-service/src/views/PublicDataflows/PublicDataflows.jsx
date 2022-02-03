@@ -263,6 +263,7 @@ export const PublicDataflows = () => {
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>{resourcesContext.messages['dataflows']}</h1>
           <Filters
+            className="publicDataflows"
             isLoading={isLoading}
             onFilter={() => {
               if (areFiltersFilled) {
