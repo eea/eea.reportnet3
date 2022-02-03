@@ -167,7 +167,10 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     return (
       <Fragment>
         {renderView()}
-        <span className={`${styles.selectedObligation} ${isEmpty(data) ? styles.selected : ''}`}>
+        <span
+          className={`${isEmpty(data) ? styles.selected : ''} ${
+            pagination.rows < 15 ? styles.selectedObligation : ''
+          }`}>
           <span>{`${resourcesContext.messages['selectedObligation']}: `}</span>
           {selectedObligation.title || '-'}
         </span>

@@ -2,6 +2,8 @@
   min-height: calc(70vh - 2rem);
   overflow: auto;
   position: relative;
+  display: flex;
+  flex-direction: column;
 
   .switch {
     align-items: center;
