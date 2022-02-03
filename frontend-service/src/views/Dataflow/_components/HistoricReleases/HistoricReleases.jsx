@@ -50,6 +50,14 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     onLoadHistoricReleases();
   }, []);
 
+  const existFilter = () => {
+    return (
+      historicReleasesView === 'dataCollection' ||
+      historicReleasesView === 'EUDataset' ||
+      historicReleasesView === 'reportingDataset'
+    );
+  };
+
   const getDataProviderCode = historicReleases => {
     const dataProviderCodes = uniq(historicReleases.map(historicRelease => historicRelease.dataProviderCode));
     historicReleasesDispatch({ type: 'GET_DATA_PROVIDER_CODES', payload: { dataProviderCodes } });
@@ -237,10 +245,19 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     }
   ];
 
+  const filterOptionsReportingDataset = [
+    {
+      type: 'CHECKBOX',
+      nestedOptions: [{ key: 'public', label: resourcesContext.messages['public'] }]
+    }
+  ];
+
   const getFilters = filterOptions => {
     return (
       <MyFilters
-        className="historicReleases"
+        className={`${
+          historicReleasesView === 'reportingDataset' ? 'historicRealeasesOnlyCheckBox' : 'historicReleases'
+        }`}
         data={historicReleasesState.data}
         options={filterOptions}
         viewType="historicReleases"
@@ -256,6 +273,12 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     if (historicReleasesView === 'EUDataset') {
       return getFilters(filterOptionsEUDataset);
     }
+
+    if (historicReleasesView === 'reportingDataset') {
+      return getFilters(filterOptionsReportingDataset);
+    }
+
+    return <div />;
   };
 
   const renderHistoricReleasesTable = () => {
@@ -299,6 +322,14 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       return (
         <div className={styles.historicReleasesWithoutTable}>
           <div className={styles.noHistoricReleases}>{resourcesContext.messages['noHistoricReleases']}</div>
+        </div>
+      );
+    }
+
+    if (!existFilter()) {
+      return (
+        <div className={styles.historicReleasesWithoutTable}>
+          <div className={styles.noHistoricReleases}>{resourcesContext.messages['noHistoricReleasesView']}</div>
         </div>
       );
     }

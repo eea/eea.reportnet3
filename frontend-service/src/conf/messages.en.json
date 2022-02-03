@@ -1486,6 +1486,7 @@
     "automaticReportingDeletionMessage": "This action will automatically delete reporter data and snapshots",
     "typeNotSelectedError": "Type not selected",
     "nameExistsError": "Name is repeated",
-    "nameIsEmptyError": "Name is empty"
+    "nameIsEmptyError": "Name is empty",
+    "noHistoricReleasesView": "There is no view for these historic releases"
   }
 }
