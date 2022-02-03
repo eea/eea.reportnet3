@@ -144,14 +144,19 @@
 }
 
 .dataflowsFilters > div {
-  width: 33.33% !important;
+  width: 20% !important;
 }
 
-.dataflowsFilters > div:last-child {
+.dataflowsFilters > .buttonWrapper {
   margin-left: auto;
+  margin-bottom: 8px;
   display: flex;
   flex-wrap: wrap;
   width: auto !important;
+}
+
+.dataflowsFilters > div:nth-child(6) {
+  padding-left: 2.5em;
 }
 
 .default,
@@ -349,27 +354,26 @@
 
 .reportingObligations {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  grid-row-gap: 2em;
-  padding: 2em 0;
-  margin-top: -7em;
-
-  .block > .sortButtonSize {
-    display: none;
-  }
+  grid-template-columns: repeat(4, 0.25fr);
+  grid-template-rows: auto;
 
   .block:first-child {
     grid-column: 1 / span 5;
     width: 30%;
+    margin-bottom: 1.5rem;
   }
 
-  .filterButton {
-    margin-top: auto;
+  .buttonWrapper {
+    align-items: center;
+    display: flex;
   }
 
-  .resetButton {
-    margin-top: auto;
+  > div:nth-child(n + 2):nth-child(-n + 5) {
+    width: 95% !important;
+  }
+
+  .buttonWrapper {
+    margin-top: 0.5em;
   }
 }
 
@@ -423,28 +427,6 @@
       width: 100%;
     }
   }
-
-  .reportingObligations {
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 0px !important;
-    padding-top: 0px !important;
-    justify-content: space-between;
-
-    .block {
-      width: 46% !important;
-    }
-
-    .buttonsContainer {
-      grid-row: auto;
-      grid-column: auto;
-      margin-left: 0;
-    }
-
-    .dropdownFilter {
-      width: 100% !important;
-    }
-  }
 }
 
 @media (max-width: 768px) {
@@ -469,6 +451,28 @@
   .historicReleases {
     .labelCheckbox {
       width: 100% !important;
+    }
+  }
+
+  .reportingObligations {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 0px !important;
+    padding-top: 0px !important;
+    justify-content: space-between;
+
+    .block {
+      width: 46% !important;
+    }
+
+    .buttonsContainer {
+      grid-row: auto;
+      grid-column: auto;
+      margin-left: 0;
+    }
+
+    .buttonWrapper {
+      margin: 0 0 1em 0;
     }
   }
 }
@@ -509,23 +513,11 @@
   }
 }
 
-@media (max-width: 990px) {
-  .reportingObligations {
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-
-    .buttonsContainer {
-      grid-row: 3;
-      grid-column: 1 / span 2;
-      margin-left: 0;
-
-      .filterButton {
-        margin-left: 0;
-      }
-
-      .resetButton {
-        margin-right: auto;
-      }
+@media (max-width: 979px) {
+  .dataflowsFilters {
+    .buttonWrapper {
+      margin-left: 2.5em !important;
+      margin-right: auto !important;
     }
   }
 }
@@ -545,5 +537,11 @@
 @media (max-width: 1695px) {
   .qcList {
     grid-row-gap: 1.5rem;
+  }
+
+  .reportingObligations {
+    .buttonWrapper {
+      margin-top: 1em;
+    }
   }
 }
