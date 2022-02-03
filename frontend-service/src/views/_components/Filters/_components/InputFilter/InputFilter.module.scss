@@ -1,6 +1,5 @@
 .block {
   display: flex;
-  margin-bottom: 1.5rem;
   align-items: flex-end;
   width: 100%;
 
@@ -8,7 +7,7 @@
     position: relative;
     border-radius: 0px !important;
     border: 0px !important;
-    color: var(--floating-label-color) !important;
+    color: var(--font-filters) !important;
     font-size: 0.8333rem !important;
     padding-left: 0em;
 

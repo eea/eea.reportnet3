@@ -172,7 +172,7 @@
     "dropdown-panel-filter-color": "var(--c-gray-110)",
     "dropdown-panel-filter-icon-color": "var(--c-corporate-blue)",
     "dropdown-panel-items-group-color": "var(--c-gray-110)",
-    "dropdown-panel-items-group-highlight-bg": "var(--c-lilac-100)",
+    "dropdown-panel-items-group-highlight-bg": "var(--c-corporate-blue)",
     "dropdown-panel-items-group-highlight-color": "var(--c-white-color)",
     "dropdown-panel-items-group-not-highlight-bg-hover": "var(--c-gray-10)",
     "dropdown-panel-items-group-not-highlight-color-hover": "var(--c-gray-110)",

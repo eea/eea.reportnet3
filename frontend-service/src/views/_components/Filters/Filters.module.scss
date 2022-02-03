@@ -90,7 +90,7 @@
 
   .selectHeader {
     border-radius: 3px;
-    color: var(--floating-label-color);
+    color: var(--font-filters);
     font-size: 0.75rem;
     font-weight: 500;
     padding: 4px;
@@ -144,7 +144,13 @@
 }
 
 .dataflowsFilters > div {
+  margin-bottom: 0.4rem;
   width: 20% !important;
+}
+
+.dataflowsFilters > div > div > label,
+.dataflowsFilters > div > div > div > label {
+  color: var(--font-filters) !important;
 }
 
 .dataflowsFilters > .buttonWrapper {
@@ -295,6 +301,7 @@
   border-bottom: var(--inputtext-border) !important;
 
   label {
+    color: var(--font-filters) !important;
     font-size: 0.8333rem !important;
   }
 
@@ -331,7 +338,7 @@
   border-radius: 0 !important;
   border-right: 0 !important;
   border-top: 0 !important;
-  color: var(--floating-label-color) !important;
+  color: var(--font-filters) !important;
   font-size: 10pt !important;
   height: 2.1rem;
   padding-left: 0em;
@@ -356,6 +363,11 @@
   display: grid;
   grid-template-columns: repeat(4, 0.25fr);
   grid-template-rows: auto;
+
+  div > div > label,
+  div > div > div > label {
+    color: var(--font-filters) !important;
+  }
 
   .block:first-child {
     grid-column: 1 / span 5;
