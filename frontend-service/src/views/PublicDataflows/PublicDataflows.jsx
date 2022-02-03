@@ -271,7 +271,7 @@ export const PublicDataflows = () => {
                 onLoadPublicDataflows();
               }
             }}
-            onReset={onLoadPublicDataflows}
+            onReset={() => setPagination({ firstRow: 0, numberRows: 100, pageNum: 0 })}
             onSort={onLoadPublicDataflows}
             options={filterOptions}
             recoilId="publicDataflows"
