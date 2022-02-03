@@ -256,7 +256,7 @@ const parseRequestPublicCountryFilterBy = filterBy => {
     if (TextUtils.areEquals(key, 'deadline') || TextUtils.areEquals(key, 'deliveryDate')) {
       if (filterBy[key][0] && !filterBy[key][1]) {
         results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-        results[`${replacements[key]}_to`] = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_to`] = `${new Date(dayjs(filterBy[key][0]).endOf('day').format()).getTime()}`;
       } else {
         results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
         results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;

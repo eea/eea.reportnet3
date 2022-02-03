@@ -35,7 +35,7 @@ export const PublicDataflows = () => {
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
-  const { getFilterBy, setData, sortByOptions } = useApplyFilters('publicDataflows');
+  const { getFilterBy, isFiltered: areFiltersFilled, setData, sortByOptions } = useApplyFilters('publicDataflows');
 
   const [contentStyles, setContentStyles] = useState({});
   const [filteredRecords, setFilteredRecords] = useState(0);
@@ -43,7 +43,7 @@ export const PublicDataflows = () => {
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [pageInputTooltip, setPageInputTooltip] = useState(resourcesContext.messages['currentPageInfoMessage']);
-  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 100, pageNum: 0 });
+  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 });
   const [publicDataflows, setPublicDataflows] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
 
@@ -194,9 +194,10 @@ export const PublicDataflows = () => {
   );
 
   const renderPaginator = () => {
-    if (!isLoading && filteredRecords > 100) {
+    if (!isLoading && totalRecords > config.DATAFLOWS_PER_PAGE) {
       return (
         <Paginator
+          areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
           className={`p-paginator-bottom ${styles.paginator}`}
           first={firstRow}
           onPageChange={onPaginate}
@@ -263,8 +264,14 @@ export const PublicDataflows = () => {
           <h1 className={styles.title}>{resourcesContext.messages['dataflows']}</h1>
           <Filters
             isLoading={isLoading}
-            onFilter={onLoadPublicDataflows}
-            onReset={onLoadPublicDataflows}
+            onFilter={() => {
+              if (areFiltersFilled) {
+                setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
+              } else {
+                onLoadPublicDataflows();
+              }
+            }}
+            onReset={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 })}
             onSort={onLoadPublicDataflows}
             options={filterOptions}
             recoilId="publicDataflows"
