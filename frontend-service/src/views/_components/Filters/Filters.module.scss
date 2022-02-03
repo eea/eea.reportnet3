@@ -144,14 +144,18 @@
 }
 
 .dataflowsFilters > div {
-  width: 33.33% !important;
+  width: 20% !important;
 }
 
-.dataflowsFilters > div:last-child {
+.dataflowsFilters > .buttonWrapper {
   margin-left: auto;
   display: flex;
   flex-wrap: wrap;
   width: auto !important;
+}
+
+.dataflowsFilters > div:nth-child(6) {
+  padding-left: 2.5em;
 }
 
 .default,
@@ -504,6 +508,15 @@
 
     .resetButton {
       grid-column: 1;
+    }
+  }
+}
+
+@media (max-width: 979px) {
+  .dataflowsFilters {
+    .buttonWrapper {
+      margin-left: 2.5em !important;
+      margin-right: auto !important;
     }
   }
 }
