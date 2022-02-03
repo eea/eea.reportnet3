@@ -1042,8 +1042,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         return exists;
       }
     });
-
-    // return matchingFiles;
   }
 
   /**
