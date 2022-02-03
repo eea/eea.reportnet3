@@ -10,11 +10,11 @@
     position: relative;
     border-radius: 0px !important;
     border: 0px !important;
-    color: var(--floating-label-color) !important;
     font-size: 0.8333rem !important;
     height: 3em;
     padding-left: 0em;
     width: 100%;
+    box-shadow: none !important;
 
     .label {
       clip: auto;
@@ -22,6 +22,10 @@
       overflow: visible;
       width: 90%;
       top: 0.7em;
+    }
+
+    > div > div > ul > li {
+      margin: 0.5em 0 !important;
     }
   }
 
@@ -31,16 +35,17 @@
 
   .elementFilterSelected {
     border-bottom: var(--active-filter-border) !important;
-    box-shadow: var(--active-filter-shadow);
+    box-shadow: var(--active-filter-shadow) !important;
     label {
       padding-left: 0 !important;
+      span {
+        color: var(--inputtext-color);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        display: block;
+      }
     }
-  }
-}
-
-@media (min-width: 600px) {
-  .block {
-    width: 50% !important;
   }
 }
 

@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useRecoilCallback, useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -6,20 +7,24 @@ import styles from './ReportingObligations.module.scss';
 
 import { CardsView } from 'views/_components/CardsView';
 import { InputSwitch } from 'views/_components/InputSwitch';
-import { MyFilters } from 'views/_components/MyFilters';
+import { Filters } from 'views/_components/Filters';
 import { Spinner } from 'views/_components/Spinner';
 import { TableView } from './_components/TableView';
 
 import { ObligationService } from 'services/ObligationService';
 
+import { dataStore, filteredDataStore, searchByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
+import { filterByKeySearchStore } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
+
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-import { useFilters } from 'views/_functions/Hooks/useFilters';
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducer';
 
+import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
 import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
 import { RodUrl } from 'repositories/config/RodUrl';
 
@@ -28,7 +33,25 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const { filterBy, isFiltered } = useFilters('reportingObligations');
+  const { getFilterBy, isFiltered } = useApplyFilters('reportingObligations');
+
+  const data = useRecoilValue(filteredDataStore('reportingObligations'));
+
+  const setData = useRecoilCallback(
+    ({ snapshot, set }) =>
+      async data => {
+        const searchValue = await snapshot.getPromise(searchByStore('reportingObligations'));
+        const searchKeys = await snapshot.getPromise(filterByKeySearchStore('reportingObligations'));
+
+        const parsedData = data.filter(item =>
+          FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: searchValue })
+        );
+
+        set(dataStore('reportingObligations'), data);
+        set(filteredDataStore('reportingObligations'), parsedData);
+      },
+    []
+  );
 
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     countries: [],
@@ -40,8 +63,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     selectedObligation: obligationChecked
   });
 
-  const { countries, data, issues, isLoading, organizations, pagination, selectedObligation } =
-    reportingObligationState;
+  const { countries, issues, isLoading, organizations, pagination, selectedObligation } = reportingObligationState;
 
   useEffect(() => {
     onLoadCountries();
@@ -87,10 +109,12 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     setLoading(true);
 
     try {
+      const filterBy = await getFilterBy();
       const response = await ObligationService.getOpen(filterBy);
       const data = ReportingObligationUtils.initialValues(response, userContext.userProps.dateFormat);
 
       reportingObligationDispatch({ type: 'ON_LOAD_DATA', payload: { data } });
+      setData(data);
     } catch (error) {
       console.error('ReportingObligations - onLoadReportingObligations.', error);
       notificationContext.add({ type: 'LOAD_OPENED_OBLIGATION_ERROR' }, true);
@@ -119,7 +143,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
       return <Spinner className={styles.spinner} />;
     }
 
-    if (isEmpty(reportingObligationState.data)) {
+    if (isEmpty(data)) {
       if (isFiltered) {
         <h3 className={styles.noObligations}>{resourcesContext.messages['noObligationsWithSelectedParameters']}</h3>;
       } else {
@@ -158,7 +182,10 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     return (
       <Fragment>
         {renderView()}
-        <span className={`${styles.selectedObligation} ${isEmpty(data) ? styles.filteredSelected : ''}`}>
+        <span
+          className={`${isEmpty(data) ? styles.selected : ''} ${
+            pagination.rows < 15 ? styles.selectedObligation : ''
+          }`}>
           <span>{`${resourcesContext.messages['selectedObligation']}: `}</span>
           {selectedObligation.title || '-'}
         </span>
@@ -170,7 +197,6 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     <Fragment>
       {resourcesContext.messages['totalRecords']} {reportingObligationState.data.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
-      {isFiltered ? ` (${resourcesContext.messages['filtered'].toLowerCase()})` : ''}
     </Fragment>
   );
 
@@ -186,19 +212,16 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
         {
           key: 'countries',
           label: resourcesContext.messages['countries'],
-          isSortable: true,
           dropdownOptions: parseDropdownOptions(countries)
         },
         {
           key: 'issues',
           label: resourcesContext.messages['issues'],
-          isSortable: true,
           dropdownOptions: parseDropdownOptions(issues)
         },
         {
           key: 'organizations',
           label: resourcesContext.messages['organizations'],
-          isSortable: true,
           dropdownOptions: parseDropdownOptions(organizations)
         }
       ],
@@ -208,23 +231,19 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   ];
 
   return (
-    <div
-      className={styles.reportingObligation}
-      style={{ justifyContent: isLoading || isEmpty(data) ? 'flex-start' : 'space-between' }}>
-      <div className={styles.repOblTools}>
-        <div className={styles.switchDiv}>
-          <label className={styles.switchTextInput}>{resourcesContext.messages['magazineView']}</label>
-          <InputSwitch checked={userContext.userProps.listView} onChange={e => userContext.onToggleTypeView(e.value)} />
-          <label className={styles.switchTextInput}>{resourcesContext.messages['listView']}</label>
-        </div>
+    <div className={styles.reportingObligation}>
+      <div className={styles.switch}>
+        <label className={styles.text}>{resourcesContext.messages['magazineView']}</label>
+        <InputSwitch checked={userContext.userProps.listView} onChange={e => userContext.onToggleTypeView(e.value)} />
+        <label className={styles.text}>{resourcesContext.messages['listView']}</label>
       </div>
 
-      <MyFilters
+      <Filters
         className="reportingObligations"
-        data={data}
         onFilter={onLoadReportingObligations}
+        onReset={onLoadReportingObligations}
         options={filterOptions}
-        viewType="reportingObligations"
+        recoilId="reportingObligations"
       />
       {renderData()}
     </div>

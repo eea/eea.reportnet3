@@ -54,7 +54,7 @@
   border: 0px !important;
   border-radius: 0px !important;
   border-bottom: var(--inputtext-border) !important;
-  color: var(--floating-label-color) !important;
+  color: var(--font-filters) !important;
   font-size: 0.8333rem !important;
   height: 2rem;
   padding-left: 0em;
@@ -129,7 +129,7 @@
 
   .selectHeader {
     border-radius: 3px;
-    color: var(--floating-label-color);
+    color: var(--font-filters);
     font-size: 0.75rem;
     font-weight: 500;
     padding: 4px;
@@ -344,7 +344,7 @@
   border-radius: 0 !important;
   border-right: 0 !important;
   border-top: 0 !important;
-  color: var(--floating-label-color) !important;
+  color: var(--font-filters) !important;
   font-size: 10pt !important;
   height: 2.1rem;
   padding-left: 0em;

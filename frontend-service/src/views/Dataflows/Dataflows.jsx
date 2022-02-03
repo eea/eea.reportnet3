@@ -91,7 +91,7 @@ export const Dataflows = () => {
     isValidatingAllDataflowsUsers: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
-    pagination: { firstRow: 0, numberRows: 100, pageNum: 0 },
+    pagination: { firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 },
     pinnedSeparatorIndex: -1,
     reference: [],
     reporting: [],
@@ -160,7 +160,8 @@ export const Dataflows = () => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
-  const { getFilterBy, setData, sortByOptions } = useApplyFilters(tabId);
+  const { getFilterBy, isFiltered: areFiltersFilled, setData, sortByOptions } = useApplyFilters(tabId);
+  const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
 
   useEffect(() => {
     getDataflowsCount();
@@ -426,12 +427,13 @@ export const Dataflows = () => {
       userContext.setCurrentDataflowType(currentTabDataflowType);
     }
     dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
-    onChangePagination({ firstRow: 0, numberRows: 100, pageNum: 0 });
+    onChangePagination({ firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 });
     setGoToPage(1);
   };
 
   const onHideObligationDialog = () => {
     manageDialogs('isReportingObligationsDialogVisible', false);
+    resetObligationsFilterState();
     setObligationToPrevious();
     resetReportingObligationsFiltersState();
   };
@@ -574,6 +576,7 @@ export const Dataflows = () => {
         label={resourcesContext.messages['ok']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
+          resetObligationsFilterState();
           setToCheckedObligation();
           resetReportingObligationsFiltersState();
         }}
@@ -584,6 +587,7 @@ export const Dataflows = () => {
         label={resourcesContext.messages['cancel']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
+          resetObligationsFilterState();
           setObligationToPrevious();
           resetReportingObligationsFiltersState();
         }}
@@ -751,9 +755,10 @@ export const Dataflows = () => {
   };
 
   const renderPaginator = () => {
-    if (!loadingStatus[tabId] && filteredRecords > 100) {
+    if (!loadingStatus[tabId] && totalRecords > config.DATAFLOWS_PER_PAGE) {
       return (
         <Paginator
+          areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
           className={`p-paginator-bottom ${styles.paginator}`}
           first={pagination.firstRow}
           isDataflowsList={true}
@@ -783,8 +788,24 @@ export const Dataflows = () => {
         <Filters
           className="dataflowsFilters"
           isLoading={loadingStatus[tabId]}
-          onFilter={getDataflows}
-          onReset={getDataflows}
+          onFilter={() => {
+            if (areFiltersFilled) {
+              onChangePagination({
+                firstRow: 0,
+                numberRows: dataflowsState.pagination.numberRows,
+                pageNum: 0
+              });
+            } else {
+              getDataflows();
+            }
+          }}
+          onReset={() => {
+            onChangePagination({
+              firstRow: 0,
+              numberRows: dataflowsState.pagination.numberRows,
+              pageNum: 0
+            });
+          }}
           onSort={getDataflows}
           options={options[tabId]}
           recoilId={tabId}

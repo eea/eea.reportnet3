@@ -90,7 +90,7 @@
 
   .selectHeader {
     border-radius: 3px;
-    color: var(--floating-label-color);
+    color: var(--font-filters);
     font-size: 0.75rem;
     font-weight: 500;
     padding: 4px;
@@ -144,14 +144,25 @@
 }
 
 .dataflowsFilters > div {
-  width: 33.33% !important;
+  margin-bottom: 0.4rem;
+  width: 20% !important;
 }
 
-.dataflowsFilters > div:last-child {
+.dataflowsFilters > div > div > label,
+.dataflowsFilters > div > div > div > label {
+  color: var(--font-filters) !important;
+}
+
+.dataflowsFilters > .buttonWrapper {
   margin-left: auto;
+  margin-bottom: 0 !important;
   display: flex;
   flex-wrap: wrap;
   width: auto !important;
+}
+
+.dataflowsFilters > div:nth-child(6) {
+  padding-left: 2.5em;
 }
 
 .default,
@@ -290,6 +301,7 @@
   border-bottom: var(--inputtext-border) !important;
 
   label {
+    color: var(--font-filters) !important;
     font-size: 0.8333rem !important;
   }
 
@@ -318,6 +330,10 @@
   .elementFilter {
     display: flex;
   }
+
+  input {
+    color: var(--inputtext-color);
+  }
 }
 
 .dropdownFilter {
@@ -326,7 +342,7 @@
   border-radius: 0 !important;
   border-right: 0 !important;
   border-top: 0 !important;
-  color: var(--floating-label-color) !important;
+  color: var(--font-filters) !important;
   font-size: 10pt !important;
   height: 2.1rem;
   padding-left: 0em;
@@ -349,27 +365,35 @@
 
 .reportingObligations {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  grid-row-gap: 2em;
-  padding: 2em 0;
-  margin-top: -7em;
+  grid-template-columns: repeat(4, 0.25fr);
+  grid-template-rows: auto;
 
-  .block > .sortButtonSize {
-    display: none;
+  div > div > label,
+  div > div > div > label {
+    color: var(--font-filters) !important;
   }
 
   .block:first-child {
     grid-column: 1 / span 5;
     width: 30%;
+    margin-bottom: 1.5rem;
   }
 
-  .filterButton {
-    margin-top: auto;
+  .buttonWrapper {
+    align-items: center;
+    display: flex;
   }
 
-  .resetButton {
-    margin-top: auto;
+  > div:nth-child(n + 2):nth-child(-n + 5) {
+    width: 95% !important;
+  }
+
+  .buttonWrapper {
+    margin-top: 0.5em;
+  }
+
+  > .block {
+    height: 4em !important;
   }
 }
 
@@ -423,28 +447,6 @@
       width: 100%;
     }
   }
-
-  .reportingObligations {
-    display: flex;
-    flex-wrap: wrap;
-    margin-top: 0px !important;
-    padding-top: 0px !important;
-    justify-content: space-between;
-
-    .block {
-      width: 46% !important;
-    }
-
-    .buttonsContainer {
-      grid-row: auto;
-      grid-column: auto;
-      margin-left: 0;
-    }
-
-    .dropdownFilter {
-      width: 100% !important;
-    }
-  }
 }
 
 @media (max-width: 768px) {
@@ -469,6 +471,28 @@
   .historicReleases {
     .labelCheckbox {
       width: 100% !important;
+    }
+  }
+
+  .reportingObligations {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 0px !important;
+    padding-top: 0px !important;
+    justify-content: space-between;
+
+    .block {
+      width: 46% !important;
+    }
+
+    .buttonsContainer {
+      grid-row: auto;
+      grid-column: auto;
+      margin-left: 0;
+    }
+
+    .buttonWrapper {
+      margin: 0 0 1em 0;
     }
   }
 }
@@ -509,23 +533,11 @@
   }
 }
 
-@media (max-width: 990px) {
-  .reportingObligations {
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(3, 1fr);
-
-    .buttonsContainer {
-      grid-row: 3;
-      grid-column: 1 / span 2;
-      margin-left: 0;
-
-      .filterButton {
-        margin-left: 0;
-      }
-
-      .resetButton {
-        margin-right: auto;
-      }
+@media (max-width: 979px) {
+  .dataflowsFilters {
+    .buttonWrapper {
+      margin-left: 2.5em !important;
+      margin-right: auto !important;
     }
   }
 }
@@ -545,5 +557,11 @@
 @media (max-width: 1695px) {
   .qcList {
     grid-row-gap: 1.5rem;
+  }
+
+  .reportingObligations {
+    .buttonWrapper {
+      margin-top: 1em;
+    }
   }
 }

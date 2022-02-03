@@ -52,6 +52,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
@@ -146,6 +147,8 @@ export const Dataflow = () => {
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
   const { resetFiltersState: resetShareRightsFiltersState } = useFilters('shareRights');
+
+  const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
 
   const {
     obligation,
@@ -997,6 +1000,7 @@ export const Dataflow = () => {
 
   const onHideObligationDialog = () => {
     manageDialogs('isReportingObligationsDialogVisible', false);
+    resetObligationsFilterState();
     setObligationToPrevious();
   };
 
@@ -1007,6 +1011,7 @@ export const Dataflow = () => {
         label={resourcesContext.messages['ok']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
+          resetObligationsFilterState();
           setToCheckedObligation();
         }}
       />
@@ -1016,6 +1021,7 @@ export const Dataflow = () => {
         label={resourcesContext.messages['cancel']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
+          resetObligationsFilterState();
           setObligationToPrevious();
         }}
       />

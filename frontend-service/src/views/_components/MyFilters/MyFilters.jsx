@@ -37,7 +37,17 @@ const { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch }
 const { switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
-export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFilter, onSort, options, viewType }) => {
+export const MyFilters = ({
+  className,
+  data = [],
+  isLoading,
+  isStrictMode,
+  onFilter,
+  onReset = () => {},
+  onSort,
+  options,
+  viewType
+}) => {
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
   const [filterByNestedKeys, setFilterByNestedKeys] = useRecoilState(filterByNestedKeysState(viewType));
@@ -337,6 +347,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
 
     return (
       <div className={styles.block} key={option.key}>
+        {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <Dropdown
           ariaLabel={option.key}
           className={styles.dropdownFilter}
@@ -512,6 +523,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
             onClick={() => {
               onResetFilters();
               setLabelsAnimationDate(getLabelsAnimationDateInitial(options, filterBy));
+              onReset(true);
             }}
           />
         </div>
