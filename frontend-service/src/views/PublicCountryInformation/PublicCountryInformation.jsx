@@ -461,6 +461,7 @@ export const PublicCountryInformation = () => {
 
     return (
       <DataTable
+        areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
         autoLayout={true}
         className={styles.countriesList}
         first={firstRow}

@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { FirstPageLink } from './_components/FirstPageLink';
@@ -14,6 +14,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 export class Paginator extends Component {
   static defaultProps = {
     alwaysShow: true,
+    areComponentsVisible: true,
     className: null,
     currentPageReportTemplate: '({currentPage} of {totalPages})',
     disabled: false,
@@ -33,6 +34,7 @@ export class Paginator extends Component {
 
   static propTypes = {
     alwaysShow: PropTypes.bool,
+    areComponentsVisible: PropTypes.bool,
     className: PropTypes.string,
     currentPageReportTemplate: PropTypes.any,
     disabled: PropTypes.bool,
@@ -60,6 +62,8 @@ export class Paginator extends Component {
     this.changePageToLast = this.changePageToLast.bind(this);
     this.onRowsChange = this.onRowsChange.bind(this);
     this.onPageLinkClick = this.onPageLinkClick.bind(this);
+
+    console.log('this.props.hasFewerDataflows :>> ', this.props.hasFewerDataflows);
   }
 
   isFirstPage() {
@@ -223,46 +227,42 @@ export class Paginator extends Component {
   }
 
   renderElements() {
-    if (this.props.hasFewerDataflows) {
-      const template = this.props.template;
+    const template = this.props.template;
 
-      if (template) {
-        if (typeof template === 'object') {
-          return template.layout
-            ? template.layout.split(' ').map(value => {
-                const key = value.trim();
-                return this.renderElement(key, template[key]);
-              })
-            : Object.entries(template).map(([key, _template]) => {
-                return this.renderElement(key, _template);
-              });
-        }
-
-        return template.split(' ').map(value => {
-          return this.renderElement(value.trim());
-        });
+    if (template) {
+      if (typeof template === 'object') {
+        return template.layout
+          ? template.layout.split(' ').map(value => {
+              const key = value.trim();
+              return this.renderElement(key, template[key]);
+            })
+          : Object.entries(template).map(([key, _template]) => {
+              return this.renderElement(key, _template);
+            });
       }
+
+      return template.split(' ').map(value => {
+        return this.renderElement(value.trim());
+      });
     }
 
     return null;
   }
 
   renderRowsPerPageDropdown() {
-    if (this.props.hasFewerDataflows) {
-      return (
-        <div className="p-paginator-left-content-rowsPerPage">
-          <RowsPerPageDropdown
-            disabled={this.props.disabled}
-            key="RowsPerPageDropdown"
-            label={this.context.messages['rowsPerPage']}
-            onChange={this.onRowsChange}
-            options={this.props.rowsPerPageOptions}
-            value={this.props.rows}
-          />
-          {this.props.leftContent && <div className="p-paginator-left-content">{this.props.leftContent}</div>}
-        </div>
-      );
-    }
+    return (
+      <div className="p-paginator-left-content-rowsPerPage">
+        <RowsPerPageDropdown
+          disabled={this.props.disabled}
+          key="RowsPerPageDropdown"
+          label={this.context.messages['rowsPerPage']}
+          onChange={this.onRowsChange}
+          options={this.props.rowsPerPageOptions}
+          value={this.props.rows}
+        />
+        {this.props.leftContent && <div className="p-paginator-left-content">{this.props.leftContent}</div>}
+      </div>
+    );
   }
 
   render() {
@@ -274,8 +274,12 @@ export class Paginator extends Component {
       <div
         className={classNames('p-paginator p-component p-unselectable-text', this.props.className)}
         style={this.props.style}>
-        {this.renderRowsPerPageDropdown()}
-        <div className="p-paginator-middle-content">{this.renderElements()}</div>
+        {this.props.areComponentsVisible && (
+          <Fragment>
+            {this.renderRowsPerPageDropdown()}
+            <div className="p-paginator-middle-content">{this.renderElements()}</div>
+          </Fragment>
+        )}
         <div>
           {this.props.rightContent && <div className="p-paginator-right-content">{this.props.rightContent}</div>}
         </div>
