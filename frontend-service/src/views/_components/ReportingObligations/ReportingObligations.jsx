@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilCallback, useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -13,7 +13,8 @@ import { TableView } from './_components/TableView';
 
 import { ObligationService } from 'services/ObligationService';
 
-import { filteredDataStore } from '../Filters/_functions/Stores/filterStore';
+import { dataStore, filteredDataStore, searchByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
+import { filterByKeySearchStore } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -23,6 +24,7 @@ import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducer';
 
+import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
 import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
 import { RodUrl } from 'repositories/config/RodUrl';
 
@@ -31,9 +33,25 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const { getFilterBy, isFiltered, setData } = useApplyFilters('reportingObligations');
+  const { getFilterBy, isFiltered } = useApplyFilters('reportingObligations');
 
   const data = useRecoilValue(filteredDataStore('reportingObligations'));
+
+  const setData = useRecoilCallback(
+    ({ snapshot, set }) =>
+      async data => {
+        const searchValue = await snapshot.getPromise(searchByStore('reportingObligations'));
+        const searchKeys = await snapshot.getPromise(filterByKeySearchStore('reportingObligations'));
+
+        const parsedData = data.filter(item =>
+          FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: searchValue })
+        );
+
+        set(dataStore('reportingObligations'), data);
+        set(filteredDataStore('reportingObligations'), parsedData);
+      },
+    []
+  );
 
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     countries: [],
@@ -179,7 +197,6 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     <Fragment>
       {resourcesContext.messages['totalRecords']} {reportingObligationState.data.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
-      {isFiltered ? ` (${resourcesContext.messages['filtered'].toLowerCase()})` : ''}
     </Fragment>
   );
 

@@ -23,7 +23,7 @@ export const sortByStore = atomFamily({
 export const filteredDataStore = atomFamily({
   key: 'filteredDataStore',
   default: selectorFamily({
-    key: 'studentSearch',
+    key: 'filteredDataStore',
     get:
       id =>
       ({ get }) =>
