@@ -33,9 +33,11 @@ import org.eea.dataset.mapper.WebFormMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
+import org.eea.dataset.persistence.metabase.domain.WebformMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.WebformRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
@@ -308,6 +310,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The lock service. */
   @Autowired
   private LockService lockService;
+
+  /** The webform repository. */
+  @Autowired
+  WebformRepository webformRepository;
 
 
 
@@ -2303,6 +2309,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void updateWebform(String datasetSchemaId, WebformVO webformVO) {
+    if (webformVO != null && StringUtils.isNotBlank(webformVO.getName())
+        && StringUtils.isBlank(webformVO.getType())) {
+      WebformMetabase webformMetabase = webformRepository.findByLabel(webformVO.getName());
+      webformVO.setType(webformMetabase.getType().toString());
+    }
     schemasRepository.updateDatasetSchemaWebForm(datasetSchemaId,
         webFormMapper.classToEntity(webformVO));
   }

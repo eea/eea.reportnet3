@@ -101,6 +101,27 @@
   > span {
     margin-right: 2rem;
   }
+
+  > div > div:nth-child(n + 1):nth-child(-n + 4) {
+    width: 49% !important;
+  }
+
+  > div > div:nth-child(1),
+  > div > div:nth-child(3) {
+    margin-right: 2%;
+  }
+
+  > div > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    width: 15%;
+    gap: 0.5em;
+    margin-left: auto;
+
+    > div:first-child {
+      margin: 0;
+    }
+  }
 }
 
 .switchTextInput {

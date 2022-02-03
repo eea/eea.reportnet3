@@ -36,4 +36,23 @@
       margin-top: 0.5rem;
     }
   }
+  .message {
+    display: flex;
+    justify-content: center;
+    .isAutomaticReportingDeletionWrapper {
+      display: flex;
+      align-items: center;
+      background-color: var(--growl-warning-bg);
+      padding: 1.5rem;
+      em {
+        color: var(--growl-warning-icon-color);
+        font-size: 2em;
+        margin-right: 0.5rem;
+      }
+      .warningAutomaticReportingDeletionLabel {
+        font-weight: bold;
+        margin: 0 0.25rem 0 0;
+      }
+    }
+  }
 }

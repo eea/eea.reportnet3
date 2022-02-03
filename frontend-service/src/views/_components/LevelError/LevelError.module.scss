@@ -71,7 +71,8 @@
   color: var(--statusBox-true-color);
 }
 
-.warning {
+.warning,
+.warn {
   background-color: var(--statusBox-warning-bg);
   color: var(--statusBox-warning-color);
 }

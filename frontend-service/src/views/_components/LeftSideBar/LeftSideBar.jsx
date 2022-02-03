@@ -21,7 +21,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible }) => {
+export const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible }) => {
   const navigate = useNavigate();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -233,7 +233,7 @@ const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible 
                 header={resourcesContext.messages['logout']}
                 labelCancel={resourcesContext.messages['no']}
                 labelConfirm={resourcesContext.messages['yes']}
-                onConfirm={() => userLogout()}
+                onConfirm={userLogout}
                 onHide={() => setLogoutConfirmVisible(false)}
                 visible={logoutConfirmVisible}>
                 {resourcesContext.messages['userLogout']}
@@ -245,5 +245,3 @@ const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible 
     </Fragment>
   );
 };
-
-export { LeftSideBar };

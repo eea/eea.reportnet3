@@ -37,4 +37,7 @@ public class SnapshotVO implements Serializable {
   /** The automatic. */
   private Boolean automatic;
 
+  /** The enabled. */
+  private Boolean enabled;
+
 }

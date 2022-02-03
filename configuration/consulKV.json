@@ -1016,6 +1016,10 @@
     "value": "JHtTTkFQU0hPVF9QQVRIOkM6XHNuYXBzaG90c1x9"
   },
   {
+    "key": "config/recordstore/pathSnapshotDisabled",
+    "value": "JHtTTkFQU0hPVF9ESVNBQkxFRF9QQVRIOkM6XHNuYXBzaG90c1xkaXNhYmxlZFx9"
+  },
+  {
     "key": "config/indexsearch/spring.jpa.hibernate.ddl-auto",
     "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
   },

@@ -33,7 +33,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 
-const BigButtonListReference = ({
+export const BigButtonListReference = ({
   dataflowId,
   dataflowState,
   onSaveName,
@@ -493,7 +493,7 @@ const BigButtonListReference = ({
           header={resourcesContext.messages['tableWithNoPKWarningTitle']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onCreateReferenceDatasetsWithNoPKs()}
+          onConfirm={onCreateReferenceDatasetsWithNoPKs}
           onHide={() => {
             handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false });
             notificationContext.removeHiddenByKey('NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT');
@@ -518,5 +518,3 @@ const BigButtonListReference = ({
     </Fragment>
   );
 };
-
-export { BigButtonListReference };

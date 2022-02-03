@@ -16,6 +16,7 @@ import org.eea.dataset.persistence.schemas.repository.WebformConfigRepository;
 import org.eea.dataset.service.impl.WebformServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.enums.WebformTypeEnum;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,14 +76,15 @@ public class WebformServiceTest {
 
   @Test
   public void testInsertWebformConfig() throws EEAException {
-    webformServiceImpl.insertWebformConfig("test", "{ \"prop1\" : \"param1\" }");
+    webformServiceImpl.insertWebformConfig("test", "{ \"prop1\" : \"param1\" }",
+        WebformTypeEnum.PAMS);
     Mockito.verify(webformConfigRepository, times(1)).save(Mockito.any());
   }
 
   @Test(expected = EEAException.class)
   public void testInsertWebformConfigException() throws EEAException {
     try {
-      webformServiceImpl.insertWebformConfig("test", "json");
+      webformServiceImpl.insertWebformConfig("test", "json", WebformTypeEnum.PAMS);
     } catch (EEAException e) {
       Assert.assertEquals(EEAErrorMessage.ERROR_JSON, e.getMessage());
       throw e;
@@ -117,7 +119,8 @@ public class WebformServiceTest {
     webform.setIdReferenced(1L);
     Mockito.when(webformConfigRepository.findByIdReferenced(Mockito.anyLong())).thenReturn(webform);
 
-    webformServiceImpl.updateWebformConfig(1L, "test", "{ \"prop1\" : \"param1\" }");
+    webformServiceImpl.updateWebformConfig(1L, "test", "{ \"prop1\" : \"param1\" }",
+        WebformTypeEnum.PAMS);
     Mockito.verify(webformConfigRepository, times(1)).findByIdReferenced(Mockito.any());
   }
 

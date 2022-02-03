@@ -2,6 +2,7 @@ package org.eea.interfaces.vo.dataset.schemas;
 
 import java.io.Serializable;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataset.enums.WebformTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -31,6 +32,9 @@ public class WebformMetabaseVO implements Serializable {
   /** The value. */
   private String value;
 
+  /** The type. */
+  private WebformTypeEnum type;
+
   /**
    * Hash code.
    *
@@ -39,7 +43,7 @@ public class WebformMetabaseVO implements Serializable {
   @Override
   public int hashCode() {
 
-    return Objects.hash(id, label, value);
+    return Objects.hash(id, label, value, type);
 
   }
 
@@ -58,6 +62,7 @@ public class WebformMetabaseVO implements Serializable {
       return false;
     }
     WebformMetabaseVO other = (WebformMetabaseVO) obj;
-    return Objects.equals(label, other.label) && Objects.equals(value, other.value);
+    return Objects.equals(label, other.label) && Objects.equals(value, other.value)
+        && Objects.equals(type, other.type);
   }
 }

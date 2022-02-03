@@ -27,7 +27,6 @@ import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
-import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
@@ -706,13 +705,14 @@ public class DataflowControllerImpl implements DataFlowController {
    * @param pageSize the page size
    * @param sortField the sort field
    * @param asc the asc
+   * @param filters the filters
    * @return the public dataflows by country
    */
   @Override
-  @GetMapping("/public/country/{countryCode}")
+  @PostMapping("/public/country/{countryCode}")
   @ApiOperation(value = "Gets all the public dataflow that use a specific Country Code",
-      hidden = true)
-  public DataflowPublicPaginatedVO getPublicDataflowsByCountry(
+      hidden = false)
+  public PaginatedDataflowVO getPublicDataflowsByCountry(
       @ApiParam(value = "Country Code",
           example = "AL") @PathVariable("countryCode") String countryCode,
       @ApiParam(value = "pageNum: page number to show", example = "0",
@@ -725,9 +725,18 @@ public class DataflowControllerImpl implements DataFlowController {
           value = "sortField: specifies the field which should be used to sort the data retrieved",
           example = "name") @RequestParam(value = "sortField", required = false) String sortField,
       @ApiParam(value = "asc: is the sorting order ascending or descending?", example = "false",
-          defaultValue = "true") @RequestParam(value = "asc", defaultValue = "true") boolean asc) {
-    return dataflowService.getPublicDataflowsByCountry(countryCode, sortField, asc, pageNum,
-        pageSize);
+          defaultValue = "true") @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+      @RequestBody(required = false) Map<String, String> filters) {
+    try {
+      return dataflowService.getPublicDataflowsByCountry(countryCode, sortField, asc, pageNum,
+          pageSize, filters);
+    } catch (EEAException e) {
+      LOG_ERROR.info(
+          String.format("There was an error retrieving the public dataflows for the country: %s",
+              countryCode),
+          e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATAFLOW_GET_ERROR);
+    }
   }
 
   /**
@@ -1025,6 +1034,31 @@ public class DataflowControllerImpl implements DataFlowController {
     }
 
     return new ResponseEntity<>(message, status);
+  }
+
+  /**
+   * Update data flow automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDelete the automatic reporting delete
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @PutMapping("/{dataflowId}/updateAutomaticDelete")
+  @ApiOperation(value = "Update one Dataflow Automatic Delete Data and Snapshot", hidden = true)
+  @ApiResponse(code = 500, message = "Internal Server Error")
+  public void updateDataFlowAutomaticReportingDeletion(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("automaticDelete") boolean automaticReportingDelete) {
+    try {
+      dataflowService.updateDataFlowAutomaticReportingDeletion(dataflowId,
+          automaticReportingDelete);
+    } catch (Exception e) {
+      LOG.error(String.format(
+          "Couldn't update the dataflow automatic delete data and snapshots with the provided dataflowId %s.",
+          dataflowId), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "Couldn't update the dataflow automatic delete data and snapshots. An unknown error happenned.");
+    }
   }
 
   /**

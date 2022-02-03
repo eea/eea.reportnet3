@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 
 import camelCase from 'lodash/camelCase';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
@@ -15,6 +16,7 @@ import { WebLinksUtils } from 'services/_utils/WebLinksUtils';
 
 import { Dataflow } from 'entities/Dataflow';
 
+import { TextUtils } from 'repositories/_utils/TextUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 const sortDataflowsByExpirationDate = dataflows =>
@@ -24,7 +26,7 @@ const sortDataflowsByExpirationDate = dataflows =>
     return deadline_1 < deadline_2 ? -1 : deadline_1 > deadline_2 ? 1 : 0;
   });
 
-const parseDataflowCount = (dataflowCountDTO, dataflowType) => {
+const parseDataflowCount = dataflowCountDTO => {
   const dataflowCount = { reporting: 0, business: 0, citizenScience: 0, reference: 0 };
 
   dataflowCountDTO.forEach(dataflowType => {
@@ -34,7 +36,7 @@ const parseDataflowCount = (dataflowCountDTO, dataflowType) => {
   return dataflowCount;
 };
 
-const parseDataflowListDTO = dataflowsDTO => dataflowsDTO?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
+const parseDataflowListDTO = (dataflowsDTO = []) => dataflowsDTO.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
 
 const parseSortedDataflowListDTO = dataflowDTOs => {
   const dataflows = dataflowDTOs?.map(dataflowDTO => parseDataflowDTO(dataflowDTO));
@@ -78,6 +80,7 @@ const parseDataflowDTO = dataflowDTO =>
     fmeUserId: dataflowDTO.fmeUserId,
     fmeUserName: dataflowDTO.fmeUserName,
     id: dataflowDTO.id,
+    isAutomaticReportingDeletion: dataflowDTO.automaticReportingDeletion,
     isReleasable: dataflowDTO.releasable,
     manualAcceptance: dataflowDTO.manualAcceptance,
     name: dataflowDTO.name,
@@ -182,6 +185,105 @@ const parseDatasetsInfoDTO = datasetsDTO =>
 
 const getDatasetType = datasetType => config.datasetType.find(type => type.key === datasetType)?.value;
 
+const replacements = {
+  creationDate: 'creation_date',
+  description: 'description',
+  expirationDate: 'deadline_date',
+  legalInstrument: 'legal_instrument',
+  name: 'name',
+  obligationTitle: 'obligation',
+  obligationId: 'obligation_id',
+  status: 'status',
+  userRole: 'role'
+};
+
+const parseRequestFilterBy = filterBy => {
+  if (isEmpty(filterBy)) {
+    return {};
+  }
+
+  const parsedFilterBy = Object.keys(filterBy).map(key => {
+    const results = { [replacements[key] || key]: filterBy[key] };
+
+    if (TextUtils.areEquals(key, 'userRole') || TextUtils.areEquals(key, 'status')) {
+      results[replacements[key] || key] = filterBy[key]?.value;
+    }
+
+    if (TextUtils.areEquals(key, 'creationDate') || TextUtils.areEquals(key, 'expirationDate')) {
+      if (filterBy[key][0] && !filterBy[key][1]) {
+        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_to`] = `${filterBy[key][0]}`;
+      } else {
+        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
+      }
+
+      delete results[replacements[key]];
+    }
+
+    return results;
+  });
+
+  return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
+};
+
+const parseRequestPublicCountryFilterBy = filterBy => {
+  if (isEmpty(filterBy)) {
+    return {};
+  }
+
+  const replacements = {
+    name: 'name',
+    obligation: 'obligation',
+    legalInstrument: 'legal_instrument',
+    deadline: 'deadline_date',
+    status: 'status',
+    deliveryDate: 'delivery_date',
+    deliveryStatus: 'delivery_status'
+  };
+
+  const parsedFilterBy = Object.keys(filterBy).map(key => {
+    const results = { [replacements[key] || key]: filterBy[key] };
+
+    if (TextUtils.areEquals(key, 'status')) {
+      results[replacements[key] || key] = filterBy[key]?.value;
+    }
+
+    if (TextUtils.areEquals(key, 'deliveryStatus')) {
+      results[replacements[key] || key] = filterBy[key]?.join(',');
+    }
+
+    if (TextUtils.areEquals(key, 'deadline') || TextUtils.areEquals(key, 'deliveryDate')) {
+      if (filterBy[key][0] && !filterBy[key][1]) {
+        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_to`] = `${filterBy[key][0]}`;
+      } else {
+        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
+      }
+
+      delete results[replacements[key]];
+    }
+
+    return results;
+  });
+
+  return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
+};
+
+const parseRequestSortBy = sortByOptions => {
+  if (isNil(sortByOptions)) {
+    return { isAsc: undefined, sortByHeader: '' };
+  }
+
+  const sortByReplacements = { asc: true, desc: false, idle: undefined };
+
+  return {
+    isAsc: sortByReplacements[sortByOptions.sortByOption],
+    sortByHeader: replacements[sortByOptions.sortByHeader]
+  };
+};
+
 export const DataflowUtils = {
   getTechnicalAcceptanceStatus,
   parseAllDataflowsUserList,
@@ -192,6 +294,9 @@ export const DataflowUtils = {
   parseDatasetsInfoDTO,
   parsePublicDataflowDTO,
   parsePublicDataflowListDTO,
+  parseRequestFilterBy,
+  parseRequestPublicCountryFilterBy,
+  parseRequestSortBy,
   parseSortedDataflowListDTO,
   parseUsersList,
   sortDataflowsByExpirationDate

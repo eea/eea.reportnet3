@@ -2,12 +2,12 @@ package org.eea.validation.service;
 
 import java.util.List;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.schemas.rule.Rule;
+import org.eea.validation.util.model.QueryVO;
 import org.json.simple.parser.ParseException;
 
 /**
@@ -47,14 +47,13 @@ public interface SqlRulesService {
    * Retrieve table data.
    *
    * @param query the query
-   * @param dataSetMetabaseVO the data set metabase VO
-   * @param rule the rule
+   * @param queryVO the query VO
    * @param ischeckDC the ischeck DC
    * @return the table value
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
-  TableValue retrieveTableData(String query, DataSetMetabaseVO dataSetMetabaseVO, Rule rule,
-      Boolean ischeckDC) throws EEAInvalidSQLException;
+  QueryVO retrieveTableData(String query, QueryVO queryVO, Boolean ischeckDC)
+      throws EEAInvalidSQLException;
 
   /**
    * Validate SQL rules.
@@ -86,4 +85,15 @@ public interface SqlRulesService {
    * @throws EEAException the EEA exception
    */
   Double evaluateSqlRule(Long datasetId, String sqlRule) throws EEAException, ParseException;
+
+  /**
+   * Query table.
+   *
+   * @param newQuery the new query
+   * @param queryVO the query VO
+   * @return the table value
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
+   */
+  TableValue queryTable(String newQuery, QueryVO queryVO) throws EEAInvalidSQLException;
+
 }

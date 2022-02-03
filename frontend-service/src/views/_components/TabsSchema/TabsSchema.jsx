@@ -66,6 +66,7 @@ export const TabsSchema = ({
               header={table.name}
               key={table.id}
               notEmpty={table.notEmpty}
+              numberOfFields={table.numberOfFields}
               readOnly={table.readOnly}
               rightIcon={getRightIcon(table)}
               rightIconTooltip={getRightIconTooltip(table)}

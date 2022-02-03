@@ -86,134 +86,75 @@ public class KieBaseManager {
    * @return the kie base
    * @throws FileNotFoundException the file not found exception
    */
-  public KieBase reloadRules(Long datasetId, String datasetSchemaId, Rule sqlRule)
+  public KieBase reloadRules(Long datasetId, String datasetSchemaId, String sqlRule)
       throws FileNotFoundException {
-
-    ObjectId datasetSchemaOId = new ObjectId(datasetSchemaId);
-    List<Map<String, String>> ruleAttributes = new ArrayList<>();
-    ObjectDataCompiler compiler = new ObjectDataCompiler();
-    KieServices kieServices = KieServices.Factory.get();
-    RulesSchema schemaRules = null;
-    List<Rule> filteredRules = new ArrayList<>();
+    KieBase kiebase = null;
     if (sqlRule == null) {
+      ObjectId datasetSchemaOId = new ObjectId(datasetSchemaId);
+      List<Map<String, String>> ruleAttributes = new ArrayList<>();
+      ObjectDataCompiler compiler = new ObjectDataCompiler();
+      KieServices kieServices = KieServices.Factory.get();
+      RulesSchema schemaRules = null;
       schemaRules = rulesRepository.getActiveAndVerifiedRules(datasetSchemaOId);
-      filteredRules = schemaRules.getRules().stream()
+      List<Rule> filteredRules = schemaRules.getRules().stream()
           .filter(rule -> !rule.getWhenCondition().startsWith("isSQL"))
           .collect(Collectors.toList());
-    } else {
-      if (sqlRule.isEnabled()) {
-        filteredRules.add(sqlRule);
-      }
-      schemaRules = new RulesSchema();
-    }
-    schemaRules.setRules(filteredRules);
-    // Get enabled and verified rules
 
-    // we bring the datasetschema
-    DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(datasetSchemaOId);
+      schemaRules.setRules(filteredRules);
+      // Get enabled and verified rules
 
-    // here we have the method who compose the field in template
-    if (null != schemaRules.getRules() && !schemaRules.getRules().isEmpty()) {
-      schemaRules.getRules().stream().forEach(rule -> {
-        String schemasDrools = "";
-        String tableName = "";
-        String fieldName = "";
-        TypeValidation typeValidation = null;
-        switch (rule.getType()) {
-          case DATASET:
-            schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
-            typeValidation = TypeValidation.DATASET;
-            tableName =
-                datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataSetName();
-            break;
-          case TABLE:
-            schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
-            typeValidation = TypeValidation.TABLE;
-            tableName = fillTableOriginName(dataSetSchema, rule, tableName);
-            break;
-          case RECORD:
-            // transform the rule to a tablerule
-            if (isSqlSentence(rule)) {
+      // we bring the datasetschema
+      DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(datasetSchemaOId);
+
+      // here we have the method who compose the field in template
+      if (null != schemaRules.getRules() && !schemaRules.getRules().isEmpty()) {
+        schemaRules.getRules().stream().forEach(rule -> {
+          String schemasDrools = "";
+          String tableName = "";
+          String fieldName = "";
+          TypeValidation typeValidation = null;
+          switch (rule.getType()) {
+            case DATASET:
+              schemasDrools = SchemasDrools.ID_DATASET_SCHEMA.getValue();
+              typeValidation = TypeValidation.DATASET;
+              tableName =
+                  datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataSetName();
+              break;
+            case TABLE:
               schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
               typeValidation = TypeValidation.TABLE;
-              fillRecordReferenceID(dataSetSchema, rule);
-            } else {
+              tableName = fillTableOriginName(dataSetSchema, rule, tableName);
+              break;
+            case RECORD:
+              // transform the rule to a tablerule
               schemasDrools = SchemasDrools.ID_RECORD_SCHEMA.getValue();
               typeValidation = TypeValidation.RECORD;
               tableName = fillRecordOriginName(dataSetSchema, rule, tableName);
-            }
-            break;
-          case FIELD:
-            // transform the rule to a tablerule
-            if (isSqlSentence(rule)) {
-              schemasDrools = SchemasDrools.ID_TABLE_SCHEMA.getValue();
-              typeValidation = TypeValidation.TABLE;
-              fillFieldReferenceId(dataSetSchema, rule);
-            } else {
+              break;
+            case FIELD:
+              // transform the rule to a tablerule
               schemasDrools = SchemasDrools.ID_FIELD_SCHEMA.getValue();
               typeValidation = TypeValidation.FIELD;
               tableName = fillFieldOriginName(dataSetSchema, rule).get(0);
               fieldName = fillFieldOriginName(dataSetSchema, rule).get(1);
-            }
-            break;
-          default:
-            break;
-        }
-        ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
-            rule.getRuleId().toString(), typeValidation, schemasDrools,
-            "RuleOperators.setEntity(this) && " + rule.getWhenCondition(),
-            rule.getThenCondition().get(0), rule.getThenCondition().get(1), tableName,
-            rule.getShortCode(), fieldName));
-      });
-    }
-
-    KieHelper kieHelper = kiebaseAssemble(compiler, kieServices, ruleAttributes);
-    // this is a shared variable in a single instanced object.
-    return kieHelper.build();
-  }
-
-  /**
-   * Checks if is sql sentence.
-   *
-   * @param rule the rule
-   * @return true, if is sql sentence
-   */
-  private boolean isSqlSentence(Rule rule) {
-    return null != rule.getSqlSentence() && !rule.getSqlSentence().isEmpty();
-  }
-
-
-  /**
-   * Fill record reference ID.
-   *
-   * @param dataSetSchema the data set schema
-   * @param rule the rule
-   */
-  private void fillRecordReferenceID(DataSetSchema dataSetSchema, Rule rule) {
-    for (TableSchema table : dataSetSchema.getTableSchemas()) {
-      if (table.getRecordSchema().getIdRecordSchema().equals(rule.getReferenceId())) {
-        rule.setReferenceId(table.getIdTableSchema());
+              break;
+            default:
+              break;
+          }
+          ruleAttributes.add(passDataToMap(rule.getReferenceId().toString(),
+              rule.getRuleId().toString(), typeValidation, schemasDrools,
+              "RuleOperators.setEntity(this) && " + rule.getWhenCondition(),
+              rule.getThenCondition().get(0), rule.getThenCondition().get(1), tableName,
+              rule.getShortCode(), fieldName));
+        });
       }
+
+      KieHelper kieHelper = kiebaseAssemble(compiler, kieServices, ruleAttributes);
+      // this is a shared variable in a single instanced object.
+      kiebase = kieHelper.build();
     }
+    return kiebase;
   }
-
-
-  /**
-   * Fill field reference id.
-   *
-   * @param dataSetSchema the data set schema
-   * @param rule the rule
-   */
-  private void fillFieldReferenceId(DataSetSchema dataSetSchema, Rule rule) {
-    for (TableSchema table : dataSetSchema.getTableSchemas()) {
-      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
-        if (field.getIdFieldSchema().equals(rule.getReferenceId())) {
-          rule.setReferenceId(table.getIdTableSchema());
-        }
-      }
-    }
-  }
-
 
   /**
    * Fill table origin name.

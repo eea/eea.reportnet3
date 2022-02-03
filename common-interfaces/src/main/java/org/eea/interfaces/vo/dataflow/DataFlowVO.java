@@ -78,6 +78,9 @@ public class DataFlowVO extends GenericDataflowVO implements Serializable {
   /** The reporting status. */
   private DatasetStatusEnum reportingStatus;
 
+  /** The automatic reporting deletion. */
+  private boolean automaticReportingDeletion;
+
   /**
    * Equals.
    *

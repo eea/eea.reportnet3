@@ -105,10 +105,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [isReferenceDataset, setIsReferenceDataset] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isReportingWebform, setIsReportingWebform] = useState(false);
-  const [isTableView, setIsTableView] = useState(true);
+  const [selectedView, setSelectedView] = useState('');
   const [isTestDataset, setIsTestDataset] = useState(false);
   const [isUpdatableDialogVisible, setIsUpdatableDialogVisible] = useState(false);
-  const [isValidationsTabularView, setIsValidationsTabularView] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [metadata, setMetadata] = useState(undefined);
   const [replaceData, setReplaceData] = useState(false);
@@ -210,7 +209,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     if (!isNil(webformData)) {
-      setIsReportingWebform(webformData === 'MMR-ART13');
+      setIsReportingWebform(webformData?.type === 'PAMS');
     }
   }, [webformData]);
 
@@ -268,8 +267,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   }, [externalOperationsList]);
 
   useEffect(() => {
-    if (window.location.search !== '' && !isNil(dataViewerOptions.tableSchemaId)) changeUrl();
-  }, [dataViewerOptions.tableSchemaId, isTableView]);
+    if (window.location.search !== '' && !isNil(dataViewerOptions.tableSchemaId)) {
+      changeUrl();
+    }
+  }, [dataViewerOptions.tableSchemaId, selectedView]);
 
   const changeUrl = () => {
     window.history.replaceState(
@@ -281,7 +282,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           : !isEmpty(tableSchema)
           ? tableSchema[0].id
           : ''
-      }${!isNil(webformData) ? `&view=${isTableView ? 'tabularData' : 'webform'}` : ''}`
+      }${!isNil(webformData?.name) ? `&view=${selectedView}` : ''}`
     );
   };
 
@@ -690,7 +691,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       setWebformData(datasetSchema.webform);
-      setIsTableView(QuerystringUtils.getUrlParamValue('view') === 'tabularData' || isNil(datasetSchema.webform));
+      if (isNil(datasetSchema.webform?.name)) {
+        setSelectedView('tabularData');
+      } else {
+        setSelectedView('webform');
+      }
       return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
@@ -731,6 +736,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               ...datasetStatistics.tables.filter(table => table.tableSchemaId === tableSchema.tableSchemaId)[0]
             }.hasErrors,
             fixedNumber: tableSchema.tableSchemaFixedNumber,
+            numberOfFields: tableSchema.records ? tableSchema.records[0].fields?.length : 0,
             readOnly: tableSchema.tableSchemaReadOnly,
             toPrefill: tableSchema.tableSchemaToPrefill
           };
@@ -912,36 +918,36 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         className="p-button-animated-blink"
         icon="check"
         label={resourcesContext.messages['import']}
-        onClick={() => onImportOtherSystems()}
+        onClick={onImportOtherSystems}
       />
       <Button
         className="p-button-secondary button-right-aligned"
         icon="cancel"
         label={resourcesContext.messages['cancel']}
-        onClick={() => cleanImportOtherSystemsDialog()}
+        onClick={cleanImportOtherSystemsDialog}
       />
     </Fragment>
   );
 
-  const renderSwitchView = () =>
-    !isNil(webformData) && (
-      <div className={styles.switchDivInput}>
-        <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-          <TabularSwitch
-            className={styles.tabularSwitch}
-            elements={[resourcesContext.messages['tabularDataView'], resourcesContext.messages['webform']]}
-            isValidationsTabularView={isValidationsTabularView}
-            onChange={switchView => setIsTableView(switchView === resourcesContext.messages['webform'] ? false : true)}
-            setIsValidationsTabularView={setIsValidationsTabularView}
-            value={resourcesContext.messages['webform']}
-          />
-        </div>
-      </div>
-    );
+  const renderSwitchView = () => {
+    if (!isNil(webformData?.name)) {
+      const viewModes = [
+        { key: 'tabularData', label: resourcesContext.messages['tabularDataView'] },
+        { key: 'webform', label: resourcesContext.messages['webform'] }
+      ];
 
-  const switchToTabularData = () => {
-    setIsTableView(true);
-    setIsValidationsTabularView(true);
+      return (
+        <div className={styles.switchDivInput}>
+          <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
+            <TabularSwitch
+              elements={viewModes}
+              onChange={switchView => setSelectedView(switchView)}
+              value={selectedView}
+            />
+          </div>
+        </div>
+      );
+    }
   };
 
   const onDownloadValidations = async () => {
@@ -991,7 +997,54 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     </div>
   );
 
-  if (isLoading) return layout(<Spinner />);
+  const renderTableWebformView = () => {
+    if (selectedView === 'webform') {
+      return (
+        <Webforms
+          dataflowId={dataflowId}
+          dataProviderId={metadata?.dataset.dataProviderId}
+          datasetId={datasetId}
+          isReleasing={dataset.isReleasing}
+          isReporting
+          options={webformOptions}
+          state={{
+            datasetSchema: { tables: datasetSchemaAllTables },
+            schemaTables,
+            datasetStatistics: datasetStatisticsInState
+          }}
+          webform={webformData}
+        />
+      );
+    }
+
+    return (
+      <TabsSchema
+        dataProviderId={metadata?.dataset.dataProviderId}
+        datasetSchemaId={metadata?.dataset.datasetSchemaId}
+        hasWritePermissions={hasWritePermissions}
+        isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
+        isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+        isReferenceDataset={isReferenceDataset}
+        isReportingWebform={isReportingWebform}
+        levelErrorTypes={levelErrorTypes}
+        onHideSelectGroupedValidation={onHideSelectGroupedValidation}
+        onLoadTableData={onLoadTableData}
+        onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+        reporting={true}
+        selectedRuleId={dataViewerOptions.selectedRuleId}
+        selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
+        selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+        selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
+        tables={tableSchema}
+        tableSchemaColumns={tableSchemaColumns}
+        tableSchemaId={dataViewerOptions.tableSchemaId}
+      />
+    );
+  };
+
+  if (isLoading) {
+    return layout(<Spinner />);
+  }
 
   return layout(
     <SnapshotContext.Provider
@@ -1086,51 +1139,13 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               } p-button-animated-blink dataset-refresh-help-step`}
               icon="refresh"
               label={resourcesContext.messages['refresh']}
-              onClick={() => onLoadDatasetSchema()}
+              onClick={onLoadDatasetSchema}
             />
           </div>
         </Toolbar>
       </div>
       {renderSwitchView()}
-      {isTableView ? (
-        <TabsSchema
-          dataProviderId={metadata?.dataset.dataProviderId}
-          datasetSchemaId={metadata?.dataset.datasetSchemaId}
-          hasWritePermissions={hasWritePermissions}
-          isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
-          isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
-          isReferenceDataset={isReferenceDataset}
-          isReportingWebform={isReportingWebform}
-          levelErrorTypes={levelErrorTypes}
-          onHideSelectGroupedValidation={onHideSelectGroupedValidation}
-          onLoadTableData={onLoadTableData}
-          onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-          reporting={true}
-          selectedRuleId={dataViewerOptions.selectedRuleId}
-          selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
-          selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
-          selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
-          tables={tableSchema}
-          tableSchemaColumns={tableSchemaColumns}
-          tableSchemaId={dataViewerOptions.tableSchemaId}
-        />
-      ) : (
-        <Webforms
-          dataflowId={dataflowId}
-          dataProviderId={metadata?.dataset.dataProviderId}
-          datasetId={datasetId}
-          isReleasing={dataset.isReleasing}
-          isReporting
-          options={webformOptions}
-          state={{
-            datasetSchema: { tables: datasetSchemaAllTables },
-            schemaTables,
-            datasetStatistics: datasetStatisticsInState
-          }}
-          webformType={webformData}
-        />
-      )}
-
+      {renderTableWebformView()}
       {validationsVisible && (
         <Dialog
           className={styles.paginatorValidationViewer}
@@ -1145,18 +1160,17 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             datasetName={datasetName}
             datasetSchemaId={metadata?.dataset.datasetSchemaId}
             hasWritePermissions={hasWritePermissions}
-            isWebformView={!isTableView}
+            isWebformView={selectedView === 'webform'}
             levelErrorTypes={levelErrorTypes}
             onSelectValidation={onSelectValidation}
             reporting={true}
             schemaTables={schemaTables}
-            switchToTabularData={switchToTabularData}
+            switchToTabularData={() => setSelectedView('tabularData')}
             tables={datasetSchemaAllTables}
             visible={validationsVisible}
           />
         </Dialog>
       )}
-
       {validationListDialogVisible && (
         <Dialog
           footer={validationListFooter}
@@ -1172,7 +1186,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           />
         </Dialog>
       )}
-
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
           accept={DatasetUtils.getValidExtensions({ validExtensions: importSelectedIntegrationExtension })}
@@ -1210,7 +1223,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           }`}
         />
       )}
-
       {isImportOtherSystemsDialogVisible && (
         <Dialog
           className={styles.Dialog}
@@ -1244,7 +1256,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           </div>
         </Dialog>
       )}
-
       {isUpdatableDialogVisible && (
         <ConfirmDialog
           disabledConfirm={isDatasetUpdatable === dataset.updatable}
@@ -1268,7 +1279,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           </label>
         </ConfirmDialog>
       )}
-
       <Snapshots
         isLoadingSnapshotListData={isLoadingSnapshotListData}
         isSnapshotDialogVisible={isSnapshotDialogVisible}

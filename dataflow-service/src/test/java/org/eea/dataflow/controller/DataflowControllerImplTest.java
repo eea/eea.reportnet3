@@ -1088,7 +1088,7 @@ public class DataflowControllerImplTest {
   @Test
   public void getPublicDataflowsByCountry() {
     assertNull("assertion error",
-        dataflowControllerImpl.getPublicDataflowsByCountry("FR", 0, 10, "name", true));
+        dataflowControllerImpl.getPublicDataflowsByCountry("FR", 0, 10, "name", true, null));
   }
 
   @Test

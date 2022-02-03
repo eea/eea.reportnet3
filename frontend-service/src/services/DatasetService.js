@@ -2,6 +2,7 @@ import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
+import isNumber from 'lodash/isNumber';
 import isUndefined from 'lodash/isUndefined';
 
 import { DatasetRepository } from 'repositories/DatasetRepository';
@@ -166,8 +167,26 @@ export const DatasetService = {
   exportDatasetDataExternal: async (datasetId, integrationId) =>
     await DatasetRepository.exportDatasetDataExternal(datasetId, integrationId),
 
-  exportTableData: async (datasetId, tableSchemaId, fileType) =>
-    await DatasetRepository.exportTableData(datasetId, tableSchemaId, fileType),
+  exportTableData: async (
+    datasetId,
+    tableSchemaId,
+    fileType,
+    filterValue,
+    levelErrorValidations,
+    selectedRuleId,
+    isExportFilteredCsv,
+    isFilterValidationsActive
+  ) =>
+    await DatasetRepository.exportTableData(
+      datasetId,
+      tableSchemaId,
+      fileType,
+      filterValue,
+      levelErrorValidations,
+      selectedRuleId,
+      isExportFilteredCsv,
+      isFilterValidationsActive
+    ),
 
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
     await DatasetRepository.exportTableSchema(datasetId, datasetSchemaId, tableSchemaId, fileType),
@@ -229,8 +248,8 @@ export const DatasetService = {
       datasetId,
       pageNum,
       pageSize,
-      sortField,
-      asc,
+      sortField || '',
+      isNumber(asc) ? asc : '',
       fieldValueFilter,
       levelErrorsFilter,
       typeEntitiesFilter,
@@ -287,7 +306,7 @@ export const DatasetService = {
           ? DatasetUtils.getAllLevelErrorsFromRuleValidations(rulesDTO.data)
           : [],
       referenceDataset: datasetSchemaDTO.data.referenceDataset,
-      webform: datasetSchemaDTO.data.webform ? datasetSchemaDTO.data.webform.name : null
+      webform: datasetSchemaDTO.data.webform ? datasetSchemaDTO.data.webform : null
     });
 
     const tables = datasetSchemaDTO.data.tableSchemas.map(datasetTableDTO => {

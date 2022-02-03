@@ -439,4 +439,14 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       List<String> tableSchemasIdPrefill) {
     LOG.info("createSnapshotToClone");
   }
+
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void updateSnapshotDisabled(Long datasetId) {
+    LOG.info("updateSnapshotDisabled");
+  }
 }

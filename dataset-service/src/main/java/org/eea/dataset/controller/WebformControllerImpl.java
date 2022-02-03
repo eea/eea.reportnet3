@@ -71,7 +71,8 @@ public class WebformControllerImpl implements WebformController {
   @ApiOperation(value = "Insert webform config json into the system", hidden = true)
   public void insertWebformConfig(@RequestBody WebformConfigVO webformConfig) {
     try {
-      webformService.insertWebformConfig(webformConfig.getName(), webformConfig.getContent());
+      webformService.insertWebformConfig(webformConfig.getName(), webformConfig.getContent(),
+          webformConfig.getType());
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
     }
@@ -91,7 +92,7 @@ public class WebformControllerImpl implements WebformController {
   public void updateWebformConfig(@RequestBody WebformConfigVO webformConfig) {
     try {
       webformService.updateWebformConfig(webformConfig.getIdReferenced(), webformConfig.getName(),
-          webformConfig.getContent());
+          webformConfig.getContent(), webformConfig.getType());
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
     }

@@ -1,7 +1,6 @@
 package org.eea.dataflow.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -53,7 +52,6 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
-import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
@@ -90,9 +88,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
-import io.jsonwebtoken.lang.Objects;
 
 /**
  * The Class DataflowServiceImpl.
@@ -296,7 +294,7 @@ public class DataflowServiceImpl implements DataflowService {
         idsResources = userManagementControllerZull
             .getResourcesByUser(ResourceTypeEnum.DATAFLOW,
                 SecurityRoleEnum.fromValue(filters.get("role")))
-            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());;
+            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
         idsResourcesWithoutRole =
             userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
                 .map(ResourceAccessVO::getId).collect(Collectors.toList());
@@ -767,28 +765,58 @@ public class DataflowServiceImpl implements DataflowService {
    * @param page the page
    * @param pageSize the page size
    * @return the public dataflows by country
+   * @throws EEAException
    */
   @Override
-  public DataflowPublicPaginatedVO getPublicDataflowsByCountry(String countryCode, String header,
-      boolean asc, int page, int pageSize) {
-    DataflowPublicPaginatedVO dataflowPublicPaginated = new DataflowPublicPaginatedVO();
-    // get the entity
-    List<DataflowPublicVO> dataflowPublicList = dataflowPublicMapper
-        .entityListToClass(dataflowRepository.findPublicDataflowsByCountryCode(countryCode));
+  public PaginatedDataflowVO getPublicDataflowsByCountry(String countryCode, String header,
+      boolean asc, int page, int pageSize, Map<String, String> filters) throws EEAException {
 
-    List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
-    setReportings(dataflowPublicList, providerId);
-    // sort and paging
-    sortPublicDataflows(dataflowPublicList, header, asc);
-    dataflowPublicPaginated.setPublicDataflows(getPage(dataflowPublicList, page, pageSize));
-    dataflowPublicPaginated.setTotalRecords(Long.valueOf(dataflowPublicList.size()));
+    try {
+      Pageable pageable = PageRequest.of(page, pageSize);
+      List<ObligationVO> obligations =
+          obligationControllerZull.findOpenedObligations(null, null, null, null, null);
+      ObjectMapper objectMapper = new ObjectMapper();
 
-    dataflowPublicPaginated.getPublicDataflows().stream().forEach(dataflow -> {
-      dataflow.setReferenceDatasets(
-          referenceDatasetControllerZuul.findReferenceDataSetPublicByDataflowId(dataflow.getId()));
-    });
+      String obligationJson = objectMapper.writeValueAsString(obligations);
 
-    return dataflowPublicPaginated;
+      List<Dataflow> publicDataflows = dataflowRepository.findPaginatedByCountry(obligationJson,
+          pageable, filters, header, asc, countryCode);
+
+      List<DataflowPublicVO> publicDataflowsVOList =
+          dataflowPublicMapper.entityListToClass(publicDataflows);
+
+      // SET OBLIGATIONS
+      for (DataflowPublicVO dataflowPublicVO : publicDataflowsVOList) {
+        for (ObligationVO obligation : obligations) {
+          if (dataflowPublicVO.getObligation().getObligationId()
+              .equals(obligation.getObligationId())) {
+            dataflowPublicVO.setObligation(obligation);
+          }
+        }
+      }
+
+      List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
+      setReportings(publicDataflowsVOList, providerId);
+
+      publicDataflowsVOList.stream().forEach(dataflow -> {
+        dataflow.setReferenceDatasets(referenceDatasetControllerZuul
+            .findReferenceDataSetPublicByDataflowId(dataflow.getId()));
+      });
+
+      PaginatedDataflowVO dataflowPublicPaginated = new PaginatedDataflowVO();
+
+      dataflowPublicPaginated.setDataflows(publicDataflowsVOList);
+      dataflowPublicPaginated.setTotalRecords(
+          dataflowRepository.countByCountry(obligationJson, filters, header, asc, countryCode));
+      dataflowPublicPaginated.setFilteredRecords(dataflowRepository
+          .countByCountryFiltered(obligationJson, filters, header, asc, countryCode));
+
+      return dataflowPublicPaginated;
+
+
+    } catch (JsonProcessingException e) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR, e);
+    }
   }
 
 
@@ -1018,106 +1046,6 @@ public class DataflowServiceImpl implements DataflowService {
         }
       }
     });
-  }
-
-  /**
-   * Sort public dataflows.
-   *
-   * @param dataflowPublicList the dataflow public list
-   * @param header the header
-   * @param asc the asc
-   */
-  private void sortPublicDataflows(List<DataflowPublicVO> dataflowPublicList, String header,
-      boolean asc) {
-    Comparator<DataflowPublicVO> compare = null;
-    // get compare
-    if (null != header) {
-      switch (header) {
-        case "name":
-          compare = Comparator.comparing(DataflowPublicVO::getName,
-              Comparator.nullsFirst(Comparator.naturalOrder()));
-          break;
-        case "obligation":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
-            return comparator(o1.getObligation().getOblTitle(), o2.getObligation().getOblTitle());
-          };
-          break;
-        case "legalInstrument":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
-            return comparator(o1.getObligation().getLegalInstrument().getSourceAlias(),
-                o2.getObligation().getLegalInstrument().getSourceAlias());
-          };
-          break;
-        case "status":
-          compare = Comparator.comparing(DataflowPublicVO::isReleasable,
-              Comparator.nullsFirst(Comparator.naturalOrder()));
-          break;
-        case "deadline":
-          compare = Comparator.comparing(DataflowPublicVO::getDeadlineDate,
-              Comparator.nullsFirst(Comparator.naturalOrder()));
-          break;
-        case "isReleased":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
-            return comparator(o1.getReportingDatasets().get(0).getIsReleased(),
-                o2.getReportingDatasets().get(0).getIsReleased());
-          };
-          break;
-        case "releaseDate":
-          compare = (DataflowPublicVO o1, DataflowPublicVO o2) -> {
-            return comparator(o1.getReportingDatasets().get(0).getDateReleased(),
-                o2.getReportingDatasets().get(0).getDateReleased());
-          };
-          break;
-
-      }
-      // order by
-      if (null != compare && asc) {
-        Collections.sort(dataflowPublicList, compare);
-      } else if (null != compare && !asc) {
-        Collections.sort(dataflowPublicList, compare.reversed());
-      }
-    }
-  }
-
-  /**
-   * Comparator.
-   *
-   * @param <T> the generic type
-   * @param o1 the o 1
-   * @param o2 the o 2
-   * @return the int
-   */
-  private <T> int comparator(T o1, T o2) {
-    if (Objects.nullSafeHashCode(o1) > Objects.nullSafeHashCode(o2)) {
-      return 1;
-    } else if (Objects.nullSafeHashCode(o1) == Objects.nullSafeHashCode(o2)) {
-      return 0;
-    } else {
-      return -1;
-    }
-  }
-
-  /**
-   * Gets the page.
-   *
-   * @param <T> the generic type
-   * @param sourceList the source list
-   * @param page the page
-   * @param pageSize the page size
-   * @return the page
-   */
-  private static <T> List<T> getPage(List<T> sourceList, int page, int pageSize) {
-    if (pageSize <= 0 || page < 0) {
-      throw new IllegalArgumentException("invalid page size or PageNum: " + pageSize + "-" + page);
-    }
-
-    int fromIndex = (page) * pageSize;
-    if (sourceList == null || sourceList.size() <= fromIndex) {
-      return Collections.emptyList();
-    }
-
-    // toIndex exclusive
-    return sourceList.subList(fromIndex, Math.min(fromIndex + pageSize, sourceList.size()));
   }
 
   /**
@@ -1684,6 +1612,18 @@ public class DataflowServiceImpl implements DataflowService {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATE_ALL_REPORTERS_FAILED_EVENT,
           null, notificationVO);
     }
+  }
+
+  /**
+   * Update data flow automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDeletion the automatic reporting deletion
+   */
+  @Override
+  public void updateDataFlowAutomaticReportingDeletion(Long dataflowId,
+      boolean automaticReportingDeletion) {
+    dataflowRepository.updateAutomaticReportingDeletion(dataflowId, automaticReportingDeletion);
   }
 
   /**

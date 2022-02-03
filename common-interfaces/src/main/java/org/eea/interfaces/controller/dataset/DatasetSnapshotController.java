@@ -50,14 +50,14 @@ public interface DatasetSnapshotController {
   SnapshotVO getSchemaById(@PathVariable("idSnapshot") Long idSnapshot);
 
   /**
-   * Gets the snapshots by id dataset.
+   * Gets the snapshots enabled by id dataset.
    *
    * @param datasetId the dataset id
-   * @return the snapshots by id dataset
+   * @return the snapshots enabled by id dataset
    */
   @GetMapping(value = "/dataset/{idDataset}/listSnapshots",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId);
+  List<SnapshotVO> getSnapshotsEnabledByIdDataset(@PathVariable("idDataset") Long datasetId);
 
 
 
@@ -247,4 +247,20 @@ public interface DatasetSnapshotController {
   @PutMapping("/private/releaseLocksRelatedToReleaseDataset/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
   void releaseLocksFromReleaseDatasets(@PathVariable("dataflowId") Long dataflowId,
       @PathVariable("dataProviderId") Long dataProviderId);
+
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @PutMapping("/private/updateSnapshotDisabled/{datasetId}")
+  void updateSnapshotDisabled(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Delete snapshot by dataset id and dc released false.
+   *
+   * @param datasetId the dataset id
+   */
+  @DeleteMapping(value = "/private/deleteSnapshotByDatasetIdAndDcReleasedFalse/{datasetId}")
+  void deleteSnapshotByDatasetIdAndDcReleasedFalse(@PathVariable("datasetId") Long datasetId);
 }

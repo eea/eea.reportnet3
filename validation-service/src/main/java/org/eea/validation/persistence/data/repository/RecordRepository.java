@@ -91,4 +91,13 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
   @Query(nativeQuery = true, value = "SELECT count(*) from record_value")
   Integer countRecordsDataset();
 
+  /**
+   * Find by ids.
+   *
+   * @param ids the ids
+   * @return the record value
+   */
+  @Query("SELECT rv from RecordValue rv WHERE rv.id IN (:ids)")
+  List<RecordValue> findByIds(@Param("ids") List<String> ids);
+
 }

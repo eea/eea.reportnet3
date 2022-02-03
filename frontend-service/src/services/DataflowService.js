@@ -25,15 +25,24 @@ export const DataflowService = {
     return DataflowUtils.parseDataflowCount(dataflowsCountDTO.data);
   },
 
-  getAll: async (accessRoles, contextRoles) => {
-    const dataflowsDTO = await DataflowRepository.getAll();
+  getAll: async ({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy }) => {
+    const { isAsc, sortByHeader } = DataflowUtils.parseRequestSortBy(sortBy);
+    const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
 
-    const dataflows = dataflowsDTO.data.map(dataflowDTO => {
+    const dataflowsDTO = await DataflowRepository.getAll({
+      filterBy: filteredFilterBy,
+      isAsc,
+      numberRows,
+      pageNum,
+      sortBy: sortByHeader
+    });
+
+    const dataflows = dataflowsDTO.data.dataflows.map(dataflowDTO => {
       dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);
       return dataflowDTO;
     });
 
-    return DataflowUtils.parseSortedDataflowListDTO(dataflows);
+    return { ...dataflowsDTO.data, dataflows: DataflowUtils.parseDataflowListDTO(dataflows) };
   },
 
   getCloneableDataflows: async () => {
@@ -309,17 +318,20 @@ export const DataflowService = {
   getApiKey: async (dataflowId, dataProviderId, isCustodian) =>
     await DataflowRepository.getApiKey(dataflowId, dataProviderId, isCustodian),
 
-  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
-    const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode(
+  getPublicDataflowsByCountryCode: async ({ countryCode, sortOrder, pageNum, numberRows, sortField, filterBy }) => {
+    const filteredFilterBy = DataflowUtils.parseRequestPublicCountryFilterBy(filterBy);
+
+    const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode({
       countryCode,
       sortOrder,
       pageNum,
       numberRows,
-      sortField
-    );
+      sortField,
+      filterBy: filteredFilterBy
+    });
 
-    publicDataflowsByCountryCodeResponse.data.publicDataflows = DataflowUtils.parsePublicDataflowListDTO(
-      publicDataflowsByCountryCodeResponse.data.publicDataflows
+    publicDataflowsByCountryCodeResponse.data.dataflows = DataflowUtils.parsePublicDataflowListDTO(
+      publicDataflowsByCountryCodeResponse.data.dataflows
     );
 
     return publicDataflowsByCountryCodeResponse.data;
@@ -356,10 +368,20 @@ export const DataflowService = {
   createEmptyDatasetSchema: async (dataflowId, datasetSchemaName) =>
     await DataflowRepository.createEmptyDatasetSchema(dataflowId, datasetSchemaName),
 
-  getPublicData: async () => {
-    const publicDataflows = await DataflowRepository.getPublicData();
-    const parsedPublicDataflows = DataflowUtils.parsePublicDataflowListDTO(publicDataflows.data);
-    return sortBy(parsedPublicDataflows, ['name']);
+  getPublicData: async ({ filterBy, numberRows, pageNum, sortByOptions }) => {
+    const { isAsc, sortByHeader } = DataflowUtils.parseRequestSortBy(sortByOptions);
+    const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
+
+    const publicDataflows = await DataflowRepository.getPublicData({
+      filterBy: filteredFilterBy,
+      isAsc,
+      numberRows,
+      pageNum,
+      sortByHeader
+    });
+    const parsedPublicDataflows = DataflowUtils.parsePublicDataflowListDTO(publicDataflows.data.dataflows);
+
+    return { ...publicDataflows.data, dataflows: parsedPublicDataflows };
   },
 
   get: async dataflowId => {
@@ -376,6 +398,9 @@ export const DataflowService = {
 
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
     await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo),
+
+  updateAutomaticDelete: async (dataflowId, isAutomaticReportingDeletion) =>
+    await DataflowRepository.updateAutomaticDelete(dataflowId, isAutomaticReportingDeletion),
 
   getDatasetsInfo: async dataflowId => {
     const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);

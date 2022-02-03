@@ -10,7 +10,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import ReactTooltip from 'react-tooltip';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, label, onClick, style, title }) => {
+export const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, label, onClick, style, title }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -120,5 +120,3 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
     </div>
   );
 };
-
-export { LeftSideBarButton };

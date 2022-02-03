@@ -10,7 +10,7 @@ import { Dropdown } from 'views/_components/Dropdown';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import isNil from 'lodash/isNil';
 
-const RelationExpression = ({
+export const RelationExpression = ({
   expressionValues,
   isDisabled,
   onRelationDelete,
@@ -127,4 +127,3 @@ const RelationExpression = ({
     </li>
   );
 };
-export { RelationExpression };

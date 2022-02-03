@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -165,6 +166,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The path snapshot. */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
+
+  /** The path snapshot disabled. */
+  @Value("${pathSnapshotDisabled}")
+  private String pathSnapshotDisabled;
 
   /** The time to wait before releasing notification. */
   @Value("${dataset.creation.notification.ms}")
@@ -986,6 +991,59 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void updateSnapshotDisabled(Long datasetId) {
+    List<SnapshotVO> listSnapshotVO =
+        dataSetSnapshotControllerZuul.getSnapshotsEnabledByIdDataset(datasetId);
+
+    File directory = new File(pathSnapshotDisabled);
+    directory.mkdir();
+
+    File[] matchingFilesToDelete = matchingFilesSnapshot(false, listSnapshotVO);
+    for (File file : matchingFilesToDelete) {
+      file.delete();
+    }
+    dataSetSnapshotControllerZuul.deleteSnapshotByDatasetIdAndDcReleasedFalse(datasetId);
+    LOG.info("Deleted user snapshots files from dataset: {}", datasetId);
+
+    File[] matchingFilesToMove = matchingFilesSnapshot(true, listSnapshotVO);
+    for (File file : matchingFilesToMove) {
+      file.renameTo(new File(pathSnapshotDisabled + file.getName()));
+    }
+    dataSetSnapshotControllerZuul.updateSnapshotDisabled(datasetId);
+    LOG.info("Moved released snapshots files to disabled folder: {}, from dataset: {}",
+        pathSnapshotDisabled, datasetId);
+
+    Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
+    datasetControllerZuul.privateDeleteDatasetData(datasetId, dataflowId);
+    LOG.info("Deleted dataset data from dataset: {}, dataflow: {}", datasetId, dataflowId);
+  }
+
+  private File[] matchingFilesSnapshot(boolean released, List<SnapshotVO> listSnapshotVO) {
+    File snapshotFolder = new File(pathSnapshot);
+    return snapshotFolder.listFiles(new FilenameFilter() {
+      public boolean accept(File dir, String name) {
+        boolean exists = false;
+        for (SnapshotVO snapshotVO : listSnapshotVO) {
+          if (name.startsWith("snapshot_" + snapshotVO.getId())) {
+            boolean validRelease =
+                (snapshotVO.getRelease() != null) ? snapshotVO.getRelease() : false;
+            if (validRelease == released) {
+              exists = true;
+            }
+          }
+        }
+        return exists;
+      }
+    });
+
+    // return matchingFiles;
+  }
 
   /**
    * Modify snapshot file.

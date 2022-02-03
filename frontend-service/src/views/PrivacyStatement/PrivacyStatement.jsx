@@ -7,7 +7,7 @@ import { Title } from 'views/_components/Title';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const PrivacyStatement = () => {
+export const PrivacyStatement = () => {
   const resourcesContext = useContext(ResourcesContext);
 
   const onClickAnchorLink = e => {
@@ -30,15 +30,13 @@ const PrivacyStatement = () => {
     });
   };
 
-  const layout = children => {
-    return (
-      <PublicLayout>
-        <div className>
-          <div className="rep-container">{children}</div>
-        </div>
-      </PublicLayout>
-    );
-  };
+  const layout = children => (
+    <PublicLayout>
+      <div className>
+        <div className="rep-container">{children}</div>
+      </div>
+    </PublicLayout>
+  );
 
   return layout(
     <div className="rep-row">
@@ -267,5 +265,3 @@ const PrivacyStatement = () => {
     </div>
   );
 };
-
-export { PrivacyStatement };

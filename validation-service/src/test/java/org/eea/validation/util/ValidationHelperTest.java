@@ -184,7 +184,7 @@ public class ValidationHelperTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
 
-    KieBase result = validationHelper.getKieBase("", 1l, new Rule());
+    KieBase result = validationHelper.getKieBase("", 1l, "idRule");
     Assert.assertNotNull(result);
   }
 

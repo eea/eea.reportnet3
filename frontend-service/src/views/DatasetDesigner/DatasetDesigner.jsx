@@ -2,7 +2,6 @@ import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'r
 import { useParams } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 
-import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -56,6 +55,7 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { designerReducer } from './_functions/Reducers/designerReducer';
 
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useDatasetDesigner } from 'views/_components/Snapshots/_hooks/useDatasetDesigner';
@@ -74,12 +74,18 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
+
+  const { resetFilterState } = useApplyFilters('uniqueConstraints');
+
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
     id: null,
     name: ''
   });
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
+  const [selectedView, setSelectedView] = useState(
+    QuerystringUtils.getUrlParamValue('view') !== '' ? QuerystringUtils.getUrlParamValue('view') : 'design'
+  );
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -308,6 +314,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const changeMode = viewMode => designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: viewMode } });
 
   const changeUrl = (changeOnlyView = false) => {
+    const activedViews = Object.keys(designerState.viewType).filter(view => designerState.viewType[view]);
+    const view = activedViews.length > 0 ? activedViews[0] : 'design';
+    setSelectedView(view);
     window.history.replaceState(
       null,
       null,
@@ -316,10 +325,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             QuerystringUtils.getUrlParamValue('tab') !== ''
               ? QuerystringUtils.getUrlParamValue('tab')
               : dataViewerOptions.tableSchemaId
-          }${`&view=${Object.keys(designerState.viewType).filter(view => designerState.viewType[view] === true)}`}`
-        : `?tab=${QuerystringUtils.getUrlParamValue('tab')}${`&view=${Object.keys(designerState.viewType).filter(
-            view => designerState.viewType[view] === true
-          )}`}`
+          }${`&view=${view}`}`
+        : `?tab=${QuerystringUtils.getUrlParamValue('tab')}${`&view=${view}`}`
     );
   };
 
@@ -468,7 +475,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
     try {
       const data = await WebformService.getAll();
-      data.unshift({ id: null, label: 'No webform', value: null });
+      data.unshift({ id: null, label: resourcesContext.messages['notSelectedWebformOption'], value: null, name: null });
 
       designerDispatch({ type: 'GET_WEBFORMS', payload: { data } });
       setWebformOptionsLoadingStatus('success');
@@ -561,6 +568,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onCloseUniqueListModal = () => {
     manageDialogs('isUniqueConstraintsListDialogVisible', false);
     refreshUniqueList(true);
+    resetFilterState();
   };
 
   const onCloseConfigureWebformModal = () => manageDialogs('isConfigureWebformDialogVisible', false);
@@ -1156,56 +1164,27 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     setIsValidationsTabularView(true);
   };
 
-  const renderRadioButtons = () => {
-    return (
-      <TabularSwitch
-        elements={Object.keys(designerState.viewType).map(view => resourcesContext.messages[`${view}View`])}
-        getIsTableCreated={setIsTableCreated}
-        isTableCreated={designerState.isTableCreated}
-        isValidationsTabularView={designerState.isValidationsTabularView}
-        onChange={switchView => {
-          const views = { design: 'design', tabularData: 'tabularData', webform: 'webform' };
-          onChangeView(views[camelCase(switchView)]);
-          changeMode(views[camelCase(switchView)]);
-        }}
-        setIsValidationsTabularView={setIsValidationsTabularView}
-        value={
-          QuerystringUtils.getUrlParamValue('view') !== ''
-            ? resourcesContext.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
-            : resourcesContext.messages['designView']
-        }
-      />
-    );
-  };
-
   const renderSwitchView = () => {
-    const switchView = (
-      <TabularSwitch
-        elements={[resourcesContext.messages['designView'], resourcesContext.messages['tabularDataView']]}
-        getIsTableCreated={setIsTableCreated}
-        isTableCreated={designerState.isTableCreated}
-        isValidationsTabularView={designerState.isValidationsTabularView}
-        onChange={switchView =>
-          designerDispatch({
-            type: 'SET_VIEW_MODE',
-            payload: { value: switchView === 'Design' ? 'design' : 'tabularData' }
-          })
-        }
-        setIsValidationsTabularView={setIsValidationsTabularView}
-        value={
-          QuerystringUtils.getUrlParamValue('view') !== ''
-            ? resourcesContext.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
-            : resourcesContext.messages['designView']
-        }
-      />
-    );
+    const viewModes = [
+      { key: 'design', label: resourcesContext.messages['designView'] },
+      { key: 'tabularData', label: resourcesContext.messages['tabularDataView'] }
+    ];
+
+    if (!isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead) {
+      viewModes.push({ key: 'webform', label: resourcesContext.messages['webform'] });
+    }
 
     return (
       <div className={styles.switchDivInput}>
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-          {!isNil(designerState.webform) && !isDataflowOpen && !isDesignDatasetEditorRead
-            ? renderRadioButtons()
-            : switchView}
+          <TabularSwitch
+            elements={viewModes}
+            onChange={switchView => {
+              onChangeView(switchView);
+              changeMode(switchView);
+            }}
+            value={selectedView}
+          />
         </div>
       </div>
     );
@@ -1216,7 +1195,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       <Dialog
         footer={renderUniqueConstraintsFooter}
         header={resourcesContext.messages['uniqueConstraints']}
-        onHide={() => onCloseUniqueListModal()}
+        onHide={onCloseUniqueListModal}
         style={{ width: '70%' }}
         visible={designerState.isUniqueConstraintsListDialogVisible}>
         <UniqueConstraints
@@ -1282,7 +1261,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon="cancel"
         label={resourcesContext.messages['close']}
-        onClick={() => onCloseUniqueListModal()}
+        onClick={onCloseUniqueListModal}
       />
     </Fragment>
   );
@@ -1355,7 +1334,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   );
 
   const renderWebformOptionsContent = () => {
-    const webform = webformOptions.find(option => option.value === designerState.webform);
+    const webform = webformOptions.find(option => option.name === designerState.webform?.name);
 
     if (webformOptionsLoadingStatus === 'pending') return <Spinner style={{ top: 0 }} />;
 
@@ -1631,7 +1610,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             datasetId={datasetId}
             options={webformOptions}
             state={designerState}
-            webformType={designerState.webform}
+            webform={designerState.webform}
           />
         ) : (
           <TabsDesigner

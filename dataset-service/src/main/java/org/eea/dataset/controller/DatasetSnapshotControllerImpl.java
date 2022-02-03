@@ -127,13 +127,11 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     return snapshot;
   }
 
-
   /**
-   * Gets the snapshots by id dataset.
+   * Gets the snapshots enabled by id dataset.
    *
    * @param datasetId the dataset id
-   *
-   * @return the snapshots by id dataset
+   * @return the snapshots enabled by id dataset
    */
   @Override
   @HystrixCommand
@@ -143,8 +141,8 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get snapshots"),
       @ApiResponse(code = 400, message = "Dataset id incorrect")})
-  public List<SnapshotVO> getSnapshotsByIdDataset(@ApiParam(type = "Long", value = "Dataset Id",
-      example = "0") @PathVariable("idDataset") Long datasetId) {
+  public List<SnapshotVO> getSnapshotsEnabledByIdDataset(@ApiParam(type = "Long",
+      value = "Dataset Id", example = "0") @PathVariable("idDataset") Long datasetId) {
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -152,7 +150,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     }
     List<SnapshotVO> snapshots = null;
     try {
-      snapshots = datasetSnapshotService.getSnapshotsByIdDataset(datasetId);
+      snapshots = datasetSnapshotService.getSnapshotsEnabledByIdDataset(datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error getting the list of snapshots. Error Message: {}", e.getMessage(), e);
     }
@@ -711,4 +709,32 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     }
   }
 
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/updateSnapshotDisabled/{datasetId}")
+  @ApiOperation(value = "Private operation to update snapshot, disable and move the files",
+      hidden = true)
+  public void updateSnapshotDisabled(@PathVariable("datasetId") Long datasetId) {
+    datasetSnapshotService.updateSnapshotDisabled(datasetId);
+  }
+
+  /**
+   * Delete snapshot by dataset id and dc released false.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/private/deleteSnapshotByDatasetIdAndDcReleasedFalse/{datasetId}")
+  @ApiOperation(value = "Private operation to delete snapshot wheren dcRelease equals false",
+      hidden = true)
+  public void deleteSnapshotByDatasetIdAndDcReleasedFalse(
+      @PathVariable("datasetId") Long datasetId) {
+    datasetSnapshotService.deleteSnapshotByDatasetIdAndDcReleasedFalse(datasetId);
+  }
 }
