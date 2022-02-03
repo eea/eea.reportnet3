@@ -54,16 +54,27 @@ export const PublicCountryInformation = () => {
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isReset, setIsReset] = useState(false);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
   const [sortField, setSortField] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
+
+  const filterBy = useRecoilValue(filterByState('publicCountryInformation'));
+
+  const { firstRow, numberRows, pageNum } = pagination;
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode });
 
   useEffect(() => {
     onLoadPublicCountryInformation();
   }, [pagination, sortOrder, sortField]);
+
+  useEffect(() => {
+    if (isReset) {
+      setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
+    }
+  }, [isReset]);
 
   useEffect(() => {
     !isNil(countryCode) && getCountryName();
@@ -76,10 +87,6 @@ export const PublicCountryInformation = () => {
       setContentStyles({});
     }
   }, [themeContext.headerCollapse]);
-
-  const { firstRow, numberRows, pageNum } = pagination;
-
-  const filterBy = useRecoilValue(filterByState('publicCountryInformation'));
 
   const getCountryName = () => {
     if (!isNil(config.countriesByGroup)) {
@@ -153,7 +160,8 @@ export const PublicCountryInformation = () => {
       setTotalRecords(data.totalRecords);
       setPublicInformation(data.dataflows);
       setFilteredRecords(data.filteredRecords);
-      setIsFiltered(data.filteredRecords !== data.totalRecords);
+      setIsFiltered(Object.keys(filterBy).length !== 0 && data.filteredRecords !== data.totalRecords);
+      setIsReset(false);
     } catch (error) {
       console.error('PublicCountryInformation - onLoadPublicCountryInformation.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' }, true);
@@ -362,7 +370,14 @@ export const PublicCountryInformation = () => {
       <MyFilters
         className="publicCountryInformationFilters"
         data={dataflows}
-        onFilter={onLoadPublicCountryInformation}
+        onFilter={() => {
+          if (isFiltered) {
+            setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
+          } else {
+            onLoadPublicCountryInformation();
+          }
+        }}
+        onReset={setIsReset}
         options={filterOptions}
         viewType="publicCountryInformation"
       />
@@ -436,22 +451,19 @@ export const PublicCountryInformation = () => {
       return <div className={styles.noDataflows}>{resourcesContext.messages['wrongUrlCountryCode']}</div>;
     }
 
-    if (isEmpty(dataflows)) {
+    if (isEmpty(dataflows) && !isFiltered) {
       return <div className={styles.noDataflows}>{resourcesContext.messages['noDataflows']}</div>;
     }
 
-    return (
-      <div className={styles.countriesList}>
-        {renderFilters()}
-        {renderPublicCountryTable()}
-      </div>
-    );
-  };
+    if (isEmpty(dataflows) && isFiltered) {
+      return <div className={styles.noDataflows}>{resourcesContext.messages['dataflowsNotMatchingFilter']}</div>;
+    }
 
-  const renderPublicCountryTable = () => {
     return (
       <DataTable
+        areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
         autoLayout={true}
+        className={styles.countriesList}
         first={firstRow}
         lazy={true}
         onPage={onChangePage}
@@ -477,6 +489,7 @@ export const PublicCountryInformation = () => {
     <PublicLayout>
       <div className={`${styles.container}  rep-container`} style={contentStyles}>
         {renderPublicCountryInformationTitle()}
+        {renderFilters()}
         {renderPublicCountryInformation()}
       </div>
     </PublicLayout>
