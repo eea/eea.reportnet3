@@ -248,7 +248,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   const filterOptionsReportingDataset = [
     {
       type: 'CHECKBOX',
-      nestedOptions: [{ key: 'public', label: resourcesContext.messages['public'] }]
+      nestedOptions: [{ key: 'isPublic', label: resourcesContext.messages['public'] }]
     }
   ];
 
