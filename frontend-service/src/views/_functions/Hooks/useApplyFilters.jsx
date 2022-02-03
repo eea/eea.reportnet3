@@ -3,7 +3,9 @@ import { useRecoilCallback, useRecoilValue, useSetRecoilState } from 'recoil';
 import {
   dataStore,
   filterByStore,
+  filteredDataStore,
   isFilteredStore,
+  searchByStore,
   sortByStore
 } from 'views/_components/Filters/_functions/Stores/filterStore';
 import { filterByAllKeys } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
@@ -32,6 +34,9 @@ export const useApplyFilters = recoilId => {
       async () => {
         const filterByKeys = await snapshot.getPromise(filterByAllKeys(recoilId));
 
+        reset(isFilteredStore(recoilId));
+        reset(searchByStore(recoilId));
+        reset(filteredDataStore(recoilId));
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
       },
     [recoilId]

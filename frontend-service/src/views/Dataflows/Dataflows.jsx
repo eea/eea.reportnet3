@@ -160,6 +160,7 @@ export const Dataflows = () => {
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
+  const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
   const { getFilterBy, setData, sortByOptions } = useApplyFilters(tabId);
 
   useEffect(() => {
@@ -432,6 +433,7 @@ export const Dataflows = () => {
 
   const onHideObligationDialog = () => {
     manageDialogs('isReportingObligationsDialogVisible', false);
+    resetObligationsFilterState();
     setObligationToPrevious();
     resetReportingObligationsFiltersState();
   };
@@ -574,6 +576,7 @@ export const Dataflows = () => {
         label={resourcesContext.messages['ok']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
+          resetObligationsFilterState();
           setToCheckedObligation();
           resetReportingObligationsFiltersState();
         }}
@@ -584,6 +587,7 @@ export const Dataflows = () => {
         label={resourcesContext.messages['cancel']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
+          resetObligationsFilterState();
           setObligationToPrevious();
           resetReportingObligationsFiltersState();
         }}
