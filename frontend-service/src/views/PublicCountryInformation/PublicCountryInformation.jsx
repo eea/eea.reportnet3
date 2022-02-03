@@ -35,6 +35,8 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
+import { useFilters } from 'views/_functions/Hooks/useFilters';
+
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
@@ -52,7 +54,6 @@ export const PublicCountryInformation = () => {
   const [countryName, setCountryName] = useState('');
   const [dataflows, setDataflows] = useState([]);
   const [filteredRecords, setFilteredRecords] = useState(0);
-  const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isReset, setIsReset] = useState(false);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
@@ -81,6 +82,8 @@ export const PublicCountryInformation = () => {
   }, [themeContext.headerCollapse]);
 
   const { firstRow, numberRows, pageNum } = pagination;
+
+  const { isFiltered } = useFilters('publicCountryInformation');
 
   const getCountryName = () => {
     if (!isNil(config.countriesByGroup)) {
@@ -154,7 +157,7 @@ export const PublicCountryInformation = () => {
       setTotalRecords(data.totalRecords);
       setPublicInformation(data.dataflows);
       setFilteredRecords(data.filteredRecords);
-      setIsFiltered(data.filteredRecords !== data.totalRecords);
+      // setIsFiltered(data.filteredRecords !== data.totalRecords);
       setIsReset(false);
     } catch (error) {
       console.error('PublicCountryInformation - onLoadPublicCountryInformation.', error);
@@ -413,6 +416,7 @@ export const PublicCountryInformation = () => {
     </span>
   );
 
+  console.log('isFiltered :>> ', isFiltered);
   const renderPaginatorRecordsCount = () => (
     <Fragment>
       {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
