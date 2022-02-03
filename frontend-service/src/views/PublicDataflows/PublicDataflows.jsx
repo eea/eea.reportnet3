@@ -199,7 +199,7 @@ export const PublicDataflows = () => {
         <Paginator
           className={`p-paginator-bottom ${styles.paginator}`}
           first={firstRow}
-          hasDataflows={filteredRecords > config.DATAFLOWS_PER_PAGE}
+          hasFewerDataflows={filteredRecords > config.DATAFLOWS_PER_PAGE}
           onPageChange={onPaginate}
           rightContent={renderPaginatorRecordsCount()}
           rows={numberRows}

@@ -18,7 +18,7 @@ export class Paginator extends Component {
     currentPageReportTemplate: '({currentPage} of {totalPages})',
     disabled: false,
     first: 0,
-    hasDataflows: false,
+    hasFewerDataflows: false,
     isDataflowsList: false,
     leftContent: null,
     onPageChange: null,
@@ -37,7 +37,7 @@ export class Paginator extends Component {
     currentPageReportTemplate: PropTypes.any,
     disabled: PropTypes.bool,
     first: PropTypes.number,
-    hasDataflows: PropTypes.bool,
+    hasFewerDataflows: PropTypes.bool,
     isDataflowsList: PropTypes.bool,
     leftContent: PropTypes.any,
     onPageChange: PropTypes.func,
@@ -223,7 +223,7 @@ export class Paginator extends Component {
   }
 
   renderElements() {
-    if (this.props.hasDataflows) {
+    if (this.props.hasFewerDataflows) {
       const template = this.props.template;
 
       if (template) {
@@ -248,7 +248,7 @@ export class Paginator extends Component {
   }
 
   renderRowsPerPageDropdown() {
-    if (this.props.hasDataflows) {
+    if (this.props.hasFewerDataflows) {
       return (
         <div className="p-paginator-left-content-rowsPerPage">
           <RowsPerPageDropdown
