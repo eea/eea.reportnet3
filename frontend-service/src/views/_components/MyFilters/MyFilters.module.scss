@@ -398,24 +398,6 @@
   grid-column: 5;
 }
 
-.historicRealeasesOnlyCheckBox {
-  display: flex;
-  flex-direction: row;
-  margin: 2rem 0;
-
-  .labelCheckbox {
-    width: 30% !important;
-    margin-left: 0.5rem;
-  }
-  .checkbox {
-    margin-left: 2rem;
-  }
-
-  .resetButton {
-    margin-top: 0.9rem;
-  }
-}
-
 .cloneSchemas,
 .manualAcceptanceDatasets,
 .historicReleases {

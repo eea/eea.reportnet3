@@ -51,11 +51,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   }, []);
 
   const existFilter = () => {
-    return (
-      historicReleasesView === 'dataCollection' ||
-      historicReleasesView === 'EUDataset' ||
-      historicReleasesView === 'reportingDataset'
-    );
+    return historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset';
   };
 
   const getDataProviderCode = historicReleases => {
@@ -65,7 +61,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const getHistoricReleasesColumns = () => {
     const getColumns = () => {
-      if (historicReleasesView === 'releaseDate') {
+      if (historicReleasesView === 'releaseDate' || historicReleasesView === 'reportingDataset') {
         return [
           {
             key: 'releaseDate',
@@ -245,19 +241,10 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     }
   ];
 
-  const filterOptionsReportingDataset = [
-    {
-      type: 'CHECKBOX',
-      nestedOptions: [{ key: 'isPublic', label: resourcesContext.messages['public'] }]
-    }
-  ];
-
   const getFilters = filterOptions => {
     return (
       <MyFilters
-        className={`${
-          historicReleasesView === 'reportingDataset' ? 'historicRealeasesOnlyCheckBox' : 'historicReleases'
-        }`}
+        className="historicReleases"
         data={historicReleasesState.data}
         options={filterOptions}
         viewType="historicReleases"
@@ -273,16 +260,18 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     if (historicReleasesView === 'EUDataset') {
       return getFilters(filterOptionsEUDataset);
     }
-
-    if (historicReleasesView === 'reportingDataset') {
-      return getFilters(filterOptionsReportingDataset);
-    }
-
-    return <div />;
   };
 
   const renderHistoricReleasesTable = () => {
-    if (isEmpty(filteredData)) {
+    const getValueTable = () => {
+      if (historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset') {
+        return filteredData;
+      } else {
+        return historicReleasesState.data;
+      }
+    };
+
+    if (isEmpty(filteredData) && existFilter()) {
       return (
         <div className={styles.emptyFilteredData}>
           {resourcesContext.messages['noHistoricReleasesWithSelectedParameters']}
@@ -301,7 +290,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['historicReleases']}
         totalRecords={filteredData.length}
-        value={filteredData}>
+        value={getValueTable()}>
         {getHistoricReleasesColumns()}
       </DataTable>
     );
@@ -322,14 +311,6 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       return (
         <div className={styles.historicReleasesWithoutTable}>
           <div className={styles.noHistoricReleases}>{resourcesContext.messages['noHistoricReleases']}</div>
-        </div>
-      );
-    }
-
-    if (!existFilter()) {
-      return (
-        <div className={styles.historicReleasesWithoutTable}>
-          <div className={styles.noHistoricReleases}>{resourcesContext.messages['noHistoricReleasesView']}</div>
         </div>
       );
     }
