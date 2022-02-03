@@ -31,6 +31,7 @@ import org.springframework.web.context.request.async.TimeoutCallableProcessingIn
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -126,6 +127,16 @@ public class DatasetConfiguration implements WebMvcConfigurer {
 
 
   /**
+   * Adds the cors mappings.
+   *
+   * @param registry the registry
+   */
+  @Override
+  public void addCorsMappings(final CorsRegistry registry) {
+    registry.addMapping("/**").allowedOrigins("*").allowedMethods("GET", "POST", "PUT", "DELETE");
+  }
+
+  /**
    * Data source data source.
    *
    * @param recordStoreControllerZuul the record store controller zuul
@@ -143,24 +154,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return dataSource;
   }
 
-  /**
-   * Data sets data source.
-   *
-   * @param connectionDataVO the connection data VO
-   *
-   * @return the data source
-   */
-  private DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
 
-    EeaDataSource ds = new EeaDataSource();
-    ds.setUrl(connectionDataVO.getConnectionString());
-    // set validation microservice credentials
-    ds.setUsername(this.username);
-    ds.setPassword(this.password);
-    ds.setDriverClassName("org.postgresql.Driver");
-
-    return ds;
-  }
 
   /**
    * Data sets entity manager factory.
@@ -274,6 +268,25 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     properties.setProperty("hibernate.order_updates", orderUpdates);
     properties.setProperty("hibernate.order_inserts", orderInserts);
     return properties;
+  }
+
+  /**
+   * Data sets data source.
+   *
+   * @param connectionDataVO the connection data VO
+   *
+   * @return the data source
+   */
+  private DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
+
+    EeaDataSource ds = new EeaDataSource();
+    ds.setUrl(connectionDataVO.getConnectionString());
+    // set validation microservice credentials
+    ds.setUsername(this.username);
+    ds.setPassword(this.password);
+    ds.setDriverClassName("org.postgresql.Driver");
+
+    return ds;
   }
 
 }
