@@ -347,6 +347,7 @@ export const MyFilters = ({
 
     return (
       <div className={styles.block} key={option.key}>
+        {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <Dropdown
           ariaLabel={option.key}
           className={styles.dropdownFilter}
