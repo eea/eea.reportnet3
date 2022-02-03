@@ -293,12 +293,13 @@ public class DatasetControllerImpl implements DatasetController {
       name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
   @LockMethod(removeWhenFinish = false)
   @PostMapping("/v1/{datasetId}/importFileData/")
-  @ApiOperation(value = "Import file to dataset data (Large files not allowed)",
+  @ApiOperation(value = "Import file to dataset data (Large files not allowed > 200 MB)",
       notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD\n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
       @ApiResponse(code = 400, message = "Error importing file"),
       @ApiResponse(code = 500, message = "Error importing file")})
+  @Deprecated
   public void importFileData(
       @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
           name = "datasetId") @PathVariable("datasetId") Long datasetId,
@@ -354,6 +355,7 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
       @ApiResponse(code = 400, message = "Error importing file"),
       @ApiResponse(code = 500, message = "Error importing file")})
+  @Deprecated
   public void importFileDataLegacy(
       @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
           name = "datasetId") @PathVariable("datasetId") Long datasetId,
