@@ -405,7 +405,7 @@ public class ValidationServiceImpl implements ValidationService {
     KieSession session = null;
     try {
       TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
-      if (sqlRule != null) {
+      if (!"null".equals(sqlRule)) {
         sqlValidationUtils.executeValidationSQLRule(datasetId, sqlRule, dataProviderId);
       } else {
         table = tableRepository.findById(idTable).orElse(null);
