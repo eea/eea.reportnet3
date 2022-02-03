@@ -724,17 +724,17 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
   /**
-   * Delete snapshot by dataset id and dc released false.
+   * Delete snapshot by dataset id and date released is null.
    *
    * @param datasetId the dataset id
    */
   @Override
   @HystrixCommand
-  @DeleteMapping(value = "/private/deleteSnapshotByDatasetIdAndDcReleasedFalse/{datasetId}")
+  @DeleteMapping(value = "/private/deleteSnapshotByDatasetIdAndDateReleasedIsNull/{datasetId}")
   @ApiOperation(value = "Private operation to delete snapshot wheren dcRelease equals false",
       hidden = true)
-  public void deleteSnapshotByDatasetIdAndDcReleasedFalse(
+  public void deleteSnapshotByDatasetIdAndDateReleasedIsNull(
       @PathVariable("datasetId") Long datasetId) {
-    datasetSnapshotService.deleteSnapshotByDatasetIdAndDcReleasedFalse(datasetId);
+    datasetSnapshotService.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
   }
 }
