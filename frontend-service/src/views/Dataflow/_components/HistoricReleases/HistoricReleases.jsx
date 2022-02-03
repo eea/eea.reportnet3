@@ -57,7 +57,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const getHistoricReleasesColumns = () => {
     const getColumns = () => {
-      if (historicReleasesView === 'releaseDate') {
+      if (historicReleasesView === 'releaseDate' || historicReleasesView === 'reportingDataset') {
         return [
           {
             key: 'releaseDate',
@@ -237,28 +237,31 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     }
   ];
 
-  const getFilters = filterOptions => {
-    return (
-      <MyFilters
-        className="historicReleases"
-        data={historicReleasesState.data}
-        options={filterOptions}
-        viewType="historicReleases"
-      />
-    );
-  };
-
+  const getFilters = filterOptions => (
+    <MyFilters
+      className="historicReleases"
+      data={historicReleasesState.data}
+      options={filterOptions}
+      viewType="historicReleases"
+    />
+  );
   const renderFilters = () => {
     if (historicReleasesView === 'dataCollection') {
       return getFilters(filterOptionsDataCollection);
-    }
-
-    if (historicReleasesView === 'EUDataset') {
+    } else if (historicReleasesView === 'EUDataset') {
       return getFilters(filterOptionsEUDataset);
     }
   };
 
   const renderHistoricReleasesTable = () => {
+    const getValueTable = () => {
+      if (historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset') {
+        return filteredData;
+      } else {
+        return historicReleasesState.data;
+      }
+    };
+
     if (isEmpty(filteredData)) {
       return (
         <div className={styles.emptyFilteredData}>
@@ -278,7 +281,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['historicReleases']}
         totalRecords={filteredData.length}
-        value={filteredData}>
+        value={getValueTable()}>
         {getHistoricReleasesColumns()}
       </DataTable>
     );
