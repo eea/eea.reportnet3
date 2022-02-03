@@ -2,6 +2,7 @@ import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import styles from './Paginator.module.scss';
+
 import { FirstPageLink } from './_components/FirstPageLink';
 import { NextPageLink } from './_components/NextPageLink';
 import { PrevPageLink } from './_components/PrevPageLink';
