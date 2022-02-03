@@ -172,7 +172,7 @@
     "dropdown-panel-filter-color": "var(--c-gray-110)",
     "dropdown-panel-filter-icon-color": "var(--c-corporate-blue)",
     "dropdown-panel-items-group-color": "var(--c-gray-110)",
-    "dropdown-panel-items-group-highlight-bg": "var(--c-lilac-100)",
+    "dropdown-panel-items-group-highlight-bg": "var(--c-corporate-blue)",
     "dropdown-panel-items-group-highlight-color": "var(--c-white-color)",
     "dropdown-panel-items-group-not-highlight-bg-hover": "var(--c-gray-10)",
     "dropdown-panel-items-group-not-highlight-color-hover": "var(--c-gray-110)",
@@ -369,7 +369,7 @@
     "active-filter": "var(--c-blue-140)",
     "active-filter-border": "1px solid var(--c-blue-140)",
     "active-filter-font": "var(--c-corporate-blue)",
-    "active-filter-shadow": "0 4px 6px -6px var(--c-corporate-blue-lighter)",
+    "active-filter-shadow": "0 4px 5px -6px var(--c-corporate-blue-lighter)",
     "dataflows-list-paginator-bg-color": "var(--c-lilac-300)"
   },
   "dark": {
@@ -743,7 +743,7 @@
     "active-filter": "var(--accent-color-dark-mode)",
     "active-filter-border": "1px solid var(--accent-color-dark-mode)",
     "active-filter-font": "var(--accent-color-dark-mode)",
-    "active-filter-shadow": "0 4px 6px -6px var(--c-corporate-yellow)",
+    "active-filter-shadow": "0 4px 5px -6px var(--c-corporate-yellow)",
     "dataflows-list-paginator-bg-color": "var(--c-lilac-300)"
   },
   "baseHeaderHeight": 180,
