@@ -2,8 +2,11 @@
 
 .noObligations {
   color: var(--button-secondary-transparent-color-hover);
-  font-weight: 450;
   margin: 2rem 1rem;
+  display: flex;
+  flex: auto;
+  align-items: center;
+  justify-content: center;
 }
 
 .currentPageWrapper {
