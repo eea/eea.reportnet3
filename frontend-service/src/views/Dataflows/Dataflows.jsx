@@ -91,7 +91,7 @@ export const Dataflows = () => {
     isValidatingAllDataflowsUsers: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
-    pagination: { firstRow: 0, numberRows: 100, pageNum: 0 },
+    pagination: { firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 },
     pinnedSeparatorIndex: -1,
     reference: [],
     reporting: [],
@@ -427,7 +427,7 @@ export const Dataflows = () => {
       userContext.setCurrentDataflowType(currentTabDataflowType);
     }
     dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
-    onChangePagination({ firstRow: 0, numberRows: 100, pageNum: 0 });
+    onChangePagination({ firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 });
     setGoToPage(1);
   };
 
@@ -790,12 +790,23 @@ export const Dataflows = () => {
           isLoading={loadingStatus[tabId]}
           onFilter={() => {
             if (areFiltersFilled) {
-              onChangePagination({ firstRow: 0, numberRows: 100, pageNum: 0 });
+              onChangePagination({
+                firstRow: 0,
+                numberRows: dataflowsState.pagination.numberRows,
+                pageNum: dataflowsState.pagination.pageNum
+              });
             } else {
               getDataflows();
             }
           }}
-          onReset={() => onChangePagination({ firstRow: 0, numberRows: 100, pageNum: 0 })}
+          onReset={() => {
+            console.log('dataflowsState.pageNum :>> ', dataflowsState.pagination.pageNum);
+            onChangePagination({
+              firstRow: 0,
+              numberRows: dataflowsState.pagination.numberRows,
+              pageNum: dataflowsState.pagination.pageNum
+            });
+          }}
           onSort={getDataflows}
           options={options[tabId]}
           recoilId={tabId}

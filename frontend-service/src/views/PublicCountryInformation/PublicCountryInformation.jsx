@@ -62,6 +62,8 @@ export const PublicCountryInformation = () => {
 
   const filterBy = useRecoilValue(filterByState('publicCountryInformation'));
 
+  const { firstRow, numberRows, pageNum } = pagination;
+
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode });
 
   useEffect(() => {
@@ -70,11 +72,9 @@ export const PublicCountryInformation = () => {
 
   useEffect(() => {
     if (isReset) {
-      setPagination({ firstRow: 0, numberRows: 10, pageNum: 0 });
+      setPagination({ firstRow: 0, numberRows: numberRows, pageNum: pageNum });
     }
   }, [isReset]);
-
-  console.log('isReset :>> ', isReset);
 
   useEffect(() => {
     !isNil(countryCode) && getCountryName();
@@ -87,8 +87,6 @@ export const PublicCountryInformation = () => {
       setContentStyles({});
     }
   }, [themeContext.headerCollapse]);
-
-  const { firstRow, numberRows, pageNum } = pagination;
 
   const getCountryName = () => {
     if (!isNil(config.countriesByGroup)) {
@@ -374,7 +372,7 @@ export const PublicCountryInformation = () => {
         data={dataflows}
         onFilter={() => {
           if (isFiltered) {
-            setPagination({ firstRow: 0, numberRows: 10, pageNum: 0 });
+            setPagination({ firstRow: 0, numberRows: numberRows, pageNum: pageNum });
           } else {
             onLoadPublicCountryInformation();
           }

@@ -43,7 +43,7 @@ export const PublicDataflows = () => {
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [pageInputTooltip, setPageInputTooltip] = useState(resourcesContext.messages['currentPageInfoMessage']);
-  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 100, pageNum: 0 });
+  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 });
   const [publicDataflows, setPublicDataflows] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
 
@@ -194,7 +194,7 @@ export const PublicDataflows = () => {
   );
 
   const renderPaginator = () => {
-    if (!isLoading && totalRecords > 100) {
+    if (!isLoading && totalRecords > config.DATAFLOWS_PER_PAGE) {
       return (
         <Paginator
           areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
@@ -266,12 +266,12 @@ export const PublicDataflows = () => {
             isLoading={isLoading}
             onFilter={() => {
               if (areFiltersFilled) {
-                setPagination({ firstRow: 0, numberRows: 100, pageNum: 0 });
+                setPagination({ firstRow: 0, numberRows: numberRows, pageNum: pageNum });
               } else {
                 onLoadPublicDataflows();
               }
             }}
-            onReset={() => setPagination({ firstRow: 0, numberRows: 100, pageNum: 0 })}
+            onReset={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: pageNum })}
             onSort={onLoadPublicDataflows}
             options={filterOptions}
             recoilId="publicDataflows"
