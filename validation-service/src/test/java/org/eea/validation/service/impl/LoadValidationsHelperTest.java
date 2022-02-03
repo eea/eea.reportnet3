@@ -19,6 +19,7 @@ import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
+import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.ValidationRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +51,10 @@ public class LoadValidationsHelperTest {
   /** The validation repository. */
   @Mock
   private ValidationRepository validationRepository;
+
+  /** The record repository. */
+  @Mock
+  private RecordRepository recordRepository;
 
   /** The pageable. */
   private Pageable pageable;
