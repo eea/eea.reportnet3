@@ -213,7 +213,11 @@ export const PublicDataflows = () => {
 
   const renderPublicDataflowsContent = () => {
     if (isLoading) {
-      return <Spinner className={styles.spinner} />;
+      return (
+        <div className={styles.noDataflows}>
+          <Spinner className={styles.spinner} />
+        </div>
+      );
     }
 
     if (isEmpty(publicDataflows)) {
@@ -227,9 +231,10 @@ export const PublicDataflows = () => {
     }
 
     return (
-      <div>
+      <Fragment>
         <div className={styles.topPaginator}>{renderPaginator()}</div>
-        <div className={styles.dataflowsList}>
+
+        <div className="responsiveCardsGrid">
           {publicDataflows.map(dataflow => (
             <PublicCard
               animation
@@ -246,8 +251,9 @@ export const PublicDataflows = () => {
             />
           ))}
         </div>
+
         <div className={styles.bottomPaginator}>{renderPaginator()}</div>
-      </div>
+      </Fragment>
     );
   };
 
@@ -264,7 +270,7 @@ export const PublicDataflows = () => {
             options={filterOptions}
             recoilId="publicDataflows"
           />
-          <div className={styles.dataflowsList}>{renderPublicDataflowsContent()}</div>
+          {renderPublicDataflowsContent()}
         </div>
       </div>
     </PublicLayout>
