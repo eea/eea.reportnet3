@@ -361,7 +361,23 @@ export const PublicCountryInformation = () => {
     {
       type: 'MULTI_SELECT',
       key: 'deliveryStatus',
-      label: resourcesContext.messages['deliveryStatus']
+      label: resourcesContext.messages['deliveryStatus'],
+      multiSelectOptions: [
+        { type: config.datasetStatus.PENDING.label.toUpperCase(), value: config.datasetStatus.PENDING.key },
+        { type: config.datasetStatus.DELIVERED.label.toUpperCase(), value: config.datasetStatus.DELIVERED.key },
+        {
+          type: config.datasetStatus.CORRECTION_REQUESTED.label.toUpperCase(),
+          value: config.datasetStatus.CORRECTION_REQUESTED.key
+        },
+        {
+          type: config.datasetStatus.FINAL_FEEDBACK.label.toUpperCase(),
+          value: config.datasetStatus.FINAL_FEEDBACK.key
+        },
+        {
+          type: config.datasetStatus.TECHNICALLY_ACCEPTED.label.toUpperCase(),
+          value: config.datasetStatus.TECHNICALLY_ACCEPTED.key
+        }
+      ]
     }
   ];
 
