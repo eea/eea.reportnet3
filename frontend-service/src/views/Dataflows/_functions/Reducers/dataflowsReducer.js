@@ -21,7 +21,6 @@ export const dataflowsReducer = (state, { type, payload }) => {
         ...state,
         [payload.type]: payload.data,
         dataflowsCountFirstLoad: false,
-        dataflowsCount: { ...state.dataflowsCount, [payload.type]: payload.data.length },
         activeIndex:
           isNil(payload.contextCurrentDataflowType) && state.dataflowsCountFirstLoad ? getIndex() : state.activeIndex,
         filteredRecords: payload.filteredRecords,
