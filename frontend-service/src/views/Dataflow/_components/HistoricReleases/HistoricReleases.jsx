@@ -262,7 +262,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       }
     };
 
-    if (isEmpty(filteredData)) {
+    if (isEmpty(filteredData) && (historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset')) {
       return (
         <div className={styles.emptyFilteredData}>
           {resourcesContext.messages['noHistoricReleasesWithSelectedParameters']}
