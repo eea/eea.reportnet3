@@ -573,3 +573,43 @@
     }
   }
 }
+
+.publicCountryInformationFilters {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  margin: 2rem 0;
+  width: 100%;
+  flex-wrap: wrap;
+
+  @include for-phone-only {
+    justify-content: flex-start;
+    .block {
+      margin-bottom: 1.5rem;
+      width: 100% !important;
+    }
+  }
+
+  @include for-tablet-portrait-up {
+    .block,
+    .inputCheckbox {
+      width: 50% !important;
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  @include for-desktop-up {
+    .block,
+    .inputCheckbox {
+      width: 25% !important;
+    }
+  }
+
+  @include for-big-desktop-up {
+    .block,
+    .inputCheckbox {
+      width: 25% !important;
+      margin-bottom: 1.5rem;
+    }
+  }
+}

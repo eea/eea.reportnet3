@@ -1,6 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
 
 import ReactTooltip from 'react-tooltip';
 
@@ -19,7 +18,7 @@ import styles from './PublicCountryInformation.module.scss';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { DownloadFile } from 'views/_components/DownloadFile';
-import { MyFilters } from 'views/_components/MyFilters';
+import { Filters } from 'views/_components/Filters';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
 import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
@@ -27,12 +26,11 @@ import { Title } from 'views/_components/Title';
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
 
-import { filterByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
-
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
@@ -60,7 +58,7 @@ export const PublicCountryInformation = () => {
   const [sortOrder, setSortOrder] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
 
-  const filterBy = useRecoilValue(filterByState('publicCountryInformation'));
+  const { getFilterBy, isFiltered: areFiltersFilled, setData } = useApplyFilters('publicCountryInformation');
 
   const { firstRow, numberRows, pageNum } = pagination;
 
@@ -149,6 +147,8 @@ export const PublicCountryInformation = () => {
   const onLoadPublicCountryInformation = async () => {
     setIsLoading(true);
     try {
+      const filterBy = await getFilterBy();
+
       const data = await DataflowService.getPublicDataflowsByCountryCode({
         countryCode,
         sortOrder: getSortOrder(),
@@ -157,8 +157,10 @@ export const PublicCountryInformation = () => {
         sortField,
         filterBy
       });
+
       setTotalRecords(data.totalRecords);
       setPublicInformation(data.dataflows);
+      setData(data.dataflows);
       setFilteredRecords(data.filteredRecords);
       setIsFiltered(Object.keys(filterBy).length !== 0 && data.filteredRecords !== data.totalRecords);
       setIsReset(false);
@@ -383,19 +385,22 @@ export const PublicCountryInformation = () => {
 
   const renderFilters = () => {
     return (
-      <MyFilters
+      <Filters
         className="publicCountryInformationFilters"
-        data={dataflows}
         onFilter={() => {
-          if (isFiltered) {
+          if (areFiltersFilled) {
             setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
           } else {
             onLoadPublicCountryInformation();
           }
         }}
-        onReset={setIsReset}
+        onReset={() => {
+          setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
+          setSortField('');
+          setSortOrder(0);
+        }}
         options={filterOptions}
-        viewType="publicCountryInformation"
+        recoilId="publicCountryInformation"
       />
     );
   };
