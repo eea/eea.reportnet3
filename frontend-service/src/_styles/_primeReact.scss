@@ -3256,3 +3256,7 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
 .responsiveDialog {
   @include responsiveDialog;
 }
+
+.responsiveCardsGrid {
+  @include responsiveCardsGrid;
+}
