@@ -451,22 +451,18 @@ export const PublicCountryInformation = () => {
       return <div className={styles.noDataflows}>{resourcesContext.messages['wrongUrlCountryCode']}</div>;
     }
 
-    if (isEmpty(dataflows)) {
+    if (isEmpty(dataflows) && !isFiltered) {
       return <div className={styles.noDataflows}>{resourcesContext.messages['noDataflows']}</div>;
     }
 
-    return (
-      <div className={styles.countriesList}>
-        {renderFilters()}
-        {renderPublicCountryTable()}
-      </div>
-    );
-  };
+    if (isEmpty(dataflows) && isFiltered) {
+      return <div className={styles.noDataflows}>{resourcesContext.messages['dataflowsNotMatchingFilter']}</div>;
+    }
 
-  const renderPublicCountryTable = () => {
     return (
       <DataTable
         autoLayout={true}
+        className={styles.countriesList}
         first={firstRow}
         lazy={true}
         onPage={onChangePage}
@@ -492,6 +488,7 @@ export const PublicCountryInformation = () => {
     <PublicLayout>
       <div className={`${styles.container}  rep-container`} style={contentStyles}>
         {renderPublicCountryInformationTitle()}
+        {renderFilters()}
         {renderPublicCountryInformation()}
       </div>
     </PublicLayout>
