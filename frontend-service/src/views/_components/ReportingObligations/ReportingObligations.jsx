@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -6,17 +7,19 @@ import styles from './ReportingObligations.module.scss';
 
 import { CardsView } from 'views/_components/CardsView';
 import { InputSwitch } from 'views/_components/InputSwitch';
-import { MyFilters } from 'views/_components/MyFilters';
+import { Filters } from 'views/_components/Filters';
 import { Spinner } from 'views/_components/Spinner';
 import { TableView } from './_components/TableView';
 
 import { ObligationService } from 'services/ObligationService';
 
+import { filteredDataStore } from '../Filters/_functions/Stores/filterStore';
+
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-import { useFilters } from 'views/_functions/Hooks/useFilters';
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 import { reportingObligationReducer } from './_functions/Reducers/reportingObligationReducer';
 
@@ -28,7 +31,9 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const { filterBy, isFiltered } = useFilters('reportingObligations');
+  const { getFilterBy, isFiltered, setData } = useApplyFilters('reportingObligations');
+
+  const data = useRecoilValue(filteredDataStore('reportingObligations'));
 
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     countries: [],
@@ -40,8 +45,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     selectedObligation: obligationChecked
   });
 
-  const { countries, data, issues, isLoading, organizations, pagination, selectedObligation } =
-    reportingObligationState;
+  const { countries, issues, isLoading, organizations, pagination, selectedObligation } = reportingObligationState;
 
   useEffect(() => {
     onLoadCountries();
@@ -87,10 +91,13 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     setLoading(true);
 
     try {
+      const filterBy = await getFilterBy();
       const response = await ObligationService.getOpen(filterBy);
       const data = ReportingObligationUtils.initialValues(response, userContext.userProps.dateFormat);
+      console.log('data in :>> ', data);
 
       reportingObligationDispatch({ type: 'ON_LOAD_DATA', payload: { data } });
+      setData(data);
     } catch (error) {
       console.error('ReportingObligations - onLoadReportingObligations.', error);
       notificationContext.add({ type: 'LOAD_OPENED_OBLIGATION_ERROR' }, true);
@@ -114,12 +121,14 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
 
   const setLoading = status => reportingObligationDispatch({ type: 'SET_LOADING', payload: { status } });
 
+  console.log('data :>> ', data);
+
   const renderData = () => {
     if (isLoading) {
       return <Spinner className={styles.spinner} />;
     }
 
-    if (isEmpty(reportingObligationState.data)) {
+    if (isEmpty(data)) {
       if (isFiltered) {
         <h3 className={styles.noObligations}>{resourcesContext.messages['noObligationsWithSelectedParameters']}</h3>;
       } else {
@@ -158,7 +167,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     return (
       <Fragment>
         {renderView()}
-        <span className={`${styles.selectedObligation} ${isEmpty(data) ? styles.filteredSelected : ''}`}>
+        <span className={`${styles.selectedObligation} ${isEmpty(data) ? styles.selected : ''}`}>
           <span>{`${resourcesContext.messages['selectedObligation']}: `}</span>
           {selectedObligation.title || '-'}
         </span>
@@ -186,19 +195,16 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
         {
           key: 'countries',
           label: resourcesContext.messages['countries'],
-          isSortable: true,
           dropdownOptions: parseDropdownOptions(countries)
         },
         {
           key: 'issues',
           label: resourcesContext.messages['issues'],
-          isSortable: true,
           dropdownOptions: parseDropdownOptions(issues)
         },
         {
           key: 'organizations',
           label: resourcesContext.messages['organizations'],
-          isSortable: true,
           dropdownOptions: parseDropdownOptions(organizations)
         }
       ],
@@ -208,23 +214,19 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   ];
 
   return (
-    <div
-      className={styles.reportingObligation}
-      style={{ justifyContent: isLoading || isEmpty(data) ? 'flex-start' : 'space-between' }}>
-      <div className={styles.repOblTools}>
-        <div className={styles.switchDiv}>
-          <label className={styles.switchTextInput}>{resourcesContext.messages['magazineView']}</label>
-          <InputSwitch checked={userContext.userProps.listView} onChange={e => userContext.onToggleTypeView(e.value)} />
-          <label className={styles.switchTextInput}>{resourcesContext.messages['listView']}</label>
-        </div>
+    <div className={styles.reportingObligation}>
+      <div className={styles.switch}>
+        <label className={styles.text}>{resourcesContext.messages['magazineView']}</label>
+        <InputSwitch checked={userContext.userProps.listView} onChange={e => userContext.onToggleTypeView(e.value)} />
+        <label className={styles.text}>{resourcesContext.messages['listView']}</label>
       </div>
 
-      <MyFilters
+      <Filters
         className="reportingObligations"
-        data={data}
         onFilter={onLoadReportingObligations}
+        onReset={onLoadReportingObligations}
         options={filterOptions}
-        viewType="reportingObligations"
+        recoilId="reportingObligations"
       />
       {renderData()}
     </div>

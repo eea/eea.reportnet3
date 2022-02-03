@@ -349,27 +349,18 @@
 
 .reportingObligations {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(2, 1fr);
-  grid-row-gap: 2em;
-  padding: 2em 0;
-  margin-top: -7em;
-
-  .block > .sortButtonSize {
-    display: none;
-  }
+  grid-template-columns: repeat(4, 0.25fr);
+  grid-template-rows: auto;
 
   .block:first-child {
     grid-column: 1 / span 5;
     width: 30%;
+    margin-bottom: 1.5rem;
   }
 
-  .filterButton {
-    margin-top: auto;
-  }
-
-  .resetButton {
-    margin-top: auto;
+  .buttonWrapper {
+    align-items: center;
+    display: flex;
   }
 }
 
