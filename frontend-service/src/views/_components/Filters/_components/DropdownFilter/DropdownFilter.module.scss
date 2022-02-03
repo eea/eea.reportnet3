@@ -15,6 +15,7 @@
     height: 3em;
     padding-left: 0em;
     width: 100%;
+    box-shadow: none !important;
 
     .label {
       clip: auto;
@@ -22,6 +23,10 @@
       overflow: visible;
       width: 90%;
       top: 0.7em;
+    }
+
+    > div > div > ul > li {
+      margin: 0.5em 0 !important;
     }
   }
 
@@ -35,12 +40,6 @@
     label {
       padding-left: 0 !important;
     }
-  }
-}
-
-@media (min-width: 600px) {
-  .block {
-    width: 50% !important;
   }
 }
 
