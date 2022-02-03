@@ -31,7 +31,15 @@ const getLabelsAnimationDateInitial = (options, filterBy) =>
   options.filter(option => option?.type === 'DATE').map(option => ({ [option.key]: !isEmpty(filterBy[option.key]) }));
 
 const getOptionsTypes = (data, nestedOptionKey) => {
-  const options = uniq(data.map(item => item[nestedOptionKey])).filter(item => !isNil(item));
+  const checkFilterOption = item => {
+    if (typeof item !== 'boolean' || item === '') {
+      return !isEmpty(item);
+    } else {
+      return !isNil(item);
+    }
+  };
+
+  const options = uniq(data.map(item => item[nestedOptionKey])).filter(item => checkFilterOption(item));
 
   return options.map(option => ({ type: option, value: option }));
 };

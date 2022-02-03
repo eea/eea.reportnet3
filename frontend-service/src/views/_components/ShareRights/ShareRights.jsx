@@ -516,9 +516,9 @@ export const ShareRights = ({
       }
     ];
 
-    return columns.map(column => {
-      return <Column body={column.template} field={column.key} header={column.header} key={column.key} sortable />;
-    });
+    return columns.map(column => (
+      <Column body={column.template} field={column.key} header={column.header} key={column.key} sortable />
+    ));
   };
 
   const getShareRightsTableStyles = () => {
@@ -546,7 +546,7 @@ export const ShareRights = ({
           iconConfirm={shareRightsState.isDeletingUserRight ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onDeleteUserRight()}
+          onConfirm={onDeleteUserRight}
           onHide={() => {
             onResetAll();
             shareRightsDispatch({
@@ -573,7 +573,7 @@ export const ShareRights = ({
           iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['cancel']}
           labelConfirm={resourcesContext.messages['save']}
-          onConfirm={() => updateUserRight()}
+          onConfirm={updateUserRight}
           onHide={() => {
             onResetAll();
             onCloseManagementDialog();

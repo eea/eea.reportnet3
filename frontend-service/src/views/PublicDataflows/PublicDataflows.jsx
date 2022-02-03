@@ -1,6 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -11,8 +10,8 @@ import ReactTooltip from 'react-tooltip';
 
 import styles from './PublicDataflows.module.scss';
 
+import { Filters } from 'views/_components/Filters';
 import { InputText } from 'views/_components/InputText';
-import { MyFilters } from 'views/_components/MyFilters';
 import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { PublicCard } from 'views/_components/PublicCard';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
@@ -22,11 +21,10 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { DataflowService } from 'services/DataflowService';
 
-import { filterByState, sortByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
-
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
@@ -37,15 +35,15 @@ export const PublicDataflows = () => {
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
-  const filterBy = useRecoilValue(filterByState('publicDataflows'));
-  const sortByOptions = useRecoilValue(sortByState('publicDataflows'));
+  const { getFilterBy, isFiltered: areFiltersFilled, setData, sortByOptions } = useApplyFilters('publicDataflows');
 
   const [contentStyles, setContentStyles] = useState({});
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [goToPage, setGoToPage] = useState(1);
+  const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [pageInputTooltip, setPageInputTooltip] = useState(resourcesContext.messages['currentPageInfoMessage']);
-  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 100, pageNum: 0 });
+  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 });
   const [publicDataflows, setPublicDataflows] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
 
@@ -113,7 +111,12 @@ export const PublicDataflows = () => {
       label: resourcesContext.messages['status'],
       isSortable: true,
       template: 'LevelError',
-      type: 'MULTI_SELECT'
+      dropdownOptions: [
+        { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+        { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
+      ],
+      type: 'DROPDOWN'
     },
     {
       key: 'expirationDate',
@@ -152,11 +155,14 @@ export const PublicDataflows = () => {
     setIsLoading(true);
 
     try {
+      const filterBy = await getFilterBy();
       const publicData = await DataflowService.getPublicData({ filterBy, numberRows, pageNum, sortByOptions: sortBy });
 
       setPublicDataflows(publicData.dataflows);
+      setData(publicData.dataflows);
       setFilteredRecords(publicData.filteredRecords);
       setTotalRecords(publicData.totalRecords);
+      setIsFiltered(publicData.filteredRecords !== publicData.totalRecords);
     } catch (error) {
       console.error('PublicDataflows - onLoadPublicDataflows.', error);
     } finally {
@@ -180,16 +186,19 @@ export const PublicDataflows = () => {
 
   const renderPaginatorRecordsCount = () => (
     <Fragment>
-      {resourcesContext.messages['totalRecords']} {totalRecords} {resourcesContext.messages['records'].toLowerCase()}
+      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
+      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
+        'records'
+      ].toLowerCase()}`}
     </Fragment>
   );
 
   const renderPaginator = () => {
-    // ADD IF THERE ARE DATAFLOWS TO RENDER PAGINATOR
-    if (!isLoading) {
+    if (totalRecords > 0) {
       return (
         <Paginator
-          className="p-paginator-bottom"
+          areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
+          className={`p-paginator-bottom ${styles.paginator}`}
           first={firstRow}
           onPageChange={onPaginate}
           rightContent={renderPaginatorRecordsCount()}
@@ -204,7 +213,11 @@ export const PublicDataflows = () => {
 
   const renderPublicDataflowsContent = () => {
     if (isLoading) {
-      return <Spinner className={styles.spinner} />;
+      return (
+        <div className={styles.noDataflows}>
+          <Spinner className={styles.spinner} />
+        </div>
+      );
     }
 
     if (isEmpty(publicDataflows)) {
@@ -218,26 +231,22 @@ export const PublicDataflows = () => {
     }
 
     return (
-      <div>
-        <div className={styles.topPaginator}>{renderPaginator()}</div>
-        <div className={styles.dataflowsList}>
-          {publicDataflows.map(dataflow => (
-            <PublicCard
-              animation
-              card={dataflow}
-              dataflowId={dataflow.id}
-              dueDate={dataflow.expirationDate}
-              key={dataflow.id}
-              landingPageCard={false}
-              obligation={dataflow.obligation}
-              onCardClick={onOpenDataflow}
-              status={resourcesContext.messages[dataflow.status]}
-              subtitle={{ text: dataflow.description, url: '' }}
-              title={{ text: dataflow.name, url: '' }}
-            />
-          ))}
-        </div>
-        <div className={styles.bottomPaginator}>{renderPaginator()}</div>
+      <div className="responsiveCardsGrid">
+        {publicDataflows.map(dataflow => (
+          <PublicCard
+            animation
+            card={dataflow}
+            dataflowId={dataflow.id}
+            dueDate={dataflow.expirationDate}
+            key={dataflow.id}
+            landingPageCard={false}
+            obligation={dataflow.obligation}
+            onCardClick={onOpenDataflow}
+            status={resourcesContext.messages[dataflow.status]}
+            subtitle={{ text: dataflow.description, url: '' }}
+            title={{ text: dataflow.name, url: '' }}
+          />
+        ))}
       </div>
     );
   };
@@ -247,15 +256,24 @@ export const PublicDataflows = () => {
       <div className={styles.content} style={contentStyles}>
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>{resourcesContext.messages['dataflows']}</h1>
-          <MyFilters
-            data={publicDataflows}
+          <Filters
+            className="publicDataflows"
             isLoading={isLoading}
-            onFilter={onLoadPublicDataflows}
+            onFilter={() => {
+              if (areFiltersFilled) {
+                setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
+              } else {
+                onLoadPublicDataflows();
+              }
+            }}
+            onReset={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 })}
             onSort={onLoadPublicDataflows}
             options={filterOptions}
-            viewType="publicDataflows"
+            recoilId="publicDataflows"
           />
-          <div className={styles.dataflowsList}>{renderPublicDataflowsContent()}</div>
+          <div className={styles.topPaginator}>{renderPaginator()}</div>
+          {renderPublicDataflowsContent()}
+          <div className={styles.bottomPaginator}>{renderPaginator()}</div>
         </div>
       </div>
     </PublicLayout>

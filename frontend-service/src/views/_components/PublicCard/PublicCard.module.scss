@@ -1,20 +1,12 @@
 .card {
-  background-color: transparent;
+  background-color: var(--card-item-bg);
   border-radius: 15px;
   box-shadow: var(--card-item-box-shadow);
-  margin: 0.5rem;
   padding: 1rem;
   position: relative;
   display: block;
-  width: calc(100% / 3.12);
   height: auto;
   cursor: pointer;
-  &:first-of-type {
-    margin-left: 0;
-  }
-  &:nth-of-type(3n + 1) {
-    margin-left: 0;
-  }
   &::after {
     content: '';
     background-image: url('/views/_assets/images/logos/logo.png') !important;
@@ -120,13 +112,6 @@
       font-size: 0.9rem;
       margin-top: 2rem;
     }
-  }
-  @media (max-width: 1349px) {
-    width: 49.5%;
-    margin: 0.5rem 0;
-  }
-  @media (max-width: 768px) {
-    width: 100%;
   }
 }
 

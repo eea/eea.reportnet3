@@ -1,6 +1,7 @@
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 
+import cloneDeep from 'lodash/cloneDeep';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
@@ -21,6 +22,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import {
   filterByKeysState,
+  filterByNestedKeysState,
   filterByState,
   filteredDataState,
   searchState,
@@ -35,12 +37,24 @@ const { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch }
 const { switchSortByIcon, switchSortByOption } = SortUtils;
 const { getLabelsAnimationDateInitial, getOptionsTypes, getPositionLabelAnimationDate, parseDateValues } = FiltersUtils;
 
-export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFilter, onSort, options, viewType }) => {
+export const MyFilters = ({
+  className,
+  data = [],
+  isLoading,
+  isStrictMode,
+  onFilter,
+  onReset = () => {},
+  onSort,
+  options,
+  viewType
+}) => {
   const [filterBy, setFilterBy] = useRecoilState(filterByState(viewType));
   const [filterByKeys, setFilterByKeys] = useRecoilState(filterByKeysState(viewType));
-  const [filteredData, setFilteredData] = useRecoilState(filteredDataState(viewType));
+  const [filterByNestedKeys, setFilterByNestedKeys] = useRecoilState(filterByNestedKeysState(viewType));
   const [searchBy, setSearchBy] = useRecoilState(searchState(viewType));
   const [sortBy, setSortBy] = useRecoilState(sortByState(viewType));
+
+  const setFilteredData = useSetRecoilState(filteredDataState(viewType));
 
   const { userProps } = useContext(UserContext);
   const notificationContext = useContext(NotificationContext);
@@ -89,10 +103,11 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
   }, [calendarRefs, labelsAnimationDate, filterBy]);
 
   useEffect(() => {
-    getFilterByKeys();
+    getFilterByKeys('key');
+    getFilterByKeys('nestedKey');
   }, [data, viewType]);
 
-  const applyFilters = () => {
+  const applyFilters = filterBy => {
     try {
       if (isEmpty(filterBy)) {
         return data;
@@ -105,7 +120,30 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     }
   };
 
-  const getFilterByKeys = () => {
+  const clearFilterByMultiselectDueToChangesData = () => {
+    const cloneFilterBy = cloneDeep(filterBy);
+
+    if (!isEmpty(data) && !isEmpty(Object.keys(filterBy)) && !isEmpty(Object.keys(filterByKeys))) {
+      const filteredKeysMultiSelect = filterByKeys.MULTI_SELECT.filter(key => Object.keys(filterBy).includes(key));
+      filteredKeysMultiSelect.forEach(key => {
+        if (filterBy[key] && !isEmpty(filterBy[key])) {
+          const dataByKey = data.map(itemData => itemData[key]).filter(itemValue => itemValue !== undefined);
+          const dataItemsByKey = [];
+
+          filterBy[key].forEach(itemFilterBy => {
+            if (dataByKey.includes(itemFilterBy)) {
+              dataItemsByKey.push(itemFilterBy);
+            }
+          });
+          cloneFilterBy[key] = dataItemsByKey;
+        }
+      });
+    }
+
+    return cloneFilterBy;
+  };
+
+  const getFilterByKeys = auxKey => {
     const filterKeys = { CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [], SEARCH: [] };
 
     options.forEach(option => {
@@ -115,19 +153,25 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
         filterKeys.SEARCH = option.searchBy;
       }
 
-      filterKeys[option.type] = option.nestedOptions?.map(nestedOption => nestedOption.key) || [
+      filterKeys[option.type] = option.nestedOptions?.map(nestedOption => nestedOption[auxKey]) || [
         ...filterKeys[option.type],
-        option.key
+        option[auxKey]
       ];
     });
 
-    setFilterByKeys(filterKeys);
+    if (auxKey === 'key') {
+      setFilterByKeys(filterKeys);
+    } else {
+      setFilterByNestedKeys(filterKeys);
+    }
   };
 
   const loadFilters = async () => {
     try {
-      const filteredData = applyFilters();
+      const clearFilterby = clearFilterByMultiselectDueToChangesData();
+      const filteredData = applyFilters(clearFilterby);
 
+      setFilterBy(clearFilterby);
       setFilteredData(filteredData);
     } catch (error) {
       console.error('MyFilters - loadFilters.', error);
@@ -141,7 +185,7 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
 
     return data.filter(
       item =>
-        applyInputs({ filterBy, filterByKeys, item }) &&
+        applyInputs({ filterBy, filterByKeys, item, filterByNestedKeys }) &&
         applyDates({ filterBy, filterByKeys, item }) &&
         applyCheckBox({ filterBy, filterByKeys, item }) &&
         applyMultiSelects({ filterBy, filterByKeys, item }) &&
@@ -246,7 +290,9 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
       }
     };
 
-    if (option.nestedOptions) return option.nestedOptions.map(nestedOption => renderDate(nestedOption));
+    if (option.nestedOptions) {
+      return option.nestedOptions.map(nestedOption => renderDate(nestedOption));
+    }
 
     const inputId = uniqueId();
 
@@ -254,7 +300,9 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
       <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <div
-          className={`p-float-label ${styles.label} ${styles.elementFilter}`}
+          className={`p-float-label ${styles.label} ${styles.dateBlock} ${
+            filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+          }`}
           id={`calendar_${option.key}`}
           ref={el => (calendarRefs.current[option.key] = el)}>
           <Calendar
@@ -297,7 +345,33 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
       return option.nestedOptions.map(nestedOption => renderDropdown(nestedOption));
     }
 
-    return <Dropdown />;
+    return (
+      <div className={styles.block} key={option.key}>
+        {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
+        <Dropdown
+          ariaLabel={option.key}
+          className={styles.dropdownFilter}
+          filter={option.dropdownOptions.length > 10}
+          filterPlaceholder={option.label}
+          id={`${option.key}_dropdown`}
+          inputClassName={`p-float-label ${styles.label}`}
+          inputId={option.key}
+          label={option.label}
+          onChange={event => {
+            onChange({ key: option.key, value: event.value });
+          }}
+          onMouseDown={event => {
+            event.preventDefault();
+            event.stopPropagation();
+          }}
+          optionLabel="label"
+          options={option.dropdownOptions}
+          showClear={filterBy[option.key]}
+          showFilterClear={true}
+          value={filterBy[option.key]}
+        />
+      </div>
+    );
   };
 
   const renderInput = option => {
@@ -308,7 +382,10 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     return (
       <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
-        <div className={`p-float-label ${styles.label} ${styles.elementFilter}`}>
+        <div
+          className={`p-float-label ${styles.label} ${
+            filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+          }`}>
           <InputText
             className={styles.inputFilter}
             id={`${option.key}_input`}
@@ -337,12 +414,14 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     }
 
     return (
-      <div className={`${styles.block}`} key={option.key}>
+      <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
         <MultiSelect
           ariaLabelledBy={`${option.key}_input`}
           checkAllHeader={resourcesContext.messages['checkAllFilter']}
-          className={styles.multiselectFilter}
+          className={`${styles.multiselectFilter} ${
+            filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+          }`}
           filter={option?.showInput}
           headerClassName={styles.selectHeader}
           id={option.key}
@@ -378,7 +457,10 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
     return (
       <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
-        <div className={`p-float-label ${styles.label} ${styles.elementFilter}`}>
+        <div
+          className={`p-float-label ${styles.label} ${styles.elementFilter} ${
+            searchBy.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+          }`}>
           <InputText
             className={styles.searchInput}
             id="searchInput"
@@ -421,25 +503,30 @@ export const MyFilters = ({ className, data = [], isLoading, isStrictMode, onFil
       {renderFilters()}
       {isStrictMode ? <InputText placeholder="StrictMode" /> : null}
 
-      {hasCustomSort && (
-        <Button
-          className="p-button-primary p-button-rounded p-button-animated-blink"
-          icon="filter"
-          label={resourcesContext.messages['filter']}
-          onClick={onFilter}
-        />
-      )}
+      <div className={styles.buttonsContainer}>
+        {hasCustomSort && (
+          <div className={styles.filterButton}>
+            <Button
+              className="p-button-primary p-button-rounded p-button-animated-blink"
+              icon="filter"
+              label={resourcesContext.messages['filter']}
+              onClick={onFilter}
+            />
+          </div>
+        )}
 
-      <div className={`${styles.resetButton}`}>
-        <Button
-          className="p-button-secondary p-button-rounded p-button-animated-blink"
-          icon="undo"
-          label={resourcesContext.messages['reset']}
-          onClick={() => {
-            onResetFilters();
-            setLabelsAnimationDate(getLabelsAnimationDateInitial(options, filterBy));
-          }}
-        />
+        <div className={styles.resetButton}>
+          <Button
+            className="p-button-secondary p-button-rounded p-button-animated-blink"
+            icon="undo"
+            label={resourcesContext.messages['reset']}
+            onClick={() => {
+              onResetFilters();
+              setLabelsAnimationDate(getLabelsAnimationDateInitial(options, filterBy));
+              onReset(true);
+            }}
+          />
+        </div>
       </div>
     </div>
   );

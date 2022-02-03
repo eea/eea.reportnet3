@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import org.eea.validation.persistence.data.domain.RecordValue;
+import org.hibernate.Session;
 import org.springframework.data.domain.Pageable;
 
 
@@ -57,6 +58,7 @@ public class RecordRepositoryPaginatedImpl implements RecordRepositoryPaginated 
    * @param pageable the pageable
    * @return the list
    */
+  @Override
   public List<RecordValue> findRecordsPageable(Pageable pageable) {
     Query query = entityManager.createQuery(QUERY_UNSORTERED);
     if (null != pageable) {
@@ -64,6 +66,17 @@ public class RecordRepositoryPaginatedImpl implements RecordRepositoryPaginated 
       query.setMaxResults(pageable.getPageSize());
     }
     return query.getResultList();
+  }
+
+
+  /**
+   * Flush.
+   */
+  @Override
+  public void flush() {
+    entityManager.flush();
+    entityManager.clear();
+    entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAllRegions();
   }
 
 }

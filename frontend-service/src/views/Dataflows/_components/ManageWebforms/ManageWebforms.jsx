@@ -1,8 +1,9 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import orderBy from 'lodash/orderBy';
+import ReactTooltip from 'react-tooltip';
 
 import styles from './ManageWebforms.module.scss';
 
@@ -14,6 +15,7 @@ import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { Dropdown } from 'views/_components/Dropdown';
+import { ErrorMessage } from 'views/_components/ErrorMessage';
 import { InputFile } from 'views/_components/InputFile';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
@@ -27,7 +29,11 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
-  const [errors, setErrors] = useState({ name: false, type: false, content: false });
+  const [errors, setErrors] = useState({
+    name: { hasErrors: false, message: '' },
+    type: { hasErrors: false, message: '' },
+    content: { hasErrors: false, message: '' }
+  });
   const [isAddEditDialogVisible, setIsAddEditDialogVisible] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,11 +63,11 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     setWebformConfiguration(getInitialWebformConfiguration);
   }, [webformConfiguration.id]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (isAddEditDialogVisible) {
-      checkHasErrors();
+      checkHasErrors('content');
     }
-  }, [webformConfiguration]);
+  }, [webformConfiguration.content]);
 
   const getWebformList = async () => {
     setLoadingStatus('pending');
@@ -276,17 +282,17 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     return { ...currentWebform };
   };
 
-  const checkNameExists = () => webformsList.some(webform => webform.name === webformConfiguration.name);
+  const checkNameExists = () => webformsList.some(webform => webform.name === webformConfiguration.name.trim());
 
   const checkNameExistsWithoutCurrent = () =>
     webformsList
       .filter(webform => webform.id !== webformConfiguration.id)
-      .some(webform => webform.name === webformConfiguration.name);
+      .some(webform => webform.name === webformConfiguration.name.trim());
 
   const getIsDisabledConfirmBtn = () => {
     if (isNil(webformConfiguration.id)) {
       return (
-        isEmpty(webformConfiguration.name) ||
+        isEmpty(webformConfiguration.name.trim()) ||
         isEmpty(webformConfiguration.content) ||
         isEmpty(webformConfiguration.type) ||
         checkNameExists() ||
@@ -297,7 +303,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     const initialWebformConfiguration = getInitialWebformConfiguration();
 
     if (
-      !isEmpty(webformConfiguration.name) &&
+      !isEmpty(webformConfiguration.name.trim()) &&
       isEmpty(webformConfiguration.content) &&
       initialWebformConfiguration.type === webformConfiguration.type
     ) {
@@ -313,37 +319,93 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     }
 
     return (
-      (isEmpty(webformConfiguration.content) && isEmpty(webformConfiguration.name)) ||
-      isEmpty(webformConfiguration.name) ||
+      (isEmpty(webformConfiguration.content) && isEmpty(webformConfiguration.name.trim())) ||
+      isEmpty(webformConfiguration.name.trim()) ||
       checkNameExistsWithoutCurrent() ||
       loadingStatus === 'pending'
     );
   };
 
-  const checkHasErrors = () => {
+  const checkHasErrors = field => {
+    let hasErrors = false;
+    let message = '';
+
     if (isNil(webformConfiguration.id)) {
-      setErrors({
-        name: isEmpty(webformConfiguration.name) || checkNameExists(),
-        type: isEmpty(webformConfiguration.type),
-        content: isEmpty(webformConfiguration.content)
-      });
+      switch (field) {
+        case 'name':
+          if (isEmpty(webformConfiguration.name.trim())) {
+            hasErrors = true;
+            message = resourcesContext.messages['nameIsEmptyError'];
+          } else if (checkNameExists()) {
+            hasErrors = true;
+            message = resourcesContext.messages['nameExistsError'];
+          }
+          break;
+
+        case 'type':
+          webformConfiguration;
+          if (isEmpty(webformConfiguration.type)) {
+            hasErrors = true;
+            message = resourcesContext.messages['typeNotSelectedError'];
+          }
+          break;
+
+        case 'content':
+          if (isEmpty(webformConfiguration.content)) {
+            hasErrors = true;
+            message = resourcesContext.messages['fileNotSelectedError'];
+          }
+          break;
+
+        default:
+          break;
+      }
     } else {
-      setErrors({
-        name: isEmpty(webformConfiguration.name) || checkNameExistsWithoutCurrent(),
-        content: false
-      });
+      switch (field) {
+        case 'name':
+          if (isEmpty(webformConfiguration.name.trim())) {
+            hasErrors = true;
+            message = resourcesContext.messages['nameIsEmptyError'];
+          } else if (checkNameExistsWithoutCurrent()) {
+            hasErrors = true;
+            message = resourcesContext.messages['nameExistsError'];
+          }
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    setErrors(prevErrors => ({ ...prevErrors, [field]: { hasErrors, message } }));
+  };
+
+  const renderTooltip = () => {
+    if (isNil(webformConfiguration.id) && getIsDisabledConfirmBtn() && isEmpty(webformConfiguration.content)) {
+      return (
+        <ReactTooltip border={true} className={styles.tooltip} effect="solid" id="confirmBtn" place="top">
+          {resourcesContext.messages['fileNotSelectedError']}
+        </ReactTooltip>
+      );
     }
   };
 
   const addEditDialogFooter = (
     <Fragment>
-      <Button
-        className={`p-button-primary ${getIsDisabledConfirmBtn() ? '' : 'p-button-animated-blink'}`}
-        disabled={getIsDisabledConfirmBtn()}
-        icon={loadingStatus === 'pending' ? 'spinnerAnimate' : 'check'}
-        label={isNil(webformConfiguration.id) ? resourcesContext.messages['create'] : resourcesContext.messages['save']}
-        onClick={onConfirm}
-      />
+      <span data-for="confirmBtn" data-tip>
+        <Button
+          className={`p-button-primary ${getIsDisabledConfirmBtn() ? '' : 'p-button-animated-blink'}`}
+          disabled={getIsDisabledConfirmBtn()}
+          icon={loadingStatus === 'pending' ? 'spinnerAnimate' : 'check'}
+          label={
+            isNil(webformConfiguration.id) ? resourcesContext.messages['create'] : resourcesContext.messages['save']
+          }
+          onClick={onConfirm}
+        />
+      </span>
+
+      {renderTooltip()}
+
       <Button
         className="p-button-secondary p-button-animated-blink"
         icon="cancel"
@@ -358,6 +420,14 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       return (
         <div className={styles.noDataContent}>
           <Spinner className={styles.spinnerPosition} />
+        </div>
+      );
+    }
+
+    if (isEmpty(webformsList)) {
+      return (
+        <div className={styles.noDataContent}>
+          <span>{resourcesContext.messages['noData']}</span>
         </div>
       );
     }
@@ -419,37 +489,47 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
           onHide={onAddEditDialogClose}
           visible={isAddEditDialogVisible}>
           <InputText
-            className={`${styles.nameInput} ${errors.name ? styles.inputError : ''}`}
+            className={`${styles.nameInput} ${errors.name.hasErrors ? styles.inputError : ''}`}
             id="name"
             maxLength={50}
+            onBlur={() => checkHasErrors('name')}
             onChange={event => {
               event.persist();
               setWebformConfiguration(prev => ({ ...prev, name: event.target.value }));
+              setErrors(prevErrors => ({ ...prevErrors, name: { hasErrors: false, message: '' } }));
             }}
             placeholder={resourcesContext.messages['name']}
             value={webformConfiguration.name}
           />
+          {errors.name.hasErrors && <ErrorMessage className={styles.errorMessage} message={errors.name.message} />}
 
           <Dropdown
             appendTo={document.body}
-            className={`${styles.typeDropdown} ${errors.type ? styles.typeError : ''}`}
-            id="errorType"
-            onChange={e => setWebformConfiguration(prev => ({ ...prev, type: e.value.value }))}
+            className={`${styles.typeDropdown} ${errors.type.hasErrors ? styles.typeError : ''}`}
+            id="type"
+            onBlur={() => checkHasErrors('type')}
+            onChange={e => {
+              setWebformConfiguration({ ...webformConfiguration, type: e.value.value });
+              setErrors(prevErrors => ({ ...prevErrors, type: { hasErrors: false, message: '' } }));
+            }}
             optionLabel="name"
             options={dropdownOptions}
             optionValue="value"
             placeholder={resourcesContext.messages['webformsConfigurationsSelect']}
             value={{ name: typesKeyValues[webformConfiguration.type], value: webformConfiguration.type }}
           />
+          {errors.type.hasErrors && <ErrorMessage className={styles.errorMessage} message={errors.type.message} />}
 
           <InputFile
             accept=".json"
             buttonTextNoFile={resourcesContext.messages['inputFileButtonNotSelected']}
             buttonTextWithFile={resourcesContext.messages['inputFileButtonSelected']}
+            className={styles.inputFile}
             fileRef={fileRef}
-            hasError={errors.content}
+            hasError={errors.content.hasErrors}
             onChange={onFileUpload}
             onClearFile={onClearFile}
+            onClick={() => checkHasErrors('content')}
           />
         </Dialog>
       )}

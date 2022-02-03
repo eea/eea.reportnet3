@@ -96,7 +96,7 @@ export const TableManagement = ({
       <Button
         className={!isSaving && 'p-button-animated-blink'}
         disabled={isSaving}
-        icon={isSaving === true ? 'spinnerAnimate' : 'check'}
+        icon={isSaving ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['save']}
         onClick={() => onSaveRecord(selectedRecord)}
       />
@@ -462,7 +462,7 @@ export const TableManagement = ({
           header={resourcesContext.messages['deleteTabHeader']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onDeleteRow()}
+          onConfirm={onDeleteRow}
           onHide={() => manageDialogs('delete', false)}
           visible={isDialogVisible.delete}>
           {resourcesContext.messages['confirmDeleteRow']}

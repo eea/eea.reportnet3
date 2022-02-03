@@ -1,9 +1,8 @@
 import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { useRecoilValue, useResetRecoilState } from 'recoil';
+import { useResetRecoilState } from 'recoil';
 
 import isNil from 'lodash/isNil';
-import intersection from 'lodash/intersection';
 import isEmpty from 'lodash/isEmpty';
 import pull from 'lodash/pull';
 import ReactTooltip from 'react-tooltip';
@@ -18,6 +17,7 @@ import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataflowsList } from './_components/DataflowsList';
 import { Dialog } from 'views/_components/Dialog';
+import { Filters } from 'views/_components/Filters';
 import { GoTopButton } from 'views/_components/GoTopButton';
 import { InputText } from 'views/_components/InputText';
 import { MainLayout } from 'views/_components/Layout';
@@ -25,7 +25,6 @@ import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ManageWebforms } from './_components/ManageWebforms';
-import { MyFilters } from 'views/_components/MyFilters';
 import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
@@ -38,7 +37,6 @@ import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { UserService } from 'services/UserService';
 
 import { dialogsStore } from 'views/_components/Dialog/_functions/Stores/dialogsStore';
-import { filterByState, sortByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -47,8 +45,10 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { dataflowsReducer } from './_functions/Reducers/dataflowsReducer';
 
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useReportingObligations } from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
 import { CurrentPage } from 'views/_functions/Utils';
@@ -91,7 +91,7 @@ export const Dataflows = () => {
     isValidatingAllDataflowsUsers: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
-    pagination: { firstRow: 0, numberRows: 100, pageNum: 0 },
+    pagination: { firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 },
     pinnedSeparatorIndex: -1,
     reference: [],
     reporting: [],
@@ -155,10 +155,13 @@ export const Dataflows = () => {
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
-  const filterBy = useRecoilValue(filterByState(tabId));
-  const sortByOptions = useRecoilValue(sortByState(tabId));
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
+  const { resetFiltersState: resetReportingObligationsFiltersState } = useFilters('reportingObligations');
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
+
+  const { getFilterBy, isFiltered: areFiltersFilled, setData, sortByOptions } = useApplyFilters(tabId);
+  const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
 
   useEffect(() => {
     getDataflowsCount();
@@ -319,6 +322,8 @@ export const Dataflows = () => {
     const { numberRows, pageNum } = pagination;
 
     try {
+      const filterBy = await getFilterBy();
+
       if (TextUtils.areEquals(tabId, 'reporting')) {
         const data = await DataflowService.getAll({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy });
         const { dataflows, filteredRecords, totalRecords } = data;
@@ -422,13 +427,15 @@ export const Dataflows = () => {
       userContext.setCurrentDataflowType(currentTabDataflowType);
     }
     dataflowsDispatch({ type: 'ON_CHANGE_TAB', payload: { index } });
-    onChangePagination({ firstRow: 0, numberRows: 100, pageNum: 0 });
+    onChangePagination({ firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 });
     setGoToPage(1);
   };
 
   const onHideObligationDialog = () => {
     manageDialogs('isReportingObligationsDialogVisible', false);
+    resetObligationsFilterState();
     setObligationToPrevious();
+    resetReportingObligationsFiltersState();
   };
 
   const onLoadPermissions = () => {
@@ -509,10 +516,7 @@ export const Dataflows = () => {
 
   const updateUserPropertiesPinnedDataflows = ({ data = [], pinnedItem }) => {
     const userProperties = { ...userContext.userProps };
-    const pinnedDataflows = intersection(
-      userProperties.pinnedDataflows,
-      data.map(data => data.id.toString())
-    );
+    const pinnedDataflows = userProperties.pinnedDataflows;
 
     if (!isEmpty(pinnedDataflows) && pinnedDataflows.includes(pinnedItem.id.toString())) {
       pull(pinnedDataflows, pinnedItem.id.toString());
@@ -530,6 +534,7 @@ export const Dataflows = () => {
     const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
 
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
+    setData(parsedDataflows);
     dataflowsDispatch({
       type: 'SET_DATAFLOWS',
       payload: {
@@ -557,7 +562,10 @@ export const Dataflows = () => {
       className="p-button-secondary p-button-animated-blink"
       icon="cancel"
       label={resourcesContext.messages['close']}
-      onClick={() => manageDialogs('isUserListVisible', false)}
+      onClick={() => {
+        manageDialogs('isUserListVisible', false);
+        resetUserListFiltersState();
+      }}
     />
   );
 
@@ -568,7 +576,9 @@ export const Dataflows = () => {
         label={resourcesContext.messages['ok']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
+          resetObligationsFilterState();
           setToCheckedObligation();
+          resetReportingObligationsFiltersState();
         }}
       />
       <Button
@@ -577,11 +587,19 @@ export const Dataflows = () => {
         label={resourcesContext.messages['cancel']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
+          resetObligationsFilterState();
           setObligationToPrevious();
+          resetReportingObligationsFiltersState();
         }}
       />
     </Fragment>
   );
+
+  const getRolesDropdownOptions = () =>
+    Object.keys(config.permissions.roles).map(role => ({
+      label: config.permissions.roles[role].label,
+      value: config.permissions.roles[role].key
+    }));
 
   const getFilterOptions = () => {
     const filters = [
@@ -596,11 +614,22 @@ export const Dataflows = () => {
         type: 'INPUT'
       },
       {
-        nestedOptions: [
-          { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' },
-          { key: 'userRole', label: resourcesContext.messages['userRole'], isSortable: true }
+        key: 'userRole',
+        label: resourcesContext.messages['userRole'],
+        dropdownOptions: getRolesDropdownOptions(),
+        type: 'DROPDOWN'
+      },
+      {
+        key: 'status',
+        label: resourcesContext.messages['status'],
+        isSortable: true,
+        template: 'LevelError',
+        dropdownOptions: [
+          { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+          { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+          { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
         ],
-        type: 'MULTI_SELECT'
+        type: 'DROPDOWN'
       },
       {
         isSortable: true,
@@ -633,11 +662,16 @@ export const Dataflows = () => {
       type: 'INPUT'
     },
     {
-      nestedOptions: [
-        { key: 'status', label: resourcesContext.messages['status'], isSortable: true, template: 'LevelError' },
-        { key: 'pinned', label: resourcesContext.messages['pinned'], isSortable: true }
+      key: 'status',
+      label: resourcesContext.messages['status'],
+      isSortable: true,
+      template: 'LevelError',
+      dropdownOptions: [
+        { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+        { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
       ],
-      type: 'MULTI_SELECT'
+      type: 'DROPDOWN'
     }
   ];
 
@@ -721,11 +755,13 @@ export const Dataflows = () => {
   };
 
   const renderPaginator = () => {
-    if (!loadingStatus[tabId] && filteredRecords !== 0) {
+    if (totalRecords > 0) {
       return (
         <Paginator
+          areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
           className={`p-paginator-bottom ${styles.paginator}`}
           first={pagination.firstRow}
+          isDataflowsList={true}
           onPageChange={onPaginate}
           rightContent={renderPaginatorRecordsCount()}
           rows={pagination.numberRows}
@@ -749,13 +785,30 @@ export const Dataflows = () => {
             onTabChange={event => onChangeTab(event.index, event.value)}
           />
         </div>
-        <MyFilters
+        <Filters
           className="dataflowsFilters"
-          data={dataflowsState[tabId]}
-          onFilter={getDataflows}
+          isLoading={loadingStatus[tabId]}
+          onFilter={() => {
+            if (areFiltersFilled) {
+              onChangePagination({
+                firstRow: 0,
+                numberRows: dataflowsState.pagination.numberRows,
+                pageNum: 0
+              });
+            } else {
+              getDataflows();
+            }
+          }}
+          onReset={() => {
+            onChangePagination({
+              firstRow: 0,
+              numberRows: dataflowsState.pagination.numberRows,
+              pageNum: 0
+            });
+          }}
           onSort={getDataflows}
           options={options[tabId]}
-          viewType={tabId}
+          recoilId={tabId}
         />
         {renderPaginator()}
         <DataflowsList
@@ -778,7 +831,10 @@ export const Dataflows = () => {
         <Dialog
           footer={renderUserListDialogFooter()}
           header={resourcesContext.messages['allDataflowsUserListHeader']}
-          onHide={() => manageDialogs('isUserListVisible', false)}
+          onHide={() => {
+            manageDialogs('isUserListVisible', false);
+            resetUserListFiltersState();
+          }}
           visible={dataflowsState.isUserListVisible}>
           <UserList />
         </Dialog>

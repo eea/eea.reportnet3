@@ -128,6 +128,16 @@ public interface DatasetController {
           required = false) Boolean deletePrefilledTables);
 
   /**
+   * Private delete dataset data.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   */
+  @DeleteMapping("/private/{datasetId}/deleteDatasetData")
+  void privateDeleteDatasetData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId);
+
+  /**
    * Delete import data legacy.
    *
    * @param datasetId the dataset id

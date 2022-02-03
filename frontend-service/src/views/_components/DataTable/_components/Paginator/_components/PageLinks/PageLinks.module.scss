@@ -1,0 +1,10 @@
+.buttonPageLinks {
+  border: none !important;
+  box-shadow: var(--paginator-dataflows-pages-highlight-box-shadow) !important;
+}
+
+.notHighlightButtonPageLinks {
+  &:hover {
+    border: var(--paginator-dataflows-pages-not-highlight-hover-border) !important;
+  }
+}

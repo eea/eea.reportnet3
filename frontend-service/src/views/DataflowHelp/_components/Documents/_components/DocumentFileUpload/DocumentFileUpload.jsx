@@ -10,7 +10,6 @@ import { config } from 'conf';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
 import { Dropdown } from 'views/_components/Dropdown';
-import { ErrorMessage } from 'views/_components/ErrorMessage';
 import { InputFile } from 'views/_components/InputFile';
 
 import { DocumentService } from 'services/DocumentService';
@@ -33,9 +32,8 @@ export const DocumentFileUpload = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [fileContent, setFileContent] = useState(null);
-
   const inputRef = useRef(null);
+  const fileRef = useRef(null);
 
   const [areAllInputsChecked, setAreAllInputsChecked] = useState(false);
   const [errors, setErrors] = useState({
@@ -52,7 +50,9 @@ export const DocumentFileUpload = ({
   });
 
   const onClearFile = () => {
-    setFileContent(null);
+    setInputs(previousValues => {
+      return { ...previousValues, uploadFile: {}, isTouchedFileUpload: false };
+    });
   };
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export const DocumentFileUpload = ({
     let message = '';
 
     const inputValue = inputName === 'lang' ? inputs[inputName].value : inputs[inputName];
-    const inputUpload = document.querySelector('#uploadFile');
+    const inputUpload = fileRef.current;
 
     if (inputName !== 'uploadFile' && checkIsEmptyInput(inputValue)) {
       message = '';
@@ -102,19 +102,12 @@ export const DocumentFileUpload = ({
       message = resourcesContext.messages['documentDescriptionValidationMax'];
       hasErrors = true;
     } else if (inputName === 'uploadFile') {
-      if (isEditForm && checkExсeedsMaxFileSize(inputUpload)) {
+      if (checkExсeedsMaxFileSize(inputUpload)) {
         message = resourcesContext.messages['tooLargeFileValidationError'];
         hasErrors = true;
-      }
-
-      if (!isEditForm) {
-        if (checkIsEmptyFile(inputUpload)) {
-          message = '';
-          hasErrors = true;
-        } else if (checkExсeedsMaxFileSize(inputUpload)) {
-          message = resourcesContext.messages['tooLargeFileValidationError'];
-          hasErrors = true;
-        }
+      } else if (!isEditForm && checkIsEmptyFile(inputUpload)) {
+        message = '';
+        hasErrors = true;
       }
     }
 
@@ -127,16 +120,11 @@ export const DocumentFileUpload = ({
   useImperativeHandle(footerRef, () => ({ onConfirm }));
 
   const onConfirm = async () => {
-    checkInputForErrors('description');
-    checkInputForErrors('lang');
-    checkInputForErrors('uploadFile');
+    const descHasError = checkInputForErrors('description');
+    const langHasError = checkInputForErrors('lang');
+    const fileHasError = checkInputForErrors('uploadFile');
 
-    if (
-      areAllInputsChecked &&
-      !errors.description.hasErrors &&
-      !errors.lang.hasErrors &&
-      !errors.uploadFile.hasErrors
-    ) {
+    if (areAllInputsChecked && !descHasError && !langHasError && !fileHasError) {
       setIsUploading(true);
       setSubmitting(true);
       setFileUpdatingId(inputs.id);
@@ -190,13 +178,11 @@ export const DocumentFileUpload = ({
   };
 
   const onFileUpload = async e => {
-    if (!isNil(e.target.files[0])) {
-      const reader = new FileReader();
-      reader.onload = async e => {
-        const text = e.target.result;
-        setFileContent(text);
-      };
-      reader.readAsText(e.target.files[0]);
+    const eventTarget = e.currentTarget;
+    if (!isNil(eventTarget.files[0])) {
+      setInputs(previousValues => {
+        return { ...previousValues, uploadFile: eventTarget.files[0], isTouchedFileUpload: true };
+      });
     }
   };
 
@@ -205,7 +191,7 @@ export const DocumentFileUpload = ({
       <fieldset>
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <input
-            id={'descriptionDocumentFileUpload'}
+            id="descriptionDocumentFileUpload"
             maxLength={config.INPUT_MAX_LENGTH}
             name={resourcesContext.messages['description']}
             onBlur={() => checkInputForErrors('description')}
@@ -230,7 +216,6 @@ export const DocumentFileUpload = ({
           <label className="srOnly" htmlFor="descriptionDocumentFileUpload">
             {resourcesContext.messages['description']}
           </label>
-          {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
         </div>
 
         <div className={`formField ${errors.lang.hasErrors ? 'error' : ''}`}>
@@ -268,8 +253,9 @@ export const DocumentFileUpload = ({
               accept="*"
               buttonTextNoFile={resourcesContext.messages['inputFileButtonNotSelected']}
               buttonTextWithFile={resourcesContext.messages['inputFileButtonSelected']}
-              fileRef={inputRef}
-              hasError={errors.jsonContent}
+              errorMessage={errors.uploadFile.message}
+              fileRef={fileRef}
+              hasError={errors.uploadFile.hasErrors}
               onChange={onFileUpload}
               onClearFile={onClearFile}
               onKeyPress={e => {
@@ -282,7 +268,6 @@ export const DocumentFileUpload = ({
               {resourcesContext.messages['uploadDocument']}
             </label>
           </span>
-          {errors.uploadFile.message !== '' && <ErrorMessage message={errors.uploadFile.message} />}
         </div>
       </fieldset>
 
@@ -302,8 +287,7 @@ export const DocumentFileUpload = ({
             htmlFor="isPublic"
             onClick={() => {
               setInputs(previousValues => ({ ...previousValues, isPublic: !previousValues.isPublic }));
-            }}
-            style={{ cursor: 'pointer', fontWeight: 'bold', marginLeft: '3px' }}>
+            }}>
             {resourcesContext.messages['checkboxIsPublic']}
           </label>
         </div>

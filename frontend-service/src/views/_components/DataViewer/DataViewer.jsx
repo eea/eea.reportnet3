@@ -21,6 +21,7 @@ import { Checkbox } from 'views/_components/Checkbox';
 import { Chips } from 'views/_components/Chips';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
+import { ConfirmDialogPaste } from 'views/_components/ConfirmDialogPaste';
 import { ContextMenu } from 'views/_components/ContextMenu';
 import { CoordinatesMoreInfo } from 'views/_components/CoordinatesMoreInfo';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
@@ -470,10 +471,7 @@ export const DataViewer = ({
     return false;
   };
 
-  const showGroupedValidationFilter = groupedBy => {
-    setIsFilterValidationsActive(groupedBy);
-    dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
-  };
+  const showGroupedValidationFilter = () => dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
 
   const showValueFilter = value => {
     setValueFilter(value);
@@ -495,7 +493,7 @@ export const DataViewer = ({
   };
 
   const onCancelRowEdit = () => {
-    let updatedValue = RecordUtils.changeRecordInTable(
+    const updatedValue = RecordUtils.changeRecordInTable(
       fetchedData,
       RecordUtils.getRecordId(fetchedData, records.selectedRecord),
       colsSchema,
@@ -931,7 +929,7 @@ export const DataViewer = ({
       <Button
         className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
         disabled={isSaving || records.isSaveDisabled}
-        icon={isSaving === true ? 'spinnerAnimate' : 'check'}
+        icon={isSaving ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['save']}
         onClick={() => {
           try {
@@ -1461,7 +1459,7 @@ export const DataViewer = ({
         </ConfirmDialog>
       )}
       {confirmPasteVisible && (
-        <ConfirmDialog
+        <ConfirmDialogPaste
           className="edit-table"
           disabledConfirm={isEmpty(records.pastedRecords)}
           divRef={divRef}
@@ -1488,7 +1486,7 @@ export const DataViewer = ({
             numCopiedRecords={records.numCopiedRecords}
             onDeletePastedRecord={onDeletePastedRecord}
           />
-        </ConfirmDialog>
+        </ConfirmDialogPaste>
       )}
       {records.isMapOpen && (
         <Dialog

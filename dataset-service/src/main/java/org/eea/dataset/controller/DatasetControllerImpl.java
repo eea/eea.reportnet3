@@ -547,6 +547,44 @@ public class DatasetControllerImpl implements DatasetController {
   }
 
   /**
+   * Private delete dataset data.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @HystrixCommand
+  @LockMethod(removeWhenFinish = true)
+  @DeleteMapping("/private/{datasetId}/deleteDatasetData")
+  @ApiOperation(value = "Private Delete dataset data", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully deleted"),
+      @ApiResponse(code = 403, message = "Dataset not belong dataflow"),
+      @ApiResponse(code = 401, message = "Unauthorize"),
+      @ApiResponse(code = 500, message = "Error deleting data")})
+  public void privateDeleteDatasetData(
+      @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
+          name = "datasetId") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow id",
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    userNotificationContentVO.setDatasetId(datasetId);
+    notificationControllerZuul.createUserNotificationPrivate("DELETE_DATASET_DATA_INIT",
+        userNotificationContentVO);
+
+    // Rest API only: Check if the dataflow belongs to the dataset
+    if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+      String errorMessage =
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
+      LOG_ERROR.error(errorMessage);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+    }
+    deleteHelper.executeDeleteDatasetProcess(datasetId, false);
+  }
+
+  /**
    * Delete import data legacy.
    *
    * @param datasetId the dataset id

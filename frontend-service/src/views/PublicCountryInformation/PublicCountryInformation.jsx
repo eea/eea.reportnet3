@@ -1,11 +1,13 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
 
 import ReactTooltip from 'react-tooltip';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
@@ -17,12 +19,15 @@ import styles from './PublicCountryInformation.module.scss';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { DownloadFile } from 'views/_components/DownloadFile';
+import { MyFilters } from 'views/_components/MyFilters';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
 import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
 
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
+
+import { filterByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -46,18 +51,30 @@ export const PublicCountryInformation = () => {
   const [contentStyles, setContentStyles] = useState({});
   const [countryName, setCountryName] = useState('');
   const [dataflows, setDataflows] = useState([]);
-  const [firstRow, setFirstRow] = useState(0);
+  const [filteredRecords, setFilteredRecords] = useState(0);
+  const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [numberRows, setNumberRows] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
+  const [isReset, setIsReset] = useState(false);
+  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
   const [sortField, setSortField] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
+  const [totalRecords, setTotalRecords] = useState(0);
+
+  const filterBy = useRecoilValue(filterByState('publicCountryInformation'));
+
+  const { firstRow, numberRows, pageNum } = pagination;
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode });
 
   useEffect(() => {
-    onLoadPublicCountryInformation(sortOrder, sortField, firstRow, numberRows);
-  }, []);
+    onLoadPublicCountryInformation();
+  }, [pagination, sortOrder, sortField]);
+
+  useEffect(() => {
+    if (isReset) {
+      setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
+    }
+  }, [isReset]);
 
   useEffect(() => {
     !isNil(countryCode) && getCountryName();
@@ -84,25 +101,20 @@ export const PublicCountryInformation = () => {
     }
   };
 
-  const getHeader = fieldHeader => {
-    switch (fieldHeader) {
-      case 'isReleased':
-        return resourcesContext.messages['delivered'];
-      case 'publicFilesNames':
-        return resourcesContext.messages['files'];
-      case 'referencePublicFilesNames':
-        return resourcesContext.messages['referenceDatasets'];
-      default:
-        return resourcesContext.messages[fieldHeader];
+  const getDeliveryStatus = (dataflow, dataset) => {
+    if (!dataset?.isReleased) {
+      return config.datasetStatus.PENDING.label;
+    } else {
+      if (!dataflow.manualAcceptance) {
+        return config.datasetStatus.DELIVERED.label;
+      } else {
+        return DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets.map(dataset => dataset.status));
+      }
     }
   };
 
-  const onChangePage = event => {
-    const isChangedPage = true;
-    setNumberRows(event.rows);
-    setFirstRow(event.first);
-    onLoadPublicCountryInformation(sortOrder, sortField, event.first, event.rows, isChangedPage);
-  };
+  const onChangePage = event =>
+    setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: Math.floor(event.first / event.rows) });
 
   const onFileDownload = async (dataflowId, dataProviderId, fileName) => {
     try {
@@ -124,22 +136,32 @@ export const PublicCountryInformation = () => {
     }
   };
 
-  const onLoadPublicCountryInformation = async (sortOrder, sortField, firstRow, numberRows, isChangedPage) => {
+  const getSortOrder = () => {
+    if (sortOrder === -1) {
+      return 0;
+    } else if (isNil(sortOrder)) {
+      return undefined;
+    } else {
+      return sortOrder;
+    }
+  };
+
+  const onLoadPublicCountryInformation = async () => {
     setIsLoading(true);
     try {
-      if (sortOrder === -1) {
-        sortOrder = 0;
-      }
-      let pageNum = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
-      const data = await DataflowService.getPublicDataflowsByCountryCode(
+      const data = await DataflowService.getPublicDataflowsByCountryCode({
         countryCode,
-        sortOrder,
+        sortOrder: getSortOrder(),
         pageNum,
         numberRows,
-        sortField
-      );
+        sortField,
+        filterBy
+      });
       setTotalRecords(data.totalRecords);
-      setPublicInformation(data.publicDataflows);
+      setPublicInformation(data.dataflows);
+      setFilteredRecords(data.filteredRecords);
+      setIsFiltered(Object.keys(filterBy).length !== 0 && data.filteredRecords !== data.totalRecords);
+      setIsReset(false);
     } catch (error) {
       console.error('PublicCountryInformation - onLoadPublicCountryInformation.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' }, true);
@@ -151,7 +173,6 @@ export const PublicCountryInformation = () => {
   const onSort = event => {
     setSortOrder(event.sortOrder);
     setSortField(event.sortField);
-    onLoadPublicCountryInformation(event.sortOrder, event.sortField, firstRow, numberRows);
   };
 
   const setPublicInformation = dataflows => {
@@ -173,69 +194,65 @@ export const PublicCountryInformation = () => {
         return {
           deadline: dataflow.expirationDate,
           id: dataflow.id,
-          isReleased: dataset.isReleased,
-          legalInstrument: dataflow.obligation?.legalInstrument,
+          legalInstrumentAlias: dataflow.obligation?.legalInstrument.alias,
+          legalInstrumentId: dataflow.obligation?.legalInstrument.id,
+          legalInstrument: dataflow.obligation?.legalInstrument.title,
           name: dataflow.name,
-          obligation: dataflow.obligation,
+          obligationId: dataflow.obligation.obligationId,
+          obligation: dataflow.obligation.title,
           publicFilesNames: publicFileNames,
           referencePublicFilesNames: referencePublicFileNames,
-          deliveryDate: dataset.releaseDate,
-          deliveryStatus: !dataset.isReleased
-            ? config.datasetStatus.PENDING.label
-            : !dataflow.manualAcceptance
-            ? config.datasetStatus.DELIVERED.label
-            : DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets.map(dataset => dataset.status)),
-          restrictFromPublic: dataflow.datasets ? dataflow.datasets[0].restrictFromPublic : false,
-          status: resourcesContext.messages[dataflow.status]
+          deliveryDate: !isNil(dataset) ? dataset?.releaseDate : '-',
+          deliveryStatus: getDeliveryStatus(dataflow, dataset).toUpperCase(),
+          restrictFromPublic: dataflow.datasets ? dataflow.datasets[0]?.restrictFromPublic : false,
+          status: resourcesContext.messages[dataflow.status].toUpperCase()
         };
       });
     setDataflows(publicDataflows);
   };
 
-  const getOrderedColumns = dataflows => {
-    const dataflowsWithPriority = [
-      { id: 'id', index: 0 },
-      { id: 'name', index: 1 },
-      { id: 'obligation', index: 2 },
-      { id: 'legalInstrument', index: 3 },
-      { id: 'deadline', index: 4 },
-      { id: 'status', index: 5 },
-      { id: 'deliveryDate', index: 6 },
-      { id: 'deliveryStatus', index: 7 },
-      { id: 'referencePublicFilesNames', index: 8 },
-      { id: 'publicFilesNames', index: 9 }
+  const renderTableColumns = () => {
+    const columns = [
+      { key: 'name', header: resourcesContext.messages['name'], template: renderDataflowNameBodyColumn },
+      { key: 'obligation', header: resourcesContext.messages['obligation'], template: renderObligationBodyColumn },
+      {
+        key: 'legalInstrument',
+        header: resourcesContext.messages['legalInstrument'],
+        template: renderLegalInstrumentBodyColumn
+      },
+      { key: 'deadline', header: resourcesContext.messages['deadline'] },
+      { key: 'status', header: resourcesContext.messages['status'], template: renderStatusBodyColumn },
+      { key: 'deliveryDate', header: resourcesContext.messages['deliveryDate'] },
+      {
+        key: 'deliveryStatus',
+        header: resourcesContext.messages['deliveryStatus'],
+        template: renderDeliveryStatusBodyColumn
+      },
+      {
+        key: 'referencePublicFilesNames',
+        header: resourcesContext.messages['referenceDatasets'],
+        template: renderDownloadReferenceFileBodyColumn
+      },
+      {
+        key: 'publicFilesNames',
+        header: resourcesContext.messages['files'],
+        template: renderDownloadFileBodyColumn
+      }
     ];
 
-    return dataflows
-      .map(field => dataflowsWithPriority.filter(e => field === e.id))
-      .flat()
-      .sort((a, b) => a.index - b.index)
-      .map(orderedField => orderedField.id);
-  };
-
-  const renderColumns = dataflows => {
-    const fieldColumns = getOrderedColumns(Object.keys(dataflows[0]))
-      .filter(key => !key.includes('id'))
-      .map(field => {
-        let template = null;
-        if (field === 'isReleased') template = renderIsReleasedBodyColumn;
-        if (field === 'name') template = renderDataflowNameBodyColumn;
-        if (field === 'legalInstrument') template = renderLegalInstrumentBodyColumn;
-        if (field === 'obligation') template = renderObligationBodyColumn;
-        if (field === 'publicFilesNames') template = renderDownloadFileBodyColumn;
-        if (field === 'referencePublicFilesNames') template = renderDownloadReferenceFileBodyColumn;
-        return (
-          <Column
-            body={template}
-            field={field}
-            header={getHeader(field)}
-            key={field}
-            sortable={field === 'publicFilesNames' || field === 'referencePublicFilesNames' ? false : true}
-          />
-        );
-      });
-
-    return fieldColumns;
+    return columns.map(column => (
+      <Column
+        body={column.template}
+        className={column.className ? column.className : ''}
+        columnResizeMode="expand"
+        editor={column.editor}
+        field={column.key}
+        header={column.header}
+        key={column.key}
+        rowEditor={column.key === 'actions'}
+        sortable={column.key === 'publicFilesNames' || column.key === 'referencePublicFilesNames' ? false : true}
+      />
+    ));
   };
 
   const renderDownloadFileBodyColumn = rowData => {
@@ -319,39 +336,77 @@ export const PublicCountryInformation = () => {
     }
   };
 
-  const renderIsReleasedBodyColumn = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {rowData.isReleased && <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} />}
-    </div>
-  );
+  const filterOptions = [
+    {
+      type: 'INPUT',
+      nestedOptions: [
+        { key: 'name', label: resourcesContext.messages['name'] },
+        { key: 'obligation', label: resourcesContext.messages['obligation'] },
+        { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'] }
+      ]
+    },
+    { type: 'DATE', key: 'deadline', label: resourcesContext.messages['deadline'] },
+    {
+      key: 'status',
+      label: resourcesContext.messages['status'],
+      template: 'LevelError',
+      dropdownOptions: [
+        { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+        { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
+      ],
+      type: 'DROPDOWN'
+    },
+    { type: 'DATE', key: 'deliveryDate', label: resourcesContext.messages['deliveryDate'] },
+    {
+      type: 'MULTI_SELECT',
+      key: 'deliveryStatus',
+      label: resourcesContext.messages['deliveryStatus']
+    }
+  ];
 
-  const renderLegalInstrumentBodyColumn = rowData => (
-    <div onClick={e => e.stopPropagation()}>
-      {rowData.legalInstrument?.id
-        ? renderRedirectText(
-            rowData.legalInstrument?.alias,
-            `${baseRod3Url}/instruments/${rowData.legalInstrument?.id}`
-          )
-        : rowData.legalInstrument?.alias}
-    </div>
-  );
+  const renderFilters = () => {
+    return (
+      <MyFilters
+        className="publicCountryInformationFilters"
+        data={dataflows}
+        onFilter={() => {
+          if (isFiltered) {
+            setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
+          } else {
+            onLoadPublicCountryInformation();
+          }
+        }}
+        onReset={setIsReset}
+        options={filterOptions}
+        viewType="publicCountryInformation"
+      />
+    );
+  };
 
   const renderDataflowNameBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
-      {rowData.obligation?.obligationId
+      {rowData.obligationId
         ? renderRedirectText(rowData.name, getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId: rowData.id }, true))
         : rowData.name}
     </div>
   );
 
+  const renderDeliveryStatusBodyColumn = rowData => <div>{capitalize(rowData.deliveryStatus)}</div>;
+
+  const renderLegalInstrumentBodyColumn = rowData => (
+    <div onClick={e => e.stopPropagation()}>
+      {rowData.legalInstrumentId
+        ? renderRedirectText(rowData.legalInstrumentAlias, `${baseRod3Url}/instruments/${rowData.legalInstrumentId}`)
+        : rowData.legalInstrumentAlias}
+    </div>
+  );
+
   const renderObligationBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
-      {rowData.obligation?.obligationId
-        ? renderRedirectText(
-            rowData.obligation?.title,
-            `${baseRod3Url}/obligations/${rowData.obligation?.obligationId}`
-          )
-        : rowData.obligation?.title}
+      {rowData.obligationId
+        ? renderRedirectText(rowData.obligation, `${baseRod3Url}/obligations/${rowData.obligationId}`)
+        : rowData.obligation}
     </div>
   );
 
@@ -370,44 +425,72 @@ export const PublicCountryInformation = () => {
     </span>
   );
 
+  const renderPaginatorRecordsCount = () => (
+    <Fragment>
+      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
+      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
+        'records'
+      ].toLowerCase()}`}
+    </Fragment>
+  );
+
+  const renderPublicCountryInformationTitle = () => {
+    if (!isEmpty(countryName)) {
+      return (
+        <Title icon="clone" iconSize={'4rem'} subtitle={resourcesContext.messages['dataflows']} title={countryName} />
+      );
+    }
+  };
+
+  const renderPublicCountryInformation = () => {
+    if (isLoading) {
+      return <Spinner className={styles.isLoading} />;
+    }
+
+    if (isEmpty(countryName)) {
+      return <div className={styles.noDataflows}>{resourcesContext.messages['wrongUrlCountryCode']}</div>;
+    }
+
+    if (isEmpty(dataflows) && !isFiltered) {
+      return <div className={styles.noDataflows}>{resourcesContext.messages['noDataflows']}</div>;
+    }
+
+    if (isEmpty(dataflows) && isFiltered) {
+      return <div className={styles.noDataflows}>{resourcesContext.messages['dataflowsNotMatchingFilter']}</div>;
+    }
+
+    return (
+      <DataTable
+        areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
+        autoLayout={true}
+        className={styles.countriesList}
+        first={firstRow}
+        lazy={true}
+        onPage={onChangePage}
+        onSort={onSort}
+        paginator={true}
+        paginatorRight={renderPaginatorRecordsCount()}
+        rows={numberRows}
+        rowsPerPageOptions={[5, 10, 15]}
+        sortable={true}
+        sortField={sortField}
+        sortOrder={sortOrder}
+        summary={resourcesContext.messages['dataflows']}
+        totalRecords={totalRecords}
+        value={dataflows}>
+        {renderTableColumns(dataflows)}
+      </DataTable>
+    );
+  };
+
+  const renderStatusBodyColumn = rowData => <div>{capitalize(rowData.status)}</div>;
+
   return (
     <PublicLayout>
       <div className={`${styles.container}  rep-container`} style={contentStyles}>
-        {!isEmpty(countryName) && (
-          <Title icon="clone" iconSize={'4rem'} subtitle={resourcesContext.messages['dataflows']} title={countryName} />
-        )}
-        {isLoading ? (
-          <Spinner className={styles.isLoading} />
-        ) : isEmpty(countryName) ? (
-          <div className={styles.noDataflows}>{resourcesContext.messages['wrongUrlCountryCode']}</div>
-        ) : isEmpty(dataflows) ? (
-          <div className={styles.noDataflows}>{resourcesContext.messages['noDataflows']}</div>
-        ) : (
-          <div className={styles.countriesList}>
-            <DataTable
-              autoLayout={true}
-              first={firstRow}
-              lazy={true}
-              onPage={onChangePage}
-              onSort={onSort}
-              paginator={true}
-              paginatorRight={
-                <span>{`${resourcesContext.messages['totalRecords']} ${totalRecords} ${resourcesContext.messages[
-                  'records'
-                ].toLowerCase()}`}</span>
-              }
-              rows={numberRows}
-              rowsPerPageOptions={[5, 10, 15]}
-              sortable={true}
-              sortField={sortField}
-              sortOrder={sortOrder}
-              summary={resourcesContext.messages['dataflows']}
-              totalRecords={totalRecords}
-              value={dataflows}>
-              {renderColumns(dataflows)}
-            </DataTable>
-          </div>
-        )}
+        {renderPublicCountryInformationTitle()}
+        {renderFilters()}
+        {renderPublicCountryInformation()}
       </div>
     </PublicLayout>
   );

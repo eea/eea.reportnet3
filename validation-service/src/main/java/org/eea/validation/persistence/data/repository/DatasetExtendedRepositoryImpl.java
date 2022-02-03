@@ -95,6 +95,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       Long datasetId, Long idTable) throws EEAInvalidSQLException {
     try {
       Session session = (Session) entityManager.getDelegate();
+      session.setDefaultReadOnly(true);
       return session.doReturningWork(
           conn -> executeQuery(conn, entityName, query, entityTypeEnum, datasetId, idTable));
     } catch (HibernateException e) {
@@ -152,6 +153,8 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             recordValidations.add(recordValidation);
           }
           return recordValidations;
+        } finally {
+          entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAll();
         }
       }
     });
@@ -207,6 +210,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
           }
           return fieldValidations;
         } finally {
+          entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAll();
           System.gc();
         }
       }
@@ -290,6 +294,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     } finally {
       stmt.close();
       conn.setAutoCommit(true);
+      entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAll();
     }
     System.gc();
     return tableValue;
@@ -434,11 +439,11 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
 
     try {
       Session session = (Session) entityManager.getDelegate();
+      session.setDefaultReadOnly(true);
       result = session.doReturningWork(new ReturningWork<String>() {
         @Override
         public String execute(Connection conn) throws SQLException {
           String resultObject = "";
-          conn.setReadOnly(true);
           conn.setSchema("dataset_" + datasetId);
           try (PreparedStatement stmt = conn.prepareStatement(sqlRule);
               ResultSet rs = stmt.executeQuery();) {
@@ -453,6 +458,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
     } catch (HibernateException e) {
       throw new EEAInvalidSQLException("SQL not valid: " + sqlRule, e);
     }
+    entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAllRegions();
     return result;
   }
 

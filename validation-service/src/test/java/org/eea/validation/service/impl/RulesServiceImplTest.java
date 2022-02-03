@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +31,14 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.DatasetHistoricRuleVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.validation.mapper.DatasetHistoricRuleMapper;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleHistoricInfoMapper;
 import org.eea.validation.mapper.RuleMapper;
@@ -53,6 +57,7 @@ import org.eea.validation.persistence.schemas.RecordSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.UniqueConstraintSchema;
 import org.eea.validation.persistence.schemas.audit.Audit;
+import org.eea.validation.persistence.schemas.audit.RuleHistoricInfo;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.util.GeometryValidationUtils;
@@ -145,6 +150,9 @@ public class RulesServiceImplTest {
 
   @Mock
   private DataFlowControllerZuul dataflowControllerZuul;
+
+  @Mock
+  private DatasetHistoricRuleMapper datasetHistoricRuleMapper;
 
   private SecurityContext securityContext;
 
@@ -1165,12 +1173,12 @@ public class RulesServiceImplTest {
         .thenReturn(dataset);
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setId(1L);
-    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
     Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     Mockito.when(rulesRepository.updateRule(Mockito.any(), Mockito.any())).thenReturn(true);
-    // Mockito.when(auditRepository.getAuditByRuleId(Mockito.any())).thenReturn(audit);
+    Mockito.when(auditRepository.getAuditByRuleId(Mockito.any())).thenReturn(audit);
     rulesServiceImpl.updateRule(1L, ruleVO);
     Mockito.verify(rulesRepository, times(1)).updateRule(Mockito.any(), Mockito.any());
   }
@@ -1220,7 +1228,7 @@ public class RulesServiceImplTest {
         .thenReturn(dataset);
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setId(1L);
-    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
     Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(rule);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
@@ -1982,11 +1990,110 @@ public class RulesServiceImplTest {
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
         .thenReturn(null);
     try {
-      rulesServiceImpl.getRuleHistoricInfo(1L, "RULEID");
+      ObjectId id = new ObjectId();
+      rulesServiceImpl.getRuleHistoricInfo(1L, id.toString());
     } catch (EEAException e) {
       assertNotNull(e);
       throw e;
     }
   }
+
+  @Test(expected = EEAException.class)
+  public void getRuleHistoricInfoRuleNotFoundTest() throws EEAException {
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    try {
+      ObjectId id = new ObjectId();
+      rulesServiceImpl.getRuleHistoricInfo(1L, id.toString());
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test
+  public void getRuleHistoricInfoRuleAuditExistTest() throws EEAException {
+    Audit audit = new Audit();
+    audit.setDatasetId(1L);
+    audit.setIdAudit(new ObjectId());
+    List<RuleHistoricInfo> historicExpected = new ArrayList<>();
+    RuleHistoricInfo ruleInfo = new RuleHistoricInfo();
+    ruleInfo.setExpression(true);
+    ruleInfo.setMetadata(false);
+    ruleInfo.setRuleBefore("");
+    ruleInfo.setRuleId(new ObjectId());
+    ruleInfo.setRuleInfoId(new ObjectId());
+    ruleInfo.setStatus(false);
+    ruleInfo.setTimestamp(new Date());
+    ruleInfo.setUser("user");
+    historicExpected.add(ruleInfo);
+    audit.setHistoric(historicExpected);
+
+    List<RuleHistoricInfoVO> historicVO = new ArrayList<>();
+    RuleHistoricInfoVO ruleInfoVO = new RuleHistoricInfoVO();
+    ruleInfo.setExpression(true);
+    ruleInfo.setMetadata(false);
+    ruleInfo.setRuleBefore("");
+    ruleInfo.setRuleId(new ObjectId());
+    ruleInfo.setRuleInfoId(new ObjectId());
+    ruleInfo.setStatus(false);
+    ruleInfo.setTimestamp(new Date());
+    ruleInfo.setUser("user");
+    historicExpected.add(ruleInfo);
+
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("5e44110d6a9e3a270ce13fac");
+    Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(new Rule());
+    Mockito.when(auditRepository.getAuditByRuleId(Mockito.any())).thenReturn(audit);
+    Mockito.when(ruleHistoricInfoMapper.entityListToClass(Mockito.anyList()))
+        .thenReturn(historicVO);
+
+    assertEquals(rulesServiceImpl.getRuleHistoricInfo(1L, new ObjectId().toString()), historicVO);
+  }
+
+  @Test
+  public void getRuleHistoricInfoByDatasetIdTest() {
+    List<Audit> audits = new ArrayList<>();
+    Audit audit = new Audit();
+    audit.setIdAudit(new ObjectId());
+    audit.setDatasetId(1L);
+    RuleHistoricInfo ruleHistoricInfo = new RuleHistoricInfo();
+    ruleHistoricInfo.setExpression(false);
+    ruleHistoricInfo.setMetadata(false);
+    ruleHistoricInfo.setRuleBefore("");
+    ruleHistoricInfo.setRuleId(new ObjectId());
+    ruleHistoricInfo.setRuleInfoId(new ObjectId());
+    ruleHistoricInfo.setStatus(false);
+    ruleHistoricInfo.setTimestamp(new Date());
+    ruleHistoricInfo.setUser("email@reportnet.net");
+    List<RuleHistoricInfo> historic = new ArrayList<>();
+    historic.add(ruleHistoricInfo);
+    audit.setHistoric(historic);
+    audits.add(audit);
+    DatasetHistoricRuleVO datasetHistoricVO = new DatasetHistoricRuleVO();
+    datasetHistoricVO.setRuleId("ruleId");
+    Mockito.when(auditRepository.getAuditsByDatasetId(Mockito.anyLong())).thenReturn(audits);
+    Mockito.when(datasetHistoricRuleMapper.entityToClass(Mockito.any()))
+        .thenReturn(datasetHistoricVO);
+    assertNotNull(rulesServiceImpl.getRuleHistoricInfoByDatasetId(1L));
+
+  }
+
+  @Test
+  public void deleteAutomaticRuleByReferenceIdTest() {
+    rulesServiceImpl.deleteAutomaticRuleByReferenceId(new ObjectId().toString(),
+        new ObjectId().toString());
+    Mockito.verify(rulesRepository, times(1)).deleteAutomaticRuleByReferenceId(Mockito.any(),
+        Mockito.any());
+  }
+
+  @Test
+  public void deleteRuleRequiredDataPointTest() {
+    rulesServiceImpl.deleteRuleRequired(new ObjectId().toString(), new ObjectId().toString(),
+        DataType.POINT);
+    Mockito.verify(rulesRepository, times(1)).deleteRulePointRequired(Mockito.any(), Mockito.any());
+  }
+
+
 
 }
