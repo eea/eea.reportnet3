@@ -755,7 +755,7 @@ export const Dataflows = () => {
   };
 
   const renderPaginator = () => {
-    if (!loadingStatus[tabId]) {
+    if (totalRecords > 0) {
       return (
         <Paginator
           areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}

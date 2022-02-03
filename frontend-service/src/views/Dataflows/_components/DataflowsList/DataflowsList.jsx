@@ -51,7 +51,11 @@ export const DataflowsList = ({
 
   const renderContent = () => {
     if (isLoading) {
-      return <Spinner style={{ top: 0 }} />;
+      return (
+        <div className={styles.spinnerDiv}>
+          <Spinner className={styles.spinner} />
+        </div>
+      );
     }
 
     if (isEmpty(data)) {
