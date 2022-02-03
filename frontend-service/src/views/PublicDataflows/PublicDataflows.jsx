@@ -194,7 +194,7 @@ export const PublicDataflows = () => {
   );
 
   const renderPaginator = () => {
-    if (!isLoading && totalRecords > config.DATAFLOWS_PER_PAGE) {
+    if (totalRecords > 0) {
       return (
         <Paginator
           areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
@@ -231,29 +231,23 @@ export const PublicDataflows = () => {
     }
 
     return (
-      <Fragment>
-        <div className={styles.topPaginator}>{renderPaginator()}</div>
-
-        <div className="responsiveCardsGrid">
-          {publicDataflows.map(dataflow => (
-            <PublicCard
-              animation
-              card={dataflow}
-              dataflowId={dataflow.id}
-              dueDate={dataflow.expirationDate}
-              key={dataflow.id}
-              landingPageCard={false}
-              obligation={dataflow.obligation}
-              onCardClick={onOpenDataflow}
-              status={resourcesContext.messages[dataflow.status]}
-              subtitle={{ text: dataflow.description, url: '' }}
-              title={{ text: dataflow.name, url: '' }}
-            />
-          ))}
-        </div>
-
-        <div className={styles.bottomPaginator}>{renderPaginator()}</div>
-      </Fragment>
+      <div className="responsiveCardsGrid">
+        {publicDataflows.map(dataflow => (
+          <PublicCard
+            animation
+            card={dataflow}
+            dataflowId={dataflow.id}
+            dueDate={dataflow.expirationDate}
+            key={dataflow.id}
+            landingPageCard={false}
+            obligation={dataflow.obligation}
+            onCardClick={onOpenDataflow}
+            status={resourcesContext.messages[dataflow.status]}
+            subtitle={{ text: dataflow.description, url: '' }}
+            title={{ text: dataflow.name, url: '' }}
+          />
+        ))}
+      </div>
     );
   };
 
@@ -263,6 +257,7 @@ export const PublicDataflows = () => {
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>{resourcesContext.messages['dataflows']}</h1>
           <Filters
+            className="publicDataflows"
             isLoading={isLoading}
             onFilter={() => {
               if (areFiltersFilled) {
@@ -276,7 +271,9 @@ export const PublicDataflows = () => {
             options={filterOptions}
             recoilId="publicDataflows"
           />
+          <div className={styles.topPaginator}>{renderPaginator()}</div>
           {renderPublicDataflowsContent()}
+          <div className={styles.bottomPaginator}>{renderPaginator()}</div>
         </div>
       </div>
     </PublicLayout>
