@@ -140,7 +140,7 @@ export const ManageManualAcceptanceDataset = ({
     const renderIconTooltip = () => <Icon icon="warning" />;
 
     const renderMessage = () => (
-      <div>
+      <div className={styles.warningAutomaticReportingDeletionWrapper}>
         <label
           className={styles.warningAutomaticReportingDeletionLabel}>{`${resourcesContext.messages['warning']}:`}</label>
         {resourcesContext.messages['automaticReportingDeletionMessage']}
