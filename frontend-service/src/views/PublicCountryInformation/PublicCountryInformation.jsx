@@ -160,7 +160,6 @@ export const PublicCountryInformation = () => {
 
       setTotalRecords(data.totalRecords);
       setPublicInformation(data.dataflows);
-      setData(data.dataflows);
       setFilteredRecords(data.filteredRecords);
       setIsFiltered(Object.keys(filterBy).length !== 0 && data.filteredRecords !== data.totalRecords);
       setIsReset(false);
@@ -211,6 +210,7 @@ export const PublicCountryInformation = () => {
         };
       });
     setDataflows(publicDataflows);
+    setData(publicDataflows);
   };
 
   const renderTableColumns = () => {
