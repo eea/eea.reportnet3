@@ -117,6 +117,7 @@ export const DateFilter = ({ isLoading, onFilterData, onSort, option, recoilId }
             onClick={() => {
               setFilterBy({});
               setIsLabelAnimated(false);
+              document.getElementById(inputId).value = '';
             }}
           />
         )}
