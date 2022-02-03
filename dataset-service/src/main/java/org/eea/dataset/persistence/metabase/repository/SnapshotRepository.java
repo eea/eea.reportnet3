@@ -110,13 +110,13 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
   void updateSnapshotEnabledFalse(@Param("idDataset") Long idDataset);
 
   /**
-   * Delete snapshot by dataset id and dc released false.
+   * Delete snapshot by dataset id and date released is null.
    *
    * @param idDataset the id dataset
    */
   @Transactional
   @Modifying
   @Query(nativeQuery = true,
-      value = "DELETE FROM snapshot WHERE reporting_dataset_id=:idDataset AND (dc_released=false OR dc_released is null) ")
-  void deleteSnapshotByDatasetIdAndDcReleasedFalse(@Param("idDataset") Long idDataset);
+      value = "DELETE FROM snapshot WHERE reporting_dataset_id=:idDataset AND date_released is null ")
+  void deleteSnapshotByDatasetIdAndDateReleasedIsNull(@Param("idDataset") Long idDataset);
 }

@@ -1202,13 +1202,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
   /**
-   * Delete snapshot by dataset id and dc released false.
+   * Delete snapshot by dataset id and date released is null.
    *
    * @param datasetId the dataset id
    */
   @Override
-  public void deleteSnapshotByDatasetIdAndDcReleasedFalse(Long datasetId) {
-    snapshotRepository.deleteSnapshotByDatasetIdAndDcReleasedFalse(datasetId);
+  public void deleteSnapshotByDatasetIdAndDateReleasedIsNull(Long datasetId) {
+    snapshotRepository.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
     LOG.info("Snapshots deleted from dataset: {}", datasetId);
   }
 
