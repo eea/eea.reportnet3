@@ -1,7 +1,6 @@
 package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
@@ -450,7 +449,7 @@ public interface DatasetController {
    * @param integrationId the integration id
    * @param delimiter the delimiter
    */
-  @PostMapping("/v1/{datasetId}/importFileData")
+  @PostMapping("/v1/importFileData/{datasetId}")
   void importFileData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
@@ -472,7 +471,7 @@ public interface DatasetController {
    * @param integrationId the integration id
    * @param delimiter the delimiter
    */
-  @PostMapping("/{datasetId}/importFileData")
+  @PostMapping("/importFileData/{datasetId}")
   void importFileDataLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
@@ -559,30 +558,5 @@ public interface DatasetController {
    */
   @GetMapping("/{datasetId}/viewUpdated")
   Boolean getCheckView(@PathVariable("datasetId") Long datasetId);
-
-
-
-  /**
-   * Stream import file data.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param tableSchemaId the table schema id
-   * @param file the file
-   * @param replace the replace
-   * @param integrationId the integration id
-   * @param delimiter the delimiter
-   */
-  @PostMapping(path = "/v1/stream/{datasetId}/streamImportFileData",
-      consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-  void streamImportFileData(@PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId,
-      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-      @RequestParam(value = "replace", required = false) boolean replace,
-      @RequestParam(value = "integrationId", required = false) Long integrationId,
-      @RequestParam(value = "delimiter", required = false) String delimiter,
-      HttpServletRequest request);
 
 }
