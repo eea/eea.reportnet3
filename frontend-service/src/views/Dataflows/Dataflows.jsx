@@ -599,7 +599,7 @@ export const Dataflows = () => {
     Object.keys(config.permissions.roles).map(role => ({
       label: config.permissions.roles[role].label,
       value: config.permissions.roles[role].key
-    }));
+    })).filter(role => role.value !== "ADMIN");
 
   const getFilterOptions = () => {
     const filters = [
