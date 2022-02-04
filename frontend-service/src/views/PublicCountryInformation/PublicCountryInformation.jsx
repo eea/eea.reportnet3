@@ -482,7 +482,6 @@ export const PublicCountryInformation = () => {
 
     return (
       <DataTable
-        areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
         autoLayout={true}
         className={styles.countriesList}
         first={firstRow}
@@ -497,7 +496,7 @@ export const PublicCountryInformation = () => {
         sortField={sortField}
         sortOrder={sortOrder}
         summary={resourcesContext.messages['dataflows']}
-        totalRecords={totalRecords}
+        totalRecords={filteredRecords}
         value={dataflows}>
         {renderTableColumns(dataflows)}
       </DataTable>

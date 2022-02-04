@@ -202,7 +202,7 @@ export const PublicDataflows = () => {
     if (totalRecords > 0) {
       return (
         <Paginator
-          areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
+          areComponentsVisible={filteredRecords > pagination.numPage}
           className={`p-paginator-bottom ${styles.paginator}`}
           first={firstRow}
           onPageChange={onPaginate}
@@ -210,7 +210,7 @@ export const PublicDataflows = () => {
           rows={numberRows}
           rowsPerPageOptions={[100, 150, 200]}
           template={currentPageTemplate}
-          totalRecords={totalRecords}
+          totalRecords={filteredRecords}
         />
       );
     }
