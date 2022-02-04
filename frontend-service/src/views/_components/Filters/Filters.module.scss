@@ -215,6 +215,58 @@
   }
 }
 
+.publicCountryInformationFilters {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  margin: 2rem 0;
+  width: 100%;
+  flex-wrap: wrap;
+
+  > div {
+    width: 25% !important;
+    height: 3em;
+    padding-right: 1em;
+    margin-bottom: 1.5rem;
+  }
+
+  .buttonWrapper {
+    display: flex;
+    margin-bottom: 0 !important;
+  }
+
+  @include for-phone-only {
+    justify-content: flex-start;
+    .block {
+      margin-bottom: 1.5rem;
+      width: 100% !important;
+    }
+  }
+
+  @include for-tablet-portrait-up {
+    .block,
+    .inputCheckbox {
+      width: 50% !important;
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  @include for-desktop-up {
+    .block,
+    .inputCheckbox {
+      width: 25% !important;
+    }
+  }
+
+  @include for-big-desktop-up {
+    .block,
+    .inputCheckbox {
+      width: 25% !important;
+      margin-bottom: 1.5rem;
+    }
+  }
+}
+
 .searchInput {
   background: transparent !important;
   border: 0px !important;
@@ -501,6 +553,12 @@
 
     .buttonWrapper {
       margin: 0 0 1em 0;
+    }
+  }
+
+  .publicCountryInformationFilters {
+    > div {
+      width: 100% !important;
     }
   }
 }
