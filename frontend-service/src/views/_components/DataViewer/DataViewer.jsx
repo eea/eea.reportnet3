@@ -100,7 +100,6 @@ export const DataViewer = ({
   const [editDialogVisible, setEditDialogVisible] = useState(false);
   const [fetchedData, setFetchedData] = useState([]);
   const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
-  const [importTableDialogVisible, setImportTableDialogVisible] = useState(false);
   const [initialCellValue, setInitialCellValue] = useState();
   const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
   const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
@@ -860,29 +859,6 @@ export const DataViewer = ({
 
   const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
 
-  const onUpload = async () => {
-    setImportTableDialogVisible(false);
-    const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-    notificationContext.add(
-      {
-        type: 'DATASET_DATA_LOADING_INIT',
-        content: {
-          dataflowName,
-          datasetName,
-          customContent: {
-            datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-            title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
-            datasetLoading: resourcesContext.messages['datasetLoading']
-          }
-        }
-      },
-      true
-    );
-  };
-
   const addRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       {isNewRecord && (
@@ -1097,56 +1073,6 @@ export const DataViewer = ({
       : resourcesContext.messages['maxSizeNotDefined']
   }`;
 
-  const readLines = async function* (blob, encoding = 'utf-8', delimiter = /\r?\n/g) {
-    const reader = blob.stream().getReader();
-    const decoder = new TextDecoder(encoding);
-
-    try {
-      let text = '';
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        text += decoder.decode(value, { stream: true });
-        const lines = text.split(delimiter);
-        text = lines.pop();
-        yield* lines;
-      }
-
-      yield text;
-    } finally {
-      reader.cancel();
-    }
-  };
-
-  const onImportTableError = async ({ xhr }) => {
-    if (xhr.status === 423) {
-      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
-    }
-  };
-
-  const onValidateFile = async file => {
-    const checkFirstLine = async firstLine => {
-      const validations = [];
-      if (colsSchema?.length - 2 !== firstLine.split(',').length) {
-        validations.push({
-          severity: 'warn',
-          summary: resourcesContext.messages['importWrongFileHeader'],
-          detail: `${resourcesContext.messages['importWrongFileHeaderDetail']} ${
-            resourcesContext.messages['columnsSchemaLabel']
-          }: ${colsSchema?.length - 2} - ${resourcesContext.messages['fileColumnsLabel']}: ${
-            firstLine.split(',').length
-          }`
-        });
-      }
-      return validations;
-    };
-
-    for await (const line of readLines(file, 'utf-8', '\n')) {
-      return checkFirstLine(line);
-    }
-  };
-
   return (
     <SnapshotContext.Provider>
       <ActionsToolbar
@@ -1179,7 +1105,6 @@ export const DataViewer = ({
         selectedRuleMessage={selectedRuleMessage}
         selectedTableSchemaId={selectedTableSchemaId}
         setColumns={setColumns}
-        setImportTableDialogVisible={setImportTableDialogVisible}
         showGroupedValidationFilter={showGroupedValidationFilter}
         showValidationFilter={showValidationFilter}
         showValueFilter={showValueFilter}
@@ -1304,31 +1229,6 @@ export const DataViewer = ({
             ))}
           </DataTable>
         </Dialog>
-      )}
-
-      {importTableDialogVisible && (
-        <CustomFileUpload
-          accept=".csv"
-          chooseLabel={resourcesContext.messages['selectFile']}
-          className={styles.FileUpload}
-          dialogClassName={styles.Dialog}
-          dialogHeader={`${resourcesContext.messages['uploadTable']}${tableName}`}
-          dialogOnHide={() => setImportTableDialogVisible(false)} //allowTypes="/(\.|\/)(csv)$/"
-          dialogVisible={importTableDialogVisible}
-          infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
-          invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
-          isDialog={true}
-          name="file"
-          onError={onImportTableError}
-          onUpload={onUpload}
-          onValidateFile={onValidateFile}
-          replaceCheck={true}
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTable, {
-            datasetId: datasetId,
-            tableSchemaId: tableId,
-            delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
-          })}`}
-        />
       )}
 
       {isAttachFileVisible && (
