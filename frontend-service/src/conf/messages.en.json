@@ -1486,8 +1486,6 @@
     "x": "X",
     "y": "Y",
     "yes": "Yes",
-    "zipCsvTable": "ZIP (.csv for each table)",
-    "deleteAllLeadReportersDialogHeader": "Delete all lead reporters",
-    "delateAllLeadReportersDialogMessage": "Are you sure you want to delete all lead reporters?"
+    "zipCsvTable": "ZIP (.csv for each table)"
   }
 }
