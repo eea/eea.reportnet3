@@ -332,6 +332,7 @@ export const MyFilters = ({
               onClick={() => {
                 onChange({ key: option.key, value: [] });
                 updateValueLabelsAnimationDate(labelsAnimationDate, positionLabelAnimationDate, option.key, false);
+                document.getElementById(inputId).value = '';
               }}
             />
           )}

@@ -47,20 +47,18 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
     getCloneDataflow(cloneSchemasState.chosenDataflow);
   }, [cloneSchemasState.chosenDataflow]);
 
-  const getPaginatorRecordsCount = () => {
-    return (
-      <Fragment>
-        {isFiltered && cloneSchemasState.allDataflows.length !== filteredData.length
-          ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
-          : ''}
-        {resourcesContext.messages['totalRecords']} {cloneSchemasState.allDataflows.length}{' '}
-        {resourcesContext.messages['records'].toLowerCase()}
-        {isFiltered && cloneSchemasState.allDataflows.length === filteredData.length
-          ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-          : ''}
-      </Fragment>
-    );
-  };
+  const getPaginatorRecordsCount = () => (
+    <Fragment>
+      {isFiltered && cloneSchemasState.allDataflows.length !== filteredData.length
+        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
+        : ''}
+      {resourcesContext.messages['totalRecords']} {cloneSchemasState.allDataflows.length}{' '}
+      {resourcesContext.messages['records'].toLowerCase()}
+      {isFiltered && cloneSchemasState.allDataflows.length === filteredData.length
+        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
+        : ''}
+    </Fragment>
+  );
 
   const isLoading = value => cloneSchemasDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -106,7 +104,10 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
             { key: 'description', label: resourcesContext.messages['description'] }
           ]
         },
-        { type: 'MULTI_SELECT', nestedOptions: [{ key: 'status', label: resourcesContext.messages['status'] }] }
+        {
+          type: 'MULTI_SELECT',
+          nestedOptions: [{ key: 'status', label: resourcesContext.messages['status'], template: 'LevelError' }]
+        }
       ]
     : [
         {
@@ -118,7 +119,10 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
             { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'] }
           ]
         },
-        { type: 'MULTI_SELECT', nestedOptions: [{ key: 'status', label: resourcesContext.messages['status'] }] },
+        {
+          type: 'MULTI_SELECT',
+          nestedOptions: [{ key: 'status', label: resourcesContext.messages['status'], template: 'LevelError' }]
+        },
         { type: 'DATE', key: 'expirationDate', label: resourcesContext.messages['expirationDate'] }
       ];
 
@@ -154,7 +158,9 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
       cloneSchemasState.isLoading || isEmpty(cloneSchemasState.data || filteredData) ? 'flex-start' : 'space-between'
   };
 
-  if (cloneSchemasState.isLoading) return <Spinner style={{ top: 0 }} />;
+  if (cloneSchemasState.isLoading) {
+    return <Spinner style={{ top: 0 }} />;
+  }
 
   return (
     <div className={styles.cloneSchemas} style={cloneSchemaStyles}>

@@ -12,12 +12,12 @@
       justify-content: center;
       font-size: 1.4rem;
       font-weight: bold;
-      height: 40vh;
+      height: 30vh;
       width: 100%;
     }
 
     > div:nth-child(2) > div:nth-child(n + 1):nth-child(-n + 7) {
-      width: 33.33% !important;
+      width: 25% !important;
     }
 
     > div > div:nth-child(8) {

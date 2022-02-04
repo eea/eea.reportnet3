@@ -22,6 +22,10 @@
       overflow: visible;
       width: 90%;
       top: 0.7em;
+
+      label {
+        margin-top: -0.7em;
+      }
     }
 
     > div > div > ul > li {

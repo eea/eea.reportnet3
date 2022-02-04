@@ -40,7 +40,7 @@ export const dataflowsReducer = (state, { type, payload }) => {
       return { ...state, [payload.dialog]: payload.value };
 
     case 'ON_CHANGE_TAB':
-      return { ...state, activeIndex: payload.index };
+      return { ...state, activeIndex: payload.index, totalRecords: 0 };
 
     case 'SET_DATAFLOWS_COUNT': {
       return {
