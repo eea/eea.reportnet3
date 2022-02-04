@@ -212,7 +212,7 @@ const parseRequestFilterBy = filterBy => {
     if (TextUtils.areEquals(key, 'creationDate') || TextUtils.areEquals(key, 'expirationDate')) {
       if (filterBy[key][0] && !filterBy[key][1]) {
         results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-        results[`${replacements[key]}_to`] = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_to`] = `${new Date(dayjs(filterBy[key][0]).endOf('day').format()).getTime()}`;
       } else {
         results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
         results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
@@ -225,6 +225,21 @@ const parseRequestFilterBy = filterBy => {
   });
 
   return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
+};
+
+const parseRequestPublicCountrySortField = sortField => {
+  if (isNil(sortField) || isEmpty(sortField)) {
+    return undefined;
+  }
+
+  const replacements = {
+    legalInstrument: 'legal_instrument',
+    deadline: 'deadline_date',
+    deliveryDate: 'delivery_date',
+    deliveryStatus: 'delivery_status'
+  };
+
+  return replacements[sortField] || sortField;
 };
 
 const parseRequestPublicCountryFilterBy = filterBy => {
@@ -245,10 +260,18 @@ const parseRequestPublicCountryFilterBy = filterBy => {
   const parsedFilterBy = Object.keys(filterBy).map(key => {
     const results = { [replacements[key] || key]: filterBy[key] };
 
+    if (TextUtils.areEquals(key, 'status')) {
+      results[replacements[key] || key] = filterBy[key]?.value;
+    }
+
+    if (TextUtils.areEquals(key, 'deliveryStatus')) {
+      results[replacements[key] || key] = filterBy[key]?.join(',');
+    }
+
     if (TextUtils.areEquals(key, 'deadline') || TextUtils.areEquals(key, 'deliveryDate')) {
       if (filterBy[key][0] && !filterBy[key][1]) {
         results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-        results[`${replacements[key]}_to`] = `${filterBy[key][0]}`;
+        results[`${replacements[key]}_to`] = `${new Date(dayjs(filterBy[key][0]).endOf('day').format()).getTime()}`;
       } else {
         results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
         results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
@@ -288,6 +311,7 @@ export const DataflowUtils = {
   parsePublicDataflowListDTO,
   parseRequestFilterBy,
   parseRequestPublicCountryFilterBy,
+  parseRequestPublicCountrySortField,
   parseRequestSortBy,
   parseSortedDataflowListDTO,
   parseUsersList,

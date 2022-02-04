@@ -54,17 +54,15 @@
   border: 0px !important;
   border-radius: 0px !important;
   border-bottom: var(--inputtext-border) !important;
-  color: var(--floating-label-color) !important;
+  color: var(--font-filters) !important;
   font-size: 0.8333rem !important;
   height: 2rem;
   padding-left: 0em;
   width: 90% !important;
 
   label {
-    color: var(--active-filter-font) !important;
     margin-left: 0.1rem;
     height: 100%;
-    font-weight: bold !important;
   }
 
   input + label {
@@ -106,6 +104,7 @@
   }
 
   .label {
+    justify-content: space-between;
     clip: auto;
     height: auto;
     overflow: visible;
@@ -130,7 +129,7 @@
 
   .selectHeader {
     border-radius: 3px;
-    color: var(--floating-label-color);
+    color: var(--font-filters);
     font-size: 0.75rem;
     font-weight: 500;
     padding: 4px;
@@ -329,10 +328,7 @@
       color: var(--active-filter);
     }
   }
-  input {
-    font-weight: bold !important;
-    color: var(--active-filter-font) !important;
-  }
+
   .searchInput {
     padding-top: 10px;
   }
@@ -348,7 +344,7 @@
   border-radius: 0 !important;
   border-right: 0 !important;
   border-top: 0 !important;
-  color: var(--floating-label-color) !important;
+  color: var(--font-filters) !important;
   font-size: 10pt !important;
   height: 2.1rem;
   padding-left: 0em;

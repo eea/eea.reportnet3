@@ -52,6 +52,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { dataflowDataReducer } from './_functions/Reducers/dataflowDataReducer';
 
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
@@ -145,6 +146,9 @@ export const Dataflow = () => {
   const { resetFiltersState: resetManageLeadReportersState } = useFilters('manageLeadReporters');
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
+  const { resetFiltersState: resetShareRightsFiltersState } = useFilters('shareRights');
+
+  const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
 
   const {
     obligation,
@@ -446,6 +450,7 @@ export const Dataflow = () => {
           icon="cancel"
           label={resourcesContext.messages['close']}
           onClick={() => {
+            resetShareRightsFiltersState();
             manageDialogs(`isManage${usersType}DialogVisible`, false);
             if (dataflowState.isRightPermissionsChanged) {
               onLoadReportingDataflow();
@@ -995,6 +1000,7 @@ export const Dataflow = () => {
 
   const onHideObligationDialog = () => {
     manageDialogs('isReportingObligationsDialogVisible', false);
+    resetObligationsFilterState();
     setObligationToPrevious();
   };
 
@@ -1005,6 +1011,7 @@ export const Dataflow = () => {
         label={resourcesContext.messages['ok']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
+          resetObligationsFilterState();
           setToCheckedObligation();
         }}
       />
@@ -1014,6 +1021,7 @@ export const Dataflow = () => {
         label={resourcesContext.messages['cancel']}
         onClick={() => {
           manageDialogs('isReportingObligationsDialogVisible', false);
+          resetObligationsFilterState();
           setObligationToPrevious();
         }}
       />
@@ -1299,6 +1307,7 @@ export const Dataflow = () => {
             header={resourcesContext.messages['manageRequestersRights']}
             onHide={() => {
               manageDialogs('isManageRequestersDialogVisible', false);
+              resetShareRightsFiltersState();
               if (dataflowState.isRightPermissionsChanged) {
                 onLoadReportingDataflow();
                 setIsPageLoading(true);
@@ -1336,7 +1345,10 @@ export const Dataflow = () => {
             className="responsiveDialog"
             footer={shareRightsFooterDialogFooter(usersTypes.REPORTERS)}
             header={resourcesContext.messages['manageReportersRights']}
-            onHide={() => manageDialogs('isManageReportersDialogVisible', false)}
+            onHide={() => {
+              manageDialogs('isManageReportersDialogVisible', false);
+              resetShareRightsFiltersState();
+            }}
             visible={dataflowState.isManageReportersDialogVisible}>
             <ShareRights
               addConfirmHeader={resourcesContext.messages['addReporterConfirmHeader']}

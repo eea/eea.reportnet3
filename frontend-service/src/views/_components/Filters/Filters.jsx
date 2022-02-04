@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { noWait, useRecoilCallback } from 'recoil';
+import { noWait, useRecoilCallback, useRecoilValue } from 'recoil';
 
 import isNil from 'lodash/isNil';
 
@@ -20,7 +20,8 @@ import {
   filteredDataStore,
   isFilteredStore,
   isStrictModeStore,
-  searchByStore
+  searchByStore,
+  sortByStore
 } from './_functions/Stores/filterStore';
 
 import {
@@ -56,6 +57,8 @@ export const Filters = ({
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
+  const isFiltered = useRecoilValue(isFilteredStore(recoilId));
+
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
   const onFilterFilteredData = useRecoilCallback(
@@ -75,7 +78,7 @@ export const Filters = ({
           keys.map(key => snapshot.getPromise(key))
         );
 
-        const searchValue = await snapshot.getPromise(searchByStore(recoilId));
+        let searchValue = await snapshot.getPromise(searchByStore(recoilId));
         let isStrictMode = await snapshot.getPromise(isStrictModeStore);
 
         const response = await Promise.all(
@@ -91,12 +94,16 @@ export const Filters = ({
           isStrictMode = newData.isStrictMode;
         }
 
+        if (newData.type === 'SEARCH') {
+          searchValue = newData.searchValue;
+        }
+
         const filteredData = data.filter(
           item =>
             FiltersUtils.applyInputs({ filterBy, filteredKeys: inputKeys.keys, item }) &&
             FiltersUtils.applyCheckBox({ filterBy, filteredKeys: checkboxKeys.keys, item }) &&
             FiltersUtils.applyMultiSelects({ filterBy, filteredKeys: multiSelectKeys.keys, isStrictMode, item }) &&
-            FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: newData.searchValue || searchValue })
+            FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: searchValue })
         );
 
         set(isFilteredStore(recoilId), FiltersUtils.getIsFiltered(filterBy));
@@ -110,10 +117,11 @@ export const Filters = ({
       async () => {
         const filterByKeys = await snapshot.getPromise(filterByAllKeys(recoilId));
 
+        reset(searchByStore(recoilId));
+        reset(sortByStore(recoilId));
         reset(filteredDataStore(recoilId));
         reset(isFilteredStore(recoilId));
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
-        await onReset();
       },
     [recoilId]
   );
@@ -131,6 +139,7 @@ export const Filters = ({
       <FilterComponent
         isLoading={isLoading}
         key={option.key}
+        onCustomFilter={onFilter}
         onFilterData={onFilterFilteredData}
         onSort={onSort}
         option={option}
@@ -155,30 +164,35 @@ export const Filters = ({
     return (
       <div className={`${styles.filterButton}`}>
         <Button
-          className="p-button-primary p-button-rounded p-button-animated-blink"
+          className={`p-button-${isFiltered ? 'primary' : 'secondary'} p-button-rounded p-button-animated-blink`}
           disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}
-          onClick={onFilter}
+          onClick={() => onFilter()}
         />
       </div>
     );
   };
 
   return (
-    <div className={className ? styles[className] : styles.default}>
+    <div className={`${className ? styles[className] : styles.default}`}>
       {renderFilters()}
       {renderStrictModeToggle()}
-      {renderCustomFiltersButton()}
 
-      <div className={`${styles.resetButton}`}>
-        <Button
-          className="p-button-secondary p-button-rounded p-button-animated-blink"
-          disabled={isLoading}
-          icon="undo"
-          label={resourcesContext.messages['reset']}
-          onClick={onResetFilters}
-        />
+      <div className={styles.buttonWrapper}>
+        {renderCustomFiltersButton()}
+        <div className={`${styles.resetButton}`}>
+          <Button
+            className="p-button-secondary p-button-rounded p-button-animated-blink"
+            disabled={isLoading}
+            icon="undo"
+            label={resourcesContext.messages['reset']}
+            onClick={async () => {
+              await onResetFilters();
+              await onReset({ sortByHeader: '', sortByOption: 'idle' });
+            }}
+          />
+        </div>
       </div>
     </div>
   );

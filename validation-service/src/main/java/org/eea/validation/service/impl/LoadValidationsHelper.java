@@ -16,6 +16,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.Validation;
+import org.eea.validation.persistence.data.repository.RecordRepository;
 import org.eea.validation.persistence.data.repository.ValidationRepository;
 import org.eea.validation.service.ValidationService;
 import org.slf4j.Logger;
@@ -50,6 +51,10 @@ public class LoadValidationsHelper {
   /** The validation repository. */
   @Autowired
   private ValidationRepository validationRepository;
+
+  /** The record repository. */
+  @Autowired
+  private RecordRepository recordRepository;
 
   /**
    * Instantiates a new file loader helper.
@@ -163,7 +168,7 @@ public class LoadValidationsHelper {
     validation.setErrors(errors);
     validation.setTotalErrors(validationRepository.count());
 
-    validation.setTotalRecords(Long.valueOf(errors.size()));
+    validation.setTotalRecords(recordRepository.count());
 
     validation.setTotalFilteredRecords(
         Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId, levelErrorsFilter,

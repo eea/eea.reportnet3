@@ -250,4 +250,11 @@ public interface DatasetSnapshotService {
    * @param datasetId the dataset id
    */
   public void updateSnapshotDisabled(Long datasetId);
+
+  /**
+   * Delete snapshot by dataset id and date released is null.
+   *
+   * @param datasetId the dataset id
+   */
+  public void deleteSnapshotByDatasetIdAndDateReleasedIsNull(Long datasetId);
 }

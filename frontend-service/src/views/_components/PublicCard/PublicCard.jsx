@@ -31,7 +31,7 @@ export const PublicCard = ({ animation, dataflowId, dueDate, obligation, onCardC
       <span className={styles.link} onMouseDown={e => onOpenTab(e, url)} title={text}>
         <FontAwesomeIcon
           aria-hidden={false}
-          ariaLabelledBy={text}
+          aria-labelledby={text}
           className="p-breadcrumb-home"
           icon={AwesomeIcons('externalUrl')}
           role="link"

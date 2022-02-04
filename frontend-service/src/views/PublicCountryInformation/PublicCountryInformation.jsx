@@ -1,6 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useRecoilValue } from 'recoil';
 
 import ReactTooltip from 'react-tooltip';
 
@@ -19,7 +18,7 @@ import styles from './PublicCountryInformation.module.scss';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { DownloadFile } from 'views/_components/DownloadFile';
-import { MyFilters } from 'views/_components/MyFilters';
+import { Filters } from 'views/_components/Filters';
 import { PublicLayout } from 'views/_components/Layout/PublicLayout';
 import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
@@ -27,12 +26,11 @@ import { Title } from 'views/_components/Title';
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
 
-import { filterByState } from 'views/_components/MyFilters/_functions/Stores/filtersStores';
-
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
@@ -54,16 +52,27 @@ export const PublicCountryInformation = () => {
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isReset, setIsReset] = useState(false);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
   const [sortField, setSortField] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
+
+  const { getFilterBy, isFiltered: areFiltersFilled, setData } = useApplyFilters('publicCountryInformation');
+
+  const { firstRow, numberRows, pageNum } = pagination;
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode });
 
   useEffect(() => {
     onLoadPublicCountryInformation();
   }, [pagination, sortOrder, sortField]);
+
+  useEffect(() => {
+    if (isReset) {
+      setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
+    }
+  }, [isReset]);
 
   useEffect(() => {
     !isNil(countryCode) && getCountryName();
@@ -76,10 +85,6 @@ export const PublicCountryInformation = () => {
       setContentStyles({});
     }
   }, [themeContext.headerCollapse]);
-
-  const { firstRow, numberRows, pageNum } = pagination;
-
-  const filterBy = useRecoilValue(filterByState('publicCountryInformation'));
 
   const getCountryName = () => {
     if (!isNil(config.countriesByGroup)) {
@@ -142,6 +147,8 @@ export const PublicCountryInformation = () => {
   const onLoadPublicCountryInformation = async () => {
     setIsLoading(true);
     try {
+      const filterBy = await getFilterBy();
+
       const data = await DataflowService.getPublicDataflowsByCountryCode({
         countryCode,
         sortOrder: getSortOrder(),
@@ -150,10 +157,12 @@ export const PublicCountryInformation = () => {
         sortField,
         filterBy
       });
+
       setTotalRecords(data.totalRecords);
       setPublicInformation(data.dataflows);
       setFilteredRecords(data.filteredRecords);
-      setIsFiltered(data.filteredRecords !== data.totalRecords);
+      setIsFiltered(Object.keys(filterBy).length !== 0 && data.filteredRecords !== data.totalRecords);
+      setIsReset(false);
     } catch (error) {
       console.error('PublicCountryInformation - onLoadPublicCountryInformation.', error);
       notificationContext.add({ type: 'LOAD_DATAFLOWS_BY_COUNTRY_ERROR' }, true);
@@ -201,6 +210,7 @@ export const PublicCountryInformation = () => {
         };
       });
     setDataflows(publicDataflows);
+    setData(publicDataflows);
   };
 
   const renderTableColumns = () => {
@@ -339,26 +349,58 @@ export const PublicCountryInformation = () => {
     },
     { type: 'DATE', key: 'deadline', label: resourcesContext.messages['deadline'] },
     {
-      type: 'MULTI_SELECT',
       key: 'status',
-      label: resourcesContext.messages['status']
+      label: resourcesContext.messages['status'],
+      template: 'LevelError',
+      dropdownOptions: [
+        { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+        { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
+      ],
+      type: 'DROPDOWN'
     },
     { type: 'DATE', key: 'deliveryDate', label: resourcesContext.messages['deliveryDate'] },
     {
       type: 'MULTI_SELECT',
       key: 'deliveryStatus',
-      label: resourcesContext.messages['deliveryStatus']
+      label: resourcesContext.messages['deliveryStatus'],
+      multiSelectOptions: [
+        { type: config.datasetStatus.PENDING.label.toUpperCase(), value: config.datasetStatus.PENDING.key },
+        { type: config.datasetStatus.DELIVERED.label.toUpperCase(), value: config.datasetStatus.DELIVERED.key },
+        {
+          type: config.datasetStatus.CORRECTION_REQUESTED.label.toUpperCase(),
+          value: config.datasetStatus.CORRECTION_REQUESTED.key
+        },
+        {
+          type: config.datasetStatus.FINAL_FEEDBACK.label.toUpperCase(),
+          value: config.datasetStatus.FINAL_FEEDBACK.key
+        },
+        {
+          type: config.datasetStatus.TECHNICALLY_ACCEPTED.label.toUpperCase(),
+          value: config.datasetStatus.TECHNICALLY_ACCEPTED.key
+        }
+      ]
     }
   ];
 
   const renderFilters = () => {
     return (
-      <MyFilters
+      <Filters
         className="publicCountryInformationFilters"
-        data={dataflows}
-        onFilter={onLoadPublicCountryInformation}
+        onFilter={() => {
+          if (areFiltersFilled) {
+            setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
+          } else {
+            onLoadPublicCountryInformation();
+          }
+        }}
+        onReset={() => {
+          setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
+          setSortField('');
+          setSortOrder(0);
+        }}
         options={filterOptions}
-        viewType="publicCountryInformation"
+        recoilId="publicCountryInformation"
       />
     );
   };
@@ -430,22 +472,18 @@ export const PublicCountryInformation = () => {
       return <div className={styles.noDataflows}>{resourcesContext.messages['wrongUrlCountryCode']}</div>;
     }
 
-    if (isEmpty(dataflows)) {
+    if (isEmpty(dataflows) && !isFiltered) {
       return <div className={styles.noDataflows}>{resourcesContext.messages['noDataflows']}</div>;
     }
 
-    return (
-      <div className={styles.countriesList}>
-        {renderFilters()}
-        {renderPublicCountryTable()}
-      </div>
-    );
-  };
+    if (isEmpty(dataflows) && isFiltered) {
+      return <div className={styles.noDataflows}>{resourcesContext.messages['dataflowsNotMatchingFilter']}</div>;
+    }
 
-  const renderPublicCountryTable = () => {
     return (
       <DataTable
         autoLayout={true}
+        className={styles.countriesList}
         first={firstRow}
         lazy={true}
         onPage={onChangePage}
@@ -458,7 +496,7 @@ export const PublicCountryInformation = () => {
         sortField={sortField}
         sortOrder={sortOrder}
         summary={resourcesContext.messages['dataflows']}
-        totalRecords={totalRecords}
+        totalRecords={filteredRecords}
         value={dataflows}>
         {renderTableColumns(dataflows)}
       </DataTable>
@@ -471,6 +509,7 @@ export const PublicCountryInformation = () => {
     <PublicLayout>
       <div className={`${styles.container}  rep-container`} style={contentStyles}>
         {renderPublicCountryInformationTitle()}
+        {renderFilters()}
         {renderPublicCountryInformation()}
       </div>
     </PublicLayout>

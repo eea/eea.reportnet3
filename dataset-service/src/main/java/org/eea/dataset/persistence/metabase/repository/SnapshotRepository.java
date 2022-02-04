@@ -109,4 +109,14 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
       value = "UPDATE snapshot SET enabled=false WHERE reporting_dataset_id=:idDataset")
   void updateSnapshotEnabledFalse(@Param("idDataset") Long idDataset);
 
+  /**
+   * Delete snapshot by dataset id and date released is null.
+   *
+   * @param idDataset the id dataset
+   */
+  @Transactional
+  @Modifying
+  @Query(nativeQuery = true,
+      value = "DELETE FROM snapshot WHERE reporting_dataset_id=:idDataset AND date_released is null ")
+  void deleteSnapshotByDatasetIdAndDateReleasedIsNull(@Param("idDataset") Long idDataset);
 }

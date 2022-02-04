@@ -1198,6 +1198,18 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public void updateSnapshotDisabled(Long datasetId) {
     snapshotRepository.updateSnapshotEnabledFalse(datasetId);
+    LOG.info("Snapshots disabled from dataset: {}", datasetId);
+  }
+
+  /**
+   * Delete snapshot by dataset id and date released is null.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void deleteSnapshotByDatasetIdAndDateReleasedIsNull(Long datasetId) {
+    snapshotRepository.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
+    LOG.info("Snapshots deleted from dataset: {}", datasetId);
   }
 
   /**

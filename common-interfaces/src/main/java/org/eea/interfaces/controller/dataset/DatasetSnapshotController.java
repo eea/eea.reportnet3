@@ -255,4 +255,12 @@ public interface DatasetSnapshotController {
    */
   @PutMapping("/private/updateSnapshotDisabled/{datasetId}")
   void updateSnapshotDisabled(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Delete snapshot by dataset id and date released is null.
+   *
+   * @param datasetId the dataset id
+   */
+  @DeleteMapping(value = "/private/deleteSnapshotByDatasetIdAndDateReleasedIsNull/{datasetId}")
+  void deleteSnapshotByDatasetIdAndDateReleasedIsNull(@PathVariable("datasetId") Long datasetId);
 }

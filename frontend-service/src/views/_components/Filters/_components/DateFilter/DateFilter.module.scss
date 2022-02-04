@@ -10,19 +10,10 @@
     position: relative;
     border-radius: 0px !important;
     border: 0px !important;
-    color: var(--floating-label-color) !important;
-    font-size: 0.8333rem !important;
-    height: 100%;
+    color: var(--font-filters) !important;
+    height: 3em;
     padding-left: 0em;
     width: 100%;
-
-    .label {
-      clip: auto;
-      height: auto;
-      overflow: visible;
-      width: 90%;
-      top: 0.25em;
-    }
 
     input {
       background: transparent;
@@ -44,7 +35,7 @@
     label {
       position: absolute;
       font-size: 0.8333rem !important;
-      top: 50% !important;
+      top: 2.2em !important;
       color: var(--font-filters);
     }
   }
@@ -52,10 +43,17 @@
   .elementFilterSelected {
     border-bottom: var(--active-filter-border) !important;
     box-shadow: var(--active-filter-shadow);
-
-    input {
-      font-weight: bold !important;
-      color: var(--active-filter-font) !important;
+    button {
+      background-color: transparent !important;
+      span {
+        color: var(--active-filter);
+      }
+    }
+    label {
+      position: absolute;
+      font-size: 0.8333rem !important;
+      top: 0.5em !important;
+      color: var(--font-filters);
     }
   }
 }
@@ -63,11 +61,5 @@
 @media (min-width: 600px) {
   .block {
     width: 50% !important;
-  }
-}
-
-@media (max-width: 1695px) {
-  .block {
-    height: 3rem;
   }
 }

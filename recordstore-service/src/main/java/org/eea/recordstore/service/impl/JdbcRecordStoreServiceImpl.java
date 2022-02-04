@@ -1001,28 +1001,47 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     List<SnapshotVO> listSnapshotVO =
         dataSetSnapshotControllerZuul.getSnapshotsEnabledByIdDataset(datasetId);
 
-    dataSetSnapshotControllerZuul.updateSnapshotDisabled(datasetId);
     File directory = new File(pathSnapshotDisabled);
     directory.mkdir();
 
+    File[] matchingFilesToDelete = matchingFilesSnapshot(false, listSnapshotVO);
+    for (File file : matchingFilesToDelete) {
+      file.delete();
+      LOG.info("File deleted: {}", file.getAbsolutePath());
+    }
+    dataSetSnapshotControllerZuul.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
+    LOG.info("Deleted user snapshots files from dataset: {}", datasetId);
+
+    File[] matchingFilesToMove = matchingFilesSnapshot(true, listSnapshotVO);
+    for (File file : matchingFilesToMove) {
+      file.renameTo(new File(pathSnapshotDisabled + file.getName()));
+      LOG.info("File: {} moved to: {}", file.getName(), file.getAbsolutePath());
+    }
+    dataSetSnapshotControllerZuul.updateSnapshotDisabled(datasetId);
+    LOG.info("Moved released snapshots files to disabled folder: {}, from dataset: {}",
+        pathSnapshotDisabled, datasetId);
+
+    Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
+    datasetControllerZuul.privateDeleteDatasetData(datasetId, dataflowId);
+    LOG.info("Deleted dataset data from dataset: {}, dataflow: {}", datasetId, dataflowId);
+  }
+
+  private File[] matchingFilesSnapshot(boolean released, List<SnapshotVO> listSnapshotVO) {
     File snapshotFolder = new File(pathSnapshot);
-    File[] matchingFiles = snapshotFolder.listFiles(new FilenameFilter() {
+    return snapshotFolder.listFiles(new FilenameFilter() {
       public boolean accept(File dir, String name) {
         boolean exists = false;
         for (SnapshotVO snapshotVO : listSnapshotVO) {
           if (name.startsWith("snapshot_" + snapshotVO.getId())) {
-            exists = true;
+            boolean validRelease = snapshotVO.getDateReleased() != null;
+            if (validRelease == released) {
+              exists = true;
+            }
           }
         }
         return exists;
       }
     });
-
-    for (File file : matchingFiles) {
-      file.renameTo(new File(pathSnapshotDisabled + file.getName()));
-    }
-    Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
-    datasetControllerZuul.privateDeleteDatasetData(datasetId, dataflowId);
   }
 
   /**
