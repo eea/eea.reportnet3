@@ -19,7 +19,7 @@
       margin-top: 1px;
 
       &:hover {
-        background: var(--c-gray-5);
+        background: var(--radioButton-dc-hover-bg);
       }
 
       .radioButton {
@@ -43,15 +43,18 @@
       display: flex;
       align-items: center;
       background-color: var(--growl-warning-bg);
-      padding: 2rem;
-      width: 50%;
+      padding: 1.5rem;
       em {
         color: var(--growl-warning-icon-color);
         font-size: 2em;
+        margin-right: 0.5rem;
       }
-      .warningAutomaticReportingDeletionLabel {
-        font-weight: bold;
-        margin: 0 0.25rem 0 0.5rem;
+      .warningAutomaticReportingDeletionWrapper {
+        color: var(--c-black-rose-500);
+        .warningAutomaticReportingDeletionLabel {
+          font-weight: bold;
+          margin: 0 0.25rem 0 0;
+        }
       }
     }
   }

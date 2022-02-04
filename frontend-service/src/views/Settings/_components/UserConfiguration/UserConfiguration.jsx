@@ -153,7 +153,7 @@ export const UserConfiguration = () => {
           }
         }}
         tooltip={
-          userContext.userProps.amPm24h
+          userContext.userProps.amPm24h === true
             ? resourcesContext.messages['amPmFormat']
             : resourcesContext.messages['24hFormat']
         }
@@ -178,7 +178,7 @@ export const UserConfiguration = () => {
           }
         }}
         tooltip={
-          userContext.userProps.showLogoutConfirmation
+          userContext.userProps.showLogoutConfirmation === true
             ? resourcesContext.messages['toggleConfirmationOff']
             : resourcesContext.messages['toggleConfirmationOn']
         }
@@ -203,7 +203,7 @@ export const UserConfiguration = () => {
           }
         }}
         tooltip={
-          userContext.userProps.notificationSound
+          userContext.userProps.notificationSound === true
             ? resourcesContext.messages['toggleNotificationSoundOff']
             : resourcesContext.messages['toggleNotificationSoundOn']
         }
@@ -229,7 +229,7 @@ export const UserConfiguration = () => {
           }
         }}
         tooltip={
-          userContext.userProps.notificationSound
+          userContext.userProps.pushNotifications === true
             ? resourcesContext.messages['togglePushNotificationOff']
             : resourcesContext.messages['togglePushNotificationOn']
         }
@@ -254,7 +254,7 @@ export const UserConfiguration = () => {
           }
         }}
         tooltip={
-          userContext.userProps.listView
+          userContext.userProps.listView === true
             ? resourcesContext.messages['toggleMagazineView']
             : resourcesContext.messages['toggleListView']
         }

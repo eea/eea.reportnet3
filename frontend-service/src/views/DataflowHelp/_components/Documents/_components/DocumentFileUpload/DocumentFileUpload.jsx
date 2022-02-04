@@ -105,7 +105,7 @@ export const DocumentFileUpload = ({
       if (checkExсeedsMaxFileSize(inputUpload)) {
         message = resourcesContext.messages['tooLargeFileValidationError'];
         hasErrors = true;
-      } else if (checkIsEmptyFile(inputUpload)) {
+      } else if (!isEditForm && checkIsEmptyFile(inputUpload)) {
         message = '';
         hasErrors = true;
       }

@@ -5,6 +5,7 @@ import concat from 'lodash/concat';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+import sortBy from 'lodash/sortBy';
 import uniq from 'lodash/uniq';
 
 import styles from './ShowValidationsList.module.scss';
@@ -23,6 +24,8 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { showValidationsReducer } from './_functions/Reducers/showValidationsReducer';
+
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -46,14 +49,7 @@ export const ShowValidationsList = memo(
     const [columns, setColumns] = useState([]);
     const [fetchedData, setFetchedData] = useState([]);
     const [fieldsTypesFilter, setFieldsTypesFilter] = useState([]);
-    const [filterBy, setFilterBy] = useState({
-      entityType: [],
-      tableSchemaName: [],
-      fieldSchemaName: [],
-      levelError: []
-    });
     const [fieldValueFilter, setFieldValueFilter] = useState([]);
-    const [filtered, setFiltered] = useState(false);
     const [firstRow, setFirstRow] = useState(0);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
     const [isFilteredOrigins, setIsFilteredOrigins] = useState(false);
@@ -70,7 +66,7 @@ export const ShowValidationsList = memo(
     const [tablesFilter, setTablesFilter] = useState([]);
     const [typeEntitiesFilter, setTypeEntitiesFilter] = useState([]);
     const [typeEntitiesTypesFilter, setTypeEntitiesTypesFilter] = useState([]);
-    const [validationsAllTypesFilters, setValidationsAllTypesFilters] = useState([]);
+    const [filterOptions, setFilterOptions] = useState([]);
 
     const [validationState, validationDispatch] = useReducer(showValidationsReducer, {
       totalErrors: 0,
@@ -81,6 +77,10 @@ export const ShowValidationsList = memo(
 
     const { totalErrors, totalFilteredRecords, totalRecords } = validationState;
 
+    const isFiltered = totalRecords !== totalFilteredRecords;
+
+    const { getFilterBy, resetFilterState, setData } = useApplyFilters('showValidations');
+
     useEffect(() => {
       const allTypesFilter = concat(
         levelErrorsTypesFilter,
@@ -88,7 +88,18 @@ export const ShowValidationsList = memo(
         typeEntitiesTypesFilter,
         fieldsTypesFilter
       );
-      setValidationsAllTypesFilters(allTypesFilter);
+
+      const nestedOptions = [];
+      filterOptionsInitial[0].nestedOptions.forEach(optionMultiSelect => {
+        nestedOptions.push({
+          ...optionMultiSelect,
+          multiSelectOptions: getValidationsOptionTypes(allTypesFilter, optionMultiSelect.key)
+        });
+      });
+
+      const filterOptions = [{ type: 'MULTI_SELECT', nestedOptions }];
+
+      setFilterOptions(filterOptions);
     }, [levelErrorsTypesFilter, originsTypesFilter, typeEntitiesTypesFilter, fieldsTypesFilter]);
 
     useEffect(() => {
@@ -96,91 +107,83 @@ export const ShowValidationsList = memo(
     }, []);
 
     useEffect(() => {
-      const headers = [
+      const columns = [
         {
-          id: 'entityType',
-          header: resourcesContext.messages['entity']
+          key: 'entityType',
+          header: resourcesContext.messages['entity'],
+          style: columnStyles('entityType'),
+          sortable: true
         },
         {
-          id: 'tableSchemaName',
-          header: resourcesContext.messages['table']
+          key: 'tableSchemaName',
+          header: resourcesContext.messages['table'],
+          style: columnStyles('tableSchemaName'),
+          sortable: true
         },
         {
-          id: 'fieldSchemaName',
-          header: resourcesContext.messages['field']
+          key: 'fieldSchemaName',
+          header: resourcesContext.messages['field'],
+          style: columnStyles('fieldSchemaName'),
+          sortable: true
         },
         {
-          id: 'shortCode',
+          key: 'shortCode',
           header: resourcesContext.messages['ruleCode'],
-          template: ruleCodeTemplate
+          template: ruleCodeTemplate,
+          style: columnStyles('shortCode'),
+          sortable: true
         },
         {
-          id: 'levelError',
+          key: 'levelError',
           header: resourcesContext.messages['levelError'],
-          template: levelErrorTemplate
+          template: levelErrorTemplate,
+          style: columnStyles('levelError'),
+          sortable: true
         },
         {
-          id: 'message',
-          header: resourcesContext.messages['errorMessage']
+          key: 'message',
+          header: resourcesContext.messages['errorMessage'],
+          style: columnStyles('message'),
+          sortable: true
+        },
+        {
+          key: 'recordId',
+          header: resourcesContext.messages['recordId'],
+          className: styles.invisibleHeader
+        },
+        {
+          key: 'datasetPartitionId',
+          header: resourcesContext.messages['datasetPartitionId'],
+          className: styles.invisibleHeader
+        },
+        {
+          key: 'tableSchemaId',
+          header: resourcesContext.messages['tableSchemaId'],
+          className: styles.invisibleHeader
+        },
+        {
+          key: 'ruleId',
+          header: resourcesContext.messages['id'],
+          className: styles.invisibleHeader
+        },
+        {
+          key: 'numberOfRecords',
+          header: resourcesContext.messages['numberOfRecords'],
+          sortable: true
         }
       ];
 
-      let columnsArr = headers.map(col => {
-        return !isNil(col.template) ? (
-          <Column
-            body={col.template}
-            field={col.id}
-            header={col.header}
-            key={col.id}
-            sortable={true}
-            style={columnStyles(col.id)}
-          />
-        ) : (
-          <Column field={col.id} header={col.header} key={col.id} sortable={true} style={columnStyles(col.id)} />
-        );
-      });
-
-      columnsArr.push(
+      const columnsArr = columns.map(column => (
         <Column
-          className={styles.invisibleHeader}
-          field="recordId"
-          header={resourcesContext.messages['recordId']}
-          key="recordId"
+          body={column?.template}
+          className={column?.className}
+          field={column.key}
+          header={column.header}
+          key={column.key}
+          sortable={column?.sortable}
+          style={column?.style}
         />
-      );
-      columnsArr.push(
-        <Column
-          className={styles.invisibleHeader}
-          field="datasetPartitionId"
-          header={resourcesContext.messages['datasetPartitionId']}
-          key="datasetPartitionId"
-        />
-      );
-      columnsArr.push(
-        <Column
-          className={styles.invisibleHeader}
-          field="tableSchemaId"
-          header={resourcesContext.messages['tableSchemaId']}
-          key="tableSchemaId"
-        />
-      );
-      columnsArr.push(
-        <Column
-          className={styles.invisibleHeader}
-          field="ruleId"
-          header={resourcesContext.messages['ruleId']}
-          key="ruleId"
-        />
-      );
-
-      columnsArr.push(
-        <Column
-          field="numberOfRecords"
-          header={resourcesContext.messages['numberOfRecords']}
-          key="numberOfRecords"
-          sortable={true}
-        />
-      );
+      ));
 
       setColumns(columnsArr);
     }, [validationContext.rulesDescription]);
@@ -207,6 +210,8 @@ export const ShowValidationsList = memo(
           }
         }
       }
+
+      resetFilterState();
     }, [visible, isRulesDescriptionLoaded]);
 
     const addTableSchemaId = tableErrors => {
@@ -227,6 +232,13 @@ export const ShowValidationsList = memo(
 
     const getRuleSchema = ruleId =>
       validationContext.rulesDescription.find(ruleDescription => ruleDescription.id === ruleId);
+
+    const getValidationsOptionTypes = (data, option) => {
+      const optionsItems = data
+        .filter(filterType => filterType.type === option)
+        .map(optionItem => ({ type: optionItem.value, value: optionItem.value }));
+      return sortBy(optionsItems, 'type');
+    };
 
     const levelErrorTemplate = recordData => (
       <div className={styles.levelErrorTemplateWrapper}>
@@ -325,6 +337,8 @@ export const ShowValidationsList = memo(
           type: 'SET_TOTALS_ERRORS',
           payload: { totalFilteredRecords: data.totalFilteredErrors, totalRecords: data.totalRecords }
         });
+
+        setData(data.errors);
         setFetchedData(data.errors);
       } catch (error) {
         console.error('ShowValidationsList - onLoadErrors.', error);
@@ -398,7 +412,9 @@ export const ShowValidationsList = memo(
       setFieldsTypesFilter(allFieldsFilterList);
     };
 
-    const onLoadFilteredValidations = filterData => {
+    const onLoadFilteredValidations = async () => {
+      const filterData = await getFilterBy();
+
       setFirstRow(0);
       setFieldValueFilter(filterData.fieldSchemaName);
       setLevelErrorsFilter(filterData.levelError);
@@ -415,11 +431,6 @@ export const ShowValidationsList = memo(
         filterData.entityType,
         filterData.tableSchemaName
       );
-      setFilterBy(filterData);
-      if (!isNil(filterData)) {
-        const filterDataValues = Object.values(filterData).map(value => value.length !== 0);
-        filterDataValues.includes(true) ? setFiltered(true) : setFiltered(false);
-      }
     };
 
     const onLoadRulesDescription = async () => {
@@ -500,16 +511,10 @@ export const ShowValidationsList = memo(
 
     const getPaginatorRecordsCount = () => (
       <Fragment>
-        {filtered && totalRecords !== totalFilteredRecords
-          ? `${resourcesContext.messages['filtered']}: ${totalFilteredRecords} | `
-          : ''}
         {resourcesContext.messages['totalRecords']} {totalRecords}{' '}
         {`${resourcesContext.messages['records'].toLowerCase()}${` (${resourcesContext.messages[
           'totalErrors'
         ].toLowerCase()}${totalErrors})`}`}
-        {filtered && totalRecords === totalFilteredRecords
-          ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-          : ''}
       </Fragment>
     );
 
@@ -523,14 +528,33 @@ export const ShowValidationsList = memo(
       onLoadFilters();
     };
 
-    const filterOptions = [
+    const filterOptionsInitial = [
       {
-        type: 'multiselect',
-        properties: [
-          { name: 'entityType' },
-          { name: 'tableSchemaName', showInput: true },
-          { name: 'fieldSchemaName', showInput: true },
-          { name: 'levelError' }
+        type: 'MULTI_SELECT',
+        nestedOptions: [
+          {
+            key: 'entityType',
+            label: resourcesContext.messages['entityType'],
+            multiSelectOptions: []
+          },
+          {
+            key: 'tableSchemaName',
+            label: resourcesContext.messages['table'],
+            showInput: true,
+            multiSelectOptions: []
+          },
+          {
+            key: 'fieldSchemaName',
+            label: resourcesContext.messages['fieldSchemaName'],
+            showInput: true,
+            multiSelectOptions: []
+          },
+          {
+            key: 'levelError',
+            label: resourcesContext.messages['levelError'],
+            multiSelectOptions: [],
+            template: 'LevelError'
+          }
         ]
       }
     ];
@@ -546,7 +570,7 @@ export const ShowValidationsList = memo(
         );
       }
 
-      if (isEmpty(fetchedData) && !filtered) {
+      if (isEmpty(fetchedData) && !isFiltered) {
         if (!isLoadingTable) {
           return (
             <div className={styles.validationsWithoutTable}>
@@ -568,12 +592,11 @@ export const ShowValidationsList = memo(
         <div className={styles.validations}>
           <div className={styles.searchInput}>
             <Filters
-              data={fetchedData}
-              filterByList={filterBy}
+              className="showValidations"
+              onFilter={onLoadFilteredValidations}
+              onReset={onLoadFilteredValidations}
               options={filterOptions}
-              sendData={onLoadFilteredValidations}
-              validations
-              validationsAllTypesFilters={validationsAllTypesFilters}
+              recoilId="showValidations"
             />
           </div>
 

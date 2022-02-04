@@ -490,8 +490,8 @@ export const QCList = ({
       iconConfirm={tabsValidationsState.isDeletingRule ? 'spinnerAnimate' : 'check'}
       labelCancel={resourcesContext.messages['no']}
       labelConfirm={resourcesContext.messages['yes']}
-      onConfirm={() => onDeleteValidation()}
-      onHide={() => onHideDeleteDialog()}
+      onConfirm={onDeleteValidation}
+      onHide={onHideDeleteDialog}
       visible={tabsValidationsState.isDeleteDialogVisible}>
       {resourcesContext.messages['deleteValidationConfirm']}
     </ConfirmDialog>

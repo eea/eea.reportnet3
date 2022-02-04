@@ -56,6 +56,7 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { designerReducer } from './_functions/Reducers/designerReducer';
 
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useDatasetDesigner } from 'views/_components/Snapshots/_hooks/useDatasetDesigner';
@@ -74,6 +75,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
+
+  const { resetFilterState } = useApplyFilters('uniqueConstraints');
+
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
     id: null,
     name: ''
@@ -583,6 +587,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onCloseUniqueListModal = () => {
     manageDialogs('isUniqueConstraintsListDialogVisible', false);
     refreshUniqueList(true);
+    resetFilterState();
   };
 
   const onCloseConfigureWebformModal = () => manageDialogs('isConfigureWebformDialogVisible', false);
@@ -1225,7 +1230,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       <Dialog
         footer={renderUniqueConstraintsFooter}
         header={resourcesContext.messages['uniqueConstraints']}
-        onHide={() => onCloseUniqueListModal()}
+        onHide={onCloseUniqueListModal}
         style={{ width: '70%' }}
         visible={designerState.isUniqueConstraintsListDialogVisible}>
         <UniqueConstraints
@@ -1291,7 +1296,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon="cancel"
         label={resourcesContext.messages['close']}
-        onClick={() => onCloseUniqueListModal()}
+        onClick={onCloseUniqueListModal}
       />
     </Fragment>
   );

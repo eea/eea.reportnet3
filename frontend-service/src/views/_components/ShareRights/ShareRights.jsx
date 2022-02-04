@@ -546,7 +546,7 @@ export const ShareRights = ({
           iconConfirm={shareRightsState.isDeletingUserRight ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onDeleteUserRight()}
+          onConfirm={onDeleteUserRight}
           onHide={() => {
             onResetAll();
             shareRightsDispatch({
@@ -573,7 +573,7 @@ export const ShareRights = ({
           iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['cancel']}
           labelConfirm={resourcesContext.messages['save']}
-          onConfirm={() => updateUserRight()}
+          onConfirm={updateUserRight}
           onHide={() => {
             onResetAll();
             onCloseManagementDialog();

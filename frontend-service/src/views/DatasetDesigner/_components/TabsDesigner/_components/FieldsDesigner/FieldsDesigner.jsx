@@ -99,11 +99,7 @@ export const FieldsDesigner = ({
       setTableDescriptionValue(table.description || '');
       setIsReadOnlyTable(table.readOnly || false);
       setToPrefill(table.toPrefill || false);
-      if (!table.notEmpty) {
-        setNotEmpty(false);
-      } else {
-        setNotEmpty(true);
-      }
+      table.notEmpty === false ? setNotEmpty(false) : setNotEmpty(true);
       setFixedNumber(table.fixedNumber || false);
     }
   }, [table]);
@@ -274,7 +270,7 @@ export const FieldsDesigner = ({
     if (checked) {
       setToPrefill(true);
     }
-    updateTableDesign({ fixedNumber, notEmpty, readOnly: checked, toPrefill: !checked ? toPrefill : true });
+    updateTableDesign({ fixedNumber, notEmpty, readOnly: checked, toPrefill: checked === false ? toPrefill : true });
   };
 
   const onChangeToPrefill = checked => {
@@ -291,7 +287,7 @@ export const FieldsDesigner = ({
       fixedNumber: checked,
       notEmpty,
       readOnly: isReadOnlyTable,
-      toPrefill: !checked ? toPrefill : true
+      toPrefill: checked === false ? toPrefill : true
     });
   };
 
