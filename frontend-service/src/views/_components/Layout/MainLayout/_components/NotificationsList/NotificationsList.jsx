@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useReducer } from 'react';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
@@ -12,6 +12,7 @@ import styles from './NotificationsList.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { DataTable } from 'views/_components/DataTable';
 import { LevelError } from 'views/_components/LevelError';
@@ -24,6 +25,8 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
+
+import { notificationReducer } from 'views/_functions/Reducers/notificationReducer';
 
 export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
   const notificationContext = useContext(NotificationContext);
@@ -38,6 +41,28 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
     firstPageRecord: 0
   });
   const [totalRecords, setTotalRecords] = useState(0);
+
+  const [notificationState, dispatchNotification] = useReducer(notificationReducer, {
+    editNotification: {},
+    firstRow: 0,
+    formType: '',
+    isDeleteDialogVisible: false,
+    isDeleting: false,
+    isVisibleCreateNotification: false,
+    numberRows: 10,
+    systemNotifications: []
+  });
+
+  const {
+    editNotification,
+    firstRow,
+    formType,
+    isDeleteDialogVisible,
+    isDeleting,
+    isVisibleCreateSysNotification,
+    numberRows,
+    systemNotifications
+  } = notificationState;
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
@@ -243,6 +268,48 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
     'p-highlight-bg': rowData.index < notificationContext.all.filter(notification => !notification.isSystem).length
   });
 
+  const onDelete = async () => {
+    try {
+      dispatchNotification({ type: 'DESTROY' });
+      await NotificationService.deleteAll();
+    } catch (error) {
+      console.error('SystemNotificationsList - onDelete.', error);
+      notificationContext.add({ type: 'DELETE_SYSTEM_NOTIFICATION_ERROR' }, true);
+    } finally {
+      dispatchNotification({ type: 'DESTROY' });
+      onLoadNotifications();
+    }
+  };
+
+  const renderConfirmDialog = () => {
+    return (
+      <ConfirmDialog
+        classNameConfirm="p-button-danger"
+        disabledConfirm={isDeleting}
+        header={resourcesContext.messages['deleteUsersNotificationsHeader']}
+        iconConfirm={isDeleting ? 'spinnerAnimate' : 'check'}
+        labelCancel={resourcesContext.messages['no']}
+        labelConfirm={resourcesContext.messages['yes']}
+        onConfirm={() => onDelete()}
+        onHide={() => {}}
+        visible={true}>
+        {resourcesContext.messages['deleteUsersNotificationsConfirm']}
+      </ConfirmDialog>
+    );
+  };
+
+  const deleteUserNotificationsBtn = () => {
+    return (
+      <Button
+        className={`p-button-rounded p-button-secondary-transparent`}
+        disabled={false}
+        icon="trash"
+        label={resourcesContext.messages['deleteUsersNotificationsData']}
+        onClick={renderConfirmDialog()}
+      />
+    );
+  };
+
   const renderNotificationsListContent = () => {
     if (isNotificationVisible) {
       return (
@@ -258,6 +325,7 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
           visible={isNotificationVisible}
           zIndex={3100}>
           {renderNotifications()}
+          {deleteUserNotificationsBtn()}
         </Dialog>
       );
     }
