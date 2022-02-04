@@ -446,7 +446,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         stringQuery.append(String.format(DATE_TO, DATE_RELEASED, key));
         break;
       case DELIVERY_STATUS:
-        stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key));
+        List<String> deliveryStatus = Arrays.asList(value.split(","));
+        stringQuery.append("(");
+        if (deliveryStatus.contains("PENDING")) {
+          stringQuery.append("(delivery_status is null) or ");
+        }
+        stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key + ")"));
         break;
       case "status":
         switch (value) {
@@ -484,6 +489,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         query.setParameter(key, new Date(Long.valueOf(value)));
         break;
       case DELIVERY_STATUS:
+        List<String> deliveryStatus = Arrays.asList(value.split(","));
         query.setParameter(key, Arrays.asList(value.split(",")));
         break;
       case "status":
