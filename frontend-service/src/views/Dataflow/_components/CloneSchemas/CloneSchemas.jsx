@@ -106,7 +106,10 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
             { key: 'description', label: resourcesContext.messages['description'] }
           ]
         },
-        { type: 'MULTI_SELECT', nestedOptions: [{ key: 'status', label: resourcesContext.messages['status'] }] }
+        {
+          type: 'MULTI_SELECT',
+          nestedOptions: [{ key: 'status', label: resourcesContext.messages['status'], template: 'LevelError' }]
+        }
       ]
     : [
         {
@@ -118,7 +121,10 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
             { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'] }
           ]
         },
-        { type: 'MULTI_SELECT', nestedOptions: [{ key: 'status', label: resourcesContext.messages['status'] }] },
+        {
+          type: 'MULTI_SELECT',
+          nestedOptions: [{ key: 'status', label: resourcesContext.messages['status'], template: 'LevelError' }]
+        },
         { type: 'DATE', key: 'expirationDate', label: resourcesContext.messages['expirationDate'] }
       ];
 
