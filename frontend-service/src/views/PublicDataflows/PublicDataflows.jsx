@@ -159,7 +159,12 @@ export const PublicDataflows = () => {
       const publicData = await DataflowService.getPublicData({ filterBy, numberRows, pageNum, sortByOptions: sortBy });
 
       setPublicDataflows(publicData.dataflows);
-      setData(publicData.dataflows);
+      setData(
+        publicData.dataflows.map(dataflow => ({
+          ...dataflow,
+          legalInstrument: dataflow.obligation.legalInstrument?.alias
+        }))
+      );
       setFilteredRecords(publicData.filteredRecords);
       setTotalRecords(publicData.totalRecords);
       setIsFiltered(publicData.filteredRecords !== publicData.totalRecords);
@@ -205,7 +210,7 @@ export const PublicDataflows = () => {
           rows={numberRows}
           rowsPerPageOptions={[100, 150, 200]}
           template={currentPageTemplate}
-          totalRecords={totalRecords}
+          totalRecords={filteredRecords}
         />
       );
     }
