@@ -38,6 +38,7 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
+import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
 import org.eea.validation.persistence.data.domain.DatasetValue;
 import org.eea.validation.persistence.data.domain.FieldValidation;
@@ -64,6 +65,7 @@ import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
 import org.eea.validation.util.RulesErrorUtils;
+import org.eea.validation.util.SQLValidationUtils;
 import org.joda.time.LocalDate;
 import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
@@ -233,6 +235,10 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private RulesServiceImpl ruleservice;
 
+  @Autowired
+  private SQLValidationUtils sqlValidationUtils;
+
+
   /**
    * Gets the element lenght.
    *
@@ -337,7 +343,7 @@ public class ValidationServiceImpl implements ValidationService {
    * @throws IllegalArgumentException the illegal argument exception
    */
   @Override
-  public KieBase loadRulesKnowledgeBase(Long datasetId, Rule rule) throws EEAException {
+  public KieBase loadRulesKnowledgeBase(Long datasetId, String rule) throws EEAException {
     KieBase kieBase;
     try {
       kieBase = kieBaseManager.reloadRules(datasetId,
@@ -392,21 +398,30 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   @Transactional
-  public void validateTable(Long datasetId, Long idTable, KieBase kieBase, String sqlRule) {
+  public void validateTable(Long datasetId, Long idTable, KieBase kieBase, String sqlRule,
+      String dataProviderId) {
     // Validating tables
-    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
-    TableValue table = tableRepository.findById(idTable).orElse(null);
-    KieSession session = kieBase.newKieSession();
-    List<TableValidation> validations = new ArrayList<>();
+    TableValue table = null;
+    KieSession session = null;
     try {
-      if (table != null) {
-        validations = runTableValidations(table, session);
-        tableValidationRepository.saveAll(validations);
+      TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
+      if (!"null".equals(sqlRule)) {
+        sqlValidationUtils.executeValidationSQLRule(datasetId, sqlRule, dataProviderId);
+      } else {
+        table = tableRepository.findById(idTable).orElse(null);
+        session = kieBase.newKieSession();
+        if (table != null) {
+          tableValidationRepository.saveAll(runTableValidations(table, session));
+        }
       }
+    } catch (EEAInvalidSQLException e) {
+      LOG_ERROR.error("The Table Validation failed: {}", e.getMessage(), e);
+      rulesErrorUtils.createRuleErrorException(table, new RuntimeException());
     } finally {
       table = null;
-      validations = null;
-      session.destroy();
+      if (session != null) {
+        session.destroy();
+      }
       System.gc();
     }
   }
@@ -424,22 +439,14 @@ public class ValidationServiceImpl implements ValidationService {
 
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     List<RecordValue> records = recordRepository.findRecordsPageable(pageable);
-    List<RecordValidation> recordValidations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
-    List<RecordValidation> validations = new ArrayList<>();
     try {
       for (RecordValue row : records) {
-        runRecordValidations(row, session);
-        validations = row.getRecordValidations();
-        recordValidations.addAll(validations);
-      }
-      if (!recordValidations.isEmpty()) {
         TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
-        recordValidationRepository.saveAll(recordValidations);
+        recordValidationRepository.saveAll(runRecordValidations(row, session));
       }
     } finally {
       records = null;
-      validations = null;
       session.destroy();
       System.gc();
     }
@@ -460,20 +467,13 @@ public class ValidationServiceImpl implements ValidationService {
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     Page<FieldValue> fields = onlyEmptyFields ? fieldRepository.findEmptyFields(pageable)
         : fieldRepository.findAll(pageable);
-    List<FieldValidation> fieldValidations = new ArrayList<>();
     KieSession session = kieBase.newKieSession();
     try {
       for (FieldValue field : fields) {
-        List<FieldValidation> resultFields = runFieldValidations(field, session);
-        fieldValidations.addAll(resultFields);
-      }
-      if (!fieldValidations.isEmpty()) {
         TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
-        validationFieldRepository.saveAll(fieldValidations);
+        validationFieldRepository.saveAll(runFieldValidations(field, session));
       }
     } finally {
-      fields = null;
-      fieldValidations = null;
       session.destroy();
     }
   }

@@ -21,7 +21,6 @@ export const dataflowsReducer = (state, { type, payload }) => {
         ...state,
         [payload.type]: payload.data,
         dataflowsCountFirstLoad: false,
-        dataflowsCount: { ...state.dataflowsCount, [payload.type]: payload.data.length },
         activeIndex:
           isNil(payload.contextCurrentDataflowType) && state.dataflowsCountFirstLoad ? getIndex() : state.activeIndex,
         filteredRecords: payload.filteredRecords,
@@ -41,7 +40,7 @@ export const dataflowsReducer = (state, { type, payload }) => {
       return { ...state, [payload.dialog]: payload.value };
 
     case 'ON_CHANGE_TAB':
-      return { ...state, activeIndex: payload.index };
+      return { ...state, activeIndex: payload.index, totalRecords: 0 };
 
     case 'SET_DATAFLOWS_COUNT': {
       return {

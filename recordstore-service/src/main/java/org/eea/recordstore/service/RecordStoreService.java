@@ -168,6 +168,13 @@ public interface RecordStoreService {
       Long datasetId);
 
   /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  void updateSnapshotDisabled(Long datasetId);
+
+  /**
    * Creates the snapshot to clone.
    *
    * @param originDataset the origin dataset

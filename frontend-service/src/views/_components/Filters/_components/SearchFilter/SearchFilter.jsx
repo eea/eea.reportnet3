@@ -6,7 +6,7 @@ import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
 import { useSearch } from 'views/_components/Filters/_functions/Hooks/useSearch';
 
-export const SearchFilter = ({ isLoading, onFilterData, option, recoilId }) => {
+export const SearchFilter = ({ isLoading, onFilterData, onSort, option, recoilId }) => {
   const { searchBy, onSearch } = useSearch({ onFilterData, option, recoilId });
 
   const renderCleanInputButton = () => {
@@ -25,7 +25,13 @@ export const SearchFilter = ({ isLoading, onFilterData, option, recoilId }) => {
 
   return (
     <div className={styles.block} key={option.key}>
-      <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} />
+      <SortButton
+        id={option.key}
+        isLoading={isLoading}
+        isVisible={option.isSortable}
+        onSort={onSort}
+        recoilId={recoilId}
+      />
       <div
         className={`p-float-label ${styles.label} ${styles.elementFilter} ${
           searchBy.length > 0 ? styles.elementFilterSelected : styles.elementFilter

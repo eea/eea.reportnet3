@@ -1,9 +1,10 @@
 @import '_styles/mixins';
 
 .noObligations {
-  color: var(--button-secondary-transparent-color-hover);
-  font-weight: 450;
-  margin: 2rem 1rem;
+  display: flex;
+  flex: auto;
+  align-items: center;
+  justify-content: center;
 }
 
 .currentPageWrapper {
@@ -25,25 +26,23 @@
 
 .cardWrap {
   display: grid;
-  gap: 1em;
+  grid-gap: 1em;
   margin-bottom: 2rem;
-  @include for-phone-only {
-    grid-auto-flow: row;
-  }
+  grid-template-columns: minmax(80%, 1fr);
 
   @media (min-width: 650px) {
-    grid-template-columns: 48% 48%;
+    grid-template-columns: repeat(2, minmax(45%, 1fr));
   }
 
   @media (min-width: 1024px) {
-    grid-template-columns: 32% 32% 32%;
+    grid-template-columns: repeat(3, minmax(30%, 1fr));
   }
 
   @media (min-width: 1280px) {
-    grid-template-columns: 24% 24% 24% 24%;
+    grid-template-columns: repeat(4, minmax(20%, 1fr));
   }
 
   @media (min-width: 1500px) {
-    grid-template-columns: 19% 19% 19% 19% 19%;
+    grid-template-columns: repeat(5, minmax(15%, 1fr));
   }
 }

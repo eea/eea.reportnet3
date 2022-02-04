@@ -1,17 +1,19 @@
 import { useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
+import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 
 import styles from './DropdownFilter.module.scss';
 
 import { Dropdown } from 'views/_components/Dropdown';
+import { LevelError } from 'views/_components/LevelError';
 import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
 import { filterByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 import { filterByAllKeys } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
 
-export const DropdownFilter = ({ isLoading, onSort, option, recoilId }) => {
+export const DropdownFilter = ({ isLoading, onFilterData, onSort, option, recoilId }) => {
   const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));
 
   const [filterBy, setFilterBy] = useRecoilState(filterByStore(`${option.key}_${recoilId}`));
@@ -20,28 +22,48 @@ export const DropdownFilter = ({ isLoading, onSort, option, recoilId }) => {
     setFilterByAllKeys(prevState => uniq([...prevState, option.key]));
   }, [recoilId]);
 
+  const onFilter = async value => {
+    setFilterBy({ [option.key]: value });
+    await onFilterData({ key: option.key, value, type: option.type });
+  };
+
+  const renderTemplate = (template, type) => {
+    if (template === 'LevelError') {
+      return <LevelError type={type} />;
+    }
+
+    return <span className={styles.statusBox}>{type?.toString()}</span>;
+  };
+
   return (
     <div className={`${styles.block}`} key={option.key}>
-      <SortButton id={option.key} isLoading={isLoading} isVisible={option.isSortable} onSort={onSort} />
+      <SortButton
+        id={option.key}
+        isLoading={isLoading}
+        isVisible={option.isSortable}
+        onSort={onSort}
+        recoilId={recoilId}
+      />
       <Dropdown
         ariaLabel={option.key}
-        className={`${styles.dropdownFilter} ${
-          filterBy[option.key]?.length > 0 ? styles.elementFilterSelected : styles.elementFilter
+        className={`p-float-label ${styles.dropdownFilter} ${
+          !isNil(filterBy[option.key]) ? styles.elementFilterSelected : styles.elementFilter
         }`}
         filter={option.dropdownOptions.length > 10}
         filterPlaceholder={option.label}
         id={`${option.key}_dropdown`}
-        inputClassName={`p-float-label ${styles.label}`}
+        inputClassName={styles.label}
         inputId={option.key}
+        itemTemplate={item => renderTemplate(option.template, item.label)}
         label={option.label}
-        onChange={event => setFilterBy({ [option.key]: event.target.value })}
+        onChange={event => onFilter(event.target.value)}
         onMouseDown={event => {
           event.preventDefault();
           event.stopPropagation();
         }}
         optionLabel="label"
         options={option.dropdownOptions}
-        showClear={filterBy[option.key]}
+        showClear={isNil(filterBy[option.key])}
         showFilterClear={true}
         value={filterBy[option.key]}
       />

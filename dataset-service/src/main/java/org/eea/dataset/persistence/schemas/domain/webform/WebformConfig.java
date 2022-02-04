@@ -12,6 +12,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 
+/**
+ * The Class WebformConfig.
+ */
 @Setter
 @Getter
 @ToString
@@ -19,21 +22,25 @@ import lombok.ToString;
 public class WebformConfig implements Serializable {
 
 
+  /** The Constant serialVersionUID. */
   private static final long serialVersionUID = -5182631387358793262L;
 
 
+  /** The id. */
   @Id
   @Field(value = "_id")
   private ObjectId id;
 
+  /** The id referenced. */
   @Field(value = "idReferenced")
   private Long idReferenced;
 
+  /** The name. */
   @Field(value = "name")
   private String name;
 
+  /** The file. */
   @Field(value = "file")
-  // private JsonNode file;
   Map<String, Object> file;
 
 

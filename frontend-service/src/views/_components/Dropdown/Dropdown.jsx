@@ -654,7 +654,7 @@ export class Dropdown extends Component {
 
       return (
         <label className={className} style={{ fontStyle: isNull(selectedOption) ? 'italic' : 'inherit' }}>
-          <span>{label || `${this.props.placeholder}` || 'empty'}</span>
+          <span>{label || this.props.placeholder || ''}</span>
           {this.props.required && isNull(selectedOption) ? (
             <FontAwesomeIcon
               aria-label="required"

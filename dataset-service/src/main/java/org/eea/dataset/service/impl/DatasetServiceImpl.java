@@ -76,7 +76,6 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.PaMService;
-import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.helper.PostgresBulkImporter;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -94,6 +93,7 @@ import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.FieldValidationVO;
@@ -124,6 +124,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -228,9 +229,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private FieldValueIdGenerator fieldValueIdGenerator;
 
-  /** The file export factory. */
-  @Autowired
-  private IFileExportFactory fileExportFactory;
 
   /** The record no validation mapper. */
   @Autowired
@@ -302,6 +300,7 @@ public class DatasetServiceImpl implements DatasetService {
   private ValidationRepository validationRepository;
 
   /** The dataset snapshot service. */
+  @Lazy
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
@@ -2332,8 +2331,9 @@ public class DatasetServiceImpl implements DatasetService {
       Long targetDatasetId, Long originDatasetId, DataProviderVO dataproviderVO) {
     try {
       List<RecordValue> auxRecords = new ArrayList<>();
+      ExportFilterVO filters = new ExportFilterVO();
       for (RecordValue record : recordRepository.findOrderedNativeRecord(targetTable.getId(),
-          originDatasetId, null)) {
+          originDatasetId, null, filters)) {
         RecordValue recordAux = new RecordValue();
         BeanUtils.copyProperties(recordAux, record);
         recordAux.setId(null);
@@ -3073,6 +3073,7 @@ public class DatasetServiceImpl implements DatasetService {
   public void updateRecordsWithConditions(List<RecordValue> recordList, Long datasetId,
       TableSchema tableSchema) {
     LOG.info("Import dataset table {} with conditions", tableSchema.getNameTableSchema());
+    ExportFilterVO filters = new ExportFilterVO();
     boolean readOnly =
         tableSchema.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchema::getReadOnly);
     tableRepository.countRecordsByIdTableSchema(tableSchema.getIdTableSchema().toString());
@@ -3081,7 +3082,7 @@ public class DatasetServiceImpl implements DatasetService {
     TableValue targetTable =
         tableRepository.findByIdTableSchema(tableSchema.getIdTableSchema().toString());
     List<RecordValue> oldRecords =
-        recordRepository.findOrderedNativeRecord(targetTable.getId(), datasetId, null);
+        recordRepository.findOrderedNativeRecord(targetTable.getId(), datasetId, null, filters);
     // sublist records to insert
     List<RecordValue> recordsToSave = new ArrayList<>();
 

@@ -35,14 +35,15 @@ export const PublicDataflows = () => {
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
-  const { getFilterBy, setData, sortByOptions } = useApplyFilters('publicDataflows');
+  const { getFilterBy, isFiltered: areFiltersFilled, setData, sortByOptions } = useApplyFilters('publicDataflows');
 
   const [contentStyles, setContentStyles] = useState({});
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [goToPage, setGoToPage] = useState(1);
+  const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [pageInputTooltip, setPageInputTooltip] = useState(resourcesContext.messages['currentPageInfoMessage']);
-  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 100, pageNum: 0 });
+  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 });
   const [publicDataflows, setPublicDataflows] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
 
@@ -111,8 +112,9 @@ export const PublicDataflows = () => {
       isSortable: true,
       template: 'LevelError',
       dropdownOptions: [
-        { label: resourcesContext.messages['close'].toUpperCase(), value: config.dataflowStatus['DESIGN'] },
-        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus['OPEN'] }
+        { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+        { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
       ],
       type: 'DROPDOWN'
     },
@@ -157,9 +159,15 @@ export const PublicDataflows = () => {
       const publicData = await DataflowService.getPublicData({ filterBy, numberRows, pageNum, sortByOptions: sortBy });
 
       setPublicDataflows(publicData.dataflows);
-      setData(publicData.dataflows);
+      setData(
+        publicData.dataflows.map(dataflow => ({
+          ...dataflow,
+          legalInstrument: dataflow.obligation.legalInstrument?.alias
+        }))
+      );
       setFilteredRecords(publicData.filteredRecords);
       setTotalRecords(publicData.totalRecords);
+      setIsFiltered(publicData.filteredRecords !== publicData.totalRecords);
     } catch (error) {
       console.error('PublicDataflows - onLoadPublicDataflows.', error);
     } finally {
@@ -183,23 +191,26 @@ export const PublicDataflows = () => {
 
   const renderPaginatorRecordsCount = () => (
     <Fragment>
-      {resourcesContext.messages['totalRecords']} {totalRecords} {resourcesContext.messages['records'].toLowerCase()}
+      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
+      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
+        'records'
+      ].toLowerCase()}`}
     </Fragment>
   );
 
   const renderPaginator = () => {
-    // ADD IF THERE ARE DATAFLOWS TO RENDER PAGINATOR
-    if (!isLoading) {
+    if (totalRecords > 0) {
       return (
         <Paginator
-          className="p-paginator-bottom"
+          areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
+          className={`p-paginator-bottom ${styles.paginator}`}
           first={firstRow}
           onPageChange={onPaginate}
           rightContent={renderPaginatorRecordsCount()}
           rows={numberRows}
           rowsPerPageOptions={[100, 150, 200]}
           template={currentPageTemplate}
-          totalRecords={totalRecords}
+          totalRecords={filteredRecords}
         />
       );
     }
@@ -207,7 +218,11 @@ export const PublicDataflows = () => {
 
   const renderPublicDataflowsContent = () => {
     if (isLoading) {
-      return <Spinner className={styles.spinner} />;
+      return (
+        <div className={styles.noDataflows}>
+          <Spinner className={styles.spinner} />
+        </div>
+      );
     }
 
     if (isEmpty(publicDataflows)) {
@@ -221,26 +236,22 @@ export const PublicDataflows = () => {
     }
 
     return (
-      <div>
-        <div className={styles.topPaginator}>{renderPaginator()}</div>
-        <div className={styles.dataflowsList}>
-          {publicDataflows.map(dataflow => (
-            <PublicCard
-              animation
-              card={dataflow}
-              dataflowId={dataflow.id}
-              dueDate={dataflow.expirationDate}
-              key={dataflow.id}
-              landingPageCard={false}
-              obligation={dataflow.obligation}
-              onCardClick={onOpenDataflow}
-              status={resourcesContext.messages[dataflow.status]}
-              subtitle={{ text: dataflow.description, url: '' }}
-              title={{ text: dataflow.name, url: '' }}
-            />
-          ))}
-        </div>
-        <div className={styles.bottomPaginator}>{renderPaginator()}</div>
+      <div className="responsiveCardsGrid">
+        {publicDataflows.map(dataflow => (
+          <PublicCard
+            animation
+            card={dataflow}
+            dataflowId={dataflow.id}
+            dueDate={dataflow.expirationDate}
+            key={dataflow.id}
+            landingPageCard={false}
+            obligation={dataflow.obligation}
+            onCardClick={onOpenDataflow}
+            status={resourcesContext.messages[dataflow.status]}
+            subtitle={{ text: dataflow.description, url: '' }}
+            title={{ text: dataflow.name, url: '' }}
+          />
+        ))}
       </div>
     );
   };
@@ -251,14 +262,23 @@ export const PublicDataflows = () => {
         <div className={`rep-container ${styles.repContainer}`}>
           <h1 className={styles.title}>{resourcesContext.messages['dataflows']}</h1>
           <Filters
+            className="publicDataflows"
             isLoading={isLoading}
-            onFilter={onLoadPublicDataflows}
-            onReset={onLoadPublicDataflows}
+            onFilter={() => {
+              if (areFiltersFilled) {
+                setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
+              } else {
+                onLoadPublicDataflows();
+              }
+            }}
+            onReset={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 })}
             onSort={onLoadPublicDataflows}
             options={filterOptions}
             recoilId="publicDataflows"
           />
-          <div className={styles.dataflowsList}>{renderPublicDataflowsContent()}</div>
+          <div className={styles.topPaginator}>{renderPaginator()}</div>
+          {renderPublicDataflowsContent()}
+          <div className={styles.bottomPaginator}>{renderPaginator()}</div>
         </div>
       </div>
     </PublicLayout>

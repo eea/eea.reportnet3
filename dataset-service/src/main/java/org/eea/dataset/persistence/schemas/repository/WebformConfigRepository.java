@@ -6,8 +6,25 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 
 
-public interface WebformConfigRepository extends MongoRepository<WebformConfig, ObjectId> {
+/**
+ * The Interface WebformConfigRepository.
+ */
+public interface WebformConfigRepository
+    extends MongoRepository<WebformConfig, ObjectId>, ExtendedWebformConfigRepository {
 
+  /**
+   * Find by id referenced.
+   *
+   * @param id the id
+   * @return the webform config
+   */
   WebformConfig findByIdReferenced(Long id);
+
+  /**
+   * Delete by id referenced.
+   *
+   * @param idReferenced the id referenced
+   */
+  void deleteByIdReferenced(Long idReferenced);
 
 }

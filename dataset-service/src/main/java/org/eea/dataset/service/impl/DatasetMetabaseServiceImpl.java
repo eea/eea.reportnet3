@@ -297,6 +297,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     String messageStatus = "";
     if (DatasetStatusEnum.TECHNICALLY_ACCEPTED.equals(datasetStatusMessageVO.getStatus())) {
       messageStatus = STATUS_TECHNICALLY_ACCEPTED;
+
+      DataFlowVO dfVO =
+          dataflowControllerZuul.getMetabaseById(datasetStatusMessageVO.getDataflowId());
+      if (dfVO.isAutomaticReportingDeletion()) {
+        recordStoreControllerZuul.updateSnapshotDisabled(datasetStatusMessageVO.getDatasetId());
+      }
     } else if (DatasetStatusEnum.CORRECTION_REQUESTED.equals(datasetStatusMessageVO.getStatus())) {
       messageStatus = STATUS_CORRECTION_REQUESTED;
     } else {

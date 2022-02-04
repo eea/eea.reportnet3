@@ -859,7 +859,7 @@ public class RepresentativeServiceImplTest {
     snapshots.add(snapshot);
     Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong()))
         .thenReturn(reportings);
-    Mockito.when(datasetSnapshotController.getSnapshotsByIdDataset(Mockito.anyLong()))
+    Mockito.when(datasetSnapshotController.getSnapshotsEnabledByIdDataset(Mockito.anyLong()))
         .thenReturn(snapshots);
     assertTrue(representativeServiceImpl.checkDataHaveBeenRelease(1L, 1L));
   }

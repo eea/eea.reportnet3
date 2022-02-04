@@ -28,3 +28,18 @@
     opacity: 0.5;
   }
 }
+
+.spinnerDiv {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: bold;
+  height: 40vh;
+  width: 100%;
+}
+
+.spinner {
+  left: 0 !important;
+  top: 0 !important;
+}
