@@ -227,6 +227,21 @@ const parseRequestFilterBy = filterBy => {
   return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
 };
 
+const parseRequestPublicCountrySortField = sortField => {
+  if (isNil(sortField) || isEmpty(sortField)) {
+    return undefined;
+  }
+
+  const replacements = {
+    legalInstrument: 'legal_instrument',
+    deadline: 'deadline_date',
+    deliveryDate: 'delivery_date',
+    deliveryStatus: 'delivery_status'
+  };
+
+  return replacements[sortField] || sortField;
+};
+
 const parseRequestPublicCountryFilterBy = filterBy => {
   if (isEmpty(filterBy)) {
     return {};
@@ -296,6 +311,7 @@ export const DataflowUtils = {
   parsePublicDataflowListDTO,
   parseRequestFilterBy,
   parseRequestPublicCountryFilterBy,
+  parseRequestPublicCountrySortField,
   parseRequestSortBy,
   parseSortedDataflowListDTO,
   parseUsersList,
