@@ -758,7 +758,7 @@ export const Dataflows = () => {
     if (totalRecords > 0) {
       return (
         <Paginator
-          areComponentsVisible={filteredRecords > pagination.numPage}
+          areComponentsVisible={filteredRecords > config.DATAFLOWS_PER_PAGE}
           className={`p-paginator-bottom ${styles.paginator}`}
           first={pagination.firstRow}
           isDataflowsList={true}
