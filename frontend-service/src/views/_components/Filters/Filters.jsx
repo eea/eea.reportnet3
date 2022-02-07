@@ -113,9 +113,9 @@ export const Filters = ({
   );
 
   const clearDateInputs = () => {
-    for (const input of document.getElementsByClassName('date-filter-input')) {
+    [...document.getElementsByClassName('date-filter-input')].forEach(input => {
       input.value = '';
-    }
+    });
   };
 
   const onResetFilters = useRecoilCallback(
