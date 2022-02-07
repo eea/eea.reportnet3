@@ -35,6 +35,9 @@ export const RepresentativeService = {
   deleteLeadReporter: async (leadReporterId, dataflowId) =>
     await RepresentativeRepository.deleteLeadReporter(leadReporterId, dataflowId),
 
+  deleteAllLeadReporters: async (leadReporterId, dataflowId) =>
+    await RepresentativeRepository.deleteAllLeadReporters(leadReporterId, dataflowId),
+
   exportFile: async dataflowId => await RepresentativeRepository.exportFile(dataflowId),
 
   exportTemplateFile: async dataProviderGroupId =>
