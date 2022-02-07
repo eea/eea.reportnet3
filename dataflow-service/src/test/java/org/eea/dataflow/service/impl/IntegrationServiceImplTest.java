@@ -460,7 +460,7 @@ public class IntegrationServiceImplTest {
   @Test
   public void releaseLocksTest() {
     integrationService.releaseLocks(0L);
-    Mockito.verify(lockService, times(7)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(8)).removeLockByCriteria(Mockito.any());
   }
 
   /**
