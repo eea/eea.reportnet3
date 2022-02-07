@@ -22,8 +22,6 @@
   }
 }
 
-.emptyTableHeader {
-  :global .p-column-title {
-    display: none;
-  }
+.cursorPointer {
+  cursor: pointer;
 }

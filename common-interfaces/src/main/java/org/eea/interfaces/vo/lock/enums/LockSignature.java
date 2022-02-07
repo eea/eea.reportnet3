@@ -9,6 +9,9 @@ public enum LockSignature {
   /** DatasetControllerImpl.importFileData(..) */
   IMPORT_FILE_DATA("DatasetControllerImpl.importFileData(..)"),
 
+  /** The import big file data. */
+  IMPORT_BIG_FILE_DATA("DatasetControllerImpl.importBigFileData(..)"),
+
   /** DatasetSnapshotControllerImpl.createSnapshot(..) */
   CREATE_SNAPSHOT("DatasetSnapshotControllerImpl.createSnapshot(..)"),
 

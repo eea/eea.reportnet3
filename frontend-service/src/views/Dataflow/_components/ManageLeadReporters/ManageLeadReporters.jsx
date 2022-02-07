@@ -89,16 +89,17 @@ export const ManageLeadReporters = ({
     const representatives = cloneDeep(formState.representatives);
     if (!isEmpty(representatives)) {
       const representativesWithLabel = representatives.map(representative => {
+        if (representative.dataProviderId === '') {
+          return representative;
+        }
+
         const existRepresentative = formState.allPossibleDataProviders.find(
           item => item.dataProviderId === representative.dataProviderId
         );
 
-        if (existRepresentative?.dataProviderId === '') {
-          return representative;
-        }
-
-        return { ...representative, nameRepresentative: existRepresentative.label };
+        return { ...representative, nameRepresentative: existRepresentative?.label };
       });
+
       formDispatcher({
         type: 'UPDATE_REPRESENTATIVES_WITH_LABEL',
         payload: { representatives: representativesWithLabel }
@@ -502,17 +503,15 @@ export const ManageLeadReporters = ({
             onAddRepresentative(representatives);
           }}
           value={representative.dataProviderId}>
-          {remainingOptionsAndSelectedOption.map((provider, i) => {
-            return (
-              <option
-                className="p-dropdown-item"
-                // eslint-disable-next-line react/no-array-index-key
-                key={`${provider.dataProviderId}${provider.label}${i}`}
-                value={provider.dataProviderId}>
-                {provider.label}
-              </option>
-            );
-          })}
+          {remainingOptionsAndSelectedOption.map((provider, i) => (
+            <option
+              className="p-dropdown-item"
+              // eslint-disable-next-line react/no-array-index-key
+              key={`${provider.dataProviderId}${provider.label}${i}`}
+              value={provider.dataProviderId}>
+              {provider.label}
+            </option>
+          ))}
         </select>
       </Fragment>
     );
@@ -522,7 +521,7 @@ export const ManageLeadReporters = ({
     if (TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value)) {
       return (
         <Dropdown
-          ariaLabel={'dataProviders'}
+          ariaLabel="dataProviders"
           className={styles.dataProvidersDropdown}
           disabled
           name="dataProvidersDropdown"
@@ -535,7 +534,7 @@ export const ManageLeadReporters = ({
 
     return (
       <Dropdown
-        ariaLabel={'dataProviders'}
+        ariaLabel="dataProviders"
         className={styles.dataProvidersDropdown}
         disabled={formState.representatives.length > 1}
         name="dataProvidersDropdown"
@@ -549,12 +548,6 @@ export const ManageLeadReporters = ({
   };
 
   const renderFilter = () => {
-    const dataFilterWithRepresentatingLabel = dataFiltersMemo.filter(item => item?.nameRepresentative !== undefined);
-
-    if (formState.isLoading || (dataFiltersMemo.length > 1 && isEmpty(dataFilterWithRepresentatingLabel))) {
-      return <Spinner className={styles.spinner} />;
-    }
-
     if (isNil(formState.selectedDataProviderGroup) || isEmpty(formState.allPossibleDataProviders)) {
       return null;
     }
@@ -606,9 +599,8 @@ export const ManageLeadReporters = ({
   };
 
   const renderDeleteBtnColumnTemplate = representative => {
-    return (
-      !isNil(representative.representativeId) &&
-      !representative.hasDatasets && (
+    if (!isNil(representative.representativeId) && !representative.hasDatasets) {
+      return (
         <ActionsColumn
           onDeleteClick={() => {
             formDispatcher({
@@ -617,11 +609,13 @@ export const ManageLeadReporters = ({
             });
           }}
         />
-      )
-    );
+      );
+    }
   };
 
-  if (isEmpty(formState.representatives)) return <Spinner style={{ top: 0 }} />;
+  if (isEmpty(formState.representatives)) {
+    return <Spinner style={{ top: 0 }} />;
+  }
 
   return (
     <div className={styles.container}>
@@ -632,10 +626,8 @@ export const ManageLeadReporters = ({
           {renderRepresentativesDropdown()}
         </div>
       </div>
-
       {renderFilter()}
       {renderTable()}
-
       {formState.isVisibleConfirmDeleteDialog && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
@@ -650,7 +642,6 @@ export const ManageLeadReporters = ({
           <p>{resourcesContext.messages['manageRolesDialogConfirmDeleteProviderQuestion']}</p>
         </ConfirmDialog>
       )}
-
       {isVisibleDialog.deleteLeadReporter && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}

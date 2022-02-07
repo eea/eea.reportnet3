@@ -17,17 +17,12 @@ import { RodUrl } from 'repositories/config/RodUrl';
 export const TableView = ({
   checkedObligation,
   data,
-  onSelectObl,
+  onSelectObligation,
   onChangePagination,
   pagination,
   paginatorRightText
 }) => {
   const resourcesContext = useContext(ResourcesContext);
-
-  const headerTableTemplate = obligation => {
-    if (obligation === 'dueDate') return resourcesContext.messages['nextReportDue'];
-    else return resourcesContext.messages[obligation];
-  };
 
   const onLoadPagination = event => onChangePagination({ first: event.first, rows: event.rows, page: event.page });
 
@@ -38,7 +33,7 @@ export const TableView = ({
         checked={checkedObligation.id === row.id}
         id={`${row.id}_checkbox`}
         inputId={`${row.id}_checkbox`}
-        onChange={() => onSelectObl(row)}
+        onChange={() => onSelectObligation(row)}
         role="checkbox"
       />
     </div>
@@ -56,56 +51,63 @@ export const TableView = ({
     </div>
   );
 
-  const renderCheckColumn = (
-    <Column
-      body={row => onLoadCheckButton(row)}
-      className={styles.emptyTableHeader}
-      header={resourcesContext.messages['selectedObligation']}
-      key="checkId"
-    />
-  );
+  const getColumns = () => {
+    const columns = [
+      {
+        key: 'checkId',
+        template: row => onLoadCheckButton(row)
+      },
+      {
+        key: 'title',
+        header: resourcesContext.messages['title'],
+        template: onLoadTitleTemplate
+      },
+      {
+        key: 'legalInstrument',
+        header: resourcesContext.messages['legalInstrument']
+      },
+      {
+        key: 'dueDate',
+        header: resourcesContext.messages['nextReportDue']
+      }
+    ];
 
-  const renderColumns = data => {
-    const repOblCols = [];
-    const repOblKeys = !isEmpty(data) ? Object.keys(data[0]) : [];
-    repOblCols.push(
-      repOblKeys
-        .filter(key => key !== 'id')
-        .map(obligation => {
-          let template = null;
-          if (obligation === 'title') template = onLoadTitleTemplate;
-
-          return (
-            <Column
-              body={template}
-              columnResizeMode="expand"
-              field={obligation}
-              header={headerTableTemplate(obligation)}
-              key={obligation}
-              sortable={true}
-            />
-          );
-        })
-    );
-    return [renderCheckColumn, ...repOblCols];
+    return columns.map(column => (
+      <Column
+        body={column.template}
+        field={column.key}
+        header={column.header}
+        key={column.key}
+        sortable={column.key !== 'checkId'}
+      />
+    ));
   };
 
-  return isEmpty(data) ? (
-    <h3 className={styles.noObligations}>{resourcesContext.messages['noObligationsWithSelectedParameters']}</h3>
-  ) : (
-    <DataTable
-      autoLayout={true}
-      first={pagination.first}
-      getPageChange={onLoadPagination}
-      onRowClick={event => onSelectObl(event.data)}
-      paginator={true}
-      paginatorRight={paginatorRightText}
-      rows={pagination.rows}
-      rowsPerPageOptions={[5, 10, 15]}
-      summary={resourcesContext.messages['reportingObligations']}
-      totalRecords={data.length}
-      value={data}>
-      {renderColumns(data)}
-    </DataTable>
-  );
+  const renderObligations = () => {
+    if (isEmpty(data)) {
+      return (
+        <h3 className={styles.noObligations}>{resourcesContext.messages['noObligationsWithSelectedParameters']}</h3>
+      );
+    }
+
+    return (
+      <DataTable
+        autoLayout={true}
+        className={styles.cursorPointer}
+        first={pagination.first}
+        getPageChange={onLoadPagination}
+        onRowClick={event => onSelectObligation(event.data)}
+        paginator={true}
+        paginatorRight={paginatorRightText}
+        rows={pagination.rows}
+        rowsPerPageOptions={[5, 10, 15]}
+        summary={resourcesContext.messages['reportingObligations']}
+        totalRecords={data.length}
+        value={data}>
+        {getColumns()}
+      </DataTable>
+    );
+  };
+
+  return renderObligations();
 };
