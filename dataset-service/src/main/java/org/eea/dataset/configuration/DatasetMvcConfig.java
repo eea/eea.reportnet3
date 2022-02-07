@@ -8,14 +8,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.TimeoutCallableProcessingInterceptor;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
-import org.springframework.web.servlet.config.annotation.CorsRegistration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -32,14 +30,16 @@ public class DatasetMvcConfig implements WebMvcConfigurer {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  @Value("${allow_cors_localhost}")
-  private Boolean allowCorsLocalhost;
-
-  @Value("${frontend_url}") //TODO el nombre de la variable está por algún lado, mirad el despliegue de frontend para obtenerla
-  private String frontendUrl;
-
-  @Value("${localhost_url}") //TODO tratad de crear una estructura mas o menos "bonica" para agrupar las dos urls
-  private String localhostUrl;
+  // @Value("${allow_cors_localhost}")
+  // private Boolean allowCorsLocalhost;
+  //
+  // @Value("${frontend_url}") //TODO el nombre de la variable está por algún lado, mirad el
+  // despliegue de frontend para obtenerla
+  // private String frontendUrl;
+  //
+  // @Value("${localhost_url}") //TODO tratad de crear una estructura mas o menos "bonica" para
+  // agrupar las dos urls
+  // private String localhostUrl;
 
   /**
    * The max file size.
@@ -52,6 +52,7 @@ public class DatasetMvcConfig implements WebMvcConfigurer {
    */
   @Value("${spring.servlet.multipart.max-request-size}")
   private Long maxRequestSize;
+
   /**
    * Adds the cors mappings.
    *
@@ -59,13 +60,15 @@ public class DatasetMvcConfig implements WebMvcConfigurer {
    */
   @Override
   public void addCorsMappings(final CorsRegistry registry) {
-    CorsRegistration corsRegistration = registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE");
-   //TODO Si esto no funciona poned lineas completas en if y en else, en una se añade fronendURL y localhost y la otra solo frontendURL
-    if(allowCorsLocalhost && !StringUtils.isEmpty(localhostUrl)){
-      corsRegistration.allowedOrigins(frontendUrl,localhostUrl);
-    }else{
-      corsRegistration.allowedOrigins(frontendUrl);
-    }
+    // CorsRegistration corsRegistration = registry.addMapping("/**").allowedMethods("GET", "POST",
+    // "PUT", "DELETE");
+    // //TODO Si esto no funciona poned lineas completas en if y en else, en una se añade fronendURL
+    // y localhost y la otra solo frontendURL
+    // if(allowCorsLocalhost && !StringUtils.isEmpty(localhostUrl)){
+    // corsRegistration.allowedOrigins(frontendUrl,localhostUrl);
+    // }else{
+    // corsRegistration.allowedOrigins(frontendUrl);
+    // }
 
   }
 
@@ -92,6 +95,7 @@ public class DatasetMvcConfig implements WebMvcConfigurer {
     configurer.setDefaultTimeout(7200000).setTaskExecutor(streamTaskExecutor());
     configurer.registerCallableInterceptors(callableProcessingInterceptor());
   }
+
   /**
    * Gets the async executor.
    *
@@ -106,6 +110,7 @@ public class DatasetMvcConfig implements WebMvcConfigurer {
     executor.setQueueCapacity(25);
     return executor;
   }
+
   /**
    * Callable processing interceptor.
    *
