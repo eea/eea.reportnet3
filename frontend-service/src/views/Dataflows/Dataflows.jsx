@@ -484,7 +484,8 @@ export const Dataflows = () => {
       payload: {
         contextCurrentDataflowType: userContext.currentDataflowType,
         data: DataflowsUtils.sortDataflows(changedInitialData),
-        type: tabId
+        type: tabId,
+        totalRecords: totalRecords
       }
     });
 
