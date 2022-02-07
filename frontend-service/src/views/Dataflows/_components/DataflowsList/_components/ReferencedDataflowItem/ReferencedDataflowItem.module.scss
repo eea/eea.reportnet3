@@ -53,8 +53,7 @@
         background: var(--card-design-dataflow-bg-hover);
       }
     }
-    &.OPEN,
-    &.CLOSED {
+    &.OPEN {
       background-color: var(--c-lilac-300);
       &:hover {
         background-color: #6565a8;
@@ -62,6 +61,16 @@
       .containerLink {
         color: var(--c-white-color);
         background-image: url('/views/_assets/images/logos/logo-blanco.png');
+      }
+    }
+    &.CLOSED {
+      background-color: var(--c-lilac-700);
+      .containerLink {
+        color: var(--c-white-color);
+        background-image: url('/views/_assets/images/logos/logo-blanco.png');
+      }
+      &:hover {
+        background-color: var(--c-lilac-800);
       }
     }
   }
