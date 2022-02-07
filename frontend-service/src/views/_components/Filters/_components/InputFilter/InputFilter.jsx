@@ -32,6 +32,7 @@ export const InputFilter = ({ isLoading, onCustomFilter, onFilterData, onSort, o
           className={styles.inputFilter}
           id={`${option.key}_input`}
           key={option.key}
+          keyfilter={option.keyfilter}
           onChange={event => onFilter(event.target.value)}
           onKeyPress={event => {
             if (event.key === 'Enter' && !isNil(onCustomFilter)) {
