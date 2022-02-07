@@ -21,21 +21,6 @@ export const useFilters = recoilId => {
   const resetSortBy = useResetRecoilState(sortByState(recoilId));
 
   const checkIsFilter = () => {
-    const isEmptyFilterBy = () => {
-      if (isEmpty(filterBy)) {
-        return true;
-      }
-      return !Object.values(filterBy)
-        .map(item => {
-          if (item === false || isEmptyOption(item)) {
-            return true;
-          } else {
-            return false;
-          }
-        })
-        .includes(false);
-    };
-
     const isEmptyOption = item => {
       if (typeof item !== 'boolean' || item === '') {
         return isEmpty(item);
@@ -43,13 +28,17 @@ export const useFilters = recoilId => {
         return isNil(item);
       }
     };
-
-    if (isEmptyFilterBy()) {
+    if (isEmpty(filterBy)) {
       return false;
     }
-
     return Object.values(filterBy)
-      .map(key => isEmptyOption(key))
+      .map(item => {
+        if (item === false || isEmptyOption(item)) {
+          return true;
+        } else {
+          return false;
+        }
+      })
       .includes(false);
   };
 
