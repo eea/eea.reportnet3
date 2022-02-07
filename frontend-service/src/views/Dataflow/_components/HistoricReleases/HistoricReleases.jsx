@@ -218,8 +218,8 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       key: 'isPublic',
       label: resourcesContext.messages['public'],
       multiSelectOptions: [
-        { type: 'TRUE', value: true },
-        { type: 'FALSE', value: false }
+        { type: resourcesContext.messages['true'].toUpperCase(), value: true },
+        { type: resourcesContext.messages['false'].toUpperCase(), value: false }
       ]
     }
   ];
@@ -240,8 +240,8 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           key: 'isPublic',
           label: resourcesContext.messages['public'],
           multiSelectOptions: [
-            { type: 'TRUE', value: true },
-            { type: 'FALSE', value: false }
+            { type: resourcesContext.messages['true'].toUpperCase(), value: true },
+            { type: resourcesContext.messages['false'].toUpperCase(), value: false }
           ]
         }
       ]
