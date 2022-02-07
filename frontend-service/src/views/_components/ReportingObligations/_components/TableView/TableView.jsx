@@ -16,6 +16,7 @@ import { RodUrl } from 'repositories/config/RodUrl';
 
 export const TableView = ({
   checkedObligation,
+  className,
   data,
   onSelectObl,
   onChangePagination,
@@ -95,6 +96,7 @@ export const TableView = ({
   ) : (
     <DataTable
       autoLayout={true}
+      className={`${className ? styles[className] : ''}`}
       first={pagination.first}
       getPageChange={onLoadPagination}
       onRowClick={event => onSelectObl(event.data)}

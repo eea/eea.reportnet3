@@ -156,6 +156,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
         return (
           <TableView
             checkedObligation={selectedObligation}
+            className="reportingObligationsTable"
             data={data}
             onChangePagination={onPaginate}
             onSelectObl={onSelectObligation}
