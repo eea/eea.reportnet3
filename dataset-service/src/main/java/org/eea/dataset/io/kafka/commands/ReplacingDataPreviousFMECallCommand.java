@@ -129,6 +129,11 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
     importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
     importFileData.put(LiteralConstants.DATASETID, datasetId);
     lockService.removeLockByCriteria(importFileData);
+    Map<String, Object> importBigFileData = new HashMap<>();
+    importBigFileData.put(LiteralConstants.SIGNATURE,
+        LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+    importBigFileData.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(importBigFileData);
     fileTreatmentHelper.releaseLockReleasingProcess(datasetId);
   }
 

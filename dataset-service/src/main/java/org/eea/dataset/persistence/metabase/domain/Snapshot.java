@@ -60,6 +60,9 @@ public class Snapshot extends DataSetMetabase {
   @Column(name = "RESTRICT_FROM_PUBLIC")
   private Boolean restrictFromPublic;
 
+  /** The enabled. */
+  @Column(name = "ENABLED")
+  private Boolean enabled;
 
   /**
    * Equals.

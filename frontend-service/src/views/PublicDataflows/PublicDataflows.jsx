@@ -102,7 +102,7 @@ export const PublicDataflows = () => {
         { key: 'description', label: resourcesContext.messages['description'], isSortable: true },
         { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], isSortable: true },
         { key: 'obligationTitle', label: resourcesContext.messages['obligation'], isSortable: true },
-        { key: 'obligationId', label: resourcesContext.messages['obligationId'], isSortable: true }
+        { key: 'obligationId', label: resourcesContext.messages['obligationId'], isSortable: true, keyfilter: 'num' }
       ],
       type: 'INPUT'
     },
@@ -162,7 +162,9 @@ export const PublicDataflows = () => {
       setData(
         publicData.dataflows.map(dataflow => ({
           ...dataflow,
-          legalInstrument: dataflow.obligation.legalInstrument?.alias
+          legalInstrument: dataflow.obligation.legalInstrument?.alias,
+          obligationTitle: dataflow.obligation?.title,
+          obligationId: dataflow.obligation?.obligationId.toString()
         }))
       );
       setFilteredRecords(publicData.filteredRecords);
@@ -193,7 +195,7 @@ export const PublicDataflows = () => {
     <Fragment>
       {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
       {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
-        'records'
+        'dataflows'
       ].toLowerCase()}`}
     </Fragment>
   );

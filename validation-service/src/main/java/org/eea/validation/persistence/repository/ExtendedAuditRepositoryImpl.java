@@ -3,7 +3,6 @@ package org.eea.validation.persistence.repository;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import org.apache.logging.log4j.util.Strings;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.validation.mapper.RuleMapper;
@@ -32,20 +31,26 @@ public class ExtendedAuditRepositoryImpl implements ExtendedAuditRepository {
    *
    * @param rule the rule
    * @param user the user
+   * @param datasetId the dataset id
+   * @param status the status
+   * @param expression the expression
+   * @param metadata the metadata
    */
   @Override
-  public void createAudit(Rule rule, UserRepresentationVO user, Long datasetId) {
+  public void createAudit(Rule rule, UserRepresentationVO user, Long datasetId, boolean status,
+      boolean expression, boolean metadata) throws JsonProcessingException {
     Audit audit = new Audit();
     audit.setDatasetId(datasetId);
     RuleHistoricInfo ruleHistoricInfo = new RuleHistoricInfo();
     ruleHistoricInfo.setRuleInfoId(new ObjectId());
-    ruleHistoricInfo.setMetadata(true);
-    ruleHistoricInfo.setExpression(true);
-    ruleHistoricInfo.setStatus(true);
+    ruleHistoricInfo.setMetadata(metadata);
+    ruleHistoricInfo.setExpression(expression);
+    ruleHistoricInfo.setStatus(status);
     ruleHistoricInfo.setUser(user.getEmail());
     ruleHistoricInfo.setTimestamp(new Date());
     ruleHistoricInfo.setRuleId(rule.getRuleId());
-    ruleHistoricInfo.setRuleBefore(Strings.EMPTY);
+    ObjectMapper mapper = new ObjectMapper();
+    ruleHistoricInfo.setRuleBefore(mapper.writeValueAsString(ruleMapper.entityToClass(rule)));
     audit.setHistoric(Arrays.asList(ruleHistoricInfo));
     mongoTemplate.save(audit);
   }

@@ -2,11 +2,15 @@ package org.eea.interfaces.vo.dataset.schemas;
 
 import java.io.Serializable;
 import java.util.Objects;
+import org.eea.interfaces.vo.dataset.enums.WebformTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 
+/**
+ * The Class WebformConfigVO.
+ */
 @Setter
 @Getter
 @ToString
@@ -29,7 +33,11 @@ public class WebformConfigVO implements Serializable {
   private String name;
 
 
+  /** The content. */
   private String content;
+
+  /** The type. */
+  private WebformTypeEnum type;
 
   /**
    * Hash code.
