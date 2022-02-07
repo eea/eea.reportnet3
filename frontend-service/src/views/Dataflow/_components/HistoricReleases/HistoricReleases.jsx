@@ -216,7 +216,11 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     {
       type: 'MULTI_SELECT',
       key: 'isPublic',
-      label: resourcesContext.messages['public']
+      label: resourcesContext.messages['public'],
+      multiSelectOptions: [
+        { type: 'TRUE', value: true },
+        { type: 'FALSE', value: false }
+      ]
     }
   ];
 
@@ -232,7 +236,14 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             'historicReleaseDataProviderFilterLabel'
           )
         },
-        { key: 'isPublic', label: resourcesContext.messages['public'] }
+        {
+          key: 'isPublic',
+          label: resourcesContext.messages['public'],
+          multiSelectOptions: [
+            { type: 'TRUE', value: true },
+            { type: 'FALSE', value: false }
+          ]
+        }
       ]
     }
   ];
