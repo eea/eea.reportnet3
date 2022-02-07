@@ -34,13 +34,7 @@ export const useFilters = recoilId => {
     }
 
     return Object.values(filterBy)
-      .map(item => {
-        if (item === false || isEmptyOption(item)) {
-          return true;
-        } else {
-          return false;
-        }
-      })
+      .map(item => item === false || isEmptyOption(item))
       .includes(false);
   };
 
