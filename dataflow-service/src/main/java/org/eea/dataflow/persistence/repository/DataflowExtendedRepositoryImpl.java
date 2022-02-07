@@ -98,7 +98,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   private static final String DATAFLOW_PUBLIC = " show_public_info = :public ";
 
   /** The Constant LIKE. */
-  private static final String LIKE = " lower(%s) LIKE lower(:%s) ";
+  private static final String LIKE = " lower(cast(%s)as text) LIKE lower(:%s) ";
 
   /** The Constant DATE_FROM. */
   private static final String DATE_FROM = " %s >= :%s ";
