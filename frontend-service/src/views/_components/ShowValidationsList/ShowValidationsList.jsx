@@ -77,7 +77,9 @@ export const ShowValidationsList = memo(
 
     const { totalErrors, totalFilteredRecords, totalRecords } = validationState;
 
-    const { getFilterBy, isFiltered, resetFilterState, setData } = useApplyFilters('showValidations');
+    const isFiltered = totalRecords !== totalFilteredRecords;
+
+    const { getFilterBy, resetFilterState, setData } = useApplyFilters('showValidations');
 
     useEffect(() => {
       const allTypesFilter = concat(
@@ -550,7 +552,8 @@ export const ShowValidationsList = memo(
           {
             key: 'levelError',
             label: resourcesContext.messages['levelError'],
-            multiSelectOptions: []
+            multiSelectOptions: [],
+            template: 'LevelError'
           }
         ]
       }
@@ -591,6 +594,7 @@ export const ShowValidationsList = memo(
             <Filters
               className="showValidations"
               onFilter={onLoadFilteredValidations}
+              onReset={onLoadFilteredValidations}
               options={filterOptions}
               recoilId="showValidations"
             />

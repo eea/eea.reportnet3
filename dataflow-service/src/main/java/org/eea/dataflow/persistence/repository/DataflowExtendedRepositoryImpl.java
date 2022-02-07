@@ -75,7 +75,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "(docaux ->> 'client' ) as client,\r\n" + "(docaux ->> 'countries' ) as countries,\r\n"
       + "(docaux ->> 'issues' ) as issues,\r\n" + "(docaux ->> 'reportFreq' ) as reportFreq,\r\n"
       + "(docaux ->> 'reportFreqDetail' ) as reportFreqDetail\r\n" + "from doc),\r\n"
-      + "dataset_aux as (select dataflowid, status as delivery_status, date_released from dataset d2 inner join (select reporting_dataset_id, date_released from \"snapshot\" s2 group by reporting_dataset_id, date_released) as snapshot_aux on snapshot_aux.reporting_dataset_id = d2.id)\r\n"
+      + "dataset_aux as (select dataflowid, MAX(status) as delivery_status, MAX(date_released) as date_released from dataset d2 right join (select reporting_dataset_id, date_released from \"snapshot\" s2 group by reporting_dataset_id, date_released) as snapshot_aux on snapshot_aux.reporting_dataset_id = d2.id group by dataflowid)"
       + "select d.*,ot.legal_Instrument, ot.obligation, dataset_aux.delivery_status, dataset_aux.date_released from obligationtable ot RIGHT join dataflow d \r\n"
       + "on d.obligation_id  = cast(ot.obligationId as integer)";
 
@@ -88,7 +88,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   /** The Constant JOIN_REPRESENTATIVE_DATA_PROVIDER_AND_DATASET_AUX. */
   private static final String JOIN_REPRESENTATIVE_DATA_PROVIDER_AND_DATASET_AUX =
       " inner join representative r on d.id = r.dataflow_id "
-          + "inner join data_provider dp on r.data_provider_id = dp.group_id "
+          + "inner join data_provider dp on r.data_provider_id = dp.id "
           + "left join dataset_aux on d.id = dataset_aux.dataflowid ";
 
   /** The Constant AND. */
@@ -464,7 +464,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         stringQuery.append(String.format(DATE_TO, DATE_RELEASED, key));
         break;
       case DELIVERY_STATUS:
-        stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key));
+        List<String> deliveryStatus = Arrays.asList(value.split(","));
+        stringQuery.append("(");
+        if (deliveryStatus.contains("PENDING")) {
+          stringQuery.append("(delivery_status is null) or ");
+        }
+        stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key + ")"));
         break;
       case "status":
         switch (value) {
@@ -502,6 +507,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         query.setParameter(key, new Date(Long.valueOf(value)));
         break;
       case DELIVERY_STATUS:
+        List<String> deliveryStatus = Arrays.asList(value.split(","));
         query.setParameter(key, Arrays.asList(value.split(",")));
         break;
       case "status":

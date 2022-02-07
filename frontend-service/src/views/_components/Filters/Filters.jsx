@@ -78,7 +78,7 @@ export const Filters = ({
           keys.map(key => snapshot.getPromise(key))
         );
 
-        const searchValue = await snapshot.getPromise(searchByStore(recoilId));
+        let searchValue = await snapshot.getPromise(searchByStore(recoilId));
         let isStrictMode = await snapshot.getPromise(isStrictModeStore);
 
         const response = await Promise.all(
@@ -94,12 +94,16 @@ export const Filters = ({
           isStrictMode = newData.isStrictMode;
         }
 
+        if (newData.type === 'SEARCH') {
+          searchValue = newData.searchValue;
+        }
+
         const filteredData = data.filter(
           item =>
             FiltersUtils.applyInputs({ filterBy, filteredKeys: inputKeys.keys, item }) &&
             FiltersUtils.applyCheckBox({ filterBy, filteredKeys: checkboxKeys.keys, item }) &&
             FiltersUtils.applyMultiSelects({ filterBy, filteredKeys: multiSelectKeys.keys, isStrictMode, item }) &&
-            FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: newData.searchValue || searchValue })
+            FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: searchValue })
         );
 
         set(isFilteredStore(recoilId), FiltersUtils.getIsFiltered(filterBy));
@@ -108,14 +112,22 @@ export const Filters = ({
     [recoilId]
   );
 
+  const clearDateInputs = () => {
+    [...document.getElementsByClassName('date-filter-input')].forEach(input => {
+      input.value = '';
+    });
+  };
+
   const onResetFilters = useRecoilCallback(
     ({ snapshot, reset }) =>
       async () => {
         const filterByKeys = await snapshot.getPromise(filterByAllKeys(recoilId));
 
+        reset(searchByStore(recoilId));
         reset(sortByStore(recoilId));
         reset(filteredDataStore(recoilId));
         reset(isFilteredStore(recoilId));
+        clearDateInputs();
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
       },
     [recoilId]
@@ -134,6 +146,7 @@ export const Filters = ({
       <FilterComponent
         isLoading={isLoading}
         key={option.key}
+        onCustomFilter={onFilter}
         onFilterData={onFilterFilteredData}
         onSort={onSort}
         option={option}

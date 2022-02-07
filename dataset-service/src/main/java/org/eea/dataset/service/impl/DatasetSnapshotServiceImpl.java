@@ -1138,6 +1138,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Map<String, Object> importFileData = new HashMap<>();
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
+      Map<String, Object> importBigFileData = new HashMap<>();
+      importBigFileData.put(LiteralConstants.SIGNATURE,
+          LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+      importBigFileData.put(LiteralConstants.DATASETID, datasetId);
 
       Map<String, Object> restoreSnapshots = new HashMap<>();
       restoreSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RESTORE_SNAPSHOT.getValue());
@@ -1155,6 +1159,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       lockService.removeLockByCriteria(updateRecords);
       lockService.removeLockByCriteria(deleteDatasetValues);
       lockService.removeLockByCriteria(importFileData);
+      lockService.removeLockByCriteria(importBigFileData);
       lockService.removeLockByCriteria(insertRecordsMultitable);
       lockService.removeLockByCriteria(restoreSnapshots);
 
@@ -1202,13 +1207,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
   /**
-   * Delete snapshot by dataset id and dc released false.
+   * Delete snapshot by dataset id and date released is null.
    *
    * @param datasetId the dataset id
    */
   @Override
-  public void deleteSnapshotByDatasetIdAndDcReleasedFalse(Long datasetId) {
-    snapshotRepository.deleteSnapshotByDatasetIdAndDcReleasedFalse(datasetId);
+  public void deleteSnapshotByDatasetIdAndDateReleasedIsNull(Long datasetId) {
+    snapshotRepository.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
     LOG.info("Snapshots deleted from dataset: {}", datasetId);
   }
 
@@ -1263,6 +1268,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
       lockService.createLock(timestamp, userName, LockType.METHOD, importFileData);
+
+      Map<String, Object> importBigFileData = new HashMap<>();
+      importBigFileData.put(LiteralConstants.SIGNATURE,
+          LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+      importBigFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.createLock(timestamp, userName, LockType.METHOD, importBigFileData);
 
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
       for (TableSchemaVO table : schema.getTableSchemas()) {

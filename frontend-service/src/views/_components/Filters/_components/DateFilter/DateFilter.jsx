@@ -95,7 +95,7 @@ export const DateFilter = ({ isLoading, onFilterData, onSort, option, recoilId }
         <Calendar
           baseZIndex={9999}
           dateFormat={userProps.dateFormat.toLowerCase().replace('yyyy', 'yy')}
-          inputClassName={styles.inputFilter}
+          inputClassName="date-filter-input"
           inputId={inputId}
           monthNavigator={true}
           onChange={event => onFilter(parseDateValues(event.target.value))}
@@ -117,6 +117,7 @@ export const DateFilter = ({ isLoading, onFilterData, onSort, option, recoilId }
             onClick={() => {
               setFilterBy({});
               setIsLabelAnimated(false);
+              document.getElementById(inputId).value = '';
             }}
           />
         )}

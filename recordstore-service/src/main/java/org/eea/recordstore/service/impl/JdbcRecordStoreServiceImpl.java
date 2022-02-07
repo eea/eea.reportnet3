@@ -1007,20 +1007,22 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     File[] matchingFilesToDelete = matchingFilesSnapshot(false, listSnapshotVO);
     for (File file : matchingFilesToDelete) {
       file.delete();
+      LOG.info("File deleted: {}", file.getAbsolutePath());
     }
-    dataSetSnapshotControllerZuul.deleteSnapshotByDatasetIdAndDcReleasedFalse(datasetId);
+    dataSetSnapshotControllerZuul.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
     LOG.info("Deleted user snapshots files from dataset: {}", datasetId);
 
     File[] matchingFilesToMove = matchingFilesSnapshot(true, listSnapshotVO);
     for (File file : matchingFilesToMove) {
       file.renameTo(new File(pathSnapshotDisabled + file.getName()));
+      LOG.info("File: {} moved to: {}", file.getName(), file.getAbsolutePath());
     }
     dataSetSnapshotControllerZuul.updateSnapshotDisabled(datasetId);
     LOG.info("Moved released snapshots files to disabled folder: {}, from dataset: {}",
         pathSnapshotDisabled, datasetId);
 
     Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
-    datasetControllerZuul.privateDeleteDatasetData(datasetId, dataflowId);
+    datasetControllerZuul.privateDeleteDatasetData(datasetId, dataflowId, true);
     LOG.info("Deleted dataset data from dataset: {}, dataflow: {}", datasetId, dataflowId);
   }
 
@@ -1031,8 +1033,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         boolean exists = false;
         for (SnapshotVO snapshotVO : listSnapshotVO) {
           if (name.startsWith("snapshot_" + snapshotVO.getId())) {
-            boolean validRelease =
-                (snapshotVO.getRelease() != null) ? snapshotVO.getRelease() : false;
+            boolean validRelease = snapshotVO.getDateReleased() != null;
             if (validRelease == released) {
               exists = true;
             }
@@ -1041,8 +1042,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         return exists;
       }
     });
-
-    // return matchingFiles;
   }
 
   /**
