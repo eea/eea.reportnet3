@@ -1167,7 +1167,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteDatasetData(1L, null, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean());
   }
 
   /**
@@ -1180,7 +1180,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteImportDataLegacy(1L, null, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean());
   }
 
 
@@ -1192,7 +1192,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     datasetControllerImpl.deleteDatasetData(1L, 1L, 1L, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean());
   }
 
   @Test(expected = ResponseStatusException.class)

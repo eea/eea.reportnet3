@@ -1022,7 +1022,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         pathSnapshotDisabled, datasetId);
 
     Long dataflowId = datasetControllerZuul.getDataFlowIdById(datasetId);
-    datasetControllerZuul.privateDeleteDatasetData(datasetId, dataflowId);
+    datasetControllerZuul.privateDeleteDatasetData(datasetId, dataflowId, true);
     LOG.info("Deleted dataset data from dataset: {}, dataflow: {}", datasetId, dataflowId);
   }
 
