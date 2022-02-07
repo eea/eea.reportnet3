@@ -158,7 +158,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
             checkedObligation={selectedObligation}
             data={data}
             onChangePagination={onPaginate}
-            onSelectObl={onSelectObligation}
+            onSelectObligation={onSelectObligation}
             pagination={pagination}
             paginatorRightText={renderPaginationCount()}
           />
