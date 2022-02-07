@@ -394,7 +394,7 @@ export const Dataflows = () => {
     <Fragment>
       {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
       {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
-        'records'
+        'dataflows'
       ].toLowerCase()}`}
     </Fragment>
   );
