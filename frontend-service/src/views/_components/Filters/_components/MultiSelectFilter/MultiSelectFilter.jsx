@@ -17,12 +17,18 @@ import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilter
 
 import { MultiSelectFilterUtils } from './_functions/Utils/MultiSelectFilterUtils';
 
-export const MultiSelectFilter = ({ isLoading, onFilterData, onSort, option, recoilId }) => {
+export const MultiSelectFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, option, recoilId }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const data = useRecoilValue(dataStore(recoilId));
 
-  const { filterBy, onFilter } = useFilters({ keyStore: filterByKeyMultiSelectStore, onFilterData, option, recoilId });
+  const { filterBy, onFilter } = useFilters({
+    hasCustomSort,
+    keyStore: filterByKeyMultiSelectStore,
+    onFilterData,
+    option,
+    recoilId
+  });
 
   const renderTemplate = (template, type) => {
     if (template === 'LevelError') {
