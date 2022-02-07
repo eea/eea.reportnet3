@@ -629,6 +629,10 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
     importFileData.put(LiteralConstants.DATASETID, datasetId);
     lockService.removeLockByCriteria(importFileData);
+    Map<String, Object> importBigFileData = new HashMap<>();
+    importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+    importFileData.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(importBigFileData);
 
     return eventType;
   }
