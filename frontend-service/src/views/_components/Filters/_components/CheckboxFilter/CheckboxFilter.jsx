@@ -10,10 +10,16 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilters';
 
-export const CheckboxFilter = ({ isLoading, onFilterData, option, recoilId }) => {
+export const CheckboxFilter = ({ hasCustomSort, isLoading, onFilterData, option, recoilId }) => {
   const resourcesContext = useContext(ResourcesContext);
 
-  const { filterBy, onFilter } = useFilters({ keyStore: filterByKeyCheckboxStore, onFilterData, option, recoilId });
+  const { filterBy, onFilter } = useFilters({
+    hasCustomSort,
+    keyStore: filterByKeyCheckboxStore,
+    onFilterData,
+    option,
+    recoilId
+  });
 
   return (
     <div className={styles.block} key={option.key}>
