@@ -1486,6 +1486,9 @@
     "automaticReportingDeletionMessage": "This action will automatically delete reporter data and snapshots",
     "typeNotSelectedError": "Type not selected",
     "nameExistsError": "Name is repeated",
-    "nameIsEmptyError": "Name is empty"
+    "nameIsEmptyError": "Name is empty",
+    "deleteAllLeadReportersDialogHeader": "Delete all lead reporters",
+    "delateAllLeadReportersDialogMessage": "Are you sure you want to delete all lead reporters?",
+    "deleteAllLeadReportersButton": "Delete all lead reporters"
   }
 }
