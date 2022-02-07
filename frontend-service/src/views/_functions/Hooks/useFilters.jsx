@@ -28,9 +28,11 @@ export const useFilters = recoilId => {
         return isNil(item);
       }
     };
+
     if (isEmpty(filterBy)) {
       return false;
     }
+
     return Object.values(filterBy)
       .map(item => {
         if (item === false || isEmptyOption(item)) {
