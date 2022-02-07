@@ -126,6 +126,7 @@ export const Dataflow = () => {
     isUserListVisible: false,
     isUserRightManagementDialogVisible: false,
     isValidateLeadReportersDialogVisible: false,
+    isDeleteAllLeadReportersDialogVisible: false,
     isValidateReportersDialogVisible: false,
     name: '',
     obligations: {},
@@ -609,6 +610,17 @@ export const Dataflow = () => {
     }
   };
 
+  const onConfirmDeleteAllLeadReporters = async () => {
+    manageDialogs('isDeleteAllLeadReportersDialogVisible', false);
+    try {
+      await RepresentativeService.deleteAllLeadReporters();
+    } catch (error) {
+      console.error('Dataflow - onConfirmValidateLeadReporters.', error);
+      notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_ERROR' }, true);
+      setIsUpdatingPermissions(false);
+    }
+  };
+
   const manageRoleDialogFooter = (
     <Fragment>
       <Button
@@ -638,6 +650,15 @@ export const Dataflow = () => {
         icon={dataflowState.isUpdatingPermissions ? 'spinnerAnimate' : 'refresh'}
         label={resourcesContext.messages['updateUsersPermissionsButton']}
         onClick={() => manageDialogs('isValidateLeadReportersDialogVisible', true)}
+      />
+      <Button
+        className={`${styles.buttonLeft} p-button-secondary ${
+          !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
+        }`}
+        disabled={dataflowState.isDeleteAllLeadReportersDialogVisible || isEmpty(dataflowState.dataProviderSelected)}
+        icon={'trash'}
+        label={resourcesContext.messages['deleteAllLeadReportersButton']}
+        onClick={() => manageDialogs('isDeleteAllLeadReportersDialogVisible', true)}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
@@ -1397,6 +1418,18 @@ export const Dataflow = () => {
             onHide={() => manageDialogs('isValidateLeadReportersDialogVisible', false)}
             visible={dataflowState.isValidateLeadReportersDialogVisible}>
             {resourcesContext.messages['updateUsersPermissionsDialogMessage']}
+          </ConfirmDialog>
+        )}
+
+        {dataflowState.isDeleteAllLeadReportersDialogVisible && (
+          <ConfirmDialog
+            header={resourcesContext.messages['deleteAllLeadReportersDialogHeader']}
+            labelCancel={resourcesContext.messages['no']}
+            labelConfirm={resourcesContext.messages['yes']}
+            onConfirm={onConfirmDeleteAllLeadReporters}
+            onHide={() => manageDialogs('isDeleteAllLeadReportersDialogVisible', false)}
+            visible={dataflowState.isDeleteAllLeadReportersDialogVisible}>
+            {resourcesContext.messages['delateAllLeadReportersDialogMessage']}
           </ConfirmDialog>
         )}
 
