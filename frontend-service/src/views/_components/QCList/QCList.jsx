@@ -101,7 +101,7 @@ export const QCList = ({
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {isFiltered && tabsValidationsState.validationList.validations.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
+        ? `${resourcesContext.messages['filtered']}: ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {tabsValidationsState.validationList.validations.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
