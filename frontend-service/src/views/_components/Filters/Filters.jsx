@@ -112,6 +112,12 @@ export const Filters = ({
     [recoilId]
   );
 
+  const clearDateInputs = () => {
+    [...document.getElementsByClassName('date-filter-input')].forEach(input => {
+      input.value = '';
+    });
+  };
+
   const onResetFilters = useRecoilCallback(
     ({ snapshot, reset }) =>
       async () => {
@@ -121,6 +127,7 @@ export const Filters = ({
         reset(sortByStore(recoilId));
         reset(filteredDataStore(recoilId));
         reset(isFilteredStore(recoilId));
+        clearDateInputs();
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
       },
     [recoilId]
