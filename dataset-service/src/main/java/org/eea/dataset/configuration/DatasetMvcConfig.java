@@ -30,16 +30,9 @@ public class DatasetMvcConfig implements WebMvcConfigurer {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  // @Value("${allow_cors_localhost}")
-  // private Boolean allowCorsLocalhost;
-  //
-  // @Value("${frontend_url}") //TODO el nombre de la variable está por algún lado, mirad el
-  // despliegue de frontend para obtenerla
-  // private String frontendUrl;
-  //
-  // @Value("${localhost_url}") //TODO tratad de crear una estructura mas o menos "bonica" para
-  // agrupar las dos urls
-  // private String localhostUrl;
+  /** The profile. */
+  @Value("${spring.profiles.active}")
+  private String[] profile;
 
   /**
    * The max file size.
@@ -60,15 +53,10 @@ public class DatasetMvcConfig implements WebMvcConfigurer {
    */
   @Override
   public void addCorsMappings(final CorsRegistry registry) {
-    // CorsRegistration corsRegistration = registry.addMapping("/**").allowedMethods("GET", "POST",
-    // "PUT", "DELETE");
-    // //TODO Si esto no funciona poned lineas completas en if y en else, en una se añade fronendURL
-    // y localhost y la otra solo frontendURL
-    // if(allowCorsLocalhost && !StringUtils.isEmpty(localhostUrl)){
-    // corsRegistration.allowedOrigins(frontendUrl,localhostUrl);
-    // }else{
-    // corsRegistration.allowedOrigins(frontendUrl);
-    // }
+
+    if (profile != null && profile.length > 0 && !"local".equals(profile[0])) {
+      registry.addMapping("/**").allowedOrigins("*").allowedMethods("GET", "POST", "PUT", "DELETE");
+    }
 
   }
 
