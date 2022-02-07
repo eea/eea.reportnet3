@@ -1,5 +1,6 @@
 package org.eea.dataflow.persistence.repository;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -14,6 +15,8 @@ import org.eea.dataflow.persistence.domain.Dataflow;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 
 
@@ -21,6 +24,9 @@ import org.springframework.data.domain.Pageable;
  * The Class DataflowExtendedRepositoryImpl.
  */
 public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepository {
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant DATE_RELEASED. */
   private static final String DATE_RELEASED = "date_released";
@@ -164,19 +170,24 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   public List<Dataflow> findPaginated(String json, Pageable pageable, boolean isPublic,
       Map<String, String> filters, String orderHeader, boolean asc, TypeDataflowEnum type,
       List<Long> dataflowIds) throws EEAException {
+    List<Dataflow> result = new ArrayList<>();
+    try {
+      StringBuilder stringQuery = new StringBuilder();
+      stringQuery.append(QUERY_JSON);
+      createQuery(isPublic, filters, orderHeader, asc, stringQuery, type, dataflowIds);
+      Query query = entityManager.createNativeQuery(stringQuery.toString(), Dataflow.class);
+      setParameters(json, isPublic, filters, query, type, dataflowIds);
 
-    StringBuilder stringQuery = new StringBuilder();
-    stringQuery.append(QUERY_JSON);
-    createQuery(isPublic, filters, orderHeader, asc, stringQuery, type, dataflowIds);
-    Query query = entityManager.createNativeQuery(stringQuery.toString(), Dataflow.class);
-    setParameters(json, isPublic, filters, query, type, dataflowIds);
-
-    if (null != pageable) {
-      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
-      query.setMaxResults(pageable.getPageSize());
+      if (null != pageable) {
+        query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+        query.setMaxResults(pageable.getPageSize());
+      }
+      result = query.getResultList();
+    } catch (Exception e) {
+      LOG_ERROR.error(e.getMessage());
     }
-    return query.getResultList();
 
+    return result;
   }
 
   /**
@@ -290,14 +301,21 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   public Long countPaginated(String json, Pageable pageable, boolean isPublic,
       Map<String, String> filters, String orderHeader, boolean asc, TypeDataflowEnum type,
       List<Long> dataflowIds) throws EEAException {
-    StringBuilder stringQuery = new StringBuilder();
-    stringQuery.append("with tableAux as (");
-    stringQuery.append(QUERY_JSON);
-    createQuery(isPublic, filters, orderHeader, asc, stringQuery, type, dataflowIds);
-    stringQuery.append(")select count(*) from tableaux");
-    Query query = entityManager.createNativeQuery(stringQuery.toString());
-    setParameters(json, isPublic, filters, query, type, dataflowIds);
-    return Long.valueOf(query.getResultList().get(0).toString());
+    Long result = Long.valueOf(0);
+    try {
+      StringBuilder stringQuery = new StringBuilder();
+      stringQuery.append("with tableAux as (");
+      stringQuery.append(QUERY_JSON);
+      createQuery(isPublic, filters, orderHeader, asc, stringQuery, type, dataflowIds);
+      stringQuery.append(")select count(*) from tableaux");
+      Query query = entityManager.createNativeQuery(stringQuery.toString());
+      setParameters(json, isPublic, filters, query, type, dataflowIds);
+      result = Long.valueOf(query.getResultList().get(0).toString());
+    } catch (Exception e) {
+      LOG_ERROR.error(e.getMessage());
+    }
+
+    return result;
   }
 
   /**
@@ -446,7 +464,12 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         stringQuery.append(String.format(DATE_TO, DATE_RELEASED, key));
         break;
       case DELIVERY_STATUS:
-        stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key));
+        List<String> deliveryStatus = Arrays.asList(value.split(","));
+        stringQuery.append("(");
+        if (deliveryStatus.contains("PENDING")) {
+          stringQuery.append("(delivery_status is null) or ");
+        }
+        stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key + ")"));
         break;
       case "status":
         switch (value) {
@@ -484,6 +507,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         query.setParameter(key, new Date(Long.valueOf(value)));
         break;
       case DELIVERY_STATUS:
+        List<String> deliveryStatus = Arrays.asList(value.split(","));
         query.setParameter(key, Arrays.asList(value.split(",")));
         break;
       case "status":

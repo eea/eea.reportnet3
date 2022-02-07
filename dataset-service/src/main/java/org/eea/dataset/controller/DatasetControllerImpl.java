@@ -268,7 +268,7 @@ public class DatasetControllerImpl implements DatasetController {
           "File import failed: datasetId={}, tableSchemaId={}, fileName={}. Message: {}", datasetId,
           tableSchemaId, file.getOriginalFilename(), e.getMessage(), e);
       Map<String, Object> importFileData = new HashMap<>();
-      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
       lockService.removeLockByCriteria(importFileData);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -299,7 +299,7 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
       @ApiResponse(code = 400, message = "Error importing file"),
       @ApiResponse(code = 500, message = "Error importing file")})
-  @Deprecated
+  // @Deprecated
   public void importFileData(
       @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
           name = "datasetId") @PathVariable("datasetId") Long datasetId,
@@ -355,7 +355,7 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
       @ApiResponse(code = 400, message = "Error importing file"),
       @ApiResponse(code = 500, message = "Error importing file")})
-  @Deprecated
+  // @Deprecated
   public void importFileDataLegacy(
       @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
           name = "datasetId") @PathVariable("datasetId") Long datasetId,
