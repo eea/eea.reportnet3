@@ -6,8 +6,8 @@ import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
 import { useSearch } from 'views/_components/Filters/_functions/Hooks/useSearch';
 
-export const SearchFilter = ({ isLoading, onFilterData, onSort, option, recoilId }) => {
-  const { searchBy, onSearch } = useSearch({ onFilterData, option, recoilId });
+export const SearchFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, option, recoilId }) => {
+  const { searchBy, onSearch } = useSearch({ hasCustomSort, onFilterData, option, recoilId });
 
   const renderCleanInputButton = () => {
     if (!searchBy) {
