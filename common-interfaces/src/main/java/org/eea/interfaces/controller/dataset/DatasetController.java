@@ -132,10 +132,12 @@ public interface DatasetController {
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
+   * @param technicallyAccepted the technically accepted
    */
   @DeleteMapping("/private/{datasetId}/deleteDatasetData")
   void privateDeleteDatasetData(@PathVariable("datasetId") Long datasetId,
-      @RequestParam(value = "dataflowId", required = false) Long dataflowId);
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "technicallyAccepted", required = true) boolean technicallyAccepted);
 
   /**
    * Delete import data legacy.
