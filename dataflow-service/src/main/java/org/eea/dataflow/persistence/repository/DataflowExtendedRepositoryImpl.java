@@ -234,10 +234,8 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     StringBuilder sb = new StringBuilder();
     constructPublicDataflowsQuery(sb, orderHeader, asc, filters, true);
     Query query = entityManager.createNativeQuery(sb.toString(), Dataflow.class);
-
     setParameters(obligationJson, true, filters, query, null, null);
 
-    query.setParameter(COUNTRY_CODE, countryCode);
     query.setParameter(COUNTRY_CODE, countryCode);
 
     if (null != pageable) {
@@ -491,12 +489,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         stringQuery.append(String.format(DATE_TO, DATE_RELEASED, key));
         break;
       case DELIVERY_STATUS:
-        List<String> deliveryStatus = Arrays.asList(value.split(","));
-        stringQuery.append("(");
-        if (deliveryStatus.contains("PENDING")) {
-          stringQuery.append("(delivery_status is null) or ");
-        }
-        stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key + ")"));
+        stringQuery.append(String.format(DELIVERY_STATUS_IN, DELIVERY_STATUS, key));
         break;
       case "status":
         switch (value) {
