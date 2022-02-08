@@ -273,8 +273,8 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
       dispatchNotification({ type: 'DESTROY' });
       await NotificationService.deleteAll();
     } catch (error) {
-      console.error('SystemNotificationsList - onDelete.', error);
-      notificationContext.add({ type: 'DELETE_SYSTEM_NOTIFICATION_ERROR' }, true);
+      console.error('NotificationsList - onDelete.', error);
+      notificationContext.add({ type: 'DELETE_USER_NOTIFICATIONS_ERROR' }, true);
     } finally {
       dispatchNotification({ type: 'DESTROY' });
       onLoadNotifications();
@@ -292,7 +292,7 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
         labelConfirm={resourcesContext.messages['yes']}
         onConfirm={() => onDelete()}
         onHide={() => {}}
-        visible={true}>
+        visible={false}>
         {resourcesContext.messages['deleteUsersNotificationsConfirm']}
       </ConfirmDialog>
     );
