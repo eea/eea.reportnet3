@@ -163,8 +163,8 @@ export const PublicDataflows = () => {
         publicData.dataflows.map(dataflow => ({
           ...dataflow,
           legalInstrument: dataflow.obligation.legalInstrument?.alias,
-          obligationTitle: dataflow.obligation?.title,
-          obligationId: dataflow.obligation?.obligationId.toString()
+          obligationId: dataflow.obligation?.obligationId,
+          obligationTitle: dataflow.obligation?.title
         }))
       );
       setFilteredRecords(publicData.filteredRecords);
