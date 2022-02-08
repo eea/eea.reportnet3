@@ -20,6 +20,7 @@ import { DataflowService } from 'services/DataflowService';
 import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { linkSelectorReducer } from './_functions/Reducers/linkSelectorReducer';
 
@@ -46,6 +47,7 @@ export const LinkSelector = ({
   const { dataflowId } = useParams();
 
   const resourcesContext = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const [linkSelectorState, dispatchLinkSelector] = useReducer(linkSelectorReducer, {
     link: {
@@ -90,8 +92,8 @@ export const LinkSelector = ({
   useEffect(() => {
     setIsLoading(true);
     const getReferenceDataflows = async () => {
-      const data = await ReferenceDataflowService.getAll();
-      const filteredDataflows = data.filter(
+      const data = await ReferenceDataflowService.getAll(userContext.accessRole, userContext.contextRoles);
+      const filteredDataflows = data.dataflows.filter(
         dataflow => dataflow.id !== parseFloat(dataflowId) && TextUtils.areEquals(dataflow.status, 'DRAFT')
       );
       setReferenceDataflows(filteredDataflows);
