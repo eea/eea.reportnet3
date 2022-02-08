@@ -119,7 +119,7 @@ export const FieldEditor = ({
 
   let fieldType = {};
 
-  let isReadOnlyField =
+  const isReadOnlyField =
     RecordUtils.getCellInfo(colsSchema, cells.field).readOnly &&
     !['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
       RecordUtils.getCellInfo(colsSchema, cells.field).type
