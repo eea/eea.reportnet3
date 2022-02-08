@@ -97,7 +97,7 @@ public class DeleteHelperTest {
     dfVO.setName("dfName");
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
-    deleteHelper.executeDeleteDatasetProcess(1L, false);
+    deleteHelper.executeDeleteDatasetProcess(1L, false, false);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
