@@ -1071,7 +1071,7 @@ export const FieldDesigner = ({
               } - ${resourcesContext.messages['maxFileSize']} ${fieldDesignerState.fieldFileProperties.maxSize} ${
                 resourcesContext.messages['MB']
               }`}
-              onClick={onAttachmentDropdownSelected}
+              onClick={() => onAttachmentDropdownSelected()}
               style={{ pointerEvents: 'auto' }}
               tooltip={renderTooltipAttachment()}
               tooltipOptions={{ position: 'top' }}
