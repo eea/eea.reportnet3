@@ -57,7 +57,7 @@ export const ManualAcceptanceDatasets = ({
     <Fragment>
       {manualAcceptanceDatasetsState.filtered &&
       manualAcceptanceDatasetsState.data.length !== manualAcceptanceDatasetsState.filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${manualAcceptanceDatasetsState.filteredData.length} | `
+        ? `${resourcesContext.messages['filtered']}: ${manualAcceptanceDatasetsState.filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {manualAcceptanceDatasetsState.data.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}

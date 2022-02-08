@@ -50,7 +50,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {isFiltered && cloneSchemasState.allDataflows.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
+        ? `${resourcesContext.messages['filtered']}: ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {cloneSchemasState.allDataflows.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}

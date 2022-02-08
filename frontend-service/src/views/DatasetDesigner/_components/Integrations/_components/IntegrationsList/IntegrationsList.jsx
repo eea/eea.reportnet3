@@ -128,7 +128,7 @@ export const IntegrationsList = ({
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {isFiltered && integrationListState.data.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
+        ? `${resourcesContext.messages['filtered']}: ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {integrationListState.data.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}

@@ -87,7 +87,7 @@ export const UniqueConstraints = ({
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {isFiltered && constraintsState.data.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
+        ? `${resourcesContext.messages['filtered']}: ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {constraintsState.data.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}

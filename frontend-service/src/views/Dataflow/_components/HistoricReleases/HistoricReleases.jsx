@@ -128,7 +128,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {isFiltered && historicReleasesState.data.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
+        ? `${resourcesContext.messages['filtered']}: ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {historicReleasesState.data.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}

@@ -58,7 +58,7 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {isFiltered && datasetsInfo.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
+        ? `${resourcesContext.messages['filtered']}: ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {datasetsInfo.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}

@@ -59,7 +59,7 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
   const getPaginatorRecordsCount = () => (
     <Fragment>
       {isFiltered && userListData.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
+        ? `${resourcesContext.messages['filtered']}: ${filteredData.length} | `
         : ''}
       {resourcesContext.messages['totalRecords']} {userListData.length}{' '}
       {resourcesContext.messages['records'].toLowerCase()}
