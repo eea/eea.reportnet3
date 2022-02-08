@@ -119,7 +119,12 @@ export const FieldEditor = ({
 
   let fieldType = {};
 
-  let isReadOnlyField = RecordUtils.getCellInfo(colsSchema, cells.field).readOnly;
+  let isReadOnlyField =
+    RecordUtils.getCellInfo(colsSchema, cells.field).readOnly &&
+    !['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+      RecordUtils.getCellInfo(colsSchema, cells.field).type
+    );
+
   if (!isEmpty(record)) {
     fieldType = RecordUtils.getCellInfo(colsSchema, cells.field).type;
   }
@@ -533,7 +538,14 @@ export const FieldEditor = ({
               onCrsChange={crs => onCrsChange(crs)}
               onFocus={() => onEditorValueFocus(cells, RecordUtils.getCellValue(cells, cells.field))}
               onKeyDown={(e, value) => onCoordinatesKeyDown(e, value)}
-              onMapOpen={() => onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type)}
+              onMapOpen={() =>
+                onMapOpen(
+                  RecordUtils.getCellValue(cells, cells.field),
+                  cells,
+                  type,
+                  RecordUtils.getCellInfo(colsSchema, cells.field).readOnly
+                )
+              }
               xyLabels={currentCRS.value === 'EPSG:3035'}
             />
           </div>

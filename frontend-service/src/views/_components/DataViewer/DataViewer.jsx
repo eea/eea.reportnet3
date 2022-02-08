@@ -130,6 +130,7 @@ export const DataViewer = ({
     editedRecord: {},
     fetchedDataFirstRecord: [],
     firstPageRecord: 0,
+    geometryReadOnly: false,
     geometryType: '',
     initialRecordValue: undefined,
     isCoordinatesMoreInfoVisible: false,
@@ -178,9 +179,13 @@ export const DataViewer = ({
     setEditDialogVisible,
     setConfirmDeleteVisible
   );
-
+  
   const mapEditingEnabled =
-    areEquals(records.geometryType, 'POINT') && hasWritePermissions && !isDesignDatasetEditorRead && !isDataflowOpen;
+    areEquals(records.geometryType, 'POINT') &&
+    hasWritePermissions &&
+    !isDesignDatasetEditorRead &&
+    !isDataflowOpen &&
+    !records.geometryReadOnly;
 
   const cellDataEditor = (cells, record) => {
     return (
@@ -188,7 +193,8 @@ export const DataViewer = ({
         areCoordinatesDisabled={
           !hasWritePermissions ||
           isDesignDatasetEditorRead ||
-          (isDataflowOpen && RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT')
+          (isDataflowOpen && RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT') ||
+          RecordUtils.getCellInfo(colsSchema, cells.field).readOnly
         }
         cells={cells}
         colsSchema={colsSchema}
@@ -312,7 +318,7 @@ export const DataViewer = ({
   }, [confirmDeleteVisible]);
 
   useEffect(() => {
-    if (records.mapGeoJson !== '' && areEquals(records.geometryType, 'POINT') && hasWritePermissions) {
+    if (records.mapGeoJson !== '' && areEquals(records.geometryType, 'POINT') && mapEditingEnabled) {
       onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
       const inmMapGeoJson = cloneDeep(records.mapGeoJson);
       const parsedInmMapGeoJson = typeof inmMapGeoJson === 'object' ? inmMapGeoJson : JSON.parse(inmMapGeoJson);
@@ -688,8 +694,8 @@ export const DataViewer = ({
     }
   };
 
-  const onMapOpen = (coordinates, mapCells, fieldType) =>
-    dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, fieldType, mapCells } });
+  const onMapOpen = (coordinates, mapCells, fieldType, readOnly) =>
+    dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, fieldType, mapCells, readOnly } });
 
   const onPaste = event => {
     if (event) {
