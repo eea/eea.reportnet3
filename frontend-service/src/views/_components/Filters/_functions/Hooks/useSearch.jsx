@@ -6,7 +6,7 @@ import uniq from 'lodash/uniq';
 import { filterByAllKeys, filterByKeySearchStore } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
 import { searchByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 
-export const useSearch = ({ onFilterData, option, recoilId }) => {
+export const useSearch = ({ hasCustomSort, onFilterData, option, recoilId }) => {
   const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));
   const setFilterBySearchKeys = useSetRecoilState(filterByKeySearchStore(recoilId));
 
@@ -19,7 +19,10 @@ export const useSearch = ({ onFilterData, option, recoilId }) => {
 
   const onSearch = async value => {
     setSearchBy(value);
-    await onFilterData({ key: option.key, searchValue: value, type: 'SEARCH' });
+
+    if (!hasCustomSort) {
+      await onFilterData({ key: option.key, searchValue: value, type: 'SEARCH' });
+    }
   };
 
   return { searchBy, onSearch };
