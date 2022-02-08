@@ -63,7 +63,7 @@ export const DataViewer = ({
   hasCountryCode,
   hasWritePermissions,
   dataflowType,
-  isDataflowOpen,
+  isDataflowOpen = false,
   isDesignDatasetEditorRead,
   isExportable,
   isFilterable,
@@ -179,14 +179,21 @@ export const DataViewer = ({
     setConfirmDeleteVisible
   );
 
+  const mapEditingEnabled =
+    areEquals(records.geometryType, 'POINT') && hasWritePermissions && !isDesignDatasetEditorRead && !isDataflowOpen;
+
   const cellDataEditor = (cells, record) => {
     return (
       <FieldEditor
+        areCoordinatesDisabled={
+          !hasWritePermissions ||
+          isDesignDatasetEditorRead ||
+          (isDataflowOpen && RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT')
+        }
         cells={cells}
         colsSchema={colsSchema}
         datasetId={datasetId}
         datasetSchemaId={datasetSchemaId}
-        hasWritePermissions={hasWritePermissions}
         onChangePointCRS={onChangePointCRS}
         onCoordinatesMoreInfoClick={onCoordinatesMoreInfoClick}
         onEditorKeyChange={onEditorKeyChange}
@@ -305,7 +312,7 @@ export const DataViewer = ({
   }, [confirmDeleteVisible]);
 
   useEffect(() => {
-    if (records.mapGeoJson !== '' && areEquals(records.geometryType, 'POINT')) {
+    if (records.mapGeoJson !== '' && areEquals(records.geometryType, 'POINT') && hasWritePermissions) {
       onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
       const inmMapGeoJson = cloneDeep(records.mapGeoJson);
       const parsedInmMapGeoJson = typeof inmMapGeoJson === 'object' ? inmMapGeoJson : JSON.parse(inmMapGeoJson);
@@ -952,16 +959,14 @@ export const DataViewer = ({
       <Button
         className={`p-button-animated-blink ${styles.saveButton}`}
         icon="check"
-        label={
-          areEquals(records.geometryType, 'POINT') ? resourcesContext.messages['save'] : resourcesContext.messages['ok']
-        }
+        label={mapEditingEnabled ? resourcesContext.messages['save'] : resourcesContext.messages['ok']}
         onClick={
-          areEquals(records.geometryType, 'POINT')
+          mapEditingEnabled
             ? () => onSavePoint(records.newPoint)
             : () => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })
         }
       />
-      {areEquals(records.geometryType, 'POINT') && (
+      {mapEditingEnabled && (
         <Button
           className="p-button-secondary button-right-aligned"
           icon="cancel"
@@ -978,6 +983,7 @@ export const DataViewer = ({
 
   const mapRender = () => (
     <Map
+      disabledEdition={!mapEditingEnabled}
       enabledDrawElements={records.drawElements}
       geoJson={records.mapGeoJson}
       geometryType={records.geometryType}

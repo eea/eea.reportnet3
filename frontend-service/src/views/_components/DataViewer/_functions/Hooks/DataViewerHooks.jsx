@@ -400,11 +400,12 @@ export const useSetColumns = (
             isDataflowOpen && isDesignDatasetEditorRead ? styles.fieldDisabled : ''
           }`}
           editor={
-            hasWebformWritePermissions &&
-            hasWritePermissions &&
-            column.type !== 'ATTACHMENT' &&
-            !isDataflowOpen &&
-            !isDesignDatasetEditorRead
+            ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(column.type) ||
+            (hasWebformWritePermissions &&
+              hasWritePermissions &&
+              column.type !== 'ATTACHMENT' &&
+              !isDataflowOpen &&
+              !isDesignDatasetEditorRead)
               ? row => cellDataEditor(row, records.selectedRecord)
               : null
           }
