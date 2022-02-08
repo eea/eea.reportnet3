@@ -2,6 +2,7 @@ package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -678,4 +679,13 @@ public class ContributorServiceImplTest {
           Mockito.any(), Mockito.any());
     }
   }
+
+  @Test
+  public void findTempUserByAccountAndDataflowTempUserNullTest() {
+    Mockito.when(tempUserRepository.findTempUserByAccountAndDataflow(Mockito.anyString(),
+        Mockito.anyLong(), Mockito.any())).thenReturn(null);
+    assertNull(contributorServiceImpl.findTempUserByAccountAndDataflow("account", 1L, 1L));
+  }
+
+
 }

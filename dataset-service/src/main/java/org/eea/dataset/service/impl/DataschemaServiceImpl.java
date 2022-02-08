@@ -33,9 +33,11 @@ import org.eea.dataset.mapper.WebFormMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
+import org.eea.dataset.persistence.metabase.domain.WebformMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.WebformRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.RecordSchema;
@@ -308,6 +310,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The lock service. */
   @Autowired
   private LockService lockService;
+
+  /** The webform repository. */
+  @Autowired
+  WebformRepository webformRepository;
 
 
 
@@ -2303,6 +2309,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void updateWebform(String datasetSchemaId, WebformVO webformVO) {
+    if (webformVO != null && StringUtils.isNotBlank(webformVO.getName())
+        && StringUtils.isBlank(webformVO.getType())) {
+      WebformMetabase webformMetabase = webformRepository.findByLabel(webformVO.getName());
+      webformVO.setType(webformMetabase.getType().toString());
+    }
     schemasRepository.updateDatasetSchemaWebForm(datasetSchemaId,
         webFormMapper.classToEntity(webformVO));
   }
@@ -2504,6 +2515,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     } catch (Exception e) {
       LOG_ERROR.error("An error in the import process happened. Message: {}", e.getMessage(), e);
+      if (e instanceof InterruptedException) {
+        Thread.currentThread().interrupt();
+      }
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_FAILED_EVENT,
           null,
           NotificationVO.builder()
@@ -3009,7 +3023,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         } else {
           columns.add(null);
         }
-        columns.add(fieldSchema.getDescription());
+        columns.add(
+            fieldSchema.getDescription() != null && fieldSchema.getDescription().startsWith("=")
+                ? " " + fieldSchema.getDescription()
+                : fieldSchema.getDescription());
         columns.add(fieldSchema.getType().toString());
         if (fieldSchema.getCodelistItems() != null && fieldSchema.getCodelistItems().length > 0) {
           String codelists = "";
@@ -3042,14 +3059,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private void setHeaderFields(CSVWriter csvWriter) {
 
     // Field name,PK,Required,ReadOnly,Field description,Field type,Extra information
-    List<String> headers = new ArrayList<>();
-    headers.add("Field name");
-    headers.add("PK");
-    headers.add("Required");
-    headers.add("ReadOnly");
-    headers.add("Field description");
-    headers.add("Field type");
-    headers.add("Extra information");
+    List<String> headers = new ArrayList<>(Arrays.asList("Field name", "PK", "Required", "ReadOnly",
+        "Field description", "Field type", "Extra information"));
 
     csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
   }

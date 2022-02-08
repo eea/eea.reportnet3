@@ -4,14 +4,8 @@ import sortBy from 'lodash/sortBy';
 
 import { Integration } from 'entities/Integration';
 
-const parseExternalParameters = parameterDTO => {
-  const externalParameters = {};
-  for (let index = 0; index < parameterDTO.length; index++) {
-    const parameter = parameterDTO[index];
-    externalParameters[parameter.key] = parameter.value;
-  }
-  return externalParameters;
-};
+const parseExternalParameters = parameterDTO =>
+  parameterDTO.reduce((obj, item) => Object.assign(obj, { [item.key]: item.value }), {});
 
 const parseDatasetSchemaId = (datasetSchemaId, dataflowId) =>
   new Integration({
@@ -74,13 +68,11 @@ const parseRepositoryList = repositoryList => parseKeyValue(repositoryList);
 const parseProcessList = processList => parseKeyValue(processList);
 
 const parseKeyValue = list => {
-  const listDTO = [];
-
-  if (!isNil(list) && !isEmpty(list.items)) {
-    list.items.map(item => listDTO.push({ label: item.name, value: item.name }));
+  if (isNil(list) || isEmpty(list.items)) {
+    return [];
   }
 
-  return listDTO;
+  return list.items.map(item => ({ label: item.name, value: item.name }));
 };
 
 export const IntegrationUtils = {

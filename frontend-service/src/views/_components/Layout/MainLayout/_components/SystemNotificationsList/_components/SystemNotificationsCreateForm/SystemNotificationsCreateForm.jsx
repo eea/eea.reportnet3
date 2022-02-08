@@ -135,8 +135,8 @@ export const SystemNotificationsCreateForm = ({
               itemTemplate={rowData => notificationLevelTemplate(rowData, true)}
               onChange={e => onChange('level', e.target.value.value)}
               optionLabel="label"
-              optionValue="value"
               options={config.systemNotifications.levels}
+              optionValue="value"
               placeholder={resourcesContext.messages['systemNotificationLevel']}
               style={{ width: '15vw' }}
               value={{ label: systemNotification.level, value: systemNotification.level }}

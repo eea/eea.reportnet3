@@ -7,8 +7,5 @@ export const NotificationRepository = {
     await HTTPRequester.get({ url: getUrl(NotificationConfig.all, { pageNum, pageSize }) }),
 
   create: async (eventType, content) =>
-    await HTTPRequester.post({
-      url: getUrl(NotificationConfig.create),
-      data: { eventType, content }
-    })
+    await HTTPRequester.post({ url: getUrl(NotificationConfig.create), data: { eventType, content } })
 };

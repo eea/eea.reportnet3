@@ -1,3 +1,4 @@
+import { useContext } from 'react';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 
@@ -8,6 +9,8 @@ import { config } from 'conf';
 import { DataViewer } from 'views/_components/DataViewer';
 import { TabView } from 'views/_components/TabView';
 import { TabPanel } from 'views/_components/TabView/_components/TabPanel';
+
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { QuerystringUtils } from 'views/_functions/Utils/QuerystringUtils';
 import { TabsUtils } from 'views/_functions/Utils/TabsUtils';
@@ -38,15 +41,40 @@ export const TabsSchema = ({
   tableSchemaColumns,
   tableSchemaId
 }) => {
+  const resourcesContext = useContext(ResourcesContext);
+
+  const getRightIcon = tab => {
+    if (tab.hasErrors) {
+      return config.icons['warning'];
+    }
+  };
+
+  const getRightIconTooltip = tab => {
+    if (tab.hasErrors) {
+      return resourcesContext.messages['tableWithErrorsTooltip'];
+    }
+  };
+
   let tabs =
     tables && tableSchemaColumns
       ? tables.map(table => {
           return (
-            <TabPanel header={table.name} key={table.id} rightIcon={table.hasErrors ? config.icons['warning'] : null}>
+            <TabPanel
+              description={table.description}
+              fixedNumber={table.fixedNumber}
+              hasInfoTooltip={table.hasInfoTooltip}
+              header={table.name}
+              key={table.id}
+              notEmpty={table.notEmpty}
+              numberOfFields={table.numberOfFields}
+              readOnly={table.readOnly}
+              rightIcon={getRightIcon(table)}
+              rightIconTooltip={getRightIconTooltip(table)}
+              toPrefill={table.toPrefill}>
               <div className={styles.tabsSchema}>
                 <DataViewer
-                  dataProviderId={dataProviderId}
                   dataflowType={dataflowType}
+                  dataProviderId={dataProviderId}
                   datasetSchemaId={datasetSchemaId}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}

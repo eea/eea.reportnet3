@@ -1,4 +1,5 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useContext } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import isNil from 'lodash/isNil';
 
@@ -12,9 +13,16 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 
-const EULogin = ({ location, history }) => {
-  const [isLoading] = useState(true);
+export const EULogin = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const userContext = useContext(UserContext);
+
+  useEffect(() => {
+    onLogin();
+  }, []);
+
   const onLogin = async () => {
     try {
       const params = new URLSearchParams(location.hash);
@@ -28,26 +36,22 @@ const EULogin = ({ location, history }) => {
           LocalUserStorageUtils.removeSessionStorageProperty('redirectUrl');
           window.location.href = rnLocalStorage.redirectUrl;
         } else {
-          history.push(getUrl(routes.DATAFLOWS));
+          navigate(getUrl(routes.DATAFLOWS));
         }
       } else {
-        history.push(getUrl(routes.ACCESS_POINT));
+        navigate(getUrl(routes.ACCESS_POINT));
       }
     } catch (error) {
       console.error('EULogin - onLogin.', error);
-      history.push(getUrl(routes.ACCESS_POINT));
+      navigate(getUrl(routes.ACCESS_POINT));
     }
   };
-  useEffect(() => {
-    onLogin();
-  }, []);
+
   return (
     <div className="rp-container">
       <div className={`${styles.loginBoxContainer}`}>
-        {isLoading && <img alt="EEA logo" className={styles.logo} src={logo} />}
+        <img alt="EEA logo" className={styles.logo} src={logo} />
       </div>
     </div>
   );
 };
-
-export { EULogin };

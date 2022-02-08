@@ -1,6 +1,10 @@
-import { Component } from 'react';
+import { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
+
 import classNames from 'classnames';
+
+import styles from './Paginator.module.scss';
+
 import { FirstPageLink } from './_components/FirstPageLink';
 import { NextPageLink } from './_components/NextPageLink';
 import { PrevPageLink } from './_components/PrevPageLink';
@@ -14,10 +18,12 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 export class Paginator extends Component {
   static defaultProps = {
     alwaysShow: true,
+    areComponentsVisible: true,
     className: null,
     currentPageReportTemplate: '({currentPage} of {totalPages})',
     disabled: false,
     first: 0,
+    isDataflowsList: false,
     leftContent: null,
     onPageChange: null,
     pageLinkSize: 5,
@@ -31,10 +37,12 @@ export class Paginator extends Component {
 
   static propTypes = {
     alwaysShow: PropTypes.bool,
+    areComponentsVisible: PropTypes.bool,
     className: PropTypes.string,
     currentPageReportTemplate: PropTypes.any,
     disabled: PropTypes.bool,
     first: PropTypes.number,
+    isDataflowsList: PropTypes.bool,
     leftContent: PropTypes.any,
     onPageChange: PropTypes.func,
     pageLinkSize: PropTypes.number,
@@ -164,50 +172,44 @@ export class Paginator extends Component {
   }
 
   renderElement(key, template) {
-    let element;
-
     switch (key) {
       case 'FirstPageLink':
-        element = (
+        return (
           <FirstPageLink
             disabled={this.isFirstPage() || this.props.disabled}
             key={key}
             onClick={this.changePageToFirst}
           />
         );
-        break;
       case 'PrevPageLink':
-        element = (
+        return (
           <PrevPageLink
             disabled={this.isFirstPage() || this.props.disabled}
             key={key}
             onClick={this.changePageToPrev}
           />
         );
-        break;
       case 'NextPageLink':
-        element = (
+        return (
           <NextPageLink disabled={this.isLastPage() || this.props.disabled} key={key} onClick={this.changePageToNext} />
         );
-        break;
       case 'LastPageLink':
-        element = (
+        return (
           <LastPageLink disabled={this.isLastPage() || this.props.disabled} key={key} onClick={this.changePageToLast} />
         );
-        break;
       case 'PageLinks':
-        element = (
+        return (
           <PageLinks
             disabled={this.props.disabled}
+            isDataflowsList={this.props.isDataflowsList}
             key={key}
             onClick={this.onPageLinkClick}
             page={this.getPage()}
             value={this.updatePageLinks()}
           />
         );
-        break;
       case 'CurrentPageReport':
-        element = (
+        return (
           <CurrentPageReport
             first={this.props.first}
             key={key}
@@ -219,13 +221,9 @@ export class Paginator extends Component {
             totalRecords={this.props.totalRecords}
           />
         );
-        break;
       default:
-        element = null;
-        break;
+        return null;
     }
-
-    return element;
   }
 
   renderElements() {
@@ -251,38 +249,45 @@ export class Paginator extends Component {
     return null;
   }
 
+  renderRowsPerPageDropdown() {
+    return (
+      <div className="p-paginator-left-content-rowsPerPage">
+        <RowsPerPageDropdown
+          disabled={this.props.disabled}
+          key="RowsPerPageDropdown"
+          label={this.context.messages['rowsPerPage']}
+          onChange={this.onRowsChange}
+          options={this.props.rowsPerPageOptions}
+          value={this.props.rows}
+        />
+        {this.props.leftContent && <div className="p-paginator-left-content">{this.props.leftContent}</div>}
+      </div>
+    );
+  }
+
   render() {
     if (!this.props.alwaysShow && this.getPageCount() === 1) {
       return null;
-    } else {
-      let className = classNames('p-paginator p-component p-unselectable-text', this.props.className);
-
-      let paginatorElements = this.renderElements();
-
-      let leftContent = this.props.leftContent && (
-        <div className="p-paginator-left-content">{this.props.leftContent}</div>
-      );
-      let rightContent = this.props.rightContent && (
-        <div className="p-paginator-right-content">{this.props.rightContent}</div>
-      );
-
-      return (
-        <div className={className} style={this.props.style}>
-          <div className="p-paginator-left-content-rowsPerPage">
-            <RowsPerPageDropdown
-              disabled={this.props.disabled}
-              key="RowsPerPageDropdown"
-              label={this.context.messages['rowsPerPage']}
-              onChange={this.onRowsChange}
-              options={this.props.rowsPerPageOptions}
-              value={this.props.rows}
-            />
-            {leftContent}
-          </div>
-          <div className="p-paginator-middle-content">{paginatorElements}</div>
-          <div>{rightContent}</div>
-        </div>
-      );
     }
+
+    return (
+      <div
+        className={classNames(
+          'p-paginator p-component p-unselectable-text',
+          this.props.className,
+          `${!this.props.areComponentsVisible && styles.paginatorContainer} `
+        )}
+        style={this.props.style}>
+        {this.props.areComponentsVisible && (
+          <Fragment>
+            {this.renderRowsPerPageDropdown()}
+            <div className="p-paginator-middle-content">{this.renderElements()}</div>
+          </Fragment>
+        )}
+        <div>
+          {this.props.rightContent && <div className="p-paginator-right-content">{this.props.rightContent}</div>}
+        </div>
+      </div>
+    );
   }
 }

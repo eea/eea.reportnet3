@@ -1,5 +1,5 @@
 /*
- * 
+ *
  */
 package org.eea.interfaces.controller.dataset;
 
@@ -66,8 +66,18 @@ public interface DatasetMetabaseController {
    * @param datasetId the id dataset
    * @return the string
    */
-  @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("datasetId") Long datasetId);
+
+
+  /**
+   * Find external dataset metabase by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data set metabase VO
+   */
+  @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetMetabaseVO findExternalDatasetMetabaseById(@PathVariable("datasetId") Long datasetId);
 
   /**
    * Find design data set id by dataflow id.

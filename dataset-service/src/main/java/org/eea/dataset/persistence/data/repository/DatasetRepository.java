@@ -4,6 +4,7 @@ import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * The Interface DatasetRepository.
@@ -29,4 +30,23 @@ public interface DatasetRepository
    */
   @Query("SELECT d.idDatasetSchema from DatasetValue d where id=?1")
   String findIdDatasetSchemaById(Long datasetId);
+
+  /**
+   * Update check view.
+   *
+   * @param datasetId the dataset id
+   * @param updated the updated
+   */
+  @Modifying
+  @Query("UPDATE DatasetValue SET viewUpdated=:updated WHERE id=:datasetId")
+  void updateCheckView(@Param("datasetId") Long datasetId, @Param("updated") Boolean updated);
+
+  /**
+   * Find view updated by id.
+   *
+   * @param datasetId the dataset id
+   * @return the boolean
+   */
+  @Query("SELECT viewUpdated FROM DatasetValue WHERE id=:datasetId")
+  Boolean findViewUpdatedById(@Param("datasetId") Long datasetId);
 }

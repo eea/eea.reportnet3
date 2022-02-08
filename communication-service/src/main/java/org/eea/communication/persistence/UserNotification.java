@@ -81,4 +81,16 @@ public class UserNotification {
   /** The file name. */
   @Field(value = "fileName")
   private String fileName;
+
+  /** The short code. */
+  @Field(value = "shortCode")
+  private String shortCode;
+
+  /** The invalid rules. */
+  @Field(value = "invalidRules")
+  private Long invalidRules;
+
+  /** The disabled rules. */
+  @Field(value = "disabledRules")
+  private Long disabledRules;
 }

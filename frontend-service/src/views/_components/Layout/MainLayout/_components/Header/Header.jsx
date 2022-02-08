@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
@@ -35,7 +35,9 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPublic = false }) => {
+export const Header = ({ onMainContentStyleChange = () => {}, isPublic = false }) => {
+  const navigate = useNavigate();
+
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -45,7 +47,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
 
   const [confirmvisible, setConfirmVisible] = useState(false);
   const [doNotRemember, setDoNotRemember] = useState(false);
-
+  const [headerOpened, setHeaderOpened] = useState(true);
   const [globanElementStyle, setGlobanElementStyle] = useState({
     marginTop: 0,
     transition: '0.5s'
@@ -57,45 +59,25 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
   const [headerElementStyle, setHeaderElementStyle] = useState({ transition: '0.5s' });
 
   useEffect(() => {
+    if (headerOpened) {
+      setGlobanElementStyle({ marginTop: '0', transition: '0.5s' });
+      setEuHeaderElementStyle({ marginTop: '0', transition: '0.5s' });
+      setHeaderElementStyle({ ...headerElementStyle, height: '180px' });
+      onMainContentStyleChange({ marginTop: '180px', transition: '0.5s' });
+    } else {
+      setGlobanElementStyle({ marginTop: '-100px', transition: '0.5s' });
+      setEuHeaderElementStyle({ marginTop: '-16px', transition: '0.5s' });
+      setHeaderElementStyle({ ...headerElementStyle, height: '64px' });
+      onMainContentStyleChange({ marginTop: '64px', transition: '0.5s' });
+    }
+  }, [headerOpened]);
+
+  useEffect(() => {
     window.onscroll = () => {
       const innerWidth = window.innerWidth;
       const currentScrollPos = window.pageYOffset;
       if (innerWidth > 768 && themeContext.headerCollapse) {
-        if (currentScrollPos === 0) {
-          setGlobanElementStyle({
-            marginTop: '0',
-            transition: '0.5s'
-          });
-          setEuHeaderElementStyle({
-            marginTop: '0',
-            transition: '0.5s'
-          });
-          setHeaderElementStyle({
-            ...headerElementStyle,
-            height: '180px'
-          });
-          onMainContentStyleChange({
-            marginTop: '180px',
-            transition: '0.5s'
-          });
-        } else {
-          setGlobanElementStyle({
-            marginTop: '-100px',
-            transition: '0.5s'
-          });
-          setEuHeaderElementStyle({
-            marginTop: '-16px',
-            transition: '0.5s'
-          });
-          setHeaderElementStyle({
-            ...headerElementStyle,
-            height: '64px'
-          });
-          onMainContentStyleChange({
-            marginTop: '64px',
-            transition: '0.5s'
-          });
-        }
+        setHeaderOpened(currentScrollPos === 0);
       }
     };
     if (!themeContext.headerCollapse) {
@@ -137,7 +119,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       href={getUrl(routes.ACCESS_POINT)}
       onClick={e => {
         e.preventDefault();
-        history.push(getUrl(routes.ACCESS_POINT));
+        navigate(getUrl(routes.ACCESS_POINT));
       }}
       title={resourcesContext.messages['titleHeader']}>
       {isPublic ? (
@@ -153,18 +135,11 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
     </a>
   );
 
-  const isLocalEnvironment = () => {
-    let url = window.location.href;
-    if (url.toString().includes('localhost')) {
-      return true;
-    }
-    return false;
-  };
+  const isLocalEnvironment = () => window.location.href.toString().includes('localhost');
 
   const localhostEnvironmentAlert = isLocalEnvironment() && (
     <div className={styles.localhostAlert}>
       <FontAwesomeIcon
-        aria-labelledby={resourcesContext.messages['localhostAlert']}
         icon={AwesomeIcons('localhostAlert')}
         role="button"
         title={resourcesContext.messages['localhostAlert']}
@@ -220,7 +195,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       href={getUrl(routes.SETTINGS)}
       onClick={async e => {
         e.preventDefault();
-        history.push(getUrl(routes.SETTINGS));
+        navigate(getUrl(routes.SETTINGS));
       }}
       title="User profile details">
       <img
@@ -282,7 +257,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
           if (window.env.REACT_APP_EULOGIN.toString() === 'true') {
             window.location.href = AccessPointConfig.euloginUrl;
           } else {
-            history.push(getUrl(routes.LOGIN));
+            navigate(getUrl(routes.LOGIN));
           }
         }}></Button>
     </div>
@@ -314,9 +289,7 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
             header={resourcesContext.messages['logout']}
             labelCancel={resourcesContext.messages['no']}
             labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={() => {
-              userLogout();
-            }}
+            onConfirm={userLogout}
             onHide={() => setConfirmVisible(false)}
             visible={confirmvisible}>
             {resourcesContext.messages['userLogout']}
@@ -325,5 +298,4 @@ const Header = withRouter(({ history, onMainContentStyleChange = () => {}, isPub
       </div>
     </div>
   );
-});
-export { Header };
+};

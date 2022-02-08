@@ -1,6 +1,7 @@
 package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
@@ -481,6 +482,36 @@ public class IntegrationControllerImplTest {
       integrationControllerImpl.deleteExportEuDatasetIntegration("5ce524fad31fc52540abae73");
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void findExtensionsAndOperationsPrivateTest() throws EEAException {
+    List<IntegrationVO> integrations = new ArrayList<>();
+    IntegrationVO integration = new IntegrationVO();
+    integration.setId(1L);
+    integrations.add(integration);
+    Mockito.when(integrationService.getAllIntegrationsByCriteria(Mockito.any()))
+        .thenReturn(integrations);
+    Mockito.when(integrationService.getOnlyExtensionsAndOperations(Mockito.anyList()))
+        .thenReturn(integrations);
+    assertEquals(integrations,
+        integrationControllerImpl.findExtensionsAndOperationsPrivate(integration));
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void findExtensionsAndOperationsPrivateExceptionTest() throws EEAException {
+    try {
+      List<IntegrationVO> integrations = new ArrayList<>();
+      IntegrationVO integration = new IntegrationVO();
+      integration.setId(1L);
+      integrations.add(integration);
+      Mockito.doThrow(EEAException.class).when(integrationService)
+          .getAllIntegrationsByCriteria(Mockito.any());
+      integrationControllerImpl.findExtensionsAndOperationsPrivate(integration);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
       throw e;
     }
   }

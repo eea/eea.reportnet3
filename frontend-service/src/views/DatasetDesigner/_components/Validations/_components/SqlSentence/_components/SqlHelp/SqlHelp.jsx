@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import toLower from 'lodash/toLower';
@@ -27,7 +27,9 @@ const sqlHelpReducer = (state, { type, payload }) => {
   }
 };
 
-export const SqlHelp = withRouter(({ match, onSetSqlSentence, sqlSentence }) => {
+export const SqlHelp = ({ onSetSqlSentence, sqlSentence }) => {
+  const { dataflowId } = useParams();
+
   const initState = {
     rawDatasets: [],
     datasets: [],
@@ -43,9 +45,6 @@ export const SqlHelp = withRouter(({ match, onSetSqlSentence, sqlSentence }) => 
   const [state, dispatch] = useReducer(sqlHelpReducer, initState);
 
   const fetchData = async () => {
-    const {
-      params: { dataflowId }
-    } = match;
     dispatch({ type: 'UPDATE_PROPERTY', payload: { key: 'datasetSpinner', value: true } });
     const dataflowDetails = await DataflowService.getSchemas(dataflowId);
     const { designDatasets } = await DataflowService.get(dataflowId);
@@ -158,4 +157,4 @@ export const SqlHelp = withRouter(({ match, onSetSqlSentence, sqlSentence }) => 
       />
     </div>
   );
-});
+};

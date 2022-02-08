@@ -729,7 +729,9 @@ public class DatasetControllerImplTest {
     fieldSchemaVO.setId("id");
     FieldVO fieldVO = new FieldVO();
     fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
-    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    MockMultipartFile file =
+        new MockMultipartFile("file.csv", "file.csv", "csv", "content".getBytes());
+
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
     Mockito.when(datasetService.getFieldById(Mockito.anyLong(), Mockito.any())).thenReturn(fieldVO);
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
@@ -746,7 +748,8 @@ public class DatasetControllerImplTest {
     fieldSchemaVO.setId("id");
     FieldVO fieldVO = new FieldVO();
     fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
-    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    MockMultipartFile file =
+        new MockMultipartFile("file.csv", "file.csv", "csv", "content".getBytes());
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
     Mockito.when(datasetService.getFieldById(Mockito.anyLong(), Mockito.any())).thenReturn(fieldVO);
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
@@ -768,7 +771,8 @@ public class DatasetControllerImplTest {
     fieldSchemaVO.setName("test");
     fieldSchemaVO.setId("id");
     fieldSchemaVO.setMaxSize(100000.1f);
-    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    MockMultipartFile file =
+        new MockMultipartFile("file.csv", "file.csv", "csv", "content".getBytes());
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
     FieldVO fieldVO = new FieldVO();
     fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
@@ -793,7 +797,7 @@ public class DatasetControllerImplTest {
     try {
       datasetControllerImpl.updateAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, e.getReason());
+      assertEquals(EEAErrorMessage.UPDATING_ATTACHMENT_IN_A_DATAFLOW, e.getReason());
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
@@ -816,7 +820,7 @@ public class DatasetControllerImplTest {
     try {
       datasetControllerImpl.updateAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {
-      assertEquals(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND, e.getReason());
+      assertEquals(EEAErrorMessage.UPDATING_ATTACHMENT_IN_A_DATAFLOW, e.getReason());
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
@@ -862,7 +866,8 @@ public class DatasetControllerImplTest {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setName("test");
     fieldSchemaVO.setId("id");
-    MockMultipartFile file = new MockMultipartFile("file.csv", "content".getBytes());
+    MockMultipartFile file =
+        new MockMultipartFile("file.csv", "file.csv", "csv", "content".getBytes());
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.any())).thenReturn("id");
     FieldVO fieldVO = new FieldVO();
     fieldVO.setIdFieldSchema("600B66C6483EA7C8B55891DA171A3E7F");
@@ -926,10 +931,11 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
         .thenReturn("tableName");
     Mockito.doNothing().when(fileTreatmentHelper).exportFile(Mockito.anyLong(), Mockito.any(),
-        Mockito.any(), Mockito.any());
-    datasetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", FileTypeEnum.CSV.getValue());
+        Mockito.any(), Mockito.any(), Mockito.any());
+    datasetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", FileTypeEnum.CSV.getValue(),
+        null);
     Mockito.verify(fileTreatmentHelper, times(1)).exportFile(1L, FileTypeEnum.CSV.getValue(),
-        "5cf0e9b3b793310e9ceca190", "tableName");
+        "5cf0e9b3b793310e9ceca190", "tableName", null);
   }
 
   /**
@@ -943,7 +949,8 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
         .thenReturn(null);
     try {
-      datasetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", FileTypeEnum.CSV.getValue());
+      datasetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", FileTypeEnum.CSV.getValue(),
+          null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.IDTABLESCHEMA_INCORRECT, e.getReason());
       throw e;
@@ -961,9 +968,10 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetSchemaService.getTableSchemaName(Mockito.any(), Mockito.anyString()))
         .thenReturn("tableName");
     Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).exportFile(Mockito.anyLong(),
-        Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     try {
-      datasetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", FileTypeEnum.CSV.getValue());
+      datasetControllerImpl.exportFile(1L, "5cf0e9b3b793310e9ceca190", FileTypeEnum.CSV.getValue(),
+          null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
@@ -1159,7 +1167,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteDatasetData(1L, null, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean());
   }
 
   /**
@@ -1172,7 +1180,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteImportDataLegacy(1L, null, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean());
   }
 
 
@@ -1184,7 +1192,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     datasetControllerImpl.deleteDatasetData(1L, 1L, 1L, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean());
   }
 
   @Test(expected = ResponseStatusException.class)
@@ -1291,6 +1299,18 @@ public class DatasetControllerImplTest {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
+  }
+
+  @Test
+  public void updateCheckViewTest() {
+    datasetControllerImpl.updateCheckView(1L, true);
+    Mockito.verify(datasetService, times(1)).updateCheckView(Mockito.anyLong(), Mockito.any());
+  }
+
+  @Test
+  public void getCheckViewTest() {
+    datasetControllerImpl.getCheckView(1L);
+    Mockito.verify(datasetService, times(1)).getCheckView(Mockito.anyLong());
   }
 
 }

@@ -24,9 +24,10 @@ import { IntegrationService } from 'services/IntegrationService';
 import { UniqueConstraintService } from 'services/UniqueConstraintService';
 import { ValidationService } from 'services/ValidationService';
 
-const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian, onLoadDatasetsSchemas }) => {
+export const DatasetSchemas = ({ dataflowId, datasetsSchemas, hasCustodianPermissions, onLoadDatasetsSchemas }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
+
   const [isLoading, setIsLoading] = useState(!isEmpty(datasetsSchemas));
   const [isDownloading, setIsDownloading] = useState(false);
   const [extensionsOperationsList, setExtensionsOperationsList] = useState();
@@ -135,7 +136,9 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
               if (table.tableSchemaId === referenceId)
                 additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
             } else if (TextUtils.areEquals(entityType, 'RECORD')) {
-              additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+              if (table.records?.some(record => record.recordSchemaId === referenceId)) {
+                additionalInfo.tableName = !isUndefined(table.tableSchemaName) ? table.tableSchemaName : table.header;
+              }
             } else if (TextUtils.areEquals(entityType, 'FIELD') || TextUtils.areEquals(entityType, 'TABLE')) {
               table.records.forEach(record =>
                 record.fields.forEach(field => {
@@ -286,7 +289,7 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
             qc.fieldName = additionalInfo.fieldName || '';
             qc.expression = getExpressionString(qc, datasetSchema[0].tables);
             qc.datasetSchemaId = allQCs.datasetSchemaId;
-            if (!isCustodian) {
+            if (!hasCustodianPermissions) {
               return pick(
                 qc,
                 'tableName',
@@ -329,11 +332,11 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
     try {
       setIsLoading(true);
       const datasetValidations = datasetsSchemas.map(async datasetSchema => {
-        return await ValidationService.getAll(dataflowId, datasetSchema.datasetSchemaId, !isCustodian);
+        return await ValidationService.getAll(dataflowId, datasetSchema.datasetSchemaId, !hasCustodianPermissions);
       });
       Promise.all(datasetValidations).then(allQCs => {
         allQCs = allQCs.filter(qc => !isUndefined(qc));
-        if (!isCustodian) {
+        if (!hasCustodianPermissions) {
           allQCs.forEach(qc => (qc = qc.validations.filter(validation => validation.enabled !== false)));
         }
         setQCList(getQCList(allQCs));
@@ -367,8 +370,8 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
           <DatasetSchema
             designDataset={designDataset}
             extensionsOperationsList={filterData(designDataset, extensionsOperationsList)}
+            hasCustodianPermissions={hasCustodianPermissions}
             index={i}
-            isCustodian={isCustodian}
             key={designDataset.datasetSchemaId}
             onGetReferencedFieldName={onGetReferencedFieldName}
             qcList={filterData(designDataset, qcList)}
@@ -383,35 +386,33 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
 
   const renderToolbar = () => {
     return (
-      isCustodian && (
-        <Toolbar className={styles.datasetSchemasToolbar} id="datasetSchemaIndex">
-          <div className="p-toolbar-group-left">
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent ${
-                !isDownloading ? 'p-button-animated-blink' : ''
-              }`}
-              disabled={isDownloading}
-              icon={isDownloading ? 'spinnerAnimate' : 'export'}
-              label={resourcesContext.messages['downloadSchemasInfo']}
-              onClick={() => onDownloadAllSchemasInfo(dataflowId)}
-              tooltip={resourcesContext.messages['downloadSchemasInfoTooltip']}
-              tooltipOptions={{ position: 'top' }}
-            />
-            <Button
-              className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
-                isLoading ? 'p-button-animated-spin' : ''
-              }`}
-              icon="refresh"
-              label={resourcesContext.messages['refresh']}
-              onClick={async () => {
-                setIsLoading(true);
-                await onLoadDatasetsSchemas();
-                setIsLoading(false);
-              }}
-            />
-          </div>
-        </Toolbar>
-      )
+      <Toolbar className={styles.datasetSchemasToolbar} id="datasetSchemaIndex">
+        <div className="p-toolbar-group-left">
+          <Button
+            className={`p-button-rounded p-button-secondary-transparent ${
+              !isDownloading ? 'p-button-animated-blink' : ''
+            }`}
+            disabled={isDownloading}
+            icon={isDownloading ? 'spinnerAnimate' : 'export'}
+            label={resourcesContext.messages['downloadSchemasInfo']}
+            onClick={() => onDownloadAllSchemasInfo(dataflowId)}
+            tooltip={resourcesContext.messages['downloadSchemasInfoTooltip']}
+            tooltipOptions={{ position: 'top' }}
+          />
+          <Button
+            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${
+              isLoading ? 'p-button-animated-spin' : ''
+            }`}
+            icon="refresh"
+            label={resourcesContext.messages['refresh']}
+            onClick={async () => {
+              setIsLoading(true);
+              await onLoadDatasetsSchemas();
+              setIsLoading(false);
+            }}
+          />
+        </div>
+      </Toolbar>
     );
   };
 
@@ -429,5 +430,3 @@ const DatasetSchemas = ({ dataflowId, dataflowName, datasetsSchemas, isCustodian
     </Fragment>
   );
 };
-
-export { DatasetSchemas };

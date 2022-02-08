@@ -13,13 +13,7 @@ export const CookiesDialog = () => {
   const isEuCookie = () => {
     const decodedCookies = decodeURIComponent(document.cookie);
     const cookiesArray = decodedCookies.split('; ');
-    for (let i = 0; i <= cookiesArray.length; i++) {
-      const cookie = cookiesArray[i];
-      if (startsWith(cookie, 'eu_cookie_consent=')) {
-        return true;
-      }
-    }
-    return false;
+    return cookiesArray.find(cookie => startsWith(cookie, 'eu_cookie_consent='));
   };
 
   useEffect(() => {

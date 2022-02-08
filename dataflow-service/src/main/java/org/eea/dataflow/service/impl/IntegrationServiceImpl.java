@@ -415,7 +415,8 @@ public class IntegrationServiceImpl implements IntegrationService {
   @Transactional
   public void executeExternalIntegration(Long datasetId, Long integrationId,
       IntegrationOperationTypeEnum operation, Boolean replace) throws EEAException {
-
+    // Mark the view data in the dataset as non updated as we are going to import data
+    datasetControllerZuul.updateCheckView(datasetId, false);
     // Delete the previous data in the dataset if we have chosen it before the call to FME
     if (Boolean.TRUE.equals(replace)) {
       LOG.info("Replacing the data previous the execution of an external integration in dataset {}",
@@ -483,6 +484,11 @@ public class IntegrationServiceImpl implements IntegrationService {
     importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
     importFileData.put(LiteralConstants.DATASETID, datasetId);
 
+    Map<String, Object> importBigFileData = new HashMap<>();
+    importBigFileData.put(LiteralConstants.SIGNATURE,
+        LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+    importBigFileData.put(LiteralConstants.DATASETID, datasetId);
+
     Map<String, Object> insertRecordsMultitable = new HashMap<>();
     insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
         LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
@@ -494,6 +500,7 @@ public class IntegrationServiceImpl implements IntegrationService {
     lockService.removeLockByCriteria(updateRecords);
     lockService.removeLockByCriteria(deleteDatasetValues);
     lockService.removeLockByCriteria(importFileData);
+    lockService.removeLockByCriteria(importBigFileData);
     lockService.removeLockByCriteria(insertRecordsMultitable);
   }
 

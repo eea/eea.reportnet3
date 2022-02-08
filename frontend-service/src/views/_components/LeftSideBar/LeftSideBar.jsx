@@ -1,7 +1,8 @@
 import { Fragment, useContext, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
+import uniqueId from 'lodash/uniqueId';
 
 import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride';
 
@@ -20,7 +21,9 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystemNotificationVisible }) => {
+export const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationVisible }) => {
+  const navigate = useNavigate();
+
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -55,7 +58,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
       label: 'dataflows',
       onClick: e => {
         e.preventDefault();
-        history.push(getUrl(routes['DATAFLOWS']));
+        navigate(getUrl(routes['DATAFLOWS']));
       },
       title: 'dataflows'
     };
@@ -70,7 +73,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
       label: 'userSettings',
       onClick: e => {
         e.preventDefault();
-        history.push(getUrl(routes['SETTINGS']));
+        navigate(getUrl(routes['SETTINGS']));
       },
       title: 'userSettings'
     };
@@ -125,7 +128,11 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
   };
 
   const renderSectionButtons = () => {
-    return leftSideBarContext.models.map(model => <LeftSideBarButton key={model.label} {...model} />);
+    return leftSideBarContext.models.map(model => (
+      <div className={styles.leftSideBarElementWrapper} key={uniqueId('sectionButton_')}>
+        <LeftSideBarButton key={model.label} {...model} />
+      </div>
+    ));
   };
 
   const userLogout = async () => {
@@ -201,11 +208,11 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
         {
           <Fragment>
             <div className={`${styles.barSection} dataflowList-left-side-bar-top-section-help-step`}>
-              {renderHome()}
-              {renderUserProfile()}
-              {renderHelp()}
-              {renderUserNotifications()}
-              {renderManageSystemNotifications()}
+              <div className={styles.leftSideBarElementWrapper}>{renderHome()}</div>
+              <div className={styles.leftSideBarElementWrapper}>{renderUserProfile()}</div>
+              <div className={styles.leftSideBarElementWrapper}>{renderHelp()}</div>
+              <div className={styles.leftSideBarElementWrapper}>{renderUserNotifications()}</div>
+              <div className={styles.leftSideBarElementWrapper}>{renderManageSystemNotifications()}</div>
             </div>
             {!isEmpty(renderSectionButtons()) && (
               <Fragment>
@@ -217,7 +224,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
             )}
             <hr />
             <div className={styles.barSection}>
-              {renderLogout()}
+              <div className={styles.leftSideBarElementWrapper}>{renderLogout()}</div>
               <div className={styles.leftSideBarElementWrapper}>{renderOpenClose()}</div>
             </div>
 
@@ -226,7 +233,7 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
                 header={resourcesContext.messages['logout']}
                 labelCancel={resourcesContext.messages['no']}
                 labelConfirm={resourcesContext.messages['yes']}
-                onConfirm={() => userLogout()}
+                onConfirm={userLogout}
                 onHide={() => setLogoutConfirmVisible(false)}
                 visible={logoutConfirmVisible}>
                 {resourcesContext.messages['userLogout']}
@@ -237,6 +244,4 @@ const LeftSideBar = withRouter(({ history, setIsNotificationVisible, setIsSystem
       </div>
     </Fragment>
   );
-});
-
-export { LeftSideBar };
+};

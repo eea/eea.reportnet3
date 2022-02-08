@@ -4,16 +4,26 @@ import { DataflowUtils } from 'services/_utils/DataflowUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 export const CitizenScienceDataflowService = {
-  getAll: async (accessRoles, contextRoles) => {
-    const dataflowsDTO = await CitizenScienceDataflowRepository.getAll();
+  getAll: async ({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy }) => {
+    const { isAsc, sortByHeader } = DataflowUtils.parseRequestSortBy(sortBy);
+    const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
 
-    const dataflows = dataflowsDTO.data.map(dataflowDTO => {
+    const dataflowsDTO = await CitizenScienceDataflowRepository.getAll({
+      filterBy: filteredFilterBy,
+      isAsc,
+      numberRows,
+      pageNum,
+      sortBy: sortByHeader
+    });
+
+    const dataflows = dataflowsDTO.data.dataflows.map(dataflowDTO => {
       dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);
       return dataflowDTO;
     });
 
-    return DataflowUtils.parseSortedDataflowListDTO(dataflows);
+    return { ...dataflowsDTO.data, dataflows: DataflowUtils.parseDataflowListDTO(dataflows) };
   },
+
   create: async (name, description, obligationId) =>
     await CitizenScienceDataflowRepository.create(name, description, obligationId),
 

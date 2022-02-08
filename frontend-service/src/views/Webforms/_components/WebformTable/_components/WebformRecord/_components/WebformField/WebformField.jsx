@@ -315,9 +315,9 @@ export const WebformField = ({
               onFillField(field, option, formatDate(event.value, isNil(event.value)));
               onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
             }}
+            selectableYears={100}
             value={new Date(field.value)}
             yearNavigator={true}
-            yearRange="1900:2100"
           />
         );
       case 'DATETIME':
@@ -340,11 +340,11 @@ export const WebformField = ({
               onFillField(field, option, formatDate(event.value, isNil(event.value)));
               onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
             }}
+            selectableYears={100}
             showSeconds={true}
             showTime={true}
             value={field.value}
             yearNavigator={true}
-            yearRange="1900:2100"
           />
         );
       case 'EXTERNAL_LINK':
@@ -522,7 +522,7 @@ export const WebformField = ({
             )}
             {
               <Button
-                className={`p-button-animated-blink p-button-primary-transparent`}
+                className="p-button-animated-blink p-button-primary-transparent"
                 icon="import"
                 label={
                   !isNil(field.value) && field.value !== ''
@@ -542,7 +542,7 @@ export const WebformField = ({
             }
 
             <Button
-              className={`p-button-animated-blink p-button-primary-transparent`}
+              className="p-button-animated-blink p-button-primary-transparent"
               icon="trash"
               onClick={() => onFileDeleteVisible(field.fieldId, field.fieldSchemaId)}
             />

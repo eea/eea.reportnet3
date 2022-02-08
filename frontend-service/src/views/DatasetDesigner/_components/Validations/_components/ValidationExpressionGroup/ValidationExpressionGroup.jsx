@@ -16,7 +16,7 @@ import { ValidationExpressionSelector } from '../ValidationExpressionSelector';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const ValidationExpressionGroup = ({
+export const ValidationExpressionGroup = ({
   expressionType,
   expressionValues,
   fieldType,
@@ -107,7 +107,7 @@ const ValidationExpressionGroup = ({
                 }}
                 optionLabel="label"
                 options={config.validations.logicalOperators}
-                placeholder={resourcesContext.messages.union}
+                placeholder={resourcesContext.messages['union']}
                 value={first(
                   config.validations.logicalOperators.filter(option => option.value === expressionValues.union)
                 )}
@@ -144,4 +144,3 @@ const ValidationExpressionGroup = ({
 
   return layout ? layouts[layout] : layouts['default'];
 };
-export { ValidationExpressionGroup };

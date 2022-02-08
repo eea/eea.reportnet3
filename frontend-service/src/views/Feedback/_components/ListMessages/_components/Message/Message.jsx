@@ -1,4 +1,5 @@
 import { Fragment, useContext, useState } from 'react';
+
 import isNil from 'lodash/isNil';
 import dayjs from 'dayjs';
 
@@ -16,14 +17,22 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onToggleVisibleDeleteMessage }) => {
+import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
+
+export const Message = ({
+  dataflowId,
+  hasSeparator,
+  hasCustodianPermissions,
+  message,
+  onToggleVisibleDeleteMessage
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
 
   const [isDownloading, setIsDownloading] = useState(false);
+
+  const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
   const getMessageContent = () => {
     let content = message.content.replace(/(?:\r\n|\r|\n)/g, '<br/>');
@@ -43,7 +52,7 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
       accStyles.push(styles.automatic);
     }
 
-    if (isCustodian) {
+    if (hasCustodianPermissions) {
       if (!message.direction) {
         accStyles.push(styles.sender);
       } else {
@@ -116,13 +125,7 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
     return (
       <div className={`${styles.message} rep-feedback-message ${getStyles()}`} key={message.id}>
         <div className={styles.messageTextWrapper}>
-          <span className={styles.datetime}>
-            {dayjs(message.date).format(
-              `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-                userContext.userProps.amPm24h ? '' : ' A'
-              }`
-            )}
-          </span>
+          <span className={styles.datetime}>{getDateTimeFormatByUserPreferences(message.date)}</span>
           {TextUtils.areEquals(message.type, 'ATTACHMENT') ? (
             renderAttachment()
           ) : (
@@ -131,7 +134,7 @@ export const Message = ({ dataflowId, hasSeparator, isCustodian, message, onTogg
               dangerouslySetInnerHTML={{ __html: getMessageContent() }}></span>
           )}
         </div>
-        {isCustodian && !message.automatic && (
+        {hasCustodianPermissions && !message.automatic && (
           <FontAwesomeIcon
             className={styles.deleteMessageButton}
             icon={AwesomeIcons('deleteCircle')}

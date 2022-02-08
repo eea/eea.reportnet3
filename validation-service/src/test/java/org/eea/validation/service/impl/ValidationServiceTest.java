@@ -901,7 +901,7 @@ public class ValidationServiceTest {
   public void validateTable() throws EEAException {
     when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(tableValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
-    validationServiceImpl.validateTable(1L, Mockito.any(), kieBase, "null");
+    validationServiceImpl.validateTable(1L, 1L, kieBase, "null", "providerId");
     Mockito.verify(tableValidationRepository, times(1)).saveAll(Mockito.any());
   }
 
@@ -1015,6 +1015,8 @@ public class ValidationServiceTest {
 
     ruleVO.setShortCode("FML");
     rulesVO.add(ruleVO);
+    ruleVO.setRuleName("");
+    ruleVO.setDescription("");
     rulesSchemaVO.setRules(rulesVO);
 
     dataSetMetabase.setDataflowId(1L);

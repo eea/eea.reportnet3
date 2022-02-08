@@ -2,13 +2,14 @@ package org.eea.interfaces.controller.dataflow;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
-import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -85,35 +86,70 @@ public interface DataFlowController {
   /**
    * Find dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the list
    */
-  @GetMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findDataflows();
+  @PostMapping(value = "/getDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  PaginatedDataflowVO findDataflows(@RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum);
 
   /**
    * Find reference dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the list
    */
-  @GetMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findReferenceDataflows();
+  @PostMapping(value = "/referenceDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  PaginatedDataflowVO findReferenceDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum);
 
 
   /**
    * Find business dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the list
    */
-  @GetMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findBusinessDataflows();
+  @PostMapping(value = "/businessDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  PaginatedDataflowVO findBusinessDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum);
 
   /**
    * Find citizen science dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the list
    */
-  @GetMapping(value = "/citizenDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DataFlowVO> findCitizenScienceDataflows();
+  @PostMapping(value = "/citizenDataflows", produces = MediaType.APPLICATION_JSON_VALUE)
+  PaginatedDataflowVO findCitizenScienceDataflows(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum);
 
   /**
    * Find dataflows for clone.
@@ -130,26 +166,6 @@ public interface DataFlowController {
    */
   @GetMapping(value = "/countByType", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataflowCountVO> getDataflowsCount();
-
-  /**
-   * Adds the contributor.
-   *
-   * @param dataflowId the dataflow id
-   * @param idContributor the id contributor
-   */
-  @PostMapping("/{dataflowId}/contributor/add")
-  void addContributor(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("idContributor") String idContributor);
-
-  /**
-   * Removes the contributor.
-   *
-   * @param dataflowId the dataflow id
-   * @param idContributor the id contributor
-   */
-  @DeleteMapping("{dataflowId}/contributor/remove")
-  void removeContributor(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("idContributor") String idContributor);
 
   /**
    * Creates the data flow.
@@ -211,10 +227,17 @@ public interface DataFlowController {
   /**
    * Gets the public dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
    * @return the public dataflows
    */
-  @GetMapping("/getPublicDataflows")
-  List<DataflowPublicVO> getPublicDataflows();
+  @PostMapping("/getPublicDataflows")
+  PaginatedDataflowVO getPublicDataflows(@RequestBody Map<String, String> filters,
+      @RequestParam String orderHeader, @RequestParam boolean asc, @RequestParam Integer pageSize,
+      @RequestParam Integer pageNum);
 
   /**
    * Gets the public dataflows.
@@ -252,15 +275,16 @@ public interface DataFlowController {
    * @param pageSize the page size
    * @param sortField the sort field
    * @param asc the asc
+   * @param filters the filters
    * @return the public dataflows by country
    */
-  @GetMapping("/public/country/{countryCode}")
-  DataflowPublicPaginatedVO getPublicDataflowsByCountry(
-      @PathVariable("countryCode") String countryCode,
+  @PostMapping("/public/country/{countryCode}")
+  PaginatedDataflowVO getPublicDataflowsByCountry(@PathVariable("countryCode") String countryCode,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
       @RequestParam(value = "sortField", required = false) String sortField,
-      @RequestParam(value = "asc", defaultValue = "true") boolean asc);
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+      @RequestBody(required = false) Map<String, String> filters);
 
 
 
@@ -345,4 +369,14 @@ public interface DataFlowController {
    */
   @PutMapping("/validateAllReporters")
   ResponseEntity validateAllReporters();
+
+  /**
+   * Update data flow automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDelete the automatic reporting delete
+   */
+  @PutMapping("/{dataflowId}/updateAutomaticDelete")
+  void updateDataFlowAutomaticReportingDeletion(@PathVariable("dataflowId") Long dataflowId,
+      @RequestParam("automaticDelete") boolean automaticReportingDelete);
 }

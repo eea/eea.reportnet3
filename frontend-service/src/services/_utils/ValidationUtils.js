@@ -17,11 +17,17 @@ const getOperatorEquivalence = (valueTypeSelector, operatorType, operatorValue =
   } = config;
 
   if (isNil(operatorValue)) {
-    if (valueTypeSelector === 'value') return comparisonValuesOperatorEquivalences[operatorType].type;
+    if (valueTypeSelector === 'value') {
+      return comparisonValuesOperatorEquivalences[operatorType].type;
+    }
+
     return comparisonOperatorEquivalences[operatorType].type;
   } else {
     if (comparisonOperatorEquivalences[operatorType]) {
-      if (valueTypeSelector === 'value') return comparisonValuesOperatorEquivalences[operatorType][operatorValue];
+      if (valueTypeSelector === 'value') {
+        return comparisonValuesOperatorEquivalences[operatorType][operatorValue];
+      }
+
       return comparisonOperatorEquivalences[operatorType][operatorValue];
     }
   }
@@ -497,6 +503,7 @@ const parseDataValidationRulesDTO = validations => {
       expressions: newExpressions,
       expressionsIf: newExpressionsIf,
       expressionsThen: newExpressionsThen,
+      hasHistoric: validationDTO.hasHistoric,
       id: validationDTO.ruleId,
       isCorrect: validationDTO.verified,
       levelError:
@@ -512,7 +519,8 @@ const parseDataValidationRulesDTO = validations => {
       relations: newRelations,
       shortCode: validationDTO.shortCode,
       sqlError: validationDTO.sqlError,
-      sqlSentence: validationDTO.sqlSentence === '' ? null : validationDTO.sqlSentence
+      sqlSentence: validationDTO.sqlSentence === '' ? null : validationDTO.sqlSentence,
+      sqlSentenceCost: validationDTO.sqlCost
     });
   });
 
@@ -549,6 +557,21 @@ const parseRowExpressionFromDTO = expression => {
 const createValidation = (entityType, id, levelError, message) =>
   new Validation({ date: new Date(Date.now()).toString(), entityType, id, levelError, message });
 
+const parseSqlValidation = rows => {
+  const flattenArray = rows.flat();
+
+  if (isNil(flattenArray) || isEmpty(flattenArray)) {
+    return flattenArray;
+  }
+
+  return rows.map(row =>
+    row.reduce((prev, curr) => {
+      prev[`${curr.table}*${curr.label}`] = curr.value;
+      return prev;
+    }, {})
+  );
+};
+
 export const ValidationUtils = {
   createValidation,
   getComparisonExpression,
@@ -563,5 +586,6 @@ export const ValidationUtils = {
   parseDatasetRelationFromDTO,
   parseDataValidationRulesDTO,
   parseExpressionFromDTO,
-  parseRowExpressionFromDTO
+  parseRowExpressionFromDTO,
+  parseSqlValidation
 };

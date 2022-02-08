@@ -116,9 +116,18 @@ export const ValidationService = {
     return validationsList;
   },
 
+  getAllQCsHistoricInfo: async datasetId => await ValidationRepository.getAllQCsHistoricInfo(datasetId),
+
+  getQcHistoricInfo: async (datasetId, ruleId) => await ValidationRepository.getQcHistoricInfo(datasetId, ruleId),
+
   generateQCRulesFile: async datasetId => await ValidationRepository.generateQCRulesFile(datasetId),
 
   generateShowValidationsFile: async datasetId => await ValidationRepository.generateShowValidationsFile(datasetId),
+
+  runSqlRule: async (datasetId, sqlSentence, showInternalFields) => {
+    const { data } = await ValidationRepository.runSqlRule(datasetId, sqlSentence, showInternalFields);
+    return ValidationUtils.parseSqlValidation(data);
+  },
 
   updateFieldRule: async (datasetId, validationRule) => {
     const { expressions } = validationRule;
@@ -209,5 +218,10 @@ export const ValidationService = {
     }
 
     return await ValidationRepository.update(datasetId, validation);
-  }
+  },
+
+  evaluateSqlSentence: async (datasetId, sqlSentence) =>
+    await ValidationRepository.evaluateSqlSentence(datasetId, sqlSentence),
+
+  viewUpdated: async datasetId => await ValidationRepository.viewUpdated(datasetId)
 };

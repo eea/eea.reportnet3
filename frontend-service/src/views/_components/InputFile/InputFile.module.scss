@@ -1,0 +1,28 @@
+.container {
+  display: flex;
+}
+
+.message {
+  margin-left: 1rem;
+  font-weight: bold;
+}
+
+.clearButton {
+  cursor: pointer;
+  align-self: start;
+  float: 'center';
+  color: 'var(--font-color)';
+}
+
+.messageWrapper {
+  display: flex;
+  align-items: center;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.buttonWrap {
+  flex-shrink: 0;
+}

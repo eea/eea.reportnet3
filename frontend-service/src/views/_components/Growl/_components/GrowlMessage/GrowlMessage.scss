@@ -40,7 +40,7 @@
   color: var(--growl-info-border-color);
 }
 .p-growl-title-warn {
-  color: var(--growl-warn-border-color);
+  color: var(--growl-warning-border-color);
 }
 .p-growl-title-error {
   color: var(--growl-error-border-color);
@@ -109,7 +109,7 @@
 .p-growl-message-system-notification {
   background-color: var(--growl-system-notification-bg);
   border-width: 1px 1px 1px 5px;
-  width: auto;
+  width: 50rem;
   margin-left: auto !important;
 }
 

@@ -27,14 +27,15 @@ export const PropertyItem = ({ content, title, redirectTo }) => {
             className={styles.icon}
             icon={AwesomeIcons(isOpen ? 'angleDown' : 'angleRight')}
             onClick={onToggleVisibility}
+            role="button"
           />
           {title}
         </h3>
 
         {!isEmpty(redirectTo) && (
           <Button
-            className={'p-button-secondary-transparent'}
-            icon={'externalUrl'}
+            className="p-button-secondary-transparent"
+            icon="externalUrl"
             onMouseDown={() => window.open(redirectTo)}
             tooltip={resourcesContext.messages['viewMore']}
           />

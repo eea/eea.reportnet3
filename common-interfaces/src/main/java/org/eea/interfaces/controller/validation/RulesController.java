@@ -7,13 +7,17 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
+import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.DatasetHistoricRuleVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.SqlRuleVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -398,4 +402,46 @@ public interface RulesController {
   void downloadQCCSV(@PathVariable Long datasetId, @RequestParam String fileName,
       HttpServletResponse response);
 
+  /**
+   * Run SQL rule with limited results.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule about to be run
+   * @param showInternalFields the show internal fields
+   * @return the string formatted as JSON
+   */
+  @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<List<ValueVO>> runSqlRule(@RequestParam("datasetId") Long datasetId,
+      @RequestBody SqlRuleVO sqlRule, @RequestParam boolean showInternalFields);
+
+
+  /**
+   * Evaluates the sql rule and returns its total cost using the query plan.
+   *
+   * @param datasetId the dataset id
+   * @param sqlRule the sql rule
+   * @return the double containing the SQL total cost
+   */
+  @PostMapping(value = "/evaluateSqlRule")
+  Double evaluateSqlRule(@RequestParam("datasetId") Long datasetId, @RequestBody SqlRuleVO sqlRule);
+
+  /**
+   * Gets the rule historic.
+   *
+   * @param datasetId the dataset id
+   * @param ruleId the rule id
+   * @return the rule historic
+   */
+  @GetMapping(value = "/historicInfo")
+  List<RuleHistoricInfoVO> getRuleHistoric(@RequestParam("datasetId") long datasetId,
+      @RequestParam("ruleId") String ruleId);
+
+  /**
+   * Gets the rule historic by dataset id.
+   *
+   * @param datasetId the dataset id
+   * @return the rule historic by dataset id
+   */
+  @GetMapping(value = "/historicDatasetRules")
+  List<DatasetHistoricRuleVO> getRuleHistoricByDatasetId(@RequestParam("datasetId") long datasetId);
 }

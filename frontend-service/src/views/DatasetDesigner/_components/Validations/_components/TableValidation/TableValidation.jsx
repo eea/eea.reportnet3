@@ -73,7 +73,7 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
     if (!creationFormState.candidateRule.automatic) {
       setTabContents([
         <TabPanel
-          header={resourcesContext.messages.tabMenuConstraintData}
+          header={resourcesContext.messages['tabMenuConstraintData']}
           headerClassName={showErrorOnInfoTab ? styles.error : ''}
           key="datasetValidationInfo"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
@@ -87,7 +87,7 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
           />
         </TabPanel>,
         <TabPanel
-          header={resourcesContext.messages.tabMenuExpression}
+          header={resourcesContext.messages['tabMenuExpression']}
           headerClassName={showErrorOnRelationsTab ? styles.error : ''}
           key="datasetValidationRelations"
           leftIcon={showErrorOnRelationsTab ? 'pi pi-exclamation-circle' : ''}>
@@ -95,6 +95,7 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
             componentName={componentName}
             creationFormState={creationFormState}
             dataflowType={dataflowType}
+            datasetId={datasetId}
             onAddNewRelation={onAddNewRelation}
             onDatasetSchemaChange={onDatasetSchemaChange}
             onDoubleReferencedChange={onDoubleReferencedChange}
@@ -114,7 +115,7 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
     } else {
       setTabContents([
         <TabPanel
-          header={resourcesContext.messages.tabMenuConstraintData}
+          header={resourcesContext.messages['tabMenuConstraintData']}
           headerClassName={showErrorOnInfoTab ? styles.error : ''}
           key="datasetValidationInfo"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
@@ -637,8 +638,8 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
         footer={renderDialogFooter}
         header={
           validationContext.ruleEdit
-            ? resourcesContext.messages.editTableConstraint
-            : resourcesContext.messages.createTableConstraint
+            ? resourcesContext.messages['editTableConstraint']
+            : resourcesContext.messages['createTableConstraint']
         }
         onHide={() => onHide()}
         style={{ width: '975px' }}

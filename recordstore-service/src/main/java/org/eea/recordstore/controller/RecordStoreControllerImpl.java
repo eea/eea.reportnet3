@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -89,8 +90,11 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     try {
       recordStoreService.createEmptyDataSet(datasetName, idDatasetSchema);
     } catch (final RecordStoreAccessException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error creating an empty dataset: Dataset Name {}. idDatasetSchema {}. Message: {}",
+          datasetName, idDatasetSchema, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.CREATING_EMPTY_DATASET);
     }
   }
 
@@ -180,8 +184,11 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       LOG.info("Snapshot created");
     } catch (SQLException | IOException | RecordStoreAccessException | EEAException
         | ParseException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error creating a snapshot for the dataset: DatasetId {}. idSnapshot {}. Message: {}",
+          datasetId, idSnapshot, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.CREATING_SNAPSHOT);
     }
 
   }
@@ -224,8 +231,11 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       restoreSnapshotHelper.processRestoration(datasetId, idSnapshot, idPartition, datasetType,
           isSchemaSnapshot, deleteData, prefillingReference);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error restoring a snapshot for the dataset: DatasetId {}. idSnapshot {}. Message: {}",
+          datasetId, idSnapshot, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RESTORING_SNAPSHOT);
     }
 
   }
@@ -249,8 +259,11 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     try {
       recordStoreService.deleteDataSnapshot(datasetId, idSnapshot);
     } catch (IOException e) {
-      LOG_ERROR.error(e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(
+          "Error deleting a snapshot in the dataset: DatasetId {}. idSnapshot {}. Message: {}",
+          datasetId, idSnapshot, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_SNAPSHOT);
     }
 
   }
@@ -332,6 +345,44 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
     recordStoreService.refreshMaterializedQuery(Arrays.asList(datasetId), false, false, null);
+  }
+
+  /**
+   * Clone data.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param originDataset the origin dataset
+   * @param targetDataset the target dataset
+   * @param partitionDatasetTarget the partition dataset target
+   * @param tableSchemasIdPrefill the table schemas id prefill
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/cloneData/origin/{originDataset}/target/{targetDataset}")
+  @ApiOperation(value = "Private operation to copy data between two datasets", hidden = true)
+  public void cloneData(@RequestBody Map<String, String> dictionaryOriginTargetObjectId,
+      @PathVariable("originDataset") Long originDataset,
+      @PathVariable("targetDataset") Long targetDataset,
+      @RequestParam("partitionDatasetTarget") Long partitionDatasetTarget,
+      @RequestParam("tableSchemasId") List<String> tableSchemasIdPrefill) {
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    recordStoreService.createSnapshotToClone(originDataset, targetDataset,
+        dictionaryOriginTargetObjectId, partitionDatasetTarget, tableSchemasIdPrefill);
+  }
+
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/updateSnapshotDisabled/{datasetId}")
+  @ApiOperation(value = "Private operation to update snapshot, disable and move the files",
+      hidden = true)
+  public void updateSnapshotDisabled(@PathVariable("datasetId") Long datasetId) {
+    recordStoreService.updateSnapshotDisabled(datasetId);
   }
 
 }

@@ -10,9 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
+import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
@@ -182,8 +185,29 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     } catch (HttpStatusCodeException exception) {
       LOG_ERROR.error("Status code: {} message: {}", exception.getStatusCode().value(),
           exception.getMessage(), exception);
-    }
+      Map<String, PublishedParameter> mapParameters = fmeAsyncJob.getPublishedParameters().stream()
+          .collect(Collectors.toMap(PublishedParameter::getName, Function.identity()));
 
+      Long datasetId = null;
+      String fileName = "";
+      if (mapParameters.containsKey("datasetId")) {
+        datasetId = Long.valueOf(mapParameters.get("datasetId").getValue().toString());
+      }
+      if (mapParameters.containsKey("inputfile")) {
+        fileName = mapParameters.get("inputfile").getValue().toString();
+      }
+      String user = SecurityContextHolder.getContext().getAuthentication().getName();
+      NotificationVO notificationVO =
+          NotificationVO.builder().user(user).error("Error calling to FME").datasetId(datasetId)
+              .dataflowId(dataflowId).fileName(fileName).build();
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.CALL_FME_PROCESS_FAILED_EVENT, null,
+            notificationVO);
+      } catch (EEAException e1) {
+        LOG_ERROR.error("Failed sending kafka notification due to an error calling FME: {}",
+            e1.getMessage(), e1);
+      }
+    }
     return result;
   }
 
@@ -605,6 +629,10 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
     importFileData.put(LiteralConstants.DATASETID, datasetId);
     lockService.removeLockByCriteria(importFileData);
+    Map<String, Object> importBigFileData = new HashMap<>();
+    importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+    importFileData.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(importBigFileData);
 
     return eventType;
   }

@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import styles from './Footer.module.scss';
 
@@ -15,7 +15,9 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-export const Footer = withRouter(({ history }) => {
+export const Footer = () => {
+  const navigate = useNavigate();
+
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
@@ -38,7 +40,7 @@ export const Footer = withRouter(({ history }) => {
             href={getUrl(routes.ACCESS_POINT)}
             onClick={e => {
               e.preventDefault();
-              history.push(getUrl(routes.ACCESS_POINT));
+              navigate(getUrl(routes.ACCESS_POINT));
             }}
             title={resourcesContext.messages['titleHeader']}>
             <img
@@ -56,4 +58,4 @@ export const Footer = withRouter(({ history }) => {
       </div>
     </div>
   );
-});
+};

@@ -622,7 +622,7 @@ export const ManageIntegrations = ({
             {editorView.isEditing && (
               <Button
                 className="p-button-secondary p-button-rounded p-button-animated-blink p-button-right-aligned"
-                icon={'cancel'}
+                icon="cancel"
                 label={resourcesContext.messages['cancel']}
                 onClick={() => onResetParameterInput()}
               />

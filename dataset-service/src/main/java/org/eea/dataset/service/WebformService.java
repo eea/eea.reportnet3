@@ -1,8 +1,9 @@
 package org.eea.dataset.service;
 
 import java.util.List;
+import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.enums.WebformTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
-import org.json.simple.parser.ParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 
@@ -15,12 +16,24 @@ public interface WebformService {
   /**
    * Insert webform config.
    *
+   * @param name the name
+   * @param content the content
+   * @param type the type
+   * @throws EEAException the EEA exception
+   */
+  void insertWebformConfig(String name, String content, WebformTypeEnum type) throws EEAException;
+
+  /**
+   * Update webform config.
+   *
    * @param id the id
    * @param name the name
    * @param content the content
-   * @throws ParseException the parse exception
+   * @param type the type
+   * @throws EEAException the EEA exception
    */
-  void insertWebformConfig(Long id, String name, String content);
+  void updateWebformConfig(Long id, String name, String content, WebformTypeEnum type)
+      throws EEAException;
 
   /**
    * Find webform config content by id.
@@ -37,4 +50,12 @@ public interface WebformService {
    * @return the list webforms
    */
   List<WebformMetabaseVO> getListWebforms();
+
+  /**
+   * Delete webform config.
+   *
+   * @param id the id
+   * @throws EEAException the EEA exception
+   */
+  void deleteWebformConfig(Long id) throws EEAException;
 }

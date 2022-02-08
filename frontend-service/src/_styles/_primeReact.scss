@@ -1,3 +1,5 @@
+@import '_styles/mixins';
+
 body .p-component {
   font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
   font-size: 14px;
@@ -754,7 +756,8 @@ body .p-fileupload-files {
   display: table-cell;
   width: 100%;
   font-size: 0.9em;
-  text-align: center;
+  word-break: break-all;
+  text-align: left;
 }
 body .p-fileupload .p-progressbar {
   top: 0;
@@ -2064,6 +2067,9 @@ body .p-messages {
   border-radius: 3px;
 }
 body .p-messages .p-messages-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 1em;
 }
 body .p-messages.p-messages-info {
@@ -2072,6 +2078,7 @@ body .p-messages.p-messages-info {
   color: #212121;
 }
 body .p-messages.p-messages-info .p-messages-icon {
+  margin-right: 0.75rem;
   color: #212121;
 }
 body .p-messages.p-messages-info .p-messages-close {
@@ -2084,6 +2091,7 @@ body .p-messages.p-messages-success {
   color: #212121;
 }
 body .p-messages.p-messages-success .p-messages-icon {
+  margin-right: 0.75rem;
   color: #212121;
 }
 body .p-messages.p-messages-success .p-messages-close {
@@ -2091,15 +2099,16 @@ body .p-messages.p-messages-success .p-messages-close {
   color: #212121;
 }
 body .p-messages.p-messages-warn {
-  background-color: #ffe399;
+  background-color: var(--growl-warning-bg);
   border: 0 none;
   color: #212121;
 }
 body .p-messages.p-messages-warn .p-messages-icon {
+  margin-right: 0.75rem;
   color: #212121;
 }
 body .p-messages.p-messages-warn .p-messages-close {
-  background-color: #ffe399;
+  background-color: var(--growl-warning-bg);
   color: #212121;
 }
 body .p-messages.p-messages-error {
@@ -2108,6 +2117,7 @@ body .p-messages.p-messages-error {
   color: #212121;
 }
 body .p-messages.p-messages-error .p-messages-icon {
+  margin-right: 0.75rem;
   color: #212121;
 }
 body .p-messages.p-messages-error .p-messages-close {
@@ -2167,7 +2177,7 @@ body .p-message.p-message-success .p-message-icon {
   color: #212121;
 }
 body .p-message.p-message-warn {
-  background-color: #ffe399;
+  background-color: var(--growl-warning-bg);
   border: 0 none;
   color: #212121;
 }
@@ -2226,7 +2236,7 @@ body .p-toast .p-toast-item-container.p-toast-message-success .p-toast-icon-clos
   color: #212121;
 }
 body .p-toast .p-toast-item-container.p-toast-message-warn {
-  background-color: #ffe399;
+  background-color: var(--growl-warning-bg);
   border: 0 none;
   color: #212121;
 }
@@ -2306,38 +2316,56 @@ body .p-dialog {
   -webkit-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
   -moz-box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
   box-shadow: 0 0 6px 0 rgba(0, 0, 0, 0.16);
+  border-radius: 5px;
 }
 body .p-dialog .p-dialog-titlebar {
+  display: flex;
+  justify-content: space-between;
   border: var(--dialog-header-border);
   background-color: var(--dialog-header-bg);
-  color: var(--dialog-header-color);
-  padding: 1em;
+  color: var(--sidebar-title-color);
+  padding: 1.2rem 1.5em;
   font-weight: 700;
+  word-break: break-all;
   border-bottom: 0 none;
+  border-radius: 5px 5px 0 0;
 }
 body .p-dialog .p-dialog-titlebar .p-dialog-title {
   margin: 0;
   float: none;
   font-weight: 700;
+  color: var(--sidebar-title-color);
+  font-size: 1.2rem;
 }
 body .p-dialog .p-dialog-titlebar .p-dialog-titlebar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--dialog-header-icon-color);
   border: 0 none;
   padding: 0;
-  margin-left: 0.5em;
+  margin-left: 1em;
   -moz-transition: color 0.2s, box-shadow 0.2s;
   -o-transition: color 0.2s, box-shadow 0.2s;
   -webkit-transition: color 0.2s, box-shadow 0.2s;
   transition: color 0.2s, box-shadow 0.2s;
+  border-radius: 50%;
+  padding: 5px;
+  background-color: var(--dialog-header-bg-icon-color);
+
+  span {
+    font-size: 1.2em;
+  }
 }
 body .p-dialog .p-dialog-titlebar .p-dialog-titlebar-icon:hover {
   color: var(--dialog-header-icon-color-hover);
+  background-color: var(--dialog-header-bg-icon-hover);
 }
 body .p-dialog .p-dialog-content {
   background-color: var(--dialog-content-bg);
   color: var(--dialog-content-color);
   border: var(--dialog-content-border);
-  padding: 1em;
+  padding: 2em 1.5em;
   max-height: 90vh;
   overflow: auto;
 }
@@ -2347,9 +2375,10 @@ body .p-dialog .p-dialog-footer {
   border-top: 0 none;
   background-color: var(--dialog-footer-bg);
   color: var(--dialog-content-color);
-  padding: 0.571em 1em;
+  padding: 1.012rem 1.5em;
   margin: 0;
   text-align: right;
+  border-radius: 0 0 5px 5px;
 }
 body .p-dialog .p-dialog-footer button {
   margin: 0 0.5em 0 0;
@@ -3221,4 +3250,12 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
   position: relative;
   background-color: var(--chart-bg);
   color: var(--chart-color);
+}
+
+.responsiveDialog {
+  @include responsiveDialog;
+}
+
+.responsiveCardsGrid {
+  @include responsiveCardsGrid;
 }

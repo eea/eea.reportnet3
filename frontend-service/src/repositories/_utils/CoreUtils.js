@@ -3,79 +3,72 @@ import isUndefined from 'lodash/isUndefined';
 
 export const CoreUtils = (() => {
   const UtilsAPI = {
-    getDashboardLevelErrorByDataset: datasetDTO => {
-      let levelErrors = [];
-      datasetDTO.forEach(datasetTableDTO => {
-        levelErrors.push(UtilsAPI.getDashboardLevelErrorByTable(datasetTableDTO));
-      });
-      return levelErrors;
-    },
+    getDashboardLevelErrorByDataset: datasetDTO =>
+      datasetDTO.map(datasetTableDTO => UtilsAPI.getDashboardLevelErrorByTable(datasetTableDTO)),
 
     getDashboardLevelErrorByTable: datasetTableDTO => {
-      let levelErrors = [];
+      const levelErrors = [];
       datasetTableDTO.tables.forEach(datasetTableDTO => {
-        let corrects =
+        const corrects =
           datasetTableDTO.totalRecords -
           (datasetTableDTO.totalRecordsWithBlockers +
             datasetTableDTO.totalRecordsWithErrors +
             datasetTableDTO.totalRecordsWithWarnings +
             datasetTableDTO.totalRecordsWithInfos);
+
         if (corrects > 0) {
           levelErrors.push('CORRECT');
         }
+
         if (datasetTableDTO.totalRecordsWithInfos > 0) {
           levelErrors.push('INFO');
         }
+
         if (datasetTableDTO.totalRecordsWithWarnings > 0) {
           levelErrors.push('WARNING');
         }
+
         if (datasetTableDTO.totalRecordsWithErrors > 0) {
           levelErrors.push('ERROR');
         }
+
         if (datasetTableDTO.totalRecordsWithBlockers > 0) {
           levelErrors.push('BLOCKER');
         }
       });
+
       return [...new Set(levelErrors)];
     },
 
     getLevelErrorPriorityByLevelError: levelError => {
-      let levelErrorIndex = 0;
       switch (levelError) {
         case 'CORRECT':
-          levelErrorIndex = 0;
-          break;
+          return 0;
         case 'INFO':
-          levelErrorIndex = 1;
-          break;
+          return 1;
         case 'WARNING':
-          levelErrorIndex = 2;
-          break;
+          return 2;
         case 'ERROR':
-          levelErrorIndex = 3;
-          break;
+          return 3;
         case 'BLOCKER':
-          levelErrorIndex = 4;
-          break;
+          return 4;
         case '':
-          levelErrorIndex = 99;
-          break;
+          return 99;
         default:
-          levelErrorIndex = null;
+          return null;
       }
-      return levelErrorIndex;
     },
 
     getPercentage: valArr => {
-      let total = valArr.reduce((arr1, arr2) => arr1.map((v, i) => v + arr2[i]));
+      const total = valArr.reduce((arr1, arr2) => arr1.map((v, i) => v + arr2[i]));
       return valArr.map(val => val.map((v, i) => ((v / total[i]) * 100).toFixed(2)));
     },
 
     getPercentageOfValue: (val, total) => (total === 0 ? '0.00' : ((val / total) * 100).toFixed(2)),
 
     isDuplicatedInObject: (array, property) => {
-      let isDuplicated = false,
-        testObject = {};
+      let isDuplicated = false;
+      const testObject = {};
 
       array.forEach(item => {
         const itemPropertyName = item[property];
@@ -88,6 +81,7 @@ export const CoreUtils = (() => {
           delete item.duplicatedRoles;
         }
       });
+
       return isDuplicated;
     },
 
@@ -115,17 +109,15 @@ export const CoreUtils = (() => {
     },
 
     tableStatisticValuesWithErrors: tableStatisticValues => {
-      let tableStatisticValuesWithSomeError = [];
-      let valuesWithValidations = CoreUtils.transposeMatrix(tableStatisticValues).map(error => {
-        return error.map(subError => {
-          return subError;
-        });
-      });
+      const valuesWithValidations = CoreUtils.transposeMatrix(tableStatisticValues);
+      const tableStatisticValuesWithSomeError = [];
+
       valuesWithValidations.forEach(item => {
         if (!isNil(item) && !item.every(value => value === 0)) {
           tableStatisticValuesWithSomeError.push(item);
         }
       });
+
       return tableStatisticValuesWithSomeError;
     },
 
@@ -135,5 +127,6 @@ export const CoreUtils = (() => {
       }
     }
   };
+
   return UtilsAPI;
 })();

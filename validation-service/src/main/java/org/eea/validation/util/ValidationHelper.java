@@ -23,7 +23,6 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -146,8 +145,6 @@ public class ValidationHelper implements DisposableBean {
   /** The Constant DATASET_: {@value}. */
   private static final String DATASET = "dataset_";
 
-  /** The Constant Rule: {@value}. */
-  private static final String Rule = null;
 
   /**
    * Instantiates a new file loader helper.
@@ -180,13 +177,17 @@ public class ValidationHelper implements DisposableBean {
    * @return the kie base
    * @throws EEAException the eea exception
    */
-  public KieBase getKieBase(String processId, Long datasetId, Rule rule) throws EEAException {
+  public KieBase getKieBase(String processId, Long datasetId, String rule) throws EEAException {
     KieBase kieBase = null;
     synchronized (processesMap) {
       if (!processesMap.containsKey(processId)) {
         initializeProcess(processId, false, false);
       }
-      kieBase = validationService.loadRulesKnowledgeBase(datasetId, rule);
+      if (null == processesMap.get(processId).getKieBase()) {
+        processesMap.get(processId)
+            .setKieBase(validationService.loadRulesKnowledgeBase(datasetId, rule));
+      }
+      kieBase = processesMap.get(processId).getKieBase();
     }
     return kieBase;
   }
@@ -249,11 +250,8 @@ public class ValidationHelper implements DisposableBean {
       String processId, boolean released, boolean updateViews) throws EEAException {
 
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-    DatasetTypeEnum type = dataset.getDatasetTypeEnum();
 
-    if (DatasetTypeEnum.DESIGN.equals(type)) {
-      executeValidationProcess(datasetId, processId, released);
-    } else if (Boolean.FALSE.equals(updateViews)) {
+    if (Boolean.FALSE.equals(updateViews)) {
       executeValidationProcess(datasetId, processId, released);
     } else {
       Map<String, Object> values = new HashMap<>();
@@ -264,6 +262,7 @@ public class ValidationHelper implements DisposableBean {
               dataset.getDataflowId(), dataset.getDatasetSchema())));
       kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
     }
+    dataset = null;
   }
 
   /**
@@ -491,11 +490,10 @@ public class ValidationHelper implements DisposableBean {
    */
   public void processValidation(EEAEventVO eeaEventVO, String processId, Long datasetId,
       Validator validator, EventType notificationEventType) throws EEAException {
-    Rule rule = null;
+    String rule = null;
     if (eeaEventVO.getData().get("sqlRule") != null) {
-      ObjectMapper mapper =
-          new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-      rule = mapper.convertValue(eeaEventVO.getData().get("sqlRule"), Rule.class);
+      new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      rule = (String) (eeaEventVO.getData().get("sqlRule"));
     }
     ValidationTask validationTask = new ValidationTask(eeaEventVO, validator, datasetId,
         getKieBase(processId, datasetId, rule), processId, notificationEventType);
@@ -693,6 +691,7 @@ public class ValidationHelper implements DisposableBean {
         }
       }
     }
+    tableList.clear();
   }
 
 
@@ -750,7 +749,7 @@ public class ValidationHelper implements DisposableBean {
     value.put("user", processesMap.get(processId).getRequestingUser());
     value.put("dataProviderId", dataset.getDataProviderId());
     value.put("datasetSchema", dataset.getDatasetSchema());
-    value.put("sqlRule", sqlRule);
+    value.put("sqlRule", sqlRule != null ? sqlRule.getRuleId().toString() : null);
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
   }
 

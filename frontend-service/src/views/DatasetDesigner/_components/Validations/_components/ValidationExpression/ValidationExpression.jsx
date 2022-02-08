@@ -22,7 +22,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TimezoneCalendar } from 'views/_components/TimezoneCalendar';
 
-const ValidationExpression = ({
+export const ValidationExpression = ({
   dataflowType,
   expressionValues,
   fieldType,
@@ -165,7 +165,9 @@ const ValidationExpression = ({
   const checkField = (field, fieldValue) => {
     if (field === 'year') {
       const yearInt = parseInt(fieldValue);
-      if (yearInt < 1000 || yearInt > 9999) onUpdateExpressionField('expressionValue', 0);
+      if (yearInt < 1000 || yearInt > 9999) {
+        onUpdateExpressionField('expressionValue', 0);
+      }
     }
 
     if (
@@ -174,8 +176,9 @@ const ValidationExpression = ({
       fieldValue !== 'MATCH' &&
       !Number(expressionValues.expressionValue)
     ) {
-      const number = Number(fieldValue);
-      if (!number) onUpdateExpressionField('expressionValue', '');
+      if (!Number(fieldValue)) {
+        onUpdateExpressionField('expressionValue', '');
+      }
     }
 
     if ((expressionValues.operatorType === 'LEN' || expressionValues.operatorType === 'number') && field === 'number') {
@@ -247,9 +250,9 @@ const ValidationExpression = ({
           }}
           placeholder="YYYY-MM-DD"
           readOnlyInput={false}
+          selectableYears={100}
           value={expressionValues.expressionValue}
-          yearNavigator={true}
-          yearRange="1900:2500"></Calendar>
+          yearNavigator={true}></Calendar>
       );
     }
     if (operatorType === 'day') {
@@ -261,7 +264,7 @@ const ValidationExpression = ({
           min={0}
           mode="decimal"
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
-          placeholder={resourcesContext.messages.value}
+          placeholder={resourcesContext.messages['value']}
           steps={0}
           useGrouping={false}
           value={expressionValues.expressionValue}
@@ -281,7 +284,7 @@ const ValidationExpression = ({
               disabled={isDisabled}
               id="expressionValueStringMatch"
               onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
-              placeholder={resourcesContext.messages.value}
+              placeholder={resourcesContext.messages['value']}
               ref={inputStringMatchRef}
               value={expressionValues.expressionValue}
             />
@@ -312,7 +315,7 @@ const ValidationExpression = ({
             disabled={isDisabled}
             id="expressionValueNumberMatch"
             onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
-            placeholder={resourcesContext.messages.value}
+            placeholder={resourcesContext.messages['value']}
             value={expressionValues.expressionValue}
           />
         );
@@ -327,7 +330,7 @@ const ValidationExpression = ({
             keyfilter={valueKeyFilter}
             onBlur={e => checkField('number', e.target.value)}
             onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
-            placeholder={resourcesContext.messages.value}
+            placeholder={resourcesContext.messages['value']}
             value={expressionValues.expressionValue}
           />
         );
@@ -340,7 +343,7 @@ const ValidationExpression = ({
           keyfilter={valueKeyFilter}
           onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
-          placeholder={resourcesContext.messages.value}
+          placeholder={resourcesContext.messages['value']}
           value={expressionValues.expressionValue}
         />
       );
@@ -350,10 +353,11 @@ const ValidationExpression = ({
       return (
         <InputNumber
           disabled={isDisabled}
+          format={false}
           mode="decimal"
           onBlur={e => checkField('year', e.target.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
-          placeholder={resourcesContext.messages.value}
+          placeholder={resourcesContext.messages['value']}
           steps={0}
           useGrouping={false}
           value={expressionValues.expressionValue}
@@ -370,7 +374,7 @@ const ValidationExpression = ({
           min={0}
           mode="decimal"
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
-          placeholder={resourcesContext.messages.value}
+          placeholder={resourcesContext.messages['value']}
           steps={0}
           useGrouping={false}
           value={expressionValues.expressionValue}
@@ -385,7 +389,7 @@ const ValidationExpression = ({
           min={-1}
           onBlur={e => checkField('number', e.target.value)}
           onChange={e => onUpdateExpressionField('expressionValue', e.target.value)}
-          placeholder={resourcesContext.messages.value}
+          placeholder={resourcesContext.messages['value']}
           value={expressionValues.expressionValue}
         />
       );
@@ -398,7 +402,7 @@ const ValidationExpression = ({
         onChange={e => {
           onUpdateExpressionField('expressionValue', e.target.value);
         }}
-        placeholder={resourcesContext.messages.value}
+        placeholder={resourcesContext.messages['value']}
         value={expressionValues.expressionValue}
       />
     );
@@ -422,7 +426,7 @@ const ValidationExpression = ({
           onChange={e => onUpdateExpressionField('union', e.target.value.value)}
           optionLabel="label"
           options={config.validations.logicalOperators}
-          placeholder={resourcesContext.messages.union}
+          placeholder={resourcesContext.messages['union']}
           value={first(config.validations.logicalOperators.filter(option => option.value === expressionValues.union))}
         />
       </span>
@@ -437,7 +441,7 @@ const ValidationExpression = ({
           }}
           optionLabel="label"
           options={operatorTypes}
-          placeholder={resourcesContext.messages.operatorType}
+          placeholder={resourcesContext.messages['operatorType']}
           value={first(operatorTypes.filter(option => option.value === expressionValues.operatorType))}
         />
       </span>
@@ -450,7 +454,7 @@ const ValidationExpression = ({
           onChange={e => onUpdateExpressionField('operatorValue', e.target.value.value)}
           optionLabel="label"
           options={operatorValues}
-          placeholder={resourcesContext.messages.operator}
+          placeholder={resourcesContext.messages['operator']}
           value={first(operatorValues.filter(option => option.value === expressionValues.operatorValue))}
         />
       </span>
@@ -471,4 +475,3 @@ const ValidationExpression = ({
     </li>
   );
 };
-export { ValidationExpression };

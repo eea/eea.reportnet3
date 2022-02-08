@@ -2,13 +2,14 @@ package org.eea.dataflow.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
-import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -57,10 +58,17 @@ public interface DataflowService {
    *
    * @param userId the user id
    * @param dataflowType the dataflow type
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param sizePage the size page
+   * @param numPage the num page
    * @return the dataflows
    * @throws EEAException the EEA exception
    */
-  List<DataFlowVO> getDataflows(String userId, TypeDataflowEnum dataflowType) throws EEAException;
+  PaginatedDataflowVO getDataflows(String userId, TypeDataflowEnum dataflowType,
+      Map<String, String> filters, String orderHeader, boolean asc, Integer sizePage,
+      Integer numPage) throws EEAException;
 
   /**
    * Gets the cloneable dataflows.
@@ -89,28 +97,6 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   List<DataFlowVO> getCompleted(String userId, Pageable pageable) throws EEAException;
-
-
-  /**
-   * Adds the contributor to dataflow.
-   *
-   * @param idDataflow the id dataflow
-   * @param idContributor the id contributor
-   *
-   * @throws EEAException the EEA exception
-   */
-  void addContributorToDataflow(Long idDataflow, String idContributor) throws EEAException;
-
-  /**
-   * Removes the contributor from dataflow.
-   *
-   * @param idDataflow the id dataflow
-   * @param idContributor the id contributor
-   *
-   * @throws EEAException the EEA exception
-   */
-  void removeContributorFromDataflow(Long idDataflow, String idContributor) throws EEAException;
-
 
   /**
    * Creates the data flow.
@@ -168,9 +154,16 @@ public interface DataflowService {
   /**
    * Gets the public dataflows.
    *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param sizePage the size page
+   * @param numPage the num page
    * @return the public dataflows
+   * @throws EEAException the EEA exception
    */
-  List<DataflowPublicVO> getPublicDataflows();
+  PaginatedDataflowVO getPublicDataflows(Map<String, String> filters, String orderHeader,
+      boolean asc, Integer sizePage, Integer numPage) throws EEAException;
 
   /**
    * Gets the public dataflow by id.
@@ -206,10 +199,12 @@ public interface DataflowService {
    * @param asc the asc
    * @param page the page
    * @param pageSize the page size
+   * @param filters the filters
    * @return the public dataflows by country
+   * @throws EEAException the EEA exception
    */
-  DataflowPublicPaginatedVO getPublicDataflowsByCountry(String countryCode, String header,
-      boolean asc, int page, int pageSize);
+  PaginatedDataflowVO getPublicDataflowsByCountry(String countryCode, String header, boolean asc,
+      int page, int pageSize, Map<String, String> filters) throws EEAException;
 
 
   /**
@@ -274,6 +269,13 @@ public interface DataflowService {
    */
   void validateAllReporters(String userId) throws EEAException;
 
-
+  /**
+   * Update data flow automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDeletion the automatic reporting deletion
+   */
+  void updateDataFlowAutomaticReportingDeletion(Long dataflowId,
+      boolean automaticReportingDeletion);
 
 }

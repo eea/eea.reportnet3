@@ -3,7 +3,7 @@ package org.eea.dataset.service.file;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.interfaces.controller.dataflow.RepresentativeController;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
@@ -31,7 +31,7 @@ public class FileParserFactoryTest {
   @Mock
   private DatasetMetabaseService datasetMetabaseService;
   @Mock
-  private RepresentativeController representativeControllerZuul;
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * Inits the mocks.

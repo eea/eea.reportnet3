@@ -164,9 +164,9 @@ export const TimezoneCalendar = ({
           checkError(inputValue);
           setDate(e.value);
         }}
+        selectableYears={100}
         value={date}
         yearNavigator
-        yearRange="1900:2100"
       />
     );
   };
@@ -180,8 +180,8 @@ export const TimezoneCalendar = ({
         filterBy="label"
         onChange={e => setSelectedOffset(e.value)}
         optionLabel="label"
-        optionValue="value"
         options={offsetOptions}
+        optionValue="value"
         value={selectedOffset}
       />
     );

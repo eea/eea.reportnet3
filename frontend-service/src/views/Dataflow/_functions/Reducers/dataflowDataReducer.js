@@ -25,6 +25,7 @@ export const dataflowDataReducer = (state, { type, payload }) => {
       return {
         ...state,
         hasWritePermissions: payload.hasWritePermissions,
+        hasCustodianPermissions: payload.hasCustodianPermissions,
         isCustodian: payload.isCustodian,
         isObserver: payload.isObserver,
         isAdmin: payload.isAdmin,
@@ -108,6 +109,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
 
     case 'SET_RESTRICT_FROM_PUBLIC':
       return { ...state, restrictFromPublic: payload };
+
+    case 'SET_AUTOMATIC_REPORTING_DELETION':
+      return { ...state, isAutomaticReportingDeletion: payload.isAutomaticReportingDeletion };
 
     case 'RESTRICT_FROM_PUBLIC_IS_UPDATING':
       return {

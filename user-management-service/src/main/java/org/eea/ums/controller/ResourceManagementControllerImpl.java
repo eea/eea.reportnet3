@@ -71,7 +71,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
       LOG_ERROR.error("Error creating resource {} due to reason {}", resourceInfoVO.getName(),
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
   }
 
@@ -187,7 +187,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating resources due to reason {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.PERMISSION_NOT_CREATED, e);
+          EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
   }
 }

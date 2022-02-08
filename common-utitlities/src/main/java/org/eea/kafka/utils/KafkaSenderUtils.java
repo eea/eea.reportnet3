@@ -126,6 +126,15 @@ public class KafkaSenderUtils {
     String fileName =
         (notificationMap.get("fileName") != null) ? notificationMap.get("fileName").toString()
             : null;
+    String shortCode =
+        (notificationMap.get("shortCode") != null) ? notificationMap.get("shortCode").toString()
+            : null;
+    Long invalidRules = (notificationMap.get("invalidRules") != null)
+        ? Long.parseLong(notificationMap.get("invalidRules").toString())
+        : null;
+    Long disabledRules = (notificationMap.get("disabledRules") != null)
+        ? Long.parseLong(notificationMap.get("disabledRules").toString())
+        : null;
 
     UserNotificationContentVO content = new UserNotificationContentVO();
     content.setDataflowId(dataflowId);
@@ -141,6 +150,9 @@ public class KafkaSenderUtils {
         : null);
     content.setTableSchemaName(tableSchemaName);
     content.setFileName(fileName);
+    content.setShortCode(shortCode);
+    content.setInvalidRules(invalidRules);
+    content.setDisabledRules(disabledRules);
     notificationControllerZuul.createUserNotificationPrivate(eventType, content);
     LOG.info("Save user notification, eventType: {}, notification content: {}", eventType, content);
 

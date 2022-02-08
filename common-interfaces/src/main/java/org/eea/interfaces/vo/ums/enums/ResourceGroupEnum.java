@@ -16,6 +16,9 @@ public enum ResourceGroupEnum {
   /** The dataflow observer. */
   DATAFLOW_OBSERVER("Dataflow-%s-DATA_OBSERVER"),
 
+  /** The dataflow steward support. */
+  DATAFLOW_STEWARD_SUPPORT("Dataflow-%s-STEWARD_SUPPORT"),
+
   /** The dataflow requester. */
   DATAFLOW_REQUESTER("Dataflow-%s-DATA_REQUESTER"),
 
@@ -47,6 +50,9 @@ public enum ResourceGroupEnum {
 
   /** The dataset observer. */
   DATASET_OBSERVER("Dataset-%s-DATA_OBSERVER"),
+
+  /** The dataset steward support. */
+  DATASET_STEWARD_SUPPORT("Dataset-%s-STEWARD_SUPPORT"),
 
   /** The dataset requester. */
   DATASET_REQUESTER("Dataset-%s-DATA_REQUESTER"),
@@ -100,6 +106,9 @@ public enum ResourceGroupEnum {
   /** The datacollection observer. */
   DATACOLLECTION_OBSERVER("DataCollection-%s-DATA_OBSERVER"),
 
+  /** The datacollection steward support. */
+  DATACOLLECTION_STEWARD_SUPPORT("DataCollection-%s-STEWARD_SUPPORT"),
+
   /** The datacollection lead reporter. */
   DATACOLLECTION_LEAD_REPORTER("DataCollection-%s-DATA_LEAD_REPORTER"),
 
@@ -114,6 +123,9 @@ public enum ResourceGroupEnum {
   /** The eudataset observer. */
   EUDATASET_OBSERVER("EUDataset-%s-DATA_OBSERVER"),
 
+  /** The eudataset steward support. */
+  EUDATASET_STEWARD_SUPPORT("EUDataset-%s-STEWARD_SUPPORT"),
+
   /** The referencedataset observer. */
   REFERENCEDATASET_OBSERVER("ReferenceDataset-%s-DATA_OBSERVER"),
 
@@ -123,12 +135,18 @@ public enum ResourceGroupEnum {
   /** The testdataset custodian. */
   TESTDATASET_CUSTODIAN("TestDataset-%s-DATA_CUSTODIAN"),
 
+  /** The testdataset steward support. */
+  TESTDATASET_STEWARD_SUPPORT("TestDataset-%s-STEWARD_SUPPORT"),
+
   /** The referencedataset custodian. */
   REFERENCEDATASET_CUSTODIAN("ReferenceDataset-%s-DATA_CUSTODIAN"),
 
 
   /** The referencedataset steward. */
   REFERENCEDATASET_STEWARD("ReferenceDataset-%s-DATA_STEWARD"),
+
+  /** The referencedataset steward support. */
+  REFERENCEDATASET_STEWARD_SUPPORT("ReferenceDataset-%s-DATA_STEWARD_SUPPORT"),
 
   /** The provider national coordinator. */
   // DATAPROVIDER-%-NATIONAL_COORDINATOR

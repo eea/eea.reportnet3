@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -795,7 +794,7 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void createRecepitPDFTest() {
-    Authentication authentication = Mockito.mock(Authentication.class);
+    Mockito.mock(Authentication.class);
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
     SecurityContextHolder.setContext(securityContext);
     ReportingDatasetVO dataset = new ReportingDatasetVO();
@@ -826,10 +825,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(dataflowVO);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(representatives);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
-    Mockito.when(userManagementControllerZull.getUserByUserId(Mockito.any()))
-        .thenReturn(userRepresentationVO);
+    Mockito.when(userManagementControllerZull.getUserByUserId()).thenReturn(userRepresentationVO);
     datasetSnapshotService.createReceiptPDF(null, 1L, 1L);
     Mockito.verify(representativeControllerZuul, times(1))
         .updateInternalRepresentative(Mockito.any());
@@ -1100,7 +1096,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(schema);
 
     datasetSnapshotService.releaseLocksRelatedToRelease(1L, 1L);
-    Mockito.verify(lockService, times(11)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(12)).removeLockByCriteria(Mockito.any());
   }
 
   @Test

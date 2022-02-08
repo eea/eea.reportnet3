@@ -247,8 +247,8 @@ export const WebformRecord = ({
                   ) : (
                     <WebformField
                       columnsSchema={columnsSchema}
-                      dataProviderId={dataProviderId}
                       dataflowId={dataflowId}
+                      dataProviderId={dataProviderId}
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
                       element={element}
@@ -275,7 +275,7 @@ export const WebformRecord = ({
                     return [element.message, element.errorLevel].join();
                   }).map(validation => (
                     <IconTooltip
-                      className={'webform-validationErrors'}
+                      className="webform-validationErrors"
                       key={validation.id}
                       levelError={validation.levelError}
                       message={validation.message}
@@ -363,8 +363,8 @@ export const WebformRecord = ({
                         addingOnTableSchemaId={addingOnTableSchemaId}
                         calculateSingle={calculateSingle}
                         columnsSchema={columnsSchema}
-                        dataProviderId={dataProviderId}
                         dataflowId={dataflowId}
+                        dataProviderId={dataProviderId}
                         datasetId={datasetId}
                         datasetSchemaId={datasetSchemaId}
                         isAddingMultiple={isAddingMultiple}
@@ -458,16 +458,16 @@ export const WebformRecord = ({
 
   const renderErrorMessages = content => {
     switch (webformType) {
-      case 'ARTICLE_15':
-        return renderArticle15ErrorMessages(content);
-      case 'ARTICLE_13':
-        return renderArticle13ErrorMessages(content);
+      case 'TABLES':
+        return renderTableWebformErrorMessages(content);
+      case 'PAMS':
+        return renderWebformPaMsErrorMessages(content);
       default:
         return [];
     }
   };
 
-  const renderArticle13ErrorMessages = content => {
+  const renderWebformPaMsErrorMessages = content => {
     const errorMessages = [];
 
     if (isEmpty(record)) errorMessages.push('PLEASE CHOOSE ONE');
@@ -480,7 +480,7 @@ export const WebformRecord = ({
     return errorMessages;
   };
 
-  const renderArticle15ErrorMessages = content => {
+  const renderTableWebformErrorMessages = content => {
     const errorMessages = [];
     if (hasFields) {
       errorMessages.push(resourcesContext.messages['emptyWebformTable']);

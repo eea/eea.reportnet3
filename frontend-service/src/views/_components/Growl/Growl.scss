@@ -2,7 +2,9 @@
   top: 70px;
   opacity: 0.95;
   filter: alpha(opacity=95);
-  width: 50em !important;
+  width: auto !important;
+  min-width: 25rem !important;
+  max-width: 50rem !important;
 }
 .p-growl.p-component.p-growl-topright {
   z-index: 5100 !important;

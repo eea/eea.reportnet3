@@ -2537,6 +2537,7 @@ public class DatasetSchemaServiceTest {
   public void testExportFieldSchemas() throws IOException, EEAException {
 
     FieldSchemaVO fieldVO = new FieldSchemaVO();
+    fieldVO.setDescription("");
     fieldVO.setType(DataType.TEXT);
     Mockito
         .when(fileCommon.getFieldSchemas(Mockito.anyString(), Mockito.any(DataSetSchemaVO.class)))

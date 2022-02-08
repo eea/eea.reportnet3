@@ -153,7 +153,7 @@ public interface UserManagementController {
    *
    * @return the users
    */
-  @GetMapping("/getUsers")
+  @GetMapping("/private/getUsers")
   List<UserRepresentationVO> getUsers();
 
   /**
@@ -213,12 +213,10 @@ public interface UserManagementController {
   /**
    * Gets the user by user id.
    *
-   * @param userId the user id
-   *
    * @return the user by user id
    */
   @GetMapping("/getUserByUserId")
-  UserRepresentationVO getUserByUserId(@RequestParam("userId") String userId);
+  UserRepresentationVO getUserByUserId();
 
   /**
    * Creates the api key.

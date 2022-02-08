@@ -29,6 +29,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const ManageDataflow = ({
   dataflowId,
   isCitizenScienceDataflow,
+  isCustodian,
   isEditForm = false,
   isVisible,
   manageDialogs,
@@ -150,7 +151,7 @@ export const ManageDataflow = ({
   const renderDataflowDialog = () => (
     <Fragment>
       <div className="p-toolbar-group-left">
-        {isEditForm && state.isCustodian && state.status === config.dataflowStatus.DESIGN && (
+        {isEditForm && isCustodian && state.status === config.dataflowStatus.DESIGN && (
           <Button
             className="p-button-danger p-button-animated-blink"
             icon="trash"
@@ -217,7 +218,7 @@ export const ManageDataflow = ({
     <Fragment>
       {isVisible && (
         <Dialog
-          className={styles.dialog}
+          className="responsiveDialog"
           footer={renderDataflowDialog()}
           header={getModalHeader()}
           onHide={() => onHideDataflowDialog()}

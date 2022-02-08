@@ -81,7 +81,6 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -275,6 +274,21 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     return snapshotMapper.entityListToClass(snapshots);
   }
 
+  /**
+   * Gets the snapshots enabled by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots enabled by id dataset
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<SnapshotVO> getSnapshotsEnabledByIdDataset(Long datasetId) throws EEAException {
+
+    List<Snapshot> snapshots =
+        snapshotRepository.findByReportingDatasetIdAndEnabledTrueOrderByCreationDateDesc(datasetId);
+
+    return snapshotMapper.entityListToClass(snapshots);
+  }
 
   /**
    * Adds the snapshot.
@@ -313,6 +327,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setDataSetName("snapshot from dataset_" + idDataset);
       snap.setDcReleased(createSnapshotVO.getReleased());
       snap.setEuReleased(false);
+      snap.setEnabled(true);
 
       Long dataflowId = metabaseRepository.findDataflowIdById(idDataset);
       if (snap.getReportingDataset() != null
@@ -892,9 +907,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
             .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
 
-    UserRepresentationVO user = userManagementControllerZull.getUserByUserId(
-        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
-            .get(AuthenticationDetails.USER_ID));
+    UserRepresentationVO user = userManagementControllerZull.getUserByUserId();
     receipt.setEmail(user.getEmail());
 
     if (!representatives.isEmpty()) {
@@ -1125,10 +1138,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Map<String, Object> importFileData = new HashMap<>();
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
+      Map<String, Object> importBigFileData = new HashMap<>();
+      importBigFileData.put(LiteralConstants.SIGNATURE,
+          LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+      importBigFileData.put(LiteralConstants.DATASETID, datasetId);
 
       Map<String, Object> restoreSnapshots = new HashMap<>();
       restoreSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RESTORE_SNAPSHOT.getValue());
       restoreSnapshots.put(LiteralConstants.DATASETID, datasetId);
+
 
       Map<String, Object> insertRecordsMultitable = new HashMap<>();
       insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
@@ -1141,6 +1159,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       lockService.removeLockByCriteria(updateRecords);
       lockService.removeLockByCriteria(deleteDatasetValues);
       lockService.removeLockByCriteria(importFileData);
+      lockService.removeLockByCriteria(importBigFileData);
       lockService.removeLockByCriteria(insertRecordsMultitable);
       lockService.removeLockByCriteria(restoreSnapshots);
 
@@ -1174,6 +1193,28 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     lockService.removeLockByCriteria(populateEuDataset);
     lockService.removeLockByCriteria(releaseSnapshots);
+  }
+
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void updateSnapshotDisabled(Long datasetId) {
+    snapshotRepository.updateSnapshotEnabledFalse(datasetId);
+    LOG.info("Snapshots disabled from dataset: {}", datasetId);
+  }
+
+  /**
+   * Delete snapshot by dataset id and date released is null.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void deleteSnapshotByDatasetIdAndDateReleasedIsNull(Long datasetId) {
+    snapshotRepository.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
+    LOG.info("Snapshots deleted from dataset: {}", datasetId);
   }
 
   /**
@@ -1227,6 +1268,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
       lockService.createLock(timestamp, userName, LockType.METHOD, importFileData);
+
+      Map<String, Object> importBigFileData = new HashMap<>();
+      importBigFileData.put(LiteralConstants.SIGNATURE,
+          LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+      importBigFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.createLock(timestamp, userName, LockType.METHOD, importBigFileData);
 
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
       for (TableSchemaVO table : schema.getTableSchemas()) {

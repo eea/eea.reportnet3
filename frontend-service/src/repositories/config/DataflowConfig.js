@@ -11,7 +11,7 @@ export const DataflowConfig = {
   downloadPublicAllSchemasInfoFile: '/dataflow/downloadPublicSchemaInformation/{:dataflowId}',
   downloadUsersListFile: '/user/downloadUsersByCountry/{:dataflowId}/?fileName={:fileName}',
   exportSchemas: '/dataschema/export?dataflowId={:dataflowId}',
-  getAll: '/dataflow/getDataflows',
+  getAll: '/dataflow/getDataflows?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}',
   getCloneableDataflows: '/dataflow/cloneableDataflows',
   getAllDataflowsUserList: '/dataflow/getUserRolesAllDataflows',
   generateAllSchemasInfoFile: '/dataflow/exportSchemaInformation/{:dataflowId}',
@@ -23,7 +23,8 @@ export const DataflowConfig = {
   getDatasetsInfo: '/dataflow/{:dataflowId}/datasetsSummary',
   getDatasetsValidationStatistics:
     '/datasetmetabase/globalStatistics/dataflow/{:dataflowId}/dataSchema/{:datasetSchemaId}',
-  getPublicData: '/dataflow/getPublicDataflows',
+  getPublicData:
+    '/dataflow/getPublicDataflows?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}',
   getPublicDataflowData: '/dataflow/getPublicDataflow/{:dataflowId}',
   getPublicDataflowsByCountryCode:
     '/dataflow/public/country/{:country}?asc={:asc}&pageNum={:pageNum}&pageSize={:pageSize}&sortField={:sortField}',
@@ -32,6 +33,8 @@ export const DataflowConfig = {
   getSchemas: '/dataschema/getSchemas/dataflow/{:dataflowId}',
   getSchemasValidation: '/dataschema/validate/dataflow/{:dataflowId}',
   getUserList: '/user/getUserRolesByDataflow/{:dataflowId}/dataProviderId/{:representativeId}',
+  updateAutomaticDelete:
+    '/dataflow/{:dataflowId}/updateAutomaticDelete?automaticDelete={:isAutomaticReportingDeletion}',
   importSchema: '/dataschema/import?dataflowId={:dataflowId}',
   validateAllDataflowsUsers: '/dataflow/validateAllReporters'
 };

@@ -3,6 +3,7 @@ package org.eea.dataset.service.file.interfaces;
 import java.io.InputStream;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 
 /**
  * The Interface ReaderStrategy.
@@ -23,9 +24,11 @@ public interface ReaderStrategy {
    * @param fileName the file name
    * @param replace the replace
    * @param schema the schema
+   * @param connectionDataVO the connection data VO
    * @return the data set VO
    * @throws EEAException the EEA exception
    */
   void parseFile(InputStream inputStream, Long dataflowId, Long partitionId, String idTableSchema,
-      Long datasetId, String fileName, boolean replace, DataSetSchema schema) throws EEAException;
+      Long datasetId, String fileName, boolean replace, DataSetSchema schema,
+      ConnectionDataVO connectionDataVO) throws EEAException;
 }

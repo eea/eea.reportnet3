@@ -1,7 +1,10 @@
 .noObligations {
   color: var(--button-secondary-transparent-color-hover);
-  font-weight: 450;
-  margin: 2rem 1rem;
+  display: flex;
+  flex: auto;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
 }
 
 .checkColumn {
@@ -13,7 +16,7 @@
   justify-content: space-between;
 
   .linkIcon {
-    color: var(--main-color-font);
+    color: var(--main-font-color);
     cursor: pointer;
     float: center;
   }
@@ -23,4 +26,8 @@
   :global .p-column-title {
     display: none;
   }
+}
+
+.cursorPointer {
+  cursor: pointer;
 }

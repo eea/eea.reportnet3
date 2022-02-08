@@ -3,6 +3,7 @@ import { useContext, useLayoutEffect, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
 import { routes } from 'conf/routes';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -12,15 +13,16 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const useBigButtonListRepresentative = ({
+  dataflowId,
   dataflowState,
   dataProviderId,
   getDataHistoricReleases,
   handleRedirect,
   isLeadReporterOfCountry,
-  match,
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
-  onShowHistoricReleases
+  onShowHistoricReleases,
+  representativeId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -35,7 +37,10 @@ const useBigButtonListRepresentative = ({
 
   const getButtonsVisibility = () => {
     const isManualAcceptance = dataflowState.data.manualAcceptance;
-    const isTestDataset = parseInt(match.params.representativeId) === 0;
+    const isTestDataset = parseInt(representativeId) === 0;
+    const isStewardSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.STEWARD_SUPPORT.key
+    ]);
     const isReleased =
       !isNil(dataflowState.data.datasets) &&
       dataflowState.data.datasets.some(dataset => dataset.isReleased && dataset.dataProviderId === dataProviderId);
@@ -55,8 +60,36 @@ const useBigButtonListRepresentative = ({
       help: true,
       receipt: isLeadReporterOfThisCountry && isReleased,
       release: isLeadReporterOfThisCountry && !isTestDataset,
-      testDatasets: isTestDataset
+      testDatasets: isTestDataset || (isStewardSupport && isTestDataset)
     };
+  };
+
+  const getReferenceDatasetModels = () => {
+    if (
+      isNil(dataflowState.data.referenceDatasets) ||
+      dataflowState.data.representatives.length > 1 ||
+      dataflowState.hasCustodianPermissions
+    ) {
+      return [];
+    }
+
+    return dataflowState.data.referenceDatasets.map(referenceDataset => {
+      return {
+        layout: 'defaultBigButton',
+        buttonClass: 'referenceDataset',
+        buttonIcon: 'howTo',
+        caption: referenceDataset.datasetSchemaName,
+        handleRedirect: () => {
+          handleRedirect(
+            getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }, true)
+          );
+        },
+        helpClassName: 'dataflow-dataset-container-help-step',
+        model: [],
+        onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }, true),
+        visibility: true
+      };
+    });
   };
 
   const feedbackButton = {
@@ -134,7 +167,7 @@ const useBigButtonListRepresentative = ({
   });
 
   const groupByRepresentativeModels = dataflowState.data.datasets
-    .filter(dataset => dataset.dataProviderId === parseInt(match.params.representativeId))
+    .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
     .map(dataset => {
       const datasetName = dataset.name;
       const datasetId = dataset.datasetId;
@@ -185,7 +218,7 @@ const useBigButtonListRepresentative = ({
   };
 
   const isReleased = dataflowState.data.datasets
-    .filter(dataset => dataset.dataProviderId === parseInt(match.params.representativeId))
+    .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
     .some(dataset => dataset.isReleased);
 
   const representative = dataflowState.data.representatives.find(
@@ -221,6 +254,7 @@ const useBigButtonListRepresentative = ({
   return [
     helpButton,
     feedbackButton,
+    ...getReferenceDatasetModels(),
     ...groupByRepresentativeModels,
     ...receiptBigButton,
     ...releaseBigButton,

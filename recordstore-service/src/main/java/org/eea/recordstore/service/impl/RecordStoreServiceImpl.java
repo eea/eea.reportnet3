@@ -423,4 +423,30 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       boolean released, Long datasetId) {
     LOG.info("Refresh async materialized view");
   }
+
+  /**
+   * Creates the snapshot to clone.
+   *
+   * @param originDataset the origin dataset
+   * @param targetDataset the target dataset
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param partitionDatasetTarget the partition dataset target
+   * @param tableSchemasIdPrefill the table schemas id prefill
+   */
+  @Override
+  public void createSnapshotToClone(Long originDataset, Long targetDataset,
+      Map<String, String> dictionaryOriginTargetObjectId, Long partitionDatasetTarget,
+      List<String> tableSchemasIdPrefill) {
+    LOG.info("createSnapshotToClone");
+  }
+
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void updateSnapshotDisabled(Long datasetId) {
+    LOG.info("updateSnapshotDisabled");
+  }
 }

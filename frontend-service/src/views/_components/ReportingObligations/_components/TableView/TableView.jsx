@@ -95,6 +95,7 @@ export const TableView = ({
   ) : (
     <DataTable
       autoLayout={true}
+      className={styles.cursorPointer}
       first={pagination.first}
       getPageChange={onLoadPagination}
       onRowClick={event => onSelectObl(event.data)}
@@ -102,6 +103,7 @@ export const TableView = ({
       paginatorRight={paginatorRightText}
       rows={pagination.rows}
       rowsPerPageOptions={[5, 10, 15]}
+      summary={resourcesContext.messages['reportingObligations']}
       totalRecords={data.length}
       value={data}>
       {renderColumns(data)}

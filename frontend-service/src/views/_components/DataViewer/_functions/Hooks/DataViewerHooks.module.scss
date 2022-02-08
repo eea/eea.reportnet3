@@ -1,0 +1,65 @@
+.readOnlyFields > div {
+  opacity: 0.5;
+}
+
+.invisibleHeader {
+  display: none;
+}
+
+.fieldDisabled {
+  cursor: default;
+}
+
+.fieldText {
+  text-align: left;
+  font-weight: bold;
+}
+
+.fieldTextPaddingTop {
+  padding-top: 1rem;
+}
+
+.propertyLabel {
+  color: var(--success-color-lighter);
+  font-weight: 600;
+}
+
+.propertyLabelListItems {
+  width: 16rem;
+  display: block;
+}
+
+.validationColWidth {
+  width: 125px;
+}
+
+.providerCode {
+  display: flex;
+  align-items: center;
+}
+
+.attachment {
+  display: flex;
+  justify-content: center;
+}
+
+.complexGeometries {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.iconSize {
+  font-size: 8pt;
+}
+
+.tooltipTitle {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  opacity: 0.9;
+}
+
+.colWidth {
+  width: 100px;
+}

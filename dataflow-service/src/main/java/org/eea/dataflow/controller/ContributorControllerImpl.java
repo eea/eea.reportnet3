@@ -116,7 +116,8 @@ public class ContributorControllerImpl implements ContributorController {
       }
       LOG_ERROR.error("Error deleting the requester {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_REQUESTER);
     }
   }
 
@@ -164,7 +165,8 @@ public class ContributorControllerImpl implements ContributorController {
       }
       LOG_ERROR.error("Error deleting the reporter {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_REPORTER);
     }
   }
 
@@ -397,7 +399,8 @@ public class ContributorControllerImpl implements ContributorController {
       LOG_ERROR.error(
           "Error creating  the associated permissions for requester role in datasetschema {}.in the dataflow: {} ",
           datasetId, dataflowId);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.CREATING_ASSOCIATED_PERMISSIONS);
     }
   }
 

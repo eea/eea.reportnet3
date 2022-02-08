@@ -13,26 +13,20 @@ export const RepresentativeService = {
     await RepresentativeRepository.createLeadReporter(leadReporterAccount, representativeId, dataflowId),
 
   getDataProviders: async dataProviderGroup => {
-    let response = [];
     const dataProvidersDTO = await RepresentativeRepository.getDataProviders(dataProviderGroup.dataProviderGroupId);
-    response = dataProvidersDTO.data.map(dataProvider => {
-      return { dataProviderId: dataProvider.id, label: dataProvider.label };
-    });
-    return response;
+    return dataProvidersDTO.data.map(dataProvider => ({ dataProviderId: dataProvider.id, label: dataProvider.label }));
   },
 
   getRepresentatives: async dataflowId => {
     const representativesDTO = await RepresentativeRepository.getRepresentatives(dataflowId);
-
     const representativesList = RepresentativeUtils.parseRepresentativeListDTO(representativesDTO.data);
 
-    const dataToConsume = {
+    return {
       group: !isEmpty(representativesDTO.data)
         ? { dataProviderGroupId: representativesDTO.data[0].dataProviderGroupId }
         : { dataProviderGroupId: null },
       representatives: sortBy(representativesList, ['representativeId'])
     };
-    return dataToConsume;
   },
 
   deleteRepresentative: async (representativeId, dataflowId) =>

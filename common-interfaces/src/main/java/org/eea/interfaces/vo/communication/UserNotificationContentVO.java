@@ -47,4 +47,13 @@ public class UserNotificationContentVO {
 
   /** The custom content. */
   private Map<String, String> customContent;
+
+  /** The short code. */
+  private String shortCode;
+
+  /** The invalid rules. */
+  private Long invalidRules;
+
+  /** The disabled rules. */
+  private Long disabledRules;
 }

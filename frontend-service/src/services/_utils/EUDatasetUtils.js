@@ -2,8 +2,8 @@ import { EUDataset } from 'entities/EUDataset';
 
 const parseEUDatasetListDTO = euDatasetsDTO => euDatasetsDTO?.map(euDatasetDTO => parseEUDatasetDTO(euDatasetDTO));
 
-const parseEUDatasetDTO = euDatasetDTO => {
-  return new EUDataset({
+const parseEUDatasetDTO = euDatasetDTO =>
+  new EUDataset({
     creationDate: euDatasetDTO.creationDate,
     euDatasetId: euDatasetDTO.id,
     euDatasetName: euDatasetDTO.dataSetName,
@@ -12,7 +12,6 @@ const parseEUDatasetDTO = euDatasetDTO => {
     expirationDate: euDatasetDTO.dueDate,
     status: euDatasetDTO.status
   });
-};
 
 export const EUDatasetUtils = {
   parseEUDatasetListDTO

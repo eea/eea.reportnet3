@@ -74,7 +74,6 @@ export const CardsView = ({
 
   const currentPageTemplate = {
     layout: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport',
-    // eslint-disable-next-line react/no-multi-comp
     CurrentPageReport: options => {
       return (
         <span className={styles.currentPageWrapper}>
@@ -135,7 +134,7 @@ export const CardsView = ({
         })}
       </div>
       <Paginator
-        className={'p-paginator-bottom'}
+        className="p-paginator-bottom"
         first={pagination.first}
         onPageChange={onPaginate}
         rightContent={paginatorRightText}

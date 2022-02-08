@@ -5,7 +5,12 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 export const DataflowRepository = {
   countByType: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.countByType) }),
 
-  getAll: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getAll) }),
+  getAll: async ({ filterBy, isAsc, numberRows, pageNum, sortBy }) => {
+    return await HTTPRequester.post({
+      url: getUrl(DataflowConfig.getAll, { isAsc, numberRows, pageNum, sortBy }),
+      data: { ...filterBy }
+    });
+  },
 
   getCloneableDataflows: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getCloneableDataflows) }),
 
@@ -59,23 +64,21 @@ export const DataflowRepository = {
   exportSchemas: async dataflowId =>
     await HTTPRequester.download({ url: getUrl(DataflowConfig.exportSchemas, { dataflowId }) }),
 
-  createApiKey: async (dataflowId, dataProviderId, isCustodian) => {
-    const url = isCustodian
-      ? getUrl(DataflowConfig.createApiKeyCustodian, { dataflowId })
-      : getUrl(DataflowConfig.createApiKey, { dataflowId, dataProviderId });
-
-    return await HTTPRequester.post({ url });
-  },
+  createApiKey: async (dataflowId, dataProviderId, isCustodian) =>
+    await HTTPRequester.post({
+      url: isCustodian
+        ? getUrl(DataflowConfig.createApiKeyCustodian, { dataflowId })
+        : getUrl(DataflowConfig.createApiKey, { dataflowId, dataProviderId })
+    }),
 
   getAllDataflowsUserList: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getAllDataflowsUserList) }),
 
-  getApiKey: async (dataflowId, dataProviderId, isCustodian) => {
-    const url = isCustodian
-      ? getUrl(DataflowConfig.getApiKeyCustodian, { dataflowId })
-      : getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId });
-
-    return await HTTPRequester.get({ url });
-  },
+  getApiKey: async (dataflowId, dataProviderId, isCustodian) =>
+    await HTTPRequester.get({
+      url: isCustodian
+        ? getUrl(DataflowConfig.getApiKeyCustodian, { dataflowId })
+        : getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId })
+    }),
 
   getRepresentativesUsersList: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getRepresentativesUsersList, { dataflowId }) }),
@@ -83,15 +86,16 @@ export const DataflowRepository = {
   getPublicDataflowData: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicDataflowData, { dataflowId }) }),
 
-  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField) =>
-    await HTTPRequester.get({
+  getPublicDataflowsByCountryCode: async ({ countryCode, sortOrder, pageNum, numberRows, sortField, filterBy }) =>
+    await HTTPRequester.post({
       url: getUrl(DataflowConfig.getPublicDataflowsByCountryCode, {
         country: countryCode,
         pageNum,
         pageSize: numberRows,
         sortField,
         asc: sortOrder
-      })
+      }),
+      data: { ...filterBy }
     }),
 
   getUserList: async (dataflowId, representativeId) =>
@@ -102,7 +106,11 @@ export const DataflowRepository = {
       url: getUrl(DataflowConfig.createEmptyDatasetSchema, { dataflowId, datasetSchemaName })
     }),
 
-  getPublicData: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicData) }),
+  getPublicData: async ({ filterBy, isAsc, numberRows, pageNum, sortByHeader }) =>
+    await HTTPRequester.post({
+      url: getUrl(DataflowConfig.getPublicData, { isAsc, numberRows, pageNum, sortBy: sortByHeader }),
+      data: { ...filterBy }
+    }),
 
   get: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) }),
 
@@ -120,6 +128,11 @@ export const DataflowRepository = {
         releasable: isReleasable,
         showPublicInfo
       }
+    }),
+
+  updateAutomaticDelete: async (dataflowId, isAutomaticReportingDeletion) =>
+    await HTTPRequester.update({
+      url: getUrl(DataflowConfig.updateAutomaticDelete, { dataflowId, isAutomaticReportingDeletion })
     }),
 
   getDatasetsInfo: async dataflowId =>

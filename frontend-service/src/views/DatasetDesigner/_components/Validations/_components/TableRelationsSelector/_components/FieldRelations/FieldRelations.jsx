@@ -47,7 +47,7 @@ export const FieldRelations = ({
           disabled={checkComparisonRelation(creationFormState.candidateRule.relations.links)}
           icon="plus"
           id={`${componentName}__addRelation`}
-          label={resourcesContext.messages.addNewRelation}
+          label={resourcesContext.messages['addNewRelation']}
           onClick={() => onAddNewRelation()}
           type="button"
         />
