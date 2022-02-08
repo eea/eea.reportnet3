@@ -37,7 +37,7 @@ const applyInputs = ({ filterBy, filteredKeys = [], item }) =>
       return true;
     }
 
-    return item[key].toLowerCase().includes(filterBy[key].toLowerCase());
+    return item[key].toString().toLowerCase().includes(filterBy[key].toString().toLowerCase());
   });
 
 const applyMultiSelects = ({ filterBy, filteredKeys = [], isStrictMode, item }) =>

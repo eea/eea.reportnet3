@@ -122,7 +122,8 @@ public class DeleteHelper {
    * @param deletePrefilledTables the delete prefilled tables
    */
   @Async
-  public void executeDeleteDatasetProcess(final Long datasetId, Boolean deletePrefilledTables) {
+  public void executeDeleteDatasetProcess(final Long datasetId, Boolean deletePrefilledTables,
+      boolean technicallyAccepted) {
     LOG.info("Deleting data from dataset {}", datasetId);
     datasetService.deleteImportData(datasetId, deletePrefilledTables);
     // now the view is not updated, update the check to false
@@ -138,23 +139,26 @@ public class DeleteHelper {
     deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
     lockService.removeLockByCriteria(deleteDatasetValues);
 
-    // after the dataset values have been deleted, an event is sent to notify it
-    Map<String, Object> value = new HashMap<>();
-    NotificationVO notificationVO = NotificationVO.builder()
-        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .build();
-    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-    notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
-    notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
-    notificationVO.setDataflowName(
-        dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+    // If technically accepted is false, it will be notified and the dataset validated
+    if (!technicallyAccepted) {
+      // after the dataset values have been deleted, an event is sent to notify it
+      Map<String, Object> value = new HashMap<>();
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).build();
+      DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+      notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+      notificationVO.setDataflowName(
+          dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
 
-    value.put(LiteralConstants.DATASET_ID, datasetId);
-    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing notification: {}", e.getMessage());
+      value.put(LiteralConstants.DATASET_ID, datasetId);
+      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error releasing notification: {}", e.getMessage());
+      }
     }
   }
 
