@@ -263,6 +263,10 @@ const parseRequestPublicCountryFilterBy = filterBy => {
     deliveryStatus: 'delivery_status'
   };
 
+  if (!isNil(filterBy['deliveryStatus']) && isEmpty(filterBy['deliveryStatus'])) {
+    filterBy['deliveryStatus'] = '';
+  }
+
   const parsedFilterBy = Object.keys(filterBy)
     .filter(key => !isNil(filterBy[key]) && filterBy[key] !== '')
     .map(key => {
