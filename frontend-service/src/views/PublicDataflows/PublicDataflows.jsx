@@ -102,7 +102,7 @@ export const PublicDataflows = () => {
         { key: 'description', label: resourcesContext.messages['description'], isSortable: true },
         { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], isSortable: true },
         { key: 'obligationTitle', label: resourcesContext.messages['obligation'], isSortable: true },
-        { key: 'obligationId', label: resourcesContext.messages['obligationId'], isSortable: true }
+        { key: 'obligationId', label: resourcesContext.messages['obligationId'], isSortable: true, keyfilter: 'num' }
       ],
       type: 'INPUT'
     },
@@ -159,7 +159,14 @@ export const PublicDataflows = () => {
       const publicData = await DataflowService.getPublicData({ filterBy, numberRows, pageNum, sortByOptions: sortBy });
 
       setPublicDataflows(publicData.dataflows);
-      setData(publicData.dataflows);
+      setData(
+        publicData.dataflows.map(dataflow => ({
+          ...dataflow,
+          legalInstrument: dataflow.obligation.legalInstrument?.alias,
+          obligationId: dataflow.obligation?.obligationId,
+          obligationTitle: dataflow.obligation?.title
+        }))
+      );
       setFilteredRecords(publicData.filteredRecords);
       setTotalRecords(publicData.totalRecords);
       setIsFiltered(publicData.filteredRecords !== publicData.totalRecords);
@@ -188,7 +195,7 @@ export const PublicDataflows = () => {
     <Fragment>
       {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
       {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
-        'records'
+        'dataflows'
       ].toLowerCase()}`}
     </Fragment>
   );
@@ -205,7 +212,7 @@ export const PublicDataflows = () => {
           rows={numberRows}
           rowsPerPageOptions={[100, 150, 200]}
           template={currentPageTemplate}
-          totalRecords={totalRecords}
+          totalRecords={filteredRecords}
         />
       );
     }

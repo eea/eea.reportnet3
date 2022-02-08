@@ -268,7 +268,7 @@ public class DatasetControllerImpl implements DatasetController {
           "File import failed: datasetId={}, tableSchemaId={}, fileName={}. Message: {}", datasetId,
           tableSchemaId, file.getOriginalFilename(), e.getMessage(), e);
       Map<String, Object> importFileData = new HashMap<>();
-      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
       lockService.removeLockByCriteria(importFileData);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -299,7 +299,7 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
       @ApiResponse(code = 400, message = "Error importing file"),
       @ApiResponse(code = 500, message = "Error importing file")})
-  @Deprecated
+  // @Deprecated
   public void importFileData(
       @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
           name = "datasetId") @PathVariable("datasetId") Long datasetId,
@@ -355,7 +355,7 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
       @ApiResponse(code = 400, message = "Error importing file"),
       @ApiResponse(code = 500, message = "Error importing file")})
-  @Deprecated
+  // @Deprecated
   public void importFileDataLegacy(
       @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
           name = "datasetId") @PathVariable("datasetId") Long datasetId,
@@ -602,7 +602,7 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
-    deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables);
+    deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false);
   }
 
   /**
@@ -610,6 +610,7 @@ public class DatasetControllerImpl implements DatasetController {
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
+   * @param technicallyAccepted the technically accepted
    */
   @Override
   @HystrixCommand
@@ -624,13 +625,9 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
           name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @ApiParam(type = "Long", value = "Dataflow id",
-          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId) {
-
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDataflowId(dataflowId);
-    userNotificationContentVO.setDatasetId(datasetId);
-    notificationControllerZuul.createUserNotificationPrivate("DELETE_DATASET_DATA_INIT",
-        userNotificationContentVO);
+          example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Boolean", value = "Technically Accepted") @RequestParam(
+          value = "technicallyAccepted", required = true) boolean technicallyAccepted) {
 
     // Rest API only: Check if the dataflow belongs to the dataset
     if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
@@ -640,7 +637,7 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
-    deleteHelper.executeDeleteDatasetProcess(datasetId, false);
+    deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted);
   }
 
   /**

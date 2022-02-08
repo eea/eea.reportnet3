@@ -12,8 +12,14 @@ import { filterByKeyInputStore } from 'views/_components/Filters/_functions/Stor
 
 import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilters';
 
-export const InputFilter = ({ isLoading, onCustomFilter, onFilterData, onSort, option, recoilId }) => {
-  const { filterBy, onFilter } = useFilters({ keyStore: filterByKeyInputStore, onFilterData, option, recoilId });
+export const InputFilter = ({ hasCustomSort, isLoading, onCustomFilter, onFilterData, onSort, option, recoilId }) => {
+  const { filterBy, onFilter } = useFilters({
+    hasCustomSort,
+    keyStore: filterByKeyInputStore,
+    onFilterData,
+    option,
+    recoilId
+  });
 
   return (
     <div className={styles.block} key={option.key}>
@@ -32,6 +38,7 @@ export const InputFilter = ({ isLoading, onCustomFilter, onFilterData, onSort, o
           className={styles.inputFilter}
           id={`${option.key}_input`}
           key={option.key}
+          keyfilter={option.keyfilter}
           onChange={event => onFilter(event.target.value)}
           onKeyPress={event => {
             if (event.key === 'Enter' && !isNil(onCustomFilter)) {

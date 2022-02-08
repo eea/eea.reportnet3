@@ -394,7 +394,7 @@ export const Dataflows = () => {
     <Fragment>
       {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
       {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
-        'records'
+        'dataflows'
       ].toLowerCase()}`}
     </Fragment>
   );
@@ -484,6 +484,8 @@ export const Dataflows = () => {
       payload: {
         contextCurrentDataflowType: userContext.currentDataflowType,
         data: DataflowsUtils.sortDataflows(changedInitialData),
+        filteredRecords,
+        totalRecords,
         type: tabId
       }
     });
@@ -595,12 +597,6 @@ export const Dataflows = () => {
     </Fragment>
   );
 
-  const getRolesDropdownOptions = () =>
-    Object.keys(config.permissions.roles).map(role => ({
-      label: config.permissions.roles[role].label,
-      value: config.permissions.roles[role].key
-    }));
-
   const getFilterOptions = () => {
     const filters = [
       {
@@ -609,14 +605,55 @@ export const Dataflows = () => {
           { key: 'description', label: resourcesContext.messages['description'], isSortable: true },
           { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], isSortable: true },
           { key: 'obligationTitle', label: resourcesContext.messages['obligation'], isSortable: true },
-          { key: 'obligationId', label: resourcesContext.messages['obligationId'], isSortable: true }
+          { key: 'obligationId', label: resourcesContext.messages['obligationId'], isSortable: true, keyfilter: 'num' }
         ],
         type: 'INPUT'
       },
       {
         key: 'userRole',
         label: resourcesContext.messages['userRole'],
-        dropdownOptions: getRolesDropdownOptions(),
+        dropdownOptions: [
+          {
+            label: config.permissions.roles.CUSTODIAN.label.toUpperCase(),
+            value: config.permissions.roles.CUSTODIAN.key
+          },
+          {
+            label: config.permissions.roles.STEWARD.label.toUpperCase(),
+            value: config.permissions.roles.STEWARD.key
+          },
+          {
+            label: config.permissions.roles.STEWARD_SUPPORT.label.toUpperCase(),
+            value: config.permissions.roles.STEWARD_SUPPORT.key
+          },
+          {
+            label: config.permissions.roles.OBSERVER.label.toUpperCase(),
+            value: config.permissions.roles.OBSERVER.key
+          },
+          {
+            label: config.permissions.roles.EDITOR_WRITE.label.toUpperCase(),
+            value: config.permissions.roles.EDITOR_WRITE.key
+          },
+          {
+            label: config.permissions.roles.EDITOR_READ.label.toUpperCase(),
+            value: config.permissions.roles.EDITOR_READ.key
+          },
+          {
+            label: config.permissions.roles.NATIONAL_COORDINATOR.label.toUpperCase(),
+            value: config.permissions.roles.NATIONAL_COORDINATOR.key
+          },
+          {
+            label: config.permissions.roles.LEAD_REPORTER.label.toUpperCase(),
+            value: config.permissions.roles.LEAD_REPORTER.key
+          },
+          {
+            label: config.permissions.roles.REPORTER_WRITE.label.toUpperCase(),
+            value: config.permissions.roles.REPORTER_WRITE.key
+          },
+          {
+            label: config.permissions.roles.REPORTER_READ.label.toUpperCase(),
+            value: config.permissions.roles.REPORTER_READ.key
+          }
+        ],
         type: 'DROPDOWN'
       },
       {

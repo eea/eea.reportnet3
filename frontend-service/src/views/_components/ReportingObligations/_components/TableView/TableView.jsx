@@ -95,6 +95,7 @@ export const TableView = ({
   ) : (
     <DataTable
       autoLayout={true}
+      className={styles.cursorPointer}
       first={pagination.first}
       getPageChange={onLoadPagination}
       onRowClick={event => onSelectObl(event.data)}

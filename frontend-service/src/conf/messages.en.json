@@ -930,7 +930,7 @@
     "numberOfRecords": "Number of records",
     "objectives": "Objectives",
     "obligation": "Obligation",
-    "obligationId": "Id obligation",
+    "obligationId": "Obligation id",
     "oblTitle": "Title",
     "of": "of",
     "ok": "OK",
@@ -1486,6 +1486,8 @@
     "automaticReportingDeletionMessage": "This action will automatically delete reporter data and snapshots",
     "typeNotSelectedError": "Type not selected",
     "nameExistsError": "Name is repeated",
-    "nameIsEmptyError": "Name is empty"
+    "nameIsEmptyError": "Name is empty",
+    "true": "True",
+    "false": "False"
   }
 }
