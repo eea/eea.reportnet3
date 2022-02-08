@@ -280,7 +280,6 @@ body .p-multiselect-panel {
   -webkit-box-shadow: var(--multiselect-panel-box-shadow);
   -moz-box-shadow: var(--multiselect-panel-box-shadow);
   box-shadow: var(--multiselect-panel-box-shadow);
-  z-index: 3000 !important;
 }
 body .p-multiselect-panel .p-multiselect-header {
   padding: 0.429em 0.857em 0.429em 0.857em;
@@ -3255,4 +3254,8 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
 
 .responsiveDialog {
   @include responsiveDialog;
+}
+
+.responsiveCardsGrid {
+  @include responsiveCardsGrid;
 }

@@ -54,17 +54,15 @@
   border: 0px !important;
   border-radius: 0px !important;
   border-bottom: var(--inputtext-border) !important;
-  color: var(--floating-label-color) !important;
+  color: var(--font-filters) !important;
   font-size: 0.8333rem !important;
   height: 2rem;
   padding-left: 0em;
   width: 90% !important;
 
   label {
-    color: var(--active-filter-font) !important;
     margin-left: 0.1rem;
     height: 100%;
-    font-weight: bold !important;
   }
 
   input + label {
@@ -106,6 +104,7 @@
   }
 
   .label {
+    justify-content: space-between;
     clip: auto;
     height: auto;
     overflow: visible;
@@ -130,7 +129,7 @@
 
   .selectHeader {
     border-radius: 3px;
-    color: var(--floating-label-color);
+    color: var(--font-filters);
     font-size: 0.75rem;
     font-weight: 500;
     padding: 4px;
@@ -187,7 +186,8 @@
 }
 
 .default,
-.dataflowsFilters {
+.dataflowsFilters,
+.publicCountryInformationFilters {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -264,13 +264,30 @@
   width: 100%;
 
   .label {
-    height: auto;
+    height: 3em;
   }
 
   .resetButton {
     grid-column: 5;
     grid-row: 1 / span 2;
     margin: auto;
+  }
+
+  > .block:nth-child(5) {
+    grid-row: 2;
+    grid-column: 1;
+  }
+  > .block:nth-child(6) {
+    grid-row: 2;
+    grid-column: 2;
+  }
+  > .block:nth-child(7) {
+    grid-row: 2;
+    grid-column: 3;
+  }
+  > .block:nth-child(8) {
+    grid-row: 2;
+    grid-column: 4;
   }
 
   .searchInput {
@@ -295,6 +312,9 @@
   .elementFilterSelected {
     display: flex !important;
     align-items: flex-end;
+    label {
+      top: 0.5em !important;
+    }
   }
 }
 
@@ -328,10 +348,7 @@
       color: var(--active-filter);
     }
   }
-  input {
-    font-weight: bold !important;
-    color: var(--active-filter-font) !important;
-  }
+
   .searchInput {
     padding-top: 10px;
   }
@@ -347,7 +364,7 @@
   border-radius: 0 !important;
   border-right: 0 !important;
   border-top: 0 !important;
-  color: var(--floating-label-color) !important;
+  color: var(--font-filters) !important;
   font-size: 10pt !important;
   height: 2.1rem;
   padding-left: 0em;

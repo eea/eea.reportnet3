@@ -21,6 +21,7 @@ import { Checkbox } from 'views/_components/Checkbox';
 import { Chips } from 'views/_components/Chips';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
+import { ConfirmDialogPaste } from 'views/_components/ConfirmDialogPaste';
 import { ContextMenu } from 'views/_components/ContextMenu';
 import { CoordinatesMoreInfo } from 'views/_components/CoordinatesMoreInfo';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
@@ -1458,7 +1459,7 @@ export const DataViewer = ({
         </ConfirmDialog>
       )}
       {confirmPasteVisible && (
-        <ConfirmDialog
+        <ConfirmDialogPaste
           className="edit-table"
           disabledConfirm={isEmpty(records.pastedRecords)}
           divRef={divRef}
@@ -1485,7 +1486,7 @@ export const DataViewer = ({
             numCopiedRecords={records.numCopiedRecords}
             onDeletePastedRecord={onDeletePastedRecord}
           />
-        </ConfirmDialog>
+        </ConfirmDialogPaste>
       )}
       {records.isMapOpen && (
         <Dialog

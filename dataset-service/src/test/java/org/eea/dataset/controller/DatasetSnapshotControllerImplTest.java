@@ -116,10 +116,11 @@ public class DatasetSnapshotControllerImplTest {
    */
   @Test
   public void testGetSnapshots() throws Exception {
-    when(datasetSnapshotService.getSnapshotsByIdDataset(Mockito.anyLong()))
+    when(datasetSnapshotService.getSnapshotsEnabledByIdDataset(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
-    datasetSnapshotControllerImpl.getSnapshotsByIdDataset(Mockito.anyLong());
-    Mockito.verify(datasetSnapshotService, times(1)).getSnapshotsByIdDataset(Mockito.any());
+    datasetSnapshotControllerImpl.getSnapshotsEnabledByIdDataset(Mockito.anyLong());
+    Mockito.verify(datasetSnapshotService, times(1))
+        .getSnapshotsEnabledByIdDataset(Mockito.anyLong());
   }
 
   /**
@@ -168,7 +169,7 @@ public class DatasetSnapshotControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testGetSnapshotsException() throws Exception {
 
-    datasetSnapshotControllerImpl.getSnapshotsByIdDataset(null);
+    datasetSnapshotControllerImpl.getSnapshotsEnabledByIdDataset(null);
   }
 
   /**

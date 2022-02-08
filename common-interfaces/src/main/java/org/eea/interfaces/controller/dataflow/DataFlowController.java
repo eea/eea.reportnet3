@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
-import org.eea.interfaces.vo.dataflow.DataflowPublicPaginatedVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
@@ -276,15 +275,16 @@ public interface DataFlowController {
    * @param pageSize the page size
    * @param sortField the sort field
    * @param asc the asc
+   * @param filters the filters
    * @return the public dataflows by country
    */
-  @GetMapping("/public/country/{countryCode}")
-  DataflowPublicPaginatedVO getPublicDataflowsByCountry(
-      @PathVariable("countryCode") String countryCode,
+  @PostMapping("/public/country/{countryCode}")
+  PaginatedDataflowVO getPublicDataflowsByCountry(@PathVariable("countryCode") String countryCode,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
       @RequestParam(value = "sortField", required = false) String sortField,
-      @RequestParam(value = "asc", defaultValue = "true") boolean asc);
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+      @RequestBody(required = false) Map<String, String> filters);
 
 
 
@@ -378,5 +378,5 @@ public interface DataFlowController {
    */
   @PutMapping("/{dataflowId}/updateAutomaticDelete")
   void updateDataFlowAutomaticReportingDeletion(@PathVariable("dataflowId") Long dataflowId,
-      @RequestParam("AutomaticReportingDelete") boolean automaticReportingDelete);
+      @RequestParam("automaticDelete") boolean automaticReportingDelete);
 }

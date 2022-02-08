@@ -86,15 +86,16 @@ export const DataflowRepository = {
   getPublicDataflowData: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getPublicDataflowData, { dataflowId }) }),
 
-  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField) =>
-    await HTTPRequester.get({
+  getPublicDataflowsByCountryCode: async ({ countryCode, sortOrder, pageNum, numberRows, sortField, filterBy }) =>
+    await HTTPRequester.post({
       url: getUrl(DataflowConfig.getPublicDataflowsByCountryCode, {
         country: countryCode,
         pageNum,
         pageSize: numberRows,
         sortField,
         asc: sortOrder
-      })
+      }),
+      data: { ...filterBy }
     }),
 
   getUserList: async (dataflowId, representativeId) =>

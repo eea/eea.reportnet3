@@ -169,4 +169,11 @@ public interface RecordStoreController {
       @RequestParam("partitionDatasetTarget") Long partitionDatasetTarget,
       @RequestParam("tableSchemasId") List<String> tableSchemasIdPrefill);
 
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @PutMapping("/private/updateSnapshotDisabled/{datasetId}")
+  void updateSnapshotDisabled(@PathVariable("datasetId") Long datasetId);
 }

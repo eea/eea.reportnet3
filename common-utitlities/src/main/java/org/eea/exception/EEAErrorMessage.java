@@ -700,6 +700,9 @@ public final class EEAErrorMessage {
   /** The Constant DATAFLOW_ERROR. {@value}. */
   public static final String DATAFLOW_GET_ERROR = "Error getting the dataflows";
 
+  /** The Constant HEADER_NOT_VALID. {@value}. */
+  public static final String HEADER_NOT_VALID = "The column header is not valid";
+
   /**
    * Instantiates a new EEA error message.
    */

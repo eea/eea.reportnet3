@@ -1012,51 +1012,49 @@ public class DataFlowServiceImplTest {
   }
 
   @Test
-  public void getPublicDataflowsByCountrySortName() {
+  public void getPublicDataflowsByCountrySortName() throws EEAException {
     DataflowPublicVO dataflowPublicVO = new DataflowPublicVO();
     DataProviderVO dataprovider = new DataProviderVO();
     Mockito.when(dataflowPublicMapper.entityListToClass(Mockito.any()))
         .thenReturn(Arrays.asList(dataflowPublicVO));
-    Mockito.when(representativeService.findDataProvidersByCode("FR"))
-        .thenReturn(Arrays.asList(dataprovider));
     assertNotNull("assertion error",
-        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "name", false, 0, 12));
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "name", false, 0, 12, null));
   }
 
   @Test
-  public void getPublicDataflowsByCountrySortObligation() {
+  public void getPublicDataflowsByCountrySortObligation() throws EEAException {
     assertNotNull("assertion error",
-        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "obligation", false, 0, 12));
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "obligation", false, 0, 12, null));
   }
 
   @Test
-  public void getPublicDataflowsByCountrySortLegalInstrument() {
-    assertNotNull("assertion error",
-        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "legalInstrument", false, 0, 12));
+  public void getPublicDataflowsByCountrySortLegalInstrument() throws EEAException {
+    assertNotNull("assertion error", dataflowServiceImpl.getPublicDataflowsByCountry("FR",
+        "legalInstrument", false, 0, 12, null));
   }
 
   @Test
-  public void getPublicDataflowsByCountrySortStatus() {
+  public void getPublicDataflowsByCountrySortStatus() throws EEAException {
     assertNotNull("assertion error",
-        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "status", true, 0, 12));
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "status", true, 0, 12, null));
   }
 
   @Test
-  public void getPublicDataflowsByCountrySortDeadline() {
+  public void getPublicDataflowsByCountrySortDeadline() throws EEAException {
     assertNotNull("assertion error",
-        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "deadline", false, 0, 12));
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "deadline", false, 0, 12, null));
   }
 
   @Test
-  public void getPublicDataflowsByCountrySortIsReleased() {
+  public void getPublicDataflowsByCountrySortIsReleased() throws EEAException {
     assertNotNull("assertion error",
-        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "isReleased", false, 0, 12));
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "isReleased", false, 0, 12, null));
   }
 
   @Test
-  public void getPublicDataflowsByCountrySortReleaseDate() {
+  public void getPublicDataflowsByCountrySortReleaseDate() throws EEAException {
     assertNotNull("assertion error",
-        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "releaseDate", false, 0, 12));
+        dataflowServiceImpl.getPublicDataflowsByCountry("FR", "releaseDate", false, 0, 12, null));
   }
 
   @Test

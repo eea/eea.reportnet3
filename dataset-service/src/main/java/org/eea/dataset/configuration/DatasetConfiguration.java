@@ -31,6 +31,7 @@ import org.springframework.web.context.request.async.TimeoutCallableProcessingIn
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.AsyncSupportConfigurer;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -43,8 +44,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableJpaRepositories(entityManagerFactoryRef = "dataSetsEntityManagerFactory",
     transactionManagerRef = "dataSetsTransactionManager",
     basePackages = "org.eea.dataset.persistence.data.repository")
-@EnableWebMvc
-public class DatasetConfiguration implements WebMvcConfigurer {
+public class DatasetConfiguration  {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetConfiguration.class);
@@ -101,18 +101,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   private String orderInserts;
 
   /**
-   * The max file size.
-   */
-  @Value("${spring.servlet.multipart.max-file-size}")
-  private Long maxFileSize;
-
-  /**
-   * The max request size.
-   */
-  @Value("${spring.servlet.multipart.max-request-size}")
-  private Long maxRequestSize;
-
-  /**
    * The username.
    */
   @Value("${spring.datasource.dataset.username}")
@@ -123,6 +111,8 @@ public class DatasetConfiguration implements WebMvcConfigurer {
    */
   @Value("${spring.datasource.dataset.password}")
   private String password;
+
+
 
 
   /**
@@ -143,24 +133,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return dataSource;
   }
 
-  /**
-   * Data sets data source.
-   *
-   * @param connectionDataVO the connection data VO
-   *
-   * @return the data source
-   */
-  private DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
 
-    EeaDataSource ds = new EeaDataSource();
-    ds.setUrl(connectionDataVO.getConnectionString());
-    // set validation microservice credentials
-    ds.setUsername(this.username);
-    ds.setPassword(this.password);
-    ds.setDriverClassName("org.postgresql.Driver");
-
-    return ds;
-  }
 
   /**
    * Data sets entity manager factory.
@@ -201,64 +174,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   }
 
   /**
-   * Multipart resolver.
-   *
-   * @return the multipart resolver
-   */
-  @Bean
-  public MultipartResolver multipartResolver() {
-    CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
-    multipartResolver.setMaxUploadSize(maxFileSize);
-    multipartResolver.setMaxUploadSizePerFile(maxRequestSize);
-    return multipartResolver;
-  }
-
-
-
-  /**
-   * Gets the async executor.
-   *
-   * @return the async executor
-   */
-  @Bean
-  public AsyncTaskExecutor streamTaskExecutor() {
-    LOG.info("Creating Async Task Executor");
-    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    executor.setCorePoolSize(5);
-    executor.setMaxPoolSize(10);
-    executor.setQueueCapacity(25);
-    return executor;
-  }
-
-
-  /**
-   * Configure async support.
-   *
-   * @param configurer the configurer
-   */
-  @Override
-  public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
-    configurer.setDefaultTimeout(7200000).setTaskExecutor(streamTaskExecutor());
-    configurer.registerCallableInterceptors(callableProcessingInterceptor());
-  }
-
-  /**
-   * Callable processing interceptor.
-   *
-   * @return the callable processing interceptor
-   */
-  @Bean
-  public CallableProcessingInterceptor callableProcessingInterceptor() {
-    return new TimeoutCallableProcessingInterceptor() {
-      @Override
-      public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
-        LOG_ERROR.error("Stream download failed by timeout");
-        return super.handleTimeout(request, task);
-      }
-    };
-  }
-
-  /**
    * Additional properties.
    *
    * @return the properties
@@ -274,6 +189,25 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     properties.setProperty("hibernate.order_updates", orderUpdates);
     properties.setProperty("hibernate.order_inserts", orderInserts);
     return properties;
+  }
+
+  /**
+   * Data sets data source.
+   *
+   * @param connectionDataVO the connection data VO
+   *
+   * @return the data source
+   */
+  private DataSource dataSetsDataSource(final ConnectionDataVO connectionDataVO) {
+
+    EeaDataSource ds = new EeaDataSource();
+    ds.setUrl(connectionDataVO.getConnectionString());
+    // set validation microservice credentials
+    ds.setUsername(this.username);
+    ds.setPassword(this.password);
+    ds.setDriverClassName("org.postgresql.Driver");
+
+    return ds;
   }
 
 }

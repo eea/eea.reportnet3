@@ -2,6 +2,7 @@ import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isNull from 'lodash/isNull';
+import isNumber from 'lodash/isNumber';
 import isUndefined from 'lodash/isUndefined';
 
 import { DatasetRepository } from 'repositories/DatasetRepository';
@@ -247,8 +248,8 @@ export const DatasetService = {
       datasetId,
       pageNum,
       pageSize,
-      sortField,
-      asc,
+      sortField || '',
+      isNumber(asc) ? asc : '',
       fieldValueFilter,
       levelErrorsFilter,
       typeEntitiesFilter,
@@ -347,7 +348,9 @@ export const DatasetService = {
         : null;
 
       return new DatasetTable({
-        hasPKReferenced: !isEmpty(records.filter(record => record.fields.filter(field => field.pkReferenced)[0])),
+        hasPKReferenced: !isEmpty(
+          records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
+        ),
         tableSchemaToPrefill: isNull(datasetTableDTO.toPrefill) ? false : datasetTableDTO.toPrefill,
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,

@@ -57,7 +57,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const getHistoricReleasesColumns = () => {
     const getColumns = () => {
-      if (historicReleasesView === 'releaseDate') {
+      if (historicReleasesView === 'releaseDate' || historicReleasesView === 'reportingDataset') {
         return [
           {
             key: 'releaseDate',
@@ -216,7 +216,11 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     {
       type: 'MULTI_SELECT',
       key: 'isPublic',
-      label: resourcesContext.messages['public']
+      label: resourcesContext.messages['public'],
+      multiSelectOptions: [
+        { type: resourcesContext.messages['true'].toUpperCase(), value: true },
+        { type: resourcesContext.messages['false'].toUpperCase(), value: false }
+      ]
     }
   ];
 
@@ -232,34 +236,44 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             'historicReleaseDataProviderFilterLabel'
           )
         },
-        { key: 'isPublic', label: resourcesContext.messages['public'] }
+        {
+          key: 'isPublic',
+          label: resourcesContext.messages['public'],
+          multiSelectOptions: [
+            { type: resourcesContext.messages['true'].toUpperCase(), value: true },
+            { type: resourcesContext.messages['false'].toUpperCase(), value: false }
+          ]
+        }
       ]
     }
   ];
 
-  const getFilters = filterOptions => {
-    return (
-      <MyFilters
-        className="historicReleases"
-        data={historicReleasesState.data}
-        options={filterOptions}
-        viewType="historicReleases"
-      />
-    );
-  };
-
+  const getFilters = filterOptions => (
+    <MyFilters
+      className="historicReleases"
+      data={historicReleasesState.data}
+      options={filterOptions}
+      viewType="historicReleases"
+    />
+  );
   const renderFilters = () => {
     if (historicReleasesView === 'dataCollection') {
       return getFilters(filterOptionsDataCollection);
-    }
-
-    if (historicReleasesView === 'EUDataset') {
+    } else if (historicReleasesView === 'EUDataset') {
       return getFilters(filterOptionsEUDataset);
     }
   };
 
   const renderHistoricReleasesTable = () => {
-    if (isEmpty(filteredData)) {
+    const getValueTable = () => {
+      if (historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset') {
+        return filteredData;
+      } else {
+        return historicReleasesState.data;
+      }
+    };
+
+    if (isEmpty(filteredData) && (historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset')) {
       return (
         <div className={styles.emptyFilteredData}>
           {resourcesContext.messages['noHistoricReleasesWithSelectedParameters']}
@@ -278,7 +292,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['historicReleases']}
         totalRecords={filteredData.length}
-        value={filteredData}>
+        value={getValueTable()}>
         {getHistoricReleasesColumns()}
       </DataTable>
     );

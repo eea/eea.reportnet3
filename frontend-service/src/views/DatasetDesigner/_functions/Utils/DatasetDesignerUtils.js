@@ -72,7 +72,7 @@ const getTabs = ({ datasetSchema, datasetStatistics, editable, isDataflowOpen, i
   });
   //Add tab Button/Tab and filter for undefined tableSchemaId tables (webform)
   inmDatasetSchema.tables = inmDatasetSchema.tables?.filter(
-    table => table.tableSchemaId !== undefined && !table.addTab && table.tableSchemaId !== ''
+    table => table.tableSchemaId !== undefined && table.addTab === false && table.tableSchemaId !== ''
   );
   if (!isDataflowOpen && !isDesignDatasetEditorRead) {
     inmDatasetSchema.tables?.push({ header: '+', editable: false, addTab: true, newTab: false, index: -1 });

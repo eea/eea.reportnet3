@@ -5,6 +5,11 @@ export const filterByKeysState = atomFamily({
   default: () => ({ CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [], SEARCH: [] })
 });
 
+export const filterByNestedKeysState = atomFamily({
+  key: 'filterByNestedKeysState',
+  default: () => ({ CHECKBOX: [], DATE: [], DROPDOWN: [], INPUT: [], MULTI_SELECT: [], SEARCH: [] })
+});
+
 export const filterByState = atomFamily({
   key: 'filterByState',
   default: () => ({})

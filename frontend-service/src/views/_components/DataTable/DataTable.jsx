@@ -22,6 +22,7 @@ import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 export class DataTable extends Component {
   static defaultProps = {
     alwaysShowPaginator: true,
+    areComponentsVisible: true,
     autoLayout: false,
     className: null,
     columnResizeMode: 'fit',
@@ -117,6 +118,7 @@ export class DataTable extends Component {
 
   static propTypes = {
     alwaysShowPaginator: PropTypes.bool,
+    areComponentsVisible: PropTypes.bool,
     autoLayout: PropTypes.bool,
     className: PropTypes.string,
     columnResizeMode: PropTypes.string,
@@ -497,6 +499,7 @@ export class DataTable extends Component {
     return (
       <Paginator
         alwaysShow={this.props.alwaysShowPaginator}
+        areComponentsVisible={this.props.areComponentsVisible}
         className={className}
         currentPageReportTemplate={this.props.currentPageReportTemplate}
         disabled={this.props.paginatorDisabled}
