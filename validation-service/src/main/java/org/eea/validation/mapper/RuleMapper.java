@@ -5,6 +5,7 @@ import org.bson.types.ObjectId;
 import org.eea.interfaces.dto.dataset.schemas.rule.RuleExpressionDTO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
 import org.eea.mapper.IMapper;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.service.RuleExpressionService;
@@ -77,6 +78,12 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
     if (ruleExpressionDTO != null) {
       rule.setWhenCondition(ruleExpressionService.convertToString(ruleExpressionDTO));
     }
+    if (AutomaticRuleTypeEnum.FIELD_LINK.equals(rule.getAutomaticType())) {
+      rule.setType(EntityTypeEnum.FIELD);
+      rule.setReferenceId(
+          new ObjectId(ruleExpressionService.convertToString(ruleExpressionDTO).substring(21, 45)));
+    }
+
   }
 
   /**
