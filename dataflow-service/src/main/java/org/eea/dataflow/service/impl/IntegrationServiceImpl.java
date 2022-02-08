@@ -484,6 +484,11 @@ public class IntegrationServiceImpl implements IntegrationService {
     importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
     importFileData.put(LiteralConstants.DATASETID, datasetId);
 
+    Map<String, Object> importBigFileData = new HashMap<>();
+    importBigFileData.put(LiteralConstants.SIGNATURE,
+        LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+    importBigFileData.put(LiteralConstants.DATASETID, datasetId);
+
     Map<String, Object> insertRecordsMultitable = new HashMap<>();
     insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
         LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
@@ -495,6 +500,7 @@ public class IntegrationServiceImpl implements IntegrationService {
     lockService.removeLockByCriteria(updateRecords);
     lockService.removeLockByCriteria(deleteDatasetValues);
     lockService.removeLockByCriteria(importFileData);
+    lockService.removeLockByCriteria(importBigFileData);
     lockService.removeLockByCriteria(insertRecordsMultitable);
   }
 

@@ -1,6 +1,7 @@
 import { useRecoilValue, useResetRecoilState } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import {
   filterByState,
@@ -20,12 +21,20 @@ export const useFilters = recoilId => {
   const resetSortBy = useResetRecoilState(sortByState(recoilId));
 
   const checkIsFilter = () => {
+    const isEmptyOption = item => {
+      if (typeof item !== 'boolean' || item === '') {
+        return isEmpty(item);
+      } else {
+        return isNil(item);
+      }
+    };
+
     if (isEmpty(filterBy)) {
       return false;
     }
 
     return Object.values(filterBy)
-      .map(key => isEmpty(key))
+      .map(item => item === false || isEmptyOption(item))
       .includes(false);
   };
 

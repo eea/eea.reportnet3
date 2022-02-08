@@ -71,8 +71,8 @@ export const PublicFrontpage = () => {
                       <p>
                         Reportnet 3 is the new e-Reporting platform for reporting environmental and climate data to the
                         European Environment Agency (EEA). The platform embraces the strategic goals of the European
-                        Commission’s Green Deal and Digital Strategy and will host reporting tasks on behalf of EEA and
-                        the Commission.
+                        Commission's Green Deal and Digital Strategy and hosts reporting tasks on behalf of EEA and the
+                        Commission.
                       </p>
                     </div>
                     <div className={styles.column}>
