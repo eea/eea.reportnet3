@@ -924,6 +924,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
       initialQuery =
           initialQuery + String.format(paginationPart, offsetAux, pageable.getPageSize());
+    } else {
+      initialQuery = initialQuery + " ) as table_aux ";
     }
     return initialQuery;
   }

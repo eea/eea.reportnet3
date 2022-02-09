@@ -58,14 +58,23 @@ export const PublicCountryInformation = () => {
   const [sortOrder, setSortOrder] = useState(0);
   const [totalRecords, setTotalRecords] = useState(0);
 
-  const { getFilterBy, isFiltered: areFiltersFilled, setData } = useApplyFilters('publicCountryInformation');
+  const {
+    getFilterBy,
+    isFiltered: areFiltersFilled,
+    resetFilterState,
+    setData
+  } = useApplyFilters('publicCountryInformation');
 
   const { firstRow, numberRows, pageNum } = pagination;
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_COUNTRY, countryCode });
 
   useEffect(() => {
-    onLoadPublicCountryInformation();
+    const fetchData = async () => {
+      await resetFilterState();
+      onLoadPublicCountryInformation();
+    };
+    fetchData();
   }, [pagination, sortOrder, sortField]);
 
   useEffect(() => {
