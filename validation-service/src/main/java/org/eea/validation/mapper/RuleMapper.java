@@ -78,12 +78,6 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
     if (ruleExpressionDTO != null) {
       rule.setWhenCondition(ruleExpressionService.convertToString(ruleExpressionDTO));
     }
-    if (AutomaticRuleTypeEnum.FIELD_LINK.equals(rule.getAutomaticType())) {
-      rule.setType(EntityTypeEnum.FIELD);
-      rule.setReferenceId(
-          new ObjectId(ruleExpressionService.convertToString(ruleExpressionDTO).substring(21, 45)));
-    }
-
   }
 
   /**
@@ -96,6 +90,10 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
   public void afterMapping(Rule rule, @MappingTarget RuleVO ruleVO) {
     ruleVO.setRuleId(rule.getRuleId().toString());
     ruleVO.setReferenceId(rule.getReferenceId().toString());
+    if (AutomaticRuleTypeEnum.FIELD_LINK.equals(rule.getAutomaticType())) {
+      ruleVO.setType(EntityTypeEnum.FIELD);
+      ruleVO.setReferenceId(rule.getWhenCondition().substring(21, 45));
+    }
     // We have to convert the rule's when condition, in case of it's a manual and record or field
     // rule
     if (StringUtils.isBlank(ruleVO.getSqlSentence())
