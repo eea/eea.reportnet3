@@ -43,26 +43,11 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
   const [totalRecords, setTotalRecords] = useState(0);
 
   const [notificationState, dispatchNotification] = useReducer(notificationReducer, {
-    editNotification: {},
-    firstRow: 0,
-    formType: '',
     isDeleteDialogVisible: false,
-    isDeleting: false,
-    isVisibleCreateNotification: false,
-    numberRows: 10,
-    systemNotifications: []
+    isDeleting: false
   });
 
-  const {
-    editNotification,
-    firstRow,
-    formType,
-    isDeleteDialogVisible,
-    isDeleting,
-    isVisibleCreateSysNotification,
-    numberRows,
-    systemNotifications
-  } = notificationState;
+  const { isDeleteDialogVisible, isDeleting } = notificationState;
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
@@ -306,6 +291,7 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
         icon="trash"
         label={resourcesContext.messages['deleteUsersNotificationsData']}
         onClick={renderConfirmDialog()}
+        visible={isDeleteDialogVisible}
       />
     );
   };
