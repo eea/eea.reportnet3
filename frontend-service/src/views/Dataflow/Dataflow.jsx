@@ -659,6 +659,7 @@ export const Dataflow = () => {
         icon={'trash'}
         label={resourcesContext.messages['deleteAllLeadReportersButton']}
         onClick={() => manageDialogs('isDeleteAllLeadReportersDialogVisible', true)}
+        style={{ display: 'none' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
