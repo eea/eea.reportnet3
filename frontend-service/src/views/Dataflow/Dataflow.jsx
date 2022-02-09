@@ -652,8 +652,8 @@ export const Dataflow = () => {
         onClick={() => manageDialogs('isValidateLeadReportersDialogVisible', true)}
       />
       <Button
-        className={`${!isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''}`}
-        disabled={dataflowState.isDeleteAllLeadReportersDialogVisible || isEmpty(dataflowState.dataProviderSelected)}
+        className="p-button-animated-blink"
+        disabled={dataflowState.isDeleteAllLeadReportersDialogVisible}
         icon="trash"
         label={resourcesContext.messages['deleteAllLeadReportersButton']}
         onClick={() => manageDialogs('isDeleteAllLeadReportersDialogVisible', true)}
