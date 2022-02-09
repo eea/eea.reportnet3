@@ -409,10 +409,9 @@ public class DataFlowServiceImplTest {
 
     List<Dataflow> list = new ArrayList<>();
     list.add(new Dataflow());
-    Mockito
-        .when(dataflowRepository.findPaginated(Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-            Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any()))
-        .thenReturn(list);
+    Mockito.when(dataflowRepository.findPaginated(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(list);
     Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dfVO);
     assertNotNull("fail",
         dataflowServiceImpl
