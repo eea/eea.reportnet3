@@ -1,6 +1,6 @@
 const getPaginatorRecordsCount = ({
-  data,
-  filteredData,
+  dataLength,
+  filteredDataLength,
   isFiltered,
   messageFiltered,
   messageRecords,
@@ -8,16 +8,15 @@ const getPaginatorRecordsCount = ({
 }) => {
   let recordsCount = '';
 
-  if (isFiltered && data.length !== filteredData.length) {
-    recordsCount += `${messageFiltered}: ${filteredData.length} | `;
+  if (isFiltered && dataLength !== filteredDataLength) {
+    recordsCount += `${messageFiltered}: ${filteredDataLength} | `;
   }
 
-  recordsCount += `${messageTotalRecords} ${data.length} ${messageRecords.toLowerCase()}`;
+  recordsCount += `${messageTotalRecords} ${dataLength} ${messageRecords.toLowerCase()}`;
 
-  if (isFiltered && data.length === filteredData.length) {
+  if (isFiltered && dataLength === filteredDataLength) {
     recordsCount += ` (${messageFiltered.toLowerCase()})`;
   }
-
   return recordsCount;
 };
 
