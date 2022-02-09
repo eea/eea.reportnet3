@@ -86,8 +86,7 @@ export const BigButton = ({
         setErrorDialogData({ isVisible: true, message: resourcesContext.messages['emptyDatasetSchema'] });
         document.getElementsByClassName('p-inputtext p-component')[0].focus();
       }
-    }
-    if (event.key === 'Escape') {
+    } else if (event.key === 'Escape') {
       if (!isEmpty(initialValue)) {
         setButtonsTitle(initialValue);
         setIsEditEnabled(false);
@@ -105,14 +104,17 @@ export const BigButton = ({
     setIsEditEnabled(true);
   };
 
-  const designModel =
-    !isUndefined(model) &&
-    model.map(button => {
-      if (button.label === resourcesContext.messages['rename']) {
-        button.command = onEnableSchemaNameEdit;
-      }
-      return button;
-    });
+  const getDesignModel = () => {
+    if (!isUndefined(model)) {
+      return model.map(button => {
+        if (button.label === resourcesContext.messages['rename']) {
+          button.command = onEnableSchemaNameEdit;
+        }
+
+        return button;
+      });
+    }
+  };
 
   const onInputSave = (value, index) => {
     const changeTitle = onUpdateName(value, index);
@@ -177,60 +179,70 @@ export const BigButton = ({
     }
   };
 
-  const defaultBigButton = (
-    <Fragment>
-      <div
-        className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName} ${
-          !enabled && styles.bigButtonDisabled
-        }`}>
-        <span data-for={caption} data-tip onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)}>
-          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} role="presentation" />
-        </span>
-        {model && !isEmpty(model) && (
-          <DropdownButton
-            buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
-            icon="caretDown"
-            iconStyle={{ fontSize: '1.8rem' }}
-            model={designModel}
+  const renderDropDownModel = () => {
+    if (model && !isEmpty(model)) {
+      return (
+        <DropdownButton
+          buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
+          icon="caretDown"
+          iconStyle={{ fontSize: '1.8rem' }}
+          model={getDesignModel()}
+        />
+      );
+    }
+  };
+
+  const renderRestrictFromPublicIcon = () => {
+    if (restrictFromPublicInfo) {
+      return (
+        <FontAwesomeIcon
+          className={`${!restrictFromPublicAccess && styles.notClickableIcon} ${
+            restrictFromPublicIsUpdating && 'fa-spin'
+          }`}
+          icon={getRestrictFromPublicIcon()}
+          onClick={() => {
+            restrictFromPublicAccess && manageDialogs('isRestrictFromPublicDialogVisible', true);
+            setSelectedRepresentative(dataProviderId);
+          }}
+          role="presentation"
+          style={{ position: 'absolute', top: '4px', left: '2px', fontSize: '1.2rem' }}
+        />
+      );
+    }
+  };
+
+  const renderInfoStatusIcon = () => {
+    if (infoStatus) {
+      if (infoStatusIcon) {
+        return (
+          <Icon
+            className={styles.notClickableIcon}
+            icon="checkCircle"
+            style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }}
           />
-        )}
-        {infoStatus &&
-          (infoStatusIcon ? (
-            <Icon
-              className={styles.notClickableIcon}
-              icon="checkCircle"
-              style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }}
-            />
-          ) : (
-            <p
-              className={styles.notClickableIcon}
-              style={{
-                position: 'absolute',
-                top: '0',
-                right: '0',
-                fontSize: '1.1rem',
-                margin: '0 0.5rem',
-                fontWeight: '600'
-              }}>
-              {resourcesContext.messages['new'].toUpperCase()}
-            </p>
-          ))}
-        {restrictFromPublicInfo && (
-          <FontAwesomeIcon
-            className={`${!restrictFromPublicAccess && styles.notClickableIcon} ${
-              restrictFromPublicIsUpdating && 'fa-spin'
-            }`}
-            icon={getRestrictFromPublicIcon()}
-            onClick={() => {
-              restrictFromPublicAccess && manageDialogs('isRestrictFromPublicDialogVisible', true);
-              setSelectedRepresentative(dataProviderId);
-            }}
-            role="presentation"
-            style={{ position: 'absolute', top: '4px', left: '2px', fontSize: '1.2rem' }}
-          />
-        )}
-      </div>
-      {!isUndefined(isEditEnabled) && isEditEnabled ? (
+        );
+      } else {
+        return (
+          <p
+            className={styles.notClickableIcon}
+            style={{
+              position: 'absolute',
+              top: '0',
+              right: '0',
+              fontSize: '1.1rem',
+              margin: '0 0.5rem',
+              fontWeight: '600'
+            }}>
+            {resourcesContext.messages['new'].toUpperCase()}
+          </p>
+        );
+      }
+    }
+  };
+
+  const renderEditableInput = () => {
+    if (!isUndefined(isEditEnabled) && isEditEnabled) {
+      return (
         <InputText
           autoFocus={true}
           className={`${styles.inputText}`}
@@ -257,7 +269,9 @@ export const BigButton = ({
           placeholder={placeholder}
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />
-      ) : (
+      );
+    } else {
+      return (
         <Fragment>
           <p
             className={styles.caption}
@@ -274,7 +288,24 @@ export const BigButton = ({
             </ReactTooltip>
           )}
         </Fragment>
-      )}
+      );
+    }
+  };
+
+  const defaultBigButton = (
+    <Fragment>
+      <div
+        className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName} ${
+          !enabled && styles.bigButtonDisabled
+        }`}>
+        <span data-for={caption} data-tip onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)}>
+          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} role="presentation" />
+        </span>
+        {renderDropDownModel()}
+        {renderInfoStatusIcon()}
+        {renderRestrictFromPublicIcon()}
+      </div>
+      {renderEditableInput()}
     </Fragment>
   );
 
@@ -295,14 +326,20 @@ export const BigButton = ({
     menuBigButton
   };
 
-  return (
-    <Fragment>
-      <div className={`${styles.datasetItem} ${!enabled && styles.datasetItemDisabled}`}>{buttons[layout]}</div>
-      {tooltip && (
+  const renderTooltip = () => {
+    if (tooltip) {
+      return (
         <ReactTooltip border={true} effect="solid" id={caption} place="top">
           {tooltip}
         </ReactTooltip>
-      )}
+      );
+    }
+  };
+
+  return (
+    <Fragment>
+      <div className={`${styles.datasetItem} ${!enabled && styles.datasetItemDisabled}`}>{buttons[layout]}</div>
+      {renderTooltip()}
     </Fragment>
   );
 };

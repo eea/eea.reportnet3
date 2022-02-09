@@ -264,42 +264,39 @@ const useBigButtonList = ({
       }));
 
   const buildGroupByRepresentativeModels = (datasets = []) => {
-    const allDatasets = datasets.map(dataset => {
-      return {
-        datasetId: dataset.datasetId,
-        datasetName: dataset.name,
-        dataProviderId: dataset.dataProviderId,
-        isReleased: isNil(dataset.isReleased) ? false : dataset.isReleased,
-        name: dataset.datasetSchemaName
-      };
-    });
+    const allDatasets = datasets.map(dataset => ({
+      datasetId: dataset.datasetId,
+      datasetName: dataset.name,
+      dataProviderId: dataset.dataProviderId,
+      isReleased: isNil(dataset.isReleased) ? false : dataset.isReleased,
+      name: dataset.datasetSchemaName,
+      status: dataset.status
+    }));
 
     const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.dataProviderId)).length === 1;
 
     if (!buttonsVisibility.groupByRepresentative && isUniqRepresentative) {
-      return allDatasets.map(dataset => {
-        return {
-          buttonClass: 'dataset',
-          buttonIcon: 'dataset',
-          caption: dataset.datasetName,
-          helpClassName: 'dataflow-dataset-help-step',
-          handleRedirect: () => {
-            handleRedirect(getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true));
-          },
-          layout: 'defaultBigButton',
-          model: [
-            {
-              label: resourcesContext.messages['historicReleases'],
-              command: () => {
-                onShowHistoricReleases('reportingDataset');
-                getDataHistoricReleases(dataset.datasetId, dataset.datasetName);
-              }
+      return allDatasets.map(dataset => ({
+        buttonClass: 'dataset',
+        buttonIcon: 'dataset',
+        caption: dataset.datasetName,
+        helpClassName: 'dataflow-dataset-help-step',
+        handleRedirect: () => {
+          handleRedirect(getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true));
+        },
+        layout: 'defaultBigButton',
+        model: [
+          {
+            label: resourcesContext.messages['historicReleases'],
+            command: () => {
+              onShowHistoricReleases('reportingDataset');
+              getDataHistoricReleases(dataset.datasetId, dataset.datasetName);
             }
-          ],
-          onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
-          visibility: true
-        };
-      });
+          }
+        ],
+        onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
+        visibility: true
+      }));
     }
 
     return uniqBy(allDatasets, 'dataProviderId').map(dataset => {
@@ -307,6 +304,22 @@ const useBigButtonList = ({
         representative => representative.dataProviderId === dataset.dataProviderId
       );
 
+      const getTechnicalAcceptanceStatus = () => {
+        if (!dataflowState.data.manualAcceptance) {
+          return null;
+        }
+
+        const datasets = allDatasets.filter(ds => ds.dataProviderId === dataset.dataProviderId);
+        if (datasets.some(ds => ds.status === config.datasetStatus.CORRECTION_REQUESTED.key)) {
+          return config.datasetStatus.CORRECTION_REQUESTED.label;
+        } else if (datasets.some(ds => ds.status === config.datasetStatus.FINAL_FEEDBACK.key)) {
+          return config.datasetStatus.FINAL_FEEDBACK.label;
+        } else if (datasets.every(ds => ds.status === config.datasetStatus.TECHNICALLY_ACCEPTED.key)) {
+          return config.datasetStatus.TECHNICALLY_ACCEPTED.label;
+        }
+      };
+
+      const technicalAcceptanceStatus = getTechnicalAcceptanceStatus();
       const releasedShowPublicInfoUpdating = dataset.isReleased && dataflowState.isShowPublicInfoUpdating;
       const representativeRestrictFromPublicUpdating =
         datasetRepresentative?.dataProviderId === dataflowState.restrictFromPublicIsUpdating.dataProviderId &&
@@ -341,6 +354,7 @@ const useBigButtonList = ({
           dataset.isReleased && (dataflowState.data.showPublicInfo || dataflowState.isShowPublicInfoUpdating),
         restrictFromPublicIsUpdating: releasedShowPublicInfoUpdating || representativeRestrictFromPublicUpdating,
         restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
+        technicalAcceptanceStatus: technicalAcceptanceStatus,
         visibility: true
       };
     });
