@@ -98,6 +98,7 @@ export const Dataflow = () => {
     isDataSchemaCorrect: [],
     isDatasetsInfoDialogVisible: false,
     isDataUpdated: false,
+    isDeleteAllLeadReportersDialogVisible: false,
     isDeleteDialogVisible: false,
     isDownloadingUsers: false,
     isExportDialogVisible: false,
@@ -126,7 +127,6 @@ export const Dataflow = () => {
     isUserListVisible: false,
     isUserRightManagementDialogVisible: false,
     isValidateLeadReportersDialogVisible: false,
-    isDeleteAllLeadReportersDialogVisible: false,
     isValidateReportersDialogVisible: false,
     name: '',
     obligations: {},
@@ -611,13 +611,13 @@ export const Dataflow = () => {
   };
 
   const onConfirmDeleteAllLeadReporters = async () => {
-    manageDialogs('isDeleteAllLeadReportersDialogVisible', false);
     try {
-      await RepresentativeService.deleteAllLeadReporters();
+      await RepresentativeService.deleteAllLeadReporters(dataflowId);
     } catch (error) {
-      console.error('Dataflow - onConfirmValidateLeadReporters.', error);
+      console.error('Dataflow - onDeleteAllLeadReporters.', error);
       notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_ERROR' }, true);
-      setIsUpdatingPermissions(false);
+    } finally {
+      manageDialogs('isDeleteAllLeadReportersDialogVisible', false);
     }
   };
 
@@ -652,11 +652,9 @@ export const Dataflow = () => {
         onClick={() => manageDialogs('isValidateLeadReportersDialogVisible', true)}
       />
       <Button
-        className={`${styles.buttonLeft} p-button-secondary ${
-          !isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''
-        }`}
+        className={`${!isEmpty(dataflowState.dataProviderSelected) ? 'p-button-animated-blink' : ''}`}
         disabled={dataflowState.isDeleteAllLeadReportersDialogVisible || isEmpty(dataflowState.dataProviderSelected)}
-        icon={'trash'}
+        icon="trash"
         label={resourcesContext.messages['deleteAllLeadReportersButton']}
         onClick={() => manageDialogs('isDeleteAllLeadReportersDialogVisible', true)}
         style={{ display: 'none' }}
