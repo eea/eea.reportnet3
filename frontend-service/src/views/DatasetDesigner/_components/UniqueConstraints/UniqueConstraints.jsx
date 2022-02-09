@@ -85,19 +85,6 @@ export const UniqueConstraints = ({
     />
   );
 
-  const getPaginatorRight = () => (
-    <Fragment>
-      {PaginatorRecordsCount.getPaginatorRecordsCount({
-        dataLength: constraintsState.data.length,
-        filteredDataLength: filteredData.length,
-        isFiltered,
-        messageFiltered: resourcesContext.messages['filtered'],
-        messageRecords: resourcesContext.messages['records'],
-        messageTotalRecords: resourcesContext.messages['totalRecords']
-      })}
-    </Fragment>
-  );
-
   const isDataUpdated = value => constraintsDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
 
   const isDeleteDialogVisible = value => constraintsDispatch({ type: 'IS_DELETE_DIALOG_VISIBLE', payload: { value } });
@@ -204,7 +191,14 @@ export const UniqueConstraints = ({
         autoLayout={true}
         onRowClick={event => getManageUniqueConstraint(event.data)}
         paginator={true}
-        paginatorRight={getPaginatorRight()}
+        paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
+          dataLength: constraintsState.data.length,
+          filteredDataLength: filteredData.length,
+          isFiltered,
+          messageFiltered: resourcesContext.messages['filtered'],
+          messageRecords: resourcesContext.messages['records'],
+          messageTotalRecords: resourcesContext.messages['totalRecords']
+        })}
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['uniqueConstraints']}

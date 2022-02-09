@@ -56,19 +56,6 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     }
   };
 
-  const getPaginatorRight = () => (
-    <Fragment>
-      {PaginatorRecordsCount.getPaginatorRecordsCount({
-        dataLength: datasetsInfo.length,
-        filteredDataLength: filteredData.length,
-        isFiltered,
-        messageFiltered: resourcesContext.messages['filtered'],
-        messageRecords: resourcesContext.messages['records'],
-        messageTotalRecords: resourcesContext.messages['totalRecords']
-      })}
-    </Fragment>
-  );
-
   const filterOptions = [
     { key: 'name', label: resourcesContext.messages['name'], type: 'INPUT' },
     {
@@ -119,7 +106,17 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     return (
       <DataTable
         paginator={true}
-        paginatorRight={!isNil(filteredData) && getPaginatorRight()}
+        paginatorRight={
+          !isNil(filteredData) &&
+          PaginatorRecordsCount.getPaginatorRecordsCount({
+            dataLength: datasetsInfo.length,
+            filteredDataLength: filteredData.length,
+            isFiltered,
+            messageFiltered: resourcesContext.messages['filtered'],
+            messageRecords: resourcesContext.messages['records'],
+            messageTotalRecords: resourcesContext.messages['totalRecords']
+          })
+        }
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['datasetsInfo']}

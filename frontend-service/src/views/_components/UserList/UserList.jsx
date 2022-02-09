@@ -57,19 +57,6 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
     <MyFilters className="lineItems" data={userListData} options={filterOptions} viewType="userList" />
   );
 
-  const getPaginatorRight = () => (
-    <Fragment>
-      {PaginatorRecordsCount.getPaginatorRecordsCount({
-        dataLength: userListData.length,
-        filteredDataLength: filteredData.length,
-        isFiltered,
-        messageFiltered: resourcesContext.messages['filtered'],
-        messageRecords: resourcesContext.messages['records'],
-        messageTotalRecords: resourcesContext.messages['totalRecords']
-      })}
-    </Fragment>
-  );
-
   const getUserListColumns = () => {
     const columns = [];
 
@@ -170,7 +157,17 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
       return (
         <DataTable
           paginator={true}
-          paginatorRight={!isNil(filteredData) && getPaginatorRight()}
+          paginatorRight={
+            !isNil(filteredData) &&
+            PaginatorRecordsCount.getPaginatorRecordsCount({
+              dataLength: userListData.length,
+              filteredDataLength: filteredData.length,
+              isFiltered,
+              messageFiltered: resourcesContext.messages['filtered'],
+              messageRecords: resourcesContext.messages['records'],
+              messageTotalRecords: resourcesContext.messages['totalRecords']
+            })
+          }
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary="usersList"

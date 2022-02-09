@@ -126,19 +126,6 @@ export const IntegrationsList = ({
     ));
   };
 
-  const getPaginatorRight = () => (
-    <Fragment>
-      {PaginatorRecordsCount.getPaginatorRecordsCount({
-        dataLength: integrationListState.data.length,
-        filteredDataLength: filteredData.length,
-        isFiltered,
-        messageFiltered: resourcesContext.messages['filtered'],
-        messageRecords: resourcesContext.messages['records'],
-        messageTotalRecords: resourcesContext.messages['totalRecords']
-      })}
-    </Fragment>
-  );
-
   const integrationId = value => integrationListDispatch({ type: 'ON_LOAD_INTEGRATION_ID', payload: { value } });
 
   const isDataUpdated = value => integrationListDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
@@ -237,7 +224,14 @@ export const IntegrationsList = ({
           autoLayout={true}
           onRowClick={event => integrationId(event.data.integrationId)}
           paginator={true}
-          paginatorRight={getPaginatorRight()}
+          paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
+            dataLength: integrationListState.data.length,
+            filteredDataLength: filteredData.length,
+            isFiltered,
+            messageFiltered: resourcesContext.messages['filtered'],
+            messageRecords: resourcesContext.messages['records'],
+            messageTotalRecords: resourcesContext.messages['totalRecords']
+          })}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary={resourcesContext.messages['externalIntegrations']}

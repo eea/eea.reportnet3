@@ -428,19 +428,6 @@ export const ShareRights = ({
     </Fragment>
   );
 
-  const getPaginatorRight = () => (
-    <Fragment>
-      {PaginatorRecordsCount.getPaginatorRecordsCount({
-        dataLength: shareRightsState.userRightList.length,
-        filteredDataLength: filteredData.length,
-        isFiltered,
-        messageFiltered: resourcesContext.messages['filtered'],
-        messageRecords: resourcesContext.messages['records'],
-        messageTotalRecords: resourcesContext.messages['totalRecords']
-      })}
-    </Fragment>
-  );
-
   const getTooltipMessage = userRight => {
     if (hasEmptyData(userRight)) {
       return resourcesContext.messages['incompleteDataTooltip'];
@@ -501,7 +488,14 @@ export const ShareRights = ({
           className={styles.dialogContent}
           hasDefaultCurrentPage
           paginator
-          paginatorRight={getPaginatorRight()}
+          paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
+            dataLength: shareRightsState.userRightList.length,
+            filteredDataLength: filteredData.length,
+            isFiltered,
+            messageFiltered: resourcesContext.messages['filtered'],
+            messageRecords: resourcesContext.messages['records'],
+            messageTotalRecords: resourcesContext.messages['totalRecords']
+          })}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           totalRecords={filteredData.length}

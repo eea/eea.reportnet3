@@ -126,19 +126,6 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     ));
   };
 
-  const getPaginatorRight = () => (
-    <Fragment>
-      {PaginatorRecordsCount.getPaginatorRecordsCount({
-        dataLength: historicReleasesState.data.length,
-        filteredDataLength: filteredData.length,
-        isFiltered,
-        messageFiltered: resourcesContext.messages['filtered'],
-        messageRecords: resourcesContext.messages['records'],
-        messageTotalRecords: resourcesContext.messages['totalRecords']
-      })}
-    </Fragment>
-  );
-
   const isLoading = value => historicReleasesDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onLoadHistoricReleases = async () => {
@@ -288,7 +275,14 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset' ? '' : styles.noFilters
         }
         paginator={true}
-        paginatorRight={getPaginatorRight()}
+        paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
+          dataLength: historicReleasesState.data.length,
+          filteredDataLength: filteredData.length,
+          isFiltered,
+          messageFiltered: resourcesContext.messages['filtered'],
+          messageRecords: resourcesContext.messages['records'],
+          messageTotalRecords: resourcesContext.messages['totalRecords']
+        })}
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['historicReleases']}

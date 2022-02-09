@@ -54,19 +54,6 @@ export const ManualAcceptanceDatasets = ({
     onLoadManualAcceptanceDatasets();
   }, [isUpdatedManualAcceptanceDatasets]);
 
-  const getPaginatorRight = () => (
-    <Fragment>
-      {PaginatorRecordsCount.getPaginatorRecordsCount({
-        dataLength: manualAcceptanceDatasetsState.data.length,
-        filteredDataLength: filteredData.length,
-        isFiltered,
-        messageFiltered: resourcesContext.messages['filtered'],
-        messageRecords: resourcesContext.messages['records'],
-        messageTotalRecords: resourcesContext.messages['totalRecords']
-      })}
-    </Fragment>
-  );
-
   const isLoading = value => manualAcceptanceDatasetsDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onLoadManualAcceptanceDatasets = async () => {
@@ -199,7 +186,14 @@ export const ManualAcceptanceDatasets = ({
           autoLayout={true}
           onRowClick={event => getManageAcceptanceDataset(event.data)}
           paginator={true}
-          paginatorRight={getPaginatorRight()}
+          paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
+            dataLength: manualAcceptanceDatasetsState.data.length,
+            filteredDataLength: filteredData.length,
+            isFiltered,
+            messageFiltered: resourcesContext.messages['filtered'],
+            messageRecords: resourcesContext.messages['records'],
+            messageTotalRecords: resourcesContext.messages['totalRecords']
+          })}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary={resourcesContext.messages['manualAcceptance']}

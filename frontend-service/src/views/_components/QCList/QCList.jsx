@@ -99,19 +99,6 @@ export const QCList = ({
   const checkHasHistoric = () =>
     tabsValidationsState.validationList.validations.some(validation => validation.hasHistoric);
 
-  const getPaginatorRight = () => (
-    <Fragment>
-      {PaginatorRecordsCount.getPaginatorRecordsCount({
-        dataLength: tabsValidationsState.validationList.validations.length,
-        filteredDataLength: filteredData.length,
-        isFiltered,
-        messageFiltered: resourcesContext.messages['filtered'],
-        messageRecords: resourcesContext.messages['records'],
-        messageTotalRecords: resourcesContext.messages['totalRecords']
-      })}
-    </Fragment>
-  );
-
   const setIsHistoryDialogVisible = isHistoryDialogVisible => {
     tabsValidationsDispatch({
       type: 'SET_IS_HISTORY_DIALOG_VISIBLE',
@@ -745,7 +732,17 @@ export const QCList = ({
             onSort={event => onSort(event)}
             paginator
             paginatorDisabled={tabsValidationsState.editingRows.length > 0}
-            paginatorRight={!isNil(filteredData) && getPaginatorRight()}
+            paginatorRight={
+              !isNil(filteredData) &&
+              PaginatorRecordsCount.getPaginatorRecordsCount({
+                dataLength: tabsValidationsState.validationList.validations.length,
+                filteredDataLength: filteredData.length,
+                isFiltered,
+                messageFiltered: resourcesContext.messages['filtered'],
+                messageRecords: resourcesContext.messages['records'],
+                messageTotalRecords: resourcesContext.messages['totalRecords']
+              })
+            }
             quickEditRowInfo={{
               updatedRow: validationContext.updatedRuleId,
               deletedRow: tabsValidationsState.deletedRuleId,
