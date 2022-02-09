@@ -1,6 +1,7 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniqueId from 'lodash/uniqueId';
 
@@ -12,7 +13,6 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { DropdownButton } from 'views/_components/DropdownButton';
 import { DropDownMenu } from 'views/_components/DropdownButton/_components/DropDownMenu';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Icon } from 'views/_components/Icon';
 import { InputText } from 'views/_components/InputText';
 import ReactTooltip from 'react-tooltip';
 
@@ -47,6 +47,7 @@ export const BigButton = ({
   restrictFromPublicStatus,
   setSelectedRepresentative = () => {},
   setErrorDialogData,
+  technicalAcceptanceStatus,
   tooltip
 }) => {
   const resourcesContext = useContext(ResourcesContext);
@@ -212,14 +213,30 @@ export const BigButton = ({
   };
 
   const renderInfoStatusIcon = () => {
+    const renderTechnicalAcceptanceTooltip = uniqName => {
+      if (!isNil(technicalAcceptanceStatus) && !isEmpty(technicalAcceptanceStatus)) {
+        return (
+          <ReactTooltip border={true} effect="solid" id={uniqName} place="top">
+            {technicalAcceptanceStatus}
+          </ReactTooltip>
+        );
+      }
+    };
     if (infoStatus) {
       if (infoStatusIcon) {
+        const uniqName = uniqueId('infoStatusTooltip');
         return (
-          <Icon
-            className={styles.notClickableIcon}
-            icon="checkCircle"
-            style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }}
-          />
+          <Fragment>
+            <FontAwesomeIcon
+              className={styles.notClickableIcon}
+              data-for={uniqName}
+              data-tip
+              icon={AwesomeIcons('circleCheck')}
+              role="presentation"
+              style={{ position: 'absolute', top: '4px', right: '0', fontSize: '1.2rem' }}
+            />
+            {renderTechnicalAcceptanceTooltip(uniqName)}
+          </Fragment>
         );
       } else {
         return (
