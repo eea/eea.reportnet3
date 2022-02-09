@@ -1,9 +1,40 @@
+import { useEffect, useState } from 'react';
 import styles from './Step.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const Step = ({ currentStep, step }) => {
+  const [stepClass, setStepClass] = useState('');
+
+  useEffect(() => {
+    if (step.completed) {
+      if (stepClass !== styles.completed) {
+        setStepClass(styles.activeCompleted);
+      }
+    } else {
+      if (step.idx < currentStep) {
+        if (stepClass !== styles.activeCompleted) {
+          setStepClass(styles.activeCompleted);
+        }
+      } else if (step.idx === currentStep) {
+        if (step.isRunning) {
+          if (stepClass !== styles.activeCompleted) {
+            setStepClass(styles.activeIncompleted);
+          }
+        } else {
+          if (stepClass !== styles.activeCompleted) {
+            setStepClass(styles.activeCompleted);
+          }
+        }
+      } else {
+        if (stepClass !== styles.inactive) {
+          setStepClass(styles.inactive);
+        }
+      }
+    }
+  }, [step]);
+
   const getIconClassName = () => {
     if (step?.idx === currentStep && step?.isRunning) {
       return 'fa-spin';
@@ -11,21 +42,7 @@ export const Step = ({ currentStep, step }) => {
   };
 
   const getIconWrapperClassName = () => {
-    if (step.completed) {
-      return styles.activeCompleted;
-    } else {
-      if (step.idx < currentStep) {
-        return styles.activeCompleted;
-      } else if (step.idx === currentStep) {
-        if (step.isRunning) {
-          return styles.activeIncompleted;
-        } else {
-          return styles.activeCompleted;
-        }
-      } else {
-        return styles.inactive;
-      }
-    }
+    return stepClass;
   };
 
   const getStepClassName = () => {

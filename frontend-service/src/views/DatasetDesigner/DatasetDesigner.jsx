@@ -830,7 +830,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         });
       };
 
-      //TODO. If dataset has been imported or has data?
+      //TODO. If dataset has been imported or has data? If is validating
       if (true) {
         designerDispatch({
           type: 'SET_PROGRESS_STEP_BAR',

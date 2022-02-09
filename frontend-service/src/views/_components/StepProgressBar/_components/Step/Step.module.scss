@@ -11,7 +11,7 @@
   }
   .activeCompleted {
     background-color: var(--step-progress-bar-activeCompleted-bg-color);
-    animation: check 1s forwards;
+    animation: check 0.1s forwards;
     svg {
       color: var(--step-progress-bar-activeCompleted-color);
       font-weight: bold;
