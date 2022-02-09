@@ -1489,7 +1489,7 @@
     "y": "Y",
     "yes": "Yes",
     "zipCsvTable": "ZIP (.csv for each table)",
-    "manualTechnicalAcceptanceNoMessage": "Feedback message not provided",
-    "manualTechnicalAcceptanceStatus": "The actual Feedback status is the same as the selected one"
+    "manualTechnicalAcceptanceNoMessage": "Feedback message is empty",
+    "manualTechnicalAcceptanceStatus": "Current feedback status is the same as the selected one"
   }
 }
