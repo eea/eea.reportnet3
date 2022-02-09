@@ -1488,6 +1488,8 @@
     "x": "X",
     "y": "Y",
     "yes": "Yes",
-    "zipCsvTable": "ZIP (.csv for each table)"
+    "zipCsvTable": "ZIP (.csv for each table)",
+    "manualTechnicalAcceptanceNoMessage": "Feedback message is empty",
+    "manualTechnicalAcceptanceStatus": "Current feedback status does not change"
   }
 }
