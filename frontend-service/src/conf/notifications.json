@@ -846,6 +846,7 @@
         { "key": "CREATE_SYSTEM_NOTIFICATION_ERROR" },
         { "key": "UPDATE_SYSTEM_NOTIFICATION_ERROR" },
         { "key": "DELETE_SYSTEM_NOTIFICATION_ERROR" },
+        { "key": "DELETE_ALL_LEAD_REPORTERS_ERROR" },
         { "key": "GET_SYSTEM_NOTIFICATIONS_ERROR" },
         { "key": "CHECK_ENABLED_SYSTEM_NOTIFICATIONS_ERROR" },
         { "key": "VALIDATE_SQL_ERROR" },
