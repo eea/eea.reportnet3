@@ -137,20 +137,20 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
   };
 
   const notificationsFooter = (
-    <div>
-      <Button
-        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon="cancel"
-        id="cancelNotification"
-        label={resourcesContext.messages['close']}
-        onClick={onHideNotificationsList}
-      />
+    <div className={styles.notificationsFooter}>
       <Button
         className="p-button-rounded p-button-secondary-transparent"
         icon="trash"
         label={resourcesContext.messages['deleteUsersNotificationsData']}
         onClick={onClickUserNotificationDeleteButton}
         visible={false}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon="cancel"
+        id="cancelNotification"
+        label={resourcesContext.messages['close']}
+        onClick={onHideNotificationsList}
       />
     </div>
   );
@@ -259,9 +259,9 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
 
   const onDelete = async () => {
     try {
+      setIsDeleting(true);
       await notificationContext.deleteAll();
       await NotificationService.deleteAll();
-      setIsDeleting(true);
     } catch (error) {
       console.error('NotificationsList - onDelete.', error);
       notificationContext.add({ type: 'DELETE_USER_NOTIFICATIONS_ERROR' }, true);
