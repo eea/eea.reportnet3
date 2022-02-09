@@ -32,6 +32,8 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
   const userContext = useContext(UserContext);
 
   const [columns, setColumns] = useState([]);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [paginationInfo, setPaginationInfo] = useState({
@@ -39,10 +41,6 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
     firstPageRecord: 0
   });
   const [totalRecords, setTotalRecords] = useState(0);
-
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
@@ -251,6 +249,7 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
   const onDelete = async () => {
     try {
       await notificationContext.deleteAll();
+      setIsDeleting(true);
     } catch (error) {
       console.error('NotificationsList - onDelete.', error);
       notificationContext.add({ type: 'DELETE_USER_NOTIFICATIONS_ERROR' }, true);
@@ -259,7 +258,12 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
     }
   };
 
-  const renderConfirmDialog = (
+  const onClickUserNotificationDeleteButton = () => {
+    deleteUserNotificationsConfirmDialog();
+    setIsDeleteDialogVisible(true);
+  };
+
+  const deleteUserNotificationsConfirmDialog = (
     <ConfirmDialog
       classNameConfirm="p-button-danger"
       disabledConfirm={isDeleting}
@@ -267,22 +271,11 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
       iconConfirm={isDeleting ? 'spinnerAnimate' : 'check'}
       labelCancel={resourcesContext.messages['no']}
       labelConfirm={resourcesContext.messages['yes']}
-      onConfirm={onDelete && setIsDeleting(true)}
+      onConfirm={onDelete}
       onHide={() => setIsDeleteDialogVisible(false)}
       visible={isDeleteDialogVisible}>
       {resourcesContext.messages['deleteUsersNotificationsConfirm']}
     </ConfirmDialog>
-  );
-
-  const renderDeleteUserNotifications = (
-    <Button
-      className={`p-button-rounded p-button-secondary-transparent`}
-      disabled={false}
-      icon="trash"
-      label={resourcesContext.messages['deleteUsersNotificationsData']}
-      onClick={renderConfirmDialog() && setIsDeleteDialogVisible(true)}
-      visible={false}
-    />
   );
 
   const renderNotificationsListContent = () => {
@@ -300,7 +293,13 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
           visible={isNotificationVisible}
           zIndex={3100}>
           {renderNotifications()}
-          {renderDeleteUserNotifications()}
+          <Button
+            className="p-button-rounded p-button-secondary-transparent"
+            icon="trash"
+            label={resourcesContext.messages['deleteUsersNotificationsData']}
+            onClick={onClickUserNotificationDeleteButton}
+            visible={false}
+          />
         </Dialog>
       );
     }
