@@ -36,6 +36,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { getExpressionString } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/getExpressionString';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const QCList = ({
@@ -98,16 +99,16 @@ export const QCList = ({
   const checkHasHistoric = () =>
     tabsValidationsState.validationList.validations.some(validation => validation.hasHistoric);
 
-  const getPaginatorRecordsCount = () => (
+  const getPaginatorRight = () => (
     <Fragment>
-      {isFiltered && tabsValidationsState.validationList.validations.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']}: ${filteredData.length} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {tabsValidationsState.validationList.validations.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-      {isFiltered && tabsValidationsState.validationList.validations.length === filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
+      {PaginatorRecordsCount.getPaginatorRecordsCount({
+        dataLength: tabsValidationsState.validationList.validations.length,
+        filteredDataLength: filteredData.length,
+        isFiltered,
+        messageFiltered: resourcesContext.messages['filtered'],
+        messageRecords: resourcesContext.messages['records'],
+        messageTotalRecords: resourcesContext.messages['totalRecords']
+      })}
     </Fragment>
   );
 
@@ -744,7 +745,7 @@ export const QCList = ({
             onSort={event => onSort(event)}
             paginator
             paginatorDisabled={tabsValidationsState.editingRows.length > 0}
-            paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
+            paginatorRight={!isNil(filteredData) && getPaginatorRight()}
             quickEditRowInfo={{
               updatedRow: validationContext.updatedRuleId,
               deletedRow: tabsValidationsState.deletedRuleId,

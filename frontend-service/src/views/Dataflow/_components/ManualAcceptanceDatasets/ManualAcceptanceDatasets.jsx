@@ -24,6 +24,7 @@ import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 
 export const ManualAcceptanceDatasets = ({
   dataflowId,
@@ -36,7 +37,7 @@ export const ManualAcceptanceDatasets = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const { filteredData } = useFilters('manualAcceptanceDatasets');
+  const { filteredData, isFiltered } = useFilters('manualAcceptanceDatasets');
 
   const manualAcceptanceInitialState = {
     data: [],
@@ -53,18 +54,16 @@ export const ManualAcceptanceDatasets = ({
     onLoadManualAcceptanceDatasets();
   }, [isUpdatedManualAcceptanceDatasets]);
 
-  const getPaginatorRecordsCount = () => (
+  const getPaginatorRight = () => (
     <Fragment>
-      {manualAcceptanceDatasetsState.filtered &&
-      manualAcceptanceDatasetsState.data.length !== manualAcceptanceDatasetsState.filteredData.length
-        ? `${resourcesContext.messages['filtered']}: ${manualAcceptanceDatasetsState.filteredData.length} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {manualAcceptanceDatasetsState.data.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-      {manualAcceptanceDatasetsState.filtered &&
-      manualAcceptanceDatasetsState.data.length === manualAcceptanceDatasetsState.filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
+      {PaginatorRecordsCount.getPaginatorRecordsCount({
+        dataLength: manualAcceptanceDatasetsState.data.length,
+        filteredDataLength: filteredData.length,
+        isFiltered,
+        messageFiltered: resourcesContext.messages['filtered'],
+        messageRecords: resourcesContext.messages['records'],
+        messageTotalRecords: resourcesContext.messages['totalRecords']
+      })}
     </Fragment>
   );
 
@@ -200,7 +199,7 @@ export const ManualAcceptanceDatasets = ({
           autoLayout={true}
           onRowClick={event => getManageAcceptanceDataset(event.data)}
           paginator={true}
-          paginatorRight={getPaginatorRecordsCount()}
+          paginatorRight={getPaginatorRight()}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary={resourcesContext.messages['manualAcceptance']}

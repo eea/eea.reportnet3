@@ -33,6 +33,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -63,7 +64,7 @@ export const ShareRights = ({
   const notDeletableRolesRequester = [config.permissions.roles.STEWARD.key, config.permissions.roles.CUSTODIAN.key];
   const userTypes = { REPORTER: 'reporter', REQUESTER: 'requester' };
 
-  const { filteredData } = useFilters('shareRights');
+  const { filteredData, isFiltered } = useFilters('shareRights');
 
   const isReporterManagement = userType === userTypes.REPORTER;
 
@@ -427,6 +428,19 @@ export const ShareRights = ({
     </Fragment>
   );
 
+  const getPaginatorRight = () => (
+    <Fragment>
+      {PaginatorRecordsCount.getPaginatorRecordsCount({
+        dataLength: shareRightsState.userRightList.length,
+        filteredDataLength: filteredData.length,
+        isFiltered,
+        messageFiltered: resourcesContext.messages['filtered'],
+        messageRecords: resourcesContext.messages['records'],
+        messageTotalRecords: resourcesContext.messages['totalRecords']
+      })}
+    </Fragment>
+  );
+
   const getTooltipMessage = userRight => {
     if (hasEmptyData(userRight)) {
       return resourcesContext.messages['incompleteDataTooltip'];
@@ -487,6 +501,7 @@ export const ShareRights = ({
           className={styles.dialogContent}
           hasDefaultCurrentPage
           paginator
+          paginatorRight={getPaginatorRight()}
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           totalRecords={filteredData.length}

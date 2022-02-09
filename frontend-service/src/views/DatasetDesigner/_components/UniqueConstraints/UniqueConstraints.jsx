@@ -23,6 +23,7 @@ import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 import { constraintsReducer } from './_functions/Reducers/constraintsReducer';
 
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { UniqueConstraintsUtils } from './_functions/Utils/UniqueConstraintsUtils';
 
 export const UniqueConstraints = ({
@@ -84,16 +85,16 @@ export const UniqueConstraints = ({
     />
   );
 
-  const getPaginatorRecordsCount = () => (
+  const getPaginatorRight = () => (
     <Fragment>
-      {isFiltered && constraintsState.data.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']}: ${filteredData.length} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {constraintsState.data.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-      {isFiltered && constraintsState.data.length === filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
+      {PaginatorRecordsCount.getPaginatorRecordsCount({
+        dataLength: constraintsState.data.length,
+        filteredDataLength: filteredData.length,
+        isFiltered,
+        messageFiltered: resourcesContext.messages['filtered'],
+        messageRecords: resourcesContext.messages['records'],
+        messageTotalRecords: resourcesContext.messages['totalRecords']
+      })}
     </Fragment>
   );
 
@@ -203,7 +204,7 @@ export const UniqueConstraints = ({
         autoLayout={true}
         onRowClick={event => getManageUniqueConstraint(event.data)}
         paginator={true}
-        paginatorRight={getPaginatorRecordsCount()}
+        paginatorRight={getPaginatorRight()}
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['uniqueConstraints']}

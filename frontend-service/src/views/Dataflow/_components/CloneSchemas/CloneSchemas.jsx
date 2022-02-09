@@ -24,6 +24,7 @@ import { cloneSchemasReducer } from './_functions/Reducers/cloneSchemasReducer';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 
 export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow = false }) => {
   const notificationContext = useContext(NotificationContext);
@@ -47,16 +48,16 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
     getCloneDataflow(cloneSchemasState.chosenDataflow);
   }, [cloneSchemasState.chosenDataflow]);
 
-  const getPaginatorRecordsCount = () => (
+  const getPaginatorRight = () => (
     <Fragment>
-      {isFiltered && cloneSchemasState.allDataflows.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']}: ${filteredData.length} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {cloneSchemasState.allDataflows.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-      {isFiltered && cloneSchemasState.allDataflows.length === filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
+      {PaginatorRecordsCount.getPaginatorRecordsCount({
+        dataLength: cloneSchemasState.allDataflows.length,
+        filteredDataLength: filteredData.length,
+        isFiltered,
+        messageFiltered: resourcesContext.messages['filtered'],
+        messageRecords: resourcesContext.messages['records'],
+        messageTotalRecords: resourcesContext.messages['totalRecords']
+      })}
     </Fragment>
   );
 
@@ -136,7 +137,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
         onChangePagination={onChangePagination}
         onSelectDataflow={onSelectDataflow}
         pagination={cloneSchemasState.pagination}
-        paginatorRightText={getPaginatorRecordsCount()}
+        paginatorRightText={getPaginatorRight()}
       />
     ) : (
       <CardsView
@@ -148,7 +149,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
         onChangePagination={onChangePagination}
         onSelectCard={onSelectDataflow}
         pagination={cloneSchemasState.pagination}
-        paginatorRightText={getPaginatorRecordsCount()}
+        paginatorRightText={getPaginatorRight()}
         type={'cloneSchemas'}
       />
     );

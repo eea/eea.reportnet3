@@ -19,6 +19,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
@@ -55,16 +56,16 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     }
   };
 
-  const getPaginatorRecordsCount = () => (
+  const getPaginatorRight = () => (
     <Fragment>
-      {isFiltered && datasetsInfo.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']}: ${filteredData.length} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {datasetsInfo.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-      {isFiltered && datasetsInfo.length === filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
+      {PaginatorRecordsCount.getPaginatorRecordsCount({
+        dataLength: datasetsInfo.length,
+        filteredDataLength: filteredData.length,
+        isFiltered,
+        messageFiltered: resourcesContext.messages['filtered'],
+        messageRecords: resourcesContext.messages['records'],
+        messageTotalRecords: resourcesContext.messages['totalRecords']
+      })}
     </Fragment>
   );
 
@@ -118,7 +119,7 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     return (
       <DataTable
         paginator={true}
-        paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
+        paginatorRight={!isNil(filteredData) && getPaginatorRight()}
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['datasetsInfo']}
