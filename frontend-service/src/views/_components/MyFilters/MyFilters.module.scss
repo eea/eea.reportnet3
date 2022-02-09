@@ -99,10 +99,6 @@
     margin: 0 1rem;
   }
 
-  .labelCheckbox {
-    width: 52% !important;
-  }
-
   .label {
     justify-content: space-between;
     clip: auto;
@@ -482,7 +478,7 @@
     display: flex !important;
     flex-direction: column;
     .labelCheckbox {
-      width: 30% !important;
+      margin-right: 1em !important;
     }
     .checkbox {
       margin: 0;

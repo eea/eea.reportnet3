@@ -343,11 +343,6 @@
   }
   .draggableFieldContentCell {
     .draggableFieldCell {
-      &:last-child {
-        button {
-          width: 100%;
-        }
-      }
       textarea {
         max-height: 33px !important;
       }
