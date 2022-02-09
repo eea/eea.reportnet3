@@ -16,6 +16,7 @@ import { ChipButton } from 'views/_components/ChipButton';
 import { DeleteDialog } from './_components/DeleteDialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { DropdownFilter } from 'views/Dataset/_components/DropdownFilter';
+import { ImportTableDataDialog } from './_components/ImportTableDataDialog';
 import { InputText } from 'views/_components/InputText';
 import { Menu } from 'views/_components/Menu';
 import { Toolbar } from 'views/_components/Toolbar';
@@ -323,6 +324,20 @@ export const ActionsToolbar = ({
     }
   };
 
+  const renderImportTableDataButton = () => (
+    <ImportTableDataDialog
+      colsSchema={colsSchema}
+      dataflowId={dataflowId}
+      datasetId={datasetId}
+      hasWritePermissions={hasWritePermissions}
+      isDataflowOpen={isDataflowOpen}
+      isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+      showWriteButtons={showWriteButtons}
+      tableId={tableId}
+      tableName={tableName}
+    />
+  );
+
   const renderValueFilter = () => {
     if (isEmpty(valueFilter)) {
       return <span style={{ width: '2.357em' }} />;
@@ -340,17 +355,7 @@ export const ActionsToolbar = ({
   return (
     <Toolbar className={`${styles.actionsToolbar} datasetSchema-table-toolbar-help-step`}>
       <div className={`${styles.toolbarLeftContent} p-toolbar-group-left`}>
-        {(hasWritePermissions || showWriteButtons) && (
-          <Button
-            className={`p-button-rounded p-button-secondary datasetSchema-import-table-help-step ${
-              !hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
-            }`}
-            disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
-            icon="import"
-            label={resourcesContext.messages['importTable']}
-            onClick={() => setImportTableDialogVisible(true)}
-          />
-        )}
+        {renderImportTableDataButton()}
         {renderExportableButton()}
         <Menu
           className={styles.menu}
