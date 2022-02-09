@@ -228,6 +228,15 @@ public interface DataflowRepository
    */
   List<Dataflow> findByShowPublicInfoTrue();
 
+
+  /**
+   * Count by show public info.
+   *
+   * @param showPublicInfo the show public info
+   * @return the long
+   */
+  Long countByShowPublicInfo(@Param("showPublicInfo") boolean showPublicInfo);
+
   /**
    * Find public dataflows by country code.
    *
@@ -236,6 +245,15 @@ public interface DataflowRepository
    */
   @Query("select r.dataflow from Representative r where r.dataflow.showPublicInfo= true and r.dataProvider.code= :countryCode and r.dataflow.status='DRAFT' and r.hasDatasets=true")
   List<Dataflow> findPublicDataflowsByCountryCode(@Param("countryCode") String countryCode);
+
+  /**
+   * Find public dataflows by country code.
+   *
+   * @param countryCode the country code
+   * @return the list
+   */
+  @Query("select count(*) from Representative r where r.dataflow.showPublicInfo= true and r.dataProvider.code= :countryCode and r.dataflow.status='DRAFT' and r.hasDatasets=true")
+  Long countPublicDataflowsByCountryCode(@Param("countryCode") String countryCode);
 
   /**
    * Find dataflows by dataprovider ids and dataflow ids.
@@ -270,6 +288,20 @@ public interface DataflowRepository
       value = "update dataflow set show_public_info = :showPublicInfo where id = :dataflowId")
   void updatePublicStatus(@Param("dataflowId") Long dataflowId,
       @Param("showPublicInfo") boolean showPublicInfo);
+
+  /**
+   * Update automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDeletion the automatic reporting deletion
+   */
+  @Modifying
+  @Transactional
+  @CacheEvict(value = "dataflowVO", key = "#dataflowId")
+  @Query(nativeQuery = true,
+      value = "UPDATE dataflow SET automatic_reporting_deletion=:automaticReportingDeletion WHERE id=:dataflowId")
+  void updateAutomaticReportingDeletion(@Param("dataflowId") Long dataflowId,
+      @Param("automaticReportingDeletion") Boolean automaticReportingDeletion);
 
   /**
    * The Interface IDatasetStatus.

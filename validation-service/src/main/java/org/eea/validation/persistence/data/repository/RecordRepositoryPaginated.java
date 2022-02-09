@@ -32,4 +32,8 @@ public interface RecordRepositoryPaginated {
    */
   List<RecordValue> findRecordsPageable(Pageable pageable);
 
+  /**
+   * Flush.
+   */
+  void flush();
 }

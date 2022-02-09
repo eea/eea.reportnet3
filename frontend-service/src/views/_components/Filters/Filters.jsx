@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { noWait, useRecoilCallback, useRecoilValue } from 'recoil';
+import { noWait, useRecoilCallback } from 'recoil';
 
 import isNil from 'lodash/isNil';
 
@@ -57,8 +57,6 @@ export const Filters = ({
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
-  const isFiltered = useRecoilValue(isFilteredStore(recoilId));
-
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
   const onFilterFilteredData = useRecoilCallback(
@@ -112,6 +110,12 @@ export const Filters = ({
     [recoilId]
   );
 
+  const clearDateInputs = () => {
+    [...document.getElementsByClassName('date-filter-input')].forEach(input => {
+      input.value = '';
+    });
+  };
+
   const onResetFilters = useRecoilCallback(
     ({ snapshot, reset }) =>
       async () => {
@@ -121,6 +125,7 @@ export const Filters = ({
         reset(sortByStore(recoilId));
         reset(filteredDataStore(recoilId));
         reset(isFilteredStore(recoilId));
+        clearDateInputs();
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
       },
     [recoilId]
@@ -137,6 +142,7 @@ export const Filters = ({
 
     return (
       <FilterComponent
+        hasCustomSort={hasCustomSort}
         isLoading={isLoading}
         key={option.key}
         onCustomFilter={onFilter}
@@ -164,7 +170,7 @@ export const Filters = ({
     return (
       <div className={`${styles.filterButton}`}>
         <Button
-          className={`p-button-${isFiltered ? 'primary' : 'secondary'} p-button-rounded p-button-animated-blink`}
+          className={`p-button-primary p-button-rounded p-button-animated-blink`}
           disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}

@@ -394,7 +394,7 @@ export const Dataflows = () => {
     <Fragment>
       {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
       {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
-        'records'
+        'dataflows'
       ].toLowerCase()}`}
     </Fragment>
   );
@@ -484,6 +484,8 @@ export const Dataflows = () => {
       payload: {
         contextCurrentDataflowType: userContext.currentDataflowType,
         data: DataflowsUtils.sortDataflows(changedInitialData),
+        filteredRecords,
+        totalRecords,
         type: tabId
       }
     });
@@ -603,7 +605,7 @@ export const Dataflows = () => {
           { key: 'description', label: resourcesContext.messages['description'], isSortable: true },
           { key: 'legalInstrument', label: resourcesContext.messages['legalInstrument'], isSortable: true },
           { key: 'obligationTitle', label: resourcesContext.messages['obligation'], isSortable: true },
-          { key: 'obligationId', label: resourcesContext.messages['obligationId'], isSortable: true }
+          { key: 'obligationId', label: resourcesContext.messages['obligationId'], isSortable: true, keyfilter: 'num' }
         ],
         type: 'INPUT'
       },

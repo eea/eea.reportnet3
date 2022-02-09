@@ -5,6 +5,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import org.eea.validation.persistence.data.domain.RecordValue;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The Class FieldExtendedRepositoryImpl.
@@ -56,6 +57,9 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
 
   }
 
-
+  @Transactional
+  public void flush() {
+    entityManager.flush();
+  }
 
 }

@@ -682,6 +682,27 @@ public final class EEAErrorMessage {
   /** The Constant HISTORIC_QC_UPDATE_ERROR: {@value}. */
   public static final String HISTORIC_QC_UPDATE_ERROR = "Error updating historic rule information.";
 
+  /** The Constant NAME_DUPLICATED. */
+  public static final String NAME_DUPLICATED = "Error: name duplicated.";
+
+  /** The Constant ERROR_JSON. */
+  public static final String ERROR_JSON = "Error in the json provided.";
+
+  /** The Constant ERROR_WEBFORM_IN_USE. */
+  public static final String ERROR_WEBFORM_IN_USE = "Error: the webform to delete is in use.";
+
+  /** The Constant ERROR_FILE_NAME_MATCHING. */
+  public static final String ERROR_FILE_NAME_MATCHING = "File name does not match any table name";
+
+  /** The Constant ERROR_FILE_NO_HEADERS_MATCHING. */
+  public static final String ERROR_FILE_NO_HEADERS_MATCHING = "No headers matching FieldSchemas";
+
+  /** The Constant DATAFLOW_ERROR. {@value}. */
+  public static final String DATAFLOW_GET_ERROR = "Error getting the dataflows";
+
+  /** The Constant HEADER_NOT_VALID. {@value}. */
+  public static final String HEADER_NOT_VALID = "The column header is not valid";
+
   /**
    * Instantiates a new EEA error message.
    */
