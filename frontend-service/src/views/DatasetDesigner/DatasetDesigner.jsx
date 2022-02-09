@@ -609,7 +609,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         },
         true
       );
-      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 1, currentStep: 2, value: true } });
+      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 1, currentStep: 2, isRunning: true } });
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -713,7 +713,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     );
     if (validationFinished && validationFinished.content.datasetId?.toString() === datasetId.toString()) {
       onHighlightRefresh(true);
-      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 1, currentStep: 2, value: false } });
+      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 1, currentStep: 2, isRunning: false } });
     }
     const isImportFieldSchemaCompleted = notificationContext.toShow.some(
       notification => notification.key === 'IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'
@@ -724,7 +724,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     );
 
     if (isImportDataCompleted) {
-      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 1, currentStep: 2, value: true } });
+      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 1, currentStep: 2, isRunning: true } });
     }
 
     if (isImportFieldSchemaCompleted) {
@@ -829,6 +829,15 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           }
         });
       };
+
+      //TODO. If dataset has been imported or has data?
+      if (true) {
+        designerDispatch({
+          type: 'SET_PROGRESS_STEP_BAR',
+          payload: { step: 0, currentStep: 1, isRunning: false, completed: true }
+        });
+      }
+
       const getDatasetSchemas = async () => {
         const data = await DataflowService.getSchemas(dataflowId);
         designerDispatch({ type: 'LOAD_DATASET_SCHEMAS', payload: { schemas: data } });
@@ -939,7 +948,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         },
         true
       );
-      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 0, currentStep: 1, value: true } });
+      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 0, currentStep: 1, isRunning: true } });
     } catch (error) {
       console.error('DatasetDesigner - onUpload.', error);
       notificationContext.add(

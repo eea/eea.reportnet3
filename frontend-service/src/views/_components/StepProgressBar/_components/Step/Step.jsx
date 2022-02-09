@@ -11,16 +11,20 @@ export const Step = ({ currentStep, step }) => {
   };
 
   const getIconWrapperClassName = () => {
-    if (step.idx < currentStep) {
+    if (step.completed) {
       return styles.activeCompleted;
-    } else if (step.idx === currentStep) {
-      if (step.isRunning) {
-        return styles.activeIncompleted;
-      } else {
-        return styles.activeCompleted;
-      }
     } else {
-      return styles.inactive;
+      if (step.idx < currentStep) {
+        return styles.activeCompleted;
+      } else if (step.idx === currentStep) {
+        if (step.isRunning) {
+          return styles.activeIncompleted;
+        } else {
+          return styles.activeCompleted;
+        }
+      } else {
+        return styles.inactive;
+      }
     }
   };
 
@@ -31,17 +35,21 @@ export const Step = ({ currentStep, step }) => {
   };
 
   const getStepLabel = () => {
-    if (step.idx < currentStep) {
+    if (step.completed) {
       return step.labelCompleted;
     } else {
-      if (step.idx === currentStep) {
-        if (step.isRunning) {
-          return step.labelRunning;
-        } else {
-          return step.labelCompleted;
-        }
+      if (step.idx < currentStep) {
+        return step.labelCompleted;
       } else {
-        return step.labelUndone;
+        if (step.idx === currentStep) {
+          if (step.isRunning) {
+            return step.labelRunning;
+          } else {
+            return step.labelCompleted;
+          }
+        } else {
+          return step.labelUndone;
+        }
       }
     }
   };
