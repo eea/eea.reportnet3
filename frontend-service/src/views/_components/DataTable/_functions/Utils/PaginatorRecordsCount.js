@@ -1,15 +1,18 @@
 const getPaginatorRecordsCount = ({ dataLength, filteredData, isFiltered, resourcesContext }) => {
   const getRecordsDifferentFiltered = () => {
-    if (isFiltered && dataLength !== filteredData.length) {
-      return `${messageFiltered}: ${filteredData.length} | `;
-    }
-    return '';
-  };
-  const getRecordsEqualsFiltered = () => {
     if (isFiltered && dataLength === filteredData.length) {
-      return ` (${messageFiltered.toLowerCase()})`;
+      return '';
     }
-    return '';
+
+    return `${messageFiltered}: ${filteredData.length} | `;
+  };
+
+  const getRecordsEqualsFiltered = () => {
+    if (isFiltered && dataLength !== filteredData.length) {
+      return '';
+    }
+
+    return ` (${messageFiltered.toLowerCase()})`;
   };
 
   const messageFiltered = resourcesContext.messages['filtered'];
