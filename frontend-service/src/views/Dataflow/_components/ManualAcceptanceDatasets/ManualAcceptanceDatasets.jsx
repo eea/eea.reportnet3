@@ -39,6 +39,8 @@ export const ManualAcceptanceDatasets = ({
 
   const { filteredData, isFiltered } = useFilters('manualAcceptanceDatasets');
 
+  const { GetPaginatorRecordsCount } = PaginatorRecordsCount;
+
   const manualAcceptanceInitialState = {
     data: [],
     filtered: false,
@@ -186,12 +188,13 @@ export const ManualAcceptanceDatasets = ({
           autoLayout={true}
           onRowClick={event => getManageAcceptanceDataset(event.data)}
           paginator={true}
-          paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
-            dataLength: manualAcceptanceDatasetsState.data.length,
-            filteredData,
-            isFiltered,
-            resourcesContext
-          })}
+          paginatorRight={
+            <GetPaginatorRecordsCount
+              dataLength={manualAcceptanceDatasetsState.data.length}
+              filteredData={filteredData}
+              isFiltered={isFiltered}
+            />
+          }
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary={resourcesContext.messages['manualAcceptance']}

@@ -40,6 +40,8 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
 
   const { filteredData, isFiltered } = useFilters('cloneSchemas');
 
+  const { GetPaginatorRecordsCount } = PaginatorRecordsCount;
+
   useEffect(() => {
     onLoadDataflows();
   }, []);
@@ -48,13 +50,13 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
     getCloneDataflow(cloneSchemasState.chosenDataflow);
   }, [cloneSchemasState.chosenDataflow]);
 
-  const getPaginatorRight = () =>
-    PaginatorRecordsCount.getPaginatorRecordsCount({
-      dataLength: cloneSchemasState.allDataflows.length,
-      filteredData,
-      isFiltered,
-      resourcesContext
-    });
+  const getPaginatorRight = () => (
+    <GetPaginatorRecordsCount
+      dataLength={cloneSchemasState.allDataflows.length}
+      filteredData={filteredData}
+      isFiltered={isFiltered}
+    />
+  );
 
   const isLoading = value => cloneSchemasDispatch({ type: 'IS_LOADING', payload: { value } });
 

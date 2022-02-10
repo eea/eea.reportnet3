@@ -55,6 +55,8 @@ export const QCList = ({
 
   const { filteredData, isFiltered } = useFilters(`qcList_${dataset.datasetId}`);
 
+  const { GetPaginatorRecordsCount } = PaginatorRecordsCount;
+
   const [tabsValidationsState, tabsValidationsDispatch] = useReducer(qcListReducer, {
     deletedRuleId: null,
     editingRows: [],
@@ -732,12 +734,13 @@ export const QCList = ({
             onSort={event => onSort(event)}
             paginator
             paginatorDisabled={tabsValidationsState.editingRows.length > 0}
-            paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
-              dataLength: tabsValidationsState.validationList.validations.length,
-              filteredData,
-              isFiltered,
-              resourcesContext
-            })}
+            paginatorRight={
+              <GetPaginatorRecordsCount
+                dataLength={tabsValidationsState.validationList.validations.length}
+                filteredData={filteredData}
+                isFiltered={isFiltered}
+              />
+            }
             quickEditRowInfo={{
               updatedRow: validationContext.updatedRuleId,
               deletedRow: tabsValidationsState.deletedRuleId,

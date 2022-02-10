@@ -45,6 +45,8 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const { filteredData, isFiltered } = useFilters('historicReleases');
 
+  const { GetPaginatorRecordsCount } = PaginatorRecordsCount;
+
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
   useEffect(() => {
@@ -275,12 +277,13 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
           historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset' ? '' : styles.noFilters
         }
         paginator={true}
-        paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
-          dataLength: historicReleasesState.data.length,
-          filteredData,
-          isFiltered,
-          resourcesContext
-        })}
+        paginatorRight={
+          <GetPaginatorRecordsCount
+            dataLength={historicReleasesState.data.length}
+            filteredData={filteredData}
+            isFiltered={isFiltered}
+          />
+        }
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['historicReleases']}

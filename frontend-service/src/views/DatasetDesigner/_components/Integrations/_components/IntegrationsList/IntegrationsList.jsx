@@ -55,6 +55,8 @@ export const IntegrationsList = ({
 
   const { filteredData, isFiltered } = useFilters('integrationsList');
 
+  const { GetPaginatorRecordsCount } = PaginatorRecordsCount;
+
   useEffect(() => {
     if (!designerState.isIntegrationManageDialogVisible && needsRefresh) {
       onLoadIntegrations();
@@ -224,12 +226,13 @@ export const IntegrationsList = ({
           autoLayout={true}
           onRowClick={event => integrationId(event.data.integrationId)}
           paginator={true}
-          paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
-            dataLength: integrationListState.data.length,
-            filteredData,
-            isFiltered,
-            resourcesContext
-          })}
+          paginatorRight={
+            <GetPaginatorRecordsCount
+              dataLength={integrationListState.data.length}
+              filteredData={filteredData}
+              isFiltered={isFiltered}
+            />
+          }
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary={resourcesContext.messages['externalIntegrations']}

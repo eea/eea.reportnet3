@@ -29,6 +29,8 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
 
   const { filteredData, isFiltered } = useFilters('userList');
 
+  const { GetPaginatorRecordsCount } = PaginatorRecordsCount;
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -157,12 +159,13 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
       return (
         <DataTable
           paginator={true}
-          paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
-            dataLength: userListData.length,
-            filteredData,
-            isFiltered,
-            resourcesContext
-          })}
+          paginatorRight={
+            <GetPaginatorRecordsCount
+              dataLength={userListData.length}
+              filteredData={filteredData}
+              isFiltered={isFiltered}
+            />
+          }
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary="usersList"

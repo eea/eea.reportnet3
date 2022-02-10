@@ -63,6 +63,8 @@ export const UniqueConstraints = ({
 
   const { isFiltered, setData } = useApplyFilters('uniqueConstraints');
 
+  const { GetPaginatorRecordsCount } = PaginatorRecordsCount;
+
   useEffect(() => {
     if (!designerState.isManageUniqueConstraintDialogVisible && needsRefresh) {
       onLoadConstraints();
@@ -191,12 +193,13 @@ export const UniqueConstraints = ({
         autoLayout={true}
         onRowClick={event => getManageUniqueConstraint(event.data)}
         paginator={true}
-        paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
-          dataLength: constraintsState.data.length,
-          filteredData,
-          isFiltered,
-          resourcesContext
-        })}
+        paginatorRight={
+          <GetPaginatorRecordsCount
+            dataLength={constraintsState.data.length}
+            filteredData={filteredData}
+            isFiltered={isFiltered}
+          />
+        }
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['uniqueConstraints']}

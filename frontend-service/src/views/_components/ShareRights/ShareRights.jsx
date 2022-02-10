@@ -90,6 +90,8 @@ export const ShareRights = ({
 
   const { actionsButtons, isLoadingButton, loadingStatus, userRight } = shareRightsState;
 
+  const { GetPaginatorRecordsCount } = PaginatorRecordsCount;
+
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -488,12 +490,13 @@ export const ShareRights = ({
           className={styles.dialogContent}
           hasDefaultCurrentPage
           paginator
-          paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
-            dataLength: shareRightsState.userRightList.length,
-            filteredData,
-            isFiltered,
-            resourcesContext
-          })}
+          paginatorRight={
+            <GetPaginatorRecordsCount
+              dataLength={shareRightsState.userRightList.length}
+              filteredData={filteredData}
+              isFiltered={isFiltered}
+            />
+          }
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           totalRecords={filteredData.length}

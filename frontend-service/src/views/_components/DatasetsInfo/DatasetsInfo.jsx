@@ -31,6 +31,8 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
 
   const { filteredData, isFiltered } = useFilters('datasetInfo');
 
+  const { GetPaginatorRecordsCount } = PaginatorRecordsCount;
+
   useEffect(() => {
     onLoadDatasetsSummary();
   }, []);
@@ -106,12 +108,13 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     return (
       <DataTable
         paginator={true}
-        paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
-          dataLength: datasetsInfo.length,
-          filteredData,
-          isFiltered,
-          resourcesContext
-        })}
+        paginatorRight={
+          <GetPaginatorRecordsCount
+            dataLength={datasetsInfo.length}
+            filteredData={filteredData}
+            isFiltered={isFiltered}
+          />
+        }
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['datasetsInfo']}
