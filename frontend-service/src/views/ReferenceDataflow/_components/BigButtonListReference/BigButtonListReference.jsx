@@ -217,9 +217,7 @@ export const BigButtonListReference = ({
 
   const onCreateReferenceDatasets = async () => {
     handleDialogs({ dialog: 'isCreateReference', isVisible: false });
-
     notificationContext.add({ type: 'CREATE_REFERENCE_DATASETS_INIT', content: {} });
-
     setIsCreatingReferenceDatasets(true);
 
     try {
@@ -246,9 +244,7 @@ export const BigButtonListReference = ({
 
   const onCreateReferenceDatasetsWithNoPKs = async () => {
     handleDialogs({ dialog: 'isCreateReference', isVisible: false });
-
     notificationContext.add({ type: 'CREATE_REFERENCE_DATASETS_INIT', content: {} });
-
     setIsCreatingReferenceDatasets(true);
 
     try {
@@ -407,7 +403,9 @@ export const BigButtonListReference = ({
     newSchemaBigButton,
     createReferenceDatasets,
     ...referenceDatasetModels
-  ].map(button => (button.visibility ? <BigButton key={button.caption} {...button} /> : null));
+  ]
+    .filter(button => button.visibility)
+    .map(button => <BigButton key={button.caption} {...button} />);
 
   return (
     <Fragment>

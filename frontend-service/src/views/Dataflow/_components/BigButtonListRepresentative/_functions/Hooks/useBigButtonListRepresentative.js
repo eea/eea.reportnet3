@@ -73,23 +73,21 @@ const useBigButtonListRepresentative = ({
       return [];
     }
 
-    return dataflowState.data.referenceDatasets.map(referenceDataset => {
-      return {
-        layout: 'defaultBigButton',
-        buttonClass: 'referenceDataset',
-        buttonIcon: 'howTo',
-        caption: referenceDataset.datasetSchemaName,
-        handleRedirect: () => {
-          handleRedirect(
-            getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }, true)
-          );
-        },
-        helpClassName: 'dataflow-dataset-container-help-step',
-        model: [],
-        onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }, true),
-        visibility: true
-      };
-    });
+    return dataflowState.data.referenceDatasets.map(referenceDataset => ({
+      layout: 'defaultBigButton',
+      buttonClass: 'referenceDataset',
+      buttonIcon: 'howTo',
+      caption: referenceDataset.datasetSchemaName,
+      handleRedirect: () => {
+        handleRedirect(
+          getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }, true)
+        );
+      },
+      helpClassName: 'dataflow-dataset-container-help-step',
+      model: [],
+      onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: referenceDataset.datasetId }, true),
+      visibility: true
+    }));
   };
 
   const feedbackButton = {
@@ -99,14 +97,7 @@ const useBigButtonListRepresentative = ({
     caption: resourcesContext.messages['technicalFeedback'],
     handleRedirect: () =>
       handleRedirect(
-        getUrl(
-          routes.DATAFLOW_FEEDBACK,
-          {
-            dataflowId: dataflowState.id,
-            representativeId: dataProviderId
-          },
-          true
-        )
+        getUrl(routes.DATAFLOW_FEEDBACK, { dataflowId: dataflowState.id, representativeId: dataProviderId }, true)
       ),
     helpClassName: 'dataflow-feedback-help-step',
     onWheel: getUrl(
@@ -125,24 +116,9 @@ const useBigButtonListRepresentative = ({
     buttonClass: 'dataflowHelp',
     buttonIcon: 'info',
     caption: resourcesContext.messages['dataflowHelp'],
-    handleRedirect: () =>
-      handleRedirect(
-        getUrl(
-          routes.DOCUMENTS,
-          {
-            dataflowId: dataflowState.id
-          },
-          true
-        )
-      ),
+    handleRedirect: () => handleRedirect(getUrl(routes.DOCUMENTS, { dataflowId: dataflowState.id }, true)),
     helpClassName: 'dataflow-documents-webLinks-help-step',
-    onWheel: getUrl(
-      routes.DOCUMENTS,
-      {
-        dataflowId: dataflowState.id
-      },
-      true
-    ),
+    onWheel: getUrl(routes.DOCUMENTS, { dataflowId: dataflowState.id }, true),
     visibility: buttonsVisibility.help
   };
 
@@ -169,8 +145,16 @@ const useBigButtonListRepresentative = ({
   const groupByRepresentativeModels = dataflowState.data.datasets
     .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
     .map(dataset => {
-      const datasetName = dataset.name;
-      const datasetId = dataset.datasetId;
+      const getTechnicalAcceptanceStatus = () => {
+        if (!dataflowState.data.manualAcceptance) {
+          return null;
+        }
+
+        return config.datasetStatus[dataset.status].label;
+      };
+
+      const technicalAcceptanceStatus = getTechnicalAcceptanceStatus();
+
       return {
         layout: 'defaultBigButton',
         buttonClass: 'dataset',
@@ -180,42 +164,40 @@ const useBigButtonListRepresentative = ({
           handleRedirect(getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true));
         },
         helpClassName: 'dataflow-dataset-container-help-step',
+        infoStatus: dataset.isReleased,
+        infoStatusIcon: dataset.isReleased,
         model: [
           {
             label: resourcesContext.messages['historicReleases'],
             command: () => {
               onShowHistoricReleases('reportingDataset', true);
-              getDataHistoricReleases(datasetId, datasetName);
+              getDataHistoricReleases(dataset.datasetId, dataset.name);
             }
           }
         ],
         onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true),
+        technicalAcceptanceStatus: technicalAcceptanceStatus,
         visibility: true
       };
     });
 
-  const onBuildReceiptButton = () => {
-    return [
-      {
-        buttonClass: 'schemaDataset',
-        buttonIcon: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
-        buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
-        caption: resourcesContext.messages['confirmationReceipt'],
-        handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
-        infoStatus: dataflowState.isReceiptOutdated,
-        layout: 'defaultBigButton',
-        visibility: buttonsVisibility.receipt
-      }
-    ];
-  };
+  const onBuildReceiptButton = () => [
+    {
+      buttonClass: 'schemaDataset',
+      buttonIcon: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
+      buttonIconClass: dataflowState.isReceiptLoading ? 'spinner' : 'fileDownload',
+      caption: resourcesContext.messages['confirmationReceipt'],
+      handleRedirect: dataflowState.isReceiptLoading ? () => {} : () => onLoadReceiptData(),
+      infoStatus: dataflowState.isReceiptOutdated,
+      layout: 'defaultBigButton',
+      visibility: buttonsVisibility.receipt
+    }
+  ];
 
   const receiptBigButton = onBuildReceiptButton();
 
-  const getIsReleasing = () => {
-    return dataflowState?.data?.datasets?.some(
-      dataset => dataset.isReleasing && dataset.dataProviderId === dataProviderId
-    );
-  };
+  const getIsReleasing = () =>
+    dataflowState?.data?.datasets?.some(dataset => dataset.isReleasing && dataset.dataProviderId === dataProviderId);
 
   const isReleased = dataflowState.data.datasets
     .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
@@ -225,29 +207,27 @@ const useBigButtonListRepresentative = ({
     representative => representative.dataProviderId === dataProviderId
   );
 
-  const onBuildReleaseButton = () => {
-    return [
-      {
-        buttonClass: 'schemaDataset',
-        buttonIcon: getIsReleasing() ? 'spinner' : 'released',
-        buttonIconClass: getIsReleasing() ? 'spinner' : 'released',
-        caption: resourcesContext.messages['releaseDataCollection'],
-        enabled: dataflowState.isReleasable && !getIsReleasing(),
-        handleRedirect: dataflowState.isReleasable && !getIsReleasing() ? () => onOpenReleaseConfirmDialog() : () => {},
-        helpClassName: 'dataflow-big-buttons-release-help-step',
-        infoStatus: isReleased,
-        infoStatusIcon: isReleased,
-        layout: 'defaultBigButton',
-        restrictFromPublicAccess:
-          isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business') && !getIsReleasing(),
-        restrictFromPublicInfo: dataflowState.data.showPublicInfo && isReleased,
-        restrictFromPublicIsUpdating: dataflowState.restrictFromPublicIsUpdating.value,
-        restrictFromPublicStatus: representative?.restrictFromPublic,
-        tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
-        visibility: buttonsVisibility.release
-      }
-    ];
-  };
+  const onBuildReleaseButton = () => [
+    {
+      buttonClass: 'schemaDataset',
+      buttonIcon: getIsReleasing() ? 'spinner' : 'released',
+      buttonIconClass: getIsReleasing() ? 'spinner' : 'released',
+      caption: resourcesContext.messages['releaseDataCollection'],
+      enabled: dataflowState.isReleasable && !getIsReleasing(),
+      handleRedirect: dataflowState.isReleasable && !getIsReleasing() ? () => onOpenReleaseConfirmDialog() : () => {},
+      helpClassName: 'dataflow-big-buttons-release-help-step',
+      infoStatus: isReleased,
+      infoStatusIcon: isReleased,
+      layout: 'defaultBigButton',
+      restrictFromPublicAccess:
+        isLeadReporterOfCountry && !TextUtils.areEquals(dataflowState.status, 'business') && !getIsReleasing(),
+      restrictFromPublicInfo: dataflowState.data.showPublicInfo && isReleased,
+      restrictFromPublicIsUpdating: dataflowState.restrictFromPublicIsUpdating.value,
+      restrictFromPublicStatus: representative?.restrictFromPublic,
+      tooltip: dataflowState.isReleasable ? '' : resourcesContext.messages['releaseButtonTooltip'],
+      visibility: buttonsVisibility.release
+    }
+  ];
 
   const releaseBigButton = onBuildReleaseButton();
 
