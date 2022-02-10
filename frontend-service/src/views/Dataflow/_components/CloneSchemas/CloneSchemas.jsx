@@ -33,7 +33,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
 
   const [cloneSchemasState, cloneSchemasDispatch] = useReducer(cloneSchemasReducer, {
     allDataflows: [],
-    chosenDataflow: { id: null, name: '' },
+    chosenDataflow: { id: null, name: '-' },
     isLoading: true,
     pagination: { first: 0, rows: 10, page: 0 }
   });
@@ -184,7 +184,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
           isEmpty(cloneSchemasState.data || filteredData) ? styles.filteredSelected : ''
         }`}>
         <span>{`${resourcesContext.messages['selectedDataflow']}: `}</span>
-        {!isEmpty(cloneSchemasState.chosenDataflow) ? cloneSchemasState.chosenDataflow.name : '-'}
+        {cloneSchemasState.chosenDataflow.name}
       </span>
     </div>
   );
