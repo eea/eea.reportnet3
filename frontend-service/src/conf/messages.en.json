@@ -1490,6 +1490,12 @@
     "yes": "Yes",
     "zipCsvTable": "ZIP (.csv for each table)",
     "manualTechnicalAcceptanceNoMessage": "Feedback message is empty",
-    "manualTechnicalAcceptanceStatus": "Current feedback status does not change"
+    "manualTechnicalAcceptanceStatus": "Current feedback status does not change",
+    "manageNationalCoordinators": "Manage national coordinators",
+    "manageNationalCoordinatorsLeftBarButton": "Manage national coordinators",
+    "manageNationalCoordinatorsConfiguration": "Manage national coordinators configuration",
+    "countryColumn": "Country",
+    "manageNationalCoordinatorsDialogColumn": "National coordinator",
+    "manageNationalCoordinatorsPlaceholder": "Select a country"
   }
 }
