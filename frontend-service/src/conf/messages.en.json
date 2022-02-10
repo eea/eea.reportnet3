@@ -1497,6 +1497,7 @@
     "deleteAllLeadReportersDialogHeader": "Delete all lead reporters",
     "delateAllLeadReportersDialogMessage": "Are you sure you want to delete all lead reporters?",
     "deleteAllLeadReportersButton": "Delete all lead reporters",
-    "deleteUserNotificationsError": "Error deleting user notifications"
+    "deleteUserNotificationsError": "Error deleting user notifications",
+    "validationStatusLeftBarButton": "Validations status"
   }
 }

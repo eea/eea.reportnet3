@@ -89,6 +89,7 @@ export const Dataflows = () => {
     isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
     isValidatingAllDataflowsUsers: false,
+    isValidationStatusDialogVisible: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
     pagination: { firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 },
@@ -238,10 +239,20 @@ export const Dataflows = () => {
       title: 'manageWebformsLeftBarButton'
     };
 
+    const adminValidationStatusBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'validate',
+      isVisible: isAdmin,
+      label: 'validationStatusLeftBarButton',
+      onClick: () => manageDialogs('isValidationStatusDialogVisible', true),
+      title: 'validationStatusLeftBarButton'
+    };
+
     leftSideBarContext.addModels(
       [
         adminCreateNewPermissionsBtn,
         adminManageWebformsBtn,
+        adminValidationStatusBtn,
         createBusinessDataflowBtn,
         createCitizenScienceDataflowBtn,
         createReferenceDataflowBtn,
@@ -914,6 +925,13 @@ export const Dataflows = () => {
         <ManageWebforms
           isDialogVisible={dataflowsState.isManageWebformsDialogVisible}
           onCloseDialog={() => manageDialogs('isManageWebformsDialogVisible', false)}
+        />
+      )}
+
+      {dataflowsState.isValidationStatusDialogVisible && (
+        <Dialog
+          isDialogVisible={dataflowsState.isValidationStatusDialogVisible}
+          onCloseDialog={() => manageDialogs('isValidationStatusDialogVisible', false)}
         />
       )}
 
