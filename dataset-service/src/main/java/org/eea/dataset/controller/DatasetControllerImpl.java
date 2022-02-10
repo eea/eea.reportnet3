@@ -404,7 +404,7 @@ public class DatasetControllerImpl implements DatasetController {
   @PutMapping("/{id}/updateRecord")
   @LockMethod
   @ApiOperation(value = "Update records", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD', 'TESTDATASET_STEWARD')")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated record"),
       @ApiResponse(code = 404, message = "Record not found in dataset"),
       @ApiResponse(code = 400, message = "record informed not found or table is read only")})
@@ -493,7 +493,7 @@ public class DatasetControllerImpl implements DatasetController {
   @HystrixCommand
   @PostMapping("/{datasetId}/table/{tableSchemaId}/record")
   @LockMethod
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD', 'TESTDATASET_STEWARD')")
   @ApiOperation(value = "Insert records in table", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully inserted"), @ApiResponse(
       code = 400,
@@ -855,7 +855,7 @@ public class DatasetControllerImpl implements DatasetController {
   @HystrixCommand
   @PutMapping("/{id}/updateField")
   @LockMethod
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD', 'TESTDATASET_STEWARD')")
   @ApiOperation(value = "Update field", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated field"),
       @ApiResponse(code = 404, message = "Error updating field, field not found"),
