@@ -212,16 +212,17 @@ export const BigButton = ({
     }
   };
 
+  const renderTechnicalAcceptanceTooltip = uniqName => {
+    if (!isNil(technicalAcceptanceStatus) && !isEmpty(technicalAcceptanceStatus)) {
+      return (
+        <ReactTooltip border={true} effect="solid" id={uniqName} place="top">
+          {technicalAcceptanceStatus}
+        </ReactTooltip>
+      );
+    }
+  };
+
   const renderInfoStatusIcon = () => {
-    const renderTechnicalAcceptanceTooltip = uniqName => {
-      if (!isNil(technicalAcceptanceStatus) && !isEmpty(technicalAcceptanceStatus)) {
-        return (
-          <ReactTooltip border={true} effect="solid" id={uniqName} place="top">
-            {technicalAcceptanceStatus}
-          </ReactTooltip>
-        );
-      }
-    };
     if (infoStatus) {
       if (infoStatusIcon) {
         const uniqName = uniqueId('infoStatusTooltip');

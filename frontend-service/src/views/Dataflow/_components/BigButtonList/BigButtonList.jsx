@@ -512,10 +512,7 @@ export const BigButtonList = ({
 
   const onResetRadioButtonOptions = () => {
     setIsManualTechnicalAcceptance(null);
-    setManualTechnicalAcceptanceOptions({
-      Yes: false,
-      No: false
-    });
+    setManualTechnicalAcceptanceOptions({ Yes: false, No: false });
   };
 
   const onChangeRadioButton = value => {

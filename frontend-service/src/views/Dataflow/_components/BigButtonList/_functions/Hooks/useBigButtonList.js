@@ -276,27 +276,42 @@ const useBigButtonList = ({
     const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.dataProviderId)).length === 1;
 
     if (!buttonsVisibility.groupByRepresentative && isUniqRepresentative) {
-      return allDatasets.map(dataset => ({
-        buttonClass: 'dataset',
-        buttonIcon: 'dataset',
-        caption: dataset.datasetName,
-        helpClassName: 'dataflow-dataset-help-step',
-        handleRedirect: () => {
-          handleRedirect(getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true));
-        },
-        layout: 'defaultBigButton',
-        model: [
-          {
-            label: resourcesContext.messages['historicReleases'],
-            command: () => {
-              onShowHistoricReleases('reportingDataset');
-              getDataHistoricReleases(dataset.datasetId, dataset.datasetName);
-            }
+      return allDatasets.map(dataset => {
+        const getTechnicalAcceptanceStatus = () => {
+          if (!dataflowState.data.manualAcceptance) {
+            return null;
           }
-        ],
-        onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
-        visibility: true
-      }));
+
+          return config.datasetStatus[dataset.status].label;
+        };
+
+        const technicalAcceptanceStatus = getTechnicalAcceptanceStatus();
+
+        return {
+          buttonClass: 'dataset',
+          buttonIcon: 'dataset',
+          caption: dataset.datasetName,
+          helpClassName: 'dataflow-dataset-help-step',
+          handleRedirect: () => {
+            handleRedirect(getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true));
+          },
+          infoStatus: dataset.isReleased,
+          infoStatusIcon: dataset.isReleased,
+          layout: 'defaultBigButton',
+          model: [
+            {
+              label: resourcesContext.messages['historicReleases'],
+              command: () => {
+                onShowHistoricReleases('reportingDataset');
+                getDataHistoricReleases(dataset.datasetId, dataset.datasetName);
+              }
+            }
+          ],
+          onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
+          technicalAcceptanceStatus: technicalAcceptanceStatus,
+          visibility: true
+        };
+      });
     }
 
     return uniqBy(allDatasets, 'dataProviderId').map(dataset => {
