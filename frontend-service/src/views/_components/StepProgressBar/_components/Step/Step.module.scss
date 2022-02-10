@@ -1,6 +1,6 @@
 .step {
   list-style-type: none;
-  width: 20%;
+  width: 10%;
   float: left;
   font-size: 12px;
   position: relative;
@@ -11,7 +11,7 @@
   }
   .activeCompleted {
     background-color: var(--step-progress-bar-activeCompleted-bg-color);
-    animation: check 0.1s forwards;
+    animation: check 1s forwards;
     svg {
       color: var(--step-progress-bar-activeCompleted-color);
       font-weight: bold;

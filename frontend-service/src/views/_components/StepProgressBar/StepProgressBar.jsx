@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import uniqueId from 'lodash/uniqueId';
 
@@ -5,7 +6,7 @@ import styles from './StepProgressBar.module.scss';
 
 import { Step } from './_components/Step';
 
-export const StepProgressBar = ({ className = '', steps = [], currentStep }) => {
+export const StepProgressBar = memo(({ className = '', steps = [], currentStep }) => {
   const renderStepProgressBar = () => {
     const renderSteps = () => {
       return steps.map(step => <Step currentStep={currentStep} key={uniqueId('step_')} step={step} />);
@@ -21,4 +22,4 @@ export const StepProgressBar = ({ className = '', steps = [], currentStep }) => 
   };
 
   return renderStepProgressBar();
-};
+});
