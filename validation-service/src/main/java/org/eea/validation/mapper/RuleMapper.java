@@ -5,6 +5,7 @@ import org.bson.types.ObjectId;
 import org.eea.interfaces.dto.dataset.schemas.rule.RuleExpressionDTO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
 import org.eea.mapper.IMapper;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.service.RuleExpressionService;
@@ -89,6 +90,10 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
   public void afterMapping(Rule rule, @MappingTarget RuleVO ruleVO) {
     ruleVO.setRuleId(rule.getRuleId().toString());
     ruleVO.setReferenceId(rule.getReferenceId().toString());
+    if (AutomaticRuleTypeEnum.FIELD_LINK.equals(rule.getAutomaticType())) {
+      ruleVO.setType(EntityTypeEnum.FIELD);
+      ruleVO.setReferenceId(rule.getWhenCondition().substring(21, 45));
+    }
     // We have to convert the rule's when condition, in case of it's a manual and record or field
     // rule
     if (StringUtils.isBlank(ruleVO.getSqlSentence())

@@ -20,6 +20,7 @@ import {
   faCaretRight,
   faChartBar,
   faCheck,
+  faCheckCircle,
   faCircleNotch,
   faClipboard,
   faClipboardList,
@@ -450,6 +451,8 @@ export const AwesomeIcons = icon => {
       return faFileArchive;
     case 'bullhorn':
       return faBullhorn;
+    case 'circleCheck':
+      return faCheckCircle;
     default:
       return faFileAlt;
   }
