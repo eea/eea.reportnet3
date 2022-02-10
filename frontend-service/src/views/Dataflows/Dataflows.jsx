@@ -257,7 +257,7 @@ export const Dataflows = () => {
       isCustodian ? DataflowsRequesterHelpConfig : DataflowsReporterHelpConfig,
       messageStep0
     );
-  }, [dataflowsState]);
+  }, [isCustodian]);
 
   useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
