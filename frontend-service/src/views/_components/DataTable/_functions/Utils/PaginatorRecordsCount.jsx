@@ -1,4 +1,8 @@
-const getPaginatorRecordsCount = ({ dataLength, filteredData, isFiltered, resourcesContext }) => {
+import { useContext } from 'react';
+
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
+const GetPaginatorRecordsCount = ({ dataLength, filteredData, isFiltered }) => {
   const getRecordsDifferentFiltered = () => {
     if (isFiltered && dataLength === filteredData.length) {
       return '';
@@ -15,6 +19,8 @@ const getPaginatorRecordsCount = ({ dataLength, filteredData, isFiltered, resour
     return ` (${messageFiltered.toLowerCase()})`;
   };
 
+  const resourcesContext = useContext(ResourcesContext);
+
   const messageFiltered = resourcesContext.messages['filtered'];
   const messageRecords = resourcesContext.messages['records'];
   const messageTotalRecords = resourcesContext.messages['totalRecords'];
@@ -23,4 +29,4 @@ const getPaginatorRecordsCount = ({ dataLength, filteredData, isFiltered, resour
   return `${getRecordsDifferentFiltered()}${recordsTotal}${getRecordsEqualsFiltered()}`;
 };
 
-export const PaginatorRecordsCount = { getPaginatorRecordsCount };
+export const PaginatorRecordsCount = { GetPaginatorRecordsCount };
