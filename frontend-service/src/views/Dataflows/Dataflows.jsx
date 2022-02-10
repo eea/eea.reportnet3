@@ -257,7 +257,7 @@ export const Dataflows = () => {
       isCustodian ? DataflowsRequesterHelpConfig : DataflowsReporterHelpConfig,
       messageStep0
     );
-  }, [dataflowsState]);
+  }, [isCustodian]);
 
   useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
@@ -484,8 +484,9 @@ export const Dataflows = () => {
       payload: {
         contextCurrentDataflowType: userContext.currentDataflowType,
         data: DataflowsUtils.sortDataflows(changedInitialData),
-        type: tabId,
-        totalRecords: totalRecords
+        filteredRecords,
+        totalRecords,
+        type: tabId
       }
     });
 

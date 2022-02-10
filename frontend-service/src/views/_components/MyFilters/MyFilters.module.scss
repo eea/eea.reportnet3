@@ -99,10 +99,6 @@
     margin: 0 1rem;
   }
 
-  .labelCheckbox {
-    width: 52% !important;
-  }
-
   .label {
     justify-content: space-between;
     clip: auto;
@@ -264,13 +260,30 @@
   width: 100%;
 
   .label {
-    height: auto;
+    height: 3em;
   }
 
   .resetButton {
     grid-column: 5;
     grid-row: 1 / span 2;
     margin: auto;
+  }
+
+  > .block:nth-child(5) {
+    grid-row: 2;
+    grid-column: 1;
+  }
+  > .block:nth-child(6) {
+    grid-row: 2;
+    grid-column: 2;
+  }
+  > .block:nth-child(7) {
+    grid-row: 2;
+    grid-column: 3;
+  }
+  > .block:nth-child(8) {
+    grid-row: 2;
+    grid-column: 4;
   }
 
   .searchInput {
@@ -295,6 +308,9 @@
   .elementFilterSelected {
     display: flex !important;
     align-items: flex-end;
+    label {
+      top: 0.5em !important;
+    }
   }
 }
 
@@ -462,7 +478,7 @@
     display: flex !important;
     flex-direction: column;
     .labelCheckbox {
-      width: 30% !important;
+      margin-right: 1em !important;
     }
     .checkbox {
       margin: 0;

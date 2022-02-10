@@ -29,6 +29,7 @@ import { MapUtils } from 'views/_functions/Utils/MapUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const FieldEditor = ({
+  areCoordinatesDisabled = false,
   cells,
   colsSchema,
   datasetId,
@@ -50,7 +51,6 @@ export const FieldEditor = ({
     { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
     { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
   ];
-
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
   const notificationContext = useContext(NotificationContext);
@@ -119,7 +119,12 @@ export const FieldEditor = ({
 
   let fieldType = {};
 
-  let isReadOnlyField = RecordUtils.getCellInfo(colsSchema, cells.field).readOnly;
+  const isReadOnlyField =
+    RecordUtils.getCellInfo(colsSchema, cells.field).readOnly &&
+    !['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+      RecordUtils.getCellInfo(colsSchema, cells.field).type
+    );
+
   if (!isEmpty(record)) {
     fieldType = RecordUtils.getCellInfo(colsSchema, cells.field).type;
   }
@@ -521,9 +526,10 @@ export const FieldEditor = ({
         return (
           <div className={styles.pointEpsgWrapper}>
             <Coordinates
-              crsDisabled={isMapDisabled}
+              crsDisabled={isMapDisabled || areCoordinatesDisabled}
               crsOptions={crs}
               crsValue={!isNil(currentCRS) ? currentCRS : { label: 'WGS84 - 4326', value: 'EPSG:4326' }}
+              disabled={areCoordinatesDisabled}
               id={cells.field}
               initialGeoJson={RecordUtils.getCellValue(cells, cells.field)}
               isCellEditor={true}
@@ -532,7 +538,14 @@ export const FieldEditor = ({
               onCrsChange={crs => onCrsChange(crs)}
               onFocus={() => onEditorValueFocus(cells, RecordUtils.getCellValue(cells, cells.field))}
               onKeyDown={(e, value) => onCoordinatesKeyDown(e, value)}
-              onMapOpen={() => onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type)}
+              onMapOpen={() =>
+                onMapOpen(
+                  RecordUtils.getCellValue(cells, cells.field),
+                  cells,
+                  type,
+                  RecordUtils.getCellInfo(colsSchema, cells.field).readOnly
+                )
+              }
               xyLabels={currentCRS.value === 'EPSG:3035'}
             />
           </div>
