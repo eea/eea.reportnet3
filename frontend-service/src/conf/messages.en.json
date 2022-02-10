@@ -1490,7 +1490,7 @@
     "yes": "Yes",
     "zipCsvTable": "ZIP (.csv for each table)",
     "deleteUsersNotificationsHeader": "Delete user notifications",
-    "deleteUsersNotificationsConfirm": "Are you sure you want to delete user notifications?",
+    "deleteUsersNotificationsConfirm": "Are you sure you want to delete all user notifications?",
     "deleteUsersNotificationsData": "Delete user notifications",
     "manualTechnicalAcceptanceNoMessage": "Feedback message is empty",
     "manualTechnicalAcceptanceStatus": "Current feedback status does not change",
