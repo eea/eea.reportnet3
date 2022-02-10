@@ -44,8 +44,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableJpaRepositories(entityManagerFactoryRef = "dataSetsEntityManagerFactory",
     transactionManagerRef = "dataSetsTransactionManager",
     basePackages = "org.eea.dataset.persistence.data.repository")
-@EnableWebMvc
-public class DatasetConfiguration implements WebMvcConfigurer {
+public class DatasetConfiguration  {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetConfiguration.class);
@@ -102,18 +101,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   private String orderInserts;
 
   /**
-   * The max file size.
-   */
-  @Value("${spring.servlet.multipart.max-file-size}")
-  private Long maxFileSize;
-
-  /**
-   * The max request size.
-   */
-  @Value("${spring.servlet.multipart.max-request-size}")
-  private Long maxRequestSize;
-
-  /**
    * The username.
    */
   @Value("${spring.datasource.dataset.username}")
@@ -126,15 +113,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   private String password;
 
 
-  /**
-   * Adds the cors mappings.
-   *
-   * @param registry the registry
-   */
-  @Override
-  public void addCorsMappings(final CorsRegistry registry) {
-    registry.addMapping("/**").allowedOrigins("*").allowedMethods("GET", "POST", "PUT", "DELETE");
-  }
+
 
   /**
    * Data source data source.
@@ -192,64 +171,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     final JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
     schemastransactionManager.setEntityManagerFactory(emf.getObject());
     return schemastransactionManager;
-  }
-
-  /**
-   * Multipart resolver.
-   *
-   * @return the multipart resolver
-   */
-  @Bean
-  public MultipartResolver multipartResolver() {
-    CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver();
-    multipartResolver.setMaxUploadSize(maxFileSize);
-    multipartResolver.setMaxUploadSizePerFile(maxRequestSize);
-    return multipartResolver;
-  }
-
-
-
-  /**
-   * Gets the async executor.
-   *
-   * @return the async executor
-   */
-  @Bean
-  public AsyncTaskExecutor streamTaskExecutor() {
-    LOG.info("Creating Async Task Executor");
-    ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    executor.setCorePoolSize(5);
-    executor.setMaxPoolSize(10);
-    executor.setQueueCapacity(25);
-    return executor;
-  }
-
-
-  /**
-   * Configure async support.
-   *
-   * @param configurer the configurer
-   */
-  @Override
-  public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
-    configurer.setDefaultTimeout(7200000).setTaskExecutor(streamTaskExecutor());
-    configurer.registerCallableInterceptors(callableProcessingInterceptor());
-  }
-
-  /**
-   * Callable processing interceptor.
-   *
-   * @return the callable processing interceptor
-   */
-  @Bean
-  public CallableProcessingInterceptor callableProcessingInterceptor() {
-    return new TimeoutCallableProcessingInterceptor() {
-      @Override
-      public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
-        LOG_ERROR.error("Stream download failed by timeout");
-        return super.handleTimeout(request, task);
-      }
-    };
   }
 
   /**

@@ -202,27 +202,33 @@ const parseRequestFilterBy = filterBy => {
     return {};
   }
 
-  const parsedFilterBy = Object.keys(filterBy).map(key => {
-    const results = { [replacements[key] || key]: filterBy[key] };
+  const parsedFilterBy = Object.keys(filterBy)
+    .filter(key => !isNil(filterBy[key]) && filterBy[key] !== '')
+    .map(key => {
+      const results = { [replacements[key] || key]: filterBy[key] };
 
-    if (TextUtils.areEquals(key, 'userRole') || TextUtils.areEquals(key, 'status')) {
-      results[replacements[key] || key] = filterBy[key]?.value;
-    }
-
-    if (TextUtils.areEquals(key, 'creationDate') || TextUtils.areEquals(key, 'expirationDate')) {
-      if (filterBy[key][0] && !filterBy[key][1]) {
-        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-        results[`${replacements[key]}_to`] = `${new Date(dayjs(filterBy[key][0]).endOf('day').format()).getTime()}`;
-      } else {
-        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-        results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
+      if (TextUtils.areEquals(key, 'userRole') || TextUtils.areEquals(key, 'status')) {
+        results[replacements[key] || key] = filterBy[key]?.value;
       }
 
-      delete results[replacements[key]];
-    }
+      if (TextUtils.areEquals(key, 'creationDate') || TextUtils.areEquals(key, 'expirationDate')) {
+        if (filterBy[key][0] && !filterBy[key][1]) {
+          results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+          results[`${replacements[key]}_to`] = `${new Date(dayjs(filterBy[key][0]).endOf('day').format()).getTime()}`;
+        } else {
+          results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+          results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
+        }
 
-    return results;
-  });
+        delete results[replacements[key]];
+      }
+
+      return results;
+    });
+
+  if (isEmpty(parsedFilterBy)) {
+    return {};
+  }
 
   return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
 };
@@ -257,31 +263,41 @@ const parseRequestPublicCountryFilterBy = filterBy => {
     deliveryStatus: 'delivery_status'
   };
 
-  const parsedFilterBy = Object.keys(filterBy).map(key => {
-    const results = { [replacements[key] || key]: filterBy[key] };
+  if (!isNil(filterBy['deliveryStatus']) && isEmpty(filterBy['deliveryStatus'])) {
+    filterBy['deliveryStatus'] = '';
+  }
 
-    if (TextUtils.areEquals(key, 'status')) {
-      results[replacements[key] || key] = filterBy[key]?.value;
-    }
+  const parsedFilterBy = Object.keys(filterBy)
+    .filter(key => !isNil(filterBy[key]) && filterBy[key] !== '')
+    .map(key => {
+      const results = { [replacements[key] || key]: filterBy[key] };
 
-    if (TextUtils.areEquals(key, 'deliveryStatus')) {
-      results[replacements[key] || key] = filterBy[key]?.join(',');
-    }
-
-    if (TextUtils.areEquals(key, 'deadline') || TextUtils.areEquals(key, 'deliveryDate')) {
-      if (filterBy[key][0] && !filterBy[key][1]) {
-        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-        results[`${replacements[key]}_to`] = `${new Date(dayjs(filterBy[key][0]).endOf('day').format()).getTime()}`;
-      } else {
-        results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-        results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
+      if (TextUtils.areEquals(key, 'status')) {
+        results[replacements[key] || key] = filterBy[key]?.value;
       }
 
-      delete results[replacements[key]];
-    }
+      if (TextUtils.areEquals(key, 'deliveryStatus')) {
+        results[replacements[key] || key] = filterBy[key]?.join(',');
+      }
 
-    return results;
-  });
+      if (TextUtils.areEquals(key, 'deadline') || TextUtils.areEquals(key, 'deliveryDate')) {
+        if (filterBy[key][0] && !filterBy[key][1]) {
+          results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+          results[`${replacements[key]}_to`] = `${new Date(dayjs(filterBy[key][0]).endOf('day').format()).getTime()}`;
+        } else {
+          results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
+          results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
+        }
+
+        delete results[replacements[key]];
+      }
+
+      return results;
+    });
+
+  if (isEmpty(parsedFilterBy)) {
+    return {};
+  }
 
   return parsedFilterBy.reduce((a, b) => Object.assign({}, a, b));
 };

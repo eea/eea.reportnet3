@@ -1488,6 +1488,15 @@
     "x": "X",
     "y": "Y",
     "yes": "Yes",
-    "zipCsvTable": "ZIP (.csv for each table)"
+    "zipCsvTable": "ZIP (.csv for each table)",
+    "deleteUsersNotificationsHeader": "Delete user notifications",
+    "deleteUsersNotificationsConfirm": "Are you sure you want to delete all user notifications?",
+    "deleteUsersNotificationsData": "Delete user notifications",
+    "manualTechnicalAcceptanceNoMessage": "Feedback message is empty",
+    "manualTechnicalAcceptanceStatus": "Current feedback status does not change",
+    "deleteAllLeadReportersDialogHeader": "Delete all lead reporters",
+    "delateAllLeadReportersDialogMessage": "Are you sure you want to delete all lead reporters?",
+    "deleteAllLeadReportersButton": "Delete all lead reporters",
+    "deleteUserNotificationsError": "Error deleting user notifications"
   }
 }
