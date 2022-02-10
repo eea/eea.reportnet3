@@ -2,6 +2,7 @@ import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } 
 import { useParams } from 'react-router-dom';
 import { useResetRecoilState } from 'recoil';
 
+import findIndex from 'lodash/findIndex';
 import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
 import pull from 'lodash/pull';
@@ -696,6 +697,11 @@ export const Dataflows = () => {
         label: resourcesContext.messages['creationDateFilterLabel'],
         type: 'DATE'
       });
+    }
+
+    const userRoleFilterIndex = findIndex(filters, filter => filter.key === 'userRole');
+    if (isAdmin) {
+      filters.splice(userRoleFilterIndex, 1);
     }
 
     return filters;
