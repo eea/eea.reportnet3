@@ -24,7 +24,14 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingStatus, setLoadingStatus] = useState('idle');
-  const [validationStatus, setValidationStatus] = useState({ id: null, name: '', status: '' });
+  const [validationStatus, setValidationStatus] = useState({
+    id: null,
+    name: '',
+    status: '',
+    user: '',
+    dataset: '',
+    dataflow: null
+  });
   const [validationsStatuses, setValidationsStatusesList] = useState([]);
 
   //   BE:
@@ -39,12 +46,19 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     getValidationsStatuses();
   }, []);
 
-  const getValidationsStatuses = async () => {
+  // const getValidationsStatuses = async () => {
+  const getValidationsStatuses = () => {
     setLoadingStatus('pending');
 
     try {
       // const data = await WebformService.getAll(); // TODO SERVICE
-      const data = [];
+      const data = [
+        { id: 10, name: 'validation 1', status: 'importing', user: 'igor' },
+        { id: 20, name: 'validation 2', status: 'imported', user: 'pablo' },
+        { id: 30, name: 'validation 3', status: 'validating', user: 'miguel' },
+        { id: 40, name: 'validation 4', status: 'validated', user: 'miriam' },
+        { id: 50, name: 'validation 4', status: 'in queue', user: 'mikel' }
+      ];
       setValidationsStatusesList(data);
       setLoadingStatus('success');
     } catch (error) {
@@ -94,6 +108,8 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const getTableColumns = () => {
     const columns = [
       { key: 'name', header: resourcesContext.messages['name'] },
+      { key: 'status', header: resourcesContext.messages['status'] },
+      { key: 'user', header: resourcesContext.messages['user'] },
       {
         key: 'actions',
         header: resourcesContext.messages['actions'],
@@ -186,7 +202,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         className="responsiveDialog"
         footer={dialogFooter}
         // header={resourcesContext.messages['manageWebformsConfiguration']}
-        header="Validations Status"
+        header="Validations Statuses"
         modal
         onHide={onCloseDialog}
         visible={isDialogVisible}>
@@ -204,7 +220,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
           onHide={onHideDeleteDialog}
           visible={isDeleteDialogVisible}>
           {/* {resourcesContext.messages['confirmDeleteValidationStatus']} */}
-          Remove validation fom queue this validation
+          Remove this validation fom queue?
         </ConfirmDialog>
       )}
     </Fragment>
