@@ -11,6 +11,11 @@
   color: rgba(var(--statusBox-blocker-color), 0.8);
 }
 
+.closed {
+  background-color: var(--c-gray-75);
+  color: var(--c-white-color);
+}
+
 .correct {
   background-color: var(--statusBox-true-bg);
   color: var(--statusBox-true-color);
