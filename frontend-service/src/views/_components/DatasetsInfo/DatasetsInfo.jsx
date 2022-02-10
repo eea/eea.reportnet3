@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -106,17 +106,12 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     return (
       <DataTable
         paginator={true}
-        paginatorRight={
-          !isNil(filteredData) &&
-          PaginatorRecordsCount.getPaginatorRecordsCount({
-            dataLength: datasetsInfo.length,
-            filteredDataLength: filteredData.length,
-            isFiltered,
-            messageFiltered: resourcesContext.messages['filtered'],
-            messageRecords: resourcesContext.messages['records'],
-            messageTotalRecords: resourcesContext.messages['totalRecords']
-          })
-        }
+        paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
+          dataLength: datasetsInfo.length,
+          filteredData,
+          isFiltered,
+          resourcesContext
+        })}
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['datasetsInfo']}

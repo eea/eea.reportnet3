@@ -732,17 +732,12 @@ export const QCList = ({
             onSort={event => onSort(event)}
             paginator
             paginatorDisabled={tabsValidationsState.editingRows.length > 0}
-            paginatorRight={
-              !isNil(filteredData) &&
-              PaginatorRecordsCount.getPaginatorRecordsCount({
-                dataLength: tabsValidationsState.validationList.validations.length,
-                filteredDataLength: filteredData.length,
-                isFiltered,
-                messageFiltered: resourcesContext.messages['filtered'],
-                messageRecords: resourcesContext.messages['records'],
-                messageTotalRecords: resourcesContext.messages['totalRecords']
-              })
-            }
+            paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
+              dataLength: tabsValidationsState.validationList.validations.length,
+              filteredData,
+              isFiltered,
+              resourcesContext
+            })}
             quickEditRowInfo={{
               updatedRow: validationContext.updatedRuleId,
               deletedRow: tabsValidationsState.deletedRuleId,

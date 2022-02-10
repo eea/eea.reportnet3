@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -51,11 +51,9 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
   const getPaginatorRight = () =>
     PaginatorRecordsCount.getPaginatorRecordsCount({
       dataLength: cloneSchemasState.allDataflows.length,
-      filteredDataLength: filteredData.length,
+      filteredData,
       isFiltered,
-      messageFiltered: resourcesContext.messages['filtered'],
-      messageRecords: resourcesContext.messages['records'],
-      messageTotalRecords: resourcesContext.messages['totalRecords']
+      resourcesContext
     });
 
   const isLoading = value => cloneSchemasDispatch({ type: 'IS_LOADING', payload: { value } });
@@ -124,32 +122,37 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
         { type: 'DATE', key: 'expirationDate', label: resourcesContext.messages['expirationDate'] }
       ];
 
-  const renderData = () =>
-    userContext.userProps.listView ? (
-      <TableViewSchemas
-        checkedDataflow={cloneSchemasState.chosenDataflow}
-        data={filteredData}
-        handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
-        isReferenceDataflow={isReferenceDataflow}
-        onChangePagination={onChangePagination}
-        onSelectDataflow={onSelectDataflow}
-        pagination={cloneSchemasState.pagination}
-        paginatorRightText={getPaginatorRight()}
-      />
-    ) : (
-      <CardsView
-        checkedCard={cloneSchemasState.chosenDataflow}
-        contentType={'Dataflows'}
-        data={filteredData}
-        handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
-        isReferenceDataflow={isReferenceDataflow}
-        onChangePagination={onChangePagination}
-        onSelectCard={onSelectDataflow}
-        pagination={cloneSchemasState.pagination}
-        paginatorRightText={getPaginatorRight()}
-        type={'cloneSchemas'}
-      />
-    );
+  const renderData = () => {
+    if (userContext.userProps.listView) {
+      return (
+        <TableViewSchemas
+          checkedDataflow={cloneSchemasState.chosenDataflow}
+          data={filteredData}
+          handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
+          isReferenceDataflow={isReferenceDataflow}
+          onChangePagination={onChangePagination}
+          onSelectDataflow={onSelectDataflow}
+          pagination={cloneSchemasState.pagination}
+          paginatorRightText={getPaginatorRight()}
+        />
+      );
+    } else {
+      return (
+        <CardsView
+          checkedCard={cloneSchemasState.chosenDataflow}
+          contentType={'Dataflows'}
+          data={filteredData}
+          handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
+          isReferenceDataflow={isReferenceDataflow}
+          onChangePagination={onChangePagination}
+          onSelectCard={onSelectDataflow}
+          pagination={cloneSchemasState.pagination}
+          paginatorRightText={getPaginatorRight()}
+          type={'cloneSchemas'}
+        />
+      );
+    }
+  };
 
   const cloneSchemaStyles = {
     justifyContent:

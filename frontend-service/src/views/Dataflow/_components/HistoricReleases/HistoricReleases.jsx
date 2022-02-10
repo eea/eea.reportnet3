@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -277,11 +277,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         paginator={true}
         paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
           dataLength: historicReleasesState.data.length,
-          filteredDataLength: filteredData.length,
+          filteredData,
           isFiltered,
-          messageFiltered: resourcesContext.messages['filtered'],
-          messageRecords: resourcesContext.messages['records'],
-          messageTotalRecords: resourcesContext.messages['totalRecords']
+          resourcesContext
         })}
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}

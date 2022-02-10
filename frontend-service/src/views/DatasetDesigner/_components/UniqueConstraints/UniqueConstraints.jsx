@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
@@ -193,11 +193,9 @@ export const UniqueConstraints = ({
         paginator={true}
         paginatorRight={PaginatorRecordsCount.getPaginatorRecordsCount({
           dataLength: constraintsState.data.length,
-          filteredDataLength: filteredData.length,
+          filteredData,
           isFiltered,
-          messageFiltered: resourcesContext.messages['filtered'],
-          messageRecords: resourcesContext.messages['records'],
-          messageTotalRecords: resourcesContext.messages['totalRecords']
+          resourcesContext
         })}
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
