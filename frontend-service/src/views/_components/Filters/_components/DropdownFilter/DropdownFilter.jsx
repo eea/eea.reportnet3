@@ -24,19 +24,6 @@ export const DropdownFilter = ({ hasCustomSort, isLoading, onFilterData, onSort,
     setFilterByAllKeys(prevState => uniq([...prevState, option.key]));
   }, [recoilId]);
 
-  const getPanelClassName = () => {
-    if (
-      recoilId !== 'reporting' &&
-      recoilId !== 'business' &&
-      recoilId !== 'citizenScience' &&
-      recoilId !== 'reference'
-    ) {
-      return undefined;
-    }
-
-    return recoilId;
-  };
-
   const onFilter = async value => {
     setFilterBy({ [option.key]: value });
 
