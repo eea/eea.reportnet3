@@ -22,24 +22,19 @@ import { NotificationService } from 'services/NotificationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
 export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
 
   const [columns, setColumns] = useState([]);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const [paginationInfo, setPaginationInfo] = useState({
-    recordsPerPage: userContext.userProps.rowsPerPage,
-    firstPageRecord: 0
-  });
+  const [paginationInfo, setPaginationInfo] = useState({ recordsPerPage: 10, firstPageRecord: 0 });
   const [totalRecords, setTotalRecords] = useState(0);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
@@ -73,7 +68,7 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
     ));
 
     setColumns(columnsArray);
-  }, [userContext]);
+  }, []);
 
   useEffect(() => {
     if (!isEmpty(columns)) {
