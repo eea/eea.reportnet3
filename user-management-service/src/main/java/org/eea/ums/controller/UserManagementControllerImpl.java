@@ -22,6 +22,7 @@ import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
+import org.eea.interfaces.vo.ums.UserNationalCoordinatorVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.UserRoleVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
@@ -912,6 +913,43 @@ public class UserManagementControllerImpl implements UserManagementController {
           "Trying to download a file generated during the export users by country process but the file is not found, dataflowId: %s + filename: %s",
           dataflowId, fileName));
     }
+  }
+
+  @Override
+  @PreAuthorize("hasRole('ADMIN')")
+  @ApiOperation(value = "Create new user national coordinator and assign permissions",
+      hidden = true)
+  @PostMapping("/nationalCoordinator")
+  public void createNationalCoordinator(
+      @RequestBody UserNationalCoordinatorVO nationalCoordinatorVO) {
+    // TODO Mock endpoint
+
+  }
+
+  @Override
+  @PreAuthorize("hasRole('ADMIN')")
+  @ApiOperation(value = "Get list of national coordinators", hidden = true)
+  @GetMapping("/nationalCoordinator")
+  public List<UserNationalCoordinatorVO> getUserNationalCoordinator() {
+    // TODO Mock endpoint
+    UserNationalCoordinatorVO userNationalCoordinator = new UserNationalCoordinatorVO();
+    userNationalCoordinator.setCountryCode("AT");
+    userNationalCoordinator.setEmail("bea.custodian@reportnet.net");
+    UserNationalCoordinatorVO userNationalCoordinator2 = new UserNationalCoordinatorVO();
+    userNationalCoordinator2.setCountryCode("ES");
+    userNationalCoordinator2.setEmail("sandra.custodian@reportnet.net");
+    return Arrays.asList(userNationalCoordinator, userNationalCoordinator2);
+  }
+
+
+  @Override
+  @PreAuthorize("hasRole('ADMIN')")
+  @ApiOperation(value = "Delete permissions national coordinators", hidden = true)
+  @DeleteMapping("/nationalCoordinator")
+  public void DeleteNationalCoordinator(
+      @RequestBody UserNationalCoordinatorVO nationalCoordinatorVO) {
+    // TODO Mock endpoint
+
   }
 
 
