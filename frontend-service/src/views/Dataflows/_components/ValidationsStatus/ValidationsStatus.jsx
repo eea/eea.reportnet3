@@ -31,23 +31,20 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const [validationsStatuses, setValidationsStatusesList] = useState([]);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
-
-  // id - not showing, dataflow name + id, dataset  name + id, user, status, queued date, process starting date and process finishing date.
-  // dataflow/dataset estructura: dataflowId, dataflowName, datasetId, datasetName
-
-  // filtrar por dataflow id y por usuario,
-  // paginado
+  const { resetFilterState } = useApplyFilters('validationsStatuses');
+  // TODO Filter : dataflowId, user
+  // TODO Pagination
 
   useEffect(() => {
     getValidationsStatuses();
   }, []);
 
-  // const getValidationsStatuses = async () => {
+  // const getValidationsStatuses = async () => { // TODO MAKE ASYNC
   const getValidationsStatuses = () => {
     setLoadingStatus('pending');
 
     try {
-      // const data = await ValidationService.getAllStatuses(); // TODO SERVICE
+      // const data = await ValidationService.getAllStatuses(); // TODO CORRECT SERVICE CALL
       const data = [
         {
           id: 10,
@@ -126,13 +123,13 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     setIsDeleteDialogVisible(false);
 
     try {
-      // await ValidationService.removeFromQueue(validationStatusId); // TODO SERVICE
+      // await ValidationService.removeFromQueue(validationStatusId); // TODO CORRECT SERVICE CALL
       getValidationsStatuses();
     } catch (error) {
       console.error('ValidationsStatus - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
 
-      // notificationContext.add({ status: 'DELETE_VALIDATION_FROM_QUEUE_ERROR' }, true); //TODO NOTIFICATIONS
+      // notificationContext.add({ status: 'DELETE_VALIDATION_FROM_QUEUE_ERROR' }, true); //TODO ADD NOTIFICATIONS
     } finally {
       setValidationStatusId(null);
     }
@@ -156,17 +153,17 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
       { key: 'status', header: resourcesContext.messages['status'] },
       {
         key: 'queuedDate',
-        header: resourcesContext.messages['queuedDate'], // TODO ADD MESSAGE
+        header: resourcesContext.messages['queuedDate'],
         template: validation => getDateTemplate(validation, 'queuedDate')
       },
       {
         key: 'processStartingDate',
-        header: resourcesContext.messages['processStartingDate'], // TODO ADD MESSAGE
+        header: resourcesContext.messages['processStartingDate'],
         template: validation => getDateTemplate(validation, 'processStartingDate')
       },
       {
         key: 'processFinishingDate',
-        header: resourcesContext.messages['processFinishingDate'], // TODO ADD MESSAGE
+        header: resourcesContext.messages['processFinishingDate'],
         template: validation => getDateTemplate(validation, 'processFinishingDate')
       },
       {
@@ -272,10 +269,9 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     <Fragment>
       <Dialog
         blockScroll={false}
-        // className="responsiveDialog"
+        className="responsiveBigDialog"
         footer={dialogFooter}
-        // header={resourcesContext.messages['manageWebformsConfiguration']}
-        header="Validations Statuses" //TODO ADD MESSAGE
+        header={resourcesContext.messages['validationsStatusesDialogHeader']}
         modal
         onHide={onCloseDialog}
         visible={isDialogVisible}>
@@ -284,16 +280,14 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
 
       {isDeleteDialogVisible && (
         <ConfirmDialog
-          classNameConfirm={'p-button-danger'}
-          // header={resourcesContext.messages['deleteValidationStatus']}
-          header="Remove from queue" //TODO ADD MESSAGE
+          classNameConfirm="p-button-danger"
+          header={resourcesContext.messages['validationRemoveQueueDialogHeader']}
           labelCancel={resourcesContext.messages['cancel']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteDialog}
           onHide={onHideDeleteDialog}
           visible={isDeleteDialogVisible}>
-          {/* {resourcesContext.messages['confirmDeleteValidationStatus']} // TODO ADD MESSAGE*/}
-          Remove this validation fom queue?
+          {resourcesContext.messages['validationRemoveQueueDialogContent']}
         </ConfirmDialog>
       )}
     </Fragment>
