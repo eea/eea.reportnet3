@@ -226,7 +226,6 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       stringQuery.append(QUERY_JSON);
       createQuery(isPublic, filters, orderHeader, asc, stringQuery, type, dataflowIds,
           pinnedDataflows);
-      System.out.println(stringQuery.toString());
       Query query = entityManager.createNativeQuery(stringQuery.toString(), Dataflow.class);
       setParameters(json, isPublic, filters, query, type, dataflowIds, pinnedDataflows);
 
