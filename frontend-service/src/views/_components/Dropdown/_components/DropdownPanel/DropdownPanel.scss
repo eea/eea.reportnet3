@@ -14,3 +14,10 @@
 .p-dropdown-items-wrapper::-webkit-scrollbar-thumb:hover {
   background: var(--c-gray-50);
 }
+
+.reporting,
+.business,
+.citizenScience,
+.reference {
+  z-index: 3000 !important;
+}
