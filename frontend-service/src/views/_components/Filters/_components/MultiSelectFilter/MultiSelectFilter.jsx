@@ -30,6 +30,19 @@ export const MultiSelectFilter = ({ hasCustomSort, isLoading, onFilterData, onSo
     recoilId
   });
 
+  const getPanelClassName = () => {
+    if (
+      recoilId !== 'reporting' &&
+      recoilId !== 'business' &&
+      recoilId !== 'citizenScience' &&
+      recoilId !== 'reference'
+    ) {
+      return undefined;
+    }
+
+    return recoilId;
+  };
+
   const renderTemplate = (template, type) => {
     if (template === 'LevelError') {
       return <LevelError type={type} />;
@@ -68,6 +81,7 @@ export const MultiSelectFilter = ({ hasCustomSort, isLoading, onFilterData, onSo
         onChange={event => onFilter(event.target.value)}
         optionLabel="type"
         options={option.multiSelectOptions || MultiSelectFilterUtils.getOptionsTypes(data, option.key)}
+        panelClassName={getPanelClassName()}
         value={filterBy[option.key]}
       />
     </div>
