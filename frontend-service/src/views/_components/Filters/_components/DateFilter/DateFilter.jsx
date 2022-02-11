@@ -17,6 +17,8 @@ import { filterByStore } from 'views/_components/Filters/_functions/Stores/filte
 
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
+import { ClassNamesUtils } from 'views/_components/Filters/_functions/Utils/ClassNamesUtils';
+
 export const DateFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, option, recoilId }) => {
   const { userProps } = useContext(UserContext);
 
@@ -53,14 +55,6 @@ export const DateFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, opt
       document.removeEventListener('touchstart', listener);
     };
   }, [calendarRefs, isLabelAnimated, filterBy]);
-
-  const getPanelClassName = () => {
-    if (recoilId !== 'reporting' && recoilId !== 'business' && recoilId !== 'citizenScience') {
-      return undefined;
-    }
-
-    return recoilId;
-  };
 
   const onFilter = async value => {
     setFilterBy({ [option.key]: value });
@@ -111,7 +105,7 @@ export const DateFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, opt
           monthNavigator={true}
           onChange={event => onFilter(parseDateValues(event.target.value))}
           onFocus={() => setIsLabelAnimated(true)}
-          panelClassName={getPanelClassName()}
+          panelClassName={ClassNamesUtils.getPanelClassName(recoilId)}
           readOnlyInput={true}
           selectionMode="range"
           value={parseDateValues(filterBy[option.key])}

@@ -15,6 +15,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilters';
 
+import { ClassNamesUtils } from 'views/_components/Filters/_functions/Utils/ClassNamesUtils';
 import { MultiSelectFilterUtils } from './_functions/Utils/MultiSelectFilterUtils';
 
 export const MultiSelectFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, option, recoilId }) => {
@@ -29,19 +30,6 @@ export const MultiSelectFilter = ({ hasCustomSort, isLoading, onFilterData, onSo
     option,
     recoilId
   });
-
-  const getPanelClassName = () => {
-    if (
-      recoilId !== 'reporting' &&
-      recoilId !== 'business' &&
-      recoilId !== 'citizenScience' &&
-      recoilId !== 'reference'
-    ) {
-      return undefined;
-    }
-
-    return recoilId;
-  };
 
   const renderTemplate = (template, type) => {
     if (template === 'LevelError') {
@@ -81,7 +69,7 @@ export const MultiSelectFilter = ({ hasCustomSort, isLoading, onFilterData, onSo
         onChange={event => onFilter(event.target.value)}
         optionLabel="type"
         options={option.multiSelectOptions || MultiSelectFilterUtils.getOptionsTypes(data, option.key)}
-        panelClassName={getPanelClassName()}
+        panelClassName={ClassNamesUtils.getPanelClassName(recoilId)}
         value={filterBy[option.key]}
       />
     </div>
