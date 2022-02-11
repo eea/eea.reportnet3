@@ -8,7 +8,7 @@ const getPanelClassName = recoilId => {
     return undefined;
   }
 
-  return recoilId;
+  return 'overWriteZindexPanel';
 };
 
 export const ClassNamesUtils = { getPanelClassName };
