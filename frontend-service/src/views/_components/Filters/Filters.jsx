@@ -59,7 +59,7 @@ export const Filters = ({
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
-  const getPanelClassName = recoilId => {
+  const getPanelClassName = () => {
     if (
       recoilId !== 'reporting' &&
       recoilId !== 'business' &&
@@ -69,7 +69,7 @@ export const Filters = ({
       return undefined;
     }
 
-    return 'overWriteZindexPanel';
+    return 'overwriteZindexPanel';
   };
 
   const onFilterFilteredData = useRecoilCallback(
@@ -162,7 +162,7 @@ export const Filters = ({
         onFilterData={onFilterFilteredData}
         onSort={onSort}
         option={option}
-        panelClassName={getPanelClassName(recoilId)}
+        panelClassName={getPanelClassName()}
         recoilId={recoilId}
       />
     );
