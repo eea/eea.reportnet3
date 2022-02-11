@@ -53,24 +53,12 @@ export const Filters = ({
   onReset = () => {},
   onSort,
   options = [],
+  panelClassName,
   recoilId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
-
-  const getPanelClassName = () => {
-    if (
-      recoilId !== 'reporting' &&
-      recoilId !== 'business' &&
-      recoilId !== 'citizenScience' &&
-      recoilId !== 'reference'
-    ) {
-      return undefined;
-    }
-
-    return 'overwriteZindexPanel';
-  };
 
   const onFilterFilteredData = useRecoilCallback(
     ({ snapshot, set }) =>
@@ -162,7 +150,7 @@ export const Filters = ({
         onFilterData={onFilterFilteredData}
         onSort={onSort}
         option={option}
-        panelClassName={getPanelClassName()}
+        panelClassName={panelClassName}
         recoilId={recoilId}
       />
     );
