@@ -3,12 +3,14 @@ import { useContext } from 'react';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const PaginatorRecordsCount = ({ dataLength, filteredData, isFiltered }) => {
+  const resourcesContext = useContext(ResourcesContext);
+
   const getRecordsDifferentFiltered = () => {
     if (!isFiltered || dataLength === filteredData.length) {
       return '';
     }
 
-    return `${messageFiltered}: ${filteredData.length} | `;
+    return `${resourcesContext.messages['filtered']}: ${filteredData.length} | `;
   };
 
   const getRecordsEqualsFiltered = () => {
@@ -16,15 +18,12 @@ export const PaginatorRecordsCount = ({ dataLength, filteredData, isFiltered }) 
       return '';
     }
 
-    return ` (${messageFiltered.toLowerCase()})`;
+    return ` (${resourcesContext.messages['filtered'].toLowerCase()})`;
   };
 
-  const resourcesContext = useContext(ResourcesContext);
-
-  const messageFiltered = resourcesContext.messages['filtered'];
-  const messageRecords = resourcesContext.messages['records'];
-  const messageTotalRecords = resourcesContext.messages['totalRecords'];
-  const recordsTotal = `${messageTotalRecords} ${dataLength} ${messageRecords.toLowerCase()}`;
+  const recordsTotal = `${resourcesContext.messages['totalRecords']} ${dataLength} ${resourcesContext.messages[
+    'records'
+  ].toLowerCase()}`;
 
   return `${getRecordsDifferentFiltered()}${recordsTotal}${getRecordsEqualsFiltered()}`;
 };
