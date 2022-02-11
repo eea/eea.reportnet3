@@ -54,6 +54,14 @@ export const DateFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, opt
     };
   }, [calendarRefs, isLabelAnimated, filterBy]);
 
+  const getPanelClassName = () => {
+    if (recoilId !== 'reporting' && recoilId !== 'business' && recoilId !== 'citizenScience') {
+      return undefined;
+    }
+
+    return recoilId;
+  };
+
   const onFilter = async value => {
     setFilterBy({ [option.key]: value });
 
@@ -103,6 +111,7 @@ export const DateFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, opt
           monthNavigator={true}
           onChange={event => onFilter(parseDateValues(event.target.value))}
           onFocus={() => setIsLabelAnimated(true)}
+          panelClassName={getPanelClassName()}
           readOnlyInput={true}
           selectionMode="range"
           value={parseDateValues(filterBy[option.key])}
