@@ -699,11 +699,6 @@ export const Dataflows = () => {
       });
     }
 
-    const userRoleFilterIndex = findIndex(filters, filter => filter.key === 'userRole');
-    if (isAdmin) {
-      filters.splice(userRoleFilterIndex, 1);
-    }
-
     return filters;
   };
 
