@@ -4,7 +4,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const PaginatorRecordsCount = ({ dataLength, filteredData, isFiltered }) => {
   const getRecordsDifferentFiltered = () => {
-    if (isFiltered && dataLength === filteredData.length) {
+    if (!isFiltered || dataLength === filteredData.length) {
       return '';
     }
 
@@ -12,7 +12,7 @@ export const PaginatorRecordsCount = ({ dataLength, filteredData, isFiltered }) 
   };
 
   const getRecordsEqualsFiltered = () => {
-    if (isFiltered && dataLength !== filteredData.length) {
+    if (!isFiltered || dataLength !== filteredData.length) {
       return '';
     }
 
