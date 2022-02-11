@@ -22,6 +22,7 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const IntegrationsList = ({
@@ -125,19 +126,6 @@ export const IntegrationsList = ({
     ));
   };
 
-  const getPaginatorRecordsCount = () => (
-    <Fragment>
-      {isFiltered && integrationListState.data.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {integrationListState.data.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-      {isFiltered && integrationListState.data.length === filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
-    </Fragment>
-  );
-
   const integrationId = value => integrationListDispatch({ type: 'ON_LOAD_INTEGRATION_ID', payload: { value } });
 
   const isDataUpdated = value => integrationListDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
@@ -236,7 +224,13 @@ export const IntegrationsList = ({
           autoLayout={true}
           onRowClick={event => integrationId(event.data.integrationId)}
           paginator={true}
-          paginatorRight={getPaginatorRecordsCount()}
+          paginatorRight={
+            <PaginatorRecordsCount
+              dataLength={integrationListState.data.length}
+              filteredData={filteredData}
+              isFiltered={isFiltered}
+            />
+          }
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           summary={resourcesContext.messages['externalIntegrations']}
