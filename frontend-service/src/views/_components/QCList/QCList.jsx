@@ -323,12 +323,18 @@ export const QCList = ({
         className: styles.descriptionColumn
       },
       { key: 'message', header: resourcesContext.messages['message'] },
-      { key: 'expressionText', header: resourcesContext.messages['expressionText'], template: getExpressionsTemplate },
-      {
+      { key: 'expressionText', header: resourcesContext.messages['expressionText'], template: getExpressionsTemplate }
+    ];
+
+    if (isDatasetDesigner) {
+      columns.push({
         key: 'sqlSentenceCost',
         header: resourcesContext.messages['sqlSentenceCost'],
         template: getSqlSentenceCostTemplate
-      },
+      });
+    }
+
+    columns.push(
       { key: 'entityType', header: resourcesContext.messages['entityType'], className: styles.entityTypeColumn },
       {
         key: 'levelError',
@@ -337,7 +343,7 @@ export const QCList = ({
         editor: getDropdownEditor,
         className: styles.levelErrorColumn
       }
-    ];
+    );
 
     if (isDatasetDesigner) {
       columns.push(
