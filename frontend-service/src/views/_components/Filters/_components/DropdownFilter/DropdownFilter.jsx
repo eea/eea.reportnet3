@@ -39,7 +39,7 @@ export const DropdownFilter = ({ hasCustomSort, isLoading, onFilterData, onSort,
   };
 
   return (
-    <div className={`${styles.block}`} key={option.key}>
+    <div className={`${styles.block} ${option.label === 'Status' && styles.roleFilter}`} key={option.key}>
       <SortButton
         id={option.key}
         isLoading={isLoading}
