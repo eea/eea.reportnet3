@@ -55,8 +55,6 @@ export const QCList = ({
 
   const { filteredData, isFiltered } = useFilters(`qcList_${dataset.datasetId}`);
 
-  const { GetPaginatorRecordsCount } = PaginatorRecordsCount;
-
   const [tabsValidationsState, tabsValidationsDispatch] = useReducer(qcListReducer, {
     deletedRuleId: null,
     editingRows: [],
@@ -735,7 +733,7 @@ export const QCList = ({
             paginator
             paginatorDisabled={tabsValidationsState.editingRows.length > 0}
             paginatorRight={
-              <GetPaginatorRecordsCount
+              <PaginatorRecordsCount
                 dataLength={tabsValidationsState.validationList.validations.length}
                 filteredData={filteredData}
                 isFiltered={isFiltered}

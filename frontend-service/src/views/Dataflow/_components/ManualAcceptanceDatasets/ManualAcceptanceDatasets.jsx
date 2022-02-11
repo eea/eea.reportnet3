@@ -39,8 +39,6 @@ export const ManualAcceptanceDatasets = ({
 
   const { filteredData, isFiltered } = useFilters('manualAcceptanceDatasets');
 
-  const { GetPaginatorRecordsCount } = PaginatorRecordsCount;
-
   const manualAcceptanceInitialState = {
     data: [],
     filtered: false,
@@ -189,7 +187,7 @@ export const ManualAcceptanceDatasets = ({
           onRowClick={event => getManageAcceptanceDataset(event.data)}
           paginator={true}
           paginatorRight={
-            <GetPaginatorRecordsCount
+            <PaginatorRecordsCount
               dataLength={manualAcceptanceDatasetsState.data.length}
               filteredData={filteredData}
               isFiltered={isFiltered}

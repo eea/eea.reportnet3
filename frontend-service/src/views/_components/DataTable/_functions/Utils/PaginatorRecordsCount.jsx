@@ -2,7 +2,7 @@ import { useContext } from 'react';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const GetPaginatorRecordsCount = ({ dataLength, filteredData, isFiltered }) => {
+export const PaginatorRecordsCount = ({ dataLength, filteredData, isFiltered }) => {
   const getRecordsDifferentFiltered = () => {
     if (isFiltered && dataLength === filteredData.length) {
       return '';
@@ -28,5 +28,3 @@ const GetPaginatorRecordsCount = ({ dataLength, filteredData, isFiltered }) => {
 
   return `${getRecordsDifferentFiltered()}${recordsTotal}${getRecordsEqualsFiltered()}`;
 };
-
-export const PaginatorRecordsCount = { GetPaginatorRecordsCount };

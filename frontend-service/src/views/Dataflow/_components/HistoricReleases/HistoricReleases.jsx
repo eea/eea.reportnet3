@@ -45,8 +45,6 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const { filteredData, isFiltered } = useFilters('historicReleases');
 
-  const { GetPaginatorRecordsCount } = PaginatorRecordsCount;
-
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
   useEffect(() => {
@@ -278,7 +276,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         }
         paginator={true}
         paginatorRight={
-          <GetPaginatorRecordsCount
+          <PaginatorRecordsCount
             dataLength={historicReleasesState.data.length}
             filteredData={filteredData}
             isFiltered={isFiltered}
