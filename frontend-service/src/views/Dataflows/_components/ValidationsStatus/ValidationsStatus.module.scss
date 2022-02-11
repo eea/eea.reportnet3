@@ -16,13 +16,10 @@
     top: 0;
     left: 0;
   }
-  button {
-    padding: 0.5em 1em;
-  }
 }
 
 .actionsColumn {
-  width: 133px;
+  width: 44px;
 }
 
 .footer {
@@ -33,40 +30,12 @@
   margin-left: auto !important;
 }
 
-.actionButton {
+.deleteRowButton {
   border: 1px solid var(--general-border-color) !important;
+  color: var(--errors) !important;
   @include shadow-0em;
   margin-left: 3px !important;
   &:enabled:hover {
     border-color: var(--button-secondary-border-color-hover) !important;
   }
-}
-
-.deleteRowButton {
-  @extend .actionButton;
-  color: var(--errors) !important;
-}
-
-.addEditDialog {
-  min-width: 400px;
-  max-width: 650px;
-}
-
-.inputFile,
-.typeDropdown {
-  margin-top: 1rem !important;
-}
-
-.typeDropdown {
-  width: 100%;
-}
-
-.inputError,
-.typeError {
-  border: var(--inputtext-border-error) !important;
-  box-shadow: var(--inputtext-box-shadow-focus-error) !important;
-}
-
-.errorMessage {
-  padding-top: 3px;
 }

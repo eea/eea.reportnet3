@@ -12,10 +12,13 @@ import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Spinner } from 'views/_components/Spinner';
 
-// import { WebformService } from 'services/WebformService';// TODO SERVICE
+import { ValidationService } from 'services/ValidationService'; // TODO IMPORT CORRECT SERVICE
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+
+import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
+import { useFilters } from 'views/_functions/Hooks/useFilters'; // TODO CHECK HISTORIC RELEASES
 
 export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
@@ -24,23 +27,16 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingStatus, setLoadingStatus] = useState('idle');
-  const [validationStatus, setValidationStatus] = useState({
-    id: null,
-    name: '',
-    status: '',
-    user: '',
-    dataset: '',
-    dataflow: null
-  });
+  const [validationStatusId, setValidationStatusId] = useState(null);
   const [validationsStatuses, setValidationsStatusesList] = useState([]);
 
-  //   BE:
-  // -Almacenar los procesos que se realizan (por ahora validacion, importacion, restauracion, release) junto a su usuario
-  // -Consultar los procesos correspondientes a un dataset y/o dataflow por usuario
-  // -Consultar todos los procesos paginados por un admin
+  const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
-  // - Añadir a los datasets el estado de la importación y validación. Algo en plan datasetRunningStatus:
-  //"importing/imported/validating/validated" o alguna estructura más dinámica
+  // id - not showing, dataflow name + id, dataset  name + id, user, status, queued date, process starting date and process finishing date.
+  // dataflow/dataset estructura: dataflowId, dataflowName, datasetId, datasetName
+
+  // filtrar por dataflow id y por usuario,
+  // paginado
 
   useEffect(() => {
     getValidationsStatuses();
@@ -51,13 +47,68 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     setLoadingStatus('pending');
 
     try {
-      // const data = await WebformService.getAll(); // TODO SERVICE
+      // const data = await ValidationService.getAllStatuses(); // TODO SERVICE
       const data = [
-        { id: 10, name: 'validation 1', status: 'importing', user: 'igor' },
-        { id: 20, name: 'validation 2', status: 'imported', user: 'pablo' },
-        { id: 30, name: 'validation 3', status: 'validating', user: 'miguel' },
-        { id: 40, name: 'validation 4', status: 'validated', user: 'miriam' },
-        { id: 50, name: 'validation 4', status: 'in queue', user: 'mikel' }
+        {
+          id: 10,
+          dataflowId: 111,
+          dataflowName: 'Dataflow name',
+          datasetId: 1,
+          datasetName: 'Dataset name',
+          status: 'importing',
+          queuedDate: 1644572710000,
+          processStartingDate: 1644572711000,
+          processFinishingDate: 1644572712000,
+          user: 'igor.provider@reportnet.net'
+        },
+        {
+          id: 20,
+          dataflowId: 222,
+          dataflowName: 'Dataflow name',
+          datasetId: 2,
+          datasetName: 'Dataset name',
+          status: 'imported',
+          queuedDate: 1644572720000,
+          processStartingDate: 1644572721000,
+          processFinishingDate: 1644572722000,
+          user: 'pablo.provider@reportnet.net'
+        },
+        {
+          id: 30,
+          dataflowId: 333,
+          dataflowName: 'Dataflow name',
+          datasetId: 3,
+          datasetName: 'Dataset name',
+          status: 'validating',
+          queuedDate: 1644572730000,
+          processStartingDate: 1644572731000,
+          processFinishingDate: 1644572732000,
+          user: 'miguel.provider@reportnet.net'
+        },
+        {
+          id: 40,
+          dataflowId: 444,
+          dataflowName: 'Dataflow name',
+          datasetId: 4,
+          datasetName: 'Dataset name',
+          status: 'validated',
+          queuedDate: 1644572740000,
+          processStartingDate: 1644572741000,
+          processFinishingDate: 1644572742000,
+          user: 'miriam.provider@reportnet.net'
+        },
+        {
+          id: 50,
+          dataflowId: 555,
+          dataflowName: 'Dataflow name',
+          datasetId: 5,
+          datasetName: 'Dataset name',
+          status: 'in queue',
+          queuedDate: 1644572750000,
+          processStartingDate: 1644572751000,
+          processFinishingDate: 1644572752000,
+          user: 'mikel.provider@reportnet.net'
+        }
       ];
       setValidationsStatusesList(data);
       setLoadingStatus('success');
@@ -75,41 +126,49 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     setIsDeleteDialogVisible(false);
 
     try {
-      // await WebformService.delete(validationStatus.id); // TODO SERVICE
+      // await ValidationService.removeFromQueue(validationStatusId); // TODO SERVICE
       getValidationsStatuses();
     } catch (error) {
       console.error('ValidationsStatus - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
 
-      // if (error.response.status === 400) {
-      //   // notificationContext.add({ status: 'DELETE_WEBFORM_IN_USE_ERROR' }, true);
-      // } else {
-      //   // notificationContext.add({ status: 'DELETE_WEBFORM_CONFIGURATION_ERROR' }, true);
-      // }
-
-      //TODO NOTIFICATIONS
+      // notificationContext.add({ status: 'DELETE_VALIDATION_FROM_QUEUE_ERROR' }, true); //TODO NOTIFICATIONS
     } finally {
-      resetValidationStatus();
+      setValidationStatusId(null);
     }
   };
 
-  const resetValidationStatus = () => setValidationStatus({ id: null, name: '', status: '' });
-
   const onShowDeleteDialog = validation => {
-    setValidationStatus(validation);
+    setValidationStatusId(validation);
     setIsDeleteDialogVisible(true);
   };
 
   const onHideDeleteDialog = () => {
     setIsDeleteDialogVisible(false);
-    resetValidationStatus();
+    setValidationStatusId(null);
   };
 
   const getTableColumns = () => {
     const columns = [
-      { key: 'name', header: resourcesContext.messages['name'] },
-      { key: 'status', header: resourcesContext.messages['status'] },
+      { key: 'dataflow', header: resourcesContext.messages['dataflow'], template: getDataflowTemplate },
+      { key: 'dataset', header: resourcesContext.messages['dataset'], template: getDatasetTemplate },
       { key: 'user', header: resourcesContext.messages['user'] },
+      { key: 'status', header: resourcesContext.messages['status'] },
+      {
+        key: 'queuedDate',
+        header: resourcesContext.messages['queuedDate'], // TODO ADD MESSAGE
+        template: validation => getDateTemplate(validation, 'queuedDate')
+      },
+      {
+        key: 'processStartingDate',
+        header: resourcesContext.messages['processStartingDate'], // TODO ADD MESSAGE
+        template: validation => getDateTemplate(validation, 'processStartingDate')
+      },
+      {
+        key: 'processFinishingDate',
+        header: resourcesContext.messages['processFinishingDate'], // TODO ADD MESSAGE
+        template: validation => getDateTemplate(validation, 'processFinishingDate')
+      },
       {
         key: 'actions',
         header: resourcesContext.messages['actions'],
@@ -131,7 +190,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   const getBtnIcon = (id, iconName) => {
-    if (id === validationStatus.id && loadingStatus === 'pending') {
+    if (id === validationStatusId && loadingStatus === 'pending') {
       return 'spinnerAnimate';
     }
 
@@ -149,6 +208,20 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
       />
     );
   };
+
+  const getDataflowTemplate = validation => (
+    <p>
+      {validation.dataflowName} - {validation.dataflowId}
+    </p>
+  );
+
+  const getDatasetTemplate = validation => (
+    <p>
+      {validation.datasetName} - {validation.datasetId}
+    </p>
+  );
+
+  const getDateTemplate = (validation, field) => getDateTimeFormatByUserPreferences(validation[field]);
 
   const dialogFooter = (
     <div className={styles.footer}>
@@ -183,7 +256,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         <DataTable
           autoLayout
           hasDefaultCurrentPage
-          // loading={loadingStatus === 'pending' && isNil(validationStatus.id)}
+          // loading={loadingStatus === 'pending' && isNil(validationStatusId)} // TODO CONTROL LOADING STATUS
           paginator
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
@@ -199,10 +272,10 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     <Fragment>
       <Dialog
         blockScroll={false}
-        className="responsiveDialog"
+        // className="responsiveDialog"
         footer={dialogFooter}
         // header={resourcesContext.messages['manageWebformsConfiguration']}
-        header="Validations Statuses"
+        header="Validations Statuses" //TODO ADD MESSAGE
         modal
         onHide={onCloseDialog}
         visible={isDialogVisible}>
@@ -213,13 +286,13 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           // header={resourcesContext.messages['deleteValidationStatus']}
-          header="Stop the shit"
+          header="Remove from queue" //TODO ADD MESSAGE
           labelCancel={resourcesContext.messages['cancel']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteDialog}
           onHide={onHideDeleteDialog}
           visible={isDeleteDialogVisible}>
-          {/* {resourcesContext.messages['confirmDeleteValidationStatus']} */}
+          {/* {resourcesContext.messages['confirmDeleteValidationStatus']} // TODO ADD MESSAGE*/}
           Remove this validation fom queue?
         </ConfirmDialog>
       )}
