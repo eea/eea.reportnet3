@@ -34,7 +34,6 @@ import {
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { ClassNamesUtils } from 'views/_components/Filters/_functions/Utils/ClassNamesUtils';
 import { FiltersUtils } from './_functions/Utils/FiltersUtils';
 
 const components = {
@@ -59,6 +58,19 @@ export const Filters = ({
   const resourcesContext = useContext(ResourcesContext);
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
+
+  const getPanelClassName = recoilId => {
+    if (
+      recoilId !== 'reporting' &&
+      recoilId !== 'business' &&
+      recoilId !== 'citizenScience' &&
+      recoilId !== 'reference'
+    ) {
+      return undefined;
+    }
+
+    return 'overWriteZindexPanel';
+  };
 
   const onFilterFilteredData = useRecoilCallback(
     ({ snapshot, set }) =>
@@ -150,7 +162,7 @@ export const Filters = ({
         onFilterData={onFilterFilteredData}
         onSort={onSort}
         option={option}
-        panelClassName={ClassNamesUtils.getPanelClassName(recoilId)}
+        panelClassName={getPanelClassName(recoilId)}
         recoilId={recoilId}
       />
     );
