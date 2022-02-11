@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
  */
 public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepository {
 
+  /** The Constant STATUS_CREATION_DATE. */
   private static final String STATUS_CREATION_DATE = "status, creation_date";
 
   /** The Constant LOG_ERROR. */
