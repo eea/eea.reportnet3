@@ -23,6 +23,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -378,6 +379,8 @@ public class ValidationHelper implements DisposableBean {
   public void executeValidationProcess(final Long datasetId, String processId, boolean released) {
     // Initialize process as coordinator
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+        DatasetRunningStatusEnum.VALIDATING);
     RulesSchema rules =
         rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getDatasetSchema()));
     initializeProcess(processId, true, released);
@@ -860,7 +863,8 @@ public class ValidationHelper implements DisposableBean {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
             NotificationVO.builder().user(notificationUser).datasetId(datasetId).build());
       }
-
+      datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+          DatasetRunningStatusEnum.VALIDATED);
       isFinished = true;
     }
     return isFinished;
