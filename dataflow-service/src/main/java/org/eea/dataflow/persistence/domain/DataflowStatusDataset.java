@@ -22,4 +22,8 @@ public class DataflowStatusDataset {
   @Column(name = "STATUS")
   private DatasetStatusEnum status;
 
+  /** The data provider id. */
+  @Column(name = "DATA_PROVIDER_ID")
+  private Long dataProviderId;
+
 }
