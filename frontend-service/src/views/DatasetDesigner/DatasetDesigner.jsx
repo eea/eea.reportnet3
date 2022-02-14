@@ -328,6 +328,14 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         schemaName: metaData.dataset.name
       }
     });
+
+    //TODO. If dataset has been imported or has data? If is validating
+    if (true) {
+      designerDispatch({
+        type: 'SET_PROGRESS_STEP_BAR',
+        payload: { step: 0, currentStep: 1, isRunning: false, completed: true }
+      });
+    }
   };
 
   const changeMode = viewMode => designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: viewMode } });
@@ -829,14 +837,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           }
         });
       };
-
-      //TODO. If dataset has been imported or has data? If is validating
-      if (true) {
-        designerDispatch({
-          type: 'SET_PROGRESS_STEP_BAR',
-          payload: { step: 0, currentStep: 1, isRunning: false, completed: true }
-        });
-      }
 
       const getDatasetSchemas = async () => {
         const data = await DataflowService.getSchemas(dataflowId);
