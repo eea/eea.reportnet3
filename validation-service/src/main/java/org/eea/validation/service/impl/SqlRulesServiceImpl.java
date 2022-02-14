@@ -190,6 +190,14 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
         .append(")").toString());
 
+    if (StringUtils.isNotBlank(query) && StringUtils.isBlank(sqlError)) {
+      try {
+        rule.setSqlCost(evaluateSqlRule(datasetId, query));
+      } catch (ParseException | EEAException e) {
+        rule.setSqlCost(null);
+      }
+    }
+
     rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     releaseNotification(notificationEventType, notificationVO);
   }

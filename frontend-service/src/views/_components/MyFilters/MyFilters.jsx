@@ -367,7 +367,7 @@ export const MyFilters = ({
           }}
           optionLabel="label"
           options={option.dropdownOptions}
-          showClear={filterBy[option.key]}
+          showClear={true}
           showFilterClear={true}
           value={filterBy[option.key]}
         />

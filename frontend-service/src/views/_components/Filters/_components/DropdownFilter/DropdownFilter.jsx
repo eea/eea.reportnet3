@@ -66,7 +66,7 @@ export const DropdownFilter = ({ hasCustomSort, isLoading, onFilterData, onSort,
         }}
         optionLabel="label"
         options={option.dropdownOptions}
-        showClear={isNil(filterBy[option.key])}
+        showClear={true}
         showFilterClear={true}
         value={filterBy[option.key]}
       />
