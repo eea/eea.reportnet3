@@ -673,8 +673,8 @@ export const Dataflows = () => {
             key: 'pinned',
             label: resourcesContext.messages['pinned'],
             dropdownOptions: [
-              { label: resourcesContext.messages['pinned'].toUpperCase(), value: true.toString() },
-              { label: resourcesContext.messages['unpinned'].toUpperCase(), value: false.toString() }
+              { label: resourcesContext.messages['pinned'].toUpperCase(), value: true },
+              { label: resourcesContext.messages['unpinned'].toUpperCase(), value: false }
             ],
             isSortable: true
           }
