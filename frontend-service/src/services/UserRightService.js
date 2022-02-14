@@ -4,19 +4,7 @@ import { UserRightUtils } from 'services/_utils/UserRightUtils';
 
 export const UserRightService = {
   getNationalCoordinators: async () => {
-    //const nationalCoordinatorDTO = await UserRightRepository.getNationalCoordinators();
-    const nationalCoordinatorDTO = {
-      data: [
-        {
-          email: 'user1@reportnet.net',
-          countryCode: 'AT'
-        },
-        {
-          email: 'user2@reportnet.net',
-          countryCode: 'ES'
-        }
-      ]
-    };
+    const nationalCoordinatorDTO = await UserRightRepository.getNationalCoordinators();
     return nationalCoordinatorDTO;
   },
 

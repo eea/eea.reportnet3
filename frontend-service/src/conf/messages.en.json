@@ -1504,7 +1504,7 @@
     "countryColumn": "Country",
     "manageNationalCoordinatorsDialogColumn": "National coordinator",
     "manageNationalCoordinatorsPlaceholder": "Select a country",
-    "addNationalCoordinatorDialogHeader": "Add national coordinator",
+    "addNationalCoordinatorsDialogHeader": "Add national coordinator",
     "nationalCoordinatorEmailColumn": "National coordinator email"
   }
 }
