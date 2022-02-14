@@ -669,14 +669,27 @@ export const Dataflows = () => {
         type: 'DROPDOWN'
       },
       {
-        key: 'status',
-        label: resourcesContext.messages['status'],
-        isSortable: true,
-        template: 'LevelError',
-        dropdownOptions: [
-          { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
-          { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
-          { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
+        nestedOptions: [
+          {
+            key: 'status',
+            label: resourcesContext.messages['status'],
+            isSortable: true,
+            template: 'LevelError',
+            dropdownOptions: [
+              { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+              { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+              { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
+            ]
+          },
+          {
+            key: 'pinned',
+            label: resourcesContext.messages['pinned'],
+            dropdownOptions: [
+              { label: resourcesContext.messages['pinned'].toUpperCase(), value: true },
+              { label: resourcesContext.messages['unpinned'].toUpperCase(), value: false }
+            ],
+            isSortable: true
+          }
         ],
         type: 'DROPDOWN'
       },
@@ -711,14 +724,27 @@ export const Dataflows = () => {
       type: 'INPUT'
     },
     {
-      key: 'status',
-      label: resourcesContext.messages['status'],
-      isSortable: true,
-      template: 'LevelError',
-      dropdownOptions: [
-        { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
-        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
-        { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
+      nestedOptions: [
+        {
+          key: 'status',
+          label: resourcesContext.messages['status'],
+          isSortable: true,
+          template: 'LevelError',
+          dropdownOptions: [
+            { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+            { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+            { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
+          ]
+        },
+        {
+          key: 'pinned',
+          label: resourcesContext.messages['pinned'],
+          dropdownOptions: [
+            { label: resourcesContext.messages['pinned'].toUpperCase(), value: true },
+            { label: resourcesContext.messages['unpinned'].toUpperCase(), value: false }
+          ],
+          isSortable: true
+        }
       ],
       type: 'DROPDOWN'
     }
@@ -857,6 +883,7 @@ export const Dataflows = () => {
           }}
           onSort={getDataflows}
           options={options[tabId]}
+          panelClassName="overwriteZindexPanel"
           recoilId={tabId}
         />
         {renderPaginator()}

@@ -49,6 +49,7 @@ export class MultiSelect extends Component {
     optionLabel: null,
     optionValue: null,
     options: null,
+    panelClassName: null,
     placeholder: null,
     scrollHeight: '200px',
     selectedItemTemplate: null,
@@ -93,6 +94,7 @@ export class MultiSelect extends Component {
     optionLabel: PropTypes.string,
     options: PropTypes.array,
     optionValue: PropTypes.string,
+    panelClassName: PropTypes.string,
     placeholder: PropTypes.string,
     scrollHeight: PropTypes.string,
     selectedItemsLabel: PropTypes.string,
@@ -625,6 +627,7 @@ export class MultiSelect extends Component {
           header={header}
           label={this.props.label}
           onClick={this.onPanelClick}
+          panelClassName={this.props.panelClassName}
           ref={el => (this.panel = el)}
           scrollHeight={this.props.scrollHeight}>
           {items}

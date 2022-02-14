@@ -24,6 +24,7 @@ export const Calendar = forwardRef((props, _) => {
     onFocus,
     onSelect,
     onTodayButtonClick,
+    panelClassName,
     placeholder,
     readOnlyInput,
     selectionMode,
@@ -90,6 +91,7 @@ export const Calendar = forwardRef((props, _) => {
       onFocus={onFocus}
       onSelect={onSelect}
       onTodayButtonClick={onTodayButtonClick}
+      panelClassName={panelClassName}
       placeholder={placeholder}
       readOnlyInput={readOnlyInput}
       ref={inputRef}
