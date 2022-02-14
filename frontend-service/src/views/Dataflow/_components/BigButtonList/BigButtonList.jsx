@@ -357,7 +357,6 @@ export const BigButtonList = ({
 
   const onUpdateDataCollection = async () => {
     setIsUpdateDataCollectionDialogVisible(false);
-
     setIsActiveButton(false);
 
     try {
@@ -369,8 +368,8 @@ export const BigButtonList = ({
 
   const onDeleteDatasetSchema = async index => {
     setDeleteDialogVisible(false);
-
     showLoading();
+
     try {
       await DatasetService.deleteSchema(dataflowState.designDatasetSchemas[index].datasetId);
       onUpdateData();
@@ -441,7 +440,6 @@ export const BigButtonList = ({
     try {
       setIsReceiptLoading(true);
       const response = await ConfirmationReceiptService.download(dataflowId, dataProviderId);
-
       downloadPdf(response.data);
       onCleanUpReceipt();
     } catch (error) {
@@ -462,12 +460,11 @@ export const BigButtonList = ({
 
   const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
 
-  const getDate = () => {
-    return new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime();
-  };
+  const getDate = () => new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime();
 
   const onCreateDataCollectionsWithNotValids = async () => {
     setIsActiveButton(false);
+
     try {
       notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
       await DataCollectionService.create(dataflowId, getDate(), isManualTechnicalAcceptance, false);
@@ -476,9 +473,7 @@ export const BigButtonList = ({
       const {
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
-
       notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } }, true);
-
       setIsActiveButton(true);
     } finally {
       setIsQCsNotValidWarningVisible(false);
@@ -517,10 +512,7 @@ export const BigButtonList = ({
 
   const onResetRadioButtonOptions = () => {
     setIsManualTechnicalAcceptance(null);
-    setManualTechnicalAcceptanceOptions({
-      Yes: false,
-      No: false
-    });
+    setManualTechnicalAcceptanceOptions({ Yes: false, No: false });
   };
 
   const onChangeRadioButton = value => {
@@ -536,8 +528,8 @@ export const BigButtonList = ({
 
   const refreshManualAcceptanceDatasets = value => setIsUpdatedManualAcceptanceDatasets(value);
 
-  const renderRadioButtonsCreateDC = () => {
-    return Object.keys(manualTechnicalAcceptanceOptions).map(value => (
+  const renderRadioButtonsCreateDC = () =>
+    Object.keys(manualTechnicalAcceptanceOptions).map(value => (
       <div className={styles.radioButton} key={`technicalAcceptance${value}`}>
         <RadioButton
           checked={manualTechnicalAcceptanceOptions[value]}
@@ -551,9 +543,8 @@ export const BigButtonList = ({
         </label>
       </div>
     ));
-  };
 
-  const bigButtonList = useBigButtonList({
+  const renderBigButtonList = useBigButtonList({
     dataflowId,
     dataflowState,
     dataProviderId,
@@ -600,7 +591,7 @@ export const BigButtonList = ({
     <Fragment>
       <div className={styles.buttonsWrapper}>
         <div className={`${styles.splitButtonWrapper} dataflow-big-buttons-help-step`}>
-          <div className={styles.datasetItem}>{bigButtonList}</div>
+          <div className={styles.datasetItem}>{renderBigButtonList}</div>
         </div>
       </div>
 

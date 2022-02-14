@@ -1572,10 +1572,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               </DatasetDeleteDataDialog>
             </div>
             <div className="p-toolbar-group-right">
-              <DatasetValidateDialog
-                disabled={isDataflowOpen || isDesignDatasetEditorRead}
-                onConfirmValidate={onConfirmValidate}
-              />
+              <DatasetValidateDialog disabled={isDesignDatasetEditorRead} onConfirmValidate={onConfirmValidate} />
               <Button
                 className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
                 icon="warning"
@@ -1638,8 +1635,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               <Button
                 className={`p-button-rounded p-button-${
                   designerState.isRefreshHighlighted ? 'primary' : 'secondary-transparent'
-                }  ${!isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null}`}
-                disabled={isDataflowOpen || isDesignDatasetEditorRead}
+                }  ${!isDesignDatasetEditorRead ? 'p-button-animated-blink' : null}`}
+                disabled={isDesignDatasetEditorRead}
                 icon="refresh"
                 label={resourcesContext.messages['refresh']}
                 onClick={onLoadSchema}
