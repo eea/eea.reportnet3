@@ -11,9 +11,6 @@
     top: 0;
     left: 0;
   }
-  button {
-    padding: 0.5em 1em;
-  }
 }
 
 .dialogContent {
@@ -24,18 +21,6 @@
 
 .addDialog {
   width: 30% !important;
-}
-
-.addDialog > div:nth-child(2) {
-  display: flex;
-  flex-direction: column;
-  input {
-    margin-bottom: 1rem;
-  }
-  label {
-    font-size: 1rem;
-    padding-bottom: 0.2em;
-  }
 }
 
 .buttonsDialogFooter {

@@ -1,20 +1,17 @@
-import { Fragment, useContext, useEffect, useLayoutEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './ManageNationalCoordinators.module.scss';
 
+import { AddNationalCoordinator } from './_components/AddNationalCoordinator';
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
-import { Dropdown } from 'views/_components/Dropdown';
-import { ErrorMessage } from 'views/_components/ErrorMessage';
 import { Filters } from 'views/_components/Filters';
-import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
 
-import { RepresentativeService } from 'services/RepresentativeService';
 import { UserRightService } from 'services/UserRightService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -29,18 +26,9 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [errors, setErrors] = useState({
-    name: { hasErrors: false, message: '' },
-    type: { hasErrors: false, message: '' },
-    content: { hasErrors: false, message: '' }
-  });
-
   const [nationalCoordinatorsData, setNationalCoordinatorsData] = useState([]);
 
-  const [isAddDialogVisible, setisAddDialogVisible] = useState(false);
-  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingStatus, setLoadingStatus] = useState('idle');
 
   //const { filteredData, isFiltered } = useFilters('manageNationalCoordinators');
 
@@ -75,31 +63,10 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     return nationalCoordinators;
   };
 
-  const [groupOfCountries, setGroupOfCountries] = useState([]);
-
-  const getDropdownsOptions = async () => {
-    setIsLoading(true);
-    const allCountries = { dataProviderGroupId: 2 };
-
-    try {
-      const responseGroupOfCountries = await RepresentativeService.getDataProviders(allCountries);
-      setGroupOfCountries(responseGroupOfCountries);
-    } catch (error) {
-      console.error('NationalCoordinators - getDropdownsOptions.', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useLayoutEffect(() => {
-    getDropdownsOptions();
-  }, []);
-
   const getActionsTemplate = () => {
     return (
       <Button
         className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteButton}`}
-        disabled={loadingStatus === 'pending'}
         icon="trash"
         //onClick={() => onShowDeleteDialog(webformRow)}
       />
@@ -135,6 +102,21 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     ));
   };
 
+  const filterOptions = [
+    {
+      key: 'search',
+      label: resourcesContext.messages['search'],
+      searchBy: ['nationalCoordinators'],
+      type: 'SEARCH'
+    },
+    {
+      key: 'countries',
+      label: resourcesContext.messages['countries'],
+      dropdownOptions: ['country1, country2, country3'],
+      type: 'DROPDOWN'
+    }
+  ];
+
   const renderDialogContent = () => {
     if (isLoading) {
       return (
@@ -155,11 +137,10 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     return (
       <div className={styles.table}>
         <Filters
-          className="reportingObligations"
+          className="manageNationalCoordinators"
           // onFilter={onLoadReportingObligations}
           // onReset={onLoadReportingObligations}
-          //  options={filterOptions}
-          recoilId="reportingObligations"
+          options={filterOptions}
         />
 
         <DataTable
@@ -177,38 +158,10 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     );
   };
 
-  const onAddDialogClose = () => {
-    setisAddDialogVisible(false);
-    setErrors({ name: false, type: false, content: false });
-  };
-
-  const addDialogFooter = (
-    <Fragment>
-      <Button
-        className="p-button-primary"
-        //disabled={getIsDisabledConfirmBtn()}
-        icon={loadingStatus === 'pending' ? 'spinnerAnimate' : 'check'}
-        label={resourcesContext.messages['save']}
-        //onClick={onConfirm}
-      />
-
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon="cancel"
-        label={resourcesContext.messages['cancel']}
-        onClick={onAddDialogClose}
-      />
-    </Fragment>
-  );
-
   const dialogFooter = (
     <div className={styles.buttonsDialogFooter}>
-      <Button
-        className="p-button-primary"
-        icon="plus"
-        label={resourcesContext.messages['add']}
-        onClick={() => setisAddDialogVisible(true)}
-      />
+      <AddNationalCoordinator />
+
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon="cancel"
@@ -219,63 +172,15 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
   );
 
   return (
-    <Fragment>
-      <Dialog
-        blockScroll={false}
-        footer={dialogFooter}
-        header={resourcesContext.messages['manageNationalCoordinators']}
-        modal
-        onHide={onCloseDialog}
-        style={{ width: '80%', maxWidth: '650px' }}
-        visible={isDialogVisible}>
-        {renderDialogContent()}
-      </Dialog>
-
-      {isAddDialogVisible && (
-        <Dialog
-          blockScroll={false}
-          className={styles.addDialog}
-          footer={addDialogFooter}
-          header={resourcesContext.messages['addNationalCoordinatorsDialogHeader']}
-          modal
-          onHide={onAddDialogClose}
-          visible={isAddDialogVisible}>
-          <label className={styles.label} htmlFor="name">
-            {resourcesContext.messages['manageNationalCoordinatorsDialogColumn']}
-          </label>
-          <InputText
-            className={`${styles.nameInput} ${errors.name.hasErrors ? styles.inputError : ''}`}
-            id="name"
-            maxLength={50}
-            //onBlur={() => checkHasErrors('name')}
-            //onChange={}
-            placeholder={resourcesContext.messages['nationalCoordinatorsEmailColumn']}
-            //value={webformConfiguration.name}
-          />
-          {errors.name.hasErrors && <ErrorMessage className={styles.errorMessage} message={errors.name.message} />}
-
-          <label className={styles.label} htmlFor="rolesDropdown">
-            {resourcesContext.messages['countryColumn']}
-          </label>
-          <Dropdown
-            appendTo={document.body}
-            ariaLabel="groupOfCountries"
-            className={styles.groupOfCountriesWrapper}
-            //disabled={!isAdmin || hasRepresentatives}
-            name="groupOfCountries"
-            //onChange={event => onSelectGroup(event.target.value)}
-            //onFocus={() => handleErrors({ field: 'groupOfCountries', hasErrors: false, message: '' })}
-            optionLabel="label"
-            options={groupOfCountries}
-            placeholder={resourcesContext.messages['manageNationalCoordinatorsPlaceholder']}
-            /* tooltip={
-      isAdmin && hasRepresentatives ? resourcesContext.messages['groupOfCountriesDisabledTooltip'] : ''
-    }
-    value={selectedGroup}*/
-          />
-          {errors.type.hasErrors && <ErrorMessage className={styles.errorMessage} message={errors.type.message} />}
-        </Dialog>
-      )}
-    </Fragment>
+    <Dialog
+      blockScroll={false}
+      footer={dialogFooter}
+      header={resourcesContext.messages['manageNationalCoordinators']}
+      modal
+      onHide={onCloseDialog}
+      style={{ width: '80%', maxWidth: '650px' }}
+      visible={isDialogVisible}>
+      {renderDialogContent()}
+    </Dialog>
   );
 };
