@@ -611,7 +611,7 @@ export const Dataflows = () => {
       }
     ];
 
-    if (isAdmin) {
+    if (!isAdmin) {
       filters.push({
         key: 'userRole',
         label: resourcesContext.messages['userRole'],
