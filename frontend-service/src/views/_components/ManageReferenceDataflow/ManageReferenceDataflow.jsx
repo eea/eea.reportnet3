@@ -47,6 +47,11 @@ export const ManageReferenceDataflow = ({
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
+  const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+  const isCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    config.permissions.roles.CUSTODIAN.key
+  ]);
+
   const [deleteInput, setDeleteInput] = useState('');
   const [description, setDescription] = useState(isEditing ? metadata.description : '');
   const [errors, setErrors] = useState({
@@ -187,7 +192,7 @@ export const ManageReferenceDataflow = ({
               uniqueIdentifier="pinDataflow"></TooltipButton>
           </div>
         )}
-        {isEditing && isDesign && (
+        {isEditing && isDesign && !isAdmin && (
           <Button
             className="p-button-danger p-button-animated-blink"
             icon="trash"
@@ -240,26 +245,28 @@ export const ManageReferenceDataflow = ({
           />
           {!isEmpty(errors.name.message) && <ErrorMessage message={errors.name.message} />}
         </div>
-        <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
-          <InputTextarea
-            className={styles.inputTextArea}
-            id="dataflowDescription"
-            onBlur={checkErrors}
-            onChange={event => setDescription(event.target.value)}
-            onFocus={() => handleErrors({ field: 'description', hasErrors: false, message: '' })}
-            placeholder={resourcesContext.messages['createDataflowDescription']}
-            rows={10}
-            value={description}
-          />
-          <div className={styles.errorAndCounterWrapper}>
-            <CharacterCounter
-              currentLength={description.length}
-              maxLength={config.INPUT_MAX_LENGTH}
-              style={{ marginTop: '0.25rem' }}
+        {!isAdmin && (
+          <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
+            <InputTextarea
+              className={styles.inputTextArea}
+              id="dataflowDescription"
+              onBlur={checkErrors}
+              onChange={event => setDescription(event.target.value)}
+              onFocus={() => handleErrors({ field: 'description', hasErrors: false, message: '' })}
+              placeholder={resourcesContext.messages['createDataflowDescription']}
+              rows={10}
+              value={description}
             />
-            {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
+            <div className={styles.errorAndCounterWrapper}>
+              <CharacterCounter
+                currentLength={description.length}
+                maxLength={config.INPUT_MAX_LENGTH}
+                style={{ marginTop: '0.25rem' }}
+              />
+              {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
+            </div>
           </div>
-        </div>
+        )}
       </Dialog>
 
       {isDeleteDialogVisible && (
