@@ -21,6 +21,7 @@ import { UserRightService } from 'services/UserRightService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { CountryUtils } from 'views/_functions/Utils/CountryUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { useFilters } from 'views/_functions/Hooks/useFilters';
@@ -52,15 +53,27 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     try {
       setIsLoading(true);
       const { data } = await UserRightService.getNationalCoordinators();
-      const dataAux = parseNationalCoordinatorData(data);
-
-      setNationalCoordinatorsData(parseNationalCoordinatorData(data));
+      setNationalCoordinatorsData(parseNationalCoordinatorsList(data));
     } catch (error) {
       console.error('NationalCoordinators - fetchData.', error);
       notificationContext.add({ type: 'LOAD_USERS_LIST_ERROR' }, true);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const parseNationalCoordinatorsList = nationalCoordinatorsList => {
+    const nationalCoordinators = [];
+
+    if (!isEmpty(nationalCoordinatorsList)) {
+      nationalCoordinatorsList.forEach(nationalCoordinator => {
+        const countryName = CountryUtils.getCountryName(nationalCoordinator.countryCode);
+        nationalCoordinator.countryName = countryName;
+        nationalCoordinators.push(nationalCoordinator);
+      });
+    }
+
+    return nationalCoordinators;
   };
 
   const [groupOfCountries, setGroupOfCountries] = useState([]);
@@ -83,21 +96,6 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     getDropdownsOptions();
   }, []);
 
-  console.log('nationalCoordinatorsData :>> ', nationalCoordinatorsData);
-
-  const parseNationalCoordinatorData = nationalCoordinatorsData => {
-    const data = [];
-    groupOfCountries.forEach(country => {
-      return nationalCoordinatorsData.forEach(user => {
-        if (user.countryCode === country.code) {
-          user.country = country.label;
-          data.push(user);
-        }
-      });
-    });
-
-    return data;
-  };
 
   const renderRepresentingColumn = nationalCoordinatorsData => {
     return <p>{nationalCoordinatorsData.country}</p>;
