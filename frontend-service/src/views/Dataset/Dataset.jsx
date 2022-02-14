@@ -32,6 +32,7 @@ import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
+import { StepProgressBar } from 'views/_components/StepProgressBar';
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -63,6 +64,24 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const userContext = useContext(UserContext);
 
   const [dataset, setDataset] = useState({});
+  const [datasetProgressBarSteps, setDatasetProgressBarSteps] = useState({
+    steps: [
+      {
+        idx: 1,
+        labelCompleted: resourcesContext.messages['importedData'],
+        labelUndone: resourcesContext.messages['importData'],
+        labelRunning: resourcesContext.messages['importingData']
+      },
+      {
+        idx: 2,
+        labelCompleted: resourcesContext.messages['validatedData'],
+        labelUndone: resourcesContext.messages['validateData'],
+        labelRunning: resourcesContext.messages['validatingData'],
+        isRunning: true
+      }
+    ],
+    currentStep: 0
+  });
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
   const [datasetName, setDatasetName] = useState('');
@@ -272,6 +291,13 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   }, [dataViewerOptions.tableSchemaId, selectedView]);
 
+  const changeProgressStepBar = stepInfo => {
+    const inmDatasetProgressBarSteps = [...datasetProgressBarSteps.steps];
+    inmDatasetProgressBarSteps[stepInfo.step].isRunning = stepInfo.isRunning;
+    inmDatasetProgressBarSteps[stepInfo.step].completed = stepInfo.completed || false;
+    setDatasetProgressBarSteps({ steps: inmDatasetProgressBarSteps, currentStep: stepInfo.currentStep });
+  };
+
   const changeUrl = () => {
     window.history.replaceState(
       null,
@@ -450,6 +476,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         },
         true
       );
+      changeProgressStepBar({ step: 1, currentStep: 2, isRunning: true });
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -1018,27 +1045,34 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
 
     return (
-      <TabsSchema
-        dataProviderId={metadata?.dataset.dataProviderId}
-        datasetSchemaId={metadata?.dataset.datasetSchemaId}
-        hasWritePermissions={hasWritePermissions}
-        isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
-        isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
-        isReferenceDataset={isReferenceDataset}
-        isReportingWebform={isReportingWebform}
-        levelErrorTypes={levelErrorTypes}
-        onHideSelectGroupedValidation={onHideSelectGroupedValidation}
-        onLoadTableData={onLoadTableData}
-        onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-        reporting={true}
-        selectedRuleId={dataViewerOptions.selectedRuleId}
-        selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
-        selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
-        selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
-        tables={tableSchema}
-        tableSchemaColumns={tableSchemaColumns}
-        tableSchemaId={dataViewerOptions.tableSchemaId}
-      />
+      <Fragment>
+        <StepProgressBar
+          className={styles.stepProgressBar}
+          currentStep={datasetProgressBarSteps.currentStep}
+          steps={datasetProgressBarSteps.steps}
+        />
+        <TabsSchema
+          dataProviderId={metadata?.dataset.dataProviderId}
+          datasetSchemaId={metadata?.dataset.datasetSchemaId}
+          hasWritePermissions={hasWritePermissions}
+          isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
+          isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+          isReferenceDataset={isReferenceDataset}
+          isReportingWebform={isReportingWebform}
+          levelErrorTypes={levelErrorTypes}
+          onHideSelectGroupedValidation={onHideSelectGroupedValidation}
+          onLoadTableData={onLoadTableData}
+          onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+          reporting={true}
+          selectedRuleId={dataViewerOptions.selectedRuleId}
+          selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
+          selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+          selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
+          tables={tableSchema}
+          tableSchemaColumns={tableSchemaColumns}
+          tableSchemaId={dataViewerOptions.tableSchemaId}
+        />
+      </Fragment>
     );
   };
 
