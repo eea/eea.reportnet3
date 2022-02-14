@@ -106,7 +106,7 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     );
   };
 
-  const renterTableColumns = () => {
+  const renderTableColumns = () => {
     const columns = [
       {
         key: 'email',
@@ -171,7 +171,7 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
           rowsPerPageOptions={[5, 10, 15]}
           totalRecords={nationalCoordinatorsData.length}
           value={nationalCoordinatorsData}>
-          {renterTableColumns()}
+          {renderTableColumns()}
         </DataTable>
       </div>
     );
