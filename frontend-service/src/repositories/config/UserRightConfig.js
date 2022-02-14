@@ -1,4 +1,5 @@
 export const UserRightConfig = {
+  getNationalCoordinators: '/user/nationalCoordinator',
   getReporters: '/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}',
   getRequesters: '/contributor/requester/dataflow/{:dataflowId}',
   deleteReporter: '/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}',

@@ -1,3 +1,43 @@
+@import '_styles/mixins';
+
+.noDataContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  flex-direction: column;
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
+  button {
+    padding: 0.5em 1em;
+  }
+}
+
+.dialogContent {
+  table > tbody > tr > td:last-child {
+    text-align: center;
+  }
+}
+
+.addDialog {
+  width: 30% !important;
+}
+
+.addDialog > div:nth-child(2) {
+  display: flex;
+  flex-direction: column;
+  input {
+    margin-bottom: 1rem;
+  }
+  label {
+    font-size: 1rem;
+    padding-bottom: 0.2em;
+  }
+}
+
 .buttonsDialogFooter {
   display: flex;
   justify-content: space-between;
@@ -5,4 +45,18 @@
 
 .groupOfCountriesWrapper {
   width: 100%;
+}
+
+.actionButton {
+  border: 1px solid var(--general-border-color) !important;
+  @include shadow-0em;
+  margin-left: 3px !important;
+  &:enabled:hover {
+    border-color: var(--button-secondary-border-color-hover) !important;
+  }
+}
+
+.deleteButton {
+  @extend .actionButton;
+  color: var(--errors) !important;
 }

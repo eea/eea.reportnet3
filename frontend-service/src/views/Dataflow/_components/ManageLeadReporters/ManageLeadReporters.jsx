@@ -161,6 +161,7 @@ export const ManageLeadReporters = ({
 
   const getAllDataProviders = async () => {
     const { representatives, selectedDataProviderGroup } = formState;
+
     try {
       const responseAllDataProviders = await RepresentativeService.getDataProviders(selectedDataProviderGroup);
 

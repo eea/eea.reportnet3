@@ -1503,6 +1503,8 @@
     "manageNationalCoordinatorsConfiguration": "Manage national coordinators configuration",
     "countryColumn": "Country",
     "manageNationalCoordinatorsDialogColumn": "National coordinator",
-    "manageNationalCoordinatorsPlaceholder": "Select a country"
+    "manageNationalCoordinatorsPlaceholder": "Select a country",
+    "addNationalCoordinatorDialogHeader": "Add national coordinator",
+    "nationalCoordinatorEmailColumn": "National coordinator email"
   }
 }

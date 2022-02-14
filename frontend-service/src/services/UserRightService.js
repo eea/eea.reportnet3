@@ -3,6 +3,23 @@ import { UserRightRepository } from 'repositories/UserRightRepository';
 import { UserRightUtils } from 'services/_utils/UserRightUtils';
 
 export const UserRightService = {
+  getNationalCoordinators: async () => {
+    //const nationalCoordinatorDTO = await UserRightRepository.getNationalCoordinators();
+    const nationalCoordinatorDTO = {
+      data: [
+        {
+          email: 'user1@reportnet.net',
+          countryCode: 'AT'
+        },
+        {
+          email: 'user2@reportnet.net',
+          countryCode: 'ES'
+        }
+      ]
+    };
+    return nationalCoordinatorDTO;
+  },
+
   getReporters: async (dataflowId, dataProviderId) => {
     const userRightListDTO = await UserRightRepository.getReporters(dataflowId, dataProviderId);
     return UserRightUtils.parseUserRightListDTO(userRightListDTO.data);
