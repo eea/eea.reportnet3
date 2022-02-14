@@ -161,7 +161,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   private static final String DELIVERY_STATUS_IN = " %s IN :%s ";
 
   /** The Constant RELEASABLE. */
-  private static final String RELEASABLE = " releasable = :releasable";
+  private static final String RELEASABLE = " releasable = :releasable ";
 
   /** The Constant STATUS. */
   private static final String STATUS = " status = :status";
@@ -179,7 +179,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   private static final String COMMA = ",";
 
   /** The Constant PINNED_FILTER. */
-  private static final String PINNED_FILTER = "pinned = :pinnedFilter";
+  private static final String PINNED_FILTER = " pinned = :pinnedFilter";
 
 
   /**
@@ -557,6 +557,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
             stringQuery.append(STATUS);
             break;
         }
+        break;
       case "pinned":
         stringQuery.append(PINNED_FILTER);
         break;
