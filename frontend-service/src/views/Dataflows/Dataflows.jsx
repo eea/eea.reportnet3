@@ -2,7 +2,6 @@ import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } 
 import { useParams } from 'react-router-dom';
 import { useResetRecoilState } from 'recoil';
 
-import findIndex from 'lodash/findIndex';
 import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
 import pull from 'lodash/pull';
