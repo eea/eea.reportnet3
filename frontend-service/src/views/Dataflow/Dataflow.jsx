@@ -334,7 +334,7 @@ export const Dataflow = () => {
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       datasetsInfoBtn: isAdmin && isNil(dataProviderId),
-      editBtn: (!isBusinessDataflow || !isSteward) && ((isDesign && isLeadDesigner) || isAdmin),
+      editBtn: (isDesign && isLeadDesigner) || (!isBusinessDataflow && isAdmin),
       editBusinessBtn: (isAdmin || isLeadDesigner) && isBusinessDataflow,
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
