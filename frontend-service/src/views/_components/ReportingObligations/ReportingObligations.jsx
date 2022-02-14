@@ -262,7 +262,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
         onReset={() => {
           reportingObligationDispatch({
             type: 'ON_PAGINATE',
-            payload: { pagination: { first: 0, rows: 10, page: 0 } }
+            payload: { pagination: { first: 0, rows: pagination.rows, page: 0 } }
           });
           onLoadReportingObligations();
         }}
