@@ -222,6 +222,13 @@ export const CustomFileUpload = ({
       return false;
     }
 
+    if (accept) {
+      if (!checkValidExtension(file)) {
+        dispatch({ type: 'UPLOAD_PROPERTY', payload: { isValid: false } });
+        return false;
+      }
+    }
+
     if (onValidateFile) {
       setIsValidating(true);
       const validations = await onValidateFile(file);
@@ -242,13 +249,6 @@ export const CustomFileUpload = ({
         return hasErrors;
       }
       setIsValidating(false);
-    }
-
-    if (accept) {
-      if (!checkValidExtension(file)) {
-        dispatch({ type: 'UPLOAD_PROPERTY', payload: { isValid: false } });
-        return false;
-      }
     }
 
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { isValid: true } });
