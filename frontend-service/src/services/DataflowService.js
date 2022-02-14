@@ -409,5 +409,22 @@ export const DataflowService = {
     return sortBy(parsedDatasetsInfoDTO, 'id');
   },
 
-  validateAllDataflowsUsers: async () => await DataflowRepository.validateAllDataflowsUsers()
+  validateAllDataflowsUsers: async () => await DataflowRepository.validateAllDataflowsUsers(),
+
+  getValidationsStatus: async ({ dataflowId, datasetId, filterBy, numberRows, pageNum, sortBy }) => {
+    const { isAsc, sortByHeader } = DataflowUtils.parseRequestSortBy(sortBy);
+    const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
+
+    const validationsDTO = await DataflowRepository.getValidationsStatus({
+      dataflowId: dataflowId,
+      datasetId: datasetId,
+      filterBy: filteredFilterBy,
+      isAsc,
+      numberRows,
+      pageNum,
+      sortBy: sortByHeader
+    });
+
+    return { ...validationsDTO.data };
+  }
 };
