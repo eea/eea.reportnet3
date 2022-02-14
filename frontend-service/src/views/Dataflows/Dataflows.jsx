@@ -501,7 +501,9 @@ export const Dataflows = () => {
     return dataflows.map(dataflow => {
       const copyDataflow = { ...dataflow };
 
-      if (copyDataflow.id === pinnedItem.id) copyDataflow.pinned = isPinned ? 'pinned' : 'unpinned';
+      if (copyDataflow.id === pinnedItem.id) {
+        copyDataflow.pinned = isPinned ? 'pinned' : 'unpinned';
+      }
 
       return copyDataflow;
     });
