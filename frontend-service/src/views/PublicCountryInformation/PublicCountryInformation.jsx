@@ -409,6 +409,7 @@ export const PublicCountryInformation = () => {
           setSortOrder(0);
         }}
         options={filterOptions}
+        panelClassName="overwriteZindexPanel"
         recoilId="publicCountryInformation"
       />
     );
