@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useState } from 'react';
 import ReactTooltip from 'react-tooltip';
 
 import camelCase from 'lodash/camelCase';
@@ -30,6 +30,8 @@ export const ManageManualAcceptanceDataset = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const [manageManualAcceptanceDatasetState, manageManualAcceptanceDatasetDispatch] = useReducer(
     manageManualAcceptanceDatasetReducer,
@@ -79,21 +81,30 @@ export const ManageManualAcceptanceDataset = ({
 
   const onUpdateDataset = async () => {
     try {
+      setIsUpdating(true);
       await DatasetService.updateDatasetFeedbackStatus(dataflowId, datasetId, datasetMessage, datasetFeedbackStatus);
       refreshManualAcceptanceDatasets(true);
     } catch (error) {
       console.error('ManageManualAcceptanceDataset - onUpdateDataset.', error);
       notificationContext.add({ type: 'UPDATE_DATASET_FEEDBACK_STATUS_ERROR' }, true);
     } finally {
+      setIsUpdating(false);
       manageDialogs(false);
     }
   };
 
   const renderTooltip = () => {
+    const getMessage = () => {
+      if (isEmpty(datasetMessage)) {
+        return resourcesContext.messages['manualTechnicalAcceptanceNoMessage'];
+      } else if (datasetFeedbackStatus === dataset.feedbackStatus) {
+        return resourcesContext.messages['manualTechnicalAcceptanceStatus'];
+      }
+    };
     if (isEmpty(datasetMessage) || datasetFeedbackStatus === dataset.feedbackStatus) {
       return (
         <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
-          <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
+          <span>{getMessage()}</span>
         </ReactTooltip>
       );
     }
@@ -108,8 +119,8 @@ export const ManageManualAcceptanceDataset = ({
               ? 'p-button-animated-blink'
               : ''
           }`}
-          disabled={isEmpty(datasetMessage) || datasetFeedbackStatus === dataset.feedbackStatus}
-          icon="check"
+          disabled={isEmpty(datasetMessage) || datasetFeedbackStatus === dataset.feedbackStatus || isUpdating}
+          icon={!isUpdating ? 'check' : 'spinnerAnimate'}
           label={resourcesContext.messages['update']}
           onClick={() => onUpdateDataset()}
         />

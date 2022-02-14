@@ -305,6 +305,11 @@ public class DataflowServiceImpl implements DataflowService {
             .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
       }
 
+      Map<String, List<String>> attributes = userManagementControllerZull.getUserAttributes();
+      List<String> pinnedDataflows = new ArrayList<>();
+      if (MapUtils.isNotEmpty(attributes) && attributes.containsKey("pinnedDataflows")) {
+        pinnedDataflows.addAll(attributes.get("pinnedDataflows"));
+      }
       // Get user's dataflows sorted by status and creation date
       if (CollectionUtils.isNotEmpty(idsResources) || userAdmin
           || dataflowType == TypeDataflowEnum.REFERENCE) {
@@ -315,44 +320,46 @@ public class DataflowServiceImpl implements DataflowService {
           case BUSINESS:
             dataflows = userAdmin
                 ? dataflowRepository.findPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                    orderHeader, asc, dataflowType, null)
+                    orderHeader, asc, dataflowType, null, pinnedDataflows)
                 : dataflowRepository.findPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                    orderHeader, asc, dataflowType, idsResources);
+                    orderHeader, asc, dataflowType, idsResources, pinnedDataflows);
             paginatedDataflowVO.setFilteredRecords(userAdmin
                 ? dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                    orderHeader, asc, dataflowType, null)
+                    orderHeader, asc, dataflowType, null, pinnedDataflows)
                 : dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                    orderHeader, asc, dataflowType, idsResources));
+                    orderHeader, asc, dataflowType, idsResources, pinnedDataflows));
 
             paginatedDataflowVO.setTotalRecords(userAdmin
                 ? dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null,
-                    asc, dataflowType, null)
+                    asc, dataflowType, null, pinnedDataflows)
                 : dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null,
                     asc, dataflowType,
-                    idsResourcesWithoutRole != null ? idsResourcesWithoutRole : idsResources));
+                    idsResourcesWithoutRole != null ? idsResourcesWithoutRole : idsResources,
+                    pinnedDataflows));
             break;
           case REFERENCE:
             if (CollectionUtils.isNotEmpty(idsResources) || userAdmin) {
               dataflows = userAdmin
                   ? dataflowRepository.findPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                      orderHeader, asc, dataflowType, null)
+                      orderHeader, asc, dataflowType, null, pinnedDataflows)
                   : dataflowRepository.findPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                      orderHeader, asc, dataflowType, idsResources);
+                      orderHeader, asc, dataflowType, idsResources, pinnedDataflows);
               paginatedDataflowVO.setFilteredRecords(userAdmin
                   ? dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                      orderHeader, asc, dataflowType, null)
+                      orderHeader, asc, dataflowType, null, pinnedDataflows)
                   : dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                      orderHeader, asc, dataflowType, idsResources));
+                      orderHeader, asc, dataflowType, idsResources, pinnedDataflows));
 
             } else {
               paginatedDataflowVO.setFilteredRecords(Long.valueOf(0));
             }
             paginatedDataflowVO.setTotalRecords(userAdmin
                 ? dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null,
-                    asc, dataflowType, null)
+                    asc, dataflowType, null, pinnedDataflows)
                 : dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null,
                     asc, dataflowType,
-                    idsResourcesWithoutRole != null ? idsResourcesWithoutRole : idsResources));
+                    idsResourcesWithoutRole != null ? idsResourcesWithoutRole : idsResources,
+                    pinnedDataflows));
 
             break;
 
@@ -384,9 +391,9 @@ public class DataflowServiceImpl implements DataflowService {
         if (idsResourcesWithoutRole != null) {
           paginatedDataflowVO.setTotalRecords(userAdmin
               ? dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null, asc,
-                  dataflowType, null)
+                  dataflowType, null, pinnedDataflows)
               : dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null, asc,
-                  dataflowType, idsResourcesWithoutRole));
+                  dataflowType, idsResourcesWithoutRole, pinnedDataflows));
         } else {
           paginatedDataflowVO.setTotalRecords(Long.valueOf(0));
         }
@@ -734,7 +741,7 @@ public class DataflowServiceImpl implements DataflowService {
       String arrayToJson = objectMapper.writeValueAsString(obligations);
 
       List<Dataflow> dataflows = dataflowRepository.findPaginated(arrayToJson, pageable,
-          Boolean.TRUE, filters, orderHeader, asc, null, null);
+          Boolean.TRUE, filters, orderHeader, asc, null, null, null);
       List<DataflowPublicVO> dfpublic = dataflowPublicMapper.entityListToClass(dataflows);
 
       // SET OBLIGATIONS
@@ -750,7 +757,7 @@ public class DataflowServiceImpl implements DataflowService {
       pag.setDataflows(dfpublic);
       pag.setTotalRecords(dataflowRepository.countByShowPublicInfo(Boolean.TRUE));
       pag.setFilteredRecords(dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.TRUE,
-          filters, orderHeader, asc, null, null));
+          filters, orderHeader, asc, null, null, null));
 
       return pag;
 
