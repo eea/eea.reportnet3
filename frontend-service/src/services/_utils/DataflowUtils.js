@@ -193,6 +193,7 @@ const replacements = {
   name: 'name',
   obligationTitle: 'obligation',
   obligationId: 'obligation_id',
+  pinned: 'pinned',
   status: 'status',
   userRole: 'role'
 };
@@ -207,7 +208,11 @@ const parseRequestFilterBy = filterBy => {
     .map(key => {
       const results = { [replacements[key] || key]: filterBy[key] };
 
-      if (TextUtils.areEquals(key, 'userRole') || TextUtils.areEquals(key, 'status')) {
+      if (
+        TextUtils.areEquals(key, 'userRole') ||
+        TextUtils.areEquals(key, 'status') ||
+        TextUtils.areEquals(key, 'pinned')
+      ) {
         results[replacements[key] || key] = filterBy[key]?.value;
       }
 
