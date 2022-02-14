@@ -429,6 +429,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     try {
       const metaData = await MetadataUtils.getMetadata({ datasetId, dataflowId });
       setMetadata(metaData);
+      //TODO. If dataset has been imported or has data? If is validating
+      // if (true) {
+      //   changeProgressStepBar({ step: 0, currentStep: 1, isRunning: false, completed: true });
+      // }
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } }, true);
@@ -566,6 +570,15 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
     if (isNotification && isNotification.content.datasetId?.toString() === datasetId.toString()) {
       onHighlightRefresh(true);
+      changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false });
+    }
+
+    const isImportDataCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'IMPORT_REPORTING_COMPLETED_EVENT'
+    );
+
+    if (isImportDataCompleted) {
+      changeProgressStepBar({ step: 1, currentStep: 2, isRunning: true });
     }
   }, [notificationContext]);
 
@@ -937,6 +950,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       },
       true
     );
+    changeProgressStepBar({ step: 0, currentStep: 1, isRunning: true });
   };
 
   const renderImportOtherSystemsFooter = (
