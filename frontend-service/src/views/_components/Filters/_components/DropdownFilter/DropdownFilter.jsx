@@ -13,7 +13,15 @@ import { SortButton } from 'views/_components/Filters/_components/SortButton';
 import { filterByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 import { filterByAllKeys } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
 
-export const DropdownFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, option, recoilId }) => {
+export const DropdownFilter = ({
+  hasCustomSort,
+  isLoading,
+  onFilterData,
+  onSort,
+  option,
+  panelClassName,
+  recoilId
+}) => {
   const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));
 
   const [filterBy, setFilterBy] = useRecoilState(filterByStore(`${option.key}_${recoilId}`));
@@ -66,6 +74,7 @@ export const DropdownFilter = ({ hasCustomSort, isLoading, onFilterData, onSort,
         }}
         optionLabel="label"
         options={option.dropdownOptions}
+        panelClassName={panelClassName}
         showClear={true}
         showFilterClear={true}
         value={filterBy[option.key]}

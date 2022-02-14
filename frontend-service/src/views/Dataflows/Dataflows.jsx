@@ -858,6 +858,7 @@ export const Dataflows = () => {
           }}
           onSort={getDataflows}
           options={options[tabId]}
+          panelClassName="overwriteZindexPanel"
           recoilId={tabId}
         />
         {renderPaginator()}
