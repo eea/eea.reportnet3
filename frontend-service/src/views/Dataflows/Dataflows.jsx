@@ -2,7 +2,6 @@ import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } 
 import { useParams } from 'react-router-dom';
 import { useResetRecoilState } from 'recoil';
 
-import findIndex from 'lodash/findIndex';
 import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
 import pull from 'lodash/pull';
@@ -609,57 +608,63 @@ export const Dataflows = () => {
           { key: 'obligationId', label: resourcesContext.messages['obligationId'], isSortable: true, keyfilter: 'num' }
         ],
         type: 'INPUT'
-      },
+      }
+    ];
+
+    if (isAdmin) {
+      filters.push({
+        key: 'userRole',
+        label: resourcesContext.messages['userRole'],
+        type: 'DROPDOWN',
+        dropdownOptions: [
+          {
+            label: config.permissions.roles.CUSTODIAN.label.toUpperCase(),
+            value: config.permissions.roles.CUSTODIAN.key
+          },
+          {
+            label: config.permissions.roles.STEWARD.label.toUpperCase(),
+            value: config.permissions.roles.STEWARD.key
+          },
+          {
+            label: config.permissions.roles.STEWARD_SUPPORT.label.toUpperCase(),
+            value: config.permissions.roles.STEWARD_SUPPORT.key
+          },
+          {
+            label: config.permissions.roles.OBSERVER.label.toUpperCase(),
+            value: config.permissions.roles.OBSERVER.key
+          },
+          {
+            label: config.permissions.roles.EDITOR_WRITE.label.toUpperCase(),
+            value: config.permissions.roles.EDITOR_WRITE.key
+          },
+          {
+            label: config.permissions.roles.EDITOR_READ.label.toUpperCase(),
+            value: config.permissions.roles.EDITOR_READ.key
+          },
+          {
+            label: config.permissions.roles.NATIONAL_COORDINATOR.label.toUpperCase(),
+            value: config.permissions.roles.NATIONAL_COORDINATOR.key
+          },
+          {
+            label: config.permissions.roles.LEAD_REPORTER.label.toUpperCase(),
+            value: config.permissions.roles.LEAD_REPORTER.key
+          },
+          {
+            label: config.permissions.roles.REPORTER_WRITE.label.toUpperCase(),
+            value: config.permissions.roles.REPORTER_WRITE.key
+          },
+          {
+            label: config.permissions.roles.REPORTER_READ.label.toUpperCase(),
+            value: config.permissions.roles.REPORTER_READ.key
+          }
+        ]
+      });
+    }
+
+    filters.push(
       {
         nestedOptions: [
           {
-            key: 'userRole',
-            label: resourcesContext.messages['userRole'],
-            dropdownOptions: [
-              {
-                label: config.permissions.roles.CUSTODIAN.label.toUpperCase(),
-                value: config.permissions.roles.CUSTODIAN.key
-              },
-              {
-                label: config.permissions.roles.STEWARD.label.toUpperCase(),
-                value: config.permissions.roles.STEWARD.key
-              },
-              {
-                label: config.permissions.roles.STEWARD_SUPPORT.label.toUpperCase(),
-                value: config.permissions.roles.STEWARD_SUPPORT.key
-              },
-              {
-                label: config.permissions.roles.OBSERVER.label.toUpperCase(),
-                value: config.permissions.roles.OBSERVER.key
-              },
-              {
-                label: config.permissions.roles.EDITOR_WRITE.label.toUpperCase(),
-                value: config.permissions.roles.EDITOR_WRITE.key
-              },
-              {
-                label: config.permissions.roles.EDITOR_READ.label.toUpperCase(),
-                value: config.permissions.roles.EDITOR_READ.key
-              },
-              {
-                label: config.permissions.roles.NATIONAL_COORDINATOR.label.toUpperCase(),
-                value: config.permissions.roles.NATIONAL_COORDINATOR.key
-              },
-              {
-                label: config.permissions.roles.LEAD_REPORTER.label.toUpperCase(),
-                value: config.permissions.roles.LEAD_REPORTER.key
-              },
-              {
-                label: config.permissions.roles.REPORTER_WRITE.label.toUpperCase(),
-                value: config.permissions.roles.REPORTER_WRITE.key
-              },
-              {
-                label: config.permissions.roles.REPORTER_READ.label.toUpperCase(),
-                value: config.permissions.roles.REPORTER_READ.key
-              }
-            ]
-          },
-          {
-            className: 'dropdownFilterWrapper',
             key: 'status',
             label: resourcesContext.messages['status'],
             isSortable: true,
@@ -668,7 +673,8 @@ export const Dataflows = () => {
               { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
               { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
               { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
-            ]
+            ],
+            className: 'dropdownFilterWrapper'
           },
           {
             key: 'pinned',
@@ -683,18 +689,12 @@ export const Dataflows = () => {
         type: 'DROPDOWN'
       },
       {
-        isSortable: true,
         key: 'expirationDate',
         label: resourcesContext.messages['expirationDateFilterLabel'],
+        isSortable: true,
         type: 'DATE'
       }
-    ];
-
-    const dropDownFilters = filters.find(filter => filter.type === 'DROPDOWN');
-    const userRoleFilterIndex = findIndex(dropDownFilters.nestedOptions, filter => filter.key === 'userRole');
-    if (isAdmin) {
-      dropDownFilters.nestedOptions.splice(userRoleFilterIndex, 1);
-    }
+    );
 
     if (isCustodian || isAdmin) {
       filters.push({
