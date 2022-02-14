@@ -1,7 +1,6 @@
 import { Fragment, useContext, useEffect, useLayoutEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 
 import styles from './ManageNationalCoordinators.module.scss';
 
@@ -96,15 +95,6 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     getDropdownsOptions();
   }, []);
 
-
-  const renderRepresentingColumn = nationalCoordinatorsData => {
-    return <p>{nationalCoordinatorsData.country}</p>;
-  };
-
-  const renderNationalCoordinatorsColumn = nationalCoordinatorsData => {
-    return <p>{nationalCoordinatorsData.email}</p>;
-  };
-
   const getActionsTemplate = () => {
     return (
       <Button
@@ -116,17 +106,15 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     );
   };
 
-  const getManageNationalCoordinatorsColumns = () => {
+  const renterTableColumns = () => {
     const columns = [
       {
-        key: 'nationalCoordinators',
-        header: resourcesContext.messages['manageNationalCoordinatorsDialogColumn'],
-        template: renderNationalCoordinatorsColumn
+        key: 'email',
+        header: resourcesContext.messages['manageNationalCoordinatorsDialogColumn']
       },
       {
-        key: 'representing',
-        header: resourcesContext.messages['manageRolesDialogDataProviderColumn'],
-        template: renderRepresentingColumn
+        key: 'countryName',
+        header: resourcesContext.messages['manageRolesDialogDataProviderColumn']
       },
       {
         key: 'actions',
@@ -183,7 +171,7 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
           rowsPerPageOptions={[5, 10, 15]}
           totalRecords={nationalCoordinatorsData.length}
           value={nationalCoordinatorsData}>
-          {getManageNationalCoordinatorsColumns()}
+          {renterTableColumns()}
         </DataTable>
       </div>
     );
