@@ -129,6 +129,14 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
     }
   };
 
+  const renderDeliveryDate = () => {
+    if (TextUtils.areEquals(itemContent.expirationDate, '-')) {
+      return resourcesContext.messages['pending'];
+    } else {
+      return dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat);
+    }
+  };
+
   const idTooltip = uniqueId();
 
   return layout(
@@ -143,11 +151,7 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
           {renderCreationDate()}
           <div>
             <span>{`${resourcesContext.messages['deliveryDate']}: `}</span>
-            <span className={`${styles.dateBlock}`}>
-              {TextUtils.areEquals(itemContent.expirationDate, '-')
-                ? resourcesContext.messages['pending']
-                : dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
-            </span>
+            <span className={`${styles.dateBlock}`}>{renderDeliveryDate()}</span>
           </div>
         </div>
       </div>
