@@ -1,4 +1,5 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -6,6 +7,7 @@ import styles from './ManageNationalCoordinators.module.scss';
 
 import { AddNationalCoordinator } from './_components/AddNationalCoordinator';
 import { Button } from 'views/_components/Button';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
@@ -14,23 +16,28 @@ import { Spinner } from 'views/_components/Spinner';
 
 import { UserRightService } from 'services/UserRightService';
 
+import { filteredDataStore } from 'views/_components/Filters/_functions/Stores/filterStore';
+
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { CountryUtils } from 'views/_functions/Utils/CountryUtils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 
-import { useFilters } from 'views/_functions/Hooks/useFilters';
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [nationalCoordinatorsData, setNationalCoordinatorsData] = useState([]);
-
+  const [deleteNationalCoordinator, setDeleteNationalCoordinator] = useState({});
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  //const { filteredData, isFiltered } = useFilters('manageNationalCoordinators');
+  const filteredData = useRecoilValue(filteredDataStore('manageNationalCoordinators'));
+  const { isFiltered, setData } = useApplyFilters('manageNationalCoordinators');
 
   useEffect(() => {
     fetchData();
@@ -41,9 +48,10 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
       setIsLoading(true);
       const { data } = await UserRightService.getNationalCoordinators();
       setNationalCoordinatorsData(parseNationalCoordinatorsList(data));
+      setData(parseNationalCoordinatorsList(data));
     } catch (error) {
       console.error('NationalCoordinators - fetchData.', error);
-      notificationContext.add({ type: 'LOAD_USERS_LIST_ERROR' }, true);
+      notificationContext.add({ type: 'LOAD_NATIONAL_COORDINATORS_ERROR' }, true);
     } finally {
       setIsLoading(false);
     }
@@ -63,12 +71,30 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     return nationalCoordinators;
   };
 
+  const deleteNationalCoordinators = async () => {
+    try {
+      setIsDeleting(true);
+      await UserRightService.deleteNationalCoordinators(deleteNationalCoordinator);
+    } catch (error) {
+      console.error('NationalCoordinators - deleteNationalCoordinators.', error);
+      notificationContext.add({ type: 'DELETE_NATIONAL_COORDINATORS_ERROR' }, true);
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogVisible(false);
+      setDeleteNationalCoordinator({});
+    }
+  };
+
+  const onDeleteDialogClose = () => {
+    setIsDeleteDialogVisible(false);
+  };
+
   const getActionsTemplate = () => {
     return (
       <Button
         className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteButton}`}
         icon="trash"
-        //onClick={() => onShowDeleteDialog(webformRow)}
+        onClick={() => setIsDeleteDialogVisible(true)}
       />
     );
   };
@@ -77,11 +103,11 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     const columns = [
       {
         key: 'email',
-        header: resourcesContext.messages['manageNationalCoordinatorsDialogColumn']
+        header: resourcesContext.messages['account']
       },
       {
         key: 'countryName',
-        header: resourcesContext.messages['manageRolesDialogDataProviderColumn']
+        header: resourcesContext.messages['countries']
       },
       {
         key: 'actions',
@@ -102,18 +128,22 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     ));
   };
 
+  const parseMultiSelectOptions = () =>
+    nationalCoordinatorsData.map(option => {
+      return { type: option.countryName, value: option.countryCode };
+    });
+
   const filterOptions = [
     {
-      key: 'search',
-      label: resourcesContext.messages['search'],
-      searchBy: ['nationalCoordinators'],
-      type: 'SEARCH'
+      key: 'email',
+      label: resourcesContext.messages['account'],
+      type: 'INPUT'
     },
     {
-      key: 'countries',
+      key: 'countryCode',
       label: resourcesContext.messages['countries'],
-      dropdownOptions: ['country1, country2, country3'],
-      type: 'DROPDOWN'
+      multiSelectOptions: parseMultiSelectOptions(),
+      type: 'MULTI_SELECT'
     }
   ];
 
@@ -135,26 +165,29 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     }
 
     return (
-      <div className={styles.table}>
-        <Filters
-          className="manageNationalCoordinators"
-          // onFilter={onLoadReportingObligations}
-          // onReset={onLoadReportingObligations}
-          options={filterOptions}
-        />
+      <Fragment>
+        <Filters className="lineItems" options={filterOptions} recoilId="manageNationalCoordinators" />
 
         <DataTable
           autoLayout
           className={styles.dialogContent}
           hasDefaultCurrentPage
+          onRowClick={event => setDeleteNationalCoordinator(event.data)}
           paginator
+          paginatorRight={
+            <PaginatorRecordsCount
+              dataLength={nationalCoordinatorsData.length}
+              filteredData={filteredData}
+              isFiltered={isFiltered}
+            />
+          }
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
           totalRecords={nationalCoordinatorsData.length}
-          value={nationalCoordinatorsData}>
+          value={filteredData}>
           {renderTableColumns()}
         </DataTable>
-      </div>
+      </Fragment>
     );
   };
 
@@ -172,15 +205,32 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
   );
 
   return (
-    <Dialog
-      blockScroll={false}
-      footer={dialogFooter}
-      header={resourcesContext.messages['manageNationalCoordinators']}
-      modal
-      onHide={onCloseDialog}
-      style={{ width: '80%', maxWidth: '650px' }}
-      visible={isDialogVisible}>
-      {renderDialogContent()}
-    </Dialog>
+    <Fragment>
+      <Dialog
+        blockScroll={false}
+        className={styles.dialog}
+        footer={dialogFooter}
+        header={resourcesContext.messages['manageNationalCoordinators']}
+        modal
+        onHide={onCloseDialog}
+        visible={isDialogVisible}>
+        {renderDialogContent()}
+      </Dialog>
+
+      {isDeleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          disabledConfirm={isDeleting}
+          header={resourcesContext.messages['deleteNationalCoordinatorsHeader']}
+          iconConfirm={isDeleting ? 'spinnerAnimate' : 'check'}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={() => deleteNationalCoordinators()}
+          onHide={onDeleteDialogClose}
+          visible={isDeleteDialogVisible}>
+          {resourcesContext.messages['deleteNationalCoordinatorsConfirm']}
+        </ConfirmDialog>
+      )}
+    </Fragment>
   );
 };

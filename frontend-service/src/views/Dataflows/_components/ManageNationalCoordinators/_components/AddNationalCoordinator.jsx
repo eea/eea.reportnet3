@@ -77,7 +77,7 @@ export const AddNationalCoordinator = () => {
           id="name"
           maxLength={50}
           //onChange={}
-          placeholder={resourcesContext.messages['nationalCoordinatorsEmailColumn']}
+          placeholder={resourcesContext.messages['nationalCoordinatorsEmail']}
           //value={webformConfiguration.name}
         />
 

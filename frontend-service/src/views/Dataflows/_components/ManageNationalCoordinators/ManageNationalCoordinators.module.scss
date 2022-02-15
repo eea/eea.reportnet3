@@ -13,23 +13,25 @@
   }
 }
 
+.dialog {
+  width: 50vw !important;
+  > div:nth-child(2) > div:first-child {
+    margin: 0 0 2.5em 0 !important;
+  }
+  > div:nth-child(2) > div:first-child > div {
+    margin: 0 !important;
+  }
+}
+
 .dialogContent {
   table > tbody > tr > td:last-child {
     text-align: center;
   }
 }
 
-.addDialog {
-  width: 30% !important;
-}
-
 .buttonsDialogFooter {
   display: flex;
   justify-content: space-between;
-}
-
-.groupOfCountriesWrapper {
-  width: 100%;
 }
 
 .actionButton {
