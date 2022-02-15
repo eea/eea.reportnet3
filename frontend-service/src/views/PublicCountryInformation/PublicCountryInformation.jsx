@@ -110,12 +110,14 @@ export const PublicCountryInformation = () => {
 
   const getDeliveryStatus = (dataflow, dataset) => {
     if (!dataset?.isReleased) {
-      return config.datasetStatus.PENDING.label;
+      return resourcesContext.messages[config.datasetStatus.PENDING.label];
     } else {
       if (!dataflow.manualAcceptance) {
-        return config.datasetStatus.DELIVERED.label;
+        return resourcesContext.messages[config.datasetStatus.DELIVERED.label];
       } else {
-        return DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets.map(dataset => dataset.status));
+        return resourcesContext.messages[
+          DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets.map(dataset => dataset.status))
+        ];
       }
     }
   };
@@ -374,18 +376,24 @@ export const PublicCountryInformation = () => {
       key: 'deliveryStatus',
       label: resourcesContext.messages['deliveryStatus'],
       multiSelectOptions: [
-        { type: config.datasetStatus.PENDING.label.toUpperCase(), value: config.datasetStatus.PENDING.key },
-        { type: config.datasetStatus.DELIVERED.label.toUpperCase(), value: config.datasetStatus.DELIVERED.key },
         {
-          type: config.datasetStatus.CORRECTION_REQUESTED.label.toUpperCase(),
+          type: resourcesContext.messages[config.datasetStatus.PENDING.label].toUpperCase(),
+          value: config.datasetStatus.PENDING.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetStatus.DELIVERED.label].toUpperCase(),
+          value: config.datasetStatus.DELIVERED.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetStatus.CORRECTION_REQUESTED.label].toUpperCase(),
           value: config.datasetStatus.CORRECTION_REQUESTED.key
         },
         {
-          type: config.datasetStatus.FINAL_FEEDBACK.label.toUpperCase(),
+          type: resourcesContext.messages[config.datasetStatus.FINAL_FEEDBACK.label].toUpperCase(),
           value: config.datasetStatus.FINAL_FEEDBACK.key
         },
         {
-          type: config.datasetStatus.TECHNICALLY_ACCEPTED.label.toUpperCase(),
+          type: resourcesContext.messages[config.datasetStatus.TECHNICALLY_ACCEPTED.label].toUpperCase(),
           value: config.datasetStatus.TECHNICALLY_ACCEPTED.key
         }
       ]
