@@ -141,12 +141,9 @@ export const DataflowRepository = {
   validateAllDataflowsUsers: async () =>
     await HTTPRequester.update({ url: getUrl(DataflowConfig.validateAllDataflowsUsers) }),
 
-  getValidationsStatus: async (dataflowId, datasetId) =>
-    await HTTPRequester.get({
-      url: getUrl(DataflowConfig.getValidationsStatus),
-      data: {
-        dataflowId: dataflowId,
-        datasetId: datasetId
-      }
+  getValidationsStatus: async (dataflowId, filterBy, isAsc, numberRows, pageNum, status) =>
+    await HTTPRequester.post({
+      url: getUrl(DataflowConfig.getValidationsStatus, { dataflowId, isAsc, numberRows, pageNum, status }),
+      data: { ...filterBy }
     })
 };
