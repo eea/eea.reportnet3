@@ -33,6 +33,8 @@ export const NotificationService = {
 
   create: async (type, content) => await NotificationRepository.create(type, content),
 
+  deleteAll: async () => await NotificationRepository.deleteAll(),
+
   parse: ({ config, content = {}, date, message, onClick, routes, type }) => {
     content = merge(content, content.customContent);
     delete content.customContent;

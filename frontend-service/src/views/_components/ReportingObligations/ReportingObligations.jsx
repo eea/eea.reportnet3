@@ -33,7 +33,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const { getFilterBy, isFiltered } = useApplyFilters('reportingObligations');
+  const { getFilterBy, isFiltered, filteredData } = useApplyFilters('reportingObligations');
 
   const data = useRecoilValue(filteredDataStore('reportingObligations'));
 
@@ -182,10 +182,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     return (
       <Fragment>
         {renderView()}
-        <span
-          className={`${isEmpty(data) ? styles.selected : ''} ${
-            pagination.rows < 15 ? styles.selectedObligation : ''
-          }`}>
+        <span className={`${styles.selectedObligation} ${isEmpty(data || filteredData) ? styles.selected : ''}`}>
           <span>{`${resourcesContext.messages['selectedObligation']}: `}</span>
           {selectedObligation.title || '-'}
         </span>
