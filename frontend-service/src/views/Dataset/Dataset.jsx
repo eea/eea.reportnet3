@@ -429,6 +429,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     try {
       const metaData = await MetadataUtils.getMetadata({ datasetId, dataflowId });
       setMetadata(metaData);
+      console.log({ metaData });
       //TODO. If dataset has been imported or has data? If is validating
       // if (true) {
       //   changeProgressStepBar({ step: 0, currentStep: 1, isRunning: false, completed: true });
@@ -935,6 +936,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
     } = metadata;
+
     notificationContext.add(
       {
         type: 'DATASET_DATA_LOADING_INIT',

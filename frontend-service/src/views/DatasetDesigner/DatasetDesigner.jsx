@@ -328,6 +328,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         schemaName: metaData.dataset.name
       }
     });
+    console.log({ metaData });
 
     //TODO. If dataset has been imported or has data? If is validating
     if (true) {
