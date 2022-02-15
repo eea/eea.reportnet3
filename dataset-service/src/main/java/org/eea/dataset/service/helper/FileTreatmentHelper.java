@@ -74,6 +74,7 @@ import org.eea.interfaces.vo.dataset.ETLRecordVO;
 import org.eea.interfaces.vo.dataset.ETLTableVO;
 import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -246,6 +247,10 @@ public class FileTreatmentHelper implements DisposableBean {
 
     if (delimiter != null && delimiter.length() > 1) {
       LOG_ERROR.error("the size of the delimiter cannot be greater than 1");
+      // TO DO Status will be updated based on the running process in the dataset, this call will be
+      // changed when processes table is implemented
+      datasetMetabaseService.updateDatasetRunningStatus(datasetId,
+          DatasetRunningStatusEnum.ERROR_IN_IMPORT);
       throw new EEAException("The size of the delimiter cannot be greater than 1");
     }
 
@@ -269,6 +274,10 @@ public class FileTreatmentHelper implements DisposableBean {
 
     // We add a lock to the Release process
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    // TO DO Status will be updated based on the running process in the dataset, this call will be
+    // changed when processes table is implemented
+    datasetMetabaseService.updateDatasetRunningStatus(datasetId,
+        DatasetRunningStatusEnum.IMPORTING);
     Map<String, Object> mapCriteria = new HashMap<>();
     mapCriteria.put("dataflowId", datasetMetabaseVO.getDataflowId());
     mapCriteria.put("dataProviderId", datasetMetabaseVO.getDataProviderId());
@@ -352,6 +361,10 @@ public class FileTreatmentHelper implements DisposableBean {
       FileUtils.deleteQuietly(folder);
       if (!folder.mkdirs()) {
         releaseLock(datasetId);
+        // TO DO Status will be updated based on the running process in the dataset, this call will
+        // be changed when processes table is implemented
+        datasetMetabaseService.updateDatasetRunningStatus(datasetId,
+            DatasetRunningStatusEnum.ERROR_IN_IMPORT);
         throw new EEAException("Folder for dataset " + datasetId + " already exists");
       }
 
@@ -377,6 +390,10 @@ public class FileTreatmentHelper implements DisposableBean {
               replace, delimiter, multipartFileMimeType);
         } else {
           releaseLock(datasetId);
+          // TO DO Status will be updated based on the running process in the dataset, this call
+          // will be changed when processes table is implemented
+          datasetMetabaseService.updateDatasetRunningStatus(datasetId,
+              DatasetRunningStatusEnum.ERROR_IN_IMPORT);
           LOG_ERROR.error("Error trying to import a zip file into dataset {}. Empty zip file",
               datasetId);
           throw new EEAException("Empty zip file");
@@ -401,6 +418,10 @@ public class FileTreatmentHelper implements DisposableBean {
           "Unexpected exception importing file data: datasetId={}, file={}. Message: {}", datasetId,
           multipartFile.getName(), e.getMessage(), e);
       releaseLock(datasetId);
+      // TO DO Status will be updated based on the running process in the dataset, this call will be
+      // changed when processes table is implemented
+      datasetMetabaseService.updateDatasetRunningStatus(datasetId,
+          DatasetRunningStatusEnum.ERROR_IN_IMPORT);
       throw new EEAException(e);
     }
   }
@@ -583,6 +604,10 @@ public class FileTreatmentHelper implements DisposableBean {
         } else {
           LOG_ERROR.error(
               "RN3-Import file failed: fileName={}. There's no table with that fileName", fileName);
+          // TO DO Status will be updated based on the running process in the dataset, this call
+          // will be changed when processes table is implemented
+          datasetMetabaseService.updateDatasetRunningStatus(datasetId,
+              DatasetRunningStatusEnum.ERROR_IN_IMPORT);
           errorWrongFilename = true;
           numberOfWrongFiles++;
           if (numberOfWrongFiles == files.size()) {
@@ -666,7 +691,16 @@ public class FileTreatmentHelper implements DisposableBean {
               ? EventType.IMPORT_REPORTING_FAILED_EVENT
               : EventType.IMPORT_DESIGN_FAILED_EVENT;
         }
+        // TO DO Status will be updated based on the running process in the dataset, this call will
+        // be changed when processes table is implemented
+        datasetMetabaseService.updateDatasetRunningStatus(datasetId,
+            DatasetRunningStatusEnum.ERROR_IN_IMPORT);
       } else {
+        // TO DO Status will be updated based on the running process in the dataset, this call will
+        // be changed when processes table is implemented
+        datasetMetabaseService.updateDatasetRunningStatus(datasetId,
+            DatasetRunningStatusEnum.IMPORTED);
+
         eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
             ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
             : EventType.IMPORT_DESIGN_COMPLETED_EVENT;

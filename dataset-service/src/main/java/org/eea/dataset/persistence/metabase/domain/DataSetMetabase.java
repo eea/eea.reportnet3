@@ -16,6 +16,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import lombok.Data;
 
@@ -80,6 +81,11 @@ public class DataSetMetabase {
   /** The public file name. */
   @Column(name = "PUBLIC_FILE_NAME")
   private String publicFileName;
+
+  /** The status. */
+  @Column(name = "DATASET_RUNNING_STATUS")
+  @Enumerated(EnumType.STRING)
+  private DatasetRunningStatusEnum datasetRunningStatus;
 
   /**
    * Hash code.
