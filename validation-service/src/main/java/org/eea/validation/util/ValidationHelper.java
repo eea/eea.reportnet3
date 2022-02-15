@@ -379,6 +379,8 @@ public class ValidationHelper implements DisposableBean {
   public void executeValidationProcess(final Long datasetId, String processId, boolean released) {
     // Initialize process as coordinator
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    // TO DO Status will be updated based on the running process in the dataset, this call will be
+    // changed when processes table is implemented
     datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
         DatasetRunningStatusEnum.VALIDATING);
     RulesSchema rules =
@@ -863,6 +865,8 @@ public class ValidationHelper implements DisposableBean {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
             NotificationVO.builder().user(notificationUser).datasetId(datasetId).build());
       }
+      // TO DO Status will be updated based on the running process in the dataset, this call will be
+      // changed when processes table is implemented
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.VALIDATED);
       isFinished = true;

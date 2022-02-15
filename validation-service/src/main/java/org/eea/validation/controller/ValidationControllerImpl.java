@@ -129,6 +129,8 @@ public class ValidationControllerImpl implements ValidationController {
 
       validationHelper.executeValidation(datasetId, UUID.randomUUID().toString(), released, true);
     } catch (EEAException e) {
+      // TO DO Status will be updated based on the running process in the dataset, this call will be
+      // changed when processes table is implemented
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
       LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);

@@ -616,7 +616,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
    * @param datasetRunningStatus the dataset running status
    */
   @Override
-  @PutMapping(value = "private/updateDatasetRunningStatus/{id}")
+  @PutMapping(value = "/private/updateDatasetRunningStatus/{id}")
   @ApiOperation(value = "Update dataset running status", hidden = true)
   public void updateDatasetRunningStatus(
       @ApiParam(value = "Dataset Id", example = "0") @PathVariable("id") Long datasetId,

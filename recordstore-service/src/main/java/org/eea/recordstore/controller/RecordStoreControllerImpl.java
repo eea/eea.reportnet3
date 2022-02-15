@@ -234,6 +234,8 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           defaultValue = "false") Boolean prefillingReference) {
 
     try {
+      // TO DO Status will be updated based on the running process in the dataset, this call will be
+      // changed when processes table is implemented
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.RESTORING_SNAPSHOT);
       restoreSnapshotHelper.processRestoration(datasetId, idSnapshot, idPartition, datasetType,
