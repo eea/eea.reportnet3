@@ -85,6 +85,30 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
     );
   };
 
+  const renderReportingDatasetsStatus = () => {
+    const renderDeliveryStatus = () => {
+      if (itemContent.reportingDatasetsStatus === 'PENDING') {
+        return resourcesContext.messages['draft'].toUpperCase();
+      } else {
+        return resourcesContext.messages[
+          config.datasetStatus[itemContent.reportingDatasetsStatus]?.label
+        ]?.toUpperCase();
+      }
+    };
+    if (
+      !isCustodian &&
+      !isNil(itemContent.reportingDatasetsStatus) &&
+      itemContent.statusKey === config.dataflowStatus.OPEN
+    ) {
+      return (
+        <p>
+          <span>{`${resourcesContext.messages['deliveryStatus']}: `}</span>
+          {renderDeliveryStatus()}
+        </p>
+      );
+    }
+  };
+
   const idTooltip = uniqueId();
 
   return layout(
@@ -128,16 +152,7 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
       </div>
 
       <div className={`${styles.status} dataflowList-status-help-step`}>
-        {!isCustodian &&
-          !isNil(itemContent.reportingDatasetsStatus) &&
-          itemContent.statusKey === config.dataflowStatus.OPEN && (
-            <p>
-              <span>{`${resourcesContext.messages['deliveryStatus']}: `}</span>
-              {itemContent.reportingDatasetsStatus === 'PENDING'
-                ? resourcesContext.messages['draft'].toUpperCase()
-                : itemContent.reportingDatasetsStatus.split('_').join(' ').toUpperCase()}
-            </p>
-          )}
+        {renderReportingDatasetsStatus()}
         <p>
           <span>{`${resourcesContext.messages['dataflowStatus']}: `}</span>
           {itemContent.status}
