@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
@@ -12,6 +12,7 @@ import styles from './NotificationsList.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { DataTable } from 'views/_components/DataTable';
 import { LevelError } from 'views/_components/LevelError';
@@ -21,22 +22,19 @@ import { NotificationService } from 'services/NotificationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
 export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
 
   const [columns, setColumns] = useState([]);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const [paginationInfo, setPaginationInfo] = useState({
-    recordsPerPage: userContext.userProps.rowsPerPage,
-    firstPageRecord: 0
-  });
+  const [paginationInfo, setPaginationInfo] = useState({ recordsPerPage: 10, firstPageRecord: 0 });
   const [totalRecords, setTotalRecords] = useState(0);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
@@ -70,7 +68,7 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
     ));
 
     setColumns(columnsArray);
-  }, [userContext]);
+  }, []);
 
   useEffect(() => {
     if (!isEmpty(columns)) {
@@ -130,7 +128,15 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
   };
 
   const notificationsFooter = (
+    // <div className={styles.notificationsFooter}>
     <div>
+      <Button
+        className="p-button-rounded p-button-secondary"
+        icon="trash"
+        label={resourcesContext.messages['deleteUsersNotificationsData']}
+        onClick={() => setIsDeleteDialogVisible(true)}
+        visible={false}
+      />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon="cancel"
@@ -243,22 +249,52 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
     'p-highlight-bg': rowData.index < notificationContext.all.filter(notification => !notification.isSystem).length
   });
 
+  const onDelete = async () => {
+    try {
+      setIsDeleting(true);
+      await notificationContext.deleteAll();
+      await NotificationService.deleteAll();
+    } catch (error) {
+      console.error('NotificationsList - onDelete.', error);
+      notificationContext.add({ type: 'DELETE_USER_NOTIFICATIONS_ERROR' }, true);
+    } finally {
+      onLoadNotifications();
+      setIsDeleteDialogVisible(false);
+      setIsDeleting(false);
+    }
+  };
+
   const renderNotificationsListContent = () => {
     if (isNotificationVisible) {
       return (
-        <Dialog
-          blockScroll={false}
-          className="edit-table"
-          contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
-          footer={notificationsFooter}
-          header={resourcesContext.messages['notifications']}
-          modal={true}
-          onHide={onHideNotificationsList}
-          style={{ width: '80%' }}
-          visible={isNotificationVisible}
-          zIndex={3100}>
-          {renderNotifications()}
-        </Dialog>
+        <Fragment>
+          <Dialog
+            blockScroll={false}
+            className="edit-table"
+            contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
+            footer={notificationsFooter}
+            header={resourcesContext.messages['notifications']}
+            modal={true}
+            onHide={onHideNotificationsList}
+            style={{ width: '80%' }}
+            visible={isNotificationVisible}>
+            {renderNotifications()}
+          </Dialog>
+          {isDeleteDialogVisible && (
+            <ConfirmDialog
+              classNameConfirm="p-button-danger"
+              disabledConfirm={isDeleting}
+              header={resourcesContext.messages['deleteUsersNotificationsHeader']}
+              iconConfirm={isDeleting ? 'spinnerAnimate' : 'check'}
+              labelCancel={resourcesContext.messages['no']}
+              labelConfirm={resourcesContext.messages['yes']}
+              onConfirm={onDelete}
+              onHide={() => setIsDeleteDialogVisible(false)}
+              visible={isDeleteDialogVisible}>
+              {resourcesContext.messages['deleteUsersNotificationsConfirm']}
+            </ConfirmDialog>
+          )}
+        </Fragment>
       );
     }
   };

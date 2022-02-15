@@ -17,7 +17,15 @@ import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilter
 
 import { MultiSelectFilterUtils } from './_functions/Utils/MultiSelectFilterUtils';
 
-export const MultiSelectFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, option, recoilId }) => {
+export const MultiSelectFilter = ({
+  hasCustomSort,
+  isLoading,
+  onFilterData,
+  onSort,
+  option,
+  panelClassName,
+  recoilId
+}) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const data = useRecoilValue(dataStore(recoilId));
@@ -68,6 +76,7 @@ export const MultiSelectFilter = ({ hasCustomSort, isLoading, onFilterData, onSo
         onChange={event => onFilter(event.target.value)}
         optionLabel="type"
         options={option.multiSelectOptions || MultiSelectFilterUtils.getOptionsTypes(data, option.key)}
+        panelClassName={panelClassName}
         value={filterBy[option.key]}
       />
     </div>

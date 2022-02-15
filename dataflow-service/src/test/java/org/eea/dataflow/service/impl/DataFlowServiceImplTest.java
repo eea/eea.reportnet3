@@ -389,6 +389,11 @@ public class DataFlowServiceImplTest {
       public Long getId() {
         return 1L;
       }
+
+      @Override
+      public Long getDataProviderId() {
+        return 2L;
+      }
     };
     IDatasetStatus ida2 = new IDatasetStatus() {
 
@@ -401,6 +406,11 @@ public class DataFlowServiceImplTest {
       public Long getId() {
         return 2L;
       }
+
+      @Override
+      public Long getDataProviderId() {
+        return 2L;
+      }
     };
     List<IDatasetStatus> listObject = Arrays.asList(ida1, ida2);
     when(dataflowRepository.getDatasetsStatus(Mockito.any())).thenReturn(listObject);
@@ -409,10 +419,9 @@ public class DataFlowServiceImplTest {
 
     List<Dataflow> list = new ArrayList<>();
     list.add(new Dataflow());
-    Mockito
-        .when(dataflowRepository.findPaginated(Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-            Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any()))
-        .thenReturn(list);
+    Mockito.when(dataflowRepository.findPaginated(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(list);
     Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dfVO);
     assertNotNull("fail",
         dataflowServiceImpl
