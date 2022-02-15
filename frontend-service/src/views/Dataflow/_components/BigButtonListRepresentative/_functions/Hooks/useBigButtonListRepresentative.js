@@ -150,7 +150,7 @@ const useBigButtonListRepresentative = ({
           return null;
         }
 
-        return config.datasetStatus[dataset.status].label;
+        return resourcesContext.messages[config.datasetStatus[dataset.status].label];
       };
 
       const technicalAcceptanceStatus = getTechnicalAcceptanceStatus();
