@@ -696,6 +696,8 @@ public class FileTreatmentHelper implements DisposableBean {
         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
             DatasetRunningStatusEnum.ERROR_IN_IMPORT);
       } else {
+        // TO DO Status will be updated based on the running process in the dataset, this call will
+        // be changed when processes table is implemented
         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
             DatasetRunningStatusEnum.IMPORTED);
 
