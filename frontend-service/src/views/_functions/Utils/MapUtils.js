@@ -219,8 +219,11 @@ const parseGeometryData = records => {
         } else {
           parsedJSON.geometry.coordinates =
             splittedValue.length === 0
-              ? [TextUtils.splitByChar(value)[0], TextUtils.splitByChar(value)[1]]
-              : [TextUtils.splitByChar(splittedValue[0])[0], TextUtils.splitByChar(splittedValue[0])[1]];
+              ? [Number(TextUtils.splitByChar(value)[0]), Number(TextUtils.splitByChar(value)[1])]
+              : [
+                  Number(TextUtils.splitByChar(splittedValue[0])[0]),
+                  Number(TextUtils.splitByChar(splittedValue[0])[1])
+                ];
           parsedJSON.properties.srid = splittedValue.length === 0 ? '4326' : checkSRID(splittedValue[1]);
         }
 
