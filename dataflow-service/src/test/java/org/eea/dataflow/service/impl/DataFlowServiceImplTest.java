@@ -523,7 +523,10 @@ public class DataFlowServiceImplTest {
     obligation.setObligationId(1);
     dataflowVO.setId(1L);
     dataflowVO.setName("test");
+    dataflowVO.setDescription("descriptionTest");
     dataflowVO.setObligation(obligation);
+    dataflowVO.setFmeUserId(1L);
+    dataflowVO.setDataProviderGroupId(1L);
     when(dataflowRepository.findByNameIgnoreCase(dataflowVO.getName()))
         .thenReturn(Optional.empty());
     when(dataflowRepository.findById(dataflowVO.getId())).thenReturn(Optional.of(new Dataflow()));
@@ -1468,6 +1471,23 @@ public class DataFlowServiceImplTest {
     when(authentication.getName()).thenReturn("name");
 
     dataflowServiceImpl.validateAllReporters("user");
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateDataflowEEAExceptionTest() throws EEAException {
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setId(2L);
+    dataflowVO.setName("name");
+    try {
+      Mockito.when(dataflowRepository.findByNameIgnoreCase(Mockito.anyString()))
+          .thenReturn(Optional.of(dataflow));
+      dataflowServiceImpl.updateDataFlow(dataflowVO);
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
   }
 
 }
