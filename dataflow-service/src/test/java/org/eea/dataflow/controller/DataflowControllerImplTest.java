@@ -1425,4 +1425,15 @@ public class DataflowControllerImplTest {
         "Couldn't validate all reporters and lead reporters, an error was produced during the process.",
         value.getBody());
   }
+
+  @Test
+  public void updateDataflowDataflowNameEmptyTest() {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    Mockito.when(dataflowService.isAdmin()).thenReturn(true);
+    ResponseEntity<?> value = dataflowControllerImpl.updateDataFlow(dataflowVO);
+    assertEquals(EEAErrorMessage.DATAFLOW_NAME_EMPTY, value.getBody());
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+  }
+
+
 }

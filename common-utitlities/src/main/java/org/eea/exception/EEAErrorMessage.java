@@ -703,6 +703,9 @@ public final class EEAErrorMessage {
   /** The Constant HEADER_NOT_VALID. {@value}. */
   public static final String HEADER_NOT_VALID = "The column header is not valid";
 
+  /** The Constant DATAFLOW_NAME: {@value}. */
+  public static final String DATAFLOW_NAME_EMPTY = "Dataflow Name empty";
+
   /**
    * Instantiates a new EEA error message.
    */

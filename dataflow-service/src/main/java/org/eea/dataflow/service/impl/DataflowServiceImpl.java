@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPrivateMapper;
@@ -553,7 +554,9 @@ public class DataflowServiceImpl implements DataflowService {
       Optional<Dataflow> dataflowSave = dataflowRepository.findById(dataflowVO.getId());
       if (dataflowSave.isPresent()) {
         dataflowSave.get().setName(dataflowVO.getName());
-        dataflowSave.get().setDescription(dataflowVO.getDescription());
+        if (!StringUtils.isBlank(dataflowVO.getDescription())) {
+          dataflowSave.get().setDescription(dataflowVO.getDescription());
+        }
         if (null != dataflowVO.getObligation()) {
           dataflowSave.get().setObligationId(dataflowVO.getObligation().getObligationId());
         }
