@@ -192,9 +192,10 @@ export const ManageReferenceDataflow = ({
               uniqueIdentifier="pinDataflow"></TooltipButton>
           </div>
         )}
-        {isEditing && isDesign && !isAdmin && (
+        {isEditing && isDesign && (
           <Button
             className="p-button-danger p-button-animated-blink"
+            disabled={isAdmin}
             icon="trash"
             label={resourcesContext.messages['deleteDataflowButton']}
             onClick={() => setIsDeleteDialogVisible(true)}
@@ -245,28 +246,28 @@ export const ManageReferenceDataflow = ({
           />
           {!isEmpty(errors.name.message) && <ErrorMessage message={errors.name.message} />}
         </div>
-        {!isAdmin && (
-          <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
-            <InputTextarea
-              className={styles.inputTextArea}
-              id="dataflowDescription"
-              onBlur={checkErrors}
-              onChange={event => setDescription(event.target.value)}
-              onFocus={() => handleErrors({ field: 'description', hasErrors: false, message: '' })}
-              placeholder={resourcesContext.messages['createDataflowDescription']}
-              rows={10}
-              value={description}
+
+        <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
+          <InputTextarea
+            className={styles.inputTextArea}
+            disabled={isAdmin}
+            id="dataflowDescription"
+            onBlur={checkErrors}
+            onChange={event => setDescription(event.target.value)}
+            onFocus={() => handleErrors({ field: 'description', hasErrors: false, message: '' })}
+            placeholder={resourcesContext.messages['createDataflowDescription']}
+            rows={10}
+            value={description}
+          />
+          <div className={styles.errorAndCounterWrapper}>
+            <CharacterCounter
+              currentLength={description.length}
+              maxLength={config.INPUT_MAX_LENGTH}
+              style={{ marginTop: '0.25rem' }}
             />
-            <div className={styles.errorAndCounterWrapper}>
-              <CharacterCounter
-                currentLength={description.length}
-                maxLength={config.INPUT_MAX_LENGTH}
-                style={{ marginTop: '0.25rem' }}
-              />
-              {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
-            </div>
+            {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
           </div>
-        )}
+        </div>
       </Dialog>
 
       {isDeleteDialogVisible && (

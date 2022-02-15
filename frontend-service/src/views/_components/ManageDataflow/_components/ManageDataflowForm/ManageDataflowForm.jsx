@@ -42,6 +42,8 @@ export const ManageDataflowForm = forwardRef(
     const resourcesContext = useContext(ResourcesContext);
     const userContext = useContext(UserContext);
 
+    const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+
     const [description, setDescription] = useState(data.description);
     const [errors, setErrors] = useState({
       description: { message: '', hasErrors: false },
@@ -182,6 +184,7 @@ export const ManageDataflowForm = forwardRef(
             <textarea
               autoComplete="off"
               component="textarea"
+              disabled={isAdmin}
               id="dataflowDescription"
               name="description"
               onBlur={() => checkIsCorrectInputValue(description, 'description')}
@@ -212,8 +215,14 @@ export const ManageDataflowForm = forwardRef(
               {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
             </div>
           </div>
+
           <div className={`${styles.search}`}>
-            <Button icon="search" label={resourcesContext.messages['searchObligations']} onClick={onSearch} />
+            <Button
+              disabled={isAdmin}
+              icon="search"
+              label={resourcesContext.messages['searchObligations']}
+              onClick={onSearch}
+            />
             <input
               className={`${styles.searchInput} ${errors.obligation.hasErrors ? styles.searchErrors : ''}`}
               id="searchObligation"
