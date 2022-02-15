@@ -90,9 +90,7 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
       if (itemContent.reportingDatasetsStatus === 'PENDING') {
         return resourcesContext.messages['draft'].toUpperCase();
       } else {
-        return resourcesContext.messages[
-          config.datasetStatus[itemContent.reportingDatasetsStatus]?.label
-        ]?.toUpperCase();
+        return resourcesContext.messages[config.datasetStatus[itemContent.reportingDatasetsStatus].label].toUpperCase();
       }
     };
     if (
