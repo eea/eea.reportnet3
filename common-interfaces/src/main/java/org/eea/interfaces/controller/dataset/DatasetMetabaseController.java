@@ -315,7 +315,7 @@ public interface DatasetMetabaseController {
    *
    * @param datasetRunningStatus the dataset running status
    */
-  @PutMapping(value = "private/updateDatasetRunningStatus/{id}")
+  @PutMapping(value = "/private/updateDatasetRunningStatus/{id}")
   void updateDatasetRunningStatus(@PathVariable("id") Long datasetId,
       @RequestParam("datasetRunningStatus") DatasetRunningStatusEnum datasetRunningStatus);
 
