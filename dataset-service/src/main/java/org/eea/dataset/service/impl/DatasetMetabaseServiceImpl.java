@@ -1122,5 +1122,16 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return metabaseVO;
   }
 
+  /**
+   * Gets the reportings by provider ids.
+   *
+   * @param providerIds the provider ids
+   * @return the reportings by provider ids
+   */
+  @Override
+  public List<DataSetMetabaseVO> getDatasetsByProviderIds(List<Long> providerIds) {
+    return dataSetMetabaseMapper
+        .entityListToClass(dataSetMetabaseRepository.findByDataProviderIdIn(providerIds));
+  }
 
 }

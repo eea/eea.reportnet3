@@ -579,6 +579,21 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
     return reportingDatasetService.getReportingsByDataflowIds(dataflowIds);
   }
 
+  /**
+   * Find reporting data set by provider ids.
+   *
+   * @param providerIds the provider ids
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/providerIds", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find datasets by Provider Ids list", hidden = true)
+  public List<DataSetMetabaseVO> findReportingDataSetByProviderIds(
+      @ApiParam(value = "Provider Ids list") @RequestParam("providerIds") List<Long> providerIds) {
+    return datasetMetabaseService.getDatasetsByProviderIds(providerIds);
+  }
+
 
   /**
    * Filter name.
