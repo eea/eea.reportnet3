@@ -10,6 +10,7 @@ import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
+import { Filters } from 'views/_components/Filters';
 import { Spinner } from 'views/_components/Spinner';
 
 import { ValidationService } from 'services/ValidationService'; // TODO IMPORT CORRECT SERVICE
@@ -17,8 +18,9 @@ import { ValidationService } from 'services/ValidationService'; // TODO IMPORT C
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
-import { useFilters } from 'views/_functions/Hooks/useFilters'; // TODO CHECK HISTORIC RELEASES
+// import { useFilters } from 'views/_functions/Hooks/useFilters'; // TODO CHECK IF NEEDED
 
 export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
@@ -29,85 +31,104 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [validationStatusId, setValidationStatusId] = useState(null);
   const [validationsStatuses, setValidationsStatusesList] = useState([]);
+  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 }); // TODO can be in same object with goToPage?
+  const [goToPage, setGoToPage] = useState(1);
+  const [sort, setSort] = useState({ field: '', order: 0 });
+  const [totalRecords, setTotalRecords] = useState(0);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
-  const { resetFilterState } = useApplyFilters('validationsStatuses');
+
+  const { getFilterBy, isFiltered, setData, resetFilterState } = useApplyFilters('validationsStatuses'); // TODO find how to use properly
+  //TODO CHECK IF NEEDED useFilters
+
   // TODO Filter : dataflowId, user
   // TODO Pagination
+  // TODO Ordering
+
+  const { firstRow, numberRows, pageNum } = pagination;
 
   useEffect(() => {
     getValidationsStatuses();
-  }, []);
+  }, [pagination, sort]);
 
-  // const getValidationsStatuses = async () => { // TODO MAKE ASYNC
+  // const getValidationsStatuses = async () => {
+  // TODO MAKE ASYNC
   const getValidationsStatuses = () => {
+    // await resetFilterState();
     setLoadingStatus('pending');
 
+    // const filterBy = await getFilterBy();
+
     try {
-      // const data = await ValidationService.getAllStatuses(); // TODO CORRECT SERVICE CALL
-      const data = [
-        {
-          id: 10,
-          dataflowId: 111,
-          dataflowName: 'Dataflow name',
-          datasetId: 1,
-          datasetName: 'Dataset name',
-          status: 'importing',
-          queuedDate: 1644572710000,
-          processStartingDate: 1644572711000,
-          processFinishingDate: 1644572712000,
-          user: 'igor.provider@reportnet.net'
-        },
-        {
-          id: 20,
-          dataflowId: 222,
-          dataflowName: 'Dataflow name',
-          datasetId: 2,
-          datasetName: 'Dataset name',
-          status: 'imported',
-          queuedDate: 1644572720000,
-          processStartingDate: 1644572721000,
-          processFinishingDate: 1644572722000,
-          user: 'pablo.provider@reportnet.net'
-        },
-        {
-          id: 30,
-          dataflowId: 333,
-          dataflowName: 'Dataflow name',
-          datasetId: 3,
-          datasetName: 'Dataset name',
-          status: 'validating',
-          queuedDate: 1644572730000,
-          processStartingDate: 1644572731000,
-          processFinishingDate: 1644572732000,
-          user: 'miguel.provider@reportnet.net'
-        },
-        {
-          id: 40,
-          dataflowId: 444,
-          dataflowName: 'Dataflow name',
-          datasetId: 4,
-          datasetName: 'Dataset name',
-          status: 'validated',
-          queuedDate: 1644572740000,
-          processStartingDate: 1644572741000,
-          processFinishingDate: 1644572742000,
-          user: 'miriam.provider@reportnet.net'
-        },
-        {
-          id: 50,
-          dataflowId: 555,
-          dataflowName: 'Dataflow name',
-          datasetId: 5,
-          datasetName: 'Dataset name',
-          status: 'in queue',
-          queuedDate: 1644572750000,
-          processStartingDate: 1644572751000,
-          processFinishingDate: 1644572752000,
-          user: 'mikel.provider@reportnet.net'
-        }
-      ];
-      setValidationsStatusesList(data);
+      // const _data = await ValidationService.getAllStatuses(pageNum, numberRows, sort.field, filterBy); // TODO CORRECT SERVICE CALL
+      const data = {
+        totalRecords: 5,
+        statuses: [
+          {
+            id: 10,
+            dataflowId: 111,
+            dataflowName: 'Dataflow name',
+            datasetId: 1,
+            datasetName: 'Dataset name',
+            status: 'importing',
+            queuedDate: 1644572710000,
+            processStartingDate: 1644572711000,
+            processFinishingDate: 1644572712000,
+            user: 'igor.provider@reportnet.net'
+          },
+          {
+            id: 20,
+            dataflowId: 222,
+            dataflowName: 'Dataflow name',
+            datasetId: 2,
+            datasetName: 'Dataset name',
+            status: 'imported',
+            queuedDate: 1644572720000,
+            processStartingDate: 1644572721000,
+            processFinishingDate: 1644572722000,
+            user: 'pablo.provider@reportnet.net'
+          },
+          {
+            id: 30,
+            dataflowId: 333,
+            dataflowName: 'Dataflow name',
+            datasetId: 3,
+            datasetName: 'Dataset name',
+            status: 'validating',
+            queuedDate: 1644572730000,
+            processStartingDate: 1644572731000,
+            processFinishingDate: 1644572732000,
+            user: 'miguel.provider@reportnet.net'
+          },
+          {
+            id: 40,
+            dataflowId: 444,
+            dataflowName: 'Dataflow name',
+            datasetId: 4,
+            datasetName: 'Dataset name',
+            status: 'validated',
+            queuedDate: 1644572740000,
+            processStartingDate: 1644572741000,
+            processFinishingDate: 1644572742000,
+            user: 'miriam.provider@reportnet.net'
+          },
+          {
+            id: 50,
+            dataflowId: 555,
+            dataflowName: 'Dataflow name',
+            datasetId: 5,
+            datasetName: 'Dataset name',
+            status: 'in queue',
+            queuedDate: 1644572750000,
+            processStartingDate: 1644572751000,
+            processFinishingDate: 1644572752000,
+            user: 'mikel.provider@reportnet.net'
+          }
+        ]
+      };
+      setTotalRecords(data.totalRecords);
+      setValidationsStatusesList(data.statuses);
+      setData(data.statuses); // TODO CHECK IF NEEDED
       setLoadingStatus('success');
     } catch (error) {
       console.error('ValidationsStatus - getValidationsStatuses.', error);
@@ -144,6 +165,29 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     setIsDeleteDialogVisible(false);
     setValidationStatusId(null);
   };
+
+  const onSort = event => {
+    setSort({ field: event.sortField, order: event.sortOrder });
+  };
+
+  const onChangePagination = event => {
+    setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: Math.floor(event.first / event.rows) });
+  };
+
+  const onChangePage = event => {
+    setGoToPage(event.target.value);
+    onChangePagination(event);
+  };
+
+  const filterOptions = [
+    {
+      nestedOptions: [
+        { key: 'dataflowId', label: resourcesContext.messages['dataflowId'] },
+        { key: 'user', label: resourcesContext.messages['user'] }
+      ],
+      type: 'INPUT'
+    }
+  ];
 
   const getTableColumns = () => {
     const columns = [
@@ -250,10 +294,37 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
 
     return (
       <div className={styles.dialogContent}>
+        <Filters
+          className="lineItems"
+          isLoading={isLoading}
+          onFilter={() => {
+            if (isFiltered) {
+              onChangePagination({
+                firstRow: 0,
+                numberRows: pagination.numberRows,
+                pageNum: 0
+              });
+            } else {
+              getValidationsStatuses();
+            }
+          }}
+          onReset={() => {
+            onChangePagination({
+              firstRow: 0,
+              numberRows: pagination.numberRows,
+              pageNum: 0
+            });
+          }}
+          options={filterOptions}
+          recoilId="validationsStatuses"
+        />
         <DataTable
           autoLayout
+          first={firstRow}
           hasDefaultCurrentPage
           // loading={loadingStatus === 'pending' && isNil(validationStatusId)} // TODO CONTROL LOADING STATUS
+          onPage={onChangePage}
+          onSort={onSort}
           paginator
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
