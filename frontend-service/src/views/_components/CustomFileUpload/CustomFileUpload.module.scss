@@ -218,3 +218,9 @@
     width: 40vw !important;
   }
 }
+
+.sizeDiv {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -442,7 +442,7 @@ export const CustomFileUpload = ({
             </div>
           );
           let size = (
-            <div>
+            <div className={styles.sizeDiv}>
               <label>{formatSize(file.size)}</label>
             </div>
           );
