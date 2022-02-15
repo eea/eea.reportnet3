@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -93,4 +94,8 @@ public class UserNotification {
   /** The disabled rules. */
   @Field(value = "disabledRules")
   private Long disabledRules;
+
+  /** The dataset status. */
+  @Field(value = "datasetStatus")
+  private DatasetStatusEnum datasetStatus;
 }

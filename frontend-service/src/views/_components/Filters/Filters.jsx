@@ -53,6 +53,7 @@ export const Filters = ({
   onReset = () => {},
   onSort,
   options = [],
+  panelClassName,
   recoilId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
@@ -149,6 +150,7 @@ export const Filters = ({
         onFilterData={onFilterFilteredData}
         onSort={onSort}
         option={option}
+        panelClassName={panelClassName}
         recoilId={recoilId}
       />
     );

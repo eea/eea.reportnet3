@@ -141,7 +141,8 @@ export const recordReducer = (state, { type, payload }) => {
         geometryType: payload.fieldType.toUpperCase(),
         isMapOpen: true,
         mapGeoJson: payload.coordinates,
-        selectedMapCells: payload.mapCells
+        selectedMapCells: payload.mapCells,
+        geometryReadOnly: payload.readOnly
       };
 
     case 'SET_RECORDS_PER_PAGE':
@@ -164,7 +165,14 @@ export const recordReducer = (state, { type, payload }) => {
       const parsedInmMapGeoJson = JSON.parse(inmMapGeoJson);
       parsedInmMapGeoJson.geometry.coordinates = MapUtils.parseCoordinates(TextUtils.splitByChar(payload));
       parsedInmMapGeoJson.properties.srid = state.newPointCRS;
-      return { ...state, isMapOpen: false, mapGeoJson: JSON.stringify(parsedInmMapGeoJson), newPoint: '' };
+      return {
+        ...state,
+        isMapOpen: false,
+        mapGeoJson: JSON.stringify(parsedInmMapGeoJson),
+        newPoint: '',
+        geometryType: '',
+        geometryReadOnly: false
+      };
 
     case 'SET_MAP_NEW_POINT':
       return { ...state, newPoint: `${payload.coordinates[0]}, ${payload.coordinates[1]}`, newPointCRS: payload.crs };
@@ -173,7 +181,7 @@ export const recordReducer = (state, { type, payload }) => {
       return { ...state, crs: payload };
 
     case 'TOGGLE_MAP_VISIBILITY':
-      return { ...state, isMapOpen: payload };
+      return { ...state, isMapOpen: payload, geometryType: '', geometryReadOnly: false };
 
     default:
       return state;

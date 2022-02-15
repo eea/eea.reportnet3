@@ -215,6 +215,9 @@ public class SqlRulesServiceImplTest {
         .thenReturn(euDatasetList);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(datasetRepository.evaluateSqlRule(Mockito.anyLong(), Mockito.anyString()))
+        .thenReturn("");
+
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
 
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -241,6 +244,9 @@ public class SqlRulesServiceImplTest {
         .thenReturn(datasetMetabaseVO);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(datasetRepository.evaluateSqlRule(Mockito.anyLong(), Mockito.anyString()))
+        .thenReturn("");
+
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
 
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -286,6 +292,9 @@ public class SqlRulesServiceImplTest {
         .thenReturn(datasetMetabaseVO);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(datasetRepository.evaluateSqlRule(Mockito.anyLong(), Mockito.anyString()))
+        .thenReturn("");
+
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
 
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -342,6 +351,10 @@ public class SqlRulesServiceImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+
+    Mockito.when(datasetRepository.evaluateSqlRule(Mockito.anyLong(), Mockito.anyString()))
+        .thenReturn("");
+
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
 
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),

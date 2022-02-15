@@ -7,7 +7,7 @@
     "@fortawesome/free-brands-svg-icons": "5.15.4",
     "@fortawesome/free-regular-svg-icons": "5.15.4",
     "@fortawesome/free-solid-svg-icons": "5.15.4",
-    "@fortawesome/react-fontawesome": "0.1.16",
+    "@fortawesome/react-fontawesome": "0.1.17",
     "@mapbox/geojsonhint": "3.0.1",
     "@stomp/stompjs": "6.1.2",
     "axios": "0.25.0",
@@ -22,11 +22,11 @@
     "leaflet-draw": "1.0.4",
     "leaflet": "1.7.1",
     "lodash": "4.17.21",
-    "mapbox-gl": "2.6.1",
+    "mapbox-gl": "2.7.0",
     "primeicons": "2.0.0",
     "primereact": "4.2.2",
     "proj4leaflet": "1.0.2",
-    "react-bootstrap": "2.1.1",
+    "react-bootstrap": "2.1.2",
     "react-country-flag": "3.0.2",
     "react-dom": "16.14.0",
     "react-error-boundary": "3.1.4",
@@ -38,8 +38,8 @@
     "react-tooltip": "4.2.21",
     "react-transition-group": "4.4.2",
     "react": "16.14.0",
-    "recoil": "0.5.2",
-    "sass": "1.49.0"
+    "recoil": "0.6.1",
+    "sass": "1.49.7"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -52,7 +52,7 @@
     "extends": "react-app"
   },
   "devDependencies": {
-    "@babel/core": "7.16.12",
+    "@babel/core": "7.17.0",
     "eslint-config-prettier": "8.3.0",
     "prettier": "2.5.1",
     "react-error-overlay": "6.0.9",

@@ -390,7 +390,12 @@ export const useSetColumns = (
       let sort = column.field === 'id' || column.field === 'datasetPartitionId' ? false : true;
       let invisibleColumn =
         column.field === 'id' || column.field === 'datasetPartitionId' ? styles.invisibleHeader : '';
-      const readOnlyColumn = column.readOnly && isReporting ? styles.readOnlyFields : '';
+      const readOnlyColumn =
+        column.readOnly &&
+        isReporting &&
+        !['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(column.type)
+          ? styles.readOnlyFields
+          : '';
       const headerWidth = RecordUtils.getTextWidth(column.header, '14pt Open Sans');
 
       return (
@@ -400,11 +405,12 @@ export const useSetColumns = (
             isDataflowOpen && isDesignDatasetEditorRead ? styles.fieldDisabled : ''
           }`}
           editor={
-            hasWebformWritePermissions &&
-            hasWritePermissions &&
-            column.type !== 'ATTACHMENT' &&
-            !isDataflowOpen &&
-            !isDesignDatasetEditorRead
+            ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(column.type) ||
+            (hasWebformWritePermissions &&
+              hasWritePermissions &&
+              column.type !== 'ATTACHMENT' &&
+              !isDataflowOpen &&
+              !isDesignDatasetEditorRead)
               ? row => cellDataEditor(row, records.selectedRecord)
               : null
           }

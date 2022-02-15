@@ -35,12 +35,13 @@ public interface DataflowExtendedRepository {
    * @param asc the asc
    * @param type the type
    * @param dataflowIds the dataflow ids
+   * @param pinnedDataflows the pinned dataflows
    * @return the list
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   List<Dataflow> findPaginated(String json, Pageable pageable, boolean isPublic,
       Map<String, String> filters, String orderHeader, boolean asc, TypeDataflowEnum type,
-      List<Long> dataflowIds) throws EEAException;
+      List<Long> dataflowIds, List<String> pinnedDataflows) throws EEAException;
 
 
 
@@ -55,12 +56,13 @@ public interface DataflowExtendedRepository {
    * @param asc the asc
    * @param type the type
    * @param dataflowIds the dataflow ids
+   * @param pinnedDataflows the pinned dataflows
    * @return the long
    * @throws EEAException the EEA exception
    */
   Long countPaginated(String json, Pageable pageable, boolean isPublic, Map<String, String> filters,
-      String orderHeader, boolean asc, TypeDataflowEnum type, List<Long> dataflowIds)
-      throws EEAException;
+      String orderHeader, boolean asc, TypeDataflowEnum type, List<Long> dataflowIds,
+      List<String> pinnedDataflows) throws EEAException;
 
 
 

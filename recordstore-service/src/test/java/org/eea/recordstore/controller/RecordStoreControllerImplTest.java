@@ -15,8 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eea.exception.EEAErrorMessage;
-import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
@@ -62,6 +63,9 @@ public class RecordStoreControllerImplTest {
 
   @Mock
   private SnapshotHelper restoreSnapshotHelper;
+
+  @Mock
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
 
   /** The Constant TEST. */
@@ -190,6 +194,8 @@ public class RecordStoreControllerImplTest {
   @Test
   public void testRestoreSnapshot()
       throws SQLException, IOException, RecordStoreAccessException, EEAException {
+    Mockito.doNothing().when(dataSetMetabaseControllerZuul).updateDatasetRunningStatus(1L,
+        DatasetRunningStatusEnum.RESTORING_SNAPSHOT);
     recordStoreControllerImpl.restoreSnapshotData(1L, 1L, 1L, DatasetTypeEnum.DESIGN, true, false,
         false);
     Mockito.verify(restoreSnapshotHelper, times(1)).processRestoration(Mockito.any(), Mockito.any(),

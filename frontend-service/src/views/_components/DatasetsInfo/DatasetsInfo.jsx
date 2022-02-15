@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -19,6 +19,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
@@ -54,19 +55,6 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
       setIsLoading(false);
     }
   };
-
-  const getPaginatorRecordsCount = () => (
-    <Fragment>
-      {isFiltered && datasetsInfo.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {datasetsInfo.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-      {isFiltered && datasetsInfo.length === filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
-    </Fragment>
-  );
 
   const filterOptions = [
     { key: 'name', label: resourcesContext.messages['name'], type: 'INPUT' },
@@ -118,7 +106,9 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
     return (
       <DataTable
         paginator={true}
-        paginatorRight={!isNil(filteredData) && getPaginatorRecordsCount()}
+        paginatorRight={
+          <PaginatorRecordsCount dataLength={datasetsInfo.length} filteredData={filteredData} isFiltered={isFiltered} />
+        }
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['datasetsInfo']}
