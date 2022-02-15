@@ -24,7 +24,9 @@ import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -102,6 +104,10 @@ public class DatasetControllerImplTest {
   /** The notification controller zuul. */
   @Mock
   private NotificationControllerZuul notificationControllerZuul;
+
+  /** The data set metabase controller zuul. */
+  @Mock
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /** The records. */
   private List<RecordVO> records;
@@ -985,6 +991,11 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void exportFileThroughIntegrationTest() throws EEAException {
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataSetName("datasetName");
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
+
     Mockito.doNothing().when(datasetService).exportFileThroughIntegration(Mockito.anyLong(),
         Mockito.any());
     datasetControllerImpl.exportFileThroughIntegration(1L, 1L);
@@ -999,6 +1010,11 @@ public class DatasetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void exportFileThroughIntegrationExceptionTest() throws EEAException {
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataSetName("datasetName");
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
+
     Mockito.doThrow(EEAException.class).when(datasetService)
         .exportFileThroughIntegration(Mockito.anyLong(), Mockito.any());
     try {
