@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -307,5 +308,15 @@ public interface DatasetMetabaseController {
    */
   @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
   List<DatasetsSummaryVO> getDatasetsSummaryList(@PathVariable("id") Long dataflowId);
+
+
+  /**
+   * Update dataset running status.
+   *
+   * @param datasetRunningStatus the dataset running status
+   */
+  @PutMapping(value = "/private/updateDatasetRunningStatus/{id}")
+  void updateDatasetRunningStatus(@PathVariable("id") Long datasetId,
+      @RequestParam("datasetRunningStatus") DatasetRunningStatusEnum datasetRunningStatus);
 
 }

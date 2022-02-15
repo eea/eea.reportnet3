@@ -14,9 +14,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
@@ -84,6 +86,10 @@ public class ValidationControllerImpl implements ValidationController {
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
 
+  /** The dataset metabase controller zuul. */
+  @Autowired
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+
 
   /**
    * Validate data set data. The lock should be released on
@@ -123,6 +129,10 @@ public class ValidationControllerImpl implements ValidationController {
 
       validationHelper.executeValidation(datasetId, UUID.randomUUID().toString(), released, true);
     } catch (EEAException e) {
+      // TO DO Status will be updated based on the running process in the dataset, this call will be
+      // changed when processes table is implemented
+      datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+          DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
       LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);
     }
   }

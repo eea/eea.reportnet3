@@ -1421,7 +1421,6 @@ public class DataflowServiceImpl implements DataflowService {
             break;
         }
       }
-
       if (containsPending) {
         dataflowVO.setReportingStatus(DatasetStatusEnum.PENDING);
       } else {
@@ -1435,6 +1434,15 @@ public class DataflowServiceImpl implements DataflowService {
           dataflowVO.setReportingStatus(DatasetStatusEnum.FINAL_FEEDBACK);
         }
       }
+      // If there's a user assigned to more than one provider, we mark MULTIPLE
+      if (CollectionUtils.isNotEmpty(datasetsStatusList)) {
+        Set<Long> providersInDataflow = new HashSet<>();
+        datasetsStatusList.stream().forEach(d -> providersInDataflow.add(d.getDataProviderId()));
+        if (providersInDataflow.size() > 1) {
+          dataflowVO.setReportingStatus(DatasetStatusEnum.MULTIPLE);
+        }
+      }
+
     }
   }
 
@@ -1459,12 +1467,16 @@ public class DataflowServiceImpl implements DataflowService {
         if (null != object.getStatus()) {
           dataflowStatusDataset.setStatus(DatasetStatusEnum.valueOf(object.getStatus()));
         }
+        if (null != object.getDataProviderId()) {
+          dataflowStatusDataset.setDataProviderId(object.getDataProviderId());
+        }
         list.add(dataflowStatusDataset);
         if (map.get(dataflowStatusDataset.getId()) != null) {
           map.get(dataflowStatusDataset.getId()).addAll(list);
         } else {
           map.put(dataflowStatusDataset.getId(), list);
         }
+
       }
     }
     return map;

@@ -11,7 +11,9 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
@@ -59,6 +61,10 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Autowired
   private SnapshotHelper restoreSnapshotHelper;
+
+  /** The dataset metabase controller zuul. */
+  @Autowired
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   /**
    * The Constant LOG_ERROR.
@@ -228,6 +234,10 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           defaultValue = "false") Boolean prefillingReference) {
 
     try {
+      // TO DO Status will be updated based on the running process in the dataset, this call will be
+      // changed when processes table is implemented
+      datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+          DatasetRunningStatusEnum.RESTORING_SNAPSHOT);
       restoreSnapshotHelper.processRestoration(datasetId, idSnapshot, idPartition, datasetType,
           isSchemaSnapshot, deleteData, prefillingReference);
     } catch (EEAException e) {

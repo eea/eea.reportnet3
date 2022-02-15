@@ -389,6 +389,11 @@ public class DataFlowServiceImplTest {
       public Long getId() {
         return 1L;
       }
+
+      @Override
+      public Long getDataProviderId() {
+        return 2L;
+      }
     };
     IDatasetStatus ida2 = new IDatasetStatus() {
 
@@ -399,6 +404,11 @@ public class DataFlowServiceImplTest {
 
       @Override
       public Long getId() {
+        return 2L;
+      }
+
+      @Override
+      public Long getDataProviderId() {
         return 2L;
       }
     };
