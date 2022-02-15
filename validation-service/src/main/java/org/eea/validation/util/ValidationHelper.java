@@ -629,11 +629,11 @@ public class ValidationHelper implements DisposableBean {
       boolean onlyEmptyFields) {
     int i = 0;
     if (fieldBatchSize != 0) {
+      Integer emptyFieldsDataset = validationService.countEmptyFieldsDataset(dataset.getId());
+      Integer countFieldsDataset = validationService.countFieldsDataset(dataset.getId());
       for (Integer totalFields =
-          onlyEmptyFields ? validationService.countEmptyFieldsDataset(dataset.getId())
-              : validationService
-                  .countFieldsDataset(dataset.getId()); totalFields >= 0; totalFields =
-                      totalFields - fieldBatchSize) {
+          onlyEmptyFields ? emptyFieldsDataset : countFieldsDataset; totalFields >= 0; totalFields =
+              totalFields - fieldBatchSize) {
         releaseFieldValidation(dataset, uuId, i++, onlyEmptyFields);
       }
     }
@@ -648,9 +648,9 @@ public class ValidationHelper implements DisposableBean {
   private void releaseRecordsValidation(final DataSetMetabaseVO dataset, String uuId) {
     int i = 0;
     if (recordBatchSize != 0) {
-      for (Integer totalRecords =
-          validationService.countRecordsDataset(dataset.getId()); totalRecords >= 0; totalRecords =
-              totalRecords - recordBatchSize) {
+      Integer recordsDataset = validationService.countRecordsDataset(dataset.getId());
+      for (Integer totalRecords = recordsDataset; totalRecords >= 0; totalRecords =
+          totalRecords - recordBatchSize) {
         releaseRecordValidation(dataset, uuId, i++);
       }
     }
