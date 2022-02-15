@@ -619,7 +619,7 @@ export const CustomFileUpload = ({
   if (isDialog) {
     return (
       <Dialog
-        className={dialogClassName}
+        className={dialogClassName || styles.dialogDefaultCustomFileUpload}
         footer={renderAdvancedFooter()}
         header={dialogHeader}
         onHide={dialogOnHide}
