@@ -271,4 +271,12 @@ public interface DatasetMetabaseService {
   void updateDatasetRunningStatus(Long datasetId, DatasetRunningStatusEnum datasetRunningStatus)
       throws EEAException;
 
+  /**
+   * Gets the reportings by provider ids.
+   *
+   * @param providerIds the provider ids
+   * @return the reportings by provider ids
+   */
+  List<DataSetMetabaseVO> getDatasetsByProviderIds(List<Long> providerIds);
+
 }
