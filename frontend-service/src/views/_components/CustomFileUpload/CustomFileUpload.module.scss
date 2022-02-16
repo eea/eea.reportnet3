@@ -1,6 +1,8 @@
 /*
  * FileUpload
  */
+@import '_styles/mixins';
+
 .p-fileupload-buttonbar .p-fileupload-choose.p-disabled input {
   cursor: default;
 }
@@ -197,4 +199,30 @@
 .iconPreview {
   font-size: 20pt;
   color: var(--main-font-color);
+}
+
+.dialogDefaultCustomFileUpload {
+  @include for-phone-landscape-up {
+    width: 90vw !important;
+  }
+
+  @include for-tablet-landscape-up {
+    width: 70vw !important;
+  }
+
+  @include for-desktop-up {
+    width: 50vw !important;
+  }
+
+  @include for-big-desktop-up {
+    width: 40vw !important;
+  }
+}
+
+.sizeDiv {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+  top: 0;
 }
