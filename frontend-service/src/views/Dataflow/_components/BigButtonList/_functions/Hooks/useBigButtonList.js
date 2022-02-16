@@ -296,7 +296,7 @@ const useBigButtonList = ({
             handleRedirect(getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true));
           },
           infoStatus: dataset.isReleased,
-          infoStatusIcon: dataset.isReleased,
+          infoStatusIcon: true,
           layout: 'defaultBigButton',
           model: [
             {
