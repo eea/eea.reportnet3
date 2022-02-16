@@ -3,6 +3,7 @@ import countryByGroup from './countriesByGroup.json';
 import dataflowStatus from './dataflowStatus.json';
 import dataflowType from './dataflowType.json';
 import datasetType from './datasetType.json';
+import datasetRunningStatus from './datasetRunningStatus.json';
 import exportTypeCode from './exportType.code.json';
 import fieldType from './fieldType.json';
 import footer from './footer.config.json';
@@ -40,6 +41,7 @@ export const config = {
   countriesByGroup: countryByGroup,
   dataflowStatus: dataflowStatus,
   dataflowType: dataflowType,
+  datasetRunningStatus: datasetRunningStatus,
   datasetType: datasetType,
   exportTypes: exportTypeCode,
   fieldType: fieldType,
