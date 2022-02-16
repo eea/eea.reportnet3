@@ -30,9 +30,9 @@ export const UserRightRepository = {
       data: { account: userRight.account, role: userRight.role }
     }),
 
-  updateNationalCoordinators: async userRight =>
-    await HTTPRequester.update({
-      url: getUrl(UserRightConfig.updateNationalCoordinators),
+  createNationalCoordinators: async userRight =>
+    await HTTPRequester.post({
+      url: getUrl(UserRightConfig.createNationalCoordinators),
       data: { countryCode: userRight.countryCode, email: userRight.email }
     }),
 

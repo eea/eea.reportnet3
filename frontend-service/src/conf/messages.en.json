@@ -1509,6 +1509,8 @@
     "deleteNationalCoordinatorsHeader": "Delete national coordinator",
     "deleteNationalCoordinatorsConfirm": "Are you sure you want to delete this national coordinator?",
     "loadNationalCoordinatorsError": "Error loading national coordinators",
-    "deleteNationalCoordinatorsError": "National coordinator deleting error"
+    "deleteNationalCoordinatorsError": "National coordinator deleting error",
+    "createNationalCoordinatorsError": "Error creating national coordinator",
+    "emptyNationalCoordinatorsCountryError": "Please select a country"
   }
 }

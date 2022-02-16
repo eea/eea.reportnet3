@@ -5,7 +5,7 @@ export const UserRightConfig = {
   deleteNationalCoordinators: '/user/nationalCoordinator',
   deleteReporter: '/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}',
   deleteRequester: '/contributor/requester/dataflow/{:dataflowId}',
-  updateNationalCoordinators: '/user/nationalCoordinator',
+  createNationalCoordinators: '/user/nationalCoordinator',
   updateReporter: '/contributor/reporter/dataflow/{:dataflowId}/provider/{:dataProviderId}',
   updateRequester: '/contributor/requester/dataflow/{:dataflowId}',
   validateReporters: '/contributor/validateReporters/dataflow/{:dataflowId}/provider/{:dataProviderId}'

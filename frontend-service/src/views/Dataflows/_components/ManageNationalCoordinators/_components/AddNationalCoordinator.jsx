@@ -1,22 +1,33 @@
 import { Fragment, useContext, useLayoutEffect, useState } from 'react';
 
+import isEmpty from 'lodash/isEmpty';
+
 import styles from './AddNationalCoordinator.module.scss';
 
 import { Button } from 'views/_components/Button';
-import { Dialog } from 'views/_components/Dialog';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { Spinner } from 'views/_components/Spinner';
 
 import { RepresentativeService } from 'services/RepresentativeService';
+import { UserRightService } from 'services/UserRightService';
 
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
+
 export const AddNationalCoordinator = () => {
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [nationalCoordinator, setNationalCoordinator] = useState({ countryCode: '', email: '' });
+  const [nationalCoordinatorEmail, setNationalCoordinatorEmail] = useState('');
+  const [nationalCoordinatorCountry, setNationalCoordinatorCountry] = useState('');
   const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [groupOfCountries, setGroupOfCountries] = useState([]);
 
@@ -38,27 +49,49 @@ export const AddNationalCoordinator = () => {
     getDropdownsOptions();
   }, []);
 
-  const onAddDialogClose = () => {
-    setIsAddDialogVisible(false);
+  const addNationalCoordinators = async () => {
+    try {
+      setIsAdding(true);
+      await UserRightService.createNationalCoordinators(nationalCoordinator);
+    } catch (error) {
+      console.error('NationalCoordinators - updateNationalCoordinators.', error);
+      notificationContext.add({ type: 'CREATE_NATIONAL_COORDINATORS_ERROR' }, true);
+    } finally {
+      setIsAdding(false);
+      setIsAddDialogVisible(false);
+      setNationalCoordinatorCountry({});
+      setNationalCoordinatorEmail({});
+      setNationalCoordinator({});
+    }
   };
 
-  const addDialogFooter = (
-    <Fragment>
-      <Button
-        className="p-button-primary"
-        icon="check"
-        label={resourcesContext.messages['save']}
-        //onClick={onConfirm}
-      />
+  const onAddDialogClose = () => {
+    setIsAddDialogVisible(false);
+    setNationalCoordinatorCountry({});
+    setNationalCoordinatorEmail({});
+  };
 
-      <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon="cancel"
-        label={resourcesContext.messages['cancel']}
-        onClick={onAddDialogClose}
-      />
-    </Fragment>
-  );
+  const onChangeEmail = email => {
+    setNationalCoordinator({ email: email, countryCode: nationalCoordinator.countryCode });
+  };
+
+  const onChangeCountryCode = countryCode => {
+    setNationalCoordinator({ email: nationalCoordinator.email, countryCode: countryCode });
+  };
+
+  const isValidEmail = email => RegularExpressions['email'].test(email);
+
+  const getTooltipMessage = () => {
+    if (isEmpty(nationalCoordinatorEmail) && isEmpty(nationalCoordinatorCountry)) {
+      return resourcesContext.messages['incompleteDataTooltip'];
+    } else if (!isValidEmail(nationalCoordinatorEmail)) {
+      return resourcesContext.messages['notValidEmailTooltip'];
+    } else if (isEmpty(nationalCoordinatorCountry)) {
+      return resourcesContext.messages['emptyNationalCoordinatorsCountryError'];
+    } else {
+      return null;
+    }
+  };
 
   const renderDialogContent = () => {
     if (isLoading) {
@@ -76,9 +109,9 @@ export const AddNationalCoordinator = () => {
           className={styles.nameInput}
           id="name"
           maxLength={50}
-          //onChange={}
+          onChange={event => onChangeEmail(event.target.value)}
           placeholder={resourcesContext.messages['nationalCoordinatorsEmail']}
-          //value={webformConfiguration.name}
+          value={nationalCoordinatorEmail}
         />
 
         <label className={styles.label} htmlFor="rolesDropdown">
@@ -86,18 +119,12 @@ export const AddNationalCoordinator = () => {
         </label>
         <Dropdown
           appendTo={document.body}
-          ariaLabel="groupOfCountries"
-          className={styles.groupOfCountriesWrapper}
-          name="groupOfCountries"
-          //onChange={event => onSelectGroup(event.target.value)}
-          //onFocus={() => handleErrors({ field: 'groupOfCountries', hasErrors: false, message: '' })}
+          id="groupOfCountries"
+          onChange={event => onChangeCountryCode(event.target.value.code)}
           optionLabel="label"
           options={groupOfCountries}
           placeholder={resourcesContext.messages['manageNationalCoordinatorsPlaceholder']}
-          /* tooltip={
-      isAdmin && hasRepresentatives ? resourcesContext.messages['groupOfCountriesDisabledTooltip'] : ''
-    }
-    value={selectedGroup}*/
+          //value={groupOfCountries?.find(country => country.code === nationalCoordinator.countryCode).name}
         />
       </div>
     );
@@ -113,16 +140,20 @@ export const AddNationalCoordinator = () => {
       />
 
       {isAddDialogVisible && (
-        <Dialog
-          blockScroll={false}
-          className={styles.containerAddDialog}
-          footer={addDialogFooter}
+        <ConfirmDialog
+          className={styles.confirmDialog}
+          classNameConfirm={'p-button-primary'}
+          confirmTooltip={getTooltipMessage()}
+          //disabledConfirm={getTooltipMessage() !== null}
           header={resourcesContext.messages['addNationalCoordinatorsDialogHeader']}
-          modal
+          iconConfirm={isAdding ? 'spinnerAnimate' : 'check'}
+          labelCancel={resourcesContext.messages['cancel']}
+          labelConfirm={resourcesContext.messages['save']}
+          onConfirm={addNationalCoordinators}
           onHide={onAddDialogClose}
           visible={isAddDialogVisible}>
           {renderDialogContent()}
-        </Dialog>
+        </ConfirmDialog>
       )}
     </Fragment>
   );

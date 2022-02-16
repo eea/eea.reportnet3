@@ -30,11 +30,11 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [nationalCoordinatorsData, setNationalCoordinatorsData] = useState([]);
   const [deleteNationalCoordinator, setDeleteNationalCoordinator] = useState({});
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [nationalCoordinatorsData, setNationalCoordinatorsData] = useState([]);
 
   const filteredData = useRecoilValue(filteredDataStore('manageNationalCoordinators'));
   const { isFiltered, setData } = useApplyFilters('manageNationalCoordinators');

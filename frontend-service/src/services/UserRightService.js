@@ -23,7 +23,7 @@ export const UserRightService = {
   deleteRequester: async (userRight, dataflowId, dataProviderId) =>
     await UserRightRepository.deleteRequester(userRight, dataflowId, dataProviderId),
 
-  updateNationalCoordinators: async userRight => await UserRightRepository.updateNationalCoordinators(userRight),
+  createNationalCoordinators: async userRight => await UserRightRepository.createNationalCoordinators(userRight),
 
   updateReporter: async (userRight, dataflowId, dataProviderId) =>
     await UserRightRepository.updateReporter(userRight, dataflowId, dataProviderId),

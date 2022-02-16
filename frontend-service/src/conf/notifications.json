@@ -863,7 +863,8 @@
         { "key": "DELETE_WEBFORM_IN_USE_ERROR" },
         { "key": "DELETE_USER_NOTIFICATIONS_ERROR" },
         { "key": "LOAD_NATIONAL_COORDINATORS_ERROR" },
-        { "key": "DELETE_NATIONAL_COORDINATORS_ERROR" }
+        { "key": "DELETE_NATIONAL_COORDINATORS_ERROR" },
+        { "key": "CREATE_NATIONAL_COORDINATORS_ERROR" }
       ]
     },
     {
