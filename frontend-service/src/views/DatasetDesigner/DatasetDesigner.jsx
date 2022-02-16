@@ -104,13 +104,15 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         idx: 1,
         labelCompleted: resourcesContext.messages['importedData'],
         labelUndone: resourcesContext.messages['importData'],
-        labelRunning: resourcesContext.messages['importingData']
+        labelRunning: resourcesContext.messages['importingData'],
+        labelError: resourcesContext.messages['importDataError']
       },
       {
         idx: 2,
         labelCompleted: resourcesContext.messages['validatedData'],
         labelUndone: resourcesContext.messages['validateData'],
         labelRunning: resourcesContext.messages['validatingData'],
+        labelError: resourcesContext.messages['validatingDataError'],
         isRunning: true
       }
     ],
@@ -330,13 +332,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     });
     console.log({ metaData });
 
-    //TODO. If dataset has been imported or has data? If is validating
-    if (true) {
-      designerDispatch({
-        type: 'SET_PROGRESS_STEP_BAR',
-        payload: { step: 0, currentStep: 1, isRunning: false, completed: true }
-      });
-    }
+    const stepStatus = DatasetUtils.getDatasetStepRunningStatus(metaData.dataset.datasetRunningStatus);
+    designerDispatch({
+      type: 'SET_PROGRESS_STEP_BAR',
+      payload: stepStatus
+    });
   };
 
   const changeMode = viewMode => designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: viewMode } });

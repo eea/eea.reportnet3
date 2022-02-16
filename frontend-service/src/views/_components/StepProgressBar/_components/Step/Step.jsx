@@ -12,8 +12,10 @@ export const Step = memo(({ currentStep, step }) => {
   };
 
   const getIconWrapperClassName = () => {
-    if (step.completed) {
+    if (step.completed && !step.withError) {
       return styles.activeCompleted;
+    } else if (step.completed && step.withError) {
+      return styles.withError;
     } else {
       if (step.idx < currentStep) {
         return styles.activeCompleted;
@@ -36,8 +38,11 @@ export const Step = memo(({ currentStep, step }) => {
   };
 
   const getStepLabel = () => {
-    if (step.completed) {
+    console.log(step);
+    if (step.completed && !step.withError) {
       return step.labelCompleted;
+    } else if (step.completed && step.withError) {
+      return step.labelError;
     } else {
       if (step.idx < currentStep) {
         return step.labelCompleted;
@@ -56,7 +61,9 @@ export const Step = memo(({ currentStep, step }) => {
   };
 
   const renderIcon = () => {
-    if (step.idx < currentStep) {
+    if (step.completed && step.withError) {
+      return AwesomeIcons('cross');
+    } else if (step.idx < currentStep) {
       return AwesomeIcons('check');
     } else if (step.idx === currentStep) {
       if (step.isRunning) {
@@ -65,7 +72,7 @@ export const Step = memo(({ currentStep, step }) => {
         return AwesomeIcons('check');
       }
     } else {
-      return AwesomeIcons('cross');
+      return AwesomeIcons('clock');
     }
   };
 
