@@ -60,7 +60,7 @@ export const MultiSelectHeader = ({
       );
     } else
       return (
-        <span className={headerClassName} id={`selectAllFilter_${id}`} onClick={event => onToggleAll(event)}>
+        <span className={headerClassName} id={`selectAllFilter_${id}`} onClick={event => onToggleAllEvent(event)}>
           {allChecked ? notCheckAllHeader : checkAllHeader}
         </span>
       );
