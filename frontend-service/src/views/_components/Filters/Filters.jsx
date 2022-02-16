@@ -60,7 +60,11 @@ export const Filters = ({
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
-  const onFilterFilteredData = useRecoilCallback(
+  const clearDateInputs = () => {
+    [...document.getElementsByClassName('date-filter-input')].forEach(input => (input.value = ''));
+  };
+
+  const onFilterData = useRecoilCallback(
     ({ snapshot, set }) =>
       async newData => {
         const data = await snapshot.getPromise(dataStore(recoilId));
@@ -111,12 +115,6 @@ export const Filters = ({
     [recoilId]
   );
 
-  const clearDateInputs = () => {
-    [...document.getElementsByClassName('date-filter-input')].forEach(input => {
-      input.value = '';
-    });
-  };
-
   const onResetFilters = useRecoilCallback(
     ({ snapshot, reset }) =>
       async () => {
@@ -132,8 +130,6 @@ export const Filters = ({
     [recoilId]
   );
 
-  const renderFilters = () => options.map(option => renderFilter(option, option.type));
-
   const renderFilter = (option, type) => {
     if (option.nestedOptions) {
       return option.nestedOptions.map(nestedOption => renderFilter(nestedOption, option.type));
@@ -147,7 +143,7 @@ export const Filters = ({
         isLoading={isLoading}
         key={option.key}
         onCustomFilter={onFilter}
-        onFilterData={onFilterFilteredData}
+        onFilterData={onFilterData}
         onSort={onSort}
         option={option}
         panelClassName={panelClassName}
@@ -161,7 +157,7 @@ export const Filters = ({
       return null;
     }
 
-    return <StrictModeToggle onFilter={onFilterFilteredData} onToggle={onFilterFilteredData} />;
+    return <StrictModeToggle onFilter={onFilterData} onToggle={onFilterData} />;
   };
 
   const renderCustomFiltersButton = () => {
@@ -184,7 +180,7 @@ export const Filters = ({
 
   return (
     <div className={`${className ? styles[className] : styles.default}`}>
-      {renderFilters()}
+      {options.map(option => renderFilter(option, option.type))}
       {renderStrictModeToggle()}
 
       <div className={styles.buttonWrapper}>
@@ -197,7 +193,7 @@ export const Filters = ({
             label={resourcesContext.messages['reset']}
             onClick={async () => {
               await onResetFilters();
-              await onReset({ sortByHeader: '', sortByOption: 'idle' });
+              onReset({ sortByHeader: '', sortByOption: 'idle' });
             }}
           />
         </div>
