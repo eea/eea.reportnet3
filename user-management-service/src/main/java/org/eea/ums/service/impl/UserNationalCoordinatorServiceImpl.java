@@ -53,6 +53,7 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
 
+  /** The security provider interface service. */
   @Autowired
   private SecurityProviderInterfaceService securityProviderInterfaceService;
 
