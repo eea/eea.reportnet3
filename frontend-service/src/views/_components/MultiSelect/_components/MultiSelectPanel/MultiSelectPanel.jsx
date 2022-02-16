@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
+import classNames from 'classnames';
 
 export class MultiSelectPanel extends Component {
   static defaultProps = {
@@ -22,7 +23,7 @@ export class MultiSelectPanel extends Component {
   renderElement() {
     return (
       <div
-        className="p-multiselect-panel p-hidden p-input-overlay"
+        className={classNames('p-multiselect-panel p-hidden p-input-overlay', this.props.panelClassName)}
         onClick={this.props.onClick}
         ref={el => (this.element = el)}>
         {this.props.header}

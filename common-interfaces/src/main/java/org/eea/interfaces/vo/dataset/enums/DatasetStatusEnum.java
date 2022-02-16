@@ -22,7 +22,10 @@ public enum DatasetStatusEnum {
   CORRECTION_REQUESTED("CORRECTION_REQUESTED"),
 
   /** The released. */
-  RELEASED("RELEASED");
+  RELEASED("RELEASED"),
+
+  /** The multiple. */
+  MULTIPLE("MULTIPLE");
 
   /** The value. */
   private final String value;

@@ -389,6 +389,11 @@ public class DataFlowServiceImplTest {
       public Long getId() {
         return 1L;
       }
+
+      @Override
+      public Long getDataProviderId() {
+        return 2L;
+      }
     };
     IDatasetStatus ida2 = new IDatasetStatus() {
 
@@ -401,6 +406,11 @@ public class DataFlowServiceImplTest {
       public Long getId() {
         return 2L;
       }
+
+      @Override
+      public Long getDataProviderId() {
+        return 2L;
+      }
     };
     List<IDatasetStatus> listObject = Arrays.asList(ida1, ida2);
     when(dataflowRepository.getDatasetsStatus(Mockito.any())).thenReturn(listObject);
@@ -409,10 +419,9 @@ public class DataFlowServiceImplTest {
 
     List<Dataflow> list = new ArrayList<>();
     list.add(new Dataflow());
-    Mockito
-        .when(dataflowRepository.findPaginated(Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-            Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any()))
-        .thenReturn(list);
+    Mockito.when(dataflowRepository.findPaginated(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(list);
     Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dfVO);
     assertNotNull("fail",
         dataflowServiceImpl
@@ -524,7 +533,10 @@ public class DataFlowServiceImplTest {
     obligation.setObligationId(1);
     dataflowVO.setId(1L);
     dataflowVO.setName("test");
+    dataflowVO.setDescription("descriptionTest");
     dataflowVO.setObligation(obligation);
+    dataflowVO.setFmeUserId(1L);
+    dataflowVO.setDataProviderGroupId(1L);
     when(dataflowRepository.findByNameIgnoreCase(dataflowVO.getName()))
         .thenReturn(Optional.empty());
     when(dataflowRepository.findById(dataflowVO.getId())).thenReturn(Optional.of(new Dataflow()));
@@ -1469,6 +1481,23 @@ public class DataFlowServiceImplTest {
     when(authentication.getName()).thenReturn("name");
 
     dataflowServiceImpl.validateAllReporters("user");
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateDataflowEEAExceptionTest() throws EEAException {
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setId(2L);
+    dataflowVO.setName("name");
+    try {
+      Mockito.when(dataflowRepository.findByNameIgnoreCase(Mockito.anyString()))
+          .thenReturn(Optional.of(dataflow));
+      dataflowServiceImpl.updateDataFlow(dataflowVO);
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
   }
 
 }

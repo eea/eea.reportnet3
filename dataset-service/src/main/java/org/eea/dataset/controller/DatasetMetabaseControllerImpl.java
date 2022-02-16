@@ -22,6 +22,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -623,5 +624,23 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   }
 
 
-
+  /**
+   * Update dataset running status.
+   *
+   * @param datasetId the dataset id
+   * @param datasetRunningStatus the dataset running status
+   */
+  @Override
+  @PutMapping(value = "/private/updateDatasetRunningStatus/{id}")
+  @ApiOperation(value = "Update dataset running status", hidden = true)
+  public void updateDatasetRunningStatus(
+      @ApiParam(value = "Dataset Id", example = "0") @PathVariable("id") Long datasetId,
+      @RequestParam("datasetRunningStatus") DatasetRunningStatusEnum datasetRunningStatus) {
+    try {
+      datasetMetabaseService.updateDatasetRunningStatus(datasetId, datasetRunningStatus);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_DATASET_STATUS);
+    }
+  }
 }

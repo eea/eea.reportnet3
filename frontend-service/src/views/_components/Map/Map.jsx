@@ -56,6 +56,7 @@ let NewMarkerIcon = L.icon({
   iconAnchor: [12, 36]
 });
 export const Map = ({
+  disabledEdition = false,
   enabledDrawElements = {
     circle: false,
     circlemarker: false,
@@ -335,7 +336,7 @@ export const Map = ({
   };
 
   const onDoubleClick = e => {
-    if (TextUtils.areEquals(geometryType, 'POINT')) {
+    if (TextUtils.areEquals(geometryType, 'POINT') && !disabledEdition) {
       if (
         currentCRS.value === 'EPSG:3035' &&
         (!MapUtils.inBounds({
@@ -530,7 +531,7 @@ export const Map = ({
         <Dropdown
           ariaLabel="crs"
           className={`${styles.crsSwitcherSplitButton} ${hasErrors.projection ? styles.error : ''}`}
-          disabled={!MapUtils.checkValidJSONCoordinates(geoJson) && !isNewPositionMarkerVisible}
+          disabled={(!MapUtils.checkValidJSONCoordinates(geoJson) && !isNewPositionMarkerVisible) || disabledEdition}
           onChange={e => {
             if (e.target.value.value === 'EPSG:3035') {
               if (

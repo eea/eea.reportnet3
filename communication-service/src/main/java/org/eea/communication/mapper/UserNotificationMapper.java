@@ -34,6 +34,7 @@ public interface UserNotificationMapper extends IMapper<UserNotification, UserNo
   @Mapping(source = "shortCode", target = "content.shortCode")
   @Mapping(source = "invalidRules", target = "content.invalidRules")
   @Mapping(source = "disabledRules", target = "content.disabledRules")
+  @Mapping(source = "datasetStatus", target = "content.datasetStatus")
   UserNotificationVO entityToClass(UserNotification entity);
 
   /**
@@ -57,6 +58,7 @@ public interface UserNotificationMapper extends IMapper<UserNotification, UserNo
   @Mapping(source = "content.shortCode", target = "shortCode")
   @Mapping(source = "content.invalidRules", target = "invalidRules")
   @Mapping(source = "content.disabledRules", target = "disabledRules")
+  @Mapping(source = "content.datasetStatus", target = "datasetStatus")
   UserNotification classToEntity(UserNotificationVO entity);
 
 }

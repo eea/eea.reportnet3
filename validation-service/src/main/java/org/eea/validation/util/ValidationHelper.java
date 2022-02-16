@@ -23,6 +23,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -378,6 +379,10 @@ public class ValidationHelper implements DisposableBean {
   public void executeValidationProcess(final Long datasetId, String processId, boolean released) {
     // Initialize process as coordinator
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    // TO DO Status will be updated based on the running process in the dataset, this call will be
+    // changed when processes table is implemented
+    datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+        DatasetRunningStatusEnum.VALIDATING);
     RulesSchema rules =
         rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getDatasetSchema()));
     initializeProcess(processId, true, released);
@@ -629,11 +634,11 @@ public class ValidationHelper implements DisposableBean {
       boolean onlyEmptyFields) {
     int i = 0;
     if (fieldBatchSize != 0) {
+      Integer emptyFieldsDataset = validationService.countEmptyFieldsDataset(dataset.getId());
+      Integer countFieldsDataset = validationService.countFieldsDataset(dataset.getId());
       for (Integer totalFields =
-          onlyEmptyFields ? validationService.countEmptyFieldsDataset(dataset.getId())
-              : validationService
-                  .countFieldsDataset(dataset.getId()); totalFields >= 0; totalFields =
-                      totalFields - fieldBatchSize) {
+          onlyEmptyFields ? emptyFieldsDataset : countFieldsDataset; totalFields >= 0; totalFields =
+              totalFields - fieldBatchSize) {
         releaseFieldValidation(dataset, uuId, i++, onlyEmptyFields);
       }
     }
@@ -648,9 +653,9 @@ public class ValidationHelper implements DisposableBean {
   private void releaseRecordsValidation(final DataSetMetabaseVO dataset, String uuId) {
     int i = 0;
     if (recordBatchSize != 0) {
-      for (Integer totalRecords =
-          validationService.countRecordsDataset(dataset.getId()); totalRecords >= 0; totalRecords =
-              totalRecords - recordBatchSize) {
+      Integer recordsDataset = validationService.countRecordsDataset(dataset.getId());
+      for (Integer totalRecords = recordsDataset; totalRecords >= 0; totalRecords =
+          totalRecords - recordBatchSize) {
         releaseRecordValidation(dataset, uuId, i++);
       }
     }
@@ -860,7 +865,10 @@ public class ValidationHelper implements DisposableBean {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
             NotificationVO.builder().user(notificationUser).datasetId(datasetId).build());
       }
-
+      // TO DO Status will be updated based on the running process in the dataset, this call will be
+      // changed when processes table is implemented
+      datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+          DatasetRunningStatusEnum.VALIDATED);
       isFinished = true;
     }
     return isFinished;
