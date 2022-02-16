@@ -1,6 +1,7 @@
 import { Fragment, useContext, useLayoutEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './AddNationalCoordinator.module.scss';
 
@@ -23,8 +24,6 @@ export const AddNationalCoordinator = () => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [nationalCoordinator, setNationalCoordinator] = useState({ countryCode: '', email: '' });
-  const [nationalCoordinatorEmail, setNationalCoordinatorEmail] = useState('');
-  const [nationalCoordinatorCountry, setNationalCoordinatorCountry] = useState('');
   const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -59,16 +58,13 @@ export const AddNationalCoordinator = () => {
     } finally {
       setIsAdding(false);
       setIsAddDialogVisible(false);
-      setNationalCoordinatorCountry({});
-      setNationalCoordinatorEmail({});
       setNationalCoordinator({});
     }
   };
 
   const onAddDialogClose = () => {
     setIsAddDialogVisible(false);
-    setNationalCoordinatorCountry({});
-    setNationalCoordinatorEmail({});
+    setNationalCoordinator({});
   };
 
   const onChangeEmail = email => {
@@ -82,11 +78,15 @@ export const AddNationalCoordinator = () => {
   const isValidEmail = email => RegularExpressions['email'].test(email);
 
   const getTooltipMessage = () => {
-    if (isEmpty(nationalCoordinatorEmail) && isEmpty(nationalCoordinatorCountry)) {
+    //console.log('isEmpty(nationalCoordinator.email) :>> ', isEmpty(nationalCoordinator.email));
+    console.log('isEmpty(nationalCoordinator.country) :>> ', isEmpty(nationalCoordinator.country));
+    //console.log('!isValidEmail(nationalCoordinator.email) :>> ', !isValidEmail(nationalCoordinator.email));
+
+    if (isEmpty(nationalCoordinator.email) && isEmpty(nationalCoordinator.country)) {
       return resourcesContext.messages['incompleteDataTooltip'];
-    } else if (!isValidEmail(nationalCoordinatorEmail)) {
+    } else if (!isValidEmail(nationalCoordinator.email)) {
       return resourcesContext.messages['notValidEmailTooltip'];
-    } else if (isEmpty(nationalCoordinatorCountry)) {
+    } else if (isEmpty(nationalCoordinator.country)) {
       return resourcesContext.messages['emptyNationalCoordinatorsCountryError'];
     } else {
       return null;
@@ -144,7 +144,7 @@ export const AddNationalCoordinator = () => {
           className={styles.confirmDialog}
           classNameConfirm={'p-button-primary'}
           confirmTooltip={getTooltipMessage()}
-          //disabledConfirm={getTooltipMessage() !== null}
+          disabledConfirm={!isNil(getTooltipMessage())}
           header={resourcesContext.messages['addNationalCoordinatorsDialogHeader']}
           iconConfirm={isAdding ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['cancel']}
