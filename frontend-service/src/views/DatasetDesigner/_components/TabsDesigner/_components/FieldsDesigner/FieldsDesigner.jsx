@@ -1060,7 +1060,6 @@ export const FieldsDesigner = ({
             accept=".csv"
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
-            dialogClassName={styles.Dialog}
             dialogHeader={`${resourcesContext.messages['importTableSchemaDialogHeader']} ${table.tableSchemaName}`}
             dialogOnHide={() => manageDialogs('isImportTableSchemaDialogVisible', false)}
             dialogVisible={designerState.isImportTableSchemaDialogVisible}

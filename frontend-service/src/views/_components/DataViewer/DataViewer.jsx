@@ -179,7 +179,7 @@ export const DataViewer = ({
     setEditDialogVisible,
     setConfirmDeleteVisible
   );
-  
+
   const mapEditingEnabled =
     areEquals(records.geometryType, 'POINT') &&
     hasWritePermissions &&
@@ -1248,7 +1248,6 @@ export const DataViewer = ({
           accept={getAttachExtensions || '*'}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
-          dialogClassName={styles.Dialog}
           dialogHeader={`${resourcesContext.messages['uploadAttachment']}`}
           dialogOnHide={() => setIsAttachFileVisible(false)}
           dialogVisible={isAttachFileVisible}
