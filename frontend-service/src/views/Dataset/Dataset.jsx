@@ -1241,7 +1241,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           accept={DatasetUtils.getValidExtensions({ validExtensions: importSelectedIntegrationExtension })}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
-          dialogClassName={styles.Dialog}
           dialogHeader={selectedCustomImportIntegration.name}
           dialogOnHide={() => {
             setIsImportDatasetDialogVisible(false);

@@ -497,7 +497,6 @@ export const Feedback = () => {
           accept="*"
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
-          dialogClassName={styles.Dialog}
           dialogHeader={`${resourcesContext.messages['uploadAttachment']} to ${selectedDataProvider.label}`}
           dialogOnHide={() => dispatchFeedback({ type: 'TOGGLE_FILE_UPLOAD_VISIBILITY', payload: false })}
           dialogVisible={importFileDialogVisible}

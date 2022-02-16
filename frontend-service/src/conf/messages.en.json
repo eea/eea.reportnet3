@@ -1498,6 +1498,8 @@
     "delateAllLeadReportersDialogMessage": "Are you sure you want to delete all lead reporters?",
     "deleteAllLeadReportersButton": "Delete all lead reporters",
     "deleteUserNotificationsError": "Error deleting user notifications",
+    "finalFeedback": "Final feedback",
+    "multiple": "Multiple",
     "importedData": "Imported data",
     "importData": "Import data",
     "importingData": "Importing data",

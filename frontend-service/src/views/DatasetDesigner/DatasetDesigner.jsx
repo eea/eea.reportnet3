@@ -1784,7 +1784,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             accept={DatasetUtils.getValidExtensions({ validExtensions: designerState.selectedImportExtension })}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
-            dialogClassName={styles.Dialog}
             dialogHeader={selectedCustomImportIntegration.name}
             dialogOnHide={() => {
               manageDialogs('isImportDatasetDialogVisible', false);
