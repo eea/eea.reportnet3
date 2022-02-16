@@ -13,7 +13,7 @@ import { Dialog } from 'views/_components/Dialog';
 import { Filters } from 'views/_components/Filters';
 import { Spinner } from 'views/_components/Spinner';
 
-import { ValidationService } from 'services/ValidationService'; // TODO IMPORT CORRECT SERVICE
+import { DataflowService } from 'services/DataflowService'; // TODO IMPORT CORRECT SERVICE
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -35,6 +35,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const [goToPage, setGoToPage] = useState(1);
   const [sort, setSort] = useState({ field: '', order: 0 });
   const [totalRecords, setTotalRecords] = useState(0);
+  const [dataflowId, setDataflowId] = useState(undefined);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
@@ -51,84 +52,93 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     getValidationsStatuses();
   }, [pagination, sort]);
 
-  // const getValidationsStatuses = async () => {
-  // TODO MAKE ASYNC
-  const getValidationsStatuses = () => {
+  const getValidationsStatuses = async () => {
+    // TODO MAKE ASYNC
+    // const getValidationsStatuses = () => {
     // await resetFilterState();
     setLoadingStatus('pending');
 
-    // const filterBy = await getFilterBy();
+    const filterBy = await getFilterBy();
 
     try {
-      // const _data = await ValidationService.getAllStatuses(pageNum, numberRows, sort.field, filterBy); // TODO CORRECT SERVICE CALL
-      const data = {
-        totalRecords: 5,
-        statuses: [
-          {
-            id: 10,
-            dataflowId: 111,
-            dataflowName: 'Dataflow name',
-            datasetId: 1,
-            datasetName: 'Dataset name',
-            status: 'importing',
-            queuedDate: 1644572710000,
-            processStartingDate: 1644572711000,
-            processFinishingDate: 1644572712000,
-            user: 'igor.provider@reportnet.net'
-          },
-          {
-            id: 20,
-            dataflowId: 222,
-            dataflowName: 'Dataflow name',
-            datasetId: 2,
-            datasetName: 'Dataset name',
-            status: 'imported',
-            queuedDate: 1644572720000,
-            processStartingDate: 1644572721000,
-            processFinishingDate: 1644572722000,
-            user: 'pablo.provider@reportnet.net'
-          },
-          {
-            id: 30,
-            dataflowId: 333,
-            dataflowName: 'Dataflow name',
-            datasetId: 3,
-            datasetName: 'Dataset name',
-            status: 'validating',
-            queuedDate: 1644572730000,
-            processStartingDate: 1644572731000,
-            processFinishingDate: 1644572732000,
-            user: 'miguel.provider@reportnet.net'
-          },
-          {
-            id: 40,
-            dataflowId: 444,
-            dataflowName: 'Dataflow name',
-            datasetId: 4,
-            datasetName: 'Dataset name',
-            status: 'validated',
-            queuedDate: 1644572740000,
-            processStartingDate: 1644572741000,
-            processFinishingDate: 1644572742000,
-            user: 'miriam.provider@reportnet.net'
-          },
-          {
-            id: 50,
-            dataflowId: 555,
-            dataflowName: 'Dataflow name',
-            datasetId: 5,
-            datasetName: 'Dataset name',
-            status: 'in queue',
-            queuedDate: 1644572750000,
-            processStartingDate: 1644572751000,
-            processFinishingDate: 1644572752000,
-            user: 'mikel.provider@reportnet.net'
-          }
-        ]
-      };
+      const { data } = await DataflowService.getValidationsStatuses({
+        pageNum,
+        numberRows,
+        sortBy: sort.field,
+        filterBy
+      });
+      // TODO CORRECT SERVICE CALL
+      // const data = {
+      //   totalRecords: 5,
+      //   filteredRecords: 2 // number of filtered records
+      //   statuses: [
+      //     {
+      //       id: 10,
+      //       dataflowId: 111,
+      //       dataflowName: 'Dataflow name',
+      //       datasetId: 1,
+      //       datasetName: 'Dataset name',
+      //       status: 'importing',
+      //       queuedDate: 1644572710000,
+      //       processStartingDate: 1644572711000,
+      //       processFinishingDate: 1644572712000,
+      //       user: 'igor.provider@reportnet.net'
+      //     },
+      //     {
+      //       id: 20,
+      //       dataflowId: 222,
+      //       dataflowName: 'Dataflow name',
+      //       datasetId: 2,
+      //       datasetName: 'Dataset name',
+      //       status: 'imported',
+      //       queuedDate: 1644572720000,
+      //       processStartingDate: 1644572721000,
+      //       processFinishingDate: 1644572722000,
+      //       user: 'pablo.provider@reportnet.net'
+      //     },
+      //     {
+      //       id: 30,
+      //       dataflowId: 333,
+      //       dataflowName: 'Dataflow name',
+      //       datasetId: 3,
+      //       datasetName: 'Dataset name',
+      //       status: 'validating',
+      //       queuedDate: 1644572730000,
+      //       processStartingDate: 1644572731000,
+      //       processFinishingDate: 1644572732000,
+      //       user: 'miguel.provider@reportnet.net'
+      //     },
+      //     {
+      //       id: 40,
+      //       dataflowId: 444,
+      //       dataflowName: 'Dataflow name',
+      //       datasetId: 4,
+      //       datasetName: 'Dataset name',
+      //       status: 'validated',
+      //       queuedDate: 1644572740000,
+      //       processStartingDate: 1644572741000,
+      //       processFinishingDate: 1644572742000,
+      //       user: 'miriam.provider@reportnet.net'
+      //     },
+      //     {
+      //       id: 50,
+      //       dataflowId: 555,
+      //       dataflowName: 'Dataflow name',
+      //       datasetId: 5,
+      //       datasetName: 'Dataset name',
+      //       status: 'in_queue',
+      //       queuedDate: 1644572750000,
+      //       processStartingDate: 1644572751000,
+      //       processFinishingDate: 1644572752000,
+      //       user: 'mikel.provider@reportnet.net'
+      //     }
+      //   ]
+      // };
       setTotalRecords(data.totalRecords);
-      setValidationsStatusesList(data.statuses);
-      setData(data.statuses); // TODO CHECK IF NEEDED
+      // setValidationsStatusesList(data.statuses);
+      setValidationsStatusesList(data);
+      // setData(data.statuses); // TODO CHECK IF NEEDED
+      setData(data); // TODO CHECK IF NEEDED
       setLoadingStatus('success');
     } catch (error) {
       console.error('ValidationsStatus - getValidationsStatuses.', error);
@@ -144,7 +154,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     setIsDeleteDialogVisible(false);
 
     try {
-      // await ValidationService.removeFromQueue(validationStatusId); // TODO CORRECT SERVICE CALL
+      // await DataflowService.removeFromQueue(validationStatusId); // TODO CORRECT SERVICE CALL
       getValidationsStatuses();
     } catch (error) {
       console.error('ValidationsStatus - onConfirmDeleteDialog.', error);
@@ -186,6 +196,11 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         { key: 'user', label: resourcesContext.messages['user'] }
       ],
       type: 'INPUT'
+    },
+    {
+      key: 'status',
+      label: resourcesContext.messages['status'],
+      type: 'MULTI_SELECT'
     }
   ];
 

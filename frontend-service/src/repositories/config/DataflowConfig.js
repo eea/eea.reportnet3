@@ -37,6 +37,5 @@ export const DataflowConfig = {
     '/dataflow/{:dataflowId}/updateAutomaticDelete?automaticDelete={:isAutomaticReportingDeletion}',
   importSchema: '/dataschema/import?dataflowId={:dataflowId}',
   validateAllDataflowsUsers: '/dataflow/validateAllReporters',
-  getValidationsStatus:
-    'dataflow/process/?asc={:isAsc}&dataflowId={:dataflowId}&pageNum={:pageNum}pageSize={:numberRows}&status={:status}&user={:user}'
+  getValidationsStatuses: '/process/?asc={:isAsc}&pageNum={:pageNum}&pageSize={:numberRows}'
 };
