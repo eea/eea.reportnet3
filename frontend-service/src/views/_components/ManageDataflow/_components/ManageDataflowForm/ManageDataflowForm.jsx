@@ -42,7 +42,13 @@ export const ManageDataflowForm = forwardRef(
     const resourcesContext = useContext(ResourcesContext);
     const userContext = useContext(UserContext);
 
-    const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+    const isCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.CUSTODIAN.key
+    ]);
+    const isSteward = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.STEWARD.key
+    ]);
+    const isLeadDesigner = isSteward || isCustodian;
 
     const [description, setDescription] = useState(data.description);
     const [errors, setErrors] = useState({
@@ -180,11 +186,14 @@ export const ManageDataflowForm = forwardRef(
             {errors.name.message !== '' && <ErrorMessage message={errors.name.message} />}
           </div>
 
-          <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
+          <div
+            className={`formField ${errors.description.hasErrors ? 'error' : ''}  ${
+              !isLeadDesigner ? styles.disabled : ''
+            }`}>
             <textarea
               autoComplete="off"
               component="textarea"
-              disabled={isAdmin}
+              disabled={!isLeadDesigner}
               id="dataflowDescription"
               name="description"
               onBlur={() => checkIsCorrectInputValue(description, 'description')}
@@ -218,13 +227,15 @@ export const ManageDataflowForm = forwardRef(
 
           <div className={`${styles.search}`}>
             <Button
-              disabled={isAdmin}
+              disabled={!isLeadDesigner}
               icon="search"
               label={resourcesContext.messages['searchObligations']}
               onClick={onSearch}
             />
             <input
-              className={`${styles.searchInput} ${errors.obligation.hasErrors ? styles.searchErrors : ''}`}
+              className={`${styles.searchInput}  ${!isLeadDesigner ? styles.disabled : ''} ${
+                errors.obligation.hasErrors ? styles.searchErrors : ''
+              }`}
               id="searchObligation"
               name="obligation.title"
               onBlur={() => checkIsCorrectInputValue(data.obligation.title, 'obligation')}
