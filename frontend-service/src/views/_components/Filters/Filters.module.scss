@@ -361,11 +361,6 @@
   display: flex !important;
   border-bottom: var(--inputtext-border) !important;
 
-  label {
-    color: var(--font-filters) !important;
-    font-size: 0.8333rem !important;
-  }
-
   .searchInput:focus {
     padding-top: 10px !important;
   }

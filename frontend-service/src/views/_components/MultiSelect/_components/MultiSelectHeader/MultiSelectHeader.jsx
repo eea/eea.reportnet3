@@ -1,6 +1,8 @@
 import { useContext, useRef } from 'react';
 import uniqueId from 'lodash/uniqueId';
 
+import styles from './MultiSelectHeader.module.scss';
+
 import { Checkbox } from 'views/_components/Checkbox';
 import { InputText } from 'views/_components/InputText';
 
@@ -28,6 +30,14 @@ export const MultiSelectHeader = ({
   const filterRef = useRef(null);
 
   useInputTextFocus(isPanelVisible, filterRef);
+
+  const getClassNameAllChecked = () => {
+    if (allChecked) {
+      return `${headerClassName} ${styles.allItemsSelected}`;
+    }
+
+    return headerClassName;
+  };
 
   const onFilterEvent = event => {
     if (onFilter) {
@@ -60,7 +70,7 @@ export const MultiSelectHeader = ({
       );
     } else
       return (
-        <span className={headerClassName} id={`selectAllFilter_${id}`} onClick={event => onToggleAllEvent(event)}>
+        <span className={getClassNameAllChecked()} onClick={event => onToggleAllEvent(event)}>
           {allChecked ? notCheckAllHeader : checkAllHeader}
         </span>
       );

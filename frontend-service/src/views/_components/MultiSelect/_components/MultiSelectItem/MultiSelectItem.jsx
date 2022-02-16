@@ -1,5 +1,7 @@
 import classNames from 'classnames';
 
+import styles from './MultiSelectItem.module.scss';
+
 export const MultiSelectItem = ({
   disabled = false,
   label,
@@ -10,6 +12,14 @@ export const MultiSelectItem = ({
   tabIndex,
   template
 }) => {
+  const getClassNameLabel = () => {
+    if (!selected) {
+      return undefined;
+    }
+
+    return styles.itemSelected;
+  };
+
   const onClickEvent = event => {
     if (onClick && !disabled) {
       onClick({
@@ -56,7 +66,7 @@ export const MultiSelectItem = ({
           </div>
         </div>
       )}
-      <label>{content}</label>
+      <label className={getClassNameLabel()}>{content}</label>
     </li>
   );
 };
