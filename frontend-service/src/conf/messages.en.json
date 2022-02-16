@@ -1499,6 +1499,14 @@
     "deleteAllLeadReportersButton": "Delete all lead reporters",
     "deleteUserNotificationsError": "Error deleting user notifications",
     "finalFeedback": "Final feedback",
-    "multiple": "Multiple"
+    "multiple": "Multiple",
+    "importedData": "Imported data",
+    "importData": "Import data",
+    "importingData": "Importing data",
+    "validatedData": "Validated data",
+    "validateData": "Validate data",
+    "validatingData": "Validating data",
+    "importDataError": "Error importing data",
+    "validatingDataError": "Error validating data"
   }
 }
