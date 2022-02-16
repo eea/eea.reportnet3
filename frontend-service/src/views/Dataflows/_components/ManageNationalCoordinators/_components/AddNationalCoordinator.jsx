@@ -111,7 +111,7 @@ export const AddNationalCoordinator = () => {
           maxLength={50}
           onChange={event => onChangeEmail(event.target.value)}
           placeholder={resourcesContext.messages['nationalCoordinatorsEmail']}
-          value={nationalCoordinatorEmail}
+          value={nationalCoordinator.email}
         />
 
         <label className={styles.label} htmlFor="rolesDropdown">
@@ -124,7 +124,7 @@ export const AddNationalCoordinator = () => {
           optionLabel="label"
           options={groupOfCountries}
           placeholder={resourcesContext.messages['manageNationalCoordinatorsPlaceholder']}
-          //value={groupOfCountries?.find(country => country.code === nationalCoordinator.countryCode).name}
+          value={groupOfCountries?.find(country => country.code === nationalCoordinator.countryCode)}
         />
       </div>
     );
