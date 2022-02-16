@@ -35,7 +35,7 @@ export const PublicDataflows = () => {
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
-  const { getFilterBy, isFiltered: areFiltersFilled, setData, sortByOptions } = useApplyFilters('publicDataflows');
+  const { getFilterBy, setData, sortByOptions } = useApplyFilters('publicDataflows');
 
   const [contentStyles, setContentStyles] = useState({});
   const [filteredRecords, setFilteredRecords] = useState(0);
@@ -266,13 +266,7 @@ export const PublicDataflows = () => {
           <Filters
             className="publicDataflows"
             isLoading={isLoading}
-            onFilter={() => {
-              if (areFiltersFilled) {
-                setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 });
-              } else {
-                onLoadPublicDataflows();
-              }
-            }}
+            onFilter={onLoadPublicDataflows}
             onReset={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 })}
             onSort={onLoadPublicDataflows}
             options={filterOptions}
