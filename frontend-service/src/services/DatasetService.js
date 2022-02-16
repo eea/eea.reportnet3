@@ -193,7 +193,7 @@ export const DatasetService = {
 
   getMetadata: async datasetId => {
     const datasetTableDataDTO = await DatasetRepository.getMetadata(datasetId);
-    console.log({ datasetTableDataDTO });
+
     return new Dataset({
       datasetFeedbackStatus:
         !isNil(datasetTableDataDTO.data.status) && capitalize(datasetTableDataDTO.data.status.split('_').join(' ')),

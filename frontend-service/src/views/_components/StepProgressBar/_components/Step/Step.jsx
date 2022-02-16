@@ -38,7 +38,6 @@ export const Step = memo(({ currentStep, step }) => {
   };
 
   const getStepLabel = () => {
-    console.log(step);
     if (step.completed && !step.withError) {
       return step.labelCompleted;
     } else if (step.completed && step.withError) {

@@ -151,21 +151,21 @@ const getValidExtensions = ({ isTooltip = false, validExtensions = '' }) =>
 const getDatasetStepRunningStatus = datasetRunningStatus => {
   switch (datasetRunningStatus) {
     case config.datasetRunningStatus.IMPORTING.key:
-      return { step: 0, currentStep: 1, isRunning: true, completed: false, withError: false, isSnapshot: false };
+      return { step: 0, currentStep: 1, isRunning: true, completed: false, withError: false };
     case config.datasetRunningStatus.IMPORTED.key:
-      return { step: 0, currentStep: 1, isRunning: false, completed: true, withError: false, isSnapshot: false };
+      return { step: 0, currentStep: 1, isRunning: false, completed: true, withError: false };
     case config.datasetRunningStatus.ERROR_IN_IMPORT.key:
-      return { step: 0, currentStep: 1, isRunning: false, completed: true, withError: true, isSnapshot: false };
+      return { step: 0, currentStep: 1, isRunning: false, completed: true, withError: true };
     case config.datasetRunningStatus.VALIDATING.key:
-      return { step: 1, currentStep: 2, isRunning: true, completed: false, withError: false, isSnapshot: false };
+      return { step: 1, currentStep: 2, isRunning: true, completed: false, withError: false };
     case config.datasetRunningStatus.VALIDATED.key:
-      return { step: 1, currentStep: 2, isRunning: false, completed: true, withError: false, isSnapshot: false };
+      return { step: 1, currentStep: 2, isRunning: false, completed: true, withError: false };
     case config.datasetRunningStatus.ERROR_IN_VALIDATION.key:
-      return { step: 1, currentStep: 2, isRunning: false, completed: true, withError: true, isSnapshot: false };
+      return { step: 1, currentStep: 2, isRunning: false, completed: true, withError: true };
     case config.datasetRunningStatus.RESTORING_SNAPSHOT.key:
-      return { step: 0, currentStep: 0, isRunning: true, completed: false, withError: false, isSnapshot: true };
+      return { step: 0, currentStep: 1, isRunning: true, completed: false, withError: false };
     default:
-      return { step: 0, currentStep: 0, isRunning: false, completed: false, withError: false, isSnapshot: false };
+      return { step: 0, currentStep: 0, isRunning: false, completed: false, withError: false };
   }
 };
 

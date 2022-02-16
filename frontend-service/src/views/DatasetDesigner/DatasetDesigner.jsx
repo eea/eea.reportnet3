@@ -330,7 +330,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         schemaName: metaData.dataset.name
       }
     });
-    console.log({ metaData });
 
     const stepStatus = DatasetUtils.getDatasetStepRunningStatus(metaData.dataset.datasetRunningStatus);
     designerDispatch({
@@ -717,12 +716,24 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   useEffect(() => {
+    if (snapshotState.isRestoring) {
+      designerDispatch({
+        type: 'SET_PROGRESS_STEP_BAR',
+        payload: { step: 0, currentStep: 1, isRunning: true, completed: false, withError: false }
+      });
+    }
+  }, [snapshotState.isRestoring]);
+
+  useEffect(() => {
     const validationFinished = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
     );
     if (validationFinished && validationFinished.content.datasetId?.toString() === datasetId.toString()) {
       onHighlightRefresh(true);
-      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 1, currentStep: 2, isRunning: false } });
+      designerDispatch({
+        type: 'SET_PROGRESS_STEP_BAR',
+        payload: { step: 1, currentStep: 2, isRunning: false, completed: false, withError: false }
+      });
     }
     const isImportFieldSchemaCompleted = notificationContext.toShow.some(
       notification => notification.key === 'IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'
@@ -732,8 +743,20 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       notification => notification.key === 'IMPORT_DESIGN_COMPLETED_EVENT'
     );
 
-    if (isImportDataCompleted) {
-      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 1, currentStep: 2, isRunning: true } });
+    const isRestoreSnapshotDataCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT'
+    );
+
+    const isDeletedDataCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'DELETE_DATASET_SCHEMA_COMPLETED_EVENT'
+    );
+
+    if (isImportDataCompleted || isRestoreSnapshotDataCompleted || isDeletedDataCompleted) {
+      designerDispatch({
+        type: 'SET_PROGRESS_STEP_BAR',
+        payload: { step: 1, currentStep: 2, isRunning: true, completed: false, withError: false }
+      });
+      snapshotDispatch({ type: 'SET_IS_RESTORING', payload: false });
     }
 
     if (isImportFieldSchemaCompleted) {
