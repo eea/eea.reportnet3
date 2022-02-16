@@ -213,13 +213,19 @@ export const BigButton = ({
   };
 
   const renderTechnicalAcceptanceTooltip = uniqName => {
-    if (!isNil(technicalAcceptanceStatus) && !isEmpty(technicalAcceptanceStatus)) {
-      return (
-        <ReactTooltip border={true} effect="solid" id={uniqName} place="top">
-          {technicalAcceptanceStatus}
-        </ReactTooltip>
-      );
-    }
+    const getMessage = () => {
+      if (!isNil(technicalAcceptanceStatus) && !isEmpty(technicalAcceptanceStatus)) {
+        return technicalAcceptanceStatus;
+      } else {
+        return resourcesContext.messages['released'];
+      }
+    };
+
+    return (
+      <ReactTooltip border={true} effect="solid" id={uniqName} place="top">
+        {getMessage()}
+      </ReactTooltip>
+    );
   };
 
   const renderInfoStatusIcon = () => {
