@@ -216,7 +216,7 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
     Pattern p = Pattern.compile(EMAIL_REGEX);
     Matcher m = p.matcher(userNationalCoordinatorVO.getEmail().toLowerCase());
     boolean result = m.matches();
-    if (Boolean.FALSE.equals(result)) {
+    if (!result) {
       throw new EEAException(
           String.format(EEAErrorMessage.NOT_EMAIL, userNationalCoordinatorVO.getEmail()));
     }

@@ -390,6 +390,6 @@ public interface UserManagementController {
    * @param nationalCoordinatorVO the national coordinator VO
    */
   @DeleteMapping("/nationalCoordinator")
-  void DeleteNationalCoordinator(@RequestBody UserNationalCoordinatorVO nationalCoordinatorVO);
+  void deleteNationalCoordinator(@RequestBody UserNationalCoordinatorVO nationalCoordinatorVO);
 
 }

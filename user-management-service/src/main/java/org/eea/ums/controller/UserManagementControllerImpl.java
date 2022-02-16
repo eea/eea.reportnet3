@@ -974,7 +974,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PreAuthorize("hasRole('ADMIN')")
   @ApiOperation(value = "Delete permissions national coordinators", hidden = true)
   @DeleteMapping("/nationalCoordinator")
-  public void DeleteNationalCoordinator(
+  public void deleteNationalCoordinator(
       @RequestBody UserNationalCoordinatorVO nationalCoordinatorVO) {
     try {
       userNationalCoordinatorService.deleteNationalCoordinator(nationalCoordinatorVO);
