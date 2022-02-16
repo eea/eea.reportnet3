@@ -149,8 +149,6 @@ const getValidExtensions = ({ isTooltip = false, validExtensions = '' }) =>
     .join(',');
 
 const getDatasetStepRunningStatus = datasetRunningStatus => {
-  console.log(datasetRunningStatus, config.datasetRunningStatus.IMPORTING);
-  return { step: 0, currentStep: 0, isRunning: true, completed: false, withError: false, isSnapshot: true };
   switch (datasetRunningStatus) {
     case config.datasetRunningStatus.IMPORTING.key:
       return { step: 0, currentStep: 1, isRunning: true, completed: false, withError: false, isSnapshot: false };
@@ -165,7 +163,7 @@ const getDatasetStepRunningStatus = datasetRunningStatus => {
     case config.datasetRunningStatus.ERROR_IN_VALIDATION.key:
       return { step: 1, currentStep: 2, isRunning: false, completed: true, withError: true, isSnapshot: false };
     case config.datasetRunningStatus.RESTORING_SNAPSHOT.key:
-      return { step: 2, currentStep: 3, isRunning: true, completed: false, withError: false, isSnapshot: true };
+      return { step: 0, currentStep: 0, isRunning: true, completed: false, withError: false, isSnapshot: true };
     default:
       return { step: 0, currentStep: 0, isRunning: false, completed: false, withError: false, isSnapshot: false };
   }
