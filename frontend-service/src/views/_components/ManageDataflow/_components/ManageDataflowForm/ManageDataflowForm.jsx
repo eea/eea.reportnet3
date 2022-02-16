@@ -8,6 +8,7 @@ import { Button } from 'views/_components/Button';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
 import { InputText } from 'views/_components/InputText';
+import { InputTextarea } from 'views/_components/InputTextarea/InputTextarea';
 
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
@@ -186,13 +187,9 @@ export const ManageDataflowForm = forwardRef(
             {errors.name.message !== '' && <ErrorMessage message={errors.name.message} />}
           </div>
 
-          <div
-            className={`formField ${errors.description.hasErrors ? 'error' : ''}  ${
-              !isLeadDesigner ? styles.disabled : ''
-            }`}>
-            <textarea
-              autoComplete="off"
-              component="textarea"
+          <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
+            <InputTextarea
+              className={styles.inputTextArea}
               disabled={!isLeadDesigner}
               id="dataflowDescription"
               name="description"
@@ -233,9 +230,7 @@ export const ManageDataflowForm = forwardRef(
               onClick={onSearch}
             />
             <input
-              className={`${styles.searchInput}  ${!isLeadDesigner ? styles.disabled : ''} ${
-                errors.obligation.hasErrors ? styles.searchErrors : ''
-              }`}
+              className={`${styles.searchInput} ${errors.obligation.hasErrors ? styles.searchErrors : ''}`}
               id="searchObligation"
               name="obligation.title"
               onBlur={() => checkIsCorrectInputValue(data.obligation.title, 'obligation')}
