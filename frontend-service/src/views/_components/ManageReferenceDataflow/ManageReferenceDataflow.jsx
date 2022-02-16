@@ -250,10 +250,7 @@ export const ManageReferenceDataflow = ({
           {!isEmpty(errors.name.message) && <ErrorMessage message={errors.name.message} />}
         </div>
 
-        <div
-          className={`formField ${errors.description.hasErrors ? 'error' : ''}  ${
-            !isLeadDesigner ? styles.disabled : ''
-          }`}>
+        <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <InputTextarea
             className={styles.inputTextArea}
             disabled={!isLeadDesigner}
