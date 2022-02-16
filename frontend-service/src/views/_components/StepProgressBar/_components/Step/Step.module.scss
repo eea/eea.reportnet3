@@ -1,11 +1,26 @@
+@import '_styles/mixins';
+
 .step {
   list-style-type: none;
-  width: 10%;
   float: left;
   font-size: 12px;
   position: relative;
   text-align: center;
+  width: 20%;
   text-transform: uppercase;
+  @include for-tablet-portrait-up {
+    width: 50%;
+  }
+  @include for-tablet-landscape-up {
+    width: 50%;
+  }
+  @include for-desktop-up {
+    width: 20%;
+  }
+  @include for-big-desktop-up {
+    width: 10%;
+  }
+
   .stepLabel {
     color: var(--step-progress-bar-label-color);
   }
