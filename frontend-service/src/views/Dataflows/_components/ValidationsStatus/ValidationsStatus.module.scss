@@ -39,3 +39,15 @@
     border-color: var(--button-secondary-border-color-hover) !important;
   }
 }
+
+.dialogContent {
+  div:nth-child(3) {
+    margin-bottom: 0;
+  }
+  div:nth-child(4) {
+    display: flex;
+    div:nth-child(1) {
+      padding-top: 1.1em;
+    }
+  }
+}
