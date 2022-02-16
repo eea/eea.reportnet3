@@ -47,7 +47,9 @@ export const DropdownFilter = ({
   };
 
   return (
-    <div className={`${styles.block} ${styles[option.className]}`} key={option.key}>
+    <div
+      className={`${styles.block} ${styles[option.className]} ${!option.isSortable && styles.noSortFilterWrapper}`}
+      key={option.key}>
       <SortButton
         id={option.key}
         isLoading={isLoading}
