@@ -21,6 +21,7 @@ import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
+import org.eea.interfaces.vo.ums.UserNationalCoordinatorVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -30,6 +31,7 @@ import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.ums.mapper.UserRepresentationMapper;
 import org.eea.ums.service.BackupManagmentService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.eea.ums.service.UserNationalCoordinatorService;
 import org.eea.ums.service.UserRoleService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
@@ -49,39 +51,62 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * The Class UserManagementControllerImplTest.
+ */
 @RunWith(MockitoJUnitRunner.class)
 public class UserManagementControllerImplTest {
 
+  /** The user management controller. */
   @InjectMocks
   private UserManagementControllerImpl userManagementController;
 
+  /** The security provider interface service. */
   @Mock
   private SecurityProviderInterfaceService securityProviderInterfaceService;
 
+  /** The keycloak connector service. */
   @Mock
   private KeycloakConnectorService keycloakConnectorService;
 
+  /** The backup managment service. */
   @Mock
   private BackupManagmentService backupManagmentService;
 
+  /** The user representation mapper. */
   @Mock
   private UserRepresentationMapper userRepresentationMapper;
 
+  /** The user role service. */
   @Mock
   private UserRoleService userRoleService;
 
+  /** The notification controller. */
   @Mock
   private NotificationControllerZuul notificationController;
 
+  /** The http servlet response. */
   @Mock
-  HttpServletResponse httpServletResponse;
+  private HttpServletResponse httpServletResponse;
 
+  /** The user national coordinator service. */
+  @Mock
+  private UserNationalCoordinatorService userNationalCoordinatorService;
+
+  /**
+   * Sets the up.
+   *
+   * @throws Exception the exception
+   */
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.openMocks(this);
   }
 
 
+  /**
+   * Generate token test.
+   */
   @Test
   public void generateTokenTest() {
     TokenVO tokenVO = new TokenVO();
@@ -94,6 +119,9 @@ public class UserManagementControllerImplTest {
     Assert.assertEquals("token", result.getAccessToken());
   }
 
+  /**
+   * Generate token by code test.
+   */
   @Test
   public void generateTokenByCodeTest() {
     TokenVO tokenVO = new TokenVO();
@@ -104,6 +132,9 @@ public class UserManagementControllerImplTest {
     Assert.assertEquals("token", result.getAccessToken());
   }
 
+  /**
+   * Refresh token test.
+   */
   @Test
   public void refreshTokenTest() {
     TokenVO tokenVO = new TokenVO();
@@ -115,6 +146,9 @@ public class UserManagementControllerImplTest {
     Assert.assertEquals("token", result.getAccessToken());
   }
 
+  /**
+   * Check resource access permission test.
+   */
   @Test
   public void checkResourceAccessPermissionTest() {
     Mockito.when(securityProviderInterfaceService.checkAccessPermission("Dataflow",
@@ -125,6 +159,9 @@ public class UserManagementControllerImplTest {
     Assert.assertTrue(checkedAccessPermission);
   }
 
+  /**
+   * Do log out.
+   */
   @Test
   public void doLogOut() {
 
@@ -133,6 +170,11 @@ public class UserManagementControllerImplTest {
         .doLogout(Mockito.anyString());
   }
 
+  /**
+   * Adds the contributor to resource.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void addContributorToResource() throws EEAException {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -146,6 +188,9 @@ public class UserManagementControllerImplTest {
         .addUserToUserGroup("userId_123", ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(1l));
   }
 
+  /**
+   * Test get resources by user.
+   */
   @Test
   public void testGetResourcesByUser() {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -161,6 +206,9 @@ public class UserManagementControllerImplTest {
 
   }
 
+  /**
+   * Test get resources by user 2.
+   */
   @Test
   public void testGetResourcesByUser2() {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -177,6 +225,9 @@ public class UserManagementControllerImplTest {
 
   }
 
+  /**
+   * Test get resources by user 3.
+   */
   @Test
   public void testGetResourcesByUser3() {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -192,6 +243,9 @@ public class UserManagementControllerImplTest {
         userManagementController.getResourcesByUser(SecurityRoleEnum.LEAD_REPORTER));
   }
 
+  /**
+   * Test get resources by user 4.
+   */
   @Test
   public void testGetResourcesByUser4() {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -208,6 +262,11 @@ public class UserManagementControllerImplTest {
 
   }
 
+  /**
+   * Read excel test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void readExcelTest() throws IOException {
     MockMultipartFile file = new MockMultipartFile("files", "filename.txt", "text/plain",
@@ -217,11 +276,21 @@ public class UserManagementControllerImplTest {
     Mockito.verify(backupManagmentService, times(1)).readAndSaveUsers(Mockito.any());
   }
 
+  /**
+   * Read excel fail test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = ResponseStatusException.class)
   public void readExcelFailTest() throws IOException {
     throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Not found");
   }
 
+  /**
+   * Gets the email by user id test.
+   *
+   * @return the email by user id test
+   */
   @Test
   public void getEmailByUserIdTest() {
     UserRepresentation user = new UserRepresentation();
@@ -239,6 +308,11 @@ public class UserManagementControllerImplTest {
         userManagementController.getUserByUserId().getEmail());
   }
 
+  /**
+   * Gets the email by user id null test.
+   *
+   * @return the email by user id null test
+   */
   @Test
   public void getEmailByUserIdNullTest() {
     Mockito.when(keycloakConnectorService.getUser(Mockito.any())).thenReturn(null);
@@ -251,6 +325,12 @@ public class UserManagementControllerImplTest {
     Assert.assertNull(userManagementController.getUserByUserId());
   }
 
+  /**
+   * Gets the users test.
+   *
+   * @return the users test
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void getUsersTest() throws IOException {
 
@@ -267,6 +347,12 @@ public class UserManagementControllerImplTest {
 
   }
 
+  /**
+   * Gets the users test fail.
+   *
+   * @return the users test fail
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test
   public void getUsersTestFail() throws IOException {
 
@@ -318,6 +404,11 @@ public class UserManagementControllerImplTest {
     Assert.assertNull(userManagementController.getUserByEmail("sample@email.net"));
   }
 
+  /**
+   * Adds the contributors to resources.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void addContributorsToResources() throws EEAException {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -338,6 +429,11 @@ public class UserManagementControllerImplTest {
   }
 
 
+  /**
+   * Adds the user to resources.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void addUserToResources() throws EEAException {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -357,6 +453,9 @@ public class UserManagementControllerImplTest {
         .addUserToUserGroup("userId_123", ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(1l));
   }
 
+  /**
+   * Update user attributes test.
+   */
   @Test
   public void updateUserAttributesTest() {
     Map<String, List<String>> attributes = new HashMap<>();
@@ -375,6 +474,9 @@ public class UserManagementControllerImplTest {
     Mockito.verify(keycloakConnectorService, Mockito.times(1)).updateUser(Mockito.any());
   }
 
+  /**
+   * Update user attributes test error.
+   */
   @Test(expected = ResponseStatusException.class)
   public void updateUserAttributesTestError() {
     Map<String, List<String>> attributes = new HashMap<>();
@@ -397,6 +499,11 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Gets the user attributes test.
+   *
+   * @return the user attributes test
+   */
   @Test
   public void getUserAttributesTest() {
     Map<String, List<String>> attributes = new HashMap<>();
@@ -413,6 +520,11 @@ public class UserManagementControllerImplTest {
     assertEquals("error", attributes, userManagementController.getUserAttributes());
   }
 
+  /**
+   * Gets the user attributes test error.
+   *
+   * @return the user attributes test error
+   */
   @Test(expected = ResponseStatusException.class)
   public void getUserAttributesTestError() {
     Map<String, List<String>> attributes = new HashMap<>();
@@ -434,6 +546,11 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Adds the contributor to resorce test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void addContributorToResorceTest() throws EEAException {
     userManagementController.addContributorToResource(1L, ResourceGroupEnum.DATAFLOW_CUSTODIAN, "");
@@ -441,6 +558,11 @@ public class UserManagementControllerImplTest {
         .addContributorToUserGroup(Mockito.any(), Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Adds the contributor to resource error test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void addContributorToResourceErrorTest() throws EEAException {
     Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
@@ -455,6 +577,11 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Adds the contributors to resource error test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void addContributorsToResourceErrorTest() throws EEAException {
     Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
@@ -468,6 +595,11 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Creates the api key no user error test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void createApiKeyNoUserErrorTest() throws EEAException {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -488,6 +620,11 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Creates the api key permission error test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void createApiKeyPermissionErrorTest() throws EEAException {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -507,6 +644,11 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Creates the api key success test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createApiKeySuccessTest() throws EEAException {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -520,6 +662,12 @@ public class UserManagementControllerImplTest {
     assertEquals("error", "uuid", userManagementController.createApiKey(1L, 1L));
   }
 
+  /**
+   * Gets the api key no user error test.
+   *
+   * @return the api key no user error test
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void getApiKeyNoUserErrorTest() throws EEAException {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -539,6 +687,12 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Gets the api key permission error test.
+   *
+   * @return the api key permission error test
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void getApiKeyPermissionErrorTest() throws EEAException {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -558,6 +712,12 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Gets the api key success test.
+   *
+   * @return the api key success test
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getApiKeySuccessTest() throws EEAException {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -572,6 +732,9 @@ public class UserManagementControllerImplTest {
     assertEquals("error", "uuid", userManagementController.getApiKey(1L, 1L));
   }
 
+  /**
+   * Authenticate user by api key.
+   */
   @Test
   public void authenticateUserByApiKey() {
     TokenVO tokenVO = new TokenVO();
@@ -583,12 +746,20 @@ public class UserManagementControllerImplTest {
     Assert.assertEquals(result, tokenVO);
   }
 
+  /**
+   * Authenticate user by api key wrong api key.
+   */
   @Test
   public void authenticateUserByApiKeyWrongApiKey() {
     TokenVO result = this.userManagementController.authenticateUserByApiKey("apiKey1");
     Assert.assertNull(result);
   }
 
+  /**
+   * Gets the users by group test.
+   *
+   * @return the users by group test
+   */
   @Test
   public void getUsersByGroupTest() {
     GroupInfo[] groupInfo = new GroupInfo[1];
@@ -601,11 +772,21 @@ public class UserManagementControllerImplTest {
     assertNotNull(userManagementController.getUsersByGroup(""));
   }
 
+  /**
+   * Gets the users by group test null.
+   *
+   * @return the users by group test null
+   */
   @Test
   public void getUsersByGroupTestNull() {
     assertNull(userManagementController.getUsersByGroup(""));
   }
 
+  /**
+   * Removes the contributor from resource.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void removeContributorFromResource() throws EEAException {
     userManagementController.removeContributorFromResource(1L,
@@ -614,6 +795,11 @@ public class UserManagementControllerImplTest {
         .removeContributorFromUserGroup(Mockito.any(), Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Removes the contributor from resource exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void removeContributorFromResourceException() throws EEAException {
     Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
@@ -628,6 +814,11 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Removes the contributors from resources.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void removeContributorsFromResources() throws EEAException {
     userManagementController.removeContributorsFromResources(new ArrayList<>());
@@ -636,6 +827,11 @@ public class UserManagementControllerImplTest {
   }
 
 
+  /**
+   * Removes the contributors from resources exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void removeContributorsFromResourcesException() throws EEAException {
     Mockito.doThrow(EEAException.class).when(securityProviderInterfaceService)
@@ -649,6 +845,11 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Removes the user from resources.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void removeUserFromResources() throws EEAException {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -667,6 +868,11 @@ public class UserManagementControllerImplTest {
         .removeUserFromUserGroup(Mockito.any(), Mockito.any());
   }
 
+  /**
+   * Removes the user from resources exception.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void removeUserFromResourcesException() throws EEAException {
     UsernamePasswordAuthenticationToken authenticationToken =
@@ -691,6 +897,11 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Gets the resources by user email test.
+   *
+   * @return the resources by user email test
+   */
   @Test
   public void getResourcesByUserEmailTest() {
     UserRepresentation[] userList = new UserRepresentation[1];
@@ -706,6 +917,9 @@ public class UserManagementControllerImplTest {
         userManagementController.getResourcesByUserEmail("email"));
   }
 
+  /**
+   * Authenticate user by email.
+   */
   @Test
   public void authenticateUserByEmail() {
     TokenVO tokenVO = new TokenVO();
@@ -719,17 +933,30 @@ public class UserManagementControllerImplTest {
   }
 
 
+  /**
+   * Gets the user roles by dataflow and country test.
+   *
+   * @return the user roles by dataflow and country test
+   */
   @Test
   public void getUserRolesByDataflowAndCountryTest() {
     assertNotNull(userManagementController.getUserRolesByDataflowAndCountry(1L, 1L));
   }
 
+  /**
+   * Gets the user roles by dataflow test.
+   *
+   * @return the user roles by dataflow test
+   */
   @Test
   public void getUserRolesByDataflowTest() {
     assertNotNull(userManagementController.getUserRolesByDataflow(0L));
   }
 
 
+  /**
+   * Download users by country exception test.
+   */
   @Test(expected = ResponseStatusException.class)
   public void downloadUsersByCountryExceptionTest() {
     Mockito.doThrow(ResponseStatusException.class).when(userRoleService)
@@ -742,6 +969,12 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Export users by country test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void exportUsersByCountryTest() throws IOException, EEAException {
     UserNotificationContentVO notification = new UserNotificationContentVO();
@@ -752,6 +985,12 @@ public class UserManagementControllerImplTest {
     Mockito.verify(userRoleService, times(1)).exportUsersByCountry(1L);
   }
 
+  /**
+   * Export users by country exception test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void exportUsersByCountryExceptionTest() throws IOException, EEAException {
     Mockito.doThrow(IOException.class).when(userRoleService)
@@ -760,6 +999,12 @@ public class UserManagementControllerImplTest {
     Mockito.verify(userRoleService, times(1)).exportUsersByCountry(Mockito.anyLong());
   }
 
+  /**
+   * Gets the api key test.
+   *
+   * @return the api key test
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void getApiKeyTest() throws EEAException {
     when(securityProviderInterfaceService.getApiKey(Mockito.any(), Mockito.any(), Mockito.any()))
@@ -767,6 +1012,11 @@ public class UserManagementControllerImplTest {
     assertEquals("uuid", userManagementController.getApiKey("uuid", 1L, 1L));
   }
 
+  /**
+   * Adds the user to resources exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void addUserToResourcesExceptionTest() throws EEAException {
     try {
@@ -791,6 +1041,11 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Creates the users exception test.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   @Test(expected = ResponseStatusException.class)
   public void createUsersExceptionTest() throws IOException {
     MockMultipartFile file = new MockMultipartFile("files", "filename.txt", "text/plain",
@@ -805,6 +1060,11 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  /**
+   * Adds the user to resource exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = ResponseStatusException.class)
   public void addUserToResourceExceptionTest() throws EEAException {
     try {
@@ -828,5 +1088,127 @@ public class UserManagementControllerImplTest {
       throw e;
     }
   }
+
+  /**
+   * Gets the user national coordinator test.
+   *
+   * @return the user national coordinator test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getUserNationalCoordinatorTest() throws EEAException {
+    assertNotNull(userManagementController.getUserNationalCoordinator());
+  }
+
+  /**
+   * Creates the user national coordinator test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void createUserNationalCoordinatorTest() throws EEAException {
+    UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
+    userNC.setCountryCode("ES");
+    userNC.setEmail("abc@abc.com");
+    userManagementController.createNationalCoordinator(userNC);
+    Mockito.verify(userNationalCoordinatorService, times(1))
+        .createNationalCoordinator(Mockito.any());
+  }
+
+  /**
+   * Creates the user national coordinator exception 400 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createUserNationalCoordinatorException400Test() throws EEAException {
+    UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
+    userNC.setCountryCode("ES");
+    userNC.setEmail("abc@abc.com");
+    Mockito.doThrow(new EEAException(String.format(EEAErrorMessage.NOT_EMAIL, userNC.getEmail())))
+        .when(userNationalCoordinatorService).createNationalCoordinator(Mockito.any());
+    try {
+      userManagementController.createNationalCoordinator(userNC);
+    } catch (ResponseStatusException e) {
+      assertEquals(String.format(EEAErrorMessage.NOT_EMAIL, userNC.getEmail()), e.getReason());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the user national coordinator exception 500 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createUserNationalCoordinatorException500Test() throws EEAException {
+    UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
+    userNC.setCountryCode("ES");
+    userNC.setEmail("abc@abc.com");
+    Mockito.doThrow(new EEAException("")).when(userNationalCoordinatorService)
+        .createNationalCoordinator(Mockito.any());
+    try {
+      userManagementController.createNationalCoordinator(userNC);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  /**
+   * Delete user national coordinator test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void deleteUserNationalCoordinatorTest() throws EEAException {
+    UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
+    userNC.setCountryCode("ES");
+    userNC.setEmail("abc@abc.com");
+    userManagementController.deleteNationalCoordinator(userNC);
+    Mockito.verify(userNationalCoordinatorService, times(1))
+        .deleteNationalCoordinator(Mockito.any());
+  }
+
+  /**
+   * Delete user national coordinator exception 400 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteUserNationalCoordinatorException400Test() throws EEAException {
+    UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
+    userNC.setCountryCode("ES");
+    userNC.setEmail("abc@abc.com");
+    Mockito.doThrow(new EEAException(String.format(EEAErrorMessage.NOT_EMAIL, userNC.getEmail())))
+        .when(userNationalCoordinatorService).deleteNationalCoordinator(Mockito.any());
+    try {
+      userManagementController.deleteNationalCoordinator(userNC);
+    } catch (ResponseStatusException e) {
+      assertEquals(String.format(EEAErrorMessage.NOT_EMAIL, userNC.getEmail()), e.getReason());
+      throw e;
+    }
+  }
+
+  /**
+   * Delete user national coordinator exception 500 test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void deleteUserNationalCoordinatorException500Test() throws EEAException {
+    UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
+    userNC.setCountryCode("ES");
+    userNC.setEmail("abc@abc.com");
+    Mockito.doThrow(new EEAException("")).when(userNationalCoordinatorService)
+        .deleteNationalCoordinator(Mockito.any());
+    try {
+      userManagementController.deleteNationalCoordinator(userNC);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
 
 }
