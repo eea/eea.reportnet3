@@ -8,9 +8,7 @@ import { Step } from './_components/Step';
 
 export const StepProgressBar = memo(({ className = '', steps = [], currentStep }) => {
   const renderStepProgressBar = () => {
-    const renderSteps = () => {
-      return steps.map(step => <Step currentStep={currentStep} key={uniqueId('step_')} step={step} />);
-    };
+    const renderSteps = () => steps.map(step => <Step currentStep={currentStep} key={uniqueId('step_')} step={step} />);
 
     if (!isEmpty(steps)) {
       return (

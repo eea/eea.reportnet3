@@ -101,14 +101,14 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     datasetHasData: false,
     datasetProgressBarSteps: [
       {
-        idx: 1,
+        stepNumber: 1,
         labelCompleted: resourcesContext.messages['importedData'],
         labelUndone: resourcesContext.messages['importData'],
         labelRunning: resourcesContext.messages['importingData'],
         labelError: resourcesContext.messages['importDataError']
       },
       {
-        idx: 2,
+        stepNumber: 2,
         labelCompleted: resourcesContext.messages['validatedData'],
         labelUndone: resourcesContext.messages['validateData'],
         labelRunning: resourcesContext.messages['validatingData'],

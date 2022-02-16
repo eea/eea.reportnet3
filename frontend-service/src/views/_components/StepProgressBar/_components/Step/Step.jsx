@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const Step = memo(({ currentStep, step }) => {
   const getIconClassName = () => {
-    if (step?.idx === currentStep && step?.isRunning) {
+    if (step?.stepNumber === currentStep && step?.isRunning) {
       return 'fa-spin';
     }
   };
@@ -17,9 +17,9 @@ export const Step = memo(({ currentStep, step }) => {
     } else if (step.completed && step.withError) {
       return styles.withError;
     } else {
-      if (step.idx < currentStep) {
+      if (step.stepNumber < currentStep) {
         return styles.activeCompleted;
-      } else if (step.idx === currentStep) {
+      } else if (step.stepNumber === currentStep) {
         if (step.isRunning) {
           return styles.activeIncompleted;
         } else {
@@ -32,7 +32,7 @@ export const Step = memo(({ currentStep, step }) => {
   };
 
   const getStepClassName = () => {
-    if (step.idx <= currentStep) {
+    if (step.stepNumber <= currentStep) {
       return styles.stepActive;
     }
   };
@@ -43,10 +43,10 @@ export const Step = memo(({ currentStep, step }) => {
     } else if (step.completed && step.withError) {
       return step.labelError;
     } else {
-      if (step.idx < currentStep) {
+      if (step.stepNumber < currentStep) {
         return step.labelCompleted;
       } else {
-        if (step.idx === currentStep) {
+        if (step.stepNumber === currentStep) {
           if (step.isRunning) {
             return step.labelRunning;
           } else {
@@ -62,9 +62,9 @@ export const Step = memo(({ currentStep, step }) => {
   const renderIcon = () => {
     if (step.completed && step.withError) {
       return AwesomeIcons('cross');
-    } else if (step.idx < currentStep) {
+    } else if (step.stepNumber < currentStep) {
       return AwesomeIcons('check');
-    } else if (step.idx === currentStep) {
+    } else if (step.stepNumber === currentStep) {
       if (step.isRunning) {
         return AwesomeIcons('spinner');
       } else {
