@@ -1,6 +1,7 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './ValidationsStatus.module.scss';
 
@@ -13,7 +14,7 @@ import { Dialog } from 'views/_components/Dialog';
 import { Filters } from 'views/_components/Filters';
 import { Spinner } from 'views/_components/Spinner';
 
-import { DataflowService } from 'services/DataflowService'; // TODO IMPORT CORRECT SERVICE
+import { DataflowService } from 'services/DataflowService'; // TODO CREATE CORRECT SERVICE
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -35,11 +36,10 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const [goToPage, setGoToPage] = useState(1);
   const [sort, setSort] = useState({ field: '', order: 0 });
   const [totalRecords, setTotalRecords] = useState(0);
-  const [dataflowId, setDataflowId] = useState(undefined);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
-  const { getFilterBy, isFiltered, setData, resetFilterState } = useApplyFilters('validationsStatuses'); // TODO find how to use properly
+  const { getFilterBy, isFiltered, setData } = useApplyFilters('validationsStatuses'); // TODO find how to use properly
   //TODO CHECK IF NEEDED useFilters
 
   // TODO Filter : dataflowId, user
@@ -53,9 +53,6 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   }, [pagination, sort]);
 
   const getValidationsStatuses = async () => {
-    // TODO MAKE ASYNC
-    // const getValidationsStatuses = () => {
-    // await resetFilterState();
     setLoadingStatus('pending');
 
     const filterBy = await getFilterBy();
@@ -67,77 +64,10 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         sortBy: sort.field,
         filterBy
       });
-      // TODO CORRECT SERVICE CALL
-      // const data = {
-      //   totalRecords: 5,
-      //   filteredRecords: 2 // number of filtered records
-      //   statuses: [
-      //     {
-      //       id: 10,
-      //       dataflowId: 111,
-      //       dataflowName: 'Dataflow name',
-      //       datasetId: 1,
-      //       datasetName: 'Dataset name',
-      //       status: 'importing',
-      //       queuedDate: 1644572710000,
-      //       processStartingDate: 1644572711000,
-      //       processFinishingDate: 1644572712000,
-      //       user: 'igor.provider@reportnet.net'
-      //     },
-      //     {
-      //       id: 20,
-      //       dataflowId: 222,
-      //       dataflowName: 'Dataflow name',
-      //       datasetId: 2,
-      //       datasetName: 'Dataset name',
-      //       status: 'imported',
-      //       queuedDate: 1644572720000,
-      //       processStartingDate: 1644572721000,
-      //       processFinishingDate: 1644572722000,
-      //       user: 'pablo.provider@reportnet.net'
-      //     },
-      //     {
-      //       id: 30,
-      //       dataflowId: 333,
-      //       dataflowName: 'Dataflow name',
-      //       datasetId: 3,
-      //       datasetName: 'Dataset name',
-      //       status: 'validating',
-      //       queuedDate: 1644572730000,
-      //       processStartingDate: 1644572731000,
-      //       processFinishingDate: 1644572732000,
-      //       user: 'miguel.provider@reportnet.net'
-      //     },
-      //     {
-      //       id: 40,
-      //       dataflowId: 444,
-      //       dataflowName: 'Dataflow name',
-      //       datasetId: 4,
-      //       datasetName: 'Dataset name',
-      //       status: 'validated',
-      //       queuedDate: 1644572740000,
-      //       processStartingDate: 1644572741000,
-      //       processFinishingDate: 1644572742000,
-      //       user: 'miriam.provider@reportnet.net'
-      //     },
-      //     {
-      //       id: 50,
-      //       dataflowId: 555,
-      //       dataflowName: 'Dataflow name',
-      //       datasetId: 5,
-      //       datasetName: 'Dataset name',
-      //       status: 'in_queue',
-      //       queuedDate: 1644572750000,
-      //       processStartingDate: 1644572751000,
-      //       processFinishingDate: 1644572752000,
-      //       user: 'mikel.provider@reportnet.net'
-      //     }
-      //   ]
-      // };
       setTotalRecords(data.totalRecords);
-      // setValidationsStatusesList(data.statuses);
+      // setValidationsStatusesList(data.statuses);// TODO correct object
       setValidationsStatusesList(data);
-      // setData(data.statuses); // TODO CHECK IF NEEDED
+      // setData(data.statuses); // TODO correct object
       setData(data); // TODO CHECK IF NEEDED
       setLoadingStatus('success');
     } catch (error) {
@@ -224,13 +154,13 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         key: 'processFinishingDate',
         header: resourcesContext.messages['processFinishingDate'],
         template: validation => getDateTemplate(validation, 'processFinishingDate')
-      },
-      {
-        key: 'actions',
-        header: resourcesContext.messages['actions'],
-        template: getActionsTemplate,
-        className: styles.actionsColumn
       }
+      // {
+      //   key: 'actions',
+      //   header: resourcesContext.messages['actions'],
+      //   template: getActionsTemplate,
+      //   className: styles.actionsColumn
+      // }
     ];
 
     return columns.map(column => (
@@ -244,25 +174,24 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
       />
     ));
   };
-
-  const getBtnIcon = (id, iconName) => {
-    if (id === validationStatusId && loadingStatus === 'pending') {
-      return 'spinnerAnimate';
-    }
-
-    return iconName;
-  };
-
   const getActionsTemplate = validation => {
     return (
       <Button
         className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
         disabled={loadingStatus === 'pending'}
-        icon={getBtnIcon(validation.id, 'trash')}
+        icon={getBtnIcon(validation.id)}
         onClick={() => onShowDeleteDialog(validation)}
         status="button"
       />
     );
+  };
+
+  const getBtnIcon = id => {
+    if (id === validationStatusId && loadingStatus === 'pending') {
+      return 'spinnerAnimate';
+    }
+
+    return 'trash';
   };
 
   const getDataflowTemplate = validation => (
@@ -337,7 +266,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
           autoLayout
           first={firstRow}
           hasDefaultCurrentPage
-          // loading={loadingStatus === 'pending' && isNil(validationStatusId)} // TODO CONTROL LOADING STATUS
+          loading={loadingStatus === 'pending' && isNil(validationStatusId)} // TODO CONTROL LOADING STATUS
           onPage={onChangePage}
           onSort={onSort}
           paginator
