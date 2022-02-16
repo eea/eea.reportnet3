@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import org.eea.dataset.persistence.data.domain.RecordValidation;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -118,6 +119,27 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
       + "join table_value tv on rval.id_table=tv.id and v.level_error='ERROR' and tv.id_table_schema=:idTableSchema)) ids")
   Long countRecordIdFromRecordWithWarningValidations(@Param("idTableSchema") String idTableSchema);
 
+
+  /**
+   * Count record id from record with errors.
+   *
+   * @param idTableSchema the id table schema
+   * @return the long
+   */
+  @Query("SELECT count(recordValue.id) FROM RecordValidation rv "
+      + " WHERE rv.recordValue.tableValue.idTableSchema=:idTableSchema ")
+  Long countRecordIdFromRecordWithErrors(@Param("idTableSchema") String idTableSchema);
+
+  /**
+   * Count record id from field with errors.
+   *
+   * @param idTableSchema the id table schema
+   * @return the long
+   */
+  @Query(value = "select count(fv.fieldValue.record.id) "
+      + "from FieldValidation fv  WHERE  fv.fieldValue.record.tableValue.idTableSchema=:idTableSchema")
+  Long countRecordIdFromFieldWithErrors(@Param("idTableSchema") String idTableSchema);
+
   /**
    * Find by validation ids.
    *
@@ -139,7 +161,8 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
       + " WHERE rv.recordValue.tableValue.datasetId.id=:datasetId "
       + " AND rv.recordValue.tableValue.idTableSchema=:idTableSchema ")
   List<IDError> findRecordIdFromRecordWithValidationsByLevelError(
-      @Param("datasetId") Long datasetId, @Param("idTableSchema") String idTableSchema);
+      @Param("datasetId") Long datasetId, @Param("idTableSchema") String idTableSchema,
+      Pageable pageable);
 
   /**
    * Find record id from field with validations by level error.
@@ -152,7 +175,7 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
       + " WHERE  fv.fieldValue.record.tableValue.datasetId.id=:datasetId "
       + " AND fv.fieldValue.record.tableValue.idTableSchema=:idTableSchema ")
   List<IDError> findRecordIdFromFieldWithValidationsByLevelError(@Param("datasetId") Long datasetId,
-      @Param("idTableSchema") String idTableSchema);
+      @Param("idTableSchema") String idTableSchema, Pageable pageable);
 
   /**
    * The Interface IDError.

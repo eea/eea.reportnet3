@@ -4,6 +4,7 @@ export class Dataset {
     dataProviderId,
     datasetFeedbackStatus,
     datasetId,
+    datasetRunningStatus,
     datasetSchemaDescription,
     datasetSchemaId,
     datasetSchemaName,
@@ -32,6 +33,7 @@ export class Dataset {
     this.dataProviderId = dataProviderId;
     this.datasetFeedbackStatus = datasetFeedbackStatus;
     this.datasetId = datasetId;
+    this.datasetRunningStatus = datasetRunningStatus;
     this.datasetSchemaDescription = datasetSchemaDescription;
     this.datasetSchemaId = datasetSchemaId;
     this.datasetSchemaName = datasetSchemaName;

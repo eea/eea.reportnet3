@@ -685,7 +685,7 @@ export const Dataflows = () => {
               { label: resourcesContext.messages['pinned'].toUpperCase(), value: true },
               { label: resourcesContext.messages['unpinned'].toUpperCase(), value: false }
             ],
-            isSortable: true
+            isSortable: false
           }
         ],
         type: 'DROPDOWN'
@@ -740,7 +740,7 @@ export const Dataflows = () => {
             { label: resourcesContext.messages['pinned'].toUpperCase(), value: true },
             { label: resourcesContext.messages['unpinned'].toUpperCase(), value: false }
           ],
-          isSortable: true
+          isSortable: false
         }
       ],
       type: 'DROPDOWN'

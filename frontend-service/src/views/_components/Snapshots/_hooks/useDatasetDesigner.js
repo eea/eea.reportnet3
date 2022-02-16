@@ -24,6 +24,7 @@ const useDatasetDesigner = (dataflowId, datasetId, datasetSchemaId) => {
     dialogConfirmQuestion: '',
     dialogMessage: '',
     isConfirmDisabled: false,
+    isRestoring: false,
     snapShotId: ''
   };
 
