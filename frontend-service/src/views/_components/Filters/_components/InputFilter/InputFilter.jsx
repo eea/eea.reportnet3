@@ -21,6 +21,13 @@ export const InputFilter = ({ hasCustomSort, isLoading, onCustomFilter, onFilter
     recoilId
   });
 
+  const onKeyPress = event => {
+    if (event.key === 'Enter' && !isNil(onCustomFilter)) {
+      onFilter(event.target.value);
+      onCustomFilter();
+    }
+  };
+
   return (
     <div className={styles.block} key={option.key}>
       <SortButton
@@ -40,12 +47,7 @@ export const InputFilter = ({ hasCustomSort, isLoading, onCustomFilter, onFilter
           key={option.key}
           keyfilter={option.keyfilter}
           onChange={event => onFilter(event.target.value)}
-          onKeyPress={event => {
-            if (event.key === 'Enter' && !isNil(onCustomFilter)) {
-              onFilter(event.target.value);
-              onCustomFilter();
-            }
-          }}
+          onKeyPress={onKeyPress}
           value={filterBy[option.key] || ''}
         />
         <label className={styles.label} htmlFor={`${option.key}_input`}>

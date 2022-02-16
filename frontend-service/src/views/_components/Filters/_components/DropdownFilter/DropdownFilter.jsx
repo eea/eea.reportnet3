@@ -1,8 +1,4 @@
-import { useEffect } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
-
 import isNil from 'lodash/isNil';
-import uniq from 'lodash/uniq';
 
 import styles from './DropdownFilter.module.scss';
 
@@ -10,8 +6,9 @@ import { Dropdown } from 'views/_components/Dropdown';
 import { LevelError } from 'views/_components/LevelError';
 import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
-import { filterByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
-import { filterByAllKeys } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
+import { filterByKeyDropdownStore } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
+
+import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilters';
 
 export const DropdownFilter = ({
   hasCustomSort,
@@ -22,21 +19,13 @@ export const DropdownFilter = ({
   panelClassName,
   recoilId
 }) => {
-  const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));
-
-  const [filterBy, setFilterBy] = useRecoilState(filterByStore(`${option.key}_${recoilId}`));
-
-  useEffect(() => {
-    setFilterByAllKeys(prevState => uniq([...prevState, option.key]));
-  }, [recoilId]);
-
-  const onFilter = async value => {
-    setFilterBy({ [option.key]: value });
-
-    if (!hasCustomSort) {
-      await onFilterData({ key: option.key, value, type: option.type });
-    }
-  };
+  const { filterBy, onFilter } = useFilters({
+    hasCustomSort,
+    keyStore: filterByKeyDropdownStore,
+    onFilterData,
+    option,
+    recoilId
+  });
 
   const renderTemplate = (template, type) => {
     if (template === 'LevelError') {
