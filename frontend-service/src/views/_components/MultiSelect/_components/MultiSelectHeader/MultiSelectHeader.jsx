@@ -90,12 +90,12 @@ export const MultiSelectHeader = ({
       {renderFilterElement()}
 
       {clearButton && (
-        <button className="p-multiselect-close p-link" onClick={event => onClose(event)} type="button">
+        <div className="p-multiselect-close p-link" onClick={event => onClose(event)} type="button">
           <span className="p-multiselect-close-icon pi pi-times" id={`clearFilter_${id}`} />
           <span className="srOnly" htmlFor={`clearFilter_${id}`}>
             {resourcesContext.messages['clearFilter']}
           </span>
-        </button>
+        </div>
       )}
     </div>
   );
