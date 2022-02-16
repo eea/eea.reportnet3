@@ -282,7 +282,7 @@ const useBigButtonList = ({
             return null;
           }
 
-          return config.datasetStatus[dataset.status].label;
+          return resourcesContext.messages[config.datasetStatus[dataset.status].label];
         };
 
         const technicalAcceptanceStatus = getTechnicalAcceptanceStatus();
@@ -326,11 +326,11 @@ const useBigButtonList = ({
 
         const datasets = allDatasets.filter(ds => ds.dataProviderId === dataset.dataProviderId);
         if (datasets.some(ds => ds.status === config.datasetStatus.CORRECTION_REQUESTED.key)) {
-          return config.datasetStatus.CORRECTION_REQUESTED.label;
+          return resourcesContext.messages[config.datasetStatus.CORRECTION_REQUESTED.label];
         } else if (datasets.some(ds => ds.status === config.datasetStatus.FINAL_FEEDBACK.key)) {
-          return config.datasetStatus.FINAL_FEEDBACK.label;
+          return resourcesContext.messages[config.datasetStatus.FINAL_FEEDBACK.label];
         } else if (datasets.every(ds => ds.status === config.datasetStatus.TECHNICALLY_ACCEPTED.key)) {
-          return config.datasetStatus.TECHNICALLY_ACCEPTED.label;
+          return resourcesContext.messages[config.datasetStatus.TECHNICALLY_ACCEPTED.label];
         }
       };
 

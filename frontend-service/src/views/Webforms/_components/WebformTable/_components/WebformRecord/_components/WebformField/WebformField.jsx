@@ -561,7 +561,6 @@ export const WebformField = ({
           accept={getAttachExtensions || '*'}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.fileUpload}
-          dialogClassName={styles.dialog}
           dialogHeader={resourcesContext.messages['uploadAttachment']}
           dialogOnHide={() => onToggleDialogVisible(false)}
           dialogVisible={isFileDialogVisible}
