@@ -8,6 +8,7 @@ import { Button } from 'views/_components/Button';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
 import { InputText } from 'views/_components/InputText';
+import { InputTextarea } from 'views/_components/InputTextarea/InputTextarea';
 
 import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
@@ -41,6 +42,14 @@ export const ManageDataflowForm = forwardRef(
     const notificationContext = useContext(NotificationContext);
     const resourcesContext = useContext(ResourcesContext);
     const userContext = useContext(UserContext);
+
+    const isCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.CUSTODIAN.key
+    ]);
+    const isSteward = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.STEWARD.key
+    ]);
+    const isLeadDesigner = isSteward || isCustodian;
 
     const [description, setDescription] = useState(data.description);
     const [errors, setErrors] = useState({
@@ -179,9 +188,9 @@ export const ManageDataflowForm = forwardRef(
           </div>
 
           <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
-            <textarea
-              autoComplete="off"
-              component="textarea"
+            <InputTextarea
+              className={styles.inputTextArea}
+              disabled={!isLeadDesigner}
               id="dataflowDescription"
               name="description"
               onBlur={() => checkIsCorrectInputValue(description, 'description')}
@@ -212,8 +221,14 @@ export const ManageDataflowForm = forwardRef(
               {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
             </div>
           </div>
+
           <div className={`${styles.search}`}>
-            <Button icon="search" label={resourcesContext.messages['searchObligations']} onClick={onSearch} />
+            <Button
+              disabled={!isLeadDesigner}
+              icon="search"
+              label={resourcesContext.messages['searchObligations']}
+              onClick={onSearch}
+            />
             <input
               className={`${styles.searchInput} ${errors.obligation.hasErrors ? styles.searchErrors : ''}`}
               id="searchObligation"

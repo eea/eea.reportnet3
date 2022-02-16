@@ -47,6 +47,14 @@ export const ManageReferenceDataflow = ({
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
+  const isCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    config.permissions.roles.CUSTODIAN.key
+  ]);
+  const isSteward = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    config.permissions.roles.STEWARD.key
+  ]);
+  const isLeadDesigner = isSteward || isCustodian;
+
   const [deleteInput, setDeleteInput] = useState('');
   const [description, setDescription] = useState(isEditing ? metadata.description : '');
   const [errors, setErrors] = useState({
@@ -190,6 +198,7 @@ export const ManageReferenceDataflow = ({
         {isEditing && isDesign && (
           <Button
             className="p-button-danger p-button-animated-blink"
+            disabled={!isLeadDesigner}
             icon="trash"
             label={resourcesContext.messages['deleteDataflowButton']}
             onClick={() => setIsDeleteDialogVisible(true)}
@@ -240,9 +249,11 @@ export const ManageReferenceDataflow = ({
           />
           {!isEmpty(errors.name.message) && <ErrorMessage message={errors.name.message} />}
         </div>
+
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <InputTextarea
             className={styles.inputTextArea}
+            disabled={!isLeadDesigner}
             id="dataflowDescription"
             onBlur={checkErrors}
             onChange={event => setDescription(event.target.value)}
