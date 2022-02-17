@@ -37,6 +37,18 @@ export const MultiSelectItem = ({
     }
   };
 
+  const renderCheckbox = () => {
+    if (!disabled) {
+      return (
+        <div className="p-checkbox p-component">
+          <div className={checkboxClassName}>
+            <span aria-label="Select all" className={checkboxIcon}></span>
+          </div>
+        </div>
+      );
+    }
+  };
+
   const className = classNames(option.className, 'p-multiselect-item', {
     'p-highlight': selected,
     'p-disabled': disabled
@@ -56,13 +68,7 @@ export const MultiSelectItem = ({
       onKeyDown={event => onKeyDownEvent(event)}
       role="option"
       tabIndex={disabled ? null : tabIndex}>
-      {!disabled && (
-        <div className="p-checkbox p-component">
-          <div className={checkboxClassName}>
-            <span aria-label="Select all" className={checkboxIcon}></span>
-          </div>
-        </div>
-      )}
+      {renderCheckbox()}
       <label className={getClassNameLabel()}>{content}</label>
     </li>
   );
