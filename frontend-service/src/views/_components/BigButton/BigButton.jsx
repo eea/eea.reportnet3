@@ -101,9 +101,7 @@ export const BigButton = ({
     }
   };
 
-  const onEnableSchemaNameEdit = () => {
-    setIsEditEnabled(true);
-  };
+  const onEnableSchemaNameEdit = () => setIsEditEnabled(true);
 
   const getDesignModel = () => {
     if (!isUndefined(model)) {
@@ -301,9 +299,11 @@ export const BigButton = ({
             className={styles.caption}
             data-for={tooltipId}
             data-tip
-            onDoubleClick={
-              dataflowStatus === config.dataflowStatus.DESIGN && canEditName ? onEnableSchemaNameEdit : null
-            }>
+            onDoubleClick={() => {
+              if (dataflowStatus === config.dataflowStatus.DESIGN && canEditName) {
+                onEnableSchemaNameEdit();
+              }
+            }}>
             {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
           </p>
           {!isUndefined(buttonsTitle) && buttonsTitle.length > 60 && (
