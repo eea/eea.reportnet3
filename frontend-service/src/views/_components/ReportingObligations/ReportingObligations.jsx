@@ -68,17 +68,8 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     selectedObligation: obligationChecked
   });
 
-  const {
-    countries,
-    issues,
-    isLoading,
-    isFiltered,
-    organizations,
-    pagination,
-    selectedObligation,
-    //filteredRecords,
-    totalRecords
-  } = reportingObligationState;
+  const { countries, issues, isLoading, isFiltered, organizations, pagination, selectedObligation, totalRecords } =
+    reportingObligationState;
 
   useEffect(() => {
     onLoadCountries();
