@@ -78,6 +78,12 @@ public interface DataflowRepository
   @Query("select df from Dataflow df where df.type='REPORTING' and df.id IN :ids order by status, creationDate desc")
   List<Dataflow> findByIdInOrderByStatusDescCreationDateDesc(@Param("ids") List<Long> ids);
 
+  /**
+   * Find metabase by dataflow ids.
+   *
+   * @param ids the ids
+   * @return the list
+   */
   @Modifying
   @Query("select df from Dataflow df where df.id IN :ids")
   List<Dataflow> findMetabaseByDataflowIds(@Param("ids") List<Long> ids);
