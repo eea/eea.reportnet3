@@ -117,7 +117,7 @@ public class ProcessServiceImpl implements ProcessService {
   public void updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
       ProcessTypeEnum type, String processId, String threadId, String user) {
 
-    Process processToUpdate = processRepository.findOneByUuid(processId).orElse(new Process());
+    Process processToUpdate = processRepository.findOneByProcessId(processId).orElse(new Process());
 
     if (processToUpdate.getDatasetId() == null) {
       processToUpdate.setDatasetId(datasetId);

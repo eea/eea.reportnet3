@@ -17,7 +17,7 @@ public interface ProcessRepository
    * @param uuid the uuid
    * @return the optional
    */
-  Optional<Process> findOneByUuid(String uuid);
+  Optional<Process> findOneByProcessId(String processId);
 
   /**
    * Count processes.
