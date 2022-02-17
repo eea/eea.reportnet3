@@ -79,6 +79,7 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
         )
       });
     }
+
     return columns.map(column => <Column field={column.key} header={column.header} key={column.key} sortable />);
   };
 
