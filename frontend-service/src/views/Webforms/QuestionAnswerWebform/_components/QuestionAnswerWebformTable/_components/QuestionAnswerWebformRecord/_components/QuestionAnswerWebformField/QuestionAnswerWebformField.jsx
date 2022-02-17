@@ -190,7 +190,6 @@ export const QuestionAnswerWebformField = ({
             <InputTextarea
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
-              hasMaxCharCounter
               id={field.fieldId}
               onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
               onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
