@@ -13,11 +13,9 @@ export const MultiSelectItem = ({
   template
 }) => {
   const getClassNameLabel = () => {
-    if (!selected) {
-      return undefined;
+    if (selected) {
+      return styles.itemSelected;
     }
-
-    return styles.itemSelected;
   };
 
   const onClickEvent = event => {
