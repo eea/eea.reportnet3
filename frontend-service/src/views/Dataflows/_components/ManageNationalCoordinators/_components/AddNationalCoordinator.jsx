@@ -114,7 +114,7 @@ export const AddNationalCoordinator = ({ onUpdateData }) => {
         />
 
         <label className={styles.label} htmlFor="rolesDropdown">
-          {resourcesContext.messages['countries']}
+          {resourcesContext.messages['dataProviderName']}
         </label>
         <Dropdown
           appendTo={document.body}
