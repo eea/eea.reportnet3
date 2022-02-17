@@ -1135,6 +1135,22 @@ public class UserManagementControllerImplTest {
     }
   }
 
+  @Test(expected = ResponseStatusException.class)
+  public void createUserNationalCoordinatorException404Test() throws EEAException {
+    UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
+    userNC.setCountryCode("ES");
+    userNC.setEmail("abc@abc.com");
+    Mockito
+        .doThrow(new EEAException(String.format(EEAErrorMessage.USER_NOTFOUND, userNC.getEmail())))
+        .when(userNationalCoordinatorService).createNationalCoordinator(Mockito.any());
+    try {
+      userManagementController.createNationalCoordinator(userNC);
+    } catch (ResponseStatusException e) {
+      assertEquals(String.format(EEAErrorMessage.USER_NOTFOUND, userNC.getEmail()), e.getReason());
+      throw e;
+    }
+  }
+
   /**
    * Creates the user national coordinator exception 500 test.
    *
@@ -1186,6 +1202,22 @@ public class UserManagementControllerImplTest {
       userManagementController.deleteNationalCoordinator(userNC);
     } catch (ResponseStatusException e) {
       assertEquals(String.format(EEAErrorMessage.NOT_EMAIL, userNC.getEmail()), e.getReason());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void deleteUserNationalCoordinatorException404Test() throws EEAException {
+    UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
+    userNC.setCountryCode("ES");
+    userNC.setEmail("abc@abc.com");
+    Mockito
+        .doThrow(new EEAException(String.format(EEAErrorMessage.USER_NOTFOUND, userNC.getEmail())))
+        .when(userNationalCoordinatorService).deleteNationalCoordinator(Mockito.any());
+    try {
+      userManagementController.deleteNationalCoordinator(userNC);
+    } catch (ResponseStatusException e) {
+      assertEquals(String.format(EEAErrorMessage.USER_NOTFOUND, userNC.getEmail()), e.getReason());
       throw e;
     }
   }
