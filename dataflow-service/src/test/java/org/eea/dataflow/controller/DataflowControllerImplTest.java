@@ -748,7 +748,7 @@ public class DataflowControllerImplTest {
     dataFlowVO2.setDataProviderGroupId(1L);
     List<RepresentativeVO> representatives = new ArrayList<>();
     representatives.add(new RepresentativeVO());
-
+    Mockito.when(dataflowService.isAdmin()).thenReturn(true);
     Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO2);
     ResponseEntity<?> value = dataflowControllerImpl.updateDataFlow(dataflowVO);
     assertEquals(HttpStatus.OK, value.getStatusCode());
@@ -773,7 +773,7 @@ public class DataflowControllerImplTest {
     dataFlowVO2.setId(1L);
     dataFlowVO2.setDataProviderGroupId(2L);
     List<RepresentativeVO> representatives = new ArrayList<>();
-
+    Mockito.when(dataflowService.isAdmin()).thenReturn(true);
     Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO2);
     Mockito.when(representativeService.getRepresetativesByIdDataFlow(Mockito.anyLong()))
         .thenReturn(representatives);
@@ -800,7 +800,7 @@ public class DataflowControllerImplTest {
     dataFlowVO2.setId(1L);
     dataFlowVO2.setDataProviderGroupId(2L);
     List<RepresentativeVO> representatives = new ArrayList<>();
-
+    Mockito.when(dataflowService.isAdmin()).thenReturn(true);
     Mockito.when(dataflowService.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO2);
     Mockito.when(representativeService.getRepresetativesByIdDataFlow(Mockito.anyLong()))
         .thenThrow(EEAException.class);

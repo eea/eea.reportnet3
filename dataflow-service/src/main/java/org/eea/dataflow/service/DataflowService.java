@@ -278,4 +278,12 @@ public interface DataflowService {
   void updateDataFlowAutomaticReportingDeletion(Long dataflowId,
       boolean automaticReportingDeletion);
 
+  /**
+   * Gets the dataflows metabase by id.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the dataflows metabase by id
+   */
+  List<DataFlowVO> getDataflowsMetabaseById(List<Long> dataflowIds);
+
 }

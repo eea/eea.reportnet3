@@ -144,9 +144,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Lazy
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The foreign relations repository.
-   */
+  /** The foreign relations repository. */
   @Autowired
   private ForeignRelationsRepository foreignRelationsRepository;
 
@@ -162,18 +160,14 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private ReferenceDatasetRepository referenceDatasetRepository;
 
-  /** The eea security expression root. */
+  /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
 
-  /**
-   * The Constant LOG.
-   */
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant STATUS_TECHNICALLY_ACCEPTED: {@value}. */
@@ -191,7 +185,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Gets the data set id by dataflow id.
    *
    * @param idFlow the id flow
-   *
    * @return the data set id by dataflow id
    */
   @Override
@@ -226,11 +219,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   /**
-   * Gets the dataset name.
+   * Find dataset metabase.
    *
    * @param idDataset the id dataset
-   *
-   * @return the dataset name
+   * @return the data set metabase VO
    */
   @Override
   public DataSetMetabaseVO findDatasetMetabase(Long idDataset) {
@@ -242,6 +234,19 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     }
     return metabaseVO;
+  }
+
+
+  /**
+   * Find data set by dataflow ids.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the list
+   */
+  @Override
+  public List<DataSetMetabaseVO> findDataSetByDataflowIds(List<Long> dataflowIds) {
+    return dataSetMetabaseMapper
+        .entityListToClass(dataSetMetabaseRepository.findDataSetByDataflowIds(dataflowIds));
   }
 
   /**
@@ -262,7 +267,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    *
    * @param datasetId the dataset id
    * @param datasetName the dataset name
-   *
    * @return true, if successful
    */
   @Override
@@ -330,9 +334,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Gets the statistics.
    *
    * @param datasetId the dataset id
-   *
    * @return the statistics
-   *
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
    */
@@ -351,7 +353,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param object the object
    * @param fieldName the field name
    * @param fieldValue the field value
-   *
    * @return the boolean
    */
   public static Boolean setEntityProperty(Object object, String fieldName, String fieldValue) {
@@ -384,9 +385,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Process statistics.
    *
    * @param statistics the statistics
-   *
    * @return the statistics VO
-   *
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
    */
@@ -430,9 +429,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Gets the global statistics.
    *
    * @param dataschemaId the dataschema id
-   *
    * @return the global statistics
-   *
    * @throws EEAException the EEA exception
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
@@ -522,7 +519,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param datasetId the dataset id
    * @param type the type
    * @param role the role
-   *
    * @return the resource info VO
    */
   private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
@@ -537,7 +533,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   /**
-   * Creates the schema group and add user.
+   * Creates the schema group.
    *
    * @param datasetId the dataset id
    */
@@ -581,9 +577,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param dueDate the due date
    * @param representatives the representatives
    * @param iterationDC the iteration DC
-   *
    * @return the future
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -684,7 +678,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param id the id
    * @param email the email
    * @param group the group
-   *
    * @return the resource assignation VO
    */
   private ResourceAssignationVO fillResourceAssignation(Long id, String email,
@@ -705,7 +698,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param representative the representative
    * @param dataflowId the dataflow id
    * @param datasetSchemaId the dataset schema id
-   *
    * @return the map
    */
   private Map<Long, String> fillAndSaveReportingDataset(RepresentativeVO representative,
@@ -735,7 +727,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Find dataset schema id by id.
    *
    * @param datasetId the dataset id
-   *
    * @return the string
    */
   @Override
@@ -747,7 +738,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   /**
-   * Adds the foreign relation into the metabase.
+   * Adds the foreign relation.
    *
    * @param datasetIdOrigin the dataset id origin
    * @param datasetIdDestination the dataset id destination
@@ -772,7 +763,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   /**
-   * Delete foreign relation from the metabase.
+   * Delete foreign relation.
    *
    * @param datasetIdOrigin the dataset id origin
    * @param datasetIdDestination the dataset id destination
@@ -811,7 +802,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Gets the dataset type.
    *
    * @param datasetId the dataset id
-   *
    * @return the dataset type
    */
 
@@ -1015,6 +1005,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /**
    * Update dataset running status.
    *
+   * @param datasetId the dataset id
    * @param datasetRunningStatus the dataset running status
    * @throws EEAException the EEA exception
    */
@@ -1022,7 +1013,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   public void updateDatasetRunningStatus(Long datasetId,
       DatasetRunningStatusEnum datasetRunningStatus) throws EEAException {
     DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId).orElse(null);
-    LOG.error("Updating dataset running status to {} for datasetId {}.", datasetRunningStatus,
+    LOG.info("Updating dataset running status to {} for datasetId {}.", datasetRunningStatus,
         datasetId);
     if (datasetMetabase != null) {
       datasetMetabase.setDatasetRunningStatus(datasetRunningStatus);
@@ -1131,7 +1122,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    *
    * @param datasetId the dataset id
    * @return the data set metabase VO
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public DataSetMetabaseVO findDatasetMetabaseExternal(Long datasetId) throws EEAException {
@@ -1144,5 +1135,16 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return metabaseVO;
   }
 
+  /**
+   * Gets the reportings by provider ids.
+   *
+   * @param providerIds the provider ids
+   * @return the reportings by provider ids
+   */
+  @Override
+  public List<DataSetMetabaseVO> getDatasetsByProviderIds(List<Long> providerIds) {
+    return dataSetMetabaseMapper
+        .entityListToClass(dataSetMetabaseRepository.findByDataProviderIdIn(providerIds));
+  }
 
 }

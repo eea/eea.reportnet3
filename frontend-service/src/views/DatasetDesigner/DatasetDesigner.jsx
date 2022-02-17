@@ -32,6 +32,7 @@ import { QCGenericHistory } from './_components/QCGenericHistory';
 import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
+import { StepProgressBar } from 'views/_components/StepProgressBar';
 import { TabsDesigner } from './_components/TabsDesigner';
 import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
@@ -98,6 +99,24 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     dataflowType: '',
     datasetDescription: '',
     datasetHasData: false,
+    datasetProgressBarSteps: [
+      {
+        stepNumber: 1,
+        labelCompleted: resourcesContext.messages['importedData'],
+        labelUndone: resourcesContext.messages['importData'],
+        labelRunning: resourcesContext.messages['importingData'],
+        labelError: resourcesContext.messages['importDataError']
+      },
+      {
+        stepNumber: 2,
+        labelCompleted: resourcesContext.messages['validatedData'],
+        labelUndone: resourcesContext.messages['validateData'],
+        labelRunning: resourcesContext.messages['validatingData'],
+        labelError: resourcesContext.messages['validatingDataError'],
+        isRunning: true
+      }
+    ],
+    datasetProgressBarCurrentStep: 0,
     datasetSchema: {},
     datasetSchemaAllTables: [],
     datasetSchemaId: '',
@@ -176,6 +195,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const {
     arePrefilledTablesDeleted,
     datasetDescription,
+    datasetProgressBarCurrentStep,
+    datasetProgressBarSteps,
     datasetSchemaAllTables,
     dataViewerOptions,
     isDataflowOpen,
@@ -308,6 +329,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         metaData,
         schemaName: metaData.dataset.name
       }
+    });
+
+    const stepStatus = DatasetUtils.getDatasetStepRunningStatus(metaData.dataset.datasetRunningStatus);
+    designerDispatch({
+      type: 'SET_PROGRESS_STEP_BAR',
+      payload: stepStatus
     });
   };
 
@@ -590,6 +617,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         },
         true
       );
+      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 1, currentStep: 2, isRunning: true } });
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -688,15 +716,48 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   useEffect(() => {
+    if (snapshotState.isRestoring) {
+      designerDispatch({
+        type: 'SET_PROGRESS_STEP_BAR',
+        payload: { step: 0, currentStep: 1, isRunning: true, completed: false, withError: false }
+      });
+    }
+  }, [snapshotState.isRestoring]);
+
+  useEffect(() => {
     const validationFinished = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
     );
     if (validationFinished && validationFinished.content.datasetId?.toString() === datasetId.toString()) {
       onHighlightRefresh(true);
+      designerDispatch({
+        type: 'SET_PROGRESS_STEP_BAR',
+        payload: { step: 1, currentStep: 2, isRunning: false, completed: false, withError: false }
+      });
     }
     const isImportFieldSchemaCompleted = notificationContext.toShow.some(
       notification => notification.key === 'IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'
     );
+
+    const isImportDataCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'IMPORT_DESIGN_COMPLETED_EVENT'
+    );
+
+    const isRestoreSnapshotDataCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT'
+    );
+
+    const isDeletedDataCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'DELETE_DATASET_SCHEMA_COMPLETED_EVENT'
+    );
+
+    if (isImportDataCompleted || isRestoreSnapshotDataCompleted || isDeletedDataCompleted) {
+      designerDispatch({
+        type: 'SET_PROGRESS_STEP_BAR',
+        payload: { step: 1, currentStep: 2, isRunning: true, completed: false, withError: false }
+      });
+      snapshotDispatch({ type: 'SET_IS_RESTORING', payload: false });
+    }
 
     if (isImportFieldSchemaCompleted) {
       window.location.reload();
@@ -800,6 +861,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           }
         });
       };
+
       const getDatasetSchemas = async () => {
         const data = await DataflowService.getSchemas(dataflowId);
         designerDispatch({ type: 'LOAD_DATASET_SCHEMAS', payload: { schemas: data } });
@@ -910,6 +972,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         },
         true
       );
+      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 0, currentStep: 1, isRunning: true } });
     } catch (error) {
       console.error('DatasetDesigner - onUpload.', error);
       notificationContext.add(
@@ -1165,6 +1228,18 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const renderSwitchView = () => {
+    const renderStepProgressBar = () => {
+      if (!isDesignDatasetEditorRead) {
+        return (
+          <StepProgressBar
+            className={styles.stepProgressBar}
+            currentStep={datasetProgressBarCurrentStep}
+            steps={datasetProgressBarSteps}
+          />
+        );
+      }
+    };
+
     const viewModes = [
       { key: 'design', label: resourcesContext.messages['designView'] },
       { key: 'tabularData', label: resourcesContext.messages['tabularDataView'] }
@@ -1176,6 +1251,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
     return (
       <div className={styles.switchDivInput}>
+        {renderStepProgressBar()}
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch
             elements={viewModes}
@@ -1739,7 +1815,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             accept={DatasetUtils.getValidExtensions({ validExtensions: designerState.selectedImportExtension })}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
-            dialogClassName={styles.Dialog}
             dialogHeader={selectedCustomImportIntegration.name}
             dialogOnHide={() => {
               manageDialogs('isImportDatasetDialogVisible', false);

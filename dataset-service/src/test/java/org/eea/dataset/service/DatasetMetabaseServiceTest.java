@@ -4,6 +4,7 @@
 package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
@@ -160,8 +161,10 @@ public class DatasetMetabaseServiceTest {
   /** The lead reporters VO. */
   private List<LeadReporterVO> leadReportersVO;
 
+  /** The security context. */
   private SecurityContext securityContext;
 
+  /** The authentication. */
   private Authentication authentication;
 
   /**
@@ -680,6 +683,11 @@ public class DatasetMetabaseServiceTest {
     Assert.assertEquals((Long) 2L, datasetMetabaseService.getLastDatasetValidationForRelease(1L));
   }
 
+  /**
+   * Update dataset status exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test(expected = EEAException.class)
   public void updateDatasetStatusExceptionTest() throws EEAException {
     try {
@@ -690,6 +698,11 @@ public class DatasetMetabaseServiceTest {
     }
   }
 
+  /**
+   * Update dataset status test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void updateDatasetStatusTest() throws EEAException {
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
@@ -700,6 +713,11 @@ public class DatasetMetabaseServiceTest {
   }
 
 
+  /**
+   * Gets the datasets summary list from dataset type test.
+   *
+   * @return the datasets summary list from dataset type test
+   */
   @Test
   public void getDatasetsSummaryListFromDatasetTypeTest() {
     DesignDataset designDataset = new DesignDataset();
@@ -762,6 +780,11 @@ public class DatasetMetabaseServiceTest {
     assertEquals(datasetsSummarysVOExpected, datasetMetabaseService.getDatasetsSummaryList(1L));
   }
 
+  /**
+   * Gets the dataset ids by dataflow id and data provider id test.
+   *
+   * @return the dataset ids by dataflow id and data provider id test
+   */
   @Test
   public void getDatasetIdsByDataflowIdAndDataProviderIdTest() {
     datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(1L, 1L);
@@ -769,6 +792,11 @@ public class DatasetMetabaseServiceTest {
         .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong());
   }
 
+  /**
+   * Gets the dataset type enum return eu dataset test.
+   *
+   * @return the dataset type enum return eu dataset test
+   */
   @Test
   public void getDatasetTypeEnumReturnEuDatasetTest() {
     Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
@@ -778,6 +806,11 @@ public class DatasetMetabaseServiceTest {
     Assert.assertEquals(DatasetTypeEnum.EUDATASET, datasetMetabaseService.getDatasetType(1L));
   }
 
+  /**
+   * Gets the dataset type enum return test dataset test.
+   *
+   * @return the dataset type enum return test dataset test
+   */
   @Test
   public void getDatasetTypeEnumReturnTestDatasetTest() {
     Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
@@ -788,6 +821,11 @@ public class DatasetMetabaseServiceTest {
     Assert.assertEquals(DatasetTypeEnum.TEST, datasetMetabaseService.getDatasetType(1L));
   }
 
+  /**
+   * Gets the dataset type enum return reference dataset test.
+   *
+   * @return the dataset type enum return reference dataset test
+   */
   @Test
   public void getDatasetTypeEnumReturnReferenceDatasetTest() {
     Mockito.when(designDatasetRepository.existsById(Mockito.any())).thenReturn(false);
@@ -799,6 +837,11 @@ public class DatasetMetabaseServiceTest {
     Assert.assertEquals(DatasetTypeEnum.REFERENCE, datasetMetabaseService.getDatasetType(1L));;
   }
 
+  /**
+   * Creates the empty test dataset test.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void createEmptyTestDatasetTest() throws EEAException {
     DataProviderVO dataProvider = new DataProviderVO();
@@ -809,6 +852,18 @@ public class DatasetMetabaseServiceTest {
     Mockito.verify(recordStoreControllerZuul, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
 
+  }
+
+  /**
+   * Gets the datasets by provider ids test.
+   *
+   * @return the datasets by provider ids test
+   */
+  @Test
+  public void getDatasetsByProviderIdsTest() {
+    Mockito.when(dataSetMetabaseRepository.findByDataProviderIdIn(Mockito.any()))
+        .thenReturn(new ArrayList<>());
+    assertNotNull(datasetMetabaseService.getDatasetsByProviderIds(null));
   }
 
 }

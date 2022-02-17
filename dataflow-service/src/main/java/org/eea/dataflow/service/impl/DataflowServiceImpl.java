@@ -276,8 +276,8 @@ public class DataflowServiceImpl implements DataflowService {
 
 
       // get obligations and pageable
-      List<ObligationVO> obligations =
-          obligationControllerZull.findOpenedObligations(null, null, null, null, null);
+      List<ObligationVO> obligations = obligationControllerZull
+          .findOpenedObligations(null, null, null, null, null).getObligations();
       ObjectMapper objectMapper = new ObjectMapper();
       String arrayToJson = objectMapper.writeValueAsString(obligations);
 
@@ -734,8 +734,8 @@ public class DataflowServiceImpl implements DataflowService {
       if (null != pageNum && null != pageSize) {
         pageable = PageRequest.of(pageNum, pageSize);
       }
-      List<ObligationVO> obligations =
-          obligationControllerZull.findOpenedObligations(null, null, null, null, null);
+      List<ObligationVO> obligations = obligationControllerZull
+          .findOpenedObligations(null, null, null, null, null).getObligations();
       ObjectMapper objectMapper = new ObjectMapper();
 
       String arrayToJson = objectMapper.writeValueAsString(obligations);
@@ -783,8 +783,8 @@ public class DataflowServiceImpl implements DataflowService {
 
     try {
       Pageable pageable = PageRequest.of(page, pageSize);
-      List<ObligationVO> obligations =
-          obligationControllerZull.findOpenedObligations(null, null, null, null, null);
+      List<ObligationVO> obligations = obligationControllerZull
+          .findOpenedObligations(null, null, null, null, null).getObligations();
       ObjectMapper objectMapper = new ObjectMapper();
 
       String obligationJson = objectMapper.writeValueAsString(obligations);
@@ -1325,8 +1325,8 @@ public class DataflowServiceImpl implements DataflowService {
 
     try {
       // Get all opened obligations from ROD
-      List<ObligationVO> obligations =
-          obligationControllerZull.findOpenedObligations(null, null, null, null, null);
+      List<ObligationVO> obligations = obligationControllerZull
+          .findOpenedObligations(null, null, null, null, null).getObligations();
 
       Map<Integer, ObligationVO> obligationMap = obligations.stream()
           .collect(Collectors.toMap(ObligationVO::getObligationId, obligation -> obligation));
@@ -1646,6 +1646,18 @@ public class DataflowServiceImpl implements DataflowService {
   public void updateDataFlowAutomaticReportingDeletion(Long dataflowId,
       boolean automaticReportingDeletion) {
     dataflowRepository.updateAutomaticReportingDeletion(dataflowId, automaticReportingDeletion);
+  }
+
+  /**
+   * Gets the dataflows metabase by id.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the dataflows metabase by id
+   */
+  @Override
+  public List<DataFlowVO> getDataflowsMetabaseById(List<Long> dataflowIds) {
+    return dataflowMapper
+        .entityListToClass(dataflowRepository.findMetabaseByDataflowIds(dataflowIds));
   }
 
   /**

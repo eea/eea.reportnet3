@@ -10,7 +10,7 @@ import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 
 /**
- * The interface Record store service.
+ * The Interface RecordStoreService.
  */
 public interface RecordStoreService {
 
@@ -20,14 +20,13 @@ public interface RecordStoreService {
    *
    * @param datasetName the dataset name
    * @param idDatasetSchema the id dataset schema
-   *
    * @throws RecordStoreAccessException the record store access exception
    */
   void createEmptyDataSet(String datasetName, String idDatasetSchema)
       throws RecordStoreAccessException;
 
   /**
-   * Create data set from other.
+   * Creates the data set from other.
    *
    * @param sourceDatasetName the source dataset name
    * @param destinationDataSetName the destination data set name
@@ -97,7 +96,6 @@ public interface RecordStoreService {
    *
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
-   *
    * @throws IOException Signals that an I/O exception has occurred.
    */
   void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException;
@@ -147,8 +145,9 @@ public interface RecordStoreService {
    * @param datasetId the dataset id
    * @param user the user
    * @param released the released
+   * @param processId the process id
    */
-  void updateMaterializedQueryView(Long datasetId, String user, Boolean released);
+  void updateMaterializedQueryView(Long datasetId, String user, Boolean released, String processId);
 
   /**
    * Launch update materialized query view.
@@ -163,6 +162,8 @@ public interface RecordStoreService {
    *
    * @param datasetIds the dataset ids
    * @param continueValidation the continue validation
+   * @param released the released
+   * @param datasetId the dataset id
    */
   void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation, boolean released,
       Long datasetId);

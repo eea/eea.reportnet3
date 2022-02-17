@@ -110,8 +110,6 @@ public class DataflowControllerImpl implements DataFlowController {
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
 
-
-
   /**
    * Find by id.
    *
@@ -497,6 +495,10 @@ public class DataflowControllerImpl implements DataFlowController {
     if (TypeDataflowEnum.BUSINESS.equals(dataFlowVO.getType()) && status == HttpStatus.OK) {
       try {
         DataFlowVO dataflow = dataflowService.getMetabaseById(dataFlowVO.getId());
+        if ((!isAdmin && !TypeStatusEnum.DESIGN.equals(dataflow.getStatus()))) {
+          message = EEAErrorMessage.DATAFLOW_BUSINESS_UPDATE_ERROR;
+          status = HttpStatus.BAD_REQUEST;
+        }
         if (!dataflow.getDataProviderGroupId().equals(dataFlowVO.getDataProviderGroupId())
             && !representativeService.getRepresetativesByIdDataFlow(dataFlowVO.getId()).isEmpty()) {
           message = EEAErrorMessage.EXISTING_REPRESENTATIVES;
@@ -1066,6 +1068,24 @@ public class DataflowControllerImpl implements DataFlowController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Couldn't update the dataflow automatic delete data and snapshots. An unknown error happenned.");
     }
+  }
+
+  /**
+   * Gets the dataflows metabase by id.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the dataflows metabase by id
+   */
+  @Override
+  @PostMapping(value = "/private/dataflows/getmetabase",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Get dataflows metadata by dataflow ids", hidden = true)
+  public List<DataFlowVO> getDataflowsMetabaseById(@RequestBody List<Long> dataflowIds) {
+    if (dataflowIds == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    return dataflowService.getDataflowsMetabaseById(dataflowIds);
   }
 
   /**

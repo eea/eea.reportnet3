@@ -615,7 +615,6 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         } else {
           eventType = EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
         }
-        launchValidationProcess(datasetId, userName);
       }
     } else {
       if (isReporting) {
@@ -702,7 +701,6 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       } else {
         eventType = EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
       }
-      launchValidationProcess(datasetId, userName);
     } else {
       if (isReporting) {
         eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT;
@@ -711,19 +709,6 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       }
     }
     return eventType;
-  }
-
-  /**
-   * Launch validation process.
-   *
-   * @param datasetId the dataset id
-   * @param userName the user name
-   */
-  private void launchValidationProcess(Long datasetId, String userName) {
-    Map<String, Object> values = new HashMap<>();
-    values.put(LiteralConstants.DATASET_ID, datasetId);
-    values.put(LiteralConstants.USER, userName);
-    kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
   }
 
   /**

@@ -99,7 +99,6 @@ export const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible
               <Button className={`p-button-primary ${styles.copyBtn}`} icon="copy" onClick={onCopyToClipboard} />
             </span>
           </div>
-
           <ReactTooltip
             afterHide={() => setCopyResultMessage('')}
             afterShow={() => setTimeout(ReactTooltip.hide, 750)}
@@ -112,7 +111,6 @@ export const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible
             place="top">
             <span>{copyResultMessage}</span>
           </ReactTooltip>
-
           <p className={styles.ids_info}>
             <span className={styles.ids_label}>
               {resourcesContext.messages['dataflow']}: <strong>{dataflowId} </strong>
