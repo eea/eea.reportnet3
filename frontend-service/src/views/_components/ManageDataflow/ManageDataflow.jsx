@@ -48,6 +48,7 @@ export const ManageDataflow = ({
   const formRef = useRef(null);
 
   const reportingDataflowInitialState = {
+    dataflowStatus: state.status,
     deleteInput: '',
     description: isEditForm ? state.description : '',
     isDeleting: false,
@@ -226,7 +227,6 @@ export const ManageDataflow = ({
           <ManageDataflowForm
             data={reportingDataflowState}
             dataflowId={dataflowId}
-            dataflowStatus={state.status}
             dialogName={dialogName}
             getData={onLoadData}
             isCitizenScienceDataflow={isCitizenScienceDataflow}
