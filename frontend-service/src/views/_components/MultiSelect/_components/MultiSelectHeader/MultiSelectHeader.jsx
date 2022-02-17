@@ -70,7 +70,10 @@ export const MultiSelectHeader = ({
       );
     } else
       return (
-        <span className={getClassNameAllChecked()} onClick={event => onToggleAllEvent(event)}>
+        <span
+          className={getClassNameAllChecked()}
+          id={`selectAllFilter_${id}`}
+          onClick={event => onToggleAllEvent(event)}>
           {allChecked ? notCheckAllHeader : checkAllHeader}
         </span>
       );
