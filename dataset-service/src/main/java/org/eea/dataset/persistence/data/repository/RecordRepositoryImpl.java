@@ -17,6 +17,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
@@ -385,8 +386,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    */
   @Override
   public String findAndGenerateETLJson(Long datasetId, OutputStream outputStream,
-      String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName)
-      throws EEAException {
+      String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
+      String dataProviderCodes) throws EEAException {
     checkSql(filterValue);
     checkSql(columnName);
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
@@ -456,7 +457,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
       }
     }
-    stringQuery.append(String.format(
+    stringQuery.append(String.format( // QUITAR and fv.value != ''
         " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
         datasetId, datasetId, datasetId));
     if (null != tableSchemaId) {
@@ -466,7 +467,18 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
               : "");
       stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
     }
-    stringQuery.append(
+
+    //////////////////////////////////
+    if (Strings.isNotBlank(dataProviderCodes)) {
+      // Tengo que hacer el split
+      String args[] = dataProviderCodes.split(",");
+      System.out.println(args);
+    }
+    /////////////////////////////////
+
+
+    stringQuery.append(/// ---- EL where data_provider_code in ('BE','DK') => Viene de un String
+        /// DataProviderCodes SEPARADOS POR COMO split(',')
         ") records group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position )recordAux2 ");
     if (null != filterValue || null != columnName) {
       stringQuery.append(

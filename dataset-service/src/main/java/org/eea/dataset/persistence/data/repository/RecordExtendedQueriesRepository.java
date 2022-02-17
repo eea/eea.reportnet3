@@ -79,7 +79,8 @@ public interface RecordExtendedQueriesRepository {
    * @throws EEAException
    */
   String findAndGenerateETLJson(Long datasetId, OutputStream outputStream, String tableSchemaId,
-      Integer limit, Integer offset, String filterValue, String columnName) throws EEAException;
+      Integer limit, Integer offset, String filterValue, String columnName,
+      String dataProviderCodes) throws EEAException;
 
   /**
    * Find ordered native record.
