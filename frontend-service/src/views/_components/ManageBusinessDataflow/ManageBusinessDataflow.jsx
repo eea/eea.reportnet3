@@ -385,7 +385,7 @@ export const ManageBusinessDataflow = ({
               </div>
               <div className={`${styles.search}`}>
                 <Button
-                  disabled={isAdmin && !isDesign}
+                  disabled={!isDesign}
                   icon="search"
                   label={resourcesContext.messages['searchObligations']}
                   onClick={() => manageDialogs('isReportingObligationsDialogVisible', true)}
