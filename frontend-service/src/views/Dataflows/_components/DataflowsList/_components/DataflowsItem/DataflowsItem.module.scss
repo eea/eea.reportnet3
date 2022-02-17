@@ -68,11 +68,24 @@
         background: var(--card-design-dataflow-bg-hover);
       }
     }
-    &.OPEN,
-    &.CLOSED {
+    &.OPEN {
       background-color: var(--c-lilac-300);
       &:hover {
         background-color: #6565a8;
+      }
+      .containerLink {
+        color: var(--c-white-color);
+        background-image: url('/views/_assets/images/logos/logo-blanco.png');
+        .dataflowDates {
+          color: var(--c-white-color);
+          text-align: right;
+        }
+      }
+    }
+    &.CLOSED {
+      background-color: var(--c-gray-75-opacity-08);
+      &:hover {
+        background-color: var(--c-gray-75);
       }
       .containerLink {
         color: var(--c-white-color);
