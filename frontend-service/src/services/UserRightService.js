@@ -15,7 +15,7 @@ export const UserRightService = {
     return UserRightUtils.parseUserRightListDTO(userRightListDTO.data);
   },
 
-  deleteNationalCoordinators: async userRight => await UserRightRepository.deleteNationalCoordinators(userRight),
+  deleteNationalCoordinator: async userRight => await UserRightRepository.deleteNationalCoordinator(userRight),
 
   deleteReporter: async (userRight, dataflowId, dataProviderId) =>
     await UserRightRepository.deleteReporter(userRight, dataflowId, dataProviderId),
@@ -23,7 +23,7 @@ export const UserRightService = {
   deleteRequester: async (userRight, dataflowId, dataProviderId) =>
     await UserRightRepository.deleteRequester(userRight, dataflowId, dataProviderId),
 
-  createNationalCoordinators: async userRight => await UserRightRepository.createNationalCoordinators(userRight),
+  createNationalCoordinator: async userRight => await UserRightRepository.createNationalCoordinator(userRight),
 
   updateReporter: async (userRight, dataflowId, dataProviderId) =>
     await UserRightRepository.updateReporter(userRight, dataflowId, dataProviderId),

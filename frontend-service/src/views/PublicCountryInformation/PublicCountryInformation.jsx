@@ -85,7 +85,9 @@ export const PublicCountryInformation = () => {
   }, [isReset]);
 
   useEffect(() => {
-    !isNil(countryCode) && setCountryName(CountryUtils.getCountryName(countryCode));
+    if (!isNil(countryCode)) {
+      setCountryName(CountryUtils.getCountryName(countryCode));
+    }
   }, [countryCode]);
 
   useEffect(() => {

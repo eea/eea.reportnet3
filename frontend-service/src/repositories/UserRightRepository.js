@@ -12,9 +12,9 @@ export const UserRightRepository = {
   getReporters: async (dataflowId, dataProviderId) =>
     await HTTPRequester.get({ url: getUrl(UserRightConfig.getReporters, { dataflowId, dataProviderId }) }),
 
-  deleteNationalCoordinators: async userRight =>
+  deleteNationalCoordinator: async userRight =>
     await HTTPRequester.delete({
-      url: getUrl(UserRightConfig.deleteNationalCoordinators),
+      url: getUrl(UserRightConfig.deleteNationalCoordinator),
       data: { countryCode: userRight.countryCode, email: userRight.email }
     }),
 
@@ -30,9 +30,9 @@ export const UserRightRepository = {
       data: { account: userRight.account, role: userRight.role }
     }),
 
-  createNationalCoordinators: async userRight =>
+  createNationalCoordinator: async userRight =>
     await HTTPRequester.post({
-      url: getUrl(UserRightConfig.createNationalCoordinators),
+      url: getUrl(UserRightConfig.createNationalCoordinator),
       data: { countryCode: userRight.countryCode, email: userRight.email }
     }),
 

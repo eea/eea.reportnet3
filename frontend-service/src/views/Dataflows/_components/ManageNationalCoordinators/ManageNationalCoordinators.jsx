@@ -76,10 +76,10 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
   const deleteNationalCoordinators = async () => {
     try {
       setIsDeleting(true);
-      await UserRightService.deleteNationalCoordinators(deleteNationalCoordinator);
+      await UserRightService.deleteNationalCoordinator(deleteNationalCoordinator);
       setIsDataUpdated(true);
     } catch (error) {
-      console.error('NationalCoordinators - deleteNationalCoordinators.', error);
+      console.error('NationalCoordinators - deleteNationalCoordinator.', error);
       notificationContext.add({ type: 'DELETE_NATIONAL_COORDINATORS_ERROR' }, true);
     } finally {
       setIsDeleting(false);
@@ -88,19 +88,15 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     }
   };
 
-  const onDeleteDialogClose = () => {
-    setIsDeleteDialogVisible(false);
-  };
+  const onDeleteDialogClose = () => setIsDeleteDialogVisible(false);
 
-  const getActionsTemplate = () => {
-    return (
-      <Button
-        className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteButton}`}
-        icon="trash"
-        onClick={() => setIsDeleteDialogVisible(true)}
-      />
-    );
-  };
+  const getActionsTemplate = () => (
+    <Button
+      className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteButton}`}
+      icon="trash"
+      onClick={() => setIsDeleteDialogVisible(true)}
+    />
+  );
 
   const renderTableColumns = () => {
     const columns = [
@@ -132,9 +128,7 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
   };
 
   const parseMultiSelectOptions = () =>
-    nationalCoordinatorsData.map(option => {
-      return { type: option.countryName, value: option.countryCode };
-    });
+    nationalCoordinatorsData.map(option => ({ type: option.countryName, value: option.countryCode }));
 
   const filterOptions = [
     {
@@ -222,7 +216,7 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
 
       {isDeleteDialogVisible && (
         <ConfirmDialog
-          classNameConfirm={'p-button-danger'}
+          classNameConfirm="p-button-danger"
           disabledConfirm={isDeleting}
           header={resourcesContext.messages['deleteNationalCoordinatorsHeader']}
           iconConfirm={isDeleting ? 'spinnerAnimate' : 'check'}

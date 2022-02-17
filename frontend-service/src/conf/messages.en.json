@@ -1510,8 +1510,6 @@
     "validatingDataError": "Error validating data",
     "manageNationalCoordinators": "Manage national coordinators",
     "manageNationalCoordinatorsLeftBarButton": "Manage national coordinators",
-    "manageNationalCoordinatorsConfiguration": "Manage national coordinators configuration",
-    "countryColumn": "Country",
     "manageNationalCoordinatorsDialogColumn": "National coordinator",
     "manageNationalCoordinatorsPlaceholder": "Select a country",
     "addNationalCoordinatorsDialogHeader": "Add national coordinator",

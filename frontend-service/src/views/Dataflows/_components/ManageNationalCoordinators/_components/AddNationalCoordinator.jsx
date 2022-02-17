@@ -52,7 +52,7 @@ export const AddNationalCoordinator = ({ onUpdateData }) => {
   const addNationalCoordinators = async () => {
     try {
       setIsAdding(true);
-      await UserRightService.createNationalCoordinators(nationalCoordinator);
+      await UserRightService.createNationalCoordinator(nationalCoordinator);
       onUpdateData(true);
     } catch (error) {
       if (error?.response?.status === 404) {
@@ -60,7 +60,7 @@ export const AddNationalCoordinator = ({ onUpdateData }) => {
       } else {
         notificationContext.add({ type: 'CREATE_NATIONAL_COORDINATORS_ERROR' }, true);
       }
-      console.error('NationalCoordinators - createNationalCoordinators.', error);
+      console.error('NationalCoordinators - createNationalCoordinator.', error);
     } finally {
       setIsAdding(false);
       setIsAddDialogVisible(false);
@@ -73,13 +73,10 @@ export const AddNationalCoordinator = ({ onUpdateData }) => {
     setNationalCoordinator({});
   };
 
-  const onChangeEmail = email => {
-    setNationalCoordinator({ email: email, countryCode: nationalCoordinator.countryCode });
-  };
+  const onChangeEmail = email => setNationalCoordinator({ email: email, countryCode: nationalCoordinator.countryCode });
 
-  const onChangeCountryCode = countryCode => {
+  const onChangeCountryCode = countryCode =>
     setNationalCoordinator({ email: nationalCoordinator.email, countryCode: countryCode });
-  };
 
   const isValidEmail = email => RegularExpressions['email'].test(email);
 
@@ -117,7 +114,7 @@ export const AddNationalCoordinator = ({ onUpdateData }) => {
         />
 
         <label className={styles.label} htmlFor="rolesDropdown">
-          {resourcesContext.messages['countryColumn']}
+          {resourcesContext.messages['publicCountryBreadcrumbs']}
         </label>
         <Dropdown
           appendTo={document.body}
@@ -144,7 +141,7 @@ export const AddNationalCoordinator = ({ onUpdateData }) => {
       {isAddDialogVisible && (
         <ConfirmDialog
           className={styles.confirmDialog}
-          classNameConfirm={'p-button-primary'}
+          classNameConfirm="p-button-primary"
           confirmTooltip={getTooltipMessage()}
           disabledConfirm={!isNil(getTooltipMessage())}
           header={resourcesContext.messages['addNationalCoordinatorsDialogHeader']}
