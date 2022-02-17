@@ -995,6 +995,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
       return (
         <div className={styles.switchDivInput}>
+          {renderStepProgressBar()}
           <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
             <TabularSwitch
               elements={viewModes}
@@ -1054,6 +1055,18 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     </div>
   );
 
+  const renderStepProgressBar = () => {
+    if (hasWritePermissions) {
+      return (
+        <StepProgressBar
+          className={styles.stepProgressBar}
+          currentStep={datasetProgressBarSteps.currentStep}
+          steps={datasetProgressBarSteps.steps}
+        />
+      );
+    }
+  };
+
   const renderTableWebformView = () => {
     if (selectedView === 'webform') {
       return (
@@ -1076,11 +1089,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
     return (
       <Fragment>
-        <StepProgressBar
-          className={styles.stepProgressBar}
-          currentStep={datasetProgressBarSteps.currentStep}
-          steps={datasetProgressBarSteps.steps}
-        />
+        {isNil(webformData?.name) && renderStepProgressBar()}
         <TabsSchema
           dataProviderId={metadata?.dataset.dataProviderId}
           datasetSchemaId={metadata?.dataset.datasetSchemaId}
