@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections.CollectionUtils;
@@ -33,6 +34,7 @@ import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.ums.mapper.UserRepresentationMapper;
 import org.eea.ums.service.BackupManagmentService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
+import org.eea.ums.service.UserNationalCoordinatorService;
 import org.eea.ums.service.UserRoleService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
@@ -98,8 +100,13 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Autowired
   private UserRoleService userRoleService;
 
+  /** The notification controller zuul. */
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
+
+  /** The user national coordinator service. */
+  @Autowired
+  private UserNationalCoordinatorService userNationalCoordinatorService;
 
   /**
    * The Constant LOG_ERROR.
@@ -501,7 +508,7 @@ public class UserManagementControllerImpl implements UserManagementController {
       @ApiParam(
           value = "User email to add contributor") @RequestParam("userMail") String userMail) {
     try {
-      securityProviderInterfaceService.addContributorToUserGroup(null, userMail,
+      securityProviderInterfaceService.addContributorToUserGroup(Optional.empty(), userMail,
           resourceGroupEnum.getGroupName(idResource));
     } catch (EEAException e) {
       LOG_ERROR.error(ERROR_ADDING_CONTRIBUTOR, e.getMessage(), e);
@@ -915,6 +922,11 @@ public class UserManagementControllerImpl implements UserManagementController {
     }
   }
 
+  /**
+   * Creates the national coordinator.
+   *
+   * @param nationalCoordinatorVO the national coordinator VO
+   */
   @Override
   @PreAuthorize("hasRole('ADMIN')")
   @ApiOperation(value = "Create new user national coordinator and assign permissions",
@@ -922,33 +934,61 @@ public class UserManagementControllerImpl implements UserManagementController {
   @PostMapping("/nationalCoordinator")
   public void createNationalCoordinator(
       @RequestBody UserNationalCoordinatorVO nationalCoordinatorVO) {
-    // TODO Mock endpoint
+    try {
+      userNationalCoordinatorService.createNationalCoordinator(nationalCoordinatorVO);
+    } catch (EEAException e) {
+      if (EEAErrorMessage.USER_REQUEST_NOTFOUND.equals(e.getMessage()) || e.getMessage()
+          .equals(String.format(EEAErrorMessage.NOT_EMAIL, nationalCoordinatorVO.getEmail()))) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      } else if (EEAErrorMessage.COUNTRY_CODE_NOTFOUND.equals(e.getMessage()) || e.getMessage()
+          .equals(String.format(EEAErrorMessage.USER_NOTFOUND, nationalCoordinatorVO.getEmail()))) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+      } else {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      }
+    }
 
   }
 
+  /**
+   * Gets the user national coordinator.
+   *
+   * @return the user national coordinator
+   */
   @Override
   @PreAuthorize("hasRole('ADMIN')")
   @ApiOperation(value = "Get list of national coordinators", hidden = true)
   @GetMapping("/nationalCoordinator")
   public List<UserNationalCoordinatorVO> getUserNationalCoordinator() {
-    // TODO Mock endpoint
-    UserNationalCoordinatorVO userNationalCoordinator = new UserNationalCoordinatorVO();
-    userNationalCoordinator.setCountryCode("AT");
-    userNationalCoordinator.setEmail("bea.custodian@reportnet.net");
-    UserNationalCoordinatorVO userNationalCoordinator2 = new UserNationalCoordinatorVO();
-    userNationalCoordinator2.setCountryCode("ES");
-    userNationalCoordinator2.setEmail("sandra.custodian@reportnet.net");
-    return Arrays.asList(userNationalCoordinator, userNationalCoordinator2);
+    return userNationalCoordinatorService.getNationalCoordinators();
+
   }
 
 
+  /**
+   * Delete national coordinator.
+   *
+   * @param nationalCoordinatorVO the national coordinator VO
+   */
   @Override
   @PreAuthorize("hasRole('ADMIN')")
   @ApiOperation(value = "Delete permissions national coordinators", hidden = true)
   @DeleteMapping("/nationalCoordinator")
-  public void DeleteNationalCoordinator(
+  public void deleteNationalCoordinator(
       @RequestBody UserNationalCoordinatorVO nationalCoordinatorVO) {
-    // TODO Mock endpoint
+    try {
+      userNationalCoordinatorService.deleteNationalCoordinator(nationalCoordinatorVO);
+    } catch (EEAException e) {
+      if (EEAErrorMessage.USER_REQUEST_NOTFOUND.equals(e.getMessage()) || e.getMessage()
+          .equals(String.format(EEAErrorMessage.NOT_EMAIL, nationalCoordinatorVO.getEmail()))) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      } else if (EEAErrorMessage.COUNTRY_CODE_NOTFOUND.equals(e.getMessage()) || e.getMessage()
+          .equals(String.format(EEAErrorMessage.USER_NOTFOUND, nationalCoordinatorVO.getEmail()))) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+      } else {
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      }
+    }
 
   }
 

@@ -54,6 +54,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
@@ -1010,6 +1011,27 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
   }
 
+
+  /**
+   * Update dataset running status.
+   *
+   * @param datasetRunningStatus the dataset running status
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void updateDatasetRunningStatus(Long datasetId,
+      DatasetRunningStatusEnum datasetRunningStatus) throws EEAException {
+    DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId).orElse(null);
+    LOG.error("Updating dataset running status to {} for datasetId {}.", datasetRunningStatus,
+        datasetId);
+    if (datasetMetabase != null) {
+      datasetMetabase.setDatasetRunningStatus(datasetRunningStatus);
+      dataSetMetabaseRepository.save(datasetMetabase);
+    } else {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+  }
+
   /**
    * Gets the datasets summary list from dataset type.
    *
@@ -1122,5 +1144,16 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return metabaseVO;
   }
 
+  /**
+   * Gets the reportings by provider ids.
+   *
+   * @param providerIds the provider ids
+   * @return the reportings by provider ids
+   */
+  @Override
+  public List<DataSetMetabaseVO> getDatasetsByProviderIds(List<Long> providerIds) {
+    return dataSetMetabaseMapper
+        .entityListToClass(dataSetMetabaseRepository.findByDataProviderIdIn(providerIds));
+  }
 
 }

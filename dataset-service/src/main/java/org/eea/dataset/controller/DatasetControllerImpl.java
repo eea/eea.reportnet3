@@ -26,6 +26,7 @@ import org.eea.interfaces.controller.communication.NotificationController.Notifi
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.eea.interfaces.vo.dataset.ExportFilterVO;
@@ -812,6 +813,14 @@ public class DatasetControllerImpl implements DatasetController {
           example = "0") @RequestParam("datasetId") Long datasetId,
       @ApiParam(type = "Long", value = "Integration id",
           example = "0") @RequestParam("integrationId") Long integrationId) {
+
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDatasetId(datasetId);
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    userNotificationContentVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+    notificationControllerZuul.createUserNotificationPrivate("EXTERNAL_EXPORT_DESIGN_INIT",
+        userNotificationContentVO);
+
     try {
       datasetService.exportFileThroughIntegration(datasetId, integrationId);
     } catch (EEAException e) {

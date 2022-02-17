@@ -10,6 +10,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 
 /**
@@ -260,5 +261,22 @@ public interface DatasetMetabaseService {
    * @throws EEAException the EEA exception
    */
   DataSetMetabaseVO findDatasetMetabaseExternal(Long datasetId) throws EEAException;
+
+  /**
+   * Update dataset running status.
+   *
+   * @param datasetRunningStatus the dataset running status
+   * @throws EEAException the EEA exception
+   */
+  void updateDatasetRunningStatus(Long datasetId, DatasetRunningStatusEnum datasetRunningStatus)
+      throws EEAException;
+
+  /**
+   * Gets the reportings by provider ids.
+   *
+   * @param providerIds the provider ids
+   * @return the reportings by provider ids
+   */
+  List<DataSetMetabaseVO> getDatasetsByProviderIds(List<Long> providerIds);
 
 }
