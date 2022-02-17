@@ -26,6 +26,8 @@ import { reportingObligationReducer } from './_functions/Reducers/reportingOblig
 
 import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
 import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
+
 import { RodUrl } from 'repositories/config/RodUrl';
 
 export const ReportingObligations = ({ obligationChecked, setCheckedObligation }) => {
@@ -205,12 +207,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   };
 
   const renderPaginationCount = () => (
-    <Fragment>
-      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
-      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
-        'records'
-      ].toLowerCase()}`}
-    </Fragment>
+    <PaginatorRecordsCount dataLength={totalRecords} filteredData={data} isFiltered={isFiltered} />
   );
 
   const updateFilter = () => {
