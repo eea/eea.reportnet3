@@ -13,7 +13,9 @@ import styles from './NotificationsList.module.scss';
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { Dialog } from 'views/_components/Dialog';
+import { DatasetService } from 'services/DatasetService';
 import { DataTable } from 'views/_components/DataTable';
+import { DownloadFile } from 'views/_components/DownloadFile';
 import { LevelError } from 'views/_components/LevelError';
 import { Spinner } from 'views/_components/Spinner';
 
@@ -87,6 +89,7 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
 
   const linkTemplate = rowData => {
     if (rowData.downloadButton) {
+      console.log('ENTRO');
       return rowData.downloadButton;
     }
 
@@ -136,6 +139,40 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
     </div>
   );
 
+  const downloadExportFMEFile = async notification => {
+    try {
+      const getFileName = () => {
+        const extension = notification.content.fileName.split('.').pop();
+        return `${notification.content.datasetName}.${extension}`;
+      };
+
+      let datasetData;
+
+      if (notification) {
+        if (notification.content.providerId) {
+          const { data } = await DatasetService.downloadExportFile(
+            notification.content.datasetId,
+            notification.content.fileName,
+            notification.content.providerId
+          );
+          datasetData = data;
+        } else {
+          const { data } = await DatasetService.downloadExportFile(
+            notification.content.datasetId,
+            notification.content.fileName
+          );
+          datasetData = data;
+        }
+        DownloadFile(datasetData, getFileName());
+      }
+    } catch (error) {
+      console.error('NotificationsList - downloadExportFMEFile.', error);
+      notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' }, true);
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
+  };
+
   const onLoadNotifications = async (fRow, nRows) => {
     try {
       setIsLoading(true);
@@ -144,12 +181,19 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
         pageSize: nRows
       });
 
+      console.log(unparsedNotifications);
+
       const parsedNotifications = unparsedNotifications.userNotifications.map(notification => {
         return NotificationService.parse({
           config: config.notifications.notificationSchema,
           content: notification.content,
           date: notification.date,
           message: resourcesContext.messages[camelCase(notification.type)],
+          onClick:
+            notification.type === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' ||
+            notification.type === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
+              ? () => downloadExportFMEFile(notification)
+              : null,
           routes,
           type: notification.type
         });
@@ -190,6 +234,7 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
       });
 
       setTotalRecords(unparsedNotifications.totalRecords);
+      console.log({ notificationsArray });
       setNotifications(notificationsArray);
     } catch (error) {
       console.error('NotificationsList - onLoadNotifications.', error);
