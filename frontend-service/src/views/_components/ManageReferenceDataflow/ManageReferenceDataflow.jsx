@@ -36,8 +36,8 @@ export const ManageReferenceDataflow = ({
   isVisible,
   manageDialogs,
   metadata,
-  onEditDataflow,
-  onCreateDataflow
+  onCreateDataflow,
+  onEditDataflow
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
 
@@ -174,6 +174,20 @@ export const ManageReferenceDataflow = ({
     }
   };
 
+  const renderDeleteDataflowButton = () => {
+    if (isEditing && isDesign) {
+      return (
+        <Button
+          className="p-button-danger p-button-animated-blink"
+          disabled={!isLeadDesigner}
+          icon="trash"
+          label={resourcesContext.messages['deleteDataflowButton']}
+          onClick={() => setIsDeleteDialogVisible(true)}
+        />
+      );
+    }
+  };
+
   const renderDialogFooter = () => (
     <Fragment>
       <div className="p-toolbar-group-left">
@@ -195,19 +209,7 @@ export const ManageReferenceDataflow = ({
               uniqueIdentifier="pinDataflow"></TooltipButton>
           </div>
         )}
-        {isEditing && isDesign && (
-          <Button
-            className="p-button-danger p-button-animated-blink"
-            disabled={
-              !isLeadDesigner ||
-              (isLeadDesigner &&
-                (config.dataflowStatus.OPEN === metadata.status || config.dataflowStatus.CLOSED === metadata.status))
-            }
-            icon="trash"
-            label={resourcesContext.messages['deleteDataflowButton']}
-            onClick={() => setIsDeleteDialogVisible(true)}
-          />
-        )}
+        {renderDeleteDataflowButton()}
       </div>
       <Button
         className={`p-button-primary ${
@@ -257,11 +259,7 @@ export const ManageReferenceDataflow = ({
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <InputTextarea
             className={styles.inputTextArea}
-            disabled={
-              !isLeadDesigner ||
-              (isLeadDesigner &&
-                (config.dataflowStatus.OPEN === metadata.status || config.dataflowStatus.CLOSED === metadata.status))
-            }
+            disabled={!isLeadDesigner || !isDesign}
             id="dataflowDescription"
             onBlur={checkErrors}
             onChange={event => setDescription(event.target.value)}
