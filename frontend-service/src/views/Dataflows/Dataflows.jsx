@@ -501,7 +501,9 @@ export const Dataflows = () => {
     return dataflows.map(dataflow => {
       const copyDataflow = { ...dataflow };
 
-      if (copyDataflow.id === pinnedItem.id) copyDataflow.pinned = isPinned ? 'pinned' : 'unpinned';
+      if (copyDataflow.id === pinnedItem.id) {
+        copyDataflow.pinned = isPinned ? 'pinned' : 'unpinned';
+      }
 
       return copyDataflow;
     });
@@ -608,10 +610,14 @@ export const Dataflows = () => {
           { key: 'obligationId', label: resourcesContext.messages['obligationId'], isSortable: true, keyfilter: 'num' }
         ],
         type: 'INPUT'
-      },
-      {
+      }
+    ];
+
+    if (!isAdmin) {
+      filters.push({
         key: 'userRole',
         label: resourcesContext.messages['userRole'],
+        type: 'DROPDOWN',
         dropdownOptions: [
           {
             label: config.permissions.roles.CUSTODIAN.label.toUpperCase(),
@@ -653,28 +659,44 @@ export const Dataflows = () => {
             label: config.permissions.roles.REPORTER_READ.label.toUpperCase(),
             value: config.permissions.roles.REPORTER_READ.key
           }
+        ]
+      });
+    }
+
+    filters.push(
+      {
+        nestedOptions: [
+          {
+            key: 'status',
+            label: resourcesContext.messages['status'],
+            isSortable: true,
+            template: 'LevelError',
+            dropdownOptions: [
+              { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+              { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+              { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
+            ],
+            className: 'dropdownFilterWrapper'
+          },
+          {
+            key: 'pinned',
+            label: resourcesContext.messages['pinned'],
+            dropdownOptions: [
+              { label: resourcesContext.messages['pinned'].toUpperCase(), value: true },
+              { label: resourcesContext.messages['unpinned'].toUpperCase(), value: false }
+            ],
+            isSortable: false
+          }
         ],
         type: 'DROPDOWN'
       },
       {
-        key: 'status',
-        label: resourcesContext.messages['status'],
-        isSortable: true,
-        template: 'LevelError',
-        dropdownOptions: [
-          { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
-          { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
-          { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
-        ],
-        type: 'DROPDOWN'
-      },
-      {
-        isSortable: true,
         key: 'expirationDate',
         label: resourcesContext.messages['expirationDateFilterLabel'],
+        isSortable: true,
         type: 'DATE'
       }
-    ];
+    );
 
     if (isCustodian || isAdmin) {
       filters.push({
@@ -699,14 +721,27 @@ export const Dataflows = () => {
       type: 'INPUT'
     },
     {
-      key: 'status',
-      label: resourcesContext.messages['status'],
-      isSortable: true,
-      template: 'LevelError',
-      dropdownOptions: [
-        { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
-        { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
-        { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
+      nestedOptions: [
+        {
+          key: 'status',
+          label: resourcesContext.messages['status'],
+          isSortable: true,
+          template: 'LevelError',
+          dropdownOptions: [
+            { label: resourcesContext.messages['design'].toUpperCase(), value: config.dataflowStatus.DESIGN },
+            { label: resourcesContext.messages['open'].toUpperCase(), value: config.dataflowStatus.OPEN_FE },
+            { label: resourcesContext.messages['closed'].toUpperCase(), value: config.dataflowStatus.CLOSED }
+          ]
+        },
+        {
+          key: 'pinned',
+          label: resourcesContext.messages['pinned'],
+          dropdownOptions: [
+            { label: resourcesContext.messages['pinned'].toUpperCase(), value: true },
+            { label: resourcesContext.messages['unpinned'].toUpperCase(), value: false }
+          ],
+          isSortable: false
+        }
       ],
       type: 'DROPDOWN'
     }
@@ -845,6 +880,7 @@ export const Dataflows = () => {
           }}
           onSort={getDataflows}
           options={options[tabId]}
+          panelClassName="overwriteZindexPanel"
           recoilId={tabId}
         />
         {renderPaginator()}

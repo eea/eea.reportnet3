@@ -14,3 +14,7 @@
 .p-dropdown-items-wrapper::-webkit-scrollbar-thumb:hover {
   background: var(--c-gray-50);
 }
+
+.overwriteZindexPanel {
+  z-index: 3000 !important;
+}
