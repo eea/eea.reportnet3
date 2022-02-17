@@ -123,7 +123,7 @@ public class ProcessServiceImpl implements ProcessService {
       processToUpdate.setDatasetId(datasetId);
     }
 
-    processToUpdate.setUuid(processId.equals(threadId) ? processId : threadId);
+    processToUpdate.setProcessId(processId.equals(threadId) ? processId : threadId);
     processToUpdate.setProcessType(type);
     processToUpdate.setStatus(status);
     processToUpdate.setDataflowId(dataflowId != -1L ? dataflowId
@@ -143,7 +143,9 @@ public class ProcessServiceImpl implements ProcessService {
         break;
     }
 
-
+    LOG.info(String.format(
+        "Adding or updating process for datasetId %s, dataflowId %s: %s %s with processId %s made by user %s",
+        datasetId, dataflowId, type, status, processId, user));
     processRepository.save(processToUpdate);
   }
 }

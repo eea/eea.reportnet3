@@ -50,9 +50,9 @@ public class Process {
   @Column(name = "username")
   private String user;
 
-  /** The uuid. */
-  @Column(name = "uuid")
-  private String uuid;
+  /** The process id. */
+  @Column(name = "process_id")
+  private String processId;
 
   /** The status. */
   @Column(name = "status")
@@ -97,7 +97,7 @@ public class Process {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(id, datasetId, dataflowId, processType, user, uuid, status, queuedDate,
+    return Objects.hash(id, datasetId, dataflowId, processType, user, processId, status, queuedDate,
         processStartingDate, processFinishingDate);
   }
 

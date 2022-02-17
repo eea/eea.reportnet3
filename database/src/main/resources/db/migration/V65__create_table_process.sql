@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS public.process (
 	dataflow_id int8 NULL,
 	process_type varchar NULL,
 	username varchar NULL,
-	uuid varchar NULL,
+	process_id varchar NULL,
 	status varchar NULL,
 	date_start timestamp(0) NULL,
 	date_finish timestamp(0) NULL,
