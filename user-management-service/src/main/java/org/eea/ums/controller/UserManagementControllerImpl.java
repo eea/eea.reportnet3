@@ -937,12 +937,12 @@ public class UserManagementControllerImpl implements UserManagementController {
     try {
       userNationalCoordinatorService.createNationalCoordinator(nationalCoordinatorVO);
     } catch (EEAException e) {
-      if (EEAErrorMessage.USER_REQUEST_NOTFOUND.equals(e.getMessage())
-          || e.getMessage().equals(
-              String.format(EEAErrorMessage.USER_NOTFOUND, nationalCoordinatorVO.getEmail()))
-          || e.getMessage()
-              .equals(String.format(EEAErrorMessage.NOT_EMAIL, nationalCoordinatorVO.getEmail()))) {
+      if (EEAErrorMessage.USER_REQUEST_NOTFOUND.equals(e.getMessage()) || e.getMessage()
+          .equals(String.format(EEAErrorMessage.NOT_EMAIL, nationalCoordinatorVO.getEmail()))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      } else if (EEAErrorMessage.COUNTRY_CODE_NOTFOUND.equals(e.getMessage()) || e.getMessage()
+          .equals(String.format(EEAErrorMessage.USER_NOTFOUND, nationalCoordinatorVO.getEmail()))) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
       } else {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
       }
@@ -979,12 +979,12 @@ public class UserManagementControllerImpl implements UserManagementController {
     try {
       userNationalCoordinatorService.deleteNationalCoordinator(nationalCoordinatorVO);
     } catch (EEAException e) {
-      if (EEAErrorMessage.USER_REQUEST_NOTFOUND.equals(e.getMessage())
-          || e.getMessage().equals(
-              String.format(EEAErrorMessage.USER_NOTFOUND, nationalCoordinatorVO.getEmail()))
-          || e.getMessage()
-              .equals(String.format(EEAErrorMessage.NOT_EMAIL, nationalCoordinatorVO.getEmail()))) {
+      if (EEAErrorMessage.USER_REQUEST_NOTFOUND.equals(e.getMessage()) || e.getMessage()
+          .equals(String.format(EEAErrorMessage.NOT_EMAIL, nationalCoordinatorVO.getEmail()))) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+      } else if (EEAErrorMessage.COUNTRY_CODE_NOTFOUND.equals(e.getMessage()) || e.getMessage()
+          .equals(String.format(EEAErrorMessage.USER_NOTFOUND, nationalCoordinatorVO.getEmail()))) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
       } else {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
       }
