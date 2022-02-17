@@ -145,7 +145,7 @@ public class ProcessServiceImpl implements ProcessService {
 
     LOG.info(String.format(
         "Adding or updating process for datasetId %s, dataflowId %s: %s %s with processId %s made by user %s",
-        datasetId, dataflowId, type, status, processId, user));
+        datasetId, processToUpdate.getDataflowId(), type, status, processId, user));
     processRepository.save(processToUpdate);
   }
 }
