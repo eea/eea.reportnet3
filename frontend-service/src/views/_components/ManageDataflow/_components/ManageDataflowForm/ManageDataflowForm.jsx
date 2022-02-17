@@ -124,7 +124,7 @@ export const ManageDataflowForm = forwardRef(
 
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
-              inmUserProperties.pinnedDataflows.push(creationResponse.metadata.toString());
+              inmUserProperties.pinnedDataflows.push(creationResponse.data.toString());
               await UserService.updateConfiguration(inmUserProperties);
               userContext.onChangePinnedDataflows(inmUserProperties.pinnedDataflows);
             }
@@ -134,7 +134,7 @@ export const ManageDataflowForm = forwardRef(
         } catch (error) {
           console.error('ManageDataflowForm - onConfirm.', error);
 
-          if (error?.response?.metadata === 'Dataflow name already exists') {
+          if (error?.response?.data === 'Dataflow name already exists') {
             setErrors(previousErrors => {
               return {
                 ...previousErrors,
