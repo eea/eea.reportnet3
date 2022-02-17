@@ -1071,6 +1071,24 @@ public class DataflowControllerImpl implements DataFlowController {
   }
 
   /**
+   * Gets the dataflows metabase by id.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the dataflows metabase by id
+   */
+  @Override
+  @PostMapping(value = "/private/dataflows/getmetabase",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Get dataflows metadata by dataflow ids", hidden = true)
+  public List<DataFlowVO> getDataflowsMetabaseById(@RequestBody List<Long> dataflowIds) {
+    if (dataflowIds == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    return dataflowService.getDataflowsMetabaseById(dataflowIds);
+  }
+
+  /**
    * Checks if is user requester.
    *
    * @param dataflowId the dataflow id

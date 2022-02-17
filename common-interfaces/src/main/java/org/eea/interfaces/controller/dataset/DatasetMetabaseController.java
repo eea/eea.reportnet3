@@ -301,6 +301,16 @@ public interface DatasetMetabaseController {
       @RequestParam("dataflowIds") List<Long> dataflowIds);
 
   /**
+   * Find data set by dataflow ids.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the list
+   */
+  @GetMapping(value = "/private/datasets/dataflowIds", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataSetMetabaseVO> findDataSetByDataflowIds(
+      @RequestParam("dataflowIds") List<Long> dataflowIds);
+
+  /**
    * Gets the datasets summary list.
    *
    * @param dataflowId the dataflow id
