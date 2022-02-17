@@ -3,11 +3,20 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const UserRightRepository = {
+  getNationalCoordinators: async () =>
+    await HTTPRequester.get({ url: getUrl(UserRightConfig.getNationalCoordinators) }),
+
   getRequesters: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(UserRightConfig.getRequesters, { dataflowId }) }),
 
   getReporters: async (dataflowId, dataProviderId) =>
     await HTTPRequester.get({ url: getUrl(UserRightConfig.getReporters, { dataflowId, dataProviderId }) }),
+
+  deleteNationalCoordinator: async userRight =>
+    await HTTPRequester.delete({
+      url: getUrl(UserRightConfig.deleteNationalCoordinator),
+      data: { countryCode: userRight.countryCode, email: userRight.email }
+    }),
 
   deleteRequester: async (userRight, dataflowId) =>
     await HTTPRequester.delete({
@@ -19,6 +28,12 @@ export const UserRightRepository = {
     await HTTPRequester.delete({
       url: getUrl(UserRightConfig.deleteReporter, { dataflowId, dataProviderId }),
       data: { account: userRight.account, role: userRight.role }
+    }),
+
+  createNationalCoordinator: async userRight =>
+    await HTTPRequester.post({
+      url: getUrl(UserRightConfig.createNationalCoordinator),
+      data: { countryCode: userRight.countryCode, email: userRight.email }
     }),
 
   updateRequester: async (userRight, dataflowId) =>
