@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.rod.LegalInstrumentVO;
+import org.eea.interfaces.vo.rod.ObligationListVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.rod.mapper.ClientMapper;
 import org.eea.rod.mapper.CountryMapper;
@@ -72,11 +73,11 @@ public class ObligationServiceImpl implements ObligationService {
    * @param issueId the issue id
    * @param deadlineDateFrom the deadline date from
    * @param deadlineDateTo the deadline date to
-   * @return the list
+   * @return the obligation list VO
    */
   @Override
-  public List<ObligationVO> findOpenedObligation(Integer clientId, Integer spatialId,
-      Integer issueId, Date deadlineDateFrom, Date deadlineDateTo) {
+  public ObligationListVO findOpenedObligation(Integer clientId, Integer spatialId, Integer issueId,
+      Date deadlineDateFrom, Date deadlineDateTo) {
     Long dateFrom = Optional.ofNullable(deadlineDateFrom).map(Date::getTime).orElse(null);
     Long dateTo = Optional.ofNullable(deadlineDateTo).map(Date::getTime).orElse(null);
     List<Obligation> obligations = obligationFeignRepository.findOpenedObligations(clientId,
@@ -92,7 +93,13 @@ public class ObligationServiceImpl implements ObligationService {
       fillObligationSubentityFields(obligationVOS.get(i), obligations.get(i), clients, countries,
           issues);
     }
-    return obligationVOS;
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(obligationVOS);
+    obligationListVO.setFilteredRecords(Long.valueOf(obligations.size()));
+    obligationListVO.setTotalRecords(Long.valueOf(
+        obligationFeignRepository.findOpenedObligations(null, null, null, null, null).size()));
+
+    return obligationListVO;
   }
 
   /**

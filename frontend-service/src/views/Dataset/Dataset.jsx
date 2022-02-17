@@ -32,6 +32,7 @@ import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
+import { StepProgressBar } from 'views/_components/StepProgressBar';
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -63,6 +64,26 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const userContext = useContext(UserContext);
 
   const [dataset, setDataset] = useState({});
+  const [datasetProgressBarSteps, setDatasetProgressBarSteps] = useState({
+    steps: [
+      {
+        stepNumber: 1,
+        labelCompleted: resourcesContext.messages['importedData'],
+        labelUndone: resourcesContext.messages['importData'],
+        labelRunning: resourcesContext.messages['importingData'],
+        labelError: resourcesContext.messages['importDataError']
+      },
+      {
+        stepNumber: 2,
+        labelCompleted: resourcesContext.messages['validatedData'],
+        labelUndone: resourcesContext.messages['validateData'],
+        labelRunning: resourcesContext.messages['validatingData'],
+        labelError: resourcesContext.messages['validatingDataError'],
+        isRunning: true
+      }
+    ],
+    currentStep: 0
+  });
   const [datasetSchemaAllTables, setDatasetSchemaAllTables] = useState([]);
   const [datasetSchemaName, setDatasetSchemaName] = useState();
   const [datasetName, setDatasetName] = useState('');
@@ -259,6 +280,12 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   }, []);
 
   useEffect(() => {
+    if (snapshotState.isRestoring) {
+      changeProgressStepBar({ step: 0, currentStep: 1, isRunning: true, completed: false, withError: false });
+    }
+  }, [snapshotState.isRestoring]);
+
+  useEffect(() => {
     if (metadata?.dataset.datasetSchemaId) getFileExtensions();
   }, [metadata?.dataset.datasetSchemaId, isImportDatasetDialogVisible]);
 
@@ -271,6 +298,13 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       changeUrl();
     }
   }, [dataViewerOptions.tableSchemaId, selectedView]);
+
+  const changeProgressStepBar = stepInfo => {
+    const inmDatasetProgressBarSteps = [...datasetProgressBarSteps.steps];
+    inmDatasetProgressBarSteps[stepInfo.step].isRunning = stepInfo.isRunning;
+    inmDatasetProgressBarSteps[stepInfo.step].completed = stepInfo.completed || false;
+    setDatasetProgressBarSteps({ steps: inmDatasetProgressBarSteps, currentStep: stepInfo.currentStep });
+  };
 
   const changeUrl = () => {
     window.history.replaceState(
@@ -403,6 +437,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     try {
       const metaData = await MetadataUtils.getMetadata({ datasetId, dataflowId });
       setMetadata(metaData);
+
+      const stepStatus = DatasetUtils.getDatasetStepRunningStatus(metaData.dataset.datasetRunningStatus);
+      changeProgressStepBar(stepStatus);
     } catch (error) {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } }, true);
@@ -450,6 +487,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         },
         true
       );
+      changeProgressStepBar({ step: 1, currentStep: 2, isRunning: true });
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -539,6 +577,23 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
     if (isNotification && isNotification.content.datasetId?.toString() === datasetId.toString()) {
       onHighlightRefresh(true);
+      changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false, completed: false, withError: false });
+    }
+
+    const isImportDataCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'IMPORT_REPORTING_COMPLETED_EVENT'
+    );
+
+    const isRestoreSnapshotDataCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT'
+    );
+
+    const isDeletedDataCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'DELETE_DATASET_DATA_COMPLETED_EVENT'
+    );
+
+    if (isImportDataCompleted || isRestoreSnapshotDataCompleted || isDeletedDataCompleted) {
+      changeProgressStepBar({ step: 1, currentStep: 2, isRunning: true, completed: false, withError: false });
     }
   }, [notificationContext]);
 
@@ -895,6 +950,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
     } = metadata;
+
     notificationContext.add(
       {
         type: 'DATASET_DATA_LOADING_INIT',
@@ -910,6 +966,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       },
       true
     );
+    changeProgressStepBar({ step: 0, currentStep: 1, isRunning: true });
   };
 
   const renderImportOtherSystemsFooter = (
@@ -1018,27 +1075,34 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
 
     return (
-      <TabsSchema
-        dataProviderId={metadata?.dataset.dataProviderId}
-        datasetSchemaId={metadata?.dataset.datasetSchemaId}
-        hasWritePermissions={hasWritePermissions}
-        isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
-        isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
-        isReferenceDataset={isReferenceDataset}
-        isReportingWebform={isReportingWebform}
-        levelErrorTypes={levelErrorTypes}
-        onHideSelectGroupedValidation={onHideSelectGroupedValidation}
-        onLoadTableData={onLoadTableData}
-        onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-        reporting={true}
-        selectedRuleId={dataViewerOptions.selectedRuleId}
-        selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
-        selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
-        selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
-        tables={tableSchema}
-        tableSchemaColumns={tableSchemaColumns}
-        tableSchemaId={dataViewerOptions.tableSchemaId}
-      />
+      <Fragment>
+        <StepProgressBar
+          className={styles.stepProgressBar}
+          currentStep={datasetProgressBarSteps.currentStep}
+          steps={datasetProgressBarSteps.steps}
+        />
+        <TabsSchema
+          dataProviderId={metadata?.dataset.dataProviderId}
+          datasetSchemaId={metadata?.dataset.datasetSchemaId}
+          hasWritePermissions={hasWritePermissions}
+          isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
+          isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+          isReferenceDataset={isReferenceDataset}
+          isReportingWebform={isReportingWebform}
+          levelErrorTypes={levelErrorTypes}
+          onHideSelectGroupedValidation={onHideSelectGroupedValidation}
+          onLoadTableData={onLoadTableData}
+          onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+          reporting={true}
+          selectedRuleId={dataViewerOptions.selectedRuleId}
+          selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
+          selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+          selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
+          tables={tableSchema}
+          tableSchemaColumns={tableSchemaColumns}
+          tableSchemaId={dataViewerOptions.tableSchemaId}
+        />
+      </Fragment>
     );
   };
 
@@ -1191,7 +1255,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           accept={DatasetUtils.getValidExtensions({ validExtensions: importSelectedIntegrationExtension })}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
-          dialogClassName={styles.Dialog}
           dialogHeader={selectedCustomImportIntegration.name}
           dialogOnHide={() => {
             setIsImportDatasetDialogVisible(false);

@@ -60,19 +60,24 @@
   margin-bottom: 1rem;
 }
 
+.stepProgressBar {
+  width: 100%;
+  display: flex;
+  justify-content: end;
+}
+
 .switchDivInput {
   display: flex;
   align-items: center;
   justify-items: flex-end;
   flex-direction: row;
-  margin-bottom: 1rem;
 }
 
 .datasetDescriptionRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0 0 2vw 0;
+  margin: 0 0 0.5vw 0;
 
   .datasetConfigurationButtons {
     display: flex;

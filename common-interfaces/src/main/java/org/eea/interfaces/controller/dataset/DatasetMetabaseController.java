@@ -329,4 +329,15 @@ public interface DatasetMetabaseController {
   void updateDatasetRunningStatus(@PathVariable("id") Long datasetId,
       @RequestParam("datasetRunningStatus") DatasetRunningStatusEnum datasetRunningStatus);
 
+  /**
+   * Find reporting data set by provider ids.
+   *
+   * @param providerIds the provider ids
+   * @return the list
+   */
+  @GetMapping(value = "/private/providerIds", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataSetMetabaseVO> findReportingDataSetByProviderIds(
+      @RequestParam("providerIds") List<Long> providerIds);
+
+
 }

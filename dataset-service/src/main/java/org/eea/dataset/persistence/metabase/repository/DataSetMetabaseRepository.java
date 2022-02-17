@@ -121,4 +121,12 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
   @Query
   List<DataSetMetabase> findByDataflowIdAndDataProviderId(@Param("dataflowId") Long dataflowId,
       @Param("dataProviderId") Long dataProviderId);
+
+  /**
+   * Find by provider id in.
+   *
+   * @param providerIdList the provider id list
+   * @return the list
+   */
+  List<DataSetMetabase> findByDataProviderIdIn(List<Long> providerIdList);
 }

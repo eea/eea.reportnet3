@@ -331,7 +331,7 @@ public final class EEAErrorMessage {
   /** The Constant DATAFLOW_NOT_RELEASABLE: {@value}. */
   public static final String DATAFLOW_NOT_RELEASABLE = "The dataflow %s is not releasable";
 
-  /** The Constant USER_REQUEST_NOTFOUND: {@value}. */
+  /** The Constant USER_AND_COUNTRY_EXIST: {@value}. */
   public static final String USER_AND_COUNTRY_EXIST =
       "Email and country already exist in this dataflow";
 
@@ -349,6 +349,9 @@ public final class EEAErrorMessage {
 
   /** The Constant COMPANY_GROUP_NOTFOUND: {@value}. */
   public static final String COMPANY_GROUP_NOTFOUND = "The company group selected is not found";
+
+  /** The Constant COUNTRY_CODE_NOTFOUND: {@value}. */
+  public static final String COUNTRY_CODE_NOTFOUND = "The country code selected is not found";
 
   /** The Constant USERFME_NOTFOUND: {@value}. */
   public static final String USERFME_NOTFOUND = "The user for fme access is not found";
@@ -705,6 +708,9 @@ public final class EEAErrorMessage {
 
   /** The Constant DATAFLOW_NAME: {@value}. */
   public static final String DATAFLOW_NAME_EMPTY = "Dataflow Name empty";
+
+  /** The Constant DATAFLOW_BUSINESS_UPDATE_ERROR: {@value}. */
+  public static final String DATAFLOW_BUSINESS_UPDATE_ERROR = "Business dataflow can't be updated";
 
   /**
    * Instantiates a new EEA error message.
