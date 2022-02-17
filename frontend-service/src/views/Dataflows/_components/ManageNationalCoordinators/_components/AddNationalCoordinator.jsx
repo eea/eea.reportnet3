@@ -19,18 +19,18 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 
-export const AddNationalCoordinator = () => {
+export const AddNationalCoordinator = ({ onUpdateData }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [nationalCoordinator, setNationalCoordinator] = useState({ countryCode: '', email: '' });
   const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [nationalCoordinator, setNationalCoordinator] = useState({ countryCode: '', email: '' });
 
   const [groupOfCountries, setGroupOfCountries] = useState([]);
 
-  const getDropdownsOptions = async () => {
+  const getDropdownOptions = async () => {
     setIsLoading(true);
     const allCountries = { dataProviderGroupId: 2 };
 
@@ -38,23 +38,29 @@ export const AddNationalCoordinator = () => {
       const responseGroupOfCountries = await RepresentativeService.getDataProviders(allCountries);
       setGroupOfCountries(responseGroupOfCountries);
     } catch (error) {
-      console.error('NationalCoordinators - getDropdownsOptions.', error);
+      console.error('NationalCoordinators - getDropdownOptions.', error);
+      notificationContext.add({ type: 'LOAD_COUNTRIES_ERROR' }, true);
     } finally {
       setIsLoading(false);
     }
   };
 
   useLayoutEffect(() => {
-    getDropdownsOptions();
+    getDropdownOptions();
   }, []);
 
   const addNationalCoordinators = async () => {
     try {
       setIsAdding(true);
       await UserRightService.createNationalCoordinators(nationalCoordinator);
+      onUpdateData(true);
     } catch (error) {
-      console.error('NationalCoordinators - updateNationalCoordinators.', error);
-      notificationContext.add({ type: 'CREATE_NATIONAL_COORDINATORS_ERROR' }, true);
+      if (error?.response?.status === 404) {
+        notificationContext.add({ type: 'EMAIL_NOT_FOUND_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'CREATE_NATIONAL_COORDINATORS_ERROR' }, true);
+      }
+      console.error('NationalCoordinators - createNationalCoordinators.', error);
     } finally {
       setIsAdding(false);
       setIsAddDialogVisible(false);
@@ -78,15 +84,11 @@ export const AddNationalCoordinator = () => {
   const isValidEmail = email => RegularExpressions['email'].test(email);
 
   const getTooltipMessage = () => {
-    //console.log('isEmpty(nationalCoordinator.email) :>> ', isEmpty(nationalCoordinator.email));
-    console.log('isEmpty(nationalCoordinator.country) :>> ', isEmpty(nationalCoordinator.country));
-    //console.log('!isValidEmail(nationalCoordinator.email) :>> ', !isValidEmail(nationalCoordinator.email));
-
-    if (isEmpty(nationalCoordinator.email) && isEmpty(nationalCoordinator.country)) {
+    if (isEmpty(nationalCoordinator.email) && isEmpty(nationalCoordinator.countryCode)) {
       return resourcesContext.messages['incompleteDataTooltip'];
     } else if (!isValidEmail(nationalCoordinator.email)) {
       return resourcesContext.messages['notValidEmailTooltip'];
-    } else if (isEmpty(nationalCoordinator.country)) {
+    } else if (isEmpty(nationalCoordinator.countryCode)) {
       return resourcesContext.messages['emptyNationalCoordinatorsCountryError'];
     } else {
       return null;
