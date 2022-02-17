@@ -123,12 +123,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
 
     try {
       const filterBy = await getFilterBy();
-      //const response = await ObligationService.getOpen(filterBy);
-      const response = {
-        obligations: await ObligationService.getOpen(filterBy),
-        filteredRecords: 380,
-        totalRecords: 389
-      };
+      const response = await ObligationService.getOpen(filterBy);
       const { obligations, filteredRecords, totalRecords } = response;
       const data = ReportingObligationUtils.initialValues(obligations, userContext.userProps.dateFormat);
 
