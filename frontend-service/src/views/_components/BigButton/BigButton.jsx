@@ -101,9 +101,7 @@ export const BigButton = ({
     }
   };
 
-  const onEnableSchemaNameEdit = () => {
-    setIsEditEnabled(true);
-  };
+  const onEnableSchemaNameEdit = () => setIsEditEnabled(true);
 
   const getDesignModel = () => {
     if (!isUndefined(model)) {
@@ -295,20 +293,32 @@ export const BigButton = ({
         />
       );
     } else {
+      const renderTitleCaption = () => {
+        if (!isUndefined(buttonsTitle)) {
+          return buttonsTitle;
+        } else {
+          return caption;
+        }
+      };
+
+      const titleCaption = renderTitleCaption();
+
       return (
         <Fragment>
           <p
             className={styles.caption}
             data-for={tooltipId}
             data-tip
-            onDoubleClick={
-              dataflowStatus === config.dataflowStatus.DESIGN && canEditName ? onEnableSchemaNameEdit : null
-            }>
-            {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+            onDoubleClick={() => {
+              if (dataflowStatus === config.dataflowStatus.DESIGN && canEditName) {
+                onEnableSchemaNameEdit();
+              }
+            }}>
+            {titleCaption}
           </p>
           {!isUndefined(buttonsTitle) && buttonsTitle.length > 60 && (
             <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={tooltipId} place="top">
-              {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+              {titleCaption}
             </ReactTooltip>
           )}
         </Fragment>
