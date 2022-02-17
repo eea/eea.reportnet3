@@ -42,10 +42,16 @@ export const ObligationService = {
         issueId,
         organizationId
       );
-      return ObligationUtils.parseObligationList(openedObligationsDTO.data);
+      const { totalRecords, filteredRecords, obligations } = openedObligationsDTO?.data;
+      const parseobligationList = ObligationUtils.parseObligationList(obligations);
+
+      return { filteredRecords, obligations: parseobligationList, totalRecords };
     } else {
       const openedObligationsDTO = await ObligationRepository.getOpen();
-      return ObligationUtils.parseObligationList(openedObligationsDTO.data);
+      const { totalRecords, filteredRecords, obligations } = openedObligationsDTO?.data;
+      const parseobligationList = ObligationUtils.parseObligationList(obligations);
+
+      return { filteredRecords, obligations: parseobligationList, totalRecords };
     }
   }
 };

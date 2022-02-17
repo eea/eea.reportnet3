@@ -4,7 +4,13 @@ export const reportingObligationReducer = (state, { type, payload }) => {
       return { ...state, countries: payload.countries };
 
     case 'ON_LOAD_DATA':
-      return { ...state, data: payload.data };
+      return {
+        ...state,
+        data: payload.data,
+        filteredRecords: payload.filteredRecords,
+        totalRecords: payload.totalRecords,
+        isFiltered: payload.filteredRecords !== payload.totalRecords
+      };
 
     case 'ON_LOAD_ISSUES':
       return { ...state, issues: payload.issues };

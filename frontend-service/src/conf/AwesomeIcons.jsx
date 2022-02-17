@@ -104,6 +104,7 @@ import {
   faUsers,
   faUsersCog,
   faUserShield,
+  faUserTie,
   faUserTimes,
   faVectorSquare,
   faVolumeUp
@@ -430,6 +431,8 @@ export const AwesomeIcons = icon => {
       return faUsers;
     case 'userShield':
       return faUserShield;
+    case 'userTie':
+      return faUserTie;
     case 'userTimes':
       return faUserTimes;
     case 'wav':
