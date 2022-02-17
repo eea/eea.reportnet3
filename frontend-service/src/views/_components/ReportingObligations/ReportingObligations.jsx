@@ -63,13 +63,14 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     isLoading: true,
     organizations: [],
     pagination: { first: 0, rows: 10, page: 0 },
-    filteredRecords: 0,
     totalRecords: 0,
     selectedObligation: obligationChecked
   });
 
   const { countries, issues, isLoading, isFiltered, organizations, pagination, selectedObligation, totalRecords } =
     reportingObligationState;
+
+  const filteredData = useRecoilValue(filteredDataStore('reportingObligations'));
 
   useEffect(() => {
     onLoadCountries();
@@ -198,7 +199,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   };
 
   const renderPaginationCount = () => (
-    <PaginatorRecordsCount dataLength={totalRecords} filteredData={data} isFiltered={isFiltered} />
+    <PaginatorRecordsCount dataLength={totalRecords} filteredData={filteredData} isFiltered={isFiltered} />
   );
 
   const updateFilter = () => {
