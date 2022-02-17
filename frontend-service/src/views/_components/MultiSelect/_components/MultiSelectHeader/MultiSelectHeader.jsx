@@ -51,6 +51,19 @@ export const MultiSelectHeader = ({
     }
   };
 
+  const renderClearButton = () => {
+    if (clearButton) {
+      return (
+        <div className="p-multiselect-close p-link" onClick={event => onClose(event)} type="button">
+          <span className="p-multiselect-close-icon pi pi-times" id={`clearFilter_${id}`} />
+          <span className="srOnly" htmlFor={`clearFilter_${id}`}>
+            {resourcesContext.messages['clearFilter']}
+          </span>
+        </div>
+      );
+    }
+  };
+
   const renderFilterElement = () => {
     if (filter) {
       return (
@@ -91,15 +104,7 @@ export const MultiSelectHeader = ({
       />
 
       {renderFilterElement()}
-
-      {clearButton && (
-        <div className="p-multiselect-close p-link" onClick={event => onClose(event)} type="button">
-          <span className="p-multiselect-close-icon pi pi-times" id={`clearFilter_${id}`} />
-          <span className="srOnly" htmlFor={`clearFilter_${id}`}>
-            {resourcesContext.messages['clearFilter']}
-          </span>
-        </div>
-      )}
+      {renderClearButton()}
     </div>
   );
 };
