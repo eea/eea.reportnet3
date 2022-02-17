@@ -198,7 +198,11 @@ export const ManageReferenceDataflow = ({
         {isEditing && isDesign && (
           <Button
             className="p-button-danger p-button-animated-blink"
-            disabled={!isLeadDesigner}
+            disabled={
+              !isLeadDesigner ||
+              (isLeadDesigner &&
+                (config.dataflowStatus.OPEN === metadata.status || config.dataflowStatus.CLOSED === metadata.status))
+            }
             icon="trash"
             label={resourcesContext.messages['deleteDataflowButton']}
             onClick={() => setIsDeleteDialogVisible(true)}
@@ -253,7 +257,11 @@ export const ManageReferenceDataflow = ({
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <InputTextarea
             className={styles.inputTextArea}
-            disabled={!isLeadDesigner}
+            disabled={
+              !isLeadDesigner ||
+              (isLeadDesigner &&
+                (config.dataflowStatus.OPEN === metadata.status || config.dataflowStatus.CLOSED === metadata.status))
+            }
             id="dataflowDescription"
             onBlur={checkErrors}
             onChange={event => setDescription(event.target.value)}
