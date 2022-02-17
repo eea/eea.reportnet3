@@ -1,6 +1,8 @@
 import { useContext, useRef } from 'react';
 import uniqueId from 'lodash/uniqueId';
 
+import styles from './MultiSelectHeader.module.scss';
+
 import { Checkbox } from 'views/_components/Checkbox';
 import { InputText } from 'views/_components/InputText';
 
@@ -29,6 +31,14 @@ export const MultiSelectHeader = ({
 
   useInputTextFocus(isPanelVisible, filterRef);
 
+  const getClassNameAllChecked = () => {
+    if (allChecked) {
+      return `${headerClassName} ${styles.allItemsSelected}`;
+    }
+
+    return headerClassName;
+  };
+
   const onFilterEvent = event => {
     if (onFilter) {
       onFilter({ originalEvent: event, query: event.target.value });
@@ -38,6 +48,19 @@ export const MultiSelectHeader = ({
   const onToggleAllEvent = event => {
     if (onToggleAll) {
       onToggleAll({ checked: allChecked, originalEvent: event });
+    }
+  };
+
+  const renderClearButton = () => {
+    if (clearButton) {
+      return (
+        <button className="p-multiselect-close p-link" onClick={event => onClose(event)} type="button">
+          <span className="p-multiselect-close-icon pi pi-times" id={`clearFilter_${id}`} />
+          <span className="srOnly" htmlFor={`clearFilter_${id}`}>
+            {resourcesContext.messages['clearFilter']}
+          </span>
+        </button>
+      );
     }
   };
 
@@ -60,7 +83,10 @@ export const MultiSelectHeader = ({
       );
     } else
       return (
-        <span className={headerClassName} id={`selectAllFilter_${id}`} onClick={event => onToggleAll(event)}>
+        <span
+          className={getClassNameAllChecked()}
+          id={`selectAllFilter_${id}`}
+          onClick={event => onToggleAllEvent(event)}>
           {allChecked ? notCheckAllHeader : checkAllHeader}
         </span>
       );
@@ -78,15 +104,7 @@ export const MultiSelectHeader = ({
       />
 
       {renderFilterElement()}
-
-      {clearButton && (
-        <button className="p-multiselect-close p-link" onClick={event => onClose(event)} type="button">
-          <span className="p-multiselect-close-icon pi pi-times" id={`clearFilter_${id}`} />
-          <span className="srOnly" htmlFor={`clearFilter_${id}`}>
-            {resourcesContext.messages['clearFilter']}
-          </span>
-        </button>
-      )}
+      {renderClearButton()}
     </div>
   );
 };
