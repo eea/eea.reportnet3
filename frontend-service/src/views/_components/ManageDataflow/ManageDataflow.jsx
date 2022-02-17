@@ -225,12 +225,12 @@ export const ManageDataflow = ({
           onHide={() => onHideDataflowDialog()}
           visible={isVisible}>
           <ManageDataflowForm
-            data={reportingDataflowState}
             dataflowId={dataflowId}
             dialogName={dialogName}
             getData={onLoadData}
             isCitizenScienceDataflow={isCitizenScienceDataflow}
             isEditForm={isEditForm}
+            metadata={reportingDataflowState}
             obligation={reportingDataflowState.obligation}
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
