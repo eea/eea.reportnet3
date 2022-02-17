@@ -213,6 +213,14 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     </Fragment>
   );
 
+  const updateFilter = () => {
+    reportingObligationDispatch({
+      type: 'ON_PAGINATE',
+      payload: { pagination: { first: 0, rows: pagination.rows, page: 0 } }
+    });
+    onLoadReportingObligations();
+  };
+
   const filterOptions = [
     {
       key: 'search',
@@ -253,14 +261,8 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
 
       <Filters
         className="reportingObligations"
-        onFilter={() => onLoadReportingObligations()}
-        onReset={() => {
-          reportingObligationDispatch({
-            type: 'ON_PAGINATE',
-            payload: { pagination: { first: 0, rows: pagination.rows, page: 0 } }
-          });
-          onLoadReportingObligations();
-        }}
+        onFilter={() => updateFilter()}
+        onReset={() => updateFilter()}
         options={filterOptions}
         recoilId="reportingObligations"
       />
