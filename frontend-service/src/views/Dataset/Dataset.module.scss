@@ -102,17 +102,29 @@
   }
 }
 
-.switchDivInput {
+.progressSwitchWrapper {
   display: flex;
-  align-items: center;
-  justify-items: flex-end;
-  flex-direction: row;
-  margin-bottom: 1rem;
-
-  .switchDiv {
+  justify-content: space-between;
+  .switchDivInput {
     display: flex;
     align-items: center;
-    margin-left: auto;
+    justify-items: flex-end;
+    flex-direction: row;
+    flex-grow: 1;
+
+    .switchDiv {
+      display: flex;
+      align-items: center;
+      margin-left: auto;
+    }
+  }
+  .stepProgressBar {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    flex-grow: 1;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 }
 
