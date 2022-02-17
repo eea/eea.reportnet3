@@ -76,7 +76,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     organizations,
     pagination,
     selectedObligation,
-    filteredRecords,
+    //filteredRecords,
     totalRecords
   } = reportingObligationState;
 
@@ -258,8 +258,8 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
 
       <Filters
         className="reportingObligations"
-        onFilter={() => updateFilter()}
-        onReset={() => updateFilter()}
+        onFilter={updateFilter}
+        onReset={updateFilter}
         options={filterOptions}
         recoilId="reportingObligations"
       />
