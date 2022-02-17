@@ -333,7 +333,7 @@ export const ManageBusinessDataflow = ({
               <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
                 <InputTextarea
                   className={styles.inputTextArea}
-                  disabled={isAdmin && !isDesign}
+                  disabled={!isDesign}
                   id="dataflowDescription"
                   onBlur={checkErrors}
                   onChange={event => setDescription(event.target.value)}
