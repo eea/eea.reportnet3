@@ -293,6 +293,16 @@ export const BigButton = ({
         />
       );
     } else {
+      const renderTitleCaption = () => {
+        if (!isUndefined(buttonsTitle)) {
+          return buttonsTitle;
+        } else {
+          return caption;
+        }
+      };
+
+      const titleCaption = renderTitleCaption();
+
       return (
         <Fragment>
           <p
@@ -304,11 +314,11 @@ export const BigButton = ({
                 onEnableSchemaNameEdit();
               }
             }}>
-            {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+            {titleCaption}
           </p>
           {!isUndefined(buttonsTitle) && buttonsTitle.length > 60 && (
             <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={tooltipId} place="top">
-              {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+              {titleCaption}
             </ReactTooltip>
           )}
         </Fragment>
