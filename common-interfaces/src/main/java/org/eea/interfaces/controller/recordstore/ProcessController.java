@@ -1,9 +1,11 @@
 package org.eea.interfaces.controller.recordstore;
 
-import java.util.List;
-import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.recordstore.ProcessesVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -14,7 +16,7 @@ public interface ProcessController {
   /**
    * The Interface ProcessControllerZuul.
    */
-  @FeignClient(value = "recordstore", contextId = "processes", path = "/processes")
+  @FeignClient(value = "recordstore", contextId = "process", path = "/process")
   interface ProcessControllerZuul extends ProcessController {
 
   }
@@ -30,12 +32,29 @@ public interface ProcessController {
    * @param user the user
    * @return the processes
    */
-  @GetMapping("/")
-  List<ProcessVO> getProcesses(
+  @GetMapping()
+  ProcessesVO getProcesses(
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "asc", defaultValue = "true") boolean asc,
       @RequestParam(value = "status", required = false) String status,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "user", required = false) String user);
+
+  /**
+   * Update process.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param status the status
+   * @param processId the process id
+   * @param user the user
+   */
+  @PostMapping(value = "/private/updateProcess")
+  void updateProcess(@RequestParam("datasetId") Long datasetId,
+      @RequestParam(required = false) Long dataflowId,
+      @RequestParam("status") ProcessStatusEnum status, @RequestParam("type") ProcessTypeEnum type,
+      @RequestParam("processId") String processId, @RequestParam("threadId") String threadId,
+      @RequestParam("user") String user);
+
 }

@@ -1649,6 +1649,18 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
+   * Gets the dataflows metabase by id.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the dataflows metabase by id
+   */
+  @Override
+  public List<DataFlowVO> getDataflowsMetabaseById(List<Long> dataflowIds) {
+    return dataflowMapper
+        .entityListToClass(dataflowRepository.findMetabaseByDataflowIds(dataflowIds));
+  }
+
+  /**
    * Removes the web links and documents.
    *
    * @param result the result

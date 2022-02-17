@@ -21,6 +21,7 @@ import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
@@ -28,6 +29,8 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.ConsumerGroupVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -138,17 +141,21 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
+  /** The process controller zuul. */
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
   /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
 
 
-  /** The Constant DATASET_: {@value}. */
+  /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
 
 
   /**
-   * Instantiates a new file loader helper.
+   * Instantiates a new validation helper.
    */
   public ValidationHelper() {
     super();
@@ -251,6 +258,9 @@ public class ValidationHelper implements DisposableBean {
       String processId, boolean released, boolean updateViews) throws EEAException {
 
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+        ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId, processId,
+        SecurityContextHolder.getContext().getAuthentication().getName());
 
     if (Boolean.FALSE.equals(updateViews)) {
       executeValidationProcess(datasetId, processId, released);
@@ -261,6 +271,7 @@ public class ValidationHelper implements DisposableBean {
       values.put("referencesToRefresh",
           List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
               dataset.getDataflowId(), dataset.getDatasetSchema())));
+      values.put("processId", processId);
       kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
     }
     dataset = null;
@@ -379,10 +390,6 @@ public class ValidationHelper implements DisposableBean {
   public void executeValidationProcess(final Long datasetId, String processId, boolean released) {
     // Initialize process as coordinator
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-    // TO DO Status will be updated based on the running process in the dataset, this call will be
-    // changed when processes table is implemented
-    datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
-        DatasetRunningStatusEnum.VALIDATING);
     RulesSchema rules =
         rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getDatasetSchema()));
     initializeProcess(processId, true, released);
@@ -399,6 +406,11 @@ public class ValidationHelper implements DisposableBean {
     releaseFieldsValidation(dataset, processId, !filterEmptyFields(rules.getRules()));
     LOG.info("Collecting Table Validation tasks");
     releaseTableValidation(dataset, processId);
+    processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+        ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId, processId,
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+        DatasetRunningStatusEnum.VALIDATING);
     startProcess(processId);
   }
 
@@ -521,7 +533,6 @@ public class ValidationHelper implements DisposableBean {
    * @param lockSignature the lock signature
    * @param mapCriteria the map criteria
    * @param userName the user name
-   *
    * @throws EEAException the EEA exception
    */
   public void createLockWithSignature(LockSignature lockSignature, Map<String, Object> mapCriteria,
@@ -539,7 +550,6 @@ public class ValidationHelper implements DisposableBean {
    * Adds the lock to release process.
    *
    * @param datasetId the dataset id
-   *
    * @throws EEAException the EEA exception
    */
   public void addLockToReleaseProcess(Long datasetId) throws EEAException {
@@ -727,7 +737,7 @@ public class ValidationHelper implements DisposableBean {
    * Release dataset validation.
    *
    * @param dataset the dataset
-   * @param processId the uuid
+   * @param processId the process id
    */
   private void releaseDatasetValidation(final DataSetMetabaseVO dataset, final String processId) {
     Map<String, Object> value = new HashMap<>();
@@ -741,8 +751,8 @@ public class ValidationHelper implements DisposableBean {
    * Release table validation.
    *
    * @param dataset the dataset
-   * @param processId the processId
-   * @param idTable the idTable
+   * @param processId the process id
+   * @param idTable the id table
    * @param sqlRule the sql rule
    */
   private void releaseTableValidation(final DataSetMetabaseVO dataset, final String processId,
@@ -762,8 +772,8 @@ public class ValidationHelper implements DisposableBean {
    * Release record validation.
    *
    * @param dataset the dataset
-   * @param processId the processId
-   * @param numPag the numPag
+   * @param processId the process id
+   * @param numPag the num pag
    */
   private void releaseRecordValidation(final DataSetMetabaseVO dataset, final String processId,
       int numPag) {
@@ -780,8 +790,8 @@ public class ValidationHelper implements DisposableBean {
    * Release field validation.
    *
    * @param dataset the dataset
-   * @param processId the uuid
-   * @param numPag the numPag
+   * @param processId the process id
+   * @param numPag the num pag
    * @param onlyEmptyFields the only empty fields
    */
   private void releaseFieldValidation(final DataSetMetabaseVO dataset, final String processId,
@@ -865,8 +875,10 @@ public class ValidationHelper implements DisposableBean {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
             NotificationVO.builder().user(notificationUser).datasetId(datasetId).build());
       }
-      // TO DO Status will be updated based on the running process in the dataset, this call will be
-      // changed when processes table is implemented
+
+      processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
+          ProcessTypeEnum.VALIDATION, processId, processId,
+          SecurityContextHolder.getContext().getAuthentication().getName());
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.VALIDATED);
       isFinished = true;
@@ -906,7 +918,6 @@ public class ValidationHelper implements DisposableBean {
    * Check started process.
    *
    * @param processId the process id
-   *
    * @return true, if successful
    */
   private boolean checkStartedProcess(String processId) {
