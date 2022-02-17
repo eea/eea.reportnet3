@@ -995,7 +995,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
       return (
         <div className={styles.switchDivInput}>
-          {renderStepProgressBar()}
+          {renderStepProgressBar(!isNil(webformData?.name))}
           <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
             <TabularSwitch
               elements={viewModes}
@@ -1055,8 +1055,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     </div>
   );
 
-  const renderStepProgressBar = () => {
-    if (hasWritePermissions) {
+  const renderStepProgressBar = showStepProgressBar => {    
+    if (hasWritePermissions && showStepProgressBar) {
       return (
         <StepProgressBar
           className={styles.stepProgressBar}
@@ -1089,7 +1089,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
     return (
       <Fragment>
-        {isNil(webformData?.name) && renderStepProgressBar()}
+        {renderStepProgressBar(isNil(webformData?.name))}
         <TabsSchema
           dataProviderId={metadata?.dataset.dataProviderId}
           datasetSchemaId={metadata?.dataset.datasetSchemaId}
