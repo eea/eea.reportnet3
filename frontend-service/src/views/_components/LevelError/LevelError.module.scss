@@ -1,7 +1,6 @@
 .statusBox {
   border-radius: 3px;
   color: var(--main-font-color);
-  font-size: 10pt;
   font-weight: 600;
   padding: 4px;
 }
@@ -9,6 +8,11 @@
 .blocker {
   background-color: rgba(var(--statusBox-blocker-bg), 0.8);
   color: rgba(var(--statusBox-blocker-color), 0.8);
+}
+
+.closed {
+  background-color: var(--c-gray-75);
+  color: var(--c-white-color);
 }
 
 .correct {

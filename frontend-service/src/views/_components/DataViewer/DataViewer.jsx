@@ -63,7 +63,7 @@ export const DataViewer = ({
   hasCountryCode,
   hasWritePermissions,
   dataflowType,
-  isDataflowOpen,
+  isDataflowOpen = false,
   isDesignDatasetEditorRead,
   isExportable,
   isFilterable,
@@ -100,7 +100,6 @@ export const DataViewer = ({
   const [editDialogVisible, setEditDialogVisible] = useState(false);
   const [fetchedData, setFetchedData] = useState([]);
   const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
-  const [importTableDialogVisible, setImportTableDialogVisible] = useState(false);
   const [initialCellValue, setInitialCellValue] = useState();
   const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
   const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
@@ -131,6 +130,7 @@ export const DataViewer = ({
     editedRecord: {},
     fetchedDataFirstRecord: [],
     firstPageRecord: 0,
+    geometryReadOnly: false,
     geometryType: '',
     initialRecordValue: undefined,
     isCoordinatesMoreInfoVisible: false,
@@ -180,14 +180,26 @@ export const DataViewer = ({
     setConfirmDeleteVisible
   );
 
+  const mapEditingEnabled =
+    areEquals(records.geometryType, 'POINT') &&
+    hasWritePermissions &&
+    !isDesignDatasetEditorRead &&
+    !isDataflowOpen &&
+    !records.geometryReadOnly;
+
   const cellDataEditor = (cells, record) => {
     return (
       <FieldEditor
+        areCoordinatesDisabled={
+          !hasWritePermissions ||
+          isDesignDatasetEditorRead ||
+          (isDataflowOpen && RecordUtils.getCellInfo(colsSchema, cells.field).type === 'POINT') ||
+          RecordUtils.getCellInfo(colsSchema, cells.field).readOnly
+        }
         cells={cells}
         colsSchema={colsSchema}
         datasetId={datasetId}
         datasetSchemaId={datasetSchemaId}
-        hasWritePermissions={hasWritePermissions}
         onChangePointCRS={onChangePointCRS}
         onCoordinatesMoreInfoClick={onCoordinatesMoreInfoClick}
         onEditorKeyChange={onEditorKeyChange}
@@ -306,7 +318,7 @@ export const DataViewer = ({
   }, [confirmDeleteVisible]);
 
   useEffect(() => {
-    if (records.mapGeoJson !== '' && areEquals(records.geometryType, 'POINT')) {
+    if (records.mapGeoJson !== '' && areEquals(records.geometryType, 'POINT') && mapEditingEnabled) {
       onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
       const inmMapGeoJson = cloneDeep(records.mapGeoJson);
       const parsedInmMapGeoJson = typeof inmMapGeoJson === 'object' ? inmMapGeoJson : JSON.parse(inmMapGeoJson);
@@ -682,8 +694,8 @@ export const DataViewer = ({
     }
   };
 
-  const onMapOpen = (coordinates, mapCells, fieldType) =>
-    dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, fieldType, mapCells } });
+  const onMapOpen = (coordinates, mapCells, fieldType, readOnly) =>
+    dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, fieldType, mapCells, readOnly } });
 
   const onPaste = event => {
     if (event) {
@@ -860,29 +872,6 @@ export const DataViewer = ({
 
   const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
 
-  const onUpload = async () => {
-    setImportTableDialogVisible(false);
-    const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-    notificationContext.add(
-      {
-        type: 'DATASET_DATA_LOADING_INIT',
-        content: {
-          dataflowName,
-          datasetName,
-          customContent: {
-            datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-            title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
-            datasetLoading: resourcesContext.messages['datasetLoading']
-          }
-        }
-      },
-      true
-    );
-  };
-
   const addRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       {isNewRecord && (
@@ -976,16 +965,14 @@ export const DataViewer = ({
       <Button
         className={`p-button-animated-blink ${styles.saveButton}`}
         icon="check"
-        label={
-          areEquals(records.geometryType, 'POINT') ? resourcesContext.messages['save'] : resourcesContext.messages['ok']
-        }
+        label={mapEditingEnabled ? resourcesContext.messages['save'] : resourcesContext.messages['ok']}
         onClick={
-          areEquals(records.geometryType, 'POINT')
+          mapEditingEnabled
             ? () => onSavePoint(records.newPoint)
             : () => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })
         }
       />
-      {areEquals(records.geometryType, 'POINT') && (
+      {mapEditingEnabled && (
         <Button
           className="p-button-secondary button-right-aligned"
           icon="cancel"
@@ -1002,6 +989,7 @@ export const DataViewer = ({
 
   const mapRender = () => (
     <Map
+      disabledEdition={!mapEditingEnabled}
       enabledDrawElements={records.drawElements}
       geoJson={records.mapGeoJson}
       geometryType={records.geometryType}
@@ -1097,56 +1085,6 @@ export const DataViewer = ({
       : resourcesContext.messages['maxSizeNotDefined']
   }`;
 
-  const readLines = async function* (blob, encoding = 'utf-8', delimiter = /\r?\n/g) {
-    const reader = blob.stream().getReader();
-    const decoder = new TextDecoder(encoding);
-
-    try {
-      let text = '';
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        text += decoder.decode(value, { stream: true });
-        const lines = text.split(delimiter);
-        text = lines.pop();
-        yield* lines;
-      }
-
-      yield text;
-    } finally {
-      reader.cancel();
-    }
-  };
-
-  const onImportTableError = async ({ xhr }) => {
-    if (xhr.status === 423) {
-      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
-    }
-  };
-
-  const onValidateFile = async file => {
-    const checkFirstLine = async firstLine => {
-      const validations = [];
-      if (colsSchema?.length - 2 !== firstLine.split(',').length) {
-        validations.push({
-          severity: 'warn',
-          summary: resourcesContext.messages['importWrongFileHeader'],
-          detail: `${resourcesContext.messages['importWrongFileHeaderDetail']} ${
-            resourcesContext.messages['columnsSchemaLabel']
-          }: ${colsSchema?.length - 2} - ${resourcesContext.messages['fileColumnsLabel']}: ${
-            firstLine.split(',').length
-          }`
-        });
-      }
-      return validations;
-    };
-
-    for await (const line of readLines(file, 'utf-8', '\n')) {
-      return checkFirstLine(line);
-    }
-  };
-
   return (
     <SnapshotContext.Provider>
       <ActionsToolbar
@@ -1179,7 +1117,6 @@ export const DataViewer = ({
         selectedRuleMessage={selectedRuleMessage}
         selectedTableSchemaId={selectedTableSchemaId}
         setColumns={setColumns}
-        setImportTableDialogVisible={setImportTableDialogVisible}
         showGroupedValidationFilter={showGroupedValidationFilter}
         showValidationFilter={showValidationFilter}
         showValueFilter={showValueFilter}
@@ -1306,37 +1243,11 @@ export const DataViewer = ({
         </Dialog>
       )}
 
-      {importTableDialogVisible && (
-        <CustomFileUpload
-          accept=".csv"
-          chooseLabel={resourcesContext.messages['selectFile']}
-          className={styles.FileUpload}
-          dialogClassName={styles.Dialog}
-          dialogHeader={`${resourcesContext.messages['uploadTable']}${tableName}`}
-          dialogOnHide={() => setImportTableDialogVisible(false)} //allowTypes="/(\.|\/)(csv)$/"
-          dialogVisible={importTableDialogVisible}
-          infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
-          invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
-          isDialog={true}
-          name="file"
-          onError={onImportTableError}
-          onUpload={onUpload}
-          onValidateFile={onValidateFile}
-          replaceCheck={true}
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTable, {
-            datasetId: datasetId,
-            tableSchemaId: tableId,
-            delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
-          })}`}
-        />
-      )}
-
       {isAttachFileVisible && (
         <CustomFileUpload
           accept={getAttachExtensions || '*'}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
-          dialogClassName={styles.Dialog}
           dialogHeader={`${resourcesContext.messages['uploadAttachment']}`}
           dialogOnHide={() => setIsAttachFileVisible(false)}
           dialogVisible={isAttachFileVisible}

@@ -10,10 +10,12 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -73,6 +75,10 @@ public class IntegrationControllerImpl implements IntegrationController {
   /** The notification controller zuul. */
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
+
+  /** The data set metabase controller zuul. */
+  @Autowired
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /**
    * The Constant LOG_ERROR.
@@ -458,6 +464,9 @@ public class IntegrationControllerImpl implements IntegrationController {
 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDatasetId(datasetId);
+    DataSetMetabaseVO datasetMetabaseVO =
+        dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    userNotificationContentVO.setDatasetName(datasetMetabaseVO.getDataSetName());
     notificationControllerZuul.createUserNotificationPrivate("DATASET_IMPORT_INIT",
         userNotificationContentVO);
 

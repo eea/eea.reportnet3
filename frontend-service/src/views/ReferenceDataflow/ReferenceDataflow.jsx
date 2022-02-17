@@ -99,7 +99,8 @@ export const ReferenceDataflow = () => {
   const getLeftSidebarButtonsVisibility = () => ({
     apiKeyBtn: dataflowState.isCustodian,
     datasetsInfoBtn: dataflowState.isAdmin,
-    editBtn: dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian,
+    editBtn:
+      (dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian) || dataflowState.isAdmin,
     manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
     propertiesBtn: true,
     reportingDataflowsBtn:
@@ -304,7 +305,7 @@ export const ReferenceDataflow = () => {
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon="cancel"
-        label={resourcesContext.messages['cancel']}
+        label={resourcesContext.messages['close']}
         onClick={() => onCloseShareRightsDialog()}
       />
     </div>

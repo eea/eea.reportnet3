@@ -14,7 +14,9 @@ import org.eea.dataflow.integration.executor.service.IntegrationExecutorService;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.lock.service.LockService;
@@ -60,6 +62,9 @@ public class IntegrationControllerImplTest {
   @Mock
   private NotificationControllerZuul notificationControllerZuul;
 
+  /** The data set metabase controller zuul. */
+  @Mock
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /**
    * Inits the mocks.
@@ -389,6 +394,10 @@ public class IntegrationControllerImplTest {
    */
   @Test
   public void executeExternalIntegrationTest() throws EEAException {
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataSetName("datasetName");
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
 
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
@@ -405,6 +414,10 @@ public class IntegrationControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void executeExternalIntegrationExceptionTest() throws EEAException {
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataSetName("datasetName");
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 

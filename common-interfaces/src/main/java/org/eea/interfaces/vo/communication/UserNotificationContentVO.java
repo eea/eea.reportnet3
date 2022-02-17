@@ -2,6 +2,7 @@ package org.eea.interfaces.vo.communication;
 
 import java.util.Map;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -56,4 +57,7 @@ public class UserNotificationContentVO {
 
   /** The disabled rules. */
   private Long disabledRules;
+
+  /** The dataset status. */
+  private DatasetStatusEnum datasetStatus;
 }
