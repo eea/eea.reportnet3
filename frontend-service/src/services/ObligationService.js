@@ -27,6 +27,12 @@ export const ObligationService = {
   },
 
   getOpen: async filterData => {
+    const getObligationData = openedObligationsDTOData => {
+      const { totalRecords, filteredRecords, obligations } = openedObligationsDTOData;
+      const parseobligationList = ObligationUtils.parseObligationList(obligations);
+
+      return { filteredRecords, obligations: parseobligationList, totalRecords };
+    };
     if (!isEmpty(filterData)) {
       const countryId = !isNil(filterData.countries) ? filterData.countries.value : '';
       const dateFrom =
@@ -42,16 +48,12 @@ export const ObligationService = {
         issueId,
         organizationId
       );
-      const { totalRecords, filteredRecords, obligations } = openedObligationsDTO?.data;
-      const parseobligationList = ObligationUtils.parseObligationList(obligations);
 
-      return { filteredRecords, obligations: parseobligationList, totalRecords };
+      return getObligationData(openedObligationsDTO?.data);
     } else {
       const openedObligationsDTO = await ObligationRepository.getOpen();
-      const { totalRecords, filteredRecords, obligations } = openedObligationsDTO?.data;
-      const parseobligationList = ObligationUtils.parseObligationList(obligations);
 
-      return { filteredRecords, obligations: parseobligationList, totalRecords };
+      return getObligationData(openedObligationsDTO?.data);
     }
   }
 };
