@@ -104,7 +104,7 @@ export const ReferenceDataflow = () => {
     manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
     propertiesBtn: true,
     reportingDataflowsBtn:
-      dataflowState.status === config.dataflowStatus.OPEN &&
+      dataflowState.status !== config.dataflowStatus.DESIGN &&
       (dataflowState.isCustodian || dataflowState.isCustodianUser)
   });
 
@@ -322,7 +322,9 @@ export const ReferenceDataflow = () => {
     </MainLayout>
   );
 
-  if (dataflowState.requestStatus === 'pending' || dataflowState.isLoading) return layout(<Spinner />);
+  if (dataflowState.requestStatus === 'pending' || dataflowState.isLoading) {
+    return layout(<Spinner />);
+  }
 
   return layout(
     <div className="rep-row">
