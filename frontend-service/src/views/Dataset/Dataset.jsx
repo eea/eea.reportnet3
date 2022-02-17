@@ -995,7 +995,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
       return (
         <div className={styles.switchDivInput}>
-          {renderStepProgressBar(!isNil(webformData?.name))}
           <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
             <TabularSwitch
               elements={viewModes}
@@ -1055,8 +1054,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     </div>
   );
 
-  const renderStepProgressBar = showStepProgressBar => {    
-    if (hasWritePermissions && showStepProgressBar) {
+  const renderStepProgressBar = () => {
+    if (hasWritePermissions) {
       return (
         <StepProgressBar
           className={styles.stepProgressBar}
@@ -1088,30 +1087,27 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
 
     return (
-      <Fragment>
-        {renderStepProgressBar(isNil(webformData?.name))}
-        <TabsSchema
-          dataProviderId={metadata?.dataset.dataProviderId}
-          datasetSchemaId={metadata?.dataset.datasetSchemaId}
-          hasWritePermissions={hasWritePermissions}
-          isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
-          isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
-          isReferenceDataset={isReferenceDataset}
-          isReportingWebform={isReportingWebform}
-          levelErrorTypes={levelErrorTypes}
-          onHideSelectGroupedValidation={onHideSelectGroupedValidation}
-          onLoadTableData={onLoadTableData}
-          onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-          reporting={true}
-          selectedRuleId={dataViewerOptions.selectedRuleId}
-          selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
-          selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
-          selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
-          tables={tableSchema}
-          tableSchemaColumns={tableSchemaColumns}
-          tableSchemaId={dataViewerOptions.tableSchemaId}
-        />
-      </Fragment>
+      <TabsSchema
+        dataProviderId={metadata?.dataset.dataProviderId}
+        datasetSchemaId={metadata?.dataset.datasetSchemaId}
+        hasWritePermissions={hasWritePermissions}
+        isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
+        isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+        isReferenceDataset={isReferenceDataset}
+        isReportingWebform={isReportingWebform}
+        levelErrorTypes={levelErrorTypes}
+        onHideSelectGroupedValidation={onHideSelectGroupedValidation}
+        onLoadTableData={onLoadTableData}
+        onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+        reporting={true}
+        selectedRuleId={dataViewerOptions.selectedRuleId}
+        selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
+        selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+        selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
+        tables={tableSchema}
+        tableSchemaColumns={tableSchemaColumns}
+        tableSchemaId={dataViewerOptions.tableSchemaId}
+      />
     );
   };
 
@@ -1217,7 +1213,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           </div>
         </Toolbar>
       </div>
-      {renderSwitchView()}
+      <div className={styles.progressSwitchWrapper}>
+        {renderStepProgressBar()}
+        {renderSwitchView()}
+      </div>
       {renderTableWebformView()}
       {validationsVisible && (
         <Dialog
