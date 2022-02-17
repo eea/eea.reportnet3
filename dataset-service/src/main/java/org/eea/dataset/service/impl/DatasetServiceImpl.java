@@ -153,6 +153,10 @@ public class DatasetServiceImpl implements DatasetService {
   /** The Constant DATASET_ID: {@value}. */
   private static final String DATASET_ID = "dataset_%s";
 
+  /** The Constant NUMBER_ERROR_RETRIEVING_STATS. */
+  private static final Integer NUMBER_ERROR_RETRIEVING_STATS = 100000;
+
+
   /** The field max length. */
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
@@ -2039,11 +2043,30 @@ public class DatasetServiceImpl implements DatasetService {
       final Map<String, String> mapIdNameDatasetSchema) {
     // Find record ids with errors
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    List<IDError> recordIdsFromRecordWithValidationBlocker =
-        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema());
-    List<IDError> recordIdsFromFieldWithValidationBlocker = recordValidationRepository
-        .findRecordIdFromFieldWithValidationsByLevelError(datasetId, tableValue.getIdTableSchema());
+
+    Long errorRecords =
+        recordValidationRepository.countRecordIdFromRecordWithErrors(tableValue.getIdTableSchema());
+    int pageCountErrorRecords = (errorRecords.intValue() + NUMBER_ERROR_RETRIEVING_STATS - 1)
+        / NUMBER_ERROR_RETRIEVING_STATS;
+    List<IDError> recordIdsFromRecordWithValidationBlocker = new ArrayList<>();
+    for (int i = 0; i < pageCountErrorRecords; i++) {
+      Pageable pageable = PageRequest.of(i, NUMBER_ERROR_RETRIEVING_STATS);
+      recordIdsFromRecordWithValidationBlocker.addAll(
+          recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
+              tableValue.getIdTableSchema(), pageable));
+    }
+
+    Long errorFields =
+        recordValidationRepository.countRecordIdFromFieldWithErrors(tableValue.getIdTableSchema());
+    int pageCountErrorFields = (errorFields.intValue() + NUMBER_ERROR_RETRIEVING_STATS - 1)
+        / NUMBER_ERROR_RETRIEVING_STATS;
+    List<IDError> recordIdsFromFieldWithValidationBlocker = new ArrayList<>();
+    for (int i = 0; i < pageCountErrorFields; i++) {
+      Pageable pageable = PageRequest.of(i, NUMBER_ERROR_RETRIEVING_STATS);
+      recordIdsFromFieldWithValidationBlocker.addAll(
+          recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
+              tableValue.getIdTableSchema(), pageable));
+    }
 
     Set<String> idsBlockers = new HashSet<>();
     Set<String> idsErrors = new HashSet<>();

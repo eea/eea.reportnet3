@@ -538,23 +538,45 @@ public class ValidationHelper implements DisposableBean {
    * @throws EEAException the EEA exception
    */
   public void addLockToReleaseProcess(Long datasetId) throws EEAException {
-    DataSetMetabaseVO datasetMetabaseVO =
-        datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-    Map<String, Object> mapCriteria = new HashMap<>();
-    mapCriteria.put("dataflowId", datasetMetabaseVO.getDataflowId());
-    mapCriteria.put("dataProviderId", datasetMetabaseVO.getDataProviderId());
+    try {
+      DataSetMetabaseVO datasetMetabaseVO =
+          datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+      Map<String, Object> mapCriteria = new HashMap<>();
+      mapCriteria.put("dataflowId", datasetMetabaseVO.getDataflowId());
+      mapCriteria.put("dataProviderId", datasetMetabaseVO.getDataProviderId());
 
-    Map<String, Object> mapCriteriaRestoreSnapshot = new HashMap<>();
-    mapCriteriaRestoreSnapshot.put("datasetId", datasetId);
-    if (datasetMetabaseVO.getDataProviderId() != null) {
-      createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria,
+      Map<String, Object> mapCriteriaRestoreSnapshot = new HashMap<>();
+      mapCriteriaRestoreSnapshot.put("datasetId", datasetId);
+      if (datasetMetabaseVO.getDataProviderId() != null) {
+        createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria,
+            SecurityContextHolder.getContext().getAuthentication().getName());
+        createLockWithSignature(LockSignature.RESTORE_SNAPSHOT, mapCriteriaRestoreSnapshot,
+            SecurityContextHolder.getContext().getAuthentication().getName());
+      } else {
+        createLockWithSignature(LockSignature.RESTORE_SCHEMA_SNAPSHOT, mapCriteriaRestoreSnapshot,
+            SecurityContextHolder.getContext().getAuthentication().getName());
+      }
+
+      // Avoid delete the table or dataset data while validating
+      Map<String, Object> mapCriteriaDeleteDataset = new HashMap<>();
+      mapCriteriaDeleteDataset.put(LiteralConstants.DATASETID, datasetId);
+      createLockWithSignature(LockSignature.DELETE_DATASET_VALUES, mapCriteriaDeleteDataset,
           SecurityContextHolder.getContext().getAuthentication().getName());
-      createLockWithSignature(LockSignature.RESTORE_SNAPSHOT, mapCriteriaRestoreSnapshot,
-          SecurityContextHolder.getContext().getAuthentication().getName());
-    } else {
-      createLockWithSignature(LockSignature.RESTORE_SCHEMA_SNAPSHOT, mapCriteriaRestoreSnapshot,
-          SecurityContextHolder.getContext().getAuthentication().getName());
+
+      TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
+      List<TableValue> tableList = tableRepository.findAll();
+      for (TableValue table : tableList) {
+        Map<String, Object> mapCriteriaDeleteTable = new HashMap<>();
+        mapCriteriaDeleteTable.put(LiteralConstants.DATASETID, datasetId);
+        mapCriteriaDeleteTable.put(LiteralConstants.TABLESCHEMAID, table.getIdTableSchema());
+        createLockWithSignature(LockSignature.DELETE_IMPORT_TABLE, mapCriteriaDeleteTable,
+            SecurityContextHolder.getContext().getAuthentication().getName());
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("There's an error putting the lock to validation process in dataset {}",
+          datasetId);
     }
+
   }
 
   /**
@@ -580,6 +602,24 @@ public class ValidationHelper implements DisposableBean {
       mapCriteriaRestoreSnapshot.put(LiteralConstants.SIGNATURE,
           LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue());
       lockService.removeLockByCriteria(mapCriteriaRestoreSnapshot);
+    }
+
+    // Remove the locks to delete data
+    Map<String, Object> mapCriteriaDeleteDataset = new HashMap<>();
+    mapCriteriaDeleteDataset.put(LiteralConstants.SIGNATURE,
+        LockSignature.DELETE_DATASET_VALUES.getValue());
+    mapCriteriaDeleteDataset.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(mapCriteriaDeleteDataset);
+
+    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
+    List<TableValue> tableList = tableRepository.findAll();
+    for (TableValue table : tableList) {
+      Map<String, Object> mapCriteriaDeleteTable = new HashMap<>();
+      mapCriteriaDeleteTable.put(LiteralConstants.SIGNATURE,
+          LockSignature.DELETE_IMPORT_TABLE.getValue());
+      mapCriteriaDeleteTable.put(LiteralConstants.DATASETID, datasetId);
+      mapCriteriaDeleteTable.put(LiteralConstants.TABLESCHEMAID, table.getIdTableSchema());
+      lockService.removeLockByCriteria(mapCriteriaDeleteTable);
     }
   }
 
