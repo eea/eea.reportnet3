@@ -244,9 +244,9 @@ export const Dataflows = () => {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'userTie',
       isVisible: isAdmin,
-      label: 'manageNationalCoordinatorsLeftBarButton',
+      label: 'nationalCoordinators',
       onClick: () => manageDialogs('isManageNationalCoordinatorsDialogVisible', true),
-      title: 'manageNationalCoordinatorsLeftBarButton'
+      title: 'manageNationalCoordinators'
     };
 
     leftSideBarContext.addModels(
