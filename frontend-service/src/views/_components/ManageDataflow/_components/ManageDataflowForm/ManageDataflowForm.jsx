@@ -25,6 +25,7 @@ export const ManageDataflowForm = forwardRef(
     {
       data,
       dataflowId,
+      dataflowStatus,
       dialogName,
       getData,
       isCitizenScienceDataflow,
@@ -190,7 +191,11 @@ export const ManageDataflowForm = forwardRef(
           <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
             <InputTextarea
               className={styles.inputTextArea}
-              disabled={!isLeadDesigner}
+              disabled={
+                !isLeadDesigner ||
+                (isLeadDesigner &&
+                  (config.dataflowStatus.OPEN === dataflowStatus || config.dataflowStatus.CLOSED === dataflowStatus))
+              }
               id="dataflowDescription"
               name="description"
               onBlur={() => checkIsCorrectInputValue(description, 'description')}
@@ -224,7 +229,11 @@ export const ManageDataflowForm = forwardRef(
 
           <div className={`${styles.search}`}>
             <Button
-              disabled={!isLeadDesigner}
+              disabled={
+                !isLeadDesigner ||
+                (isLeadDesigner &&
+                  (config.dataflowStatus.OPEN === dataflowStatus || config.dataflowStatus.CLOSED === dataflowStatus))
+              }
               icon="search"
               label={resourcesContext.messages['searchObligations']}
               onClick={onSearch}

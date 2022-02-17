@@ -226,6 +226,7 @@ export const ManageDataflow = ({
           <ManageDataflowForm
             data={reportingDataflowState}
             dataflowId={dataflowId}
+            dataflowStatus={state.status}
             dialogName={dialogName}
             getData={onLoadData}
             isCitizenScienceDataflow={isCitizenScienceDataflow}
