@@ -41,13 +41,25 @@
 }
 
 .dialogContent {
-  div:nth-child(3) {
+  > div:first-child > div {
+    width: 25% !important;
+  }
+  > div:first-child > div:nth-child(3) {
     margin-bottom: 0;
   }
-  div:nth-child(4) {
+  > div:first-child > div:last-child {
     display: flex;
-    div:nth-child(1) {
-      padding-top: 1.1em;
+    flex-direction: row;
+    > div {
+      margin: 0 1em 0 0 !important;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .dialogContent {
+    > div:first-child > div {
+      width: 100% !important;
     }
   }
 }
