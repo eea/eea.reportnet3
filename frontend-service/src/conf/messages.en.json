@@ -1507,6 +1507,18 @@
     "validateData": "Validate data",
     "validatingData": "Validating data",
     "importDataError": "Error importing data",
-    "validatingDataError": "Error validating data"
+    "validatingDataError": "Error validating data",
+    "nationalCoordinators": "National coordinators",
+    "manageNationalCoordinators": "Manage national coordinators",
+    "manageNationalCoordinatorsDialogColumn": "National coordinator",
+    "manageNationalCoordinatorsPlaceholder": "Select a country",
+    "addNationalCoordinatorsDialogHeader": "Add national coordinator",
+    "nationalCoordinatorsEmail": "National coordinator email...",
+    "deleteNationalCoordinatorsHeader": "Delete national coordinator",
+    "deleteNationalCoordinatorsConfirm": "Are you sure you want to delete this national coordinator?",
+    "loadNationalCoordinatorsError": "Error loading national coordinators",
+    "deleteNationalCoordinatorsError": "National coordinator deleting error",
+    "createNationalCoordinatorsError": "Error creating national coordinator",
+    "emptyNationalCoordinatorsCountryError": "Please select a country"
   }
 }
