@@ -247,8 +247,6 @@ public class FileTreatmentHelper implements DisposableBean {
 
     if (delimiter != null && delimiter.length() > 1) {
       LOG_ERROR.error("the size of the delimiter cannot be greater than 1");
-      // TO DO Status will be updated based on the running process in the dataset, this call will be
-      // changed when processes table is implemented
       datasetMetabaseService.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_IMPORT);
       throw new EEAException("The size of the delimiter cannot be greater than 1");
@@ -274,8 +272,6 @@ public class FileTreatmentHelper implements DisposableBean {
 
     // We add a lock to the Release process
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-    // TO DO Status will be updated based on the running process in the dataset, this call will be
-    // changed when processes table is implemented
     datasetMetabaseService.updateDatasetRunningStatus(datasetId,
         DatasetRunningStatusEnum.IMPORTING);
     Map<String, Object> mapCriteria = new HashMap<>();
@@ -361,8 +357,6 @@ public class FileTreatmentHelper implements DisposableBean {
       FileUtils.deleteQuietly(folder);
       if (!folder.mkdirs()) {
         releaseLock(datasetId);
-        // TO DO Status will be updated based on the running process in the dataset, this call will
-        // be changed when processes table is implemented
         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
             DatasetRunningStatusEnum.ERROR_IN_IMPORT);
         throw new EEAException("Folder for dataset " + datasetId + " already exists");
@@ -390,8 +384,6 @@ public class FileTreatmentHelper implements DisposableBean {
               replace, delimiter, multipartFileMimeType);
         } else {
           releaseLock(datasetId);
-          // TO DO Status will be updated based on the running process in the dataset, this call
-          // will be changed when processes table is implemented
           datasetMetabaseService.updateDatasetRunningStatus(datasetId,
               DatasetRunningStatusEnum.ERROR_IN_IMPORT);
           LOG_ERROR.error("Error trying to import a zip file into dataset {}. Empty zip file",
@@ -418,8 +410,6 @@ public class FileTreatmentHelper implements DisposableBean {
           "Unexpected exception importing file data: datasetId={}, file={}. Message: {}", datasetId,
           multipartFile.getName(), e.getMessage(), e);
       releaseLock(datasetId);
-      // TO DO Status will be updated based on the running process in the dataset, this call will be
-      // changed when processes table is implemented
       datasetMetabaseService.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_IMPORT);
       throw new EEAException(e);
@@ -604,8 +594,6 @@ public class FileTreatmentHelper implements DisposableBean {
         } else {
           LOG_ERROR.error(
               "RN3-Import file failed: fileName={}. There's no table with that fileName", fileName);
-          // TO DO Status will be updated based on the running process in the dataset, this call
-          // will be changed when processes table is implemented
           datasetMetabaseService.updateDatasetRunningStatus(datasetId,
               DatasetRunningStatusEnum.ERROR_IN_IMPORT);
           errorWrongFilename = true;
@@ -691,13 +679,9 @@ public class FileTreatmentHelper implements DisposableBean {
               ? EventType.IMPORT_REPORTING_FAILED_EVENT
               : EventType.IMPORT_DESIGN_FAILED_EVENT;
         }
-        // TO DO Status will be updated based on the running process in the dataset, this call will
-        // be changed when processes table is implemented
         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
             DatasetRunningStatusEnum.ERROR_IN_IMPORT);
       } else {
-        // TO DO Status will be updated based on the running process in the dataset, this call will
-        // be changed when processes table is implemented
         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
             DatasetRunningStatusEnum.IMPORTED);
 
