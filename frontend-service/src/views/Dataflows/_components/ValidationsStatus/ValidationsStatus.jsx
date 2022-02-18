@@ -43,8 +43,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
-  const { getFilterBy, setData } = useApplyFilters('validationsStatuses'); // TODO find how to use properly
-
+  const { getFilterBy, setData } = useApplyFilters('validationsStatuses');
   // TODO Ordering
   // TODO Pagination
 
@@ -257,7 +256,8 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     </p>
   );
 
-  const getDateTemplate = (validation, field) => getDateTimeFormatByUserPreferences(validation[field]);
+  const getDateTemplate = (validation, field) =>
+    isNil(validation[field]) ? '-' : getDateTimeFormatByUserPreferences(validation[field]);
 
   const dialogFooter = (
     <div className={styles.footer}>

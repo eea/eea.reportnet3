@@ -3,9 +3,16 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const BackgroundProcessRepository = {
-  getValidationsStatuses: async ({ filterBy, isAsc, numberRows, pageNum }) =>
+  getValidationsStatuses: async ({ sortOrder, numberRows, pageNum, sortField = '', user, dataflowId, status }) =>
     await HTTPRequester.get({
-      url: getUrl(BackgroundProcessConfig.getValidationsStatuses, { isAsc, numberRows, pageNum }),
-      data: { ...filterBy }
+      url: getUrl(BackgroundProcessConfig.getValidationsStatuses, {
+        sortOrder,
+        numberRows,
+        pageNum,
+        sortField,
+        user,
+        dataflowId,
+        status
+      })
     })
 };

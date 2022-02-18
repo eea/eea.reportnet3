@@ -409,19 +409,5 @@ export const DataflowService = {
     return sortBy(parsedDatasetsInfoDTO, 'id');
   },
 
-  validateAllDataflowsUsers: async () => await DataflowRepository.validateAllDataflowsUsers(),
-
-  getValidationsStatuses: async ({ numberRows, pageNum, sortField, sortOrder, user, dataflowId, status }) => {
-    const validationsDTO = await DataflowRepository.getValidationsStatuses({
-      numberRows,
-      pageNum,
-      sortField,
-      sortOrder,
-      user,
-      dataflowId,
-      status
-    });
-
-    return validationsDTO;
-  }
+  validateAllDataflowsUsers: async () => await DataflowRepository.validateAllDataflowsUsers()
 };

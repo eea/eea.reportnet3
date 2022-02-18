@@ -1,15 +1,15 @@
-import sortBy from 'lodash/sortBy';
-
 import { BackgroundProcessRepository } from 'repositories/BackgroundProcessRepository';
 
 export const BackgroundProcessService = {
-  getValidationsStatuses: async ({ filterBy, numberRows, pageNum, sortBy }) => {
+  getValidationsStatuses: async ({ dataflowId, numberRows, pageNum, sortField, sortOrder, status, user }) => {
     const validationsDTO = await BackgroundProcessRepository.getValidationsStatuses({
-      filterBy,
-      isAsc: true, // TODO parser?
+      dataflowId,
       numberRows,
       pageNum,
-      sortBy
+      sortField,
+      sortOrder,
+      status,
+      user
     });
 
     return validationsDTO;
