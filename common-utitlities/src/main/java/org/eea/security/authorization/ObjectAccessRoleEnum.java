@@ -1,6 +1,5 @@
 package org.eea.security.authorization;
 
-// TODO: Auto-generated Javadoc
 /**
  * The enum Object access role enum. Allows to know if the user has access to the right entity
  */
