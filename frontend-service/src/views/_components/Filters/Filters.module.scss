@@ -473,6 +473,26 @@
   }
 }
 
+.manageNationalCoordinators {
+  display: flex;
+  flex-direction: row;
+
+  div {
+    width: 40%;
+    height: 3em;
+    &:nth-child(2) {
+      align-items: flex-start;
+    }
+  }
+  .buttonWrapper {
+    width: 20% !important;
+    .resetButton {
+      padding-left: 1.5em;
+      margin-top: 0.5em;
+    }
+  }
+}
+
 @media (max-width: 640px) {
   .dataflowsFilters > div {
     width: 100% !important;
@@ -495,6 +515,17 @@
     flex-direction: column;
     div {
       width: 100%;
+    }
+  }
+
+  .manageNationalCoordinators {
+    flex-direction: column;
+    div {
+      width: 100%;
+      .resetButton {
+        padding-left: 0 !important;
+        margin-top: 0 !important;
+      }
     }
   }
 }

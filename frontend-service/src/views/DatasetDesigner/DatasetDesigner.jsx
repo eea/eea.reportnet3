@@ -1228,6 +1228,18 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const renderSwitchView = () => {
+    const renderStepProgressBar = () => {
+      if (!isDesignDatasetEditorRead) {
+        return (
+          <StepProgressBar
+            className={styles.stepProgressBar}
+            currentStep={datasetProgressBarCurrentStep}
+            steps={datasetProgressBarSteps}
+          />
+        );
+      }
+    };
+
     const viewModes = [
       { key: 'design', label: resourcesContext.messages['designView'] },
       { key: 'tabularData', label: resourcesContext.messages['tabularDataView'] }
@@ -1239,11 +1251,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
     return (
       <div className={styles.switchDivInput}>
-        <StepProgressBar
-          className={styles.stepProgressBar}
-          currentStep={datasetProgressBarCurrentStep}
-          steps={datasetProgressBarSteps}
-        />
+        {renderStepProgressBar()}
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch
             elements={viewModes}
