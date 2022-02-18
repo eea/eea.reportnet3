@@ -14,7 +14,11 @@ export const RepresentativeService = {
 
   getDataProviders: async dataProviderGroup => {
     const dataProvidersDTO = await RepresentativeRepository.getDataProviders(dataProviderGroup.dataProviderGroupId);
-    return dataProvidersDTO.data.map(dataProvider => ({ dataProviderId: dataProvider.id, label: dataProvider.label }));
+    return dataProvidersDTO.data.map(dataProvider => ({
+      dataProviderId: dataProvider.id,
+      label: dataProvider.label,
+      code: dataProvider.code
+    }));
   },
 
   getRepresentatives: async dataflowId => {

@@ -33,6 +33,7 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
+import { CountryUtils } from 'views/_functions/Utils/CountryUtils';
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
@@ -84,7 +85,9 @@ export const PublicCountryInformation = () => {
   }, [isReset]);
 
   useEffect(() => {
-    !isNil(countryCode) && getCountryName();
+    if (!isNil(countryCode)) {
+      setCountryName(CountryUtils.getCountryName(countryCode));
+    }
   }, [countryCode]);
 
   useEffect(() => {
@@ -94,19 +97,6 @@ export const PublicCountryInformation = () => {
       setContentStyles({});
     }
   }, [themeContext.headerCollapse]);
-
-  const getCountryName = () => {
-    if (!isNil(config.countriesByGroup)) {
-      const allCountries = config.countriesByGroup['eeaCountries']
-        .concat(config.countriesByGroup['cooperatingCountries'])
-        .concat(config.countriesByGroup['otherCountries']);
-      allCountries.forEach(country => {
-        if (countryCode === country.code) {
-          setCountryName(country.name);
-        }
-      });
-    }
-  };
 
   const getDeliveryStatus = (dataflow, dataset) => {
     if (!dataset?.isReleased) {
