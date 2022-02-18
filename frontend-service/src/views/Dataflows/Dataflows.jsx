@@ -242,7 +242,7 @@ export const Dataflows = () => {
 
     const adminValidationStatusBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
-      icon: 'validate',
+      icon: 'listClipboard',
       isVisible: isAdmin,
       label: 'validationStatusLeftBarButton',
       onClick: () => manageDialogs('isValidationStatusDialogVisible', true),
