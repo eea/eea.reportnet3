@@ -19,10 +19,11 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 
-export const AddNationalCoordinator = ({ onUpdateData }) => {
+export const AddNationalCoordinator = ({ onUpdateData, nationalCoordinatorsEmails }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const [emailHasError, setEmailHasError] = useState(false);
   const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,7 +74,10 @@ export const AddNationalCoordinator = ({ onUpdateData }) => {
     setNationalCoordinator({});
   };
 
-  const onChangeEmail = email => setNationalCoordinator({ email: email, countryCode: nationalCoordinator.countryCode });
+  const onChangeEmail = email =>
+    setNationalCoordinator({ email: email.trim(), countryCode: nationalCoordinator.countryCode });
+
+  const checkDuplicates = email => setEmailHasError(nationalCoordinatorsEmails.includes(email));
 
   const onChangeCountryCode = countryCode =>
     setNationalCoordinator({ email: nationalCoordinator.email, countryCode: countryCode });
@@ -83,6 +87,8 @@ export const AddNationalCoordinator = ({ onUpdateData }) => {
   const getTooltipMessage = () => {
     if (isEmpty(nationalCoordinator.email) && isEmpty(nationalCoordinator.countryCode)) {
       return resourcesContext.messages['incompleteDataTooltip'];
+    } else if (emailHasError) {
+      return resourcesContext.messages['emailAlreadyAssignedTooltip'];
     } else if (!isValidEmail(nationalCoordinator.email)) {
       return resourcesContext.messages['notValidEmailTooltip'];
     } else if (isEmpty(nationalCoordinator.countryCode)) {
@@ -105,9 +111,11 @@ export const AddNationalCoordinator = ({ onUpdateData }) => {
       <div className={styles.addDialog}>
         <label className={styles.label}>{resourcesContext.messages['manageNationalCoordinatorsDialogColumn']}</label>
         <InputText
-          className={styles.nameInput}
+          className={emailHasError ? styles.error : ''}
           id="name"
+          keyfilter="email"
           maxLength={50}
+          onBlur={event => checkDuplicates(event.target.value)}
           onChange={event => onChangeEmail(event.target.value)}
           placeholder={resourcesContext.messages['nationalCoordinatorsEmail']}
           value={nationalCoordinator.email}

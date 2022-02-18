@@ -190,7 +190,10 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
 
   const dialogFooter = (
     <div className={styles.buttonsDialogFooter}>
-      <AddNationalCoordinator onUpdateData={setIsDataUpdated} />
+      <AddNationalCoordinator
+        nationalCoordinatorsEmails={nationalCoordinatorsData.map(user => user.email)}
+        onUpdateData={setIsDataUpdated}
+      />
 
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
