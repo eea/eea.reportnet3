@@ -1,6 +1,9 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
+
+import { config } from 'conf';
 
 import styles from './ValidationsStatus.module.scss';
 
@@ -11,16 +14,16 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Filters } from 'views/_components/Filters';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { Spinner } from 'views/_components/Spinner';
 
-import { BackgroundProcessService } from 'services/BackgroundProcessService'; // TODO IMPORT CORRECT SERVICE
+import { BackgroundProcessService } from 'services/BackgroundProcessService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
-// import { useFilters } from 'views/_functions/Hooks/useFilters'; // TODO CHECK IF NEEDED
 
 export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
@@ -31,31 +34,29 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [validationStatusId, setValidationStatusId] = useState(null);
   const [validationsStatuses, setValidationsStatusesList] = useState([]);
-  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 }); // TODO can be in same object with goToPage?
-  const [goToPage, setGoToPage] = useState(1);
   const [sort, setSort] = useState({ field: '', order: 0 });
+  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 }); // TODO can be in same object with goToPage and totalRecords?
   const [totalRecords, setTotalRecords] = useState(0);
-  const [dataflowId, setDataflowId] = useState(undefined);
+  const [goToPage, setGoToPage] = useState(1);
+  const [filteredRecords, setFilteredRecords] = useState(0);
+  const [isFiltered, setIsFiltered] = useState(false);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
-  const { getFilterBy, isFiltered, setData, resetFilterState } = useApplyFilters('validationsStatuses'); // TODO find how to use properly
-  //TODO CHECK IF NEEDED useFilters
+  const { getFilterBy, setData } = useApplyFilters('validationsStatuses'); // TODO find how to use properly
 
-  // TODO Filter : dataflowId, user
-  // TODO Pagination
   // TODO Ordering
+  // TODO Pagination
 
   const { firstRow, numberRows, pageNum } = pagination;
 
   useEffect(() => {
+    // if (true) { // TODO check double call on reset filter
     getValidationsStatuses();
+    // }
   }, [pagination, sort]);
 
   const getValidationsStatuses = async () => {
-    // TODO MAKE ASYNC
-    // const getValidationsStatuses = () => {
-    // await resetFilterState();
     setLoadingStatus('pending');
 
     const filterBy = await getFilterBy();
@@ -64,81 +65,18 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
       const { data } = await BackgroundProcessService.getValidationsStatuses({
         pageNum,
         numberRows,
-        sortBy: sort.field,
-        filterBy
+        sortOrder: sort.order,
+        sortField: sort.field,
+        user: filterBy.user,
+        dataflowId: filterBy.dataflowId,
+        status: filterBy.status?.join()
       });
-      // TODO CORRECT SERVICE CALL
-      // const data = {
-      //   totalRecords: 5,
-      //   filteredRecords: 2 // number of filtered records
-      //   statuses: [
-      //     {
-      //       id: 10,
-      //       dataflowId: 111,
-      //       dataflowName: 'Dataflow name',
-      //       datasetId: 1,
-      //       datasetName: 'Dataset name',
-      //       status: 'importing',
-      //       queuedDate: 1644572710000,
-      //       processStartingDate: 1644572711000,
-      //       processFinishingDate: 1644572712000,
-      //       user: 'igor.provider@reportnet.net'
-      //     },
-      //     {
-      //       id: 20,
-      //       dataflowId: 222,
-      //       dataflowName: 'Dataflow name',
-      //       datasetId: 2,
-      //       datasetName: 'Dataset name',
-      //       status: 'imported',
-      //       queuedDate: 1644572720000,
-      //       processStartingDate: 1644572721000,
-      //       processFinishingDate: 1644572722000,
-      //       user: 'pablo.provider@reportnet.net'
-      //     },
-      //     {
-      //       id: 30,
-      //       dataflowId: 333,
-      //       dataflowName: 'Dataflow name',
-      //       datasetId: 3,
-      //       datasetName: 'Dataset name',
-      //       status: 'validating',
-      //       queuedDate: 1644572730000,
-      //       processStartingDate: 1644572731000,
-      //       processFinishingDate: 1644572732000,
-      //       user: 'miguel.provider@reportnet.net'
-      //     },
-      //     {
-      //       id: 40,
-      //       dataflowId: 444,
-      //       dataflowName: 'Dataflow name',
-      //       datasetId: 4,
-      //       datasetName: 'Dataset name',
-      //       status: 'validated',
-      //       queuedDate: 1644572740000,
-      //       processStartingDate: 1644572741000,
-      //       processFinishingDate: 1644572742000,
-      //       user: 'miriam.provider@reportnet.net'
-      //     },
-      //     {
-      //       id: 50,
-      //       dataflowId: 555,
-      //       dataflowName: 'Dataflow name',
-      //       datasetId: 5,
-      //       datasetName: 'Dataset name',
-      //       status: 'in_queue',
-      //       queuedDate: 1644572750000,
-      //       processStartingDate: 1644572751000,
-      //       processFinishingDate: 1644572752000,
-      //       user: 'mikel.provider@reportnet.net'
-      //     }
-      //   ]
-      // };
+
       setTotalRecords(data.totalRecords);
-      // setValidationsStatusesList(data.statuses);
-      setValidationsStatusesList(data);
-      // setData(data.statuses); // TODO CHECK IF NEEDED
-      setData(data); // TODO CHECK IF NEEDED
+      setValidationsStatusesList(data.processList);
+      setFilteredRecords(data.filteredRecords);
+      setIsFiltered(Object.keys(filterBy).length !== 0 && data.filteredRecords !== data.totalRecords);
+      setData(data.processList);
       setLoadingStatus('success');
     } catch (error) {
       console.error('ValidationsStatus - getValidationsStatuses.', error);
@@ -160,7 +98,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
       console.error('ValidationsStatus - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
 
-      // notificationContext.add({ status: 'DELETE_VALIDATION_FROM_QUEUE_ERROR' }, true); //TODO ADD NOTIFICATIONS
+      //notificationContext.add({ status: 'DELETE_VALIDATION_FROM_QUEUE_ERROR' }, true); //TODO ADD NOTIFICATIONS
     } finally {
       setValidationStatusId(null);
     }
@@ -177,15 +115,25 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   const onSort = event => {
-    setSort({ field: event.sortField, order: event.sortOrder });
+    let sortField;
+
+    if (event.sortField === 'dataflow') {
+      sortField = 'dataflowName';
+    } else if (sortField === 'dataset') {
+      sortField = 'datasetName';
+    } else {
+      sortField = event.sortField;
+    }
+
+    setSort({ field: sortField, order: event.sortOrder });
   };
 
   const onChangePagination = event => {
-    setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: Math.floor(event.first / event.rows) });
+    setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
   };
 
   const onChangePage = event => {
-    setGoToPage(event.target.value);
+    setGoToPage(event.page + 1);
     onChangePagination(event);
   };
 
@@ -200,16 +148,47 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     {
       key: 'status',
       label: resourcesContext.messages['status'],
+      multiSelectOptions: [
+        {
+          type: resourcesContext.messages[config.datasetRunningStatus.IMPORTING.label].toUpperCase(),
+          value: config.datasetRunningStatus.IMPORTING.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetRunningStatus.IMPORTED.label].toUpperCase(),
+          value: config.datasetRunningStatus.IMPORTED.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetRunningStatus.VALIDATING.label].toUpperCase(),
+          value: config.datasetRunningStatus.VALIDATING.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetRunningStatus.VALIDATED.label].toUpperCase(),
+          value: config.datasetRunningStatus.VALIDATED.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetRunningStatus.IN_QUEUE.label].toUpperCase(),
+          value: config.datasetRunningStatus.IN_QUEUE.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetRunningStatus.FINISHED.label].toUpperCase(),
+          value: config.datasetRunningStatus.FINISHED.key
+        }
+      ],
       type: 'MULTI_SELECT'
     }
   ];
+
+  const getStatusTemplate = rowData => {
+    console.log('rowData.status', rowData.status);
+    return <div>{resourcesContext.messages[config.datasetRunningStatus[rowData.status].label].toUpperCase()}</div>;
+  };
 
   const getTableColumns = () => {
     const columns = [
       { key: 'dataflow', header: resourcesContext.messages['dataflow'], template: getDataflowTemplate },
       { key: 'dataset', header: resourcesContext.messages['dataset'], template: getDatasetTemplate },
       { key: 'user', header: resourcesContext.messages['user'] },
-      { key: 'status', header: resourcesContext.messages['status'] },
+      { key: 'status', header: resourcesContext.messages['status'], template: getStatusTemplate },
       {
         key: 'queuedDate',
         header: resourcesContext.messages['queuedDate'],
@@ -224,13 +203,13 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         key: 'processFinishingDate',
         header: resourcesContext.messages['processFinishingDate'],
         template: validation => getDateTemplate(validation, 'processFinishingDate')
-      },
-      {
-        key: 'actions',
-        header: resourcesContext.messages['actions'],
-        template: getActionsTemplate,
-        className: styles.actionsColumn
       }
+      // {
+      //   key: 'actions',
+      //   header: resourcesContext.messages['actions'],
+      //   template: getActionsTemplate,
+      //   className: styles.actionsColumn
+      // }
     ];
 
     return columns.map(column => (
@@ -241,16 +220,9 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         field={column.key}
         header={column.header}
         key={column.key}
+        sortable
       />
     ));
-  };
-
-  const getBtnIcon = (id, iconName) => {
-    if (id === validationStatusId && loadingStatus === 'pending') {
-      return 'spinnerAnimate';
-    }
-
-    return iconName;
   };
 
   const getActionsTemplate = validation => {
@@ -258,11 +230,19 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
       <Button
         className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
         disabled={loadingStatus === 'pending'}
-        icon={getBtnIcon(validation.id, 'trash')}
+        icon={getBtnIcon(validation.id)}
         onClick={() => onShowDeleteDialog(validation)}
         status="button"
       />
     );
+  };
+
+  const getBtnIcon = id => {
+    if (id === validationStatusId && loadingStatus === 'pending') {
+      return 'spinnerAnimate';
+    }
+
+    return 'trash';
   };
 
   const getDataflowTemplate = validation => (
@@ -290,6 +270,37 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
+  const onFilter = () => {
+    if (isFiltered) {
+      onChangePagination({
+        firstRow: 0,
+        numberRows: pagination.numberRows,
+        pageNum: 0
+      });
+    } else {
+      getValidationsStatuses();
+    }
+  };
+
+  const onReset = () => {
+    if (pagination.pageNum !== 0) {
+      onChangePagination({
+        firstRow: 0,
+        numberRows: pagination.numberRows,
+        pageNum: 0
+      });
+    }
+  };
+
+  // const renderPaginatorRecordsCount = () => (
+  //   <Fragment>
+  //     {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
+  //     {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
+  //       'records'
+  //     ].toLowerCase()}`}
+  //   </Fragment>
+  // );
+
   const renderDialogContent = () => {
     if (isLoading) {
       return (
@@ -312,24 +323,8 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         <Filters
           className="lineItems"
           isLoading={isLoading}
-          onFilter={() => {
-            if (isFiltered) {
-              onChangePagination({
-                firstRow: 0,
-                numberRows: pagination.numberRows,
-                pageNum: 0
-              });
-            } else {
-              getValidationsStatuses();
-            }
-          }}
-          onReset={() => {
-            onChangePagination({
-              firstRow: 0,
-              numberRows: pagination.numberRows,
-              pageNum: 0
-            });
-          }}
+          onFilter={onFilter}
+          onReset={onReset}
           options={filterOptions}
           recoilId="validationsStatuses"
         />
@@ -337,12 +332,23 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
           autoLayout
           first={firstRow}
           hasDefaultCurrentPage
-          // loading={loadingStatus === 'pending' && isNil(validationStatusId)} // TODO CONTROL LOADING STATUS
+          loading={loadingStatus === 'pending' && isNil(validationStatusId)} // TODO CONTROL LOADING STATUS
           onPage={onChangePage}
           onSort={onSort}
           paginator
-          rows={10}
+          paginatorRight={
+            <PaginatorRecordsCount
+              dataLength={totalRecords}
+              filteredDataLength={filteredRecords}
+              isFiltered={isFiltered}
+            />
+          }
+          reorderableColumns
+          resizableColumns
+          rows={numberRows}
           rowsPerPageOptions={[5, 10, 15]}
+          sortField={sort.field}
+          sortOrder={sort.order}
           totalRecords={validationsStatuses.length}
           value={validationsStatuses}>
           {getTableColumns()}

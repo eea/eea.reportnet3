@@ -1500,13 +1500,6 @@
     "deleteUserNotificationsError": "Error deleting user notifications",
     "finalFeedback": "Final feedback",
     "multiple": "Multiple",
-    "validationStatusLeftBarButton": "Validations status",
-    "validationsStatusesDialogHeader": "Validations statuses",
-    "queuedDate": "Queued date",
-    "processStartingDate": "Process starting date",
-    "processFinishingDate": "Process fininshing date",
-    "validationRemoveQueueDialogHeader": "Remove from queue",
-    "validationRemoveQueueDialogContent": "Are you sure you want to remove this validation from queue?",
     "importedData": "Imported data",
     "importData": "Import data",
     "importingData": "Importing data",
@@ -1528,6 +1521,18 @@
     "createNationalCoordinatorsError": "Error creating national coordinator",
     "emptyNationalCoordinatorsCountryError": "Please select a country",
     "getValidationsStatusesError": "Error loading validations statuses",
-    "deleteValidationFromQueueError": "Error deleting validation from queue"
+    "deleteValidationFromQueueError": "Error deleting validation from queue",
+    "validationStatusLeftBarButton": "Validations status",
+    "validationsStatusesDialogHeader": "Validations statuses",
+    "queuedDate": "Queued date",
+    "processStartingDate": "Process starting date",
+    "processFinishingDate": "Process fininshing date",
+    "validationRemoveQueueDialogHeader": "Remove from queue",
+    "validationRemoveQueueDialogContent": "Are you sure you want to remove this validation from queue?",
+    "inQueue": "In queue",
+    "finished": "Finished",
+    "imported": "Imported",
+    "importing": "Importing",
+    "validated": "Validated"
   }
 }

@@ -162,6 +162,7 @@ export const Dataflows = () => {
 
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
   const { resetFiltersState: resetReportingObligationsFiltersState } = useFilters('reportingObligations');
+  const { resetFilterState: resetValidationsStatusesFilterState } = useApplyFilters('validationsStatuses');
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -797,6 +798,11 @@ export const Dataflows = () => {
     }
   };
 
+  const onCloseValidationStatusDialog = () => {
+    manageDialogs('isValidationStatusDialogVisible', false);
+    resetValidationsStatusesFilterState();
+  };
+
   const onChangePagination = pagination => dataflowsDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
 
   const onPaginate = event => {
@@ -979,7 +985,7 @@ export const Dataflows = () => {
       {dataflowsState.isValidationStatusDialogVisible && (
         <ValidationsStatus
           isDialogVisible={dataflowsState.isValidationStatusDialogVisible}
-          onCloseDialog={() => manageDialogs('isValidationStatusDialogVisible', false)}
+          onCloseDialog={onCloseValidationStatusDialog}
         />
       )}
 
