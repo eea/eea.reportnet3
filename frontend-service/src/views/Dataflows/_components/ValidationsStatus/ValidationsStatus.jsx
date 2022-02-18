@@ -300,9 +300,10 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         </div>
       );
     }
-    if (isFiltered) {
+
+    if (isFiltered && isEmpty(validationsStatuses)) {
       return (
-        <div className="dialogContent">
+        <div className={styles.dialogContent}>
           <Filters
             className="lineItems"
             isLoading={isLoading}
@@ -311,7 +312,6 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
             options={filterOptions}
             recoilId="validationsStatuses"
           />
-
           <div className={styles.noDataContent}>
             <p>{resourcesContext.messages['validationsStatusesNotMatchingFilter']}</p>
           </div>
@@ -341,7 +341,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
           autoLayout
           first={firstRow}
           hasDefaultCurrentPage
-          loading={loadingStatus === 'pending' && isNil(validationStatusId)} // TODO CONTROL LOADING STATUS
+          loading={loadingStatus === 'pending' && isNil(validationStatusId)}
           onPage={onChangePage}
           onSort={onSort}
           paginator
