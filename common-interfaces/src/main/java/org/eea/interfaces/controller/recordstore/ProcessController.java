@@ -30,6 +30,7 @@ public interface ProcessController {
    * @param status the status
    * @param dataflowId the dataflow id
    * @param user the user
+   * @param header the header
    * @return the processes
    */
   @GetMapping()
@@ -39,7 +40,8 @@ public interface ProcessController {
       @RequestParam(value = "asc", defaultValue = "true") boolean asc,
       @RequestParam(value = "status", required = false) String status,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-      @RequestParam(value = "user", required = false) String user);
+      @RequestParam(value = "user", required = false) String user,
+      @RequestParam(value = "header", required = false) String header);
 
   /**
    * Update process.
