@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
@@ -28,6 +28,7 @@ import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 
 export const PublicDataflows = () => {
   const navigate = useNavigate();
@@ -191,15 +192,6 @@ export const PublicDataflows = () => {
     setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
   };
 
-  const renderPaginatorRecordsCount = () => (
-    <Fragment>
-      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
-      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
-        'dataflows'
-      ].toLowerCase()}`}
-    </Fragment>
-  );
-
   const renderPaginator = () => {
     if (totalRecords > 0) {
       return (
@@ -208,7 +200,14 @@ export const PublicDataflows = () => {
           className={`p-paginator-bottom ${styles.paginator}`}
           first={firstRow}
           onPageChange={onPaginate}
-          rightContent={renderPaginatorRecordsCount()}
+          rightContent={
+            <PaginatorRecordsCount
+              dataLength={totalRecords}
+              filteredDataLength={filteredRecords}
+              isFiltered={isFiltered}
+              nameRecords="dataflows"
+            />
+          }
           rows={numberRows}
           rowsPerPageOptions={[100, 150, 200]}
           template={currentPageTemplate}

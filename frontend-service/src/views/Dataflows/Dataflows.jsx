@@ -56,6 +56,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 
 const { permissions } = config;
 
@@ -401,15 +402,6 @@ export const Dataflows = () => {
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' }, true);
     }
   };
-
-  const renderPaginatorRecordsCount = () => (
-    <Fragment>
-      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
-      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
-        'dataflows'
-      ].toLowerCase()}`}
-    </Fragment>
-  );
 
   const manageDialogs = (dialog, value) => {
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
@@ -849,7 +841,14 @@ export const Dataflows = () => {
           first={pagination.firstRow}
           isDataflowsList={true}
           onPageChange={onPaginate}
-          rightContent={renderPaginatorRecordsCount()}
+          rightContent={
+            <PaginatorRecordsCount
+              dataLength={totalRecords}
+              filteredDataLength={filteredRecords}
+              isFiltered={isFiltered}
+              nameRecords="dataflows"
+            />
+          }
           rows={pagination.numberRows}
           rowsPerPageOptions={[100, 150, 200]}
           template={currentPageTemplate}

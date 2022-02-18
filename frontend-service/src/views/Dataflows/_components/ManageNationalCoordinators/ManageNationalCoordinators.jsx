@@ -174,7 +174,7 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
           paginatorRight={
             <PaginatorRecordsCount
               dataLength={nationalCoordinatorsData.length}
-              filteredData={filteredData}
+              filteredDataLength={filteredData.length}
               isFiltered={isFiltered}
             />
           }
