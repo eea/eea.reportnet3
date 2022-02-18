@@ -86,6 +86,7 @@ public class EntityAccessService {
           ObjectAccessRoleEnum.TESTDATASET_CUSTODIAN, ObjectAccessRoleEnum.TESTDATASET_STEWARD,
           ObjectAccessRoleEnum.REFERENCEDATASET_OBSERVER,
           ObjectAccessRoleEnum.REFERENCEDATASET_CUSTODIAN,
+          ObjectAccessRoleEnum.REFERENCEDATASET_LEAD_REPORTER,
           ObjectAccessRoleEnum.REFERENCEDATASET_STEWARD, ObjectAccessRoleEnum.EUDATASET_CUSTODIAN,
           ObjectAccessRoleEnum.EUDATASET_STEWARD, ObjectAccessRoleEnum.DATACOLLECTION_CUSTODIAN,
           ObjectAccessRoleEnum.DATACOLLECTION_STEWARD, ObjectAccessRoleEnum.DATACOLLECTION_OBSERVER,
