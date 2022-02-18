@@ -42,15 +42,10 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   const setData = useRecoilCallback(
     ({ snapshot, set }) =>
       async data => {
-        const searchValue = await snapshot.getPromise(searchByStore('reportingObligations'));
-        const searchKeys = await snapshot.getPromise(filterByKeySearchStore('reportingObligations'));
-
-        const parsedData = data.filter(item =>
-          FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: searchValue })
-        );
+        const filteredData = await getValuesFilteredData(snapshot, data);
 
         set(dataStore('reportingObligations'), data);
-        set(filteredDataStore('reportingObligations'), parsedData);
+        set(filteredDataStore('reportingObligations'), filteredData);
       },
     []
   );
@@ -58,12 +53,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   const getFilteredData = useRecoilCallback(
     ({ snapshot }) =>
       async data => {
-        const searchValue = await snapshot.getPromise(searchByStore('reportingObligations'));
-        const searchKeys = await snapshot.getPromise(filterByKeySearchStore('reportingObligations'));
-
-        const filteredData = data.filter(item =>
-          FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: searchValue })
-        );
+        const filteredData = await getValuesFilteredData(snapshot, data);
 
         return filteredData;
       },
@@ -101,6 +91,17 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     onLoadOrganizations();
     onLoadReportingObligations();
   }, []);
+
+  const getValuesFilteredData = async (snapshot, data) => {
+    const searchValue = await snapshot.getPromise(searchByStore('reportingObligations'));
+    const searchKeys = await snapshot.getPromise(filterByKeySearchStore('reportingObligations'));
+
+    const filteredData = data.filter(item =>
+      FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: searchValue })
+    );
+
+    return filteredData;
+  };
 
   const onLoadCountries = async () => {
     try {
