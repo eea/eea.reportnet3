@@ -213,7 +213,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   };
 
   const renderPaginationCount = () => (
-    <PaginatorRecordsCount dataLength={totalRecords} filteredData={filteredData} isFiltered={isFiltered} />
+    <PaginatorRecordsCount dataLength={totalRecords} filteredDataLength={filteredRecords} isFiltered={isFiltered} />
   );
 
   const updateFilter = () => {

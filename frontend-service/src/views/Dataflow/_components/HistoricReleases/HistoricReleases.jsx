@@ -278,7 +278,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         paginatorRight={
           <PaginatorRecordsCount
             dataLength={historicReleasesState.data.length}
-            filteredData={filteredData}
+            filteredDataLength={filteredData.length}
             isFiltered={isFiltered}
           />
         }
