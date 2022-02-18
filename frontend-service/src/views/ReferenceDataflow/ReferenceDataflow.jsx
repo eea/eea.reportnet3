@@ -371,7 +371,7 @@ export const ReferenceDataflow = () => {
       {dataflowState.isEditDialogVisible && (
         <ManageReferenceDataflow
           dataflowId={referenceDataflowId}
-          isEditing
+          isEditing={true}
           isVisible={dataflowState.isEditDialogVisible}
           manageDialogs={manageDialogs}
           metadata={{ name: dataflowState.name, description: dataflowState.description, status: dataflowState.status }}
