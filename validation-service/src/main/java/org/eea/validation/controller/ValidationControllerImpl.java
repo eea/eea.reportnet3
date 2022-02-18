@@ -127,11 +127,9 @@ public class ValidationControllerImpl implements ValidationController {
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-
+      validationHelper.executeValidation(datasetId, processId, released, true);
       // Add lock to the release process if necessary
       validationHelper.addLockToReleaseProcess(datasetId);
-
-      validationHelper.executeValidation(datasetId, processId, released, true);
     } catch (EEAException e) {
       // TO DO Status will be updated based on the running process in the dataset, this call will be
       // changed when processes table is implemented
