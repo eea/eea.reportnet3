@@ -266,11 +266,11 @@ export const Dataflows = () => {
     }
   }, [userContext.contextRoles]);
 
-  useLayoutEffect(() => {
-    if (!isNil(userContext.contextRoles)) {
-      getDataflows();
-    }
-  }, [tabId, pagination]);
+  // useLayoutEffect(() => {
+  //   if (!isNil(userContext.contextRoles)) {
+  //     getDataflows();
+  //   }
+  // }, [tabId, pagination]);
 
   useEffect(() => {
     setActiveIndexTabOnBack();
@@ -315,11 +315,11 @@ export const Dataflows = () => {
       return dataflow;
     });
 
-  const getDataflows = async (sortBy = sortByOptions) => {
+  const getDataflows = async (sortBy = sortByOptions, pag = pagination) => {
     setLoading(true);
 
     const { accessRole: accessRoles, contextRoles } = userContext;
-    const { numberRows, pageNum } = pagination;
+    const { numberRows, pageNum } = pag;
 
     try {
       const filterBy = await getFilterBy();
@@ -786,6 +786,8 @@ export const Dataflows = () => {
   const onPaginate = event => {
     setGoToPage(event.page + 1);
     onChangePagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
+
+    getDataflows(sortByOptions, { firstRow: event.first, numberRows: event.rows, pageNum: event.page });
   };
 
   const setGoToPage = value => dataflowsDispatch({ type: 'SET_GO_TO_PAGE', payload: value });
@@ -871,13 +873,7 @@ export const Dataflows = () => {
               getDataflows();
             }
           }}
-          onReset={() => {
-            onChangePagination({
-              firstRow: 0,
-              numberRows: dataflowsState.pagination.numberRows,
-              pageNum: 0
-            });
-          }}
+          onReset={() => onPaginate({ first: 0, rows: dataflowsState.pagination.numberRows, page: 0 })}
           onSort={getDataflows}
           options={options[tabId]}
           panelClassName="overwriteZindexPanel"
