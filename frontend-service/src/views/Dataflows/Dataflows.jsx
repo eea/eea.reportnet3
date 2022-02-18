@@ -25,6 +25,7 @@ import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ManageWebforms } from './_components/ManageWebforms';
+import { ManageNationalCoordinators } from './_components/ManageNationalCoordinators';
 import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
@@ -56,6 +57,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 
 const { permissions } = config;
 
@@ -82,6 +84,7 @@ export const Dataflows = () => {
     isCitizenScienceDataflowDialogVisible: false,
     isCustodian: null,
     isFiltered: false,
+    isManageNationalCoordinatorsVisible: false,
     isManageWebformsDialogVisible: false,
     isNationalCoordinator: false,
     isRecreatePermissionsDialogVisible: false,
@@ -249,9 +252,19 @@ export const Dataflows = () => {
       title: 'validationStatusLeftBarButton'
     };
 
+    const adminManageNationalCoordinatorsBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'userTie',
+      isVisible: isAdmin,
+      label: 'nationalCoordinators',
+      onClick: () => manageDialogs('isManageNationalCoordinatorsDialogVisible', true),
+      title: 'manageNationalCoordinators'
+    };
+
     leftSideBarContext.addModels(
       [
         adminCreateNewPermissionsBtn,
+        adminManageNationalCoordinatorsBtn,
         adminManageWebformsBtn,
         adminValidationStatusBtn,
         createBusinessDataflowBtn,
@@ -401,15 +414,6 @@ export const Dataflows = () => {
       notificationContext.add({ type: 'LOAD_DATAFLOWS_ERROR' }, true);
     }
   };
-
-  const renderPaginatorRecordsCount = () => (
-    <Fragment>
-      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
-      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
-        'dataflows'
-      ].toLowerCase()}`}
-    </Fragment>
-  );
 
   const manageDialogs = (dialog, value) => {
     dataflowsDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value } });
@@ -847,7 +851,14 @@ export const Dataflows = () => {
           first={pagination.firstRow}
           isDataflowsList={true}
           onPageChange={onPaginate}
-          rightContent={renderPaginatorRecordsCount()}
+          rightContent={
+            <PaginatorRecordsCount
+              dataLength={totalRecords}
+              filteredDataLength={filteredRecords}
+              isFiltered={isFiltered}
+              nameRecords="dataflows"
+            />
+          }
           rows={pagination.numberRows}
           rowsPerPageOptions={[100, 150, 200]}
           template={currentPageTemplate}
@@ -969,6 +980,12 @@ export const Dataflows = () => {
         <ValidationsStatus
           isDialogVisible={dataflowsState.isValidationStatusDialogVisible}
           onCloseDialog={() => manageDialogs('isValidationStatusDialogVisible', false)}
+        />
+      )}
+      {dataflowsState.isManageNationalCoordinatorsDialogVisible && (
+        <ManageNationalCoordinators
+          isDialogVisible={dataflowsState.isManageNationalCoordinatorsDialogVisible}
+          onCloseDialog={() => manageDialogs('isManageNationalCoordinatorsDialogVisible', false)}
         />
       )}
 
