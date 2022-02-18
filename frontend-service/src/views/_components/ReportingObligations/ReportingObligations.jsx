@@ -55,6 +55,21 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     []
   );
 
+  const getFilteredData = useRecoilCallback(
+    ({ snapshot }) =>
+      async data => {
+        const searchValue = await snapshot.getPromise(searchByStore('reportingObligations'));
+        const searchKeys = await snapshot.getPromise(filterByKeySearchStore('reportingObligations'));
+
+        const filteredData = data.filter(item =>
+          FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: searchValue })
+        );
+
+        return filteredData;
+      },
+    []
+  );
+
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     countries: [],
     data: [],
@@ -79,9 +94,6 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     selectedObligation,
     totalRecords
   } = reportingObligationState;
-
-  const filteredData = useRecoilValue(filteredDataStore('reportingObligations'));
-  const searchBy = useRecoilValue(searchByStore('reportingObligations'));
 
   useEffect(() => {
     onLoadCountries();
@@ -129,12 +141,13 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     try {
       const filterBy = await getFilterBy();
       const response = await ObligationService.getOpen(filterBy);
-      const { obligations, filteredRecords, totalRecords } = response;
+      const { obligations, totalRecords } = response;
       const data = ReportingObligationUtils.initialValues(obligations, userContext.userProps.dateFormat);
+      const filteredData = await getFilteredData(data);
 
       reportingObligationDispatch({
         type: 'ON_LOAD_DATA',
-        payload: { data, filteredRecords, totalRecords, searchBy, filteredData }
+        payload: { data: data, filteredRecords: filteredData.length, totalRecords, filteredData }
       });
       setData(data);
     } catch (error) {
