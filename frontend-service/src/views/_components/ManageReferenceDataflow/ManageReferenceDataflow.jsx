@@ -36,8 +36,8 @@ export const ManageReferenceDataflow = ({
   isVisible,
   manageDialogs,
   metadata,
-  onEditDataflow,
-  onCreateDataflow
+  onCreateDataflow,
+  onEditDataflow
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
 
@@ -46,6 +46,14 @@ export const ManageReferenceDataflow = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+
+  const isCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    config.permissions.roles.CUSTODIAN.key
+  ]);
+  const isSteward = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    config.permissions.roles.STEWARD.key
+  ]);
+  const isLeadDesigner = isSteward || isCustodian;
 
   const [deleteInput, setDeleteInput] = useState('');
   const [description, setDescription] = useState(isEditing ? metadata.description : '');
@@ -166,6 +174,20 @@ export const ManageReferenceDataflow = ({
     }
   };
 
+  const renderDeleteDataflowButton = () => {
+    if (isEditing && isDesign) {
+      return (
+        <Button
+          className="p-button-danger p-button-animated-blink"
+          disabled={!isLeadDesigner}
+          icon="trash"
+          label={resourcesContext.messages['deleteDataflowButton']}
+          onClick={() => setIsDeleteDialogVisible(true)}
+        />
+      );
+    }
+  };
+
   const renderDialogFooter = () => (
     <Fragment>
       <div className="p-toolbar-group-left">
@@ -187,14 +209,7 @@ export const ManageReferenceDataflow = ({
               uniqueIdentifier="pinDataflow"></TooltipButton>
           </div>
         )}
-        {isEditing && isDesign && (
-          <Button
-            className="p-button-danger p-button-animated-blink"
-            icon="trash"
-            label={resourcesContext.messages['deleteDataflowButton']}
-            onClick={() => setIsDeleteDialogVisible(true)}
-          />
-        )}
+        {renderDeleteDataflowButton()}
       </div>
       <Button
         className={`p-button-primary ${
@@ -240,9 +255,11 @@ export const ManageReferenceDataflow = ({
           />
           {!isEmpty(errors.name.message) && <ErrorMessage message={errors.name.message} />}
         </div>
+
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <InputTextarea
             className={styles.inputTextArea}
+            disabled={isEditing && (!isLeadDesigner || !isDesign)}
             id="dataflowDescription"
             onBlur={checkErrors}
             onChange={event => setDescription(event.target.value)}

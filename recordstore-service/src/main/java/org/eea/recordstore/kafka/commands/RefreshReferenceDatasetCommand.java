@@ -70,6 +70,7 @@ public class RefreshReferenceDatasetCommand extends AbstractEEAEventHandlerComma
       Map<String, Object> values = new HashMap<>();
       values.put(LiteralConstants.DATASET_ID, datasetId);
       values.put("released", released);
+      values.put("processId", String.valueOf(eeaEventVO.getData().get("processId")));
       kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
     }
   }

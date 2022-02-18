@@ -1,5 +1,7 @@
 import classNames from 'classnames';
 
+import styles from './MultiSelectItem.module.scss';
+
 export const MultiSelectItem = ({
   disabled = false,
   label,
@@ -10,6 +12,12 @@ export const MultiSelectItem = ({
   tabIndex,
   template
 }) => {
+  const getClassNameLabel = () => {
+    if (selected) {
+      return styles.itemSelected;
+    }
+  };
+
   const onClickEvent = event => {
     if (onClick && !disabled) {
       onClick({
@@ -29,6 +37,18 @@ export const MultiSelectItem = ({
     }
   };
 
+  const renderCheckbox = () => {
+    if (!disabled) {
+      return (
+        <div className="p-checkbox p-component">
+          <div className={checkboxClassName}>
+            <span aria-label="Select all" className={checkboxIcon}></span>
+          </div>
+        </div>
+      );
+    }
+  };
+
   const className = classNames(option.className, 'p-multiselect-item', {
     'p-highlight': selected,
     'p-disabled': disabled
@@ -44,19 +64,12 @@ export const MultiSelectItem = ({
     <li
       aria-selected={selected}
       className={className}
-      // id={label}
       onClick={event => onClickEvent(event)}
       onKeyDown={event => onKeyDownEvent(event)}
       role="option"
       tabIndex={disabled ? null : tabIndex}>
-      {!disabled && (
-        <div className="p-checkbox p-component">
-          <div className={checkboxClassName}>
-            <span aria-label="Select all" className={checkboxIcon}></span>
-          </div>
-        </div>
-      )}
-      <label>{content}</label>
+      {renderCheckbox()}
+      <label className={getClassNameLabel()}>{content}</label>
     </li>
   );
 };

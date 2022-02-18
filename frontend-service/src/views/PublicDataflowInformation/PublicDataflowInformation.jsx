@@ -320,10 +320,12 @@ export const PublicDataflowInformation = () => {
         restrictFromPublic: dataset.restrictFromPublic,
         publicsFileName: publicFileNames,
         deliveryStatus: !dataset.isReleased
-          ? config.datasetStatus.PENDING.label
+          ? resourcesContext.messages[config.datasetStatus.PENDING.label]
           : !hasManualAcceptance
-          ? config.datasetStatus.DELIVERED.label
-          : DataflowUtils.getTechnicalAcceptanceStatus(datasetsFromRepresentative.map(dataset => dataset.status))
+          ? resourcesContext.messages[config.datasetStatus.DELIVERED.label]
+          : resourcesContext.messages[
+              DataflowUtils.getTechnicalAcceptanceStatus(datasetsFromRepresentative.map(dataset => dataset.status))
+            ]
       };
     });
 

@@ -15,12 +15,15 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
@@ -53,23 +56,19 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 
 /**
- * The Class ValidationServiceController.
+ * The Class ValidationControllerImpl.
  */
 @RestController
 @RequestMapping(value = "/validation")
 public class ValidationControllerImpl implements ValidationController {
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ValidationControllerImpl.class);
 
-  /**
-   * The validation service.
-   */
+  /** The validation service. */
   @Autowired
   @Qualifier("proxyValidationService")
   private ValidationService validationService;
@@ -90,10 +89,13 @@ public class ValidationControllerImpl implements ValidationController {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  /** The process controller zuul. */
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
 
   /**
-   * Validate data set data. The lock should be released on
-   * ValidationHelper.checkFinishedValidations(..)
+   * Validate data set data.
    *
    * @param datasetId the dataset id
    * @param released the released
@@ -115,6 +117,8 @@ public class ValidationControllerImpl implements ValidationController {
         "The user invoking ValidationControllerImpl.validateDataSetData is {} and the datasetId {}",
         SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
 
+    String processId = UUID.randomUUID().toString();
+
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -127,10 +131,13 @@ public class ValidationControllerImpl implements ValidationController {
       // Add lock to the release process if necessary
       validationHelper.addLockToReleaseProcess(datasetId);
 
-      validationHelper.executeValidation(datasetId, UUID.randomUUID().toString(), released, true);
+      validationHelper.executeValidation(datasetId, processId, released, true);
     } catch (EEAException e) {
       // TO DO Status will be updated based on the running process in the dataset, this call will be
       // changed when processes table is implemented
+      processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.CANCELED,
+          ProcessTypeEnum.VALIDATION, processId, processId,
+          SecurityContextHolder.getContext().getAuthentication().getName());
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
       LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);

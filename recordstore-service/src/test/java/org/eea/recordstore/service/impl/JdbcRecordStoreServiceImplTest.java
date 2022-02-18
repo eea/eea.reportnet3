@@ -543,7 +543,7 @@ public class JdbcRecordStoreServiceImplTest {
         .when(datasetMetabaseControllerZuul
             .findReportingDataSetIdByDataflowIdAndProviderId(Mockito.any(), Mockito.any()))
         .thenReturn(reportings);
-    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true);
+    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true, "processId");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
@@ -561,7 +561,7 @@ public class JdbcRecordStoreServiceImplTest {
     reportings.add(reportingDatasetVO);
     Mockito.when(testDatasetControllerZuul.findTestDatasetByDataflowId(Mockito.any()))
         .thenReturn(reportings);
-    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true);
+    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true, "processId");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
@@ -579,7 +579,7 @@ public class JdbcRecordStoreServiceImplTest {
     reportings.add(reportingDatasetVO);
     Mockito.when(dataCollectionControllerZuul.findDataCollectionIdByDataflowId(Mockito.any()))
         .thenReturn(reportings);
-    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true);
+    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true, "processId");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
@@ -597,7 +597,7 @@ public class JdbcRecordStoreServiceImplTest {
     reportings.add(reportingDatasetVO);
     Mockito.when(euDatasetControllerZuul.findEUDatasetByDataflowId(Mockito.any()))
         .thenReturn(reportings);
-    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true);
+    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true, "processId");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
@@ -615,7 +615,7 @@ public class JdbcRecordStoreServiceImplTest {
     reportings.add(reportingDatasetVO);
     Mockito.when(referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(Mockito.any()))
         .thenReturn(reportings);
-    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true);
+    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true, "processId");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 

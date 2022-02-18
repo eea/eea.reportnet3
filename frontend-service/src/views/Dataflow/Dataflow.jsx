@@ -334,8 +334,8 @@ export const Dataflow = () => {
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       datasetsInfoBtn: isAdmin && isNil(dataProviderId),
-      editBtn: isDesign && isLeadDesigner && !isBusinessDataflow,
-      editBusinessBtn: (isAdmin || isLeadDesigner) && isBusinessDataflow,
+      editBtn: !isBusinessDataflow && ((isDesign && isLeadDesigner) || isAdmin),
+      editBusinessBtn: isBusinessDataflow && ((isDesign && isLeadDesigner) || isAdmin),
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
@@ -1643,7 +1643,7 @@ export const Dataflow = () => {
           <ManageDataflow
             dataflowId={dataflowId}
             isCustodian={isLeadDesigner}
-            isEditForm
+            isEditing={true}
             isVisible={dataflowState.isReportingDataflowDialogVisible}
             manageDialogs={manageDialogs}
             obligation={obligation}
@@ -1660,7 +1660,7 @@ export const Dataflow = () => {
             dataflowId={dataflowId}
             hasRepresentatives={dataflowState.data.representatives.length !== 0}
             isAdmin={dataflowState.isAdmin}
-            isEditing
+            isEditing={true}
             isVisible={dataflowState.isBusinessDataflowDialogVisible}
             manageDialogs={manageDialogs}
             obligation={obligation}

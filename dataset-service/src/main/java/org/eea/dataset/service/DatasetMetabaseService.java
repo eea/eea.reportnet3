@@ -35,6 +35,14 @@ public interface DatasetMetabaseService {
   DataSetMetabaseVO findDatasetMetabase(Long idDataset);
 
   /**
+   * Find data set by dataflow ids.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the list
+   */
+  List<DataSetMetabaseVO> findDataSetByDataflowIds(List<Long> dataflowIds);
+
+  /**
    * Delete design dataset.
    *
    * @param datasetId the dataset id
@@ -265,10 +273,19 @@ public interface DatasetMetabaseService {
   /**
    * Update dataset running status.
    *
+   * @param datasetId the dataset id
    * @param datasetRunningStatus the dataset running status
    * @throws EEAException the EEA exception
    */
   void updateDatasetRunningStatus(Long datasetId, DatasetRunningStatusEnum datasetRunningStatus)
       throws EEAException;
+
+  /**
+   * Gets the reportings by provider ids.
+   *
+   * @param providerIds the provider ids
+   * @return the reportings by provider ids
+   */
+  List<DataSetMetabaseVO> getDatasetsByProviderIds(List<Long> providerIds);
 
 }
