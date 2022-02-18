@@ -30,7 +30,7 @@ export const ManageDataflow = ({
   dataflowId,
   isCitizenScienceDataflow,
   isCustodian,
-  isEditForm = false,
+  isEditing = false,
   isVisible,
   manageDialogs,
   obligation,
@@ -50,10 +50,10 @@ export const ManageDataflow = ({
   const reportingDataflowInitialState = {
     dataflowStatus: state.status,
     deleteInput: '',
-    description: isEditForm ? state.description : '',
+    description: isEditing ? state.description : '',
     isDeleting: false,
     isSubmitting: false,
-    name: isEditForm ? state.name : '',
+    name: isEditing ? state.name : '',
     obligation,
     pinDataflow: false,
     isReleasable: state.isReleasable
@@ -73,7 +73,7 @@ export const ManageDataflow = ({
   );
 
   useEffect(() => {
-    if (isEditForm) {
+    if (isEditing) {
       onLoadObligation({ id: state.obligations.obligationId, title: state.obligations.title });
       setCheckedObligation({ id: state.obligations.obligationId, title: state.obligations.title });
     }
@@ -135,32 +135,38 @@ export const ManageDataflow = ({
     <Button
       className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
       icon="cancel"
-      label={isEditForm ? resourcesContext.messages['cancel'] : resourcesContext.messages['close']}
+      label={isEditing ? resourcesContext.messages['cancel'] : resourcesContext.messages['close']}
       onClick={() => action()}
     />
   );
 
   const getModalHeader = () => {
     if (isCitizenScienceDataflow) {
-      return isEditForm
+      return isEditing
         ? resourcesContext.messages['updateCitizenScienceDataflow']
         : resourcesContext.messages['createNewCitizenScienceDataflow'];
+    } else {
+      return isEditing ? resourcesContext.messages['updateDataflow'] : resourcesContext.messages['createNewDataflow'];
     }
-    return isEditForm ? resourcesContext.messages['updateDataflow'] : resourcesContext.messages['createNewDataflow'];
   };
 
-  const renderDataflowDialog = () => (
-    <Fragment>
-      <div className="p-toolbar-group-left">
-        {isEditForm && isCustodian && state.status === config.dataflowStatus.DESIGN && (
+  const renderDataflowDialog = () => {
+    const renderDeleteDataflowButton = () => {
+      if (isEditing && isCustodian && state.status === config.dataflowStatus.DESIGN) {
+        return (
           <Button
             className="p-button-danger p-button-animated-blink"
             icon="trash"
             label={resourcesContext.messages['deleteDataflowButton']}
             onClick={() => manageDialogs('isDeleteDialogVisible', true)}
           />
-        )}
-        {!isEditForm && (
+        );
+      }
+    };
+
+    const renderCheckBoxPinned = () => {
+      if (!isEditing) {
+        return (
           <div className={styles.checkboxWrapper}>
             <Checkbox
               ariaLabel={resourcesContext.messages['pinDataflow']}
@@ -190,30 +196,39 @@ export const ManageDataflow = ({
               message={resourcesContext.messages['pinDataflowMessage']}
               uniqueIdentifier="pinDataflow"></TooltipButton>
           </div>
-        )}
-      </div>
-      <Button
-        className={`p-button-primary ${
-          !isEmpty(reportingDataflowState.name) &&
-          !isEmpty(reportingDataflowState.description) &&
-          !isNil(reportingDataflowState.obligation?.id) &&
-          !reportingDataflowState.isSubmitting
-            ? 'p-button-animated-blink'
-            : ''
-        }`}
-        disabled={
-          isEmpty(reportingDataflowState.name) ||
-          isEmpty(reportingDataflowState.description) ||
-          isNil(reportingDataflowState.obligation?.id) ||
-          reportingDataflowState.isSubmitting
-        }
-        icon={reportingDataflowState.isSubmitting ? 'spinnerAnimate' : isEditForm ? 'check' : 'add'}
-        label={isEditForm ? resourcesContext.messages['save'] : resourcesContext.messages['create']}
-        onClick={() => (reportingDataflowState.isSubmitting ? {} : onSave())}
-      />
-      {renderCancelButton(onHideDataflowDialog)}
-    </Fragment>
-  );
+        );
+      }
+    };
+
+    return (
+      <Fragment>
+        <div className="p-toolbar-group-left">
+          {renderDeleteDataflowButton()}
+          {renderCheckBoxPinned()}
+        </div>
+        <Button
+          className={`p-button-primary ${
+            !isEmpty(reportingDataflowState.name) &&
+            !isEmpty(reportingDataflowState.description) &&
+            !isNil(reportingDataflowState.obligation?.id) &&
+            !reportingDataflowState.isSubmitting
+              ? 'p-button-animated-blink'
+              : ''
+          }`}
+          disabled={
+            isEmpty(reportingDataflowState.name) ||
+            isEmpty(reportingDataflowState.description) ||
+            isNil(reportingDataflowState.obligation?.id) ||
+            reportingDataflowState.isSubmitting
+          }
+          icon={reportingDataflowState.isSubmitting ? 'spinnerAnimate' : isEditing ? 'check' : 'add'}
+          label={isEditing ? resourcesContext.messages['save'] : resourcesContext.messages['create']}
+          onClick={() => (reportingDataflowState.isSubmitting ? {} : onSave())}
+        />
+        {renderCancelButton(onHideDataflowDialog)}
+      </Fragment>
+    );
+  };
 
   return (
     <Fragment>
@@ -229,7 +244,7 @@ export const ManageDataflow = ({
             dialogName={dialogName}
             getData={onLoadData}
             isCitizenScienceDataflow={isCitizenScienceDataflow}
-            isEditForm={isEditForm}
+            isEditing={isEditing}
             metadata={reportingDataflowState}
             obligation={reportingDataflowState.obligation}
             onCreate={onCreateDataflow}

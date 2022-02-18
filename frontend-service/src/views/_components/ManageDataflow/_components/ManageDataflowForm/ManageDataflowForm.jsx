@@ -29,7 +29,7 @@ export const ManageDataflowForm = forwardRef(
       dialogName,
       getData,
       isCitizenScienceDataflow,
-      isEditForm,
+      isEditing,
       metadata,
       onCreate,
       onEdit,
@@ -52,7 +52,7 @@ export const ManageDataflowForm = forwardRef(
     ]);
     const isLeadDesigner = isSteward || isCustodian;
 
-    const isDesign = TextUtils.areEquals(metadata?.status, config.dataflowStatus.DESIGN);
+    const isDesign = TextUtils.areEquals(metadata?.dataflowStatus, config.dataflowStatus.DESIGN);
 
     const [description, setDescription] = useState(metadata.description);
     const [errors, setErrors] = useState({
@@ -108,7 +108,7 @@ export const ManageDataflowForm = forwardRef(
         try {
           const service = isCitizenScienceDataflow ? CitizenScienceDataflowService : DataflowService;
 
-          if (isEditForm) {
+          if (isEditing) {
             await service.update(
               dataflowId,
               name,
@@ -143,7 +143,7 @@ export const ManageDataflowForm = forwardRef(
             });
             notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' }, true);
           } else {
-            const notification = isEditForm
+            const notification = isEditing
               ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId: metadata.id, dataflowName: name } }
               : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };
 
@@ -193,7 +193,7 @@ export const ManageDataflowForm = forwardRef(
           <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
             <InputTextarea
               className={styles.inputTextArea}
-              disabled={!isLeadDesigner || !isDesign}
+              disabled={isEditing && (!isLeadDesigner || !isDesign)}
               id="dataflowDescription"
               name="description"
               onBlur={() => checkIsCorrectInputValue(description, 'description')}
@@ -227,7 +227,7 @@ export const ManageDataflowForm = forwardRef(
 
           <div className={`${styles.search}`}>
             <Button
-              disabled={!isLeadDesigner || !isDesign}
+              disabled={isEditing && (!isLeadDesigner || !isDesign)}
               icon="search"
               label={resourcesContext.messages['searchObligations']}
               onClick={onSearch}

@@ -238,6 +238,19 @@ export const ManageBusinessDataflow = ({
   };
 
   const renderDialogFooter = () => {
+    const renderDeleteDataflowButton = () => {
+      if (isEditing && isDesign && isAdmin) {
+        return (
+          <Button
+            className="p-button-danger p-button-animated-blink"
+            icon="trash"
+            label={resourcesContext.messages['deleteDataflowButton']}
+            onClick={() => setIsDeleteDialogVisible(true)}
+          />
+        );
+      }
+    };
+
     const renderCheckBoxPinned = () => {
       if (!isEditing) {
         return (
@@ -261,24 +274,11 @@ export const ManageBusinessDataflow = ({
       }
     };
 
-    const renderDeleteDataflowButton = () => {
-      if (isEditing && isDesign && isAdmin) {
-        return (
-          <Button
-            className="p-button-danger p-button-animated-blink"
-            icon="trash"
-            label={resourcesContext.messages['deleteDataflowButton']}
-            onClick={() => setIsDeleteDialogVisible(true)}
-          />
-        );
-      }
-    };
-
     return (
       <Fragment>
         <div className="p-toolbar-group-left">
-          {renderCheckBoxPinned()}
           {renderDeleteDataflowButton()}
+          {renderCheckBoxPinned()}
         </div>
         <Button
           className={`p-button-primary ${

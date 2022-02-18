@@ -259,7 +259,7 @@ export const ManageReferenceDataflow = ({
         <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
           <InputTextarea
             className={styles.inputTextArea}
-            disabled={!isLeadDesigner || !isDesign}
+            disabled={isEditing && (!isLeadDesigner || !isDesign)}
             id="dataflowDescription"
             onBlur={checkErrors}
             onChange={event => setDescription(event.target.value)}
