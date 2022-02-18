@@ -20,18 +20,19 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
 export const ManageDataflowForm = forwardRef(
   (
     {
-      data,
       dataflowId,
       dialogName,
       getData,
       isCitizenScienceDataflow,
-      isEditForm,
+      isEditing,
+      metadata,
       onCreate,
       onEdit,
-      onHide,
       onResetData,
       onSearch,
       onSubmit,
@@ -51,13 +52,15 @@ export const ManageDataflowForm = forwardRef(
     ]);
     const isLeadDesigner = isSteward || isCustodian;
 
-    const [description, setDescription] = useState(data.description);
+    const isDesign = TextUtils.areEquals(metadata?.dataflowStatus, config.dataflowStatus.DESIGN);
+
+    const [description, setDescription] = useState(metadata.description);
     const [errors, setErrors] = useState({
       description: { message: '', hasErrors: false },
       name: { message: '', hasErrors: false },
       obligation: { message: '', hasErrors: false }
     });
-    const [name, setName] = useState(data.name);
+    const [name, setName] = useState(metadata.name);
 
     const form = useRef(null);
     const inputRef = useRef(null);
@@ -95,7 +98,7 @@ export const ManageDataflowForm = forwardRef(
     };
 
     const onConfirm = async pinned => {
-      checkIsCorrectInputValue(data.obligation.title, 'obligation');
+      checkIsCorrectInputValue(metadata.obligation.title, 'obligation');
       checkIsCorrectInputValue(name, 'name');
       checkIsCorrectInputValue(description, 'description');
 
@@ -105,19 +108,19 @@ export const ManageDataflowForm = forwardRef(
         try {
           const service = isCitizenScienceDataflow ? CitizenScienceDataflowService : DataflowService;
 
-          if (isEditForm) {
+          if (isEditing) {
             await service.update(
               dataflowId,
               name,
               description,
-              data.obligation.id,
-              data.isReleasable,
-              data.showPublicInfo
+              metadata.obligation.id,
+              metadata.isReleasable,
+              metadata.showPublicInfo
             );
 
-            onEdit(name, description, data.obligation.id);
+            onEdit(name, description, metadata.obligation.id);
           } else {
-            const creationResponse = await service.create(name, description, data.obligation.id);
+            const creationResponse = await service.create(name, description, metadata.obligation.id);
 
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
@@ -140,8 +143,8 @@ export const ManageDataflowForm = forwardRef(
             });
             notificationContext.add({ type: 'DATAFLOW_NAME_EXISTS' }, true);
           } else {
-            const notification = isEditForm
-              ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId: data.id, dataflowName: name } }
+            const notification = isEditing
+              ? { type: 'DATAFLOW_UPDATING_ERROR', content: { dataflowId: metadata.id, dataflowName: name } }
               : { type: 'DATAFLOW_CREATION_ERROR', content: { dataflowName: name } };
 
             notificationContext.add(notification, true);
@@ -165,7 +168,7 @@ export const ManageDataflowForm = forwardRef(
               name="name"
               onBlur={() => checkIsCorrectInputValue(name, 'name')}
               onChange={event => {
-                getData({ ...data, name: event.target.value });
+                getData({ ...metadata, name: event.target.value });
                 setName(event.target.value);
               }}
               onFocus={() => {
@@ -190,12 +193,12 @@ export const ManageDataflowForm = forwardRef(
           <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
             <InputTextarea
               className={styles.inputTextArea}
-              disabled={!isLeadDesigner}
+              disabled={isEditing && (!isLeadDesigner || !isDesign)}
               id="dataflowDescription"
               name="description"
               onBlur={() => checkIsCorrectInputValue(description, 'description')}
               onChange={event => {
-                getData({ ...data, description: event.target.value });
+                getData({ ...metadata, description: event.target.value });
                 setDescription(event.target.value);
               }}
               onFocus={() => {
@@ -224,7 +227,7 @@ export const ManageDataflowForm = forwardRef(
 
           <div className={`${styles.search}`}>
             <Button
-              disabled={!isLeadDesigner}
+              disabled={isEditing && (!isLeadDesigner || !isDesign)}
               icon="search"
               label={resourcesContext.messages['searchObligations']}
               onClick={onSearch}
@@ -233,14 +236,15 @@ export const ManageDataflowForm = forwardRef(
               className={`${styles.searchInput} ${errors.obligation.hasErrors ? styles.searchErrors : ''}`}
               id="searchObligation"
               name="obligation.title"
-              onBlur={() => checkIsCorrectInputValue(data.obligation.title, 'obligation')}
+              onBlur={() => checkIsCorrectInputValue(metadata.obligation.title, 'obligation')}
               onKeyPress={e => {
-                if (e.key === 'Enter' && !checkIsCorrectInputValue(data.obligation.title, 'obligation')) onConfirm();
+                if (e.key === 'Enter' && !checkIsCorrectInputValue(metadata.obligation.title, 'obligation'))
+                  onConfirm();
               }}
               placeholder={resourcesContext.messages['associatedObligation']}
               readOnly={true}
               type="text"
-              value={data.obligation.title}
+              value={metadata.obligation.title}
             />
             <label className="srOnly" htmlFor="searchObligation">
               {resourcesContext.messages['searchObligations']}
