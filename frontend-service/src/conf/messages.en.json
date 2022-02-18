@@ -1489,6 +1489,7 @@
     "nameIsEmptyError": "Name is empty",
     "true": "True",
     "false": "False",
-    "externalExportDesignInit": "External design export init"
+    "externalExportDesignInit": "External design export init",
+    "getMetadataError": "Error getting metadata"
   }
 }
