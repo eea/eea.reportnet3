@@ -373,7 +373,7 @@ export const ManageBusinessDataflow = ({
                   appendTo={document.body}
                   ariaLabel="fmeUsers"
                   className={styles.fmeUsersWrapper}
-                  disabled={isAdmin && !isDesign}
+                  disabled={isAdmin || !isDesign}
                   name="fmeUsers"
                   onChange={event => onSelectFmeUser(event.target.value)}
                   onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
@@ -385,7 +385,7 @@ export const ManageBusinessDataflow = ({
               </div>
               <div className={`${styles.search}`}>
                 <Button
-                  disabled={!isDesign}
+                  disabled={isAdmin || !isDesign}
                   icon="search"
                   label={resourcesContext.messages['searchObligations']}
                   onClick={() => manageDialogs('isReportingObligationsDialogVisible', true)}
