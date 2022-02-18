@@ -43,7 +43,7 @@ export const MultiSelectFilter = ({
       return <LevelError type={type} />;
     }
 
-    return <span className={styles.statusBox}>{type?.toString()}</span>;
+    return <span>{type?.toString()}</span>;
   };
 
   return (

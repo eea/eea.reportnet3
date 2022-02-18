@@ -25,6 +25,7 @@ import { ManageBusinessDataflow } from 'views/_components/ManageBusinessDataflow
 import { ManageDataflow } from 'views/_components/ManageDataflow';
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ManageWebforms } from './_components/ManageWebforms';
+import { ManageNationalCoordinators } from './_components/ManageNationalCoordinators';
 import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
@@ -82,6 +83,7 @@ export const Dataflows = () => {
     isCitizenScienceDataflowDialogVisible: false,
     isCustodian: null,
     isFiltered: false,
+    isManageNationalCoordinatorsVisible: false,
     isManageWebformsDialogVisible: false,
     isNationalCoordinator: false,
     isRecreatePermissionsDialogVisible: false,
@@ -249,9 +251,19 @@ export const Dataflows = () => {
       title: 'validationStatusLeftBarButton'
     };
 
+    const adminManageNationalCoordinatorsBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'userTie',
+      isVisible: isAdmin,
+      label: 'nationalCoordinators',
+      onClick: () => manageDialogs('isManageNationalCoordinatorsDialogVisible', true),
+      title: 'manageNationalCoordinators'
+    };
+
     leftSideBarContext.addModels(
       [
         adminCreateNewPermissionsBtn,
+        adminManageNationalCoordinatorsBtn,
         adminManageWebformsBtn,
         adminValidationStatusBtn,
         createBusinessDataflowBtn,
@@ -969,6 +981,13 @@ export const Dataflows = () => {
         <ValidationsStatus
           isDialogVisible={dataflowsState.isValidationStatusDialogVisible}
           onCloseDialog={() => manageDialogs('isValidationStatusDialogVisible', false)}
+        />
+      )}
+
+      {dataflowsState.isManageNationalCoordinatorsDialogVisible && (
+        <ManageNationalCoordinators
+          isDialogVisible={dataflowsState.isManageNationalCoordinatorsDialogVisible}
+          onCloseDialog={() => manageDialogs('isManageNationalCoordinatorsDialogVisible', false)}
         />
       )}
 
