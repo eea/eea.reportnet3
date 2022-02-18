@@ -1,5 +1,6 @@
 package org.eea.security.authorization;
 
+// TODO: Auto-generated Javadoc
 /**
  * The enum Object access role enum. Allows to know if the user has access to the right entity
  */
@@ -53,6 +54,7 @@ public enum ObjectAccessRoleEnum {
   /** The dataset observer. */
   DATASET_OBSERVER("ROLE_DATASET-%s-DATA_OBSERVER"),
 
+  /** The dataset steward support. */
   DATASET_STEWARD_SUPPORT("ROLE_DATASET-%s-STEWARD_SUPPORT"),
 
   /** The dataset reporter write. */
@@ -132,6 +134,9 @@ public enum ObjectAccessRoleEnum {
 
   /** The referencedataset custodian. */
   REFERENCEDATASET_CUSTODIAN("ROLE_REFERENCEDATASET-%s-DATA_CUSTODIAN"),
+
+  /** The referencedataset lead reporter. */
+  REFERENCEDATASET_LEAD_REPORTER("ROLE_REFERENCEDATASET-%s-LEAD_REPORTER"),
 
   /** The referencedataset steward support. */
   REFERENCEDATASET_STEWARD_SUPPORT("ROLE_REFERENCEDATASET-%s-STEWARD_SUPPORT");
