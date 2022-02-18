@@ -141,9 +141,21 @@ export const DataflowRepository = {
   validateAllDataflowsUsers: async () =>
     await HTTPRequester.update({ url: getUrl(DataflowConfig.validateAllDataflowsUsers) }),
 
-  getValidationsStatuses: async ({ filterBy, isAsc, numberRows, pageNum }) =>
-    await HTTPRequester.get({
-      url: getUrl(DataflowConfig.getValidationsStatuses, { isAsc, numberRows, pageNum }),
-      data: { ...filterBy }
-    })
+  getValidationsStatuses: async ({ sortOrder, numberRows, pageNum, sortField = '', user, dataflowId, status }) => {
+    // if (sortOrder === -1) {
+    //   sortOrder = 0;
+    // }
+
+    return await HTTPRequester.get({
+      url: getUrl(DataflowConfig.getValidationsStatuses, {
+        sortOrder,
+        numberRows,
+        pageNum,
+        sortField,
+        user,
+        dataflowId,
+        status
+      })
+    });
+  }
 };

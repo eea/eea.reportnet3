@@ -5,5 +5,7 @@
   "VALIDATED": { "key": "VALIDATED", "label": "validated" },
   "RESTORING_SNAPSHOT": { "key": "RESTORING_SNAPSHOT", "label": "restoringSnapshot" },
   "ERROR_IN_VALIDATION": { "key": "ERROR_IN_VALIDATION", "label": "errorInValidation" },
-  "ERROR_IN_IMPORT": { "key": "ERROR_IN_IMPORT", "label": "errorInImport" }
+  "ERROR_IN_IMPORT": { "key": "ERROR_IN_IMPORT", "label": "errorInImport" },
+  "IN_QUEUE": { "key": "IN_QUEUE", "label": "inQueue" },
+  "FINISHED": { "key": "FINISHED", "label": "finished" }
 }

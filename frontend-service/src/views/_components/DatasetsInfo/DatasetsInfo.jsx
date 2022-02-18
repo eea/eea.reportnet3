@@ -107,7 +107,11 @@ export const DatasetsInfo = ({ dataflowId, dataflowType }) => {
       <DataTable
         paginator={true}
         paginatorRight={
-          <PaginatorRecordsCount dataLength={datasetsInfo.length} filteredData={filteredData} isFiltered={isFiltered} />
+          <PaginatorRecordsCount
+            dataLength={datasetsInfo.length}
+            filteredDataLength={filteredData.length}
+            isFiltered={isFiltered}
+          />
         }
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}

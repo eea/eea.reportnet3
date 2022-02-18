@@ -411,13 +411,15 @@ export const DataflowService = {
 
   validateAllDataflowsUsers: async () => await DataflowRepository.validateAllDataflowsUsers(),
 
-  getValidationsStatuses: async ({ filterBy, numberRows, pageNum, sortBy }) => {
+  getValidationsStatuses: async ({ numberRows, pageNum, sortField, sortOrder, user, dataflowId, status }) => {
     const validationsDTO = await DataflowRepository.getValidationsStatuses({
-      filterBy,
-      isAsc: true, // TODO parser?
       numberRows,
       pageNum,
-      sortBy
+      sortField,
+      sortOrder,
+      user,
+      dataflowId,
+      status
     });
 
     return validationsDTO;

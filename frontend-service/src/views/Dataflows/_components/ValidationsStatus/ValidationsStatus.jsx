@@ -3,6 +3,8 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { config } from 'conf';
+
 import styles from './ValidationsStatus.module.scss';
 
 import { Column } from 'primereact/column';
@@ -12,6 +14,7 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Filters } from 'views/_components/Filters';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { Spinner } from 'views/_components/Spinner';
 
 import { DataflowService } from 'services/DataflowService'; // TODO CREATE CORRECT SERVICE
@@ -21,7 +24,6 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
-// import { useFilters } from 'views/_functions/Hooks/useFilters'; // TODO CHECK IF NEEDED
 
 export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
@@ -32,24 +34,26 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [validationStatusId, setValidationStatusId] = useState(null);
   const [validationsStatuses, setValidationsStatusesList] = useState([]);
-  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 }); // TODO can be in same object with goToPage?
-  const [goToPage, setGoToPage] = useState(1);
   const [sort, setSort] = useState({ field: '', order: 0 });
+  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 }); // TODO can be in same object with goToPage and totalRecords?
   const [totalRecords, setTotalRecords] = useState(0);
+  const [goToPage, setGoToPage] = useState(1);
+  const [filteredRecords, setFilteredRecords] = useState(0);
+  const [isFiltered, setIsFiltered] = useState(false);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
-  const { getFilterBy, isFiltered, setData } = useApplyFilters('validationsStatuses'); // TODO find how to use properly
-  //TODO CHECK IF NEEDED useFilters
+  const { getFilterBy, setData } = useApplyFilters('validationsStatuses'); // TODO find how to use properly
 
-  // TODO Filter : dataflowId, user
-  // TODO Pagination
   // TODO Ordering
+  // TODO Pagination
 
   const { firstRow, numberRows, pageNum } = pagination;
 
   useEffect(() => {
+    // if (true) { // TODO check double call on reset filter
     getValidationsStatuses();
+    // }
   }, [pagination, sort]);
 
   const getValidationsStatuses = async () => {
@@ -61,19 +65,23 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
       const { data } = await DataflowService.getValidationsStatuses({
         pageNum,
         numberRows,
-        sortBy: sort.field,
-        filterBy
+        sortOrder: sort.order,
+        sortField: sort.field,
+        user: filterBy.user,
+        dataflowId: filterBy.dataflowId,
+        status: filterBy.status?.join()
       });
+
       setTotalRecords(data.totalRecords);
-      // setValidationsStatusesList(data.statuses);// TODO correct object
-      setValidationsStatusesList(data);
-      // setData(data.statuses); // TODO correct object
-      setData(data); // TODO CHECK IF NEEDED
+      setValidationsStatusesList(data.processList);
+      setFilteredRecords(data.filteredRecords);
+      setIsFiltered(Object.keys(filterBy).length !== 0 && data.filteredRecords !== data.totalRecords);
+      setData(data.processList);
       setLoadingStatus('success');
     } catch (error) {
       console.error('ValidationsStatus - getValidationsStatuses.', error);
       setLoadingStatus('error');
-      notificationContext.add({ status: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
+      // notificationContext.add({ status: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);//TODO add error message AND NOTIFICATION
     } finally {
       setIsLoading(false);
     }
@@ -90,7 +98,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
       console.error('ValidationsStatus - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
 
-      // notificationContext.add({ status: 'DELETE_VALIDATION_FROM_QUEUE_ERROR' }, true); //TODO ADD NOTIFICATIONS
+      //notificationContext.add({ status: 'DELETE_VALIDATION_FROM_QUEUE_ERROR' }, true); //TODO ADD NOTIFICATIONS
     } finally {
       setValidationStatusId(null);
     }
@@ -107,15 +115,25 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   const onSort = event => {
-    setSort({ field: event.sortField, order: event.sortOrder });
+    let sortField;
+
+    if (event.sortField === 'dataflow') {
+      sortField = 'dataflowName';
+    } else if (sortField === 'dataset') {
+      sortField = 'datasetName';
+    } else {
+      sortField = event.sortField;
+    }
+
+    setSort({ field: sortField, order: event.sortOrder });
   };
 
   const onChangePagination = event => {
-    setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: Math.floor(event.first / event.rows) });
+    setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
   };
 
   const onChangePage = event => {
-    setGoToPage(event.target.value);
+    setGoToPage(event.page + 1);
     onChangePagination(event);
   };
 
@@ -130,16 +148,47 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     {
       key: 'status',
       label: resourcesContext.messages['status'],
+      multiSelectOptions: [
+        {
+          type: resourcesContext.messages[config.datasetRunningStatus.IMPORTING.label].toUpperCase(),
+          value: config.datasetRunningStatus.IMPORTING.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetRunningStatus.IMPORTED.label].toUpperCase(),
+          value: config.datasetRunningStatus.IMPORTED.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetRunningStatus.VALIDATING.label].toUpperCase(),
+          value: config.datasetRunningStatus.VALIDATING.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetRunningStatus.VALIDATED.label].toUpperCase(),
+          value: config.datasetRunningStatus.VALIDATED.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetRunningStatus.IN_QUEUE.label].toUpperCase(),
+          value: config.datasetRunningStatus.IN_QUEUE.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetRunningStatus.FINISHED.label].toUpperCase(),
+          value: config.datasetRunningStatus.FINISHED.key
+        }
+      ],
       type: 'MULTI_SELECT'
     }
   ];
+
+  const getStatusTemplate = rowData => {
+    console.log('rowData.status', rowData.status);
+    return <div>{resourcesContext.messages[config.datasetRunningStatus[rowData.status].label].toUpperCase()}</div>;
+  };
 
   const getTableColumns = () => {
     const columns = [
       { key: 'dataflow', header: resourcesContext.messages['dataflow'], template: getDataflowTemplate },
       { key: 'dataset', header: resourcesContext.messages['dataset'], template: getDatasetTemplate },
       { key: 'user', header: resourcesContext.messages['user'] },
-      { key: 'status', header: resourcesContext.messages['status'] },
+      { key: 'status', header: resourcesContext.messages['status'], template: getStatusTemplate },
       {
         key: 'queuedDate',
         header: resourcesContext.messages['queuedDate'],
@@ -171,9 +220,11 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         field={column.key}
         header={column.header}
         key={column.key}
+        sortable
       />
     ));
   };
+
   const getActionsTemplate = validation => {
     return (
       <Button
@@ -219,6 +270,37 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
+  const onFilter = () => {
+    if (isFiltered) {
+      onChangePagination({
+        firstRow: 0,
+        numberRows: pagination.numberRows,
+        pageNum: 0
+      });
+    } else {
+      getValidationsStatuses();
+    }
+  };
+
+  const onReset = () => {
+    if (pagination.pageNum !== 0) {
+      onChangePagination({
+        firstRow: 0,
+        numberRows: pagination.numberRows,
+        pageNum: 0
+      });
+    }
+  };
+
+  // const renderPaginatorRecordsCount = () => (
+  //   <Fragment>
+  //     {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
+  //     {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
+  //       'records'
+  //     ].toLowerCase()}`}
+  //   </Fragment>
+  // );
+
   const renderDialogContent = () => {
     if (isLoading) {
       return (
@@ -241,24 +323,8 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         <Filters
           className="lineItems"
           isLoading={isLoading}
-          onFilter={() => {
-            if (isFiltered) {
-              onChangePagination({
-                firstRow: 0,
-                numberRows: pagination.numberRows,
-                pageNum: 0
-              });
-            } else {
-              getValidationsStatuses();
-            }
-          }}
-          onReset={() => {
-            onChangePagination({
-              firstRow: 0,
-              numberRows: pagination.numberRows,
-              pageNum: 0
-            });
-          }}
+          onFilter={onFilter}
+          onReset={onReset}
           options={filterOptions}
           recoilId="validationsStatuses"
         />
@@ -270,8 +336,19 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
           onPage={onChangePage}
           onSort={onSort}
           paginator
-          rows={10}
+          paginatorRight={
+            <PaginatorRecordsCount
+              dataLength={totalRecords}
+              filteredDataLength={filteredRecords}
+              isFiltered={isFiltered}
+            />
+          }
+          reorderableColumns
+          resizableColumns
+          rows={numberRows}
           rowsPerPageOptions={[5, 10, 15]}
+          sortField={sort.field}
+          sortOrder={sort.order}
           totalRecords={validationsStatuses.length}
           value={validationsStatuses}>
           {getTableColumns()}
