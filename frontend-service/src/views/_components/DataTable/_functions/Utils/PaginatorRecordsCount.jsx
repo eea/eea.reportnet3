@@ -2,19 +2,19 @@ import { useContext } from 'react';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const PaginatorRecordsCount = ({ dataLength, filteredData, isFiltered }) => {
+export const PaginatorRecordsCount = ({ dataLength, filteredDataLength, isFiltered }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const getRecordsDifferentFiltered = () => {
-    if (!isFiltered || dataLength === filteredData.length) {
+    if (!isFiltered || dataLength === filteredDataLength) {
       return '';
     }
 
-    return `${resourcesContext.messages['filtered']}: ${filteredData.length} | `;
+    return `${resourcesContext.messages['filtered']}: ${filteredDataLength} | `;
   };
 
   const getRecordsEqualsFiltered = () => {
-    if (!isFiltered || dataLength !== filteredData.length) {
+    if (!isFiltered || dataLength !== filteredDataLength) {
       return '';
     }
 
