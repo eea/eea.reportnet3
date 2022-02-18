@@ -58,6 +58,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     countries: [],
     data: [],
+    filteredRecords: 0,
     issues: [],
     isFiltered: false,
     isLoading: true,
@@ -67,10 +68,20 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     selectedObligation: obligationChecked
   });
 
-  const { countries, issues, isLoading, isFiltered, organizations, pagination, selectedObligation, totalRecords } =
-    reportingObligationState;
+  const {
+    countries,
+    filteredRecords,
+    issues,
+    isLoading,
+    isFiltered,
+    organizations,
+    pagination,
+    selectedObligation,
+    totalRecords
+  } = reportingObligationState;
 
   const filteredData = useRecoilValue(filteredDataStore('reportingObligations'));
+  const searchBy = useRecoilValue(searchByStore('reportingObligations'));
 
   useEffect(() => {
     onLoadCountries();
@@ -121,7 +132,10 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
       const { obligations, filteredRecords, totalRecords } = response;
       const data = ReportingObligationUtils.initialValues(obligations, userContext.userProps.dateFormat);
 
-      reportingObligationDispatch({ type: 'ON_LOAD_DATA', payload: { data, filteredRecords, totalRecords } });
+      reportingObligationDispatch({
+        type: 'ON_LOAD_DATA',
+        payload: { data, filteredRecords, totalRecords, searchBy, filteredData }
+      });
       setData(data);
     } catch (error) {
       console.error('ReportingObligations - onLoadReportingObligations.', error);
