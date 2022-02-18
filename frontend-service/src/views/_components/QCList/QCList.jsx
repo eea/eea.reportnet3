@@ -741,7 +741,7 @@ export const QCList = ({
             paginatorRight={
               <PaginatorRecordsCount
                 dataLength={tabsValidationsState.validationList.validations.length}
-                filteredData={filteredData}
+                filteredDataLength={filteredData.length}
                 isFiltered={isFiltered}
               />
             }
