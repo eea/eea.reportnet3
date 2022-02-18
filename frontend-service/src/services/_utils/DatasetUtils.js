@@ -88,7 +88,10 @@ const parseValue = ({ type, value, splitSRID = false }) => {
       if (parsedValue.properties.srid !== 'EPSG:3035' && parsedValue.properties.srid !== '3035') {
         switch (type.toUpperCase()) {
           case 'POINT':
-            inmValue.geometry.coordinates = [parsedValue.geometry.coordinates[1], parsedValue.geometry.coordinates[0]];
+            inmValue.geometry.coordinates =
+              !isNil(parsedValue.geometry.coordinates[0]) && !isNil(parsedValue.geometry.coordinates[1])
+                ? [parsedValue.geometry.coordinates[1], parsedValue.geometry.coordinates[0]]
+                : [];
             break;
           case 'MULTIPOINT':
           case 'LINESTRING':
