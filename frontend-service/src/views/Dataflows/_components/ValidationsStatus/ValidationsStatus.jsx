@@ -13,7 +13,7 @@ import { Dialog } from 'views/_components/Dialog';
 import { Filters } from 'views/_components/Filters';
 import { Spinner } from 'views/_components/Spinner';
 
-import { DataflowService } from 'services/DataflowService'; // TODO IMPORT CORRECT SERVICE
+import { ValidationsService } from 'services/ValidationsService'; // TODO IMPORT CORRECT SERVICE
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -61,7 +61,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     const filterBy = await getFilterBy();
 
     try {
-      const { data } = await DataflowService.getValidationsStatuses({
+      const { data } = await ValidationsService.getValidationsStatuses({
         pageNum,
         numberRows,
         sortBy: sort.field,
