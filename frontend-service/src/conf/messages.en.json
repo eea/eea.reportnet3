@@ -1526,6 +1526,8 @@
     "loadNationalCoordinatorsError": "Error loading national coordinators",
     "deleteNationalCoordinatorsError": "National coordinator deleting error",
     "createNationalCoordinatorsError": "Error creating national coordinator",
-    "emptyNationalCoordinatorsCountryError": "Please select a country"
+    "emptyNationalCoordinatorsCountryError": "Please select a country",
+    "getValidationsStatusesError": "Error loading validations statuses",
+    "deleteValidationFromQueueError": "Error deleting validation from queue"
   }
 }

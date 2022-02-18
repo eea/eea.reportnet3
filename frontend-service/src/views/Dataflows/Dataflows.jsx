@@ -982,6 +982,7 @@ export const Dataflows = () => {
           onCloseDialog={() => manageDialogs('isValidationStatusDialogVisible', false)}
         />
       )}
+
       {dataflowsState.isManageNationalCoordinatorsDialogVisible && (
         <ManageNationalCoordinators
           isDialogVisible={dataflowsState.isManageNationalCoordinatorsDialogVisible}

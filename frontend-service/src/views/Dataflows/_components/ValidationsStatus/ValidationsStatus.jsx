@@ -143,7 +143,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     } catch (error) {
       console.error('ValidationsStatus - getValidationsStatuses.', error);
       setLoadingStatus('error');
-      notificationContext.add({ status: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
+      notificationContext.add({ status: 'GET_VALIDATIONS_STATUSES_ERROR' }, true);
     } finally {
       setIsLoading(false);
     }
