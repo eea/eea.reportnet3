@@ -2,7 +2,7 @@ import { useContext } from 'react';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const PaginatorRecordsCount = ({ dataLength, filteredDataLength, isFiltered }) => {
+export const PaginatorRecordsCount = ({ dataLength, filteredDataLength, isFiltered, nameRecords = 'records' }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const getRecordsDifferentFiltered = () => {
@@ -22,7 +22,7 @@ export const PaginatorRecordsCount = ({ dataLength, filteredDataLength, isFilter
   };
 
   const recordsTotal = `${resourcesContext.messages['totalRecords']} ${dataLength} ${resourcesContext.messages[
-    'records'
+    nameRecords
   ].toLowerCase()}`;
 
   return `${getRecordsDifferentFiltered()}${recordsTotal}${getRecordsEqualsFiltered()}`;
