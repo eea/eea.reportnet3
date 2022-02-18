@@ -1643,7 +1643,7 @@ export const Dataflow = () => {
           <ManageDataflow
             dataflowId={dataflowId}
             isCustodian={isLeadDesigner}
-            isEditForm
+            isEditing={true}
             isVisible={dataflowState.isReportingDataflowDialogVisible}
             manageDialogs={manageDialogs}
             obligation={obligation}
@@ -1660,7 +1660,7 @@ export const Dataflow = () => {
             dataflowId={dataflowId}
             hasRepresentatives={dataflowState.data.representatives.length !== 0}
             isAdmin={dataflowState.isAdmin}
-            isEditing
+            isEditing={true}
             isVisible={dataflowState.isBusinessDataflowDialogVisible}
             manageDialogs={manageDialogs}
             obligation={obligation}
