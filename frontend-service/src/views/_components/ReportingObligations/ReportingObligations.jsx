@@ -26,6 +26,8 @@ import { reportingObligationReducer } from './_functions/Reducers/reportingOblig
 
 import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
 import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
+
 import { RodUrl } from 'repositories/config/RodUrl';
 
 export const ReportingObligations = ({ obligationChecked, setCheckedObligation }) => {
@@ -61,22 +63,14 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     isLoading: true,
     organizations: [],
     pagination: { first: 0, rows: 10, page: 0 },
-    filteredRecords: 0,
     totalRecords: 0,
     selectedObligation: obligationChecked
   });
 
-  const {
-    countries,
-    issues,
-    isLoading,
-    isFiltered,
-    organizations,
-    pagination,
-    selectedObligation,
-    filteredRecords,
-    totalRecords
-  } = reportingObligationState;
+  const { countries, issues, isLoading, isFiltered, organizations, pagination, selectedObligation, totalRecords } =
+    reportingObligationState;
+
+  const filteredData = useRecoilValue(filteredDataStore('reportingObligations'));
 
   useEffect(() => {
     onLoadCountries();
@@ -205,12 +199,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   };
 
   const renderPaginationCount = () => (
-    <Fragment>
-      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
-      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
-        'records'
-      ].toLowerCase()}`}
-    </Fragment>
+    <PaginatorRecordsCount dataLength={totalRecords} filteredData={filteredData} isFiltered={isFiltered} />
   );
 
   const updateFilter = () => {
@@ -261,8 +250,8 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
 
       <Filters
         className="reportingObligations"
-        onFilter={() => updateFilter()}
-        onReset={() => updateFilter()}
+        onFilter={updateFilter}
+        onReset={updateFilter}
         options={filterOptions}
         recoilId="reportingObligations"
       />
