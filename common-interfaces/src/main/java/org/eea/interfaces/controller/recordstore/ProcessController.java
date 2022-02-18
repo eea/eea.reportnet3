@@ -41,7 +41,7 @@ public interface ProcessController {
       @RequestParam(value = "status", required = false) String status,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "user", required = false) String user,
-      @RequestParam(value = "header", required = false) String header);
+      @RequestParam(value = "header", defaultValue = "date_start") String header);
 
   /**
    * Update process.
