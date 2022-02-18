@@ -283,29 +283,38 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   const onReset = () => {
-    if (pagination.pageNum !== 0) {
-      onChangePagination({
-        firstRow: 0,
-        numberRows: pagination.numberRows,
-        pageNum: 0
-      });
-    }
+    // if (pagination.pageNum !== 0) { // todo: check if this is needed
+    onChangePagination({
+      firstRow: 0,
+      numberRows: pagination.numberRows,
+      pageNum: 0
+    });
+    // }
   };
-
-  // const renderPaginatorRecordsCount = () => (
-  //   <Fragment>
-  //     {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
-  //     {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
-  //       'records'
-  //     ].toLowerCase()}`}
-  //   </Fragment>
-  // );
 
   const renderDialogContent = () => {
     if (isLoading) {
       return (
         <div className={styles.noDataContent}>
           <Spinner className={styles.spinnerPosition} />
+        </div>
+      );
+    }
+    if (isFiltered) {
+      return (
+        <div className="dialogContent">
+          <Filters
+            className="lineItems"
+            isLoading={isLoading}
+            onFilter={onFilter}
+            onReset={onReset}
+            options={filterOptions}
+            recoilId="validationsStatuses"
+          />
+
+          <div className={styles.noDataContent}>
+            <p>{resourcesContext.messages['validationsStatusesNotMatchingFilter']}</p>
+          </div>
         </div>
       );
     }

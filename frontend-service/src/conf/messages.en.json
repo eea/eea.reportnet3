@@ -1533,6 +1533,7 @@
     "finished": "Finished",
     "imported": "Imported",
     "importing": "Importing",
-    "validated": "Validated"
+    "validated": "Validated",
+    "validationsStatusesNotMatchingFilter": "There are no validations with the selected parameters"
   }
 }
