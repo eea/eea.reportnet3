@@ -117,11 +117,9 @@ public class ValidationControllerImpl implements ValidationController {
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-
       // Add lock to the release process if necessary
-      validationHelper.addLockToReleaseProcess(datasetId);
-
       validationHelper.executeValidation(datasetId, UUID.randomUUID().toString(), released, true);
+      validationHelper.addLockToReleaseProcess(datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);
     }
