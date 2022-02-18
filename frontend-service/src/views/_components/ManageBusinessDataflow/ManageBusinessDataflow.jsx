@@ -57,8 +57,8 @@ export const ManageBusinessDataflow = ({
   const [deleteInput, setDeleteInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState({});
-  const [selectedFmeUser, setSelectedFmeUser] = useState({});
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [selectedFmeUser, setSelectedFmeUser] = useState(null);
   const [description, setDescription] = useState(isEditing ? state.description : '');
   const [groupOfCompanies, setGroupOfCompanies] = useState([]);
   const [fmeUsers, setFmeUsers] = useState([]);
@@ -237,10 +237,10 @@ export const ManageBusinessDataflow = ({
     }
   };
 
-  const renderDialogFooter = () => (
-    <Fragment>
-      <div className="p-toolbar-group-left">
-        {!isEditing && (
+  const renderDialogFooter = () => {
+    const renderCheckBoxPinned = () => {
+      if (!isEditing) {
+        return (
           <div className={styles.checkboxWrapper}>
             <Checkbox
               ariaLabel={resourcesContext.messages['pinDataflow']}
@@ -257,46 +257,161 @@ export const ManageBusinessDataflow = ({
               message={resourcesContext.messages['pinDataflowMessage']}
               uniqueIdentifier="pinDataflow"></TooltipButton>
           </div>
-        )}
-        {isEditing && isDesign && isAdmin && (
+        );
+      }
+    };
+
+    const renderDeleteDataflowButton = () => {
+      if (isEditing && isDesign && isAdmin) {
+        return (
           <Button
             className="p-button-danger p-button-animated-blink"
             icon="trash"
             label={resourcesContext.messages['deleteDataflowButton']}
             onClick={() => setIsDeleteDialogVisible(true)}
           />
-        )}
-      </div>
-      <Button
-        className={`p-button-primary ${
-          !isEmpty(name) &&
-          !isEmpty(description) &&
-          !isNil(obligation.id) &&
-          !isNil(selectedFmeUser?.id) &&
-          !isNil(selectedGroup?.dataProviderGroupId) &&
-          !isSending &&
-          'p-button-animated-blink'
-        }`}
-        disabled={
-          isEmpty(name) ||
-          isEmpty(description) ||
-          isNil(obligation.id) ||
-          isNil(selectedFmeUser?.id) ||
-          isNil(selectedGroup?.dataProviderGroupId) ||
-          isSending
-        }
-        icon={isSending ? 'spinnerAnimate' : isEditing ? 'check' : 'plus'}
-        label={isEditing ? resourcesContext.messages['save'] : resourcesContext.messages['create']}
-        onClick={() => onManageBusinessDataflow()}
-      />
-      <Button
-        className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
-        icon="cancel"
-        label={isEditing ? resourcesContext.messages['cancel'] : resourcesContext.messages['close']}
-        onClick={onHideDataflowDialog}
-      />
-    </Fragment>
-  );
+        );
+      }
+    };
+
+    return (
+      <Fragment>
+        <div className="p-toolbar-group-left">
+          {renderCheckBoxPinned()}
+          {renderDeleteDataflowButton()}
+        </div>
+        <Button
+          className={`p-button-primary ${
+            !isEmpty(name) &&
+            !isEmpty(description) &&
+            !isNil(obligation.id) &&
+            !isNil(selectedFmeUser?.id) &&
+            !isNil(selectedGroup?.dataProviderGroupId) &&
+            !isSending
+              ? 'p-button-animated-blink'
+              : ''
+          }`}
+          disabled={
+            isEmpty(name) ||
+            isEmpty(description) ||
+            isNil(obligation.id) ||
+            isNil(selectedFmeUser?.id) ||
+            isNil(selectedGroup?.dataProviderGroupId) ||
+            isSending
+          }
+          icon={isSending ? 'spinnerAnimate' : isEditing ? 'check' : 'plus'}
+          label={isEditing ? resourcesContext.messages['save'] : resourcesContext.messages['create']}
+          onClick={() => onManageBusinessDataflow()}
+        />
+        <Button
+          className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}
+          icon="cancel"
+          label={isEditing ? resourcesContext.messages['cancel'] : resourcesContext.messages['close']}
+          onClick={onHideDataflowDialog}
+        />
+      </Fragment>
+    );
+  };
+
+  const renderForm = () => {
+    if (isLoading) {
+      return <Spinner className={styles.spinnerCenter} />;
+    }
+
+    return (
+      <Fragment>
+        <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
+          <InputText
+            hasMaxCharCounter={true}
+            id="dataflowName"
+            maxLength={config.INPUT_MAX_LENGTH}
+            onBlur={checkErrors}
+            onChange={event => setName(event.target.value)}
+            onFocus={() => handleErrors({ field: 'name', hasErrors: false, message: '' })}
+            placeholder={resourcesContext.messages['createDataflowName']}
+            ref={inputRef}
+            value={name}
+          />
+          {!isEmpty(errors.name.message) && <ErrorMessage message={errors.name.message} />}
+        </div>
+
+        <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
+          <InputTextarea
+            className={styles.inputTextArea}
+            disabled={isEditing && !isDesign}
+            id="dataflowDescription"
+            onBlur={checkErrors}
+            onChange={event => setDescription(event.target.value)}
+            onFocus={() => handleErrors({ field: 'description', hasErrors: false, message: '' })}
+            placeholder={resourcesContext.messages['createDataflowDescription']}
+            rows={10}
+            value={description}
+          />
+          <div className={styles.errorAndCounterWrapper}>
+            <CharacterCounter
+              currentLength={description.length}
+              maxLength={config.INPUT_MAX_LENGTH}
+              style={{ marginTop: '0.25rem' }}
+            />
+            {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
+          </div>
+        </div>
+        <div className={styles.dropdownsWrapper}>
+          <Dropdown
+            appendTo={document.body}
+            ariaLabel="groupOfCompanies"
+            className={styles.groupOfCompaniesWrapper}
+            disabled={isEditing && (!isAdmin || !isDesign || hasRepresentatives)}
+            name="groupOfCompanies"
+            onChange={event => onSelectGroup(event.target.value)}
+            onFocus={() => handleErrors({ field: 'groupOfCompanies', hasErrors: false, message: '' })}
+            optionLabel="label"
+            options={!isAdmin ? (!isNil(selectedGroup) ? [selectedGroup] : []) : groupOfCompanies}
+            placeholder={resourcesContext.messages['selectGroupOfCompanies']}
+            tooltip={
+              isAdmin && isDesign && hasRepresentatives
+                ? resourcesContext.messages['groupOfCompaniesDisabledTooltip']
+                : ''
+            }
+            value={selectedGroup}
+          />
+
+          <Dropdown
+            appendTo={document.body}
+            ariaLabel="fmeUsers"
+            className={styles.fmeUsersWrapper}
+            disabled={isEditing && (!isAdmin || !isDesign)}
+            name="fmeUsers"
+            onChange={event => onSelectFmeUser(event.target.value)}
+            onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
+            optionLabel="username"
+            options={!isAdmin ? (!isNil(selectedFmeUser) ? [selectedFmeUser] : []) : fmeUsers}
+            placeholder={resourcesContext.messages['selectFmeUser']}
+            value={selectedFmeUser}
+          />
+        </div>
+        <div className={`${styles.search}`}>
+          <Button
+            disabled={isEditing && !isDesign}
+            icon="search"
+            label={resourcesContext.messages['searchObligations']}
+            onClick={() => manageDialogs('isReportingObligationsDialogVisible', true)}
+          />
+          <InputText
+            className={`${styles.searchInput} ${errors?.obligation?.hasErrors ? styles.searchErrors : ''}`}
+            id="obligation"
+            placeholder={resourcesContext.messages['associatedObligation']}
+            readOnly={true}
+            type="text"
+            value={obligation.title}
+          />
+          <label className="srOnly" htmlFor="obligation">
+            {resourcesContext.messages['searchObligations']}
+          </label>
+        </div>
+      </Fragment>
+    );
+  };
 
   return (
     <Fragment>
@@ -310,101 +425,7 @@ export const ManageBusinessDataflow = ({
         }
         onHide={onHideDataflowDialog}
         visible={isVisible}>
-        <div className={styles.dialogContent}>
-          {isLoading ? (
-            <Spinner className={styles.spinnerCenter} />
-          ) : (
-            <Fragment>
-              <div className={`formField ${errors.name.hasErrors ? 'error' : ''}`}>
-                <InputText
-                  hasMaxCharCounter={true}
-                  id="dataflowName"
-                  maxLength={config.INPUT_MAX_LENGTH}
-                  onBlur={checkErrors}
-                  onChange={event => setName(event.target.value)}
-                  onFocus={() => handleErrors({ field: 'name', hasErrors: false, message: '' })}
-                  placeholder={resourcesContext.messages['createDataflowName']}
-                  ref={inputRef}
-                  value={name}
-                />
-                {!isEmpty(errors.name.message) && <ErrorMessage message={errors.name.message} />}
-              </div>
-
-              <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
-                <InputTextarea
-                  className={styles.inputTextArea}
-                  disabled={!isDesign}
-                  id="dataflowDescription"
-                  onBlur={checkErrors}
-                  onChange={event => setDescription(event.target.value)}
-                  onFocus={() => handleErrors({ field: 'description', hasErrors: false, message: '' })}
-                  placeholder={resourcesContext.messages['createDataflowDescription']}
-                  rows={10}
-                  value={description}
-                />
-                <div className={styles.errorAndCounterWrapper}>
-                  <CharacterCounter
-                    currentLength={description.length}
-                    maxLength={config.INPUT_MAX_LENGTH}
-                    style={{ marginTop: '0.25rem' }}
-                  />
-                  {!isEmpty(errors.description.message) && <ErrorMessage message={errors.description.message} />}
-                </div>
-              </div>
-              <div className={styles.dropdownsWrapper}>
-                <Dropdown
-                  appendTo={document.body}
-                  ariaLabel="groupOfCompanies"
-                  className={styles.groupOfCompaniesWrapper}
-                  disabled={!isAdmin || hasRepresentatives}
-                  name="groupOfCompanies"
-                  onChange={event => onSelectGroup(event.target.value)}
-                  onFocus={() => handleErrors({ field: 'groupOfCompanies', hasErrors: false, message: '' })}
-                  optionLabel="label"
-                  options={!isAdmin ? [selectedGroup] : groupOfCompanies}
-                  placeholder={resourcesContext.messages['selectGroupOfCompanies']}
-                  tooltip={
-                    isAdmin && hasRepresentatives ? resourcesContext.messages['groupOfCompaniesDisabledTooltip'] : ''
-                  }
-                  value={selectedGroup}
-                />
-
-                <Dropdown
-                  appendTo={document.body}
-                  ariaLabel="fmeUsers"
-                  className={styles.fmeUsersWrapper}
-                  disabled={isAdmin || !isDesign}
-                  name="fmeUsers"
-                  onChange={event => onSelectFmeUser(event.target.value)}
-                  onFocus={() => handleErrors({ field: 'fmeUsers', hasErrors: false, message: '' })}
-                  optionLabel="username"
-                  options={!isAdmin ? [selectedFmeUser] : fmeUsers}
-                  placeholder={resourcesContext.messages['selectFmeUser']}
-                  value={selectedFmeUser}
-                />
-              </div>
-              <div className={`${styles.search}`}>
-                <Button
-                  disabled={isAdmin || !isDesign}
-                  icon="search"
-                  label={resourcesContext.messages['searchObligations']}
-                  onClick={() => manageDialogs('isReportingObligationsDialogVisible', true)}
-                />
-                <InputText
-                  className={`${styles.searchInput} ${errors?.obligation?.hasErrors ? styles.searchErrors : ''}`}
-                  id="obligation"
-                  placeholder={resourcesContext.messages['associatedObligation']}
-                  readOnly={true}
-                  type="text"
-                  value={obligation.title}
-                />
-                <label className="srOnly" htmlFor="obligation">
-                  {resourcesContext.messages['searchObligations']}
-                </label>
-              </div>
-            </Fragment>
-          )}
-        </div>
+        <div className={styles.dialogContent}>{renderForm()}</div>
       </Dialog>
 
       {isDeleteDialogVisible && (
