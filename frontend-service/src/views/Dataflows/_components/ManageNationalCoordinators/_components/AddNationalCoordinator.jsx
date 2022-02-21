@@ -52,10 +52,9 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
   const addNationalCoordinator = async () => {
     try {
       setIsAdding(true);
-      nationalCoordinator.email = nationalCoordinator.email.trim();
 
       if (checkDuplicateNationalCoordinator(nationalCoordinator)) {
-        notificationContext.add({ type: 'ADDED_DUPLICATE_NATIONAL_COORDINATORS_ERROR' });
+        notificationContext.add({ type: 'ADDED_DUPLICATE_NATIONAL_COORDINATORS_ERROR' }, true);
       } else {
         await UserRightService.createNationalCoordinator(nationalCoordinator);
         onUpdateData(true);
@@ -115,7 +114,7 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
           id="name"
           keyfilter="email"
           maxLength={50}
-          onChange={event => onChangeEmail(event.target.value)}
+          onChange={event => onChangeEmail(event.target.value.trim())}
           placeholder={resourcesContext.messages['nationalCoordinatorsEmail']}
           value={nationalCoordinator.email}
         />
