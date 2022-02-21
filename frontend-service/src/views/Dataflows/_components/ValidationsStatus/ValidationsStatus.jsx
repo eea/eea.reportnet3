@@ -50,15 +50,14 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const { firstRow, numberRows, pageNum } = pagination;
 
   useEffect(() => {
-    // if (true) { // TODO check double call on reset filter
     getValidationsStatuses();
-    // }
   }, [pagination, sort]);
 
   const getValidationsStatuses = async () => {
     setLoadingStatus('pending');
 
     const filterBy = await getFilterBy();
+    console.log('filterBy', filterBy);
 
     try {
       const { data } = await BackgroundProcessService.getValidationsStatuses({
@@ -74,7 +73,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
       setTotalRecords(data.totalRecords);
       setValidationsStatusesList(data.processList);
       setFilteredRecords(data.filteredRecords);
-      setIsFiltered(Object.keys(filterBy).length !== 0 && data.filteredRecords !== data.totalRecords);
+      setIsFiltered(Object.keys(filterBy).length !== 0 && data.filteredRecords !== data.totalRecords); // TODO CHECK FILTERS ARE EMPTY
       setData(data.processList);
       setLoadingStatus('success');
     } catch (error) {
@@ -139,7 +138,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const filterOptions = [
     {
       nestedOptions: [
-        { key: 'dataflowId', label: resourcesContext.messages['dataflowId'] },
+        { key: 'dataflowId', label: resourcesContext.messages['dataflowId'], keyfilter: 'num' },
         { key: 'user', label: resourcesContext.messages['user'] }
       ],
       type: 'INPUT'
