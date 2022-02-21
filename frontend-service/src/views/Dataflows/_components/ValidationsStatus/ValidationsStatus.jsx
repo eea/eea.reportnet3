@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
+import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -22,10 +23,16 @@ import { BackgroundProcessService } from 'services/BackgroundProcessService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { filterByCustomFilterStore } from 'views/_components/Filters/_functions/Stores/filterStore';
+
 import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
 export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
+  const filterBy = useRecoilValue(filterByCustomFilterStore('validationsStatuses'));
+
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
@@ -53,11 +60,19 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     getValidationsStatuses();
   }, [pagination, sort]);
 
+  const checkIsFiltered = () => {
+    if (isEmpty(filterBy)) {
+      return false;
+    }
+
+    return Object.values(filterBy)
+      .map(key => TextUtils.areEquals(key.trim(), ''))
+      .includes(false);
+  };
+
   const getValidationsStatuses = async () => {
     setLoadingStatus('pending');
 
-    const filterBy = await getFilterBy();
-    console.log('filterBy', filterBy);
 
     try {
       const { data } = await BackgroundProcessService.getValidationsStatuses({
@@ -73,7 +88,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
       setTotalRecords(data.totalRecords);
       setValidationsStatusesList(data.processList);
       setFilteredRecords(data.filteredRecords);
-      setIsFiltered(Object.keys(filterBy).length !== 0 && data.filteredRecords !== data.totalRecords); // TODO CHECK FILTERS ARE EMPTY
+      setIsFiltered(checkIsFiltered()); // TODO CHECK FILTERS ARE EMPTY
       setData(data.processList);
       setLoadingStatus('success');
     } catch (error) {
@@ -246,27 +261,6 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
-  const onFilter = () => {
-    if (isFiltered) {
-      onChangePagination({
-        firstRow: 0,
-        numberRows: pagination.numberRows,
-        pageNum: 0
-      });
-    } else {
-      getValidationsStatuses();
-    }
-  };
-
-  const onReset = () => {
-    if (isFiltered) {
-      onChangePagination({
-        firstRow: 0,
-        numberRows: pagination.numberRows,
-        pageNum: 0
-      });
-    }
-  };
 
   const renderDialogContent = () => {
     if (isLoading) {
@@ -283,8 +277,8 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
           <Filters
             className="lineItems"
             isLoading={isLoading}
-            onFilter={onFilter}
-            onReset={onReset}
+            onFilter={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+            onReset={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
             options={filterOptions}
             recoilId="validationsStatuses"
           />
@@ -308,8 +302,8 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         <Filters
           className="lineItems"
           isLoading={isLoading}
-          onFilter={onFilter}
-          onReset={onReset}
+          onFilter={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+          onReset={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
           options={filterOptions}
           recoilId="validationsStatuses"
         />
