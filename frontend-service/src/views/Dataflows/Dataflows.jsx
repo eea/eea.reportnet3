@@ -791,8 +791,6 @@ export const Dataflows = () => {
   const onPaginate = event => {
     setGoToPage(event.page + 1);
     onChangePagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
-
-    // getDataflows(sortByOptions, { firstRow: event.first, numberRows: event.rows, pageNum: event.page });
   };
 
   const setGoToPage = value => dataflowsDispatch({ type: 'SET_GO_TO_PAGE', payload: value });

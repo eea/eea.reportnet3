@@ -30,12 +30,11 @@ export const InputFilter = ({
     recoilId
   });
 
-  const onKeyDown = event => {
+  const onKeyPress = async event => {
     if (event.key === 'Enter' && !isNil(onCustomFilter) && event.target.value) {
-      console.log('event :>> ', event.target.value);
-      getFilterBy();
       onFilter(event.target.value);
-      onCustomFilter();
+      await getFilterBy();
+      await onCustomFilter();
     }
   };
 
@@ -59,7 +58,7 @@ export const InputFilter = ({
           key={option.key}
           keyfilter={option.keyfilter}
           onChange={event => onFilter(event.target.value)}
-          onKeyDown={onKeyDown}
+          onKeyPress={onKeyPress}
           value={filterBy[option.key] || ''}
         />
         <label className={styles.label} htmlFor={`${option.key}_input`}>

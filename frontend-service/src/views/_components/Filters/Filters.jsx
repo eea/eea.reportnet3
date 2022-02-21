@@ -190,13 +190,10 @@ export const Filters = ({
           disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}
-          onClick={() => {
-            getFilterBy();
-            setTimeout(async () => {
-              await onFilter();
-            }, 0);
+          onClick={async () => {
+            await getFilterBy();
+            await onFilter();
           }}
-          // onMouseDown={getFilterBy}
         />
       </div>
     );

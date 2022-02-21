@@ -18,8 +18,8 @@ import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilter
 import { MultiSelectFilterUtils } from './_functions/Utils/MultiSelectFilterUtils';
 
 export const MultiSelectFilter = ({
-  hasCustomSort,
   getFilterBy,
+  hasCustomSort,
   isLoading,
   onFilterData,
   onSort,

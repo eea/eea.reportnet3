@@ -11,9 +11,9 @@ import { filterByKeyDropdownStore } from 'views/_components/Filters/_functions/S
 import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilters';
 
 export const DropdownFilter = ({
+  getFilterBy,
   hasCustomSort,
   isLoading,
-  getFilterBy,
   onFilterData,
   onSort,
   option,
@@ -43,8 +43,8 @@ export const DropdownFilter = ({
       }`}
       key={option.key}>
       <SortButton
-        id={option.key}
         getFilterBy={getFilterBy}
+        id={option.key}
         isLoading={isLoading}
         isVisible={option.isSortable}
         onSort={onSort}
