@@ -91,8 +91,7 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
   };
 
   const linkTemplate = rowData => {
-    if (rowData.downloadButton) {
-      console.log('ENTRO');
+    if (rowData.downloadButton) {      
       return rowData.downloadButton;
     }
 
@@ -192,8 +191,6 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
         pageSize: nRows
       });
 
-      console.log(unparsedNotifications);
-
       const parsedNotifications = unparsedNotifications.userNotifications.map(notification => {
         return NotificationService.parse({
           config: config.notifications.notificationSchema,
@@ -244,8 +241,7 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
         };
       });
 
-      setTotalRecords(unparsedNotifications.totalRecords);
-      console.log({ notificationsArray });
+      setTotalRecords(unparsedNotifications.totalRecords);      
       setNotifications(notificationsArray);
     } catch (error) {
       console.error('NotificationsList - onLoadNotifications.', error);

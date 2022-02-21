@@ -267,7 +267,6 @@ export const GlobalNotifications = () => {
       notification =>
         notification.key === 'IMPORT_DESIGN_COMPLETED_EVENT' ||
         notification.key === 'EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT' ||
-        // notification.key === 'EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT' ||
         notification.key === 'DELETE_TABLE_SCHEMA_COMPLETED_EVENT' ||
         notification.key === 'DELETE_DATASET_SCHEMA_COMPLETED_EVENT' ||
         notification.key === 'RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT'
