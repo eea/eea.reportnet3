@@ -19,6 +19,7 @@ import { MultiSelectFilterUtils } from './_functions/Utils/MultiSelectFilterUtil
 
 export const MultiSelectFilter = ({
   hasCustomSort,
+  getFilterBy,
   isLoading,
   onFilterData,
   onSort,
@@ -53,6 +54,7 @@ export const MultiSelectFilter = ({
       }`}
       key={option.key}>
       <SortButton
+        getFilterBy={getFilterBy}
         id={option.key}
         isLoading={isLoading}
         isVisible={option.isSortable}

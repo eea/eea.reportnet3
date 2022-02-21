@@ -13,6 +13,7 @@ import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilter
 export const DropdownFilter = ({
   hasCustomSort,
   isLoading,
+  getFilterBy,
   onFilterData,
   onSort,
   option,
@@ -43,6 +44,7 @@ export const DropdownFilter = ({
       key={option.key}>
       <SortButton
         id={option.key}
+        getFilterBy={getFilterBy}
         isLoading={isLoading}
         isVisible={option.isSortable}
         onSort={onSort}

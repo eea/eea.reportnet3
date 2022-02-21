@@ -12,7 +12,16 @@ import { filterByKeyInputStore } from 'views/_components/Filters/_functions/Stor
 
 import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilters';
 
-export const InputFilter = ({ hasCustomSort, isLoading, onCustomFilter, onFilterData, onSort, option, recoilId }) => {
+export const InputFilter = ({
+  getFilterBy,
+  hasCustomSort,
+  isLoading,
+  onCustomFilter,
+  onFilterData,
+  onSort,
+  option,
+  recoilId
+}) => {
   const { filterBy, onFilter } = useFilters({
     hasCustomSort,
     keyStore: filterByKeyInputStore,
@@ -21,8 +30,10 @@ export const InputFilter = ({ hasCustomSort, isLoading, onCustomFilter, onFilter
     recoilId
   });
 
-  const onKeyPress = event => {
-    if (event.key === 'Enter' && !isNil(onCustomFilter)) {
+  const onKeyDown = event => {
+    if (event.key === 'Enter' && !isNil(onCustomFilter) && event.target.value) {
+      console.log('event :>> ', event.target.value);
+      getFilterBy();
       onFilter(event.target.value);
       onCustomFilter();
     }
@@ -31,6 +42,7 @@ export const InputFilter = ({ hasCustomSort, isLoading, onCustomFilter, onFilter
   return (
     <div className={styles.block} key={option.key}>
       <SortButton
+        getFilterBy={getFilterBy}
         id={option.key}
         isLoading={isLoading}
         isVisible={option.isSortable}
@@ -47,7 +59,7 @@ export const InputFilter = ({ hasCustomSort, isLoading, onCustomFilter, onFilter
           key={option.key}
           keyfilter={option.keyfilter}
           onChange={event => onFilter(event.target.value)}
-          onKeyPress={onKeyPress}
+          onKeyDown={onKeyDown}
           value={filterBy[option.key] || ''}
         />
         <label className={styles.label} htmlFor={`${option.key}_input`}>

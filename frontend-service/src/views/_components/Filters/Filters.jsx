@@ -16,6 +16,7 @@ import { StrictModeToggle } from './_components/StrictModeToggle';
 
 import {
   dataStore,
+  filterByCustomFilterStore,
   filterByStore,
   filteredDataStore,
   isFilteredStore,
@@ -63,6 +64,21 @@ export const Filters = ({
   const clearDateInputs = () => {
     [...document.getElementsByClassName('date-filter-input')].forEach(input => (input.value = ''));
   };
+
+  const getFilterBy = useRecoilCallback(
+    ({ snapshot, set }) =>
+      async () => {
+        const filterByKeys = await snapshot.getPromise(filterByAllKeys(recoilId));
+        const response = await Promise.all(
+          filterByKeys.map(key => snapshot.getPromise(filterByStore(`${key}_${recoilId}`)))
+        );
+
+        const filterBy = Object.assign({}, ...response);
+
+        set(filterByCustomFilterStore(recoilId), filterBy);
+      },
+    [recoilId]
+  );
 
   const onFilterData = useRecoilCallback(
     ({ snapshot, set }) =>
@@ -124,6 +140,7 @@ export const Filters = ({
         reset(sortByStore(recoilId));
         reset(filteredDataStore(recoilId));
         reset(isFilteredStore(recoilId));
+        reset(filterByCustomFilterStore(recoilId));
         clearDateInputs();
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
       },
@@ -139,6 +156,7 @@ export const Filters = ({
 
     return (
       <FilterComponent
+        getFilterBy={getFilterBy}
         hasCustomSort={hasCustomSort}
         isLoading={isLoading}
         key={option.key}
@@ -172,7 +190,13 @@ export const Filters = ({
           disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}
-          onClick={() => onFilter()}
+          onClick={() => {
+            getFilterBy();
+            setTimeout(async () => {
+              await onFilter();
+            }, 0);
+          }}
+          // onMouseDown={getFilterBy}
         />
       </div>
     );
@@ -193,7 +217,7 @@ export const Filters = ({
             label={resourcesContext.messages['reset']}
             onClick={async () => {
               await onResetFilters();
-              onReset({ sortByHeader: '', sortByOption: 'idle' });
+              await onReset({ sortByHeader: '', sortByOption: 'idle' });
             }}
           />
         </div>
