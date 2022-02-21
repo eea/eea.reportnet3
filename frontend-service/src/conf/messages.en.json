@@ -1489,6 +1489,8 @@
     "y": "Y",
     "yes": "Yes",
     "zipCsvTable": "ZIP (.csv for each table)",
+    "getMetadataError": "Error getting metadata",
+    "externalExportDesignInit": "External design export init",
     "deleteUsersNotificationsHeader": "Delete user notifications",
     "deleteUsersNotificationsConfirm": "Are you sure you want to delete all user notifications?",
     "deleteUsersNotificationsData": "Delete user notifications",
@@ -1519,6 +1521,7 @@
     "loadNationalCoordinatorsError": "Error loading national coordinators",
     "deleteNationalCoordinatorsError": "National coordinator deleting error",
     "createNationalCoordinatorsError": "Error creating national coordinator",
-    "emptyNationalCoordinatorsCountryError": "Please select a country"
+    "emptyNationalCoordinatorsCountryError": "Please select a country",
+    "addedDuplicateNationalCoordinatorsError": "The national coordinator already exists in this country"
   }
 }

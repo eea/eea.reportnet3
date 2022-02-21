@@ -491,7 +491,7 @@ export const ShareRights = ({
           paginatorRight={
             <PaginatorRecordsCount
               dataLength={shareRightsState.userRightList.length}
-              filteredData={filteredData}
+              filteredDataLength={filteredData.length}
               isFiltered={isFiltered}
             />
           }

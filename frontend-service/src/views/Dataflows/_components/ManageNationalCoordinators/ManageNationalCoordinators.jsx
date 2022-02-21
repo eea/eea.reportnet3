@@ -2,6 +2,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './ManageNationalCoordinators.module.scss';
 
@@ -98,6 +99,11 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     />
   );
 
+  const checkDuplicateNationalCoordinator = nationalCoordinator =>
+    nationalCoordinatorsData.some(
+      user => user.countryCode === nationalCoordinator.countryCode && user.email === nationalCoordinator.email
+    );
+
   const renderTableColumns = () => {
     const columns = [
       {
@@ -174,7 +180,7 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
           paginatorRight={
             <PaginatorRecordsCount
               dataLength={nationalCoordinatorsData.length}
-              filteredData={filteredData}
+              filteredDataLength={filteredData.length}
               isFiltered={isFiltered}
             />
           }
@@ -190,7 +196,10 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
 
   const dialogFooter = (
     <div className={styles.buttonsDialogFooter}>
-      <AddNationalCoordinator onUpdateData={setIsDataUpdated} />
+      <AddNationalCoordinator
+        checkDuplicateNationalCoordinator={checkDuplicateNationalCoordinator}
+        onUpdateData={setIsDataUpdated}
+      />
 
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
