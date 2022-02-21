@@ -11,6 +11,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import lombok.Getter;
@@ -23,7 +24,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @Table(name = "PROCESS")
-public class Process {
+public class EEAProcess {
 
   /** The id. */
   @Id
@@ -37,9 +38,17 @@ public class Process {
   @Column(name = "dataset_id")
   private Long datasetId;
 
+  /** The dataset name. */
+  @Transient
+  private String datasetName;
+
   /** The dataflow id. */
   @Column(name = "dataflow_id")
   private Long dataflowId;
+
+  /** The dataflow name. */
+  @Transient
+  private String dataflowName;
 
   /** The process type. */
   @Column(name = "process_type")
@@ -85,7 +94,7 @@ public class Process {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    final Process dataflow = (Process) o;
+    final EEAProcess dataflow = (EEAProcess) o;
     return id.equals(dataflow.id);
 
   }

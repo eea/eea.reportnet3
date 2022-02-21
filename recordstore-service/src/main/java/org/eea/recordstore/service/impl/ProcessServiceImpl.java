@@ -3,26 +3,25 @@ package org.eea.recordstore.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.recordstore.mapper.ProcessMapper;
-import org.eea.recordstore.persistence.domain.Process;
+import org.eea.recordstore.persistence.domain.EEAProcess;
 import org.eea.recordstore.persistence.repository.ProcessRepository;
 import org.eea.recordstore.service.ProcessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.server.ResponseStatusException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 
 
@@ -68,30 +67,19 @@ public class ProcessServiceImpl implements ProcessService {
   @Override
   public ProcessesVO getProcesses(Pageable pageable, boolean asc, String status, Long dataflowId,
       String user, ProcessTypeEnum type, String header) {
-    List<Process> processList = processRepository.getProcessesPaginated(pageable, asc, status,
-        dataflowId, user, type, header);
+    List<EEAProcess> processList;
+    try {
+      processList = processRepository.getProcessesPaginated(pageable, asc, status, dataflowId, user,
+          type, header);
+    } catch (JsonProcessingException e) {
+      LOG.info("Error processing processes list from json. {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+          "Error retrieving processes list.");
+    }
     List<ProcessVO> processVOList = new ArrayList<>();
 
     if (!CollectionUtils.isEmpty(processList)) {
       processVOList = processMapper.entityListToClass(processList);
-      // Get all the information from dataflow and dataset in one go to avoid calling the database
-      // for
-      // each process
-      List<Long> dataflowIds =
-          processVOList.stream().map(ProcessVO::getDataflowId).collect(Collectors.toList());
-      List<DataSetMetabaseVO> datasets =
-          datasetMetabaseControllerZuul.findDataSetByDataflowIds(dataflowIds);
-      List<DataFlowVO> dataflows = dataflowControllerZuul.getDataflowsMetabaseById(dataflowIds);
-      // Associate dataflow and dataset ids with their respective names
-      Map<Long, String> datasetNameSet = datasets.stream()
-          .collect(Collectors.toMap(DataSetMetabaseVO::getId, DataSetMetabaseVO::getDataSetName));
-      Map<Long, String> dataflowNameSet =
-          dataflows.stream().collect(Collectors.toMap(DataFlowVO::getId, DataFlowVO::getName));
-
-      for (ProcessVO processVO : processVOList) {
-        processVO.setDatasetName(datasetNameSet.get(processVO.getDatasetId()));
-        processVO.setDataflowName(dataflowNameSet.get(processVO.getDataflowId()));
-      }
     }
     ProcessesVO processes = new ProcessesVO();
     processes.setTotalRecords(processRepository.countProcesses());
@@ -117,7 +105,8 @@ public class ProcessServiceImpl implements ProcessService {
   public void updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
       ProcessTypeEnum type, String processId, String threadId, String user) {
 
-    Process processToUpdate = processRepository.findOneByProcessId(processId).orElse(new Process());
+    EEAProcess processToUpdate =
+        processRepository.findOneByProcessId(processId).orElse(new EEAProcess());
 
     if (processToUpdate.getDatasetId() == null) {
       processToUpdate.setDatasetId(datasetId);
