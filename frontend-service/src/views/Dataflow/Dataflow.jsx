@@ -433,7 +433,7 @@ export const Dataflow = () => {
       if (!isAddButtonHidden) {
         return (
           <Button
-            className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink`}
+            className={`${styles.buttonLeft} p-button-animated-blink`}
             icon="plus"
             label={resourcesContext.messages['add']}
             onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
