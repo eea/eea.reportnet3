@@ -493,7 +493,7 @@ export class DataTable extends Component {
     }
   }
 
-  createPaginator(position, totalRecords, data) {
+  createPaginator(position, totalRecords) {
     const className = 'p-paginator-' + position;
 
     return (
@@ -546,7 +546,7 @@ export class DataTable extends Component {
                       </ReactTooltip>
                       <label style={{ margin: '0 0 0 0.5rem' }}>
                         {`${this.context.messages['of']} ${
-                          this.props.totalRecords > 0 ? ` ${Math.ceil(this.props.totalRecords / this.getRows())}` : 1
+                          totalRecords > 0 ? ` ${Math.ceil(totalRecords / this.getRows())}` : 1
                         }`}
                       </label>
                     </span>
