@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -1024,7 +1023,7 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
           value = "columnName", required = false) String columnName) {
     return this.etlExportDataset(datasetId, dataflowId, providerId, tableSchemaId, limit, offset,
-        filterValue, columnName, Strings.EMPTY);
+        filterValue, columnName, "");
   }
 
   /**
