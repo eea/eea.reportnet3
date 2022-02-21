@@ -52,11 +52,8 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
 
   const getFilteredData = useRecoilCallback(
     ({ snapshot }) =>
-      async data => {
-        const filteredData = await getValuesFilteredData(snapshot, data);
-
-        return filteredData;
-      },
+      async data =>
+        await getValuesFilteredData(snapshot, data),
     []
   );
 
