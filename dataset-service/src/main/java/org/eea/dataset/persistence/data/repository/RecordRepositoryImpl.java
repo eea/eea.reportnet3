@@ -381,6 +381,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    * @return the string
    * @throws EEAException the EEA exception
    */
@@ -457,8 +458,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
       }
     }
-    stringQuery.append(String.format( // QUITAR and fv.value != ''
-        " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
+    stringQuery.append(String.format(
+        " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
         datasetId, datasetId, datasetId));
     if (null != tableSchemaId) {
       stringQuery.append(" where ")
@@ -468,18 +469,23 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
     }
 
-    //////////////////////////////////
+    stringQuery.append(") records ");
     if (Strings.isNotBlank(dataProviderCodes)) {
-      // Tengo que hacer el split
-      String args[] = dataProviderCodes.split(",");
-      System.out.println(args);
+      List<String> countryCodesList = new ArrayList<>(Arrays.asList(dataProviderCodes.split(",")));
+      StringBuilder countries = new StringBuilder();
+      for (int i = 0; i < countryCodesList.size(); i++) {
+        countries.append("'" + countryCodesList.get(i) + "'");
+        if (i + 1 != countryCodesList.size()) {
+          countries.append(",");
+        }
+      }
+      stringQuery.append(
+          null != countryCodesList ? String.format("where data_provider_code in (%s) ", countries)
+              : "");
     }
-    /////////////////////////////////
+    stringQuery.append(
+        "group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position )recordAux2 ");
 
-
-    stringQuery.append(/// ---- EL where data_provider_code in ('BE','DK') => Viene de un String
-        /// DataProviderCodes SEPARADOS POR COMO split(',')
-        ") records group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position )recordAux2 ");
     if (null != filterValue || null != columnName) {
       stringQuery.append(
           " where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")

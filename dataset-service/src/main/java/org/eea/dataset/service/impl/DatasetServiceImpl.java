@@ -1307,6 +1307,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    */
   @Override
   @Transactional
@@ -3021,6 +3022,7 @@ public class DatasetServiceImpl implements DatasetService {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    * @throws EEAException the EEA exception
    */
   private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
