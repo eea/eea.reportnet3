@@ -7,5 +7,6 @@
   "ERROR_IN_VALIDATION": { "key": "ERROR_IN_VALIDATION", "label": "errorInValidation" },
   "ERROR_IN_IMPORT": { "key": "ERROR_IN_IMPORT", "label": "errorInImport" },
   "IN_QUEUE": { "key": "IN_QUEUE", "label": "inQueue" },
-  "FINISHED": { "key": "FINISHED", "label": "finished" }
+  "FINISHED": { "key": "FINISHED", "label": "finished" },
+  "IN_PROGRESS": { "key": "IN_PROGRESS", "label": "inProgress" }
 }

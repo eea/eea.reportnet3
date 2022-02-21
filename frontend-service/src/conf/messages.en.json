@@ -1531,9 +1531,7 @@
     "validationRemoveQueueDialogContent": "Are you sure you want to remove this validation from queue?",
     "inQueue": "In queue",
     "finished": "Finished",
-    "imported": "Imported",
-    "importing": "Importing",
-    "validated": "Validated",
+    "inProgress": "In progress",
     "validationsStatusesNotMatchingFilter": "There are no validations with the selected parameters"
   }
 }

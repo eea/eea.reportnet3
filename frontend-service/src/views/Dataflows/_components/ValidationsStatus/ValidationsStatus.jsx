@@ -149,20 +149,8 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
       label: resourcesContext.messages['status'],
       multiSelectOptions: [
         {
-          type: resourcesContext.messages[config.datasetRunningStatus.IMPORTING.label].toUpperCase(),
-          value: config.datasetRunningStatus.IMPORTING.key
-        },
-        {
-          type: resourcesContext.messages[config.datasetRunningStatus.IMPORTED.label].toUpperCase(),
-          value: config.datasetRunningStatus.IMPORTED.key
-        },
-        {
-          type: resourcesContext.messages[config.datasetRunningStatus.VALIDATING.label].toUpperCase(),
-          value: config.datasetRunningStatus.VALIDATING.key
-        },
-        {
-          type: resourcesContext.messages[config.datasetRunningStatus.VALIDATED.label].toUpperCase(),
-          value: config.datasetRunningStatus.VALIDATED.key
+          type: resourcesContext.messages[config.datasetRunningStatus.IN_PROGRESS.label].toUpperCase(),
+          value: config.datasetRunningStatus.IN_PROGRESS.key
         },
         {
           type: resourcesContext.messages[config.datasetRunningStatus.IN_QUEUE.label].toUpperCase(),
@@ -284,11 +272,13 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
 
   const onReset = () => {
     // if (pagination.pageNum !== 0) { // todo: check if this is needed
-    onChangePagination({
-      firstRow: 0,
-      numberRows: pagination.numberRows,
-      pageNum: 0
-    });
+    if (isFiltered) {
+      onChangePagination({
+        firstRow: 0,
+        numberRows: pagination.numberRows,
+        pageNum: 0
+      });
+    }
     // }
   };
 
