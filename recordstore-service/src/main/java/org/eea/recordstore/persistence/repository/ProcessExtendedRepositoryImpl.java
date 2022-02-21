@@ -1,13 +1,21 @@
 package org.eea.recordstore.persistence.repository;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
-import org.eea.recordstore.persistence.domain.Process;
+import org.eea.recordstore.persistence.domain.EEAProcess;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
@@ -16,7 +24,21 @@ import org.springframework.data.domain.Pageable;
 public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository {
 
   /** The Constant PROCESS_QUERY: {@value}. */
-  private static final String PROCESS_QUERY = "select * from process";
+  private static final String PROCESS_QUERY =
+      "select cast(json_agg(row_to_json(table_aux)) as text) as processList from (\r\n"
+          + "   select\r\n" + "        process.id,\r\n"
+          + "        process.dataset_id as \"datasetId\",\r\n"
+          + "        process.dataflow_id as \"dataflowId\",\r\n"
+          + "        process.date_start as \"processStartingDate\",\r\n"
+          + "        process.date_finish as \"processFinishingDate\",\r\n"
+          + "        process.queued_date as \"queuedDate\",\r\n"
+          + "        process.process_id as \"processId\",\r\n"
+          + "        process.username as \"user\",\r\n"
+          + "        process.process_type as \"processType\",\r\n" + "        process.status,\r\n"
+          + "        d.\"name\" as \"dataflowName\",\r\n"
+          + "        d2.dataset_name as \"datasetName\" " + "from\r\n" + "    process\r\n"
+          + "inner join dataflow d on\r\n" + "    process.dataflow_id = d.id\r\n"
+          + "inner join dataset d2 on\r\n" + "    process.dataset_id = d2.id";
 
   /** The Constant COUNT_PROCESS_QUERY: {@value}. */
   private static final String COUNT_PROCESS_QUERY = "select count(*) from process";
@@ -24,6 +46,9 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
   /** The entity manager. */
   @PersistenceContext(name = "recordStoreEntityManagerFactory")
   private EntityManager entityManager;
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(ProcessExtendedRepositoryImpl.class);
 
   /**
    * Gets the processes paginated.
@@ -36,18 +61,36 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
    * @param type the type
    * @param header the header
    * @return the processes paginated
+   * @throws JsonProcessingException
+   * @throws JsonMappingException
    */
   @Override
-  public List<Process> getProcessesPaginated(Pageable pageable, boolean asc, String status,
-      Long dataflowId, String user, ProcessTypeEnum type, String header) {
+  public List<EEAProcess> getProcessesPaginated(Pageable pageable, boolean asc, String status,
+      Long dataflowId, String user, ProcessTypeEnum type, String header)
+      throws JsonProcessingException {
     StringBuilder stringQuery = new StringBuilder();
+    List<EEAProcess> processList = new ArrayList<>();
     Query query = constructQuery(asc, status, dataflowId, user, type, header, stringQuery, false);
 
     if (null != pageable) {
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
     }
-    return query.getResultList();
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      String json = (String) query.getSingleResult();
+      processList = json != null ? Arrays.asList(mapper.readValue(json, EEAProcess[].class))
+          : new ArrayList<>();
+    } catch (NoResultException e) {
+      LOG.info(String.format(
+          "No processes found with provided filters: status = %s, dataflowId = %s, user = %s, type = %s",
+          status, dataflowId, user, type));
+    }
+
+    LOG.info(String.format(
+        "Retrieved process list with provided filters: status = %s, dataflowId = %s, user = %s, type = %s",
+        status, dataflowId, user, type));
+    return processList;
   }
 
   /**
@@ -90,9 +133,9 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
     if (!countQuery) {
       stringQuery.append(" order by " + header);
       stringQuery.append(asc ? " asc" : " desc");
+      stringQuery.append(") table_aux");
     }
-    Query query = countQuery ? entityManager.createNativeQuery(stringQuery.toString())
-        : entityManager.createNativeQuery(stringQuery.toString(), Process.class);
+    Query query = entityManager.createNativeQuery(stringQuery.toString());
 
     addParameters(query, status, dataflowId, user, type);
     return query;
@@ -108,7 +151,7 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
    */
   private void addFilters(StringBuilder query, String status, Long dataflowId, String user) {
     query.append(" where process_type = :process_type ");
-    query.append(StringUtils.isNotBlank(status) ? " and status = :status " : "");
+    query.append(StringUtils.isNotBlank(status) ? " and process.status IN :status " : "");
     query.append(dataflowId != null ? " and dataflow_id = :dataflowId " : "");
     query.append(StringUtils.isNotBlank(user) ? " and username = :user " : "");
 
@@ -128,7 +171,7 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
     query.setParameter("process_type", type.toString());
 
     if (StringUtils.isNotBlank(status)) {
-      query.setParameter("status", status);
+      query.setParameter("status", Arrays.asList(status.split(",")));
     }
     if (dataflowId != null) {
       query.setParameter("dataflowId", dataflowId);
