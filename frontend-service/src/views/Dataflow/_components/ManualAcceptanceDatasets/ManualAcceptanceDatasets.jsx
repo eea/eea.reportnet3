@@ -189,7 +189,7 @@ export const ManualAcceptanceDatasets = ({
           paginatorRight={
             <PaginatorRecordsCount
               dataLength={manualAcceptanceDatasetsState.data.length}
-              filteredData={filteredData}
+              filteredDataLength={filteredData.length}
               isFiltered={isFiltered}
             />
           }
