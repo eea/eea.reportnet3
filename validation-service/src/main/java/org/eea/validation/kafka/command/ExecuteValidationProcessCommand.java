@@ -51,8 +51,8 @@ public class ExecuteValidationProcessCommand extends AbstractEEAEventHandlerComm
     boolean released = aux instanceof Boolean && (boolean) aux;
 
     // Add lock to the release process if necessary
-    validationHelper.addLockToReleaseProcess(datasetId);
     validationHelper.executeValidation(datasetId, processId, released, updateViews);
+    validationHelper.addLockToReleaseProcess(datasetId);
   }
 
 

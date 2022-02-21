@@ -59,11 +59,10 @@ public class ProcessControllerImpl implements ProcessController {
       responseContainer = "List", hidden = true)
   @PreAuthorize("hasAnyRole('ADMIN')")
   public ProcessesVO getProcesses(Integer pageNum, Integer pageSize, boolean asc, String status,
-      Long dataflowId, String user) {
+      Long dataflowId, String user, String header) {
     Pageable pageable = PageRequest.of(pageNum, pageSize);
 
     ProcessTypeEnum type = ProcessTypeEnum.VALIDATION;
-    String header = "date_start";
 
     return processService.getProcesses(pageable, asc, status, dataflowId, user, type, header);
   }

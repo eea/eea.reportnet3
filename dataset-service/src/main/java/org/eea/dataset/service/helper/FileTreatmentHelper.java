@@ -1108,11 +1108,6 @@ public class FileTreatmentHelper implements DisposableBean {
     LOG.info("Data saved into dataset {}", datasetId);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
-    Map<String, Object> value = new HashMap<>();
-    value.put(LiteralConstants.DATASET_ID, datasetId);
-    value.put(LiteralConstants.USER,
-        SecurityContextHolder.getContext().getAuthentication().getName());
-    kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, value);
   }
 
   /**

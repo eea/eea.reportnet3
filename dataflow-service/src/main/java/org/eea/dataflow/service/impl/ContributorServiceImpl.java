@@ -304,7 +304,7 @@ public class ContributorServiceImpl implements ContributorService {
     addResources(account, resourcesProviders,
         referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId).stream()
             .map(ReferenceDatasetVO::getId).collect(Collectors.toList()),
-        ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN);
+        ResourceGroupEnum.REFERENCEDATASET_LEAD_REPORTER);
 
     for (Long id : ids) {
       // remove resources
@@ -625,7 +625,7 @@ public class ContributorServiceImpl implements ContributorService {
       }
 
       createGroupList(dataflowId, contributorVO, resourceAssignationVOList, resourceInfoVOs,
-          ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN, SecurityRoleEnum.DATA_CUSTODIAN,
+          ResourceGroupEnum.REFERENCEDATASET_LEAD_REPORTER, SecurityRoleEnum.LEAD_REPORTER,
           referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId).stream()
               .map(ReferenceDatasetVO::getId).collect(Collectors.toList()),
           ResourceTypeEnum.REFERENCE_DATASET);
