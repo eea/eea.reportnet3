@@ -11,6 +11,11 @@ export const SortButton = ({ getFilterBy, id, isLoading, isVisible, onSort, reco
 
   const isSortActive = id === sortBy.sortByHeader && sortBy.sortByOption !== 'idle';
 
+  const onApplySort = async () => {
+    await getFilterBy();
+    onSortData(id);
+  };
+
   const onSortData = key => {
     setSortBy(prevSortBy => {
       const sortByHeader = switchSortByOption(prevSortBy.sortByOption) === 'idle' ? '' : key;
@@ -65,10 +70,7 @@ export const SortButton = ({ getFilterBy, id, isLoading, isVisible, onSort, reco
       className={`p-button-secondary-transparent ${styles.sortButton} ${isSortActive ? styles.iconActive : null}`}
       disabled={isLoading}
       icon={id === sortBy.sortByHeader ? switchSortByIcon(sortBy.sortByOption) : 'sortAlt'}
-      onClick={async () => {
-        await getFilterBy();
-        onSortData(id);
-      }}
+      onClick={onApplySort}
     />
   );
 };

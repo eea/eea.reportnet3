@@ -331,11 +331,11 @@ export const Dataflows = () => {
       return dataflow;
     });
 
-  const getDataflows = async (sortBy = sortByOptions, pag = pagination) => {
+  const getDataflows = async (sortBy = sortByOptions, _pagination = pagination) => {
     setLoading(true);
 
     const { accessRole: accessRoles, contextRoles } = userContext;
-    const { numberRows, pageNum } = pag;
+    const { numberRows, pageNum } = _pagination;
 
     try {
       if (TextUtils.areEquals(tabId, 'reporting')) {

@@ -80,6 +80,11 @@ export const Filters = ({
     [recoilId]
   );
 
+  const onApplyFilters = async () => {
+    await getFilterBy();
+    await onFilter();
+  };
+
   const onFilterData = useRecoilCallback(
     ({ snapshot, set }) =>
       async newData => {
@@ -190,10 +195,7 @@ export const Filters = ({
           disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}
-          onClick={async () => {
-            await getFilterBy();
-            await onFilter();
-          }}
+          onClick={onApplyFilters}
         />
       </div>
     );
