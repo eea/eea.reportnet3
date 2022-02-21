@@ -17,7 +17,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
@@ -470,7 +469,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
 
     stringQuery.append(") records ");
-    if (Strings.isNotBlank(dataProviderCodes)) {
+    if (StringUtils.isNotBlank(dataProviderCodes)) {
       List<String> countryCodesList = new ArrayList<>(Arrays.asList(dataProviderCodes.split(",")));
       StringBuilder countries = new StringBuilder();
       for (int i = 0; i < countryCodesList.size(); i++) {
