@@ -79,7 +79,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     } catch (error) {
       console.error('ValidationsStatus - getValidationsStatuses.', error);
       setLoadingStatus('error');
-      notificationContext.add({ status: 'GET_VALIDATIONS_STATUSES_ERROR' }, true);
+      notificationContext.add({ type: 'GET_VALIDATIONS_STATUSES_ERROR' }, true);
     } finally {
       setIsLoading(false);
     }
@@ -259,7 +259,6 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   const onReset = () => {
-    // if (pagination.pageNum !== 0) { // todo: check if this is needed
     if (isFiltered) {
       onChangePagination({
         firstRow: 0,
@@ -267,7 +266,6 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
         pageNum: 0
       });
     }
-    // }
   };
 
   const renderDialogContent = () => {
