@@ -54,7 +54,11 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
       setIsAdding(true);
       nationalCoordinator.email = nationalCoordinator.email.trim();
 
-      checkDuplicateNationalCoordinator(nationalCoordinator);
+      if (checkDuplicateNationalCoordinator(nationalCoordinator)) {
+        notificationContext.add({ type: 'ADDED_NATIONAL_COORDINATORS_ERROR' });
+      } else {
+        notificationContext.add({ type: 'ADDED_NATIONAL_COORDINATOR' });
+      }
 
       await UserRightService.createNationalCoordinator(nationalCoordinator);
       onUpdateData(true);
