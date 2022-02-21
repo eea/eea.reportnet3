@@ -370,7 +370,7 @@
     "active-filter-border": "1px solid var(--c-blue-140)",
     "active-filter-font": "var(--c-corporate-blue)",
     "active-filter-shadow": "0 4px 5px -6px var(--c-corporate-blue-lighter)",
-    "dataflows-list-paginator-bg-color": "var(--c-lilac-300)",
+    "dataflows-list-paginator-bg-color": "var(--bg)",
     "step-progress-bar-activeCompleted-bg-color": "var(--success-color)",
     "step-progress-bar-activeIncompleted-bg-color": "var(--c-corporate-blue)",
     "step-progress-bar-activeCompleted-color": "var(--c-white-color)",
@@ -382,7 +382,8 @@
     "step-progress-bar-link-done-bg-color": "var(--success-color)",
     "step-progress-bar-label-color": "var(--main-font-color)",
     "step-progress-bar-withError-bg-color": "var(--errors)",
-    "step-progress-bar-withError-color": "var(--c-white-color)"
+    "step-progress-bar-withError-color": "var(--c-white-color)",
+    "paginator-dataflows-pages-highlight-box-shadow": "inset 0 0 0 0.1em var(--c-lilac-400)"
   },
   "dark": {
     "accent-color": "var(--accent-color-dark-mode)",
@@ -677,7 +678,7 @@
     "multiselect-panel-item-color": "var(--c-white-color)",
     "multiselect-trigger-bg": "var(--bg-dark-00dp)",
     "multiselect-trigger-color": "var(--c-gray-50)",
-    "paginator-bg-hover": "var(--c-white-color)",
+    "paginator-bg-hover": "var(--tabview-bg)",
     "paginator-bg": "var(--bg-dark-01dp)",
     "paginator-border": "1px solid var(--c-gray-75)",
     "paginator-color-hover": "var(--c-black-color)",
@@ -756,7 +757,7 @@
     "active-filter-border": "1px solid var(--accent-color-dark-mode)",
     "active-filter-font": "var(--accent-color-dark-mode)",
     "active-filter-shadow": "0 4px 5px -6px var(--c-corporate-yellow)",
-    "dataflows-list-paginator-bg-color": "var(--c-lilac-300)",
+    "dataflows-list-paginator-bg-color": "var(--bg)",
     "step-progress-bar-activeCompleted-bg-color": "var(--success-color)",
     "step-progress-bar-activeIncompleted-bg-color": "var(--c-corporate-blue)",
     "step-progress-bar-activeCompleted-color": "var(--c-white-color)",
@@ -768,7 +769,8 @@
     "step-progress-bar-link-done-bg-color": "var(--success-color)",
     "step-progress-bar-label-color": "var(--main-font-color)",
     "step-progress-bar-withError-bg-color": "var(--errors)",
-    "step-progress-bar-withError-color": "var(--c-white-color)"
+    "step-progress-bar-withError-color": "var(--c-white-color)",
+    "paginator-dataflows-pages-highlight-box-shadow": "inset 0 0 0 0.1em var(--tabview-highlight-color)"
   },
   "baseHeaderHeight": 180,
   "cookieConsentHeight": 160,
