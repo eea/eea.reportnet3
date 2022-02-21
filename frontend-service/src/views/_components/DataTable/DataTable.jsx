@@ -493,7 +493,7 @@ export class DataTable extends Component {
     }
   }
 
-  createPaginator(position, totalRecords, data) {
+  createPaginator(position, totalRecords) {
     const className = 'p-paginator-' + position;
 
     return (
