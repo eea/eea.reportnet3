@@ -865,7 +865,7 @@
         { "key": "LOAD_NATIONAL_COORDINATORS_ERROR" },
         { "key": "DELETE_NATIONAL_COORDINATORS_ERROR" },
         { "key": "CREATE_NATIONAL_COORDINATORS_ERROR" },
-        { "key": "ADDED_NATIONAL_COORDINATORS_ERROR" }
+        { "key": "ADDED_DUPLICATE_NATIONAL_COORDINATORS_ERROR" }
       ]
     },
     {
@@ -1118,8 +1118,7 @@
         },
         { "key": "VALIDATE_REPORTERS_COMPLETED_EVENT" },
         { "key": "VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT" },
-        { "key": "EXPORT_TABLE_DATA_COMPLETED_EVENT" },
-        { "key": "ADDED_NATIONAL_COORDINATOR" }
+        { "key": "EXPORT_TABLE_DATA_COMPLETED_EVENT" }
       ]
     },
     {

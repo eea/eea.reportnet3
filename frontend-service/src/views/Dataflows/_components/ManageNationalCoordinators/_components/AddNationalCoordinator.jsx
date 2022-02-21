@@ -26,7 +26,7 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
   const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [nationalCoordinator, setNationalCoordinator] = useState({ countryCode: '', email: '' });
+  const [nationalCoordinator, setNationalCoordinator] = useState({});
 
   const [groupOfCountries, setGroupOfCountries] = useState([]);
 
@@ -55,13 +55,11 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
       nationalCoordinator.email = nationalCoordinator.email.trim();
 
       if (checkDuplicateNationalCoordinator(nationalCoordinator)) {
-        notificationContext.add({ type: 'ADDED_NATIONAL_COORDINATORS_ERROR' });
+        notificationContext.add({ type: 'ADDED_DUPLICATE_NATIONAL_COORDINATORS_ERROR' });
       } else {
-        notificationContext.add({ type: 'ADDED_NATIONAL_COORDINATOR' });
+        await UserRightService.createNationalCoordinator(nationalCoordinator);
+        onUpdateData(true);
       }
-
-      await UserRightService.createNationalCoordinator(nationalCoordinator);
-      onUpdateData(true);
     } catch (error) {
       if (error?.response?.status === 404) {
         notificationContext.add({ type: 'EMAIL_NOT_FOUND_ERROR' }, true);

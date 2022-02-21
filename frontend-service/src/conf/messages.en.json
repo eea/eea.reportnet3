@@ -1520,7 +1520,6 @@
     "deleteNationalCoordinatorsError": "National coordinator deleting error",
     "createNationalCoordinatorsError": "Error creating national coordinator",
     "emptyNationalCoordinatorsCountryError": "Please select a country",
-    "addedNationalCoordinator": "National coordinator added successfully",
-    "addedNationalCoordinatorsError": "The national coordinator already exists in this country"
+    "addedDuplicateNationalCoordinatorsError": "The national coordinator already exists in this country"
   }
 }
