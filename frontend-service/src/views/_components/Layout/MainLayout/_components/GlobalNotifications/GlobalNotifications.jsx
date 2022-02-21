@@ -280,7 +280,6 @@ export const GlobalNotifications = () => {
       dataset: { name: datasetName }
     } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
-    console.log('EEEE');
     notificationContext.add(
       {
         type: 'VALIDATE_DATA_INIT',
