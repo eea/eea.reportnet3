@@ -36,19 +36,10 @@ export const ObligationService = {
           !isNil(filterData.expirationDate) && filterData.expirationDate[1] ? filterData.expirationDate[1] : '';
         const issueId = !isNil(filterData.issues) ? filterData.issues.value : '';
         const organizationId = !isNil(filterData.organizations) ? filterData.organizations.value : '';
-        const openedObligationsDTO = await ObligationRepository.getOpen(
-          countryId,
-          dateFrom,
-          dateTo,
-          issueId,
-          organizationId
-        );
 
-        return openedObligationsDTO;
+        return await ObligationRepository.getOpen(countryId, dateFrom, dateTo, issueId, organizationId);
       } else {
-        const openedObligationsDTO = await ObligationRepository.getOpen();
-
-        return openedObligationsDTO;
+        return await ObligationRepository.getOpen();
       }
     };
 
