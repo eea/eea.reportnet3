@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -21,6 +22,8 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { DataflowService } from 'services/DataflowService';
 
+import { filterByCustomFilterStore } from 'views/_components/Filters/_functions/Stores/filterStore';
+
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
@@ -36,7 +39,9 @@ export const PublicDataflows = () => {
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
 
-  const { getFilterBy, setData, sortByOptions } = useApplyFilters('publicDataflows');
+  const filterBy = useRecoilValue(filterByCustomFilterStore('publicDataflows'));
+
+  const { setData, sortByOptions } = useApplyFilters('publicDataflows');
 
   const [contentStyles, setContentStyles] = useState({});
   const [filteredRecords, setFilteredRecords] = useState(0);
@@ -156,7 +161,6 @@ export const PublicDataflows = () => {
     setIsLoading(true);
 
     try {
-      const filterBy = await getFilterBy();
       const publicData = await DataflowService.getPublicData({ filterBy, numberRows, pageNum, sortByOptions: sortBy });
 
       setPublicDataflows(publicData.dataflows);
@@ -265,9 +269,9 @@ export const PublicDataflows = () => {
           <Filters
             className="publicDataflows"
             isLoading={isLoading}
-            onFilter={onLoadPublicDataflows}
+            onFilter={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 })}
             onReset={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 })}
-            onSort={onLoadPublicDataflows}
+            onSort={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 })}
             options={filterOptions}
             panelClassName="overwriteZindexPanel"
             recoilId="publicDataflows"
