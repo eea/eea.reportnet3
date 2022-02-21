@@ -1519,6 +1519,7 @@
     "loadNationalCoordinatorsError": "Error loading national coordinators",
     "deleteNationalCoordinatorsError": "National coordinator deleting error",
     "createNationalCoordinatorsError": "Error creating national coordinator",
-    "emptyNationalCoordinatorsCountryError": "Please select a country"
+    "emptyNationalCoordinatorsCountryError": "Please select a country",
+    "addedDuplicateNationalCoordinatorsError": "The national coordinator already exists in this country"
   }
 }

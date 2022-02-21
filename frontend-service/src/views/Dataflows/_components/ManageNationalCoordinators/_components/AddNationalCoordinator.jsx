@@ -19,14 +19,14 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 
-export const AddNationalCoordinator = ({ onUpdateData }) => {
+export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoordinator }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [nationalCoordinator, setNationalCoordinator] = useState({ countryCode: '', email: '' });
+  const [nationalCoordinator, setNationalCoordinator] = useState({});
 
   const [groupOfCountries, setGroupOfCountries] = useState([]);
 
@@ -49,11 +49,16 @@ export const AddNationalCoordinator = ({ onUpdateData }) => {
     getDropdownOptions();
   }, []);
 
-  const addNationalCoordinators = async () => {
+  const addNationalCoordinator = async () => {
     try {
       setIsAdding(true);
-      await UserRightService.createNationalCoordinator(nationalCoordinator);
-      onUpdateData(true);
+
+      if (checkDuplicateNationalCoordinator(nationalCoordinator)) {
+        notificationContext.add({ type: 'ADDED_DUPLICATE_NATIONAL_COORDINATORS_ERROR' }, true);
+      } else {
+        await UserRightService.createNationalCoordinator(nationalCoordinator);
+        onUpdateData(true);
+      }
     } catch (error) {
       if (error?.response?.status === 404) {
         notificationContext.add({ type: 'EMAIL_NOT_FOUND_ERROR' }, true);
@@ -105,10 +110,11 @@ export const AddNationalCoordinator = ({ onUpdateData }) => {
       <div className={styles.addDialog}>
         <label className={styles.label}>{resourcesContext.messages['manageNationalCoordinatorsDialogColumn']}</label>
         <InputText
-          className={styles.nameInput}
+          className={!isValidEmail(nationalCoordinator.email) ? styles.error : ''}
           id="name"
+          keyfilter="email"
           maxLength={50}
-          onChange={event => onChangeEmail(event.target.value)}
+          onChange={event => onChangeEmail(event.target.value.trim())}
           placeholder={resourcesContext.messages['nationalCoordinatorsEmail']}
           value={nationalCoordinator.email}
         />
@@ -148,7 +154,7 @@ export const AddNationalCoordinator = ({ onUpdateData }) => {
           iconConfirm={isAdding ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['cancel']}
           labelConfirm={resourcesContext.messages['save']}
-          onConfirm={addNationalCoordinators}
+          onConfirm={addNationalCoordinator}
           onHide={onAddDialogClose}
           visible={isAddDialogVisible}>
           {renderDialogContent()}
