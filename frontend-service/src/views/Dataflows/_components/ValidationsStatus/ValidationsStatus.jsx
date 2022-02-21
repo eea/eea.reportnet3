@@ -113,17 +113,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   const onSort = event => {
-    let sortField;
-
-    if (event.sortField === 'dataflow') {
-      sortField = 'dataflowName';
-    } else if (sortField === 'dataset') {
-      sortField = 'datasetName';
-    } else {
-      sortField = event.sortField;
-    }
-
-    setSort({ field: sortField, order: event.sortOrder });
+    setSort({ field: event.sortField, order: event.sortOrder });
   };
 
   const onChangePagination = event => {
@@ -164,10 +154,9 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     }
   ];
 
-  const getStatusTemplate = rowData => {
-    console.log('rowData.status', rowData.status);
-    return <div>{resourcesContext.messages[config.datasetRunningStatus[rowData.status].label].toUpperCase()}</div>;
-  };
+  const getStatusTemplate = rowData => (
+    <div>{resourcesContext.messages[config.datasetRunningStatus[rowData.status].label].toUpperCase()}</div>
+  );
 
   const getTableColumns = () => {
     const columns = [
