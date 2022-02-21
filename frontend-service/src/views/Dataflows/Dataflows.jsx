@@ -1,6 +1,6 @@
 import { Fragment, useContext, useEffect, useLayoutEffect, useReducer, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { useResetRecoilState } from 'recoil';
+import { useRecoilValue, useResetRecoilState } from 'recoil';
 
 import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
@@ -38,6 +38,7 @@ import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { UserService } from 'services/UserService';
 
 import { dialogsStore } from 'views/_components/Dialog/_functions/Stores/dialogsStore';
+import { filterByCustomFilterStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -55,8 +56,8 @@ import { useReportingObligations } from 'views/_components/ReportingObligations/
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { ErrorUtils } from 'views/_functions/Utils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const { permissions } = config;
 
@@ -158,12 +159,14 @@ export const Dataflows = () => {
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
+  const filterBy = useRecoilValue(filterByCustomFilterStore(tabId));
+
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
   const { resetFiltersState: resetReportingObligationsFiltersState } = useFilters('reportingObligations');
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
-  const { getFilterBy, isFiltered: areFiltersFilled, setData, sortByOptions } = useApplyFilters(tabId);
+  const { setData, sortByOptions } = useApplyFilters(tabId);
   const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
 
   useEffect(() => {
@@ -328,15 +331,13 @@ export const Dataflows = () => {
       return dataflow;
     });
 
-  const getDataflows = async (sortBy = sortByOptions) => {
+  const getDataflows = async (sortBy = sortByOptions, _pagination = pagination) => {
     setLoading(true);
 
     const { accessRole: accessRoles, contextRoles } = userContext;
-    const { numberRows, pageNum } = pagination;
+    const { numberRows, pageNum } = _pagination;
 
     try {
-      const filterBy = await getFilterBy();
-
       if (TextUtils.areEquals(tabId, 'reporting')) {
         const data = await DataflowService.getAll({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy });
         const { dataflows, filteredRecords, totalRecords } = data;
@@ -871,25 +872,9 @@ export const Dataflows = () => {
         <Filters
           className="dataflowsFilters"
           isLoading={loadingStatus[tabId]}
-          onFilter={() => {
-            if (areFiltersFilled) {
-              onChangePagination({
-                firstRow: 0,
-                numberRows: dataflowsState.pagination.numberRows,
-                pageNum: 0
-              });
-            } else {
-              getDataflows();
-            }
-          }}
-          onReset={() => {
-            onChangePagination({
-              firstRow: 0,
-              numberRows: dataflowsState.pagination.numberRows,
-              pageNum: 0
-            });
-          }}
-          onSort={getDataflows}
+          onFilter={() => onPaginate({ first: 0, rows: dataflowsState.pagination.numberRows, page: 0 })}
+          onReset={() => onPaginate({ first: 0, rows: dataflowsState.pagination.numberRows, page: 0 })}
+          onSort={() => onPaginate({ first: 0, rows: dataflowsState.pagination.numberRows, page: 0 })}
           options={options[tabId]}
           panelClassName="overwriteZindexPanel"
           recoilId={tabId}
