@@ -2,6 +2,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './ManageNationalCoordinators.module.scss';
 
@@ -31,6 +32,7 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
   const resourcesContext = useContext(ResourcesContext);
 
   const [deleteNationalCoordinator, setDeleteNationalCoordinator] = useState({});
+  const [isChecked, setIsChecked] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -97,6 +99,21 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
       onClick={() => setIsDeleteDialogVisible(true)}
     />
   );
+
+  const checkDuplicateNationalCoordinator = nationalCoordinator => {
+    nationalCoordinatorsData.map(user => {
+      if (user.countryCode === nationalCoordinator.countryCode && user.email === nationalCoordinator.email) {
+        return setIsChecked(true);
+      }
+    });
+
+    if (isChecked) {
+      notificationContext.add({ type: 'ADDED_NATIONAL_COORDINATOR' });
+      setIsChecked(false);
+    } else {
+      notificationContext.add({ type: 'ADDED_NATIONAL_COORDINATORS_ERROR' });
+    }
+  };
 
   const renderTableColumns = () => {
     const columns = [
@@ -191,7 +208,7 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
   const dialogFooter = (
     <div className={styles.buttonsDialogFooter}>
       <AddNationalCoordinator
-        nationalCoordinatorsEmails={nationalCoordinatorsData.map(user => user.email)}
+        checkDuplicateNationalCoordinator={checkDuplicateNationalCoordinator}
         onUpdateData={setIsDataUpdated}
       />
 

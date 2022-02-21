@@ -19,11 +19,10 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 
-export const AddNationalCoordinator = ({ onUpdateData, nationalCoordinatorsEmails }) => {
+export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoordinator }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [emailHasError, setEmailHasError] = useState(false);
   const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -50,9 +49,13 @@ export const AddNationalCoordinator = ({ onUpdateData, nationalCoordinatorsEmail
     getDropdownOptions();
   }, []);
 
-  const addNationalCoordinators = async () => {
+  const addNationalCoordinator = async () => {
     try {
       setIsAdding(true);
+      nationalCoordinator.email = nationalCoordinator.email.trim();
+
+      checkDuplicateNationalCoordinator(nationalCoordinator);
+
       await UserRightService.createNationalCoordinator(nationalCoordinator);
       onUpdateData(true);
     } catch (error) {
@@ -74,10 +77,7 @@ export const AddNationalCoordinator = ({ onUpdateData, nationalCoordinatorsEmail
     setNationalCoordinator({});
   };
 
-  const onChangeEmail = email =>
-    setNationalCoordinator({ email: email.trim(), countryCode: nationalCoordinator.countryCode });
-
-  const checkDuplicates = email => setEmailHasError(nationalCoordinatorsEmails.includes(email));
+  const onChangeEmail = email => setNationalCoordinator({ email: email, countryCode: nationalCoordinator.countryCode });
 
   const onChangeCountryCode = countryCode =>
     setNationalCoordinator({ email: nationalCoordinator.email, countryCode: countryCode });
@@ -87,8 +87,6 @@ export const AddNationalCoordinator = ({ onUpdateData, nationalCoordinatorsEmail
   const getTooltipMessage = () => {
     if (isEmpty(nationalCoordinator.email) && isEmpty(nationalCoordinator.countryCode)) {
       return resourcesContext.messages['incompleteDataTooltip'];
-    } else if (emailHasError) {
-      return resourcesContext.messages['emailAlreadyAssignedTooltip'];
     } else if (!isValidEmail(nationalCoordinator.email)) {
       return resourcesContext.messages['notValidEmailTooltip'];
     } else if (isEmpty(nationalCoordinator.countryCode)) {
@@ -111,11 +109,10 @@ export const AddNationalCoordinator = ({ onUpdateData, nationalCoordinatorsEmail
       <div className={styles.addDialog}>
         <label className={styles.label}>{resourcesContext.messages['manageNationalCoordinatorsDialogColumn']}</label>
         <InputText
-          className={emailHasError ? styles.error : ''}
+          className={!isValidEmail(nationalCoordinator.email) ? styles.error : ''}
           id="name"
           keyfilter="email"
           maxLength={50}
-          onBlur={event => checkDuplicates(event.target.value)}
           onChange={event => onChangeEmail(event.target.value)}
           placeholder={resourcesContext.messages['nationalCoordinatorsEmail']}
           value={nationalCoordinator.email}
@@ -156,7 +153,7 @@ export const AddNationalCoordinator = ({ onUpdateData, nationalCoordinatorsEmail
           iconConfirm={isAdding ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['cancel']}
           labelConfirm={resourcesContext.messages['save']}
-          onConfirm={addNationalCoordinators}
+          onConfirm={addNationalCoordinator}
           onHide={onAddDialogClose}
           visible={isAddDialogVisible}>
           {renderDialogContent()}
