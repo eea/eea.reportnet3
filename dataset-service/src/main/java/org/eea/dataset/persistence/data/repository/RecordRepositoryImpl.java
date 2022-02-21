@@ -171,7 +171,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant MASTER_QUERY_COUNT: {@value}. */
   private static final String MASTER_QUERY_COUNT =
-      "SELECT count(rv) from RecordValue rv INNER JOIN rv.tableValue tv " + WHERE_ID_TABLE_SCHEMA;
+      "SELECT count(rv.id) from RecordValue rv INNER JOIN rv.tableValue tv "
+          + WHERE_ID_TABLE_SCHEMA;
 
   /** The Constant FINAL_MASTER_QUERY: {@value}. */
   private static final String FINAL_MASTER_QUERY = " order by %s";
