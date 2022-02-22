@@ -1,6 +1,7 @@
 package org.eea.dataset.persistence.data.repository;
 
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -424,9 +425,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         .append(" select json_build_object('tableName',(case " + caseTables.toString() + " end), ");
     String totalRecords = "";
     if (null != tableSchemaId) {
-      totalRecords = String.format(
-          " 'totalRecords',(select count(*) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table), ",
-          datasetId, datasetId, tableSchemaId);
+      totalRecords = " 'totalRecords', " + getCount(String.format(
+          "select count(rv.id) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table ",
+          datasetId, datasetId, tableSchemaId)) + ", ";
     }
     if (null != columnName || null != filterValue) {
       totalRecords =
@@ -524,6 +525,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return result.toString();
   }
 
+  private Long getCount(String generatedQuery) {
+    Query query = entityManager.createNativeQuery(generatedQuery);
+    BigInteger result = (BigInteger) query.getSingleResult();
+    return result.longValue();
+  }
 
   /**
    * Check sql.
@@ -1096,7 +1102,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     if (null != tableSchemaId) {
       totalRecords = String.format(
-          "select count(*) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table ",
+          "select count(rv.id) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table ",
           datasetId, datasetId, tableSchemaId);
     }
 
@@ -1212,7 +1218,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     for (TableSchema tableSchemaIdAux : tableSchemaList) {
       String tableSchemaIdString = tableSchemaIdAux.getIdTableSchema().toString();
       stringQuery.append(String.format(
-          "when id_table_schema = '%s'  then ( select count(*)  as \"totalRecords\" from ( ",
+          "when id_table_schema = '%s'  then ( select count(tablesAux.id_record)  as \"totalRecords\" from ( ",
           tableSchemaIdString));
       stringQuery.append(
           " select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
@@ -1236,7 +1242,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
       }
       stringQuery.append(String.format(
-          " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
+          " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table) fieldsAux",
           datasetId, datasetId, datasetId));
 
       if (null != tableSchemaIdString) {
@@ -1247,7 +1253,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
       }
       stringQuery.append(
-          ") records group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position ");
+          ") records group by id_table_schema,id_record,data_provider_code, rdata_position ");
       stringQuery.append(" ) tablesAux ");
       if (null != filterValue || null != columnName) {
         stringQuery.append(
@@ -1259,6 +1265,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       }
     }
     stringQuery.append(" end ) , ");
-    return stringQuery.toString();
+    String valor = stringQuery.toString();
+    return valor;
   }
 }
