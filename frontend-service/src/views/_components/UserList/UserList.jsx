@@ -160,7 +160,7 @@ export const UserList = ({ dataflowId, dataflowType, representativeId }) => {
           paginatorRight={
             <PaginatorRecordsCount
               dataLength={userListData.length}
-              filteredData={filteredData}
+              filteredDataLength={filteredData.length}
               isFiltered={isFiltered}
             />
           }

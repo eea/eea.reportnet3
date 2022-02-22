@@ -67,19 +67,20 @@ public interface RecordExtendedQueriesRepository {
   /**
    * Find and generate ETL json.
    *
-   * @param outputStream
-   * @param datasetId
-   *
-   * @param stringQuery the string query
-   * @param columnName
-   * @param filterValue
-   * @param offset
-   * @param limit
+   * @param datasetId the dataset id
+   * @param outputStream the output stream
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    * @return the stream
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   String findAndGenerateETLJson(Long datasetId, OutputStream outputStream, String tableSchemaId,
-      Integer limit, Integer offset, String filterValue, String columnName) throws EEAException;
+      Integer limit, Integer offset, String filterValue, String columnName,
+      String dataProviderCodes) throws EEAException;
 
   /**
    * Find ordered native record.

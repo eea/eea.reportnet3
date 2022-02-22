@@ -51,7 +51,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
   const getPaginatorRight = () => (
     <PaginatorRecordsCount
       dataLength={cloneSchemasState.allDataflows.length}
-      filteredData={filteredData}
+      filteredDataLength={filteredData.length}
       isFiltered={isFiltered}
     />
   );

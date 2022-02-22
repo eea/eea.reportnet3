@@ -1307,16 +1307,18 @@ public class DatasetServiceImpl implements DatasetService {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    */
   @Override
   @Transactional
   public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream,
-      String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName) {
+      String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
+      String dataProviderCodes) {
     try {
       long startTime = System.currentTimeMillis();
       LOG.info("ETL Export process initiated to DatasetId: {}", datasetId);
       exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset, filterValue,
-          columnName);
+          columnName, dataProviderCodes);
       outputStream.flush();
       long endTime = System.currentTimeMillis() - startTime;
       LOG.info("ETL Export process completed for DatasetId: {} in {} seconds", datasetId,
@@ -3020,14 +3022,16 @@ public class DatasetServiceImpl implements DatasetService {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    * @throws EEAException the EEA exception
    */
   private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
-      Integer limit, Integer offset, String filterValue, String columnName) throws EEAException {
+      Integer limit, Integer offset, String filterValue, String columnName,
+      String dataProviderCodes) throws EEAException {
     try {
       // Delete the query log and the timestamp part later, once the tests are finished.
       outputStream.write(recordRepository.findAndGenerateETLJson(datasetId, outputStream,
-          tableSchemaId, limit, offset, filterValue, columnName).getBytes());
+          tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes).getBytes());
       LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
     } catch (IOException e) {
       LOG.error("ETLExport error in  Dataset: {}", datasetId, e);

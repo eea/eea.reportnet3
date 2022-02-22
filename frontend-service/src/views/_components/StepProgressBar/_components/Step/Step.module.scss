@@ -26,6 +26,7 @@
   }
   .activeCompleted {
     background-color: var(--step-progress-bar-activeCompleted-bg-color);
+    border: var(--step-progress-bar-icon-activeCompleted-border) !important;
     animation: check 1s forwards;
     svg {
       color: var(--step-progress-bar-activeCompleted-color);
@@ -42,6 +43,7 @@
   }
   .activeIncompleted {
     background-color: var(--step-progress-bar-activeIncompleted-bg-color);
+    border: var(--step-progress-bar-icon-activeIncompleted-border) !important;
     svg {
       color: var(--step-progress-bar-activeCompleted-color);
       font-weight: bold;
@@ -103,6 +105,6 @@
     border-radius: 50%;
   }
   100% {
-    border-radius: 0%;
+    border-radius: 3px;
   }
 }

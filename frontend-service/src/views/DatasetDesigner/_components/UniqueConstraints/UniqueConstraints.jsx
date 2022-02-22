@@ -194,7 +194,7 @@ export const UniqueConstraints = ({
         paginatorRight={
           <PaginatorRecordsCount
             dataLength={constraintsState.data.length}
-            filteredData={filteredData}
+            filteredDataLength={filteredData.length}
             isFiltered={isFiltered}
           />
         }
