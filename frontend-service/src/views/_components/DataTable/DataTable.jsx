@@ -248,9 +248,6 @@ export class DataTable extends Component {
     this.onColumnDrop = this.onColumnDrop.bind(this);
     this.onVirtualScroll = this.onVirtualScroll.bind(this);
     this.frozenSelectionMode = null;
-
-    console.log('this.props.rows', this.props.rows, 'this.state.rows', this.state.rows);
-    console.log('this.props.first', this.props.first, 'this.state.first', this.state.first);
   }
 
   getFirst() {
@@ -551,13 +548,14 @@ export class DataTable extends Component {
                         {`${this.context.messages['of']} ${
                           totalRecords > 0 ? ` ${Math.ceil(totalRecords / this.getRows())}` : 1
                         }`}
+                        {console.log('totalRecords', totalRecords)}
                       </label>
                     </span>
                   );
                 }
               }
         }
-        totalRecords={totalRecords}
+        totalRecords={40}
       />
     );
   }

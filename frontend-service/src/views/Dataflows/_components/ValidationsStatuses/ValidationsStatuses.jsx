@@ -52,12 +52,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const { firstRow, numberRows, pageNum } = pagination;
 
-  // console.log('pagination', pagination);
-  // console.log('sort :>> ', sort);
-  // console.log('validationsStatuses', validationsStatuses);
-  // console.log('totalRecords :>> ', totalRecords, 'filteredRecords :>> ', filteredRecords);
-  // console.log('isFiltered', isFiltered);
-
   useEffect(() => {
     getValidationsStatuses();
   }, [pagination, sort]);
@@ -297,7 +291,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           rowsPerPageOptions={[5, 10, 15]}
           sortField={sort.field}
           sortOrder={sort.order}
-          totalRecords={validationsStatuses.length}
+          totalRecords={totalRecords}
           value={validationsStatuses}>
           {getTableColumns()}
         </DataTable>
