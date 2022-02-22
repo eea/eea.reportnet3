@@ -10,6 +10,6 @@ const getSortOrder = sortOrder => {
   }
 };
 
-export const ServiceUtils = () => {
-  getSortOrder;
+export const ServiceUtils = {
+  getSortOrder
 };
