@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -61,8 +60,7 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
    * @param type the type
    * @param header the header
    * @return the processes paginated
-   * @throws JsonProcessingException
-   * @throws JsonMappingException
+   * @throws JsonProcessingException the json processing exception
    */
   @Override
   public List<EEAProcess> getProcessesPaginated(Pageable pageable, boolean asc, String status,
@@ -70,12 +68,9 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
       throws JsonProcessingException {
     StringBuilder stringQuery = new StringBuilder();
     List<EEAProcess> processList = new ArrayList<>();
-    Query query = constructQuery(asc, status, dataflowId, user, type, header, stringQuery, false);
+    Query query =
+        constructQuery(asc, status, dataflowId, user, type, header, stringQuery, false, pageable);
 
-    if (null != pageable) {
-      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
-      query.setMaxResults(pageable.getPageSize());
-    }
     ObjectMapper mapper = new ObjectMapper();
     try {
       String json = (String) query.getSingleResult();
@@ -108,7 +103,8 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
   public Long countProcessesPaginated(boolean asc, String status, Long dataflowId, String user,
       ProcessTypeEnum type, String header) {
     StringBuilder stringQuery = new StringBuilder();
-    Query query = constructQuery(asc, status, dataflowId, user, type, header, stringQuery, true);
+    Query query =
+        constructQuery(asc, status, dataflowId, user, type, header, stringQuery, true, null);
 
     return Long.valueOf(query.getResultList().get(0).toString());
   }
@@ -124,15 +120,21 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
    * @param header the header
    * @param stringQuery the string query
    * @param countQuery the count query
+   * @param pageable the pageable
    * @return the query
    */
   private Query constructQuery(boolean asc, String status, Long dataflowId, String user,
-      ProcessTypeEnum type, String header, StringBuilder stringQuery, boolean countQuery) {
+      ProcessTypeEnum type, String header, StringBuilder stringQuery, boolean countQuery,
+      Pageable pageable) {
     stringQuery.append(countQuery ? COUNT_PROCESS_QUERY : PROCESS_QUERY);
     addFilters(stringQuery, status, dataflowId, user);
     if (!countQuery) {
       stringQuery.append(" order by " + header);
       stringQuery.append(asc ? " asc" : " desc");
+      if (null != pageable) {
+        stringQuery.append(" LIMIT " + pageable.getPageSize());
+        stringQuery.append(" OFFSET " + pageable.getPageSize() * pageable.getPageNumber());
+      }
       stringQuery.append(") table_aux");
     }
     Query query = entityManager.createNativeQuery(stringQuery.toString());
