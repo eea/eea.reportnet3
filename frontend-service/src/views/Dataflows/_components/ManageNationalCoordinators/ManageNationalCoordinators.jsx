@@ -2,7 +2,6 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 
 import styles from './ManageNationalCoordinators.module.scss';
 
