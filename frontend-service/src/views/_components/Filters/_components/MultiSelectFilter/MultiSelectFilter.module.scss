@@ -23,6 +23,10 @@
   }
 }
 
+.selectHeader {
+  color: var(--font-filters) !important;
+}
+
 .block + span {
   display: flex;
   align-items: center;
