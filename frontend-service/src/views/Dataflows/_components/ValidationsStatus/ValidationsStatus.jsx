@@ -36,17 +36,17 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
+  const [filteredRecords, setFilteredRecords] = useState(0);
+  const [goToPage, setGoToPage] = useState(1);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingStatus, setLoadingStatus] = useState('idle');
-  const [validationStatusId, setValidationStatusId] = useState(null);
-  const [validationsStatuses, setValidationsStatusesList] = useState([]);
+  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
   const [sort, setSort] = useState({ field: '', order: 0 });
-  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 }); // TODO can be in same object with goToPage and totalRecords?
   const [totalRecords, setTotalRecords] = useState(0);
-  const [goToPage, setGoToPage] = useState(1);
-  const [filteredRecords, setFilteredRecords] = useState(0);
-  const [isFiltered, setIsFiltered] = useState(false);
+  const [validationsStatuses, setValidationsStatusesList] = useState([]);
+  const [validationStatusId, setValidationStatusId] = useState(null);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
   const { setData } = useApplyFilters('validationsStatuses');
