@@ -484,6 +484,20 @@ public class DataflowControllerImpl implements DataFlowController {
       }
     }
 
+    if (status == HttpStatus.OK && !isAdmin) {
+      try {
+        DataFlowVO dataflow = dataflowService.getMetabaseById(dataFlowVO.getId());
+        if (!TypeStatusEnum.DESIGN.equals(dataflow.getStatus())
+            && (TypeDataflowEnum.CITIZEN_SCIENCE.equals(dataflow.getType())
+                || TypeDataflowEnum.REPORTING.equals(dataflow.getType()))) {
+          message = EEAErrorMessage.DATAFLOW_UPDATE_ERROR;
+          status = HttpStatus.BAD_REQUEST;
+        }
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error finding dataflow metabase from dataflow id {}", dataFlowVO.getId());
+      }
+    }
+
     if (!isAdmin && !TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
         && status == HttpStatus.OK && (null == dataFlowVO.getObligation()
             || null == dataFlowVO.getObligation().getObligationId())) {
@@ -496,7 +510,7 @@ public class DataflowControllerImpl implements DataFlowController {
       try {
         DataFlowVO dataflow = dataflowService.getMetabaseById(dataFlowVO.getId());
         if ((!isAdmin && !TypeStatusEnum.DESIGN.equals(dataflow.getStatus()))) {
-          message = EEAErrorMessage.DATAFLOW_BUSINESS_UPDATE_ERROR;
+          message = EEAErrorMessage.DATAFLOW_UPDATE_ERROR;
           status = HttpStatus.BAD_REQUEST;
         }
         if (!dataflow.getDataProviderGroupId().equals(dataFlowVO.getDataProviderGroupId())
