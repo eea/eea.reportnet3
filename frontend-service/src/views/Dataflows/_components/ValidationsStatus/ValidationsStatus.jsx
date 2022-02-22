@@ -49,9 +49,8 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
   const [isFiltered, setIsFiltered] = useState(false);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
+  const { setData } = useApplyFilters('validationsStatuses');
 
-  const { getFilterBy, setData } = useApplyFilters('validationsStatuses');
-  // TODO Ordering
   // TODO Pagination
 
   const { firstRow, numberRows, pageNum } = pagination;
@@ -72,7 +71,6 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
 
   const getValidationsStatuses = async () => {
     setLoadingStatus('pending');
-
 
     try {
       const { data } = await BackgroundProcessService.getValidationsStatuses({
@@ -261,6 +259,18 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
+  const renderFilters = () => {
+    return (
+      <Filters
+        className="lineItems"
+        isLoading={isLoading}
+        onFilter={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+        onReset={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+        options={filterOptions}
+        recoilId="validationsStatuses"
+      />
+    );
+  };
 
   const renderDialogContent = () => {
     if (isLoading) {
@@ -274,14 +284,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     if (isFiltered && isEmpty(validationsStatuses)) {
       return (
         <div className={styles.dialogContent}>
-          <Filters
-            className="lineItems"
-            isLoading={isLoading}
-            onFilter={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
-            onReset={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
-            options={filterOptions}
-            recoilId="validationsStatuses"
-          />
+          {renderFilters()}
           <div className={styles.noDataContent}>
             <p>{resourcesContext.messages['validationsStatusesNotMatchingFilter']}</p>
           </div>
@@ -299,14 +302,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
 
     return (
       <div className={styles.dialogContent}>
-        <Filters
-          className="lineItems"
-          isLoading={isLoading}
-          onFilter={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
-          onReset={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
-          options={filterOptions}
-          recoilId="validationsStatuses"
-        />
+        {renderFilters()}
         <DataTable
           autoLayout
           first={firstRow}
