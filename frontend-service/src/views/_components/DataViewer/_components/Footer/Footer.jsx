@@ -14,7 +14,7 @@ export const Footer = ({
   return (
     <div className="p-clearfix datasetSchema-addRecordsBar-help-step" style={{ width: '100%' }}>
       <Button
-        className={`${isDataflowOpen ? null : 'p-button-animated-blink'}`}
+        className={`${isDataflowOpen ? '' : 'p-button-animated-blink'}`}
         disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
         icon="add"
         label={resourcesContext.messages['addRecord']}
