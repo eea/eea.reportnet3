@@ -6,7 +6,7 @@ import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
 
-import styles from './ValidationsStatus.module.scss';
+import styles from './ValidationsStatuses.module.scss';
 
 import { Column } from 'primereact/column';
 
@@ -30,7 +30,7 @@ import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDa
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
+export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const filterBy = useRecoilValue(filterByCustomFilterStore('validationsStatuses'));
 
   const resourcesContext = useContext(ResourcesContext);
@@ -115,7 +115,7 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
       console.error('ValidationsStatus - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
 
-      //notificationContext.add({ status: 'DELETE_VALIDATION_FROM_QUEUE_ERROR' }, true); //TODO ADD NOTIFICATIONS
+      notificationContext.add({ status: 'DELETE_VALIDATION_FROM_QUEUE_ERROR' }, true);
     } finally {
       setValidationStatusId(null);
     }

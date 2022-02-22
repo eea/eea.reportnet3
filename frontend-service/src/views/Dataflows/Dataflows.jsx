@@ -30,7 +30,7 @@ import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
-import { ValidationsStatus } from './_components/ValidationsStatus';
+import { ValidationsStatuses } from './_components/ValidationsStatuses';
 
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
 import { CitizenScienceDataflowService } from 'services/CitizenScienceDataflowService';
@@ -968,7 +968,7 @@ export const Dataflows = () => {
       )}
 
       {dataflowsState.isValidationStatusDialogVisible && (
-        <ValidationsStatus
+        <ValidationsStatuses
           isDialogVisible={dataflowsState.isValidationStatusDialogVisible}
           onCloseDialog={onCloseValidationStatusDialog}
         />
