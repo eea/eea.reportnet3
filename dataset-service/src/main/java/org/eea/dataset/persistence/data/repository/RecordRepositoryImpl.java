@@ -1,6 +1,7 @@
 package org.eea.dataset.persistence.data.repository;
 
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -424,9 +425,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         .append(" select json_build_object('tableName',(case " + caseTables.toString() + " end), ");
     String totalRecords = "";
     if (null != tableSchemaId) {
-      totalRecords = String.format(
-          " 'totalRecords',(select count(*) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table), ",
-          datasetId, datasetId, tableSchemaId);
+      totalRecords = " 'totalRecords', " + getCount(String.format(
+          "select count(rv.id) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table ",
+          datasetId, datasetId, tableSchemaId)) + ", ";
     }
     if (null != columnName || null != filterValue) {
       totalRecords =
@@ -524,6 +525,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return result.toString();
   }
 
+  private Long getCount(String generatedQuery) {
+    Query query = entityManager.createNativeQuery(generatedQuery);
+    BigInteger result = (BigInteger) query.getSingleResult();
+    return result.longValue();
+  }
 
   /**
    * Check sql.
@@ -1096,7 +1102,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     if (null != tableSchemaId) {
       totalRecords = String.format(
-          "select count(*) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table ",
+          "select count(rv.id) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table ",
           datasetId, datasetId, tableSchemaId);
     }
 
@@ -1259,6 +1265,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       }
     }
     stringQuery.append(" end ) , ");
-    return stringQuery.toString();
+    String valor = stringQuery.toString();
+    return valor;
   }
 }
