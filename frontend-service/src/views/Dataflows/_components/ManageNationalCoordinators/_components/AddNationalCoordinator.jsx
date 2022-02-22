@@ -53,13 +53,9 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
   const addNationalCoordinator = async () => {
     try {
       setIsAdding(true);
-
-      if (checkDuplicateNationalCoordinator(nationalCoordinator)) {
-        notificationContext.add({ type: 'ADDED_DUPLICATE_NATIONAL_COORDINATORS_ERROR' }, true);
-      } else {
-        await UserRightService.createNationalCoordinator(nationalCoordinator);
-        onUpdateData(true);
-      }
+      await UserRightService.createNationalCoordinator(nationalCoordinator);
+      onUpdateData(true);
+      setIsAddDialogVisible(false);
     } catch (error) {
       if (error?.response?.status === 404) {
         notificationContext.add({ type: 'EMAIL_NOT_FOUND_ERROR' }, true);
@@ -69,7 +65,6 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
       console.error('NationalCoordinators - createNationalCoordinator.', error);
     } finally {
       setIsAdding(false);
-      setIsAddDialogVisible(false);
       setNationalCoordinator({});
     }
   };
@@ -93,6 +88,8 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
       return resourcesContext.messages['notValidEmailTooltip'];
     } else if (isEmpty(nationalCoordinator.countryCode)) {
       return resourcesContext.messages['emptyNationalCoordinatorsCountryError'];
+    } else if (checkDuplicateNationalCoordinator(nationalCoordinator)) {
+      return resourcesContext.messages['addedDuplicateNationalCoordinatorsError'];
     } else {
       return null;
     }
@@ -151,7 +148,11 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
           className={styles.confirmDialog}
           classNameConfirm="p-button-primary"
           confirmTooltip={getTooltipMessage()}
-          disabledConfirm={!isNil(getTooltipMessage())}
+          disabledConfirm={
+            checkDuplicateNationalCoordinator(nationalCoordinator) ||
+            isEmpty(nationalCoordinator.email) ||
+            isEmpty(nationalCoordinator.countryCode)
+          }
           header={resourcesContext.messages['addNationalCoordinatorsDialogHeader']}
           iconConfirm={isAdding ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['cancel']}
