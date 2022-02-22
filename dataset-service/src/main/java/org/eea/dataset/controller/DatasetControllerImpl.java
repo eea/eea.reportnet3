@@ -948,9 +948,9 @@ public class DatasetControllerImpl implements DatasetController {
           example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
               required = false) String tableSchemaId,
       @ApiParam(type = "Integer", value = "Limit", example = "0") @RequestParam(value = "limit",
-          required = false) Integer limit,
+          defaultValue = "10000") Integer limit,
       @ApiParam(type = "Integer", value = "Offset", example = "0") @RequestParam(value = "offset",
-          required = false) Integer offset,
+          defaultValue = "0") Integer offset,
       @ApiParam(type = "String", value = "Filter value", example = "value") @RequestParam(
           value = "filterValue", required = false) String filterValue,
       @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
