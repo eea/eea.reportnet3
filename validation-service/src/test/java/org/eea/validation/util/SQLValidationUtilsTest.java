@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.validation.persistence.data.domain.DatasetValidation;
@@ -56,6 +58,9 @@ public class SQLValidationUtilsTest {
 
   @InjectMocks
   private SQLValidationUtils sqlValidationUtils;
+
+  @Mock
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   private DatasetValue datasetValue;
 
@@ -190,7 +195,11 @@ public class SQLValidationUtilsTest {
         .when(sqlRulesService.retrieveTableData(Mockito.anyString(), Mockito.any(), Mockito.any()))
         .thenReturn(queryVO);
     Mockito.when(datasetRepository.evaluateSqlRule(Mockito.any(), Mockito.any())).thenReturn("2");
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
+    DataProviderVO providerCode = new DataProviderVO();
+    providerCode.setCode("DE");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(providerCode);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "27");
 
     Mockito.verify(tableRepository, times(1)).save(Mockito.any());
   }
@@ -234,7 +243,11 @@ public class SQLValidationUtilsTest {
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
     Mockito.when(datasetRepository.evaluateSqlRule(Mockito.any(), Mockito.any())).thenReturn("2");
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
+    DataProviderVO providerCode = new DataProviderVO();
+    providerCode.setCode("DE");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(providerCode);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "27");
 
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
@@ -275,7 +288,11 @@ public class SQLValidationUtilsTest {
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
     Mockito.when(datasetRepository.evaluateSqlRule(Mockito.any(), Mockito.any())).thenReturn("2");
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
+    DataProviderVO providerCode = new DataProviderVO();
+    providerCode.setCode("DE");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(providerCode);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "27");
 
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
 
@@ -324,7 +341,11 @@ public class SQLValidationUtilsTest {
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
     Mockito.when(datasetRepository.evaluateSqlRule(Mockito.any(), Mockito.any())).thenReturn("2");
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
+    DataProviderVO providerCode = new DataProviderVO();
+    providerCode.setCode("DE");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(providerCode);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "27");
 
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
@@ -375,7 +396,11 @@ public class SQLValidationUtilsTest {
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
     Mockito.when(datasetRepository.evaluateSqlRule(Mockito.any(), Mockito.any())).thenReturn("2");
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
+    DataProviderVO providerCode = new DataProviderVO();
+    providerCode.setCode("DE");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(providerCode);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "27");
 
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
@@ -439,7 +464,11 @@ public class SQLValidationUtilsTest {
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
     Mockito.when(recordRepository.findByIds(Mockito.any())).thenReturn(records);
     Mockito.when(datasetRepository.evaluateSqlRule(Mockito.any(), Mockito.any())).thenReturn("2");
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
+    DataProviderVO providerCode = new DataProviderVO();
+    providerCode.setCode("DE");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(providerCode);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "27");
     Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
   }
 
@@ -500,7 +529,11 @@ public class SQLValidationUtilsTest {
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(schema));
     Mockito.when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(table));
     Mockito.when(datasetRepository.evaluateSqlRule(Mockito.any(), Mockito.any())).thenReturn("2");
-    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "DE");
+    DataProviderVO providerCode = new DataProviderVO();
+    providerCode.setCode("DE");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(providerCode);
+    sqlValidationUtils.executeValidationSQLRule(datasetValue.getId(), ruleId, "27");
     Mockito.verify(datasetRepository, times(1)).save(Mockito.any());
   }
 }
