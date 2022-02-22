@@ -59,14 +59,20 @@ export const ValidationsStatus = ({ onCloseDialog, isDialogVisible }) => {
     getValidationsStatuses();
   }, [pagination, sort]);
 
+  const checkForEmptyValues = key => {
+    if (Array.isArray(key)) {
+      return key.length > 0;
+    }
+
+    return TextUtils.areEquals(key.trim(), '');
+  };
+
   const checkIsFiltered = () => {
     if (isEmpty(filterBy)) {
       return false;
     }
 
-    return Object.values(filterBy)
-      .map(key => TextUtils.areEquals(key.trim(), ''))
-      .includes(false);
+    return Object.values(filterBy).map(checkForEmptyValues).includes(false);
   };
 
   const getValidationsStatuses = async () => {
