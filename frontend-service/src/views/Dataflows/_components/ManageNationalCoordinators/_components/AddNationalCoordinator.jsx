@@ -23,7 +23,7 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [hasEmailError, setHasEmailError] = useState(true);
+  const [hasEmailError, setHasEmailError] = useState(false);
   const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -111,11 +111,11 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
       <div className={styles.addDialog}>
         <label className={styles.label}>{resourcesContext.messages['manageNationalCoordinatorsDialogColumn']}</label>
         <InputText
-          className={hasEmailError ? '' : styles.error}
+          className={hasEmailError ? styles.error : ''}
           id="name"
           keyfilter="email"
           maxLength={50}
-          onBlur={event => (isValidEmail(event.target.value) ? setHasEmailError(true) : setHasEmailError(false))}
+          onBlur={event => setHasEmailError(!isValidEmail(event.target.value))}
           onChange={event => onChangeEmail(event.target.value.trim())}
           placeholder={resourcesContext.messages['nationalCoordinatorsEmail']}
           value={nationalCoordinator.email}
