@@ -993,7 +993,7 @@ export const DataViewer = ({
       enabledDrawElements={records.drawElements}
       geoJson={records.mapGeoJson}
       geometryType={records.geometryType}
-      hasLegend={true}
+      hasLegend
       onSelectPoint={onSelectPoint}
       selectedCRS={records.crs}></Map>
   );
@@ -1006,14 +1006,14 @@ export const DataViewer = ({
         ) : rowData.field === 'Single select items' || rowData.field === 'Multiple select items' ? (
           <Chips
             className={styles.chips}
-            disabled={true}
+            disabled
             name={resourcesContext.messages['multipleSingleMessage']}
             pasteSeparator=";"
             value={rowData.value.split(';')}></Chips>
         ) : rowData.field === 'Valid extensions' ? (
           <Chips
             className={styles.chips}
-            disabled={true}
+            disabled
             name={resourcesContext.messages['validExtensionsShort']}
             value={rowData.value.split(',')}></Chips>
         ) : rowData.field === 'Maximum file size' ? (
@@ -1148,9 +1148,9 @@ export const DataViewer = ({
               />
             ) : null
           }
-          hasDefaultCurrentPage={true}
+          hasDefaultCurrentPage
           id={tableId}
-          lazy={true}
+          lazy
           loading={isLoading}
           onContextMenu={
             (hasWebformWritePermissions &&
@@ -1171,17 +1171,17 @@ export const DataViewer = ({
           onPaste={e => onPaste(e)}
           onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
           onSort={onSort}
-          paginator={true}
+          paginator
           paginatorRight={renderPaginatorRecordsCount()}
           ref={datatableRef}
-          reorderableColumns={true}
-          resizableColumns={true}
+          reorderableColumns
+          resizableColumns
           rows={records.recordsPerPage}
           rowsPerPageOptions={[5, 10, 20, 100]}
-          scrollable={true}
+          scrollable
           scrollHeight="70vh"
           selectionMode="single"
-          sortable={true}
+          sortable
           sortField={sort.sortField}
           sortOrder={sort.sortOrder}
           totalRecords={
@@ -1203,7 +1203,7 @@ export const DataViewer = ({
           onHide={() => setIsColumnInfoVisible(false)}
           visible={isColumnInfoVisible}>
           <DataTable
-            autoLayout={true}
+            autoLayout
             className={styles.itemTable}
             value={DataViewerUtils.getFieldValues(colsSchema, selectedHeader, [
               'header',
@@ -1253,7 +1253,7 @@ export const DataViewer = ({
           dialogVisible={isAttachFileVisible}
           infoTooltip={infoAttachTooltip}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
-          isDialog={true}
+          isDialog
           maxFileSize={
             !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
               ? records.selectedMaxSize * config.MB_SIZE
@@ -1286,7 +1286,7 @@ export const DataViewer = ({
             className={`edit-table calendar-table ${styles.addEditRecordDialog}`}
             footer={addRowDialogFooter}
             header={resourcesContext.messages['addRecord']}
-            modal={true}
+            modal
             onHide={() => setAddDialogVisible(false)}
             visible={addDialogVisible}
             zIndex={3003}>
@@ -1318,7 +1318,7 @@ export const DataViewer = ({
           className={`calendar-table ${styles.addEditRecordDialog}`}
           footer={editRowDialogFooter}
           header={resourcesContext.messages['editRow']}
-          modal={true}
+          modal
           onHide={() => setEditDialogVisible(false)}
           visible={editDialogVisible}
           zIndex={3003}>
@@ -1374,7 +1374,7 @@ export const DataViewer = ({
           className="edit-table"
           disabledConfirm={isEmpty(records.pastedRecords)}
           divRef={divRef}
-          hasPasteOption={true}
+          hasPasteOption
           header={resourcesContext.messages['pasteRecords']}
           isPasting={isPasting}
           labelCancel={resourcesContext.messages['cancel']}
@@ -1405,7 +1405,7 @@ export const DataViewer = ({
           className="map-data"
           footer={saveMapGeoJsonDialogFooter}
           header={resourcesContext.messages['geospatialData']}
-          modal={true}
+          modal
           onHide={() => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })}
           visible={records.isMapOpen}>
           <div className="p-grid p-fluid">{mapRender()}</div>
@@ -1417,7 +1417,7 @@ export const DataViewer = ({
           className={styles.coordinatesMoreInfo}
           footer={coordinatesMoreInfoDialogFooter}
           header={resourcesContext.messages['geospatialDataMoreInfo']}
-          modal={true}
+          modal
           onHide={onHideCoordinatesMoreInfo}
           style={{}}
           visible={records.isCoordinatesMoreInfoVisible}>
