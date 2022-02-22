@@ -29,7 +29,6 @@ import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
 import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
-import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const filterBy = useRecoilValue(filterByCustomFilterStore('validationsStatuses'));
