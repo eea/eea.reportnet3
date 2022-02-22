@@ -7,7 +7,7 @@ export const BackgroundProcessService = {
   getValidationsStatuses: async ({ dataflowId, numberRows, pageNum, sortField, sortOrder, status, user }) => {
     const parsedSortField = BackgroundProcessUtils.parseSortField(sortField);
 
-    const validationsDTO = await BackgroundProcessRepository.getValidationsStatuses({
+    return await BackgroundProcessRepository.getValidationsStatuses({
       dataflowId,
       numberRows,
       pageNum,
@@ -16,7 +16,5 @@ export const BackgroundProcessService = {
       status,
       user
     });
-
-    return validationsDTO;
   }
 };

@@ -51,8 +51,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
   const { setData } = useApplyFilters('validationsStatuses');
 
-  // TODO Pagination
-
   const { firstRow, numberRows, pageNum } = pagination;
 
   useEffect(() => {
@@ -65,14 +63,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     }
 
     return TextUtils.areEquals(key.trim(), '');
-  };
-
-  const checkIsFiltered = () => {
-    if (isEmpty(filterBy)) {
-      return false;
-    }
-
-    return Object.values(filterBy).map(checkForEmptyValues).includes(false);
   };
 
   const getValidationsStatuses = async () => {
@@ -92,7 +82,13 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       setTotalRecords(data.totalRecords);
       setValidationsStatusesList(data.processList);
       setFilteredRecords(data.filteredRecords);
-      setIsFiltered(checkIsFiltered()); // TODO CHECK FILTERS ARE EMPTY
+      setIsFiltered(() => {
+        if (isEmpty(filterBy)) {
+          return false;
+        }
+
+        return Object.values(filterBy).map(checkForEmptyValues).includes(false);
+      });
       setData(data.processList);
       setLoadingStatus('success');
     } catch (error) {
@@ -131,13 +127,10 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     setValidationStatusId(null);
   };
 
-  const onSort = event => {
-    setSort({ field: event.sortField, order: event.sortOrder });
-  };
+  const onSort = event => setSort({ field: event.sortField, order: event.sortOrder });
 
-  const onChangePagination = event => {
+  const onChangePagination = event =>
     setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
-  };
 
   const onChangePage = event => {
     setGoToPage(event.page + 1);
@@ -219,25 +212,15 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     ));
   };
 
-  const getActionsTemplate = validation => {
-    return (
-      <Button
-        className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
-        disabled={loadingStatus === 'pending'}
-        icon={getBtnIcon(validation.id)}
-        onClick={() => onShowDeleteDialog(validation)}
-        status="button"
-      />
-    );
-  };
-
-  const getBtnIcon = id => {
-    if (id === validationStatusId && loadingStatus === 'pending') {
-      return 'spinnerAnimate';
-    }
-
-    return 'trash';
-  };
+  const getActionsTemplate = validation => (
+    <Button
+      className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
+      disabled={loadingStatus === 'pending'}
+      icon={validation.id === validationStatusId && loadingStatus === 'pending' ? 'spinnerAnimate' : 'trash'}
+      onClick={() => onShowDeleteDialog(validation)}
+      status="button"
+    />
+  );
 
   const getDataflowTemplate = validation => (
     <p>
@@ -265,18 +248,16 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
-  const renderFilters = () => {
-    return (
-      <Filters
-        className="lineItems"
-        isLoading={isLoading}
-        onFilter={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
-        onReset={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
-        options={filterOptions}
-        recoilId="validationsStatuses"
-      />
-    );
-  };
+  const renderFilters = () => (
+    <Filters
+      className="lineItems"
+      isLoading={isLoading}
+      onFilter={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+      onReset={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+      options={filterOptions}
+      recoilId="validationsStatuses"
+    />
+  );
 
   const renderDialogContent = () => {
     if (isLoading) {

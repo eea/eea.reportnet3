@@ -38,7 +38,6 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
-import { ServiceUtils } from 'services/_utils/ServiceUtils';
 
 export const PublicCountryInformation = () => {
   const { countryCode } = useParams();
@@ -144,7 +143,7 @@ export const PublicCountryInformation = () => {
 
       const data = await DataflowService.getPublicDataflowsByCountryCode({
         countryCode,
-        sortOrder: ServiceUtils.getSortOrder(),
+        sortOrder,
         pageNum,
         numberRows,
         sortField,
