@@ -155,7 +155,7 @@ export const PublicFrontpage = () => {
                       </li>
                       <li>
                         <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/api_howto_reportnet3/`}
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/api_howto_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">
                           API
