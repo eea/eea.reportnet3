@@ -37,7 +37,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const notificationContext = useContext(NotificationContext);
 
   const [filteredRecords, setFilteredRecords] = useState(0);
-  const [goToPage, setGoToPage] = useState(1);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,6 +51,12 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const { setData } = useApplyFilters('validationsStatuses');
 
   const { firstRow, numberRows, pageNum } = pagination;
+
+  // console.log('pagination', pagination);
+  // console.log('sort :>> ', sort);
+  // console.log('validationsStatuses', validationsStatuses);
+  // console.log('totalRecords :>> ', totalRecords, 'filteredRecords :>> ', filteredRecords);
+  // console.log('isFiltered', isFiltered);
 
   useEffect(() => {
     getValidationsStatuses();
@@ -115,13 +120,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const onSort = event => setSort({ field: event.sortField, order: event.sortOrder });
 
-  const onChangePagination = event =>
-    setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
-
-  const onChangePage = event => {
-    setGoToPage(event.page + 1);
-    onChangePagination(event);
-  };
+  const onChangePage = event => setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
 
   const filterOptions = [
     {
@@ -238,8 +237,8 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     <Filters
       className="lineItems"
       isLoading={isLoading}
-      onFilter={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
-      onReset={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+      onFilter={() => onChangePage({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+      onReset={() => onChangePage({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
       options={filterOptions}
       recoilId="validationsStatuses"
     />
