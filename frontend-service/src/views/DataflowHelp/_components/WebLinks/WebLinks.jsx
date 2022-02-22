@@ -334,7 +334,7 @@ export const WebLinks = ({
         <Toolbar className={styles.webLinksToolbar}>
           <div className="p-toolbar-group-left">
             <Button
-              className={`p-button-rounded p-button-animated-blink dataflowHelp-webLink-upload-help-step`}
+              className="p-button-rounded p-button-animated-blink dataflowHelp-webLink-upload-help-step"
               icon="add"
               id="addWebLinkButton"
               label={resourcesContext.messages['add']}
