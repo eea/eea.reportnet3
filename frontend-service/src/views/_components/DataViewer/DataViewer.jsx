@@ -1419,7 +1419,6 @@ export const DataViewer = ({
           header={resourcesContext.messages['geospatialDataMoreInfo']}
           modal
           onHide={onHideCoordinatesMoreInfo}
-          style={{}}
           visible={records.isCoordinatesMoreInfoVisible}>
           <div className="p-grid p-fluid">{renderCoordinatesMoreInfo()}</div>
         </Dialog>
