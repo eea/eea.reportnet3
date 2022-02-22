@@ -297,7 +297,7 @@ export const ReferenceDataflow = () => {
   const shareRightsFooterDialogFooter = (
     <div className={styles.buttonsRolesFooter}>
       <Button
-        className="p-button-secondary p-button-animated-blink p-button-left-aligned"
+        className="p-button-animated-blink p-button-left-aligned"
         icon="plus"
         label={resourcesContext.messages['add']}
         onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
