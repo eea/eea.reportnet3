@@ -261,6 +261,7 @@ public class ValidationHelper implements DisposableBean {
           List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
               dataset.getDataflowId(), dataset.getDatasetSchema())));
       kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
+      deleteLockToReleaseProcess(datasetId);
     }
     dataset = null;
   }
@@ -572,6 +573,14 @@ public class ValidationHelper implements DisposableBean {
         createLockWithSignature(LockSignature.DELETE_IMPORT_TABLE, mapCriteriaDeleteTable,
             SecurityContextHolder.getContext().getAuthentication().getName());
       }
+      // We add a lock to the validation processs itself
+      Map<String, Object> mapCriteriaValidation = new HashMap<>();
+      mapCriteriaValidation.put(LiteralConstants.DATASETID, datasetId);
+      createLockWithSignature(LockSignature.EXECUTE_VALIDATION, mapCriteriaValidation,
+          SecurityContextHolder.getContext().getAuthentication().getName());
+      createLockWithSignature(LockSignature.FORCE_EXECUTE_VALIDATION, mapCriteriaValidation,
+          SecurityContextHolder.getContext().getAuthentication().getName());
+
     } catch (Exception e) {
       LOG_ERROR.error("There's an error putting the lock to validation process in dataset {}",
           datasetId);
@@ -621,6 +630,17 @@ public class ValidationHelper implements DisposableBean {
       mapCriteriaDeleteTable.put(LiteralConstants.TABLESCHEMAID, table.getIdTableSchema());
       lockService.removeLockByCriteria(mapCriteriaDeleteTable);
     }
+
+    Map<String, Object> mapCriteriaValidation = new HashMap<>();
+    mapCriteriaValidation.put(LiteralConstants.SIGNATURE,
+        LockSignature.EXECUTE_VALIDATION.getValue());
+    mapCriteriaValidation.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(mapCriteriaValidation);
+    Map<String, Object> mapCriteriaValidationDataset = new HashMap<>();
+    mapCriteriaValidationDataset.put(LiteralConstants.SIGNATURE,
+        LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
+    mapCriteriaValidationDataset.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(mapCriteriaValidationDataset);
   }
 
   /**

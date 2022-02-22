@@ -1488,6 +1488,8 @@
     "nameExistsError": "Name is repeated",
     "nameIsEmptyError": "Name is empty",
     "true": "True",
-    "false": "False"
+    "false": "False",
+    "externalExportDesignInit": "External design export init",
+    "getMetadataError": "Error getting metadata"
   }
 }
