@@ -28,6 +28,7 @@ import { filterByCustomFilterStore } from 'views/_components/Filters/_functions/
 import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
+import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
@@ -57,14 +58,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     getValidationsStatuses();
   }, [pagination, sort]);
 
-  const checkForEmptyValues = key => {
-    if (Array.isArray(key)) {
-      return key.length > 0;
-    }
-
-    return TextUtils.areEquals(key.trim(), '');
-  };
-
   const getValidationsStatuses = async () => {
     setLoadingStatus('pending');
 
@@ -82,13 +75,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       setTotalRecords(data.totalRecords);
       setValidationsStatusesList(data.processList);
       setFilteredRecords(data.filteredRecords);
-      setIsFiltered(() => {
-        if (isEmpty(filterBy)) {
-          return false;
-        }
-
-        return Object.values(filterBy).map(checkForEmptyValues).includes(false);
-      });
+      setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
       setData(data.processList);
       setLoadingStatus('success');
     } catch (error) {
@@ -117,10 +104,10 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     }
   };
 
-  const onShowDeleteDialog = validation => {
-    setValidationStatusId(validation);
-    setIsDeleteDialogVisible(true);
-  };
+  // const onShowDeleteDialog = validation => {
+  //   setValidationStatusId(validation);
+  //   setIsDeleteDialogVisible(true);
+  // };
 
   const onHideDeleteDialog = () => {
     setIsDeleteDialogVisible(false);
@@ -212,15 +199,15 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     ));
   };
 
-  const getActionsTemplate = validation => (
-    <Button
-      className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
-      disabled={loadingStatus === 'pending'}
-      icon={validation.id === validationStatusId && loadingStatus === 'pending' ? 'spinnerAnimate' : 'trash'}
-      onClick={() => onShowDeleteDialog(validation)}
-      status="button"
-    />
-  );
+  // const getActionsTemplate = validation => (
+  //   <Button
+  //     className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
+  //     disabled={loadingStatus === 'pending'}
+  //     icon={validation.id === validationStatusId && loadingStatus === 'pending' ? 'spinnerAnimate' : 'trash'}
+  //     onClick={() => onShowDeleteDialog(validation)}
+  //     status="button"
+  //   />
+  // );
 
   const getDataflowTemplate = validation => (
     <p>

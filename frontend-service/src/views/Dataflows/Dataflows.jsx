@@ -166,11 +166,11 @@ export const Dataflows = () => {
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
   const { resetFiltersState: resetReportingObligationsFiltersState } = useFilters('reportingObligations');
   const { resetFilterState: resetValidationsStatusesFilterState } = useApplyFilters('validationsStatuses');
+  const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
   const { setData, sortByOptions } = useApplyFilters(tabId);
-  const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
 
   useEffect(() => {
     getDataflowsCount();
@@ -481,11 +481,7 @@ export const Dataflows = () => {
   };
 
   const onReorderPinnedDataflows = async (pinnedItem, isPinned) => {
-    const { business, citizenScience, reference, reporting } = dataflowsState;
-
-    const copyData = [...reporting, ...reference, ...business, ...citizenScience];
-
-    const userProperties = updateUserPropertiesPinnedDataflows({ pinnedItem, data: copyData });
+    const userProperties = updateUserPropertiesPinnedDataflows(pinnedItem);
 
     await onUpdateUserProperties(userProperties);
     userContext.onChangePinnedDataflows(userProperties.pinnedDataflows);
@@ -536,7 +532,7 @@ export const Dataflows = () => {
     }
   };
 
-  const updateUserPropertiesPinnedDataflows = ({ data = [], pinnedItem }) => {
+  const updateUserPropertiesPinnedDataflows = pinnedItem => {
     const userProperties = { ...userContext.userProps };
     const pinnedDataflows = userProperties.pinnedDataflows;
 

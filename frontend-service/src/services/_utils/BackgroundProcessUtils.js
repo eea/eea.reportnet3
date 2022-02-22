@@ -7,11 +7,12 @@ const parseSortField = sortField => {
   }
 
   const replacements = {
-    processStartingDate: 'date_start',
-    processFinishingDate: 'date_finish',
-    queuedDate: 'queued_date',
+    dataflow: 'name',
     dataset: 'dataset_name',
-    dataflow: 'name'
+    processFinishingDate: 'date_finish',
+    processStartingDate: 'date_start',
+    queuedDate: 'queued_date',
+    user: 'username'
   };
 
   return replacements[sortField] || sortField;
