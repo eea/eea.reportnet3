@@ -292,6 +292,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         {renderFilters()}
         <DataTable
           autoLayout
+          className={styles.validationStatusesTable}
           first={firstRow}
           hasDefaultCurrentPage
           loading={loadingStatus === 'pending' && isNil(validationStatusId)}

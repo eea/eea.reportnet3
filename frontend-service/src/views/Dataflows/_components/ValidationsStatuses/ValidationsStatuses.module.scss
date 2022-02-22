@@ -1,8 +1,11 @@
 @import '_styles/mixins';
 
-.dialogContent,
+.dialogContent {
+  min-height: 50vh;
+}
+
 .noDataContent {
-  height: 58vh;
+  height: 35vh;
 }
 
 .noDataContent {
@@ -41,6 +44,9 @@
 }
 
 .dialogContent {
+  > div:first-child {
+    margin-top: 0 !important;
+  }
   > div:first-child > div {
     width: 25% !important;
   }
@@ -50,9 +56,16 @@
   > div:first-child > div:last-child {
     display: flex;
     flex-direction: row;
-    > div {
-      margin: 0 1em 0 0 !important;
+    > div:first-child {
+      margin-top: auto;
+      margin-bottom: 0 !important;
     }
+  }
+}
+
+.validationStatusesTable {
+  p {
+    margin: 0 !important;
   }
 }
 
