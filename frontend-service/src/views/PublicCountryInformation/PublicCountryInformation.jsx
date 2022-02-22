@@ -38,6 +38,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
+import { ServiceUtils } from 'services/_utils/ServiceUtils';
 
 export const PublicCountryInformation = () => {
   const { countryCode } = useParams();
@@ -136,16 +137,6 @@ export const PublicCountryInformation = () => {
     }
   };
 
-  const getSortOrder = () => {
-    if (sortOrder === -1) {
-      return 0;
-    } else if (isNil(sortOrder)) {
-      return undefined;
-    } else {
-      return sortOrder;
-    }
-  };
-
   const onLoadPublicCountryInformation = async () => {
     setIsLoading(true);
     try {
@@ -153,7 +144,7 @@ export const PublicCountryInformation = () => {
 
       const data = await DataflowService.getPublicDataflowsByCountryCode({
         countryCode,
-        sortOrder: getSortOrder(),
+        sortOrder: ServiceUtils.getSortOrder(),
         pageNum,
         numberRows,
         sortField,
