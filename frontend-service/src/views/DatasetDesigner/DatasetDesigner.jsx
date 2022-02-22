@@ -687,7 +687,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
-    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
+    notificationContext.add({ type: 'EXTERNAL_EXPORT_DESIGN_INIT' });
 
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
@@ -705,7 +705,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
-    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
+    notificationContext.add({ type: 'EXTERNAL_EXPORT_DESIGN_INIT' });
 
     try {
       await DatasetService.exportDatasetData(datasetId, fileType);

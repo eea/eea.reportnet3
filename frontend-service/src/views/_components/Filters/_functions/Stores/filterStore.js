@@ -40,3 +40,8 @@ export const isFilteredStore = atomFamily({
   key: 'isFilteredStore',
   default: () => false
 });
+
+export const filterByCustomFilterStore = atomFamily({
+  key: 'filterByCustomFilterStore',
+  default: {}
+});

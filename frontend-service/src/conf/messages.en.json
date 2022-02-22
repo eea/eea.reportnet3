@@ -1489,6 +1489,8 @@
     "y": "Y",
     "yes": "Yes",
     "zipCsvTable": "ZIP (.csv for each table)",
+    "getMetadataError": "Error getting metadata",
+    "externalExportDesignInit": "External design export init",
     "deleteUsersNotificationsHeader": "Delete user notifications",
     "deleteUsersNotificationsConfirm": "Are you sure you want to delete all user notifications?",
     "deleteUsersNotificationsData": "Delete user notifications",
