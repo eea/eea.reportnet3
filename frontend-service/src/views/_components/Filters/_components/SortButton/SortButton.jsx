@@ -6,10 +6,15 @@ import { Button } from 'views/_components/Button';
 
 import { sortByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 
-export const SortButton = ({ id, isLoading, isVisible, onSort, recoilId }) => {
+export const SortButton = ({ getFilterBy, id, isLoading, isVisible, onSort, recoilId }) => {
   const [sortBy, setSortBy] = useRecoilState(sortByStore(recoilId));
 
   const isSortActive = id === sortBy.sortByHeader && sortBy.sortByOption !== 'idle';
+
+  const onApplySort = async () => {
+    await getFilterBy();
+    onSortData(id);
+  };
 
   const onSortData = key => {
     setSortBy(prevSortBy => {
@@ -65,7 +70,7 @@ export const SortButton = ({ id, isLoading, isVisible, onSort, recoilId }) => {
       className={`p-button-secondary-transparent ${styles.sortButton} ${isSortActive ? styles.iconActive : null}`}
       disabled={isLoading}
       icon={id === sortBy.sortByHeader ? switchSortByIcon(sortBy.sortByOption) : 'sortAlt'}
-      onClick={() => onSortData(id)}
+      onClick={onApplySort}
     />
   );
 };
