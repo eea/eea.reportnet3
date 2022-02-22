@@ -1106,19 +1106,19 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         onClick={() => onDownloadQCRules()}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createFieldValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('field', 'validationsListDialog')}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createRowValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('row', 'validationsListDialog')}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createTableValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
@@ -1327,7 +1327,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     <Fragment>
       <div className="p-toolbar-group-left">
         <Button
-          className="p-button-secondary p-button-animated-blink"
+          className="p-button-animated-blink"
           icon="plus"
           label={resourcesContext.messages['addUniqueConstraint']}
           onClick={() => manageDialogs('isManageUniqueConstraintDialogVisible', true)}
