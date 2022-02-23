@@ -184,7 +184,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         field={column.key}
         header={column.header}
         key={column.key}
-        sortable
+        sortable={true}
       />
     ));
   };
@@ -274,15 +274,15 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       <div className={styles.dialogContent}>
         {renderFilters()}
         <DataTable
-          autoLayout
+          autoLayout={true}
           className={styles.validationStatusesTable}
           first={firstRow}
-          hasDefaultCurrentPage
-          lazy
+          hasDefaultCurrentPage={true}
+          lazy={true}
           loading={loadingStatus === 'pending' && isNil(validationStatusId)}
           onPage={event => setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page })}
           onSort={onSort}
-          paginator
+          paginator={true}
           paginatorRight={
             <PaginatorRecordsCount
               dataLength={totalRecords}
@@ -290,8 +290,8 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               isFiltered={isFiltered}
             />
           }
-          reorderableColumns
-          resizableColumns
+          reorderableColumns={true}
+          resizableColumns={true}
           rows={numberRows}
           rowsPerPageOptions={[5, 10, 15]}
           sortField={sort.field}
@@ -311,7 +311,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         className="responsiveBigDialog"
         footer={dialogFooter}
         header={resourcesContext.messages['validationsStatusesDialogHeader']}
-        modal
+        modal={true}
         onHide={onCloseDialog}
         visible={isDialogVisible}>
         {renderDialogContent()}
