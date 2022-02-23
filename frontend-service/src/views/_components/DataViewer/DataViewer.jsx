@@ -993,37 +993,45 @@ export const DataViewer = ({
       enabledDrawElements={records.drawElements}
       geoJson={records.mapGeoJson}
       geometryType={records.geometryType}
-      hasLegend
+      hasLegend={true}
       onSelectPoint={onSelectPoint}
       selectedCRS={records.crs}></Map>
   );
 
-  const requiredTemplate = rowData => {
-    return (
-      <div className={styles.requiredTemplateWrapper}>
-        {rowData.field === 'Required' || rowData.field === 'Read only' ? (
-          <FontAwesomeIcon className={styles.requiredTemplateCheck} icon={AwesomeIcons('check')} />
-        ) : rowData.field === 'Single select items' || rowData.field === 'Multiple select items' ? (
-          <Chips
-            className={styles.chips}
-            disabled
-            name={resourcesContext.messages['multipleSingleMessage']}
-            pasteSeparator=";"
-            value={rowData.value.split(';')}></Chips>
-        ) : rowData.field === 'Valid extensions' ? (
-          <Chips
-            className={styles.chips}
-            disabled
-            name={resourcesContext.messages['validExtensionsShort']}
-            value={rowData.value.split(',')}></Chips>
-        ) : rowData.field === 'Maximum file size' ? (
-          `${rowData.value} ${resourcesContext.messages['MB']}`
-        ) : (
-          rowData.value
-        )}
-      </div>
-    );
+  const requiredTemplateContent = rowData => {
+    if (rowData.field === 'Required' || rowData.field === 'Read only') {
+      return <FontAwesomeIcon className={styles.requiredTemplateCheck} icon={AwesomeIcons('check')} />;
+    }
+
+    if (rowData.field === 'Single select items' || rowData.field === 'Multiple select items') {
+      return (
+        <Chips
+          className={styles.chips}
+          disabled={true}
+          name={resourcesContext.messages['multipleSingleMessage']}
+          pasteSeparator=";"
+          value={rowData.value.split(';')}
+        />
+      );
+    }
+
+    if (rowData.field === 'Valid extensions') {
+      return (
+        <Chips
+          className={styles.chips}
+          disabled={true}
+          name={resourcesContext.messages['validExtensionsShort']}
+          value={rowData.value.split(',')}
+        />
+      );
+    }
+
+    return rowData.value;
   };
+
+  const requiredTemplate = rowData => (
+    <div className={styles.requiredTemplateWrapper}>{requiredTemplateContent(rowData)}</div>
+  );
 
   const renderPaginatorRecordsCount = () => {
     const renderFilteredRowsLabel = () => {
@@ -1148,9 +1156,9 @@ export const DataViewer = ({
               />
             ) : null
           }
-          hasDefaultCurrentPage
+          hasDefaultCurrentPage={true}
           id={tableId}
-          lazy
+          lazy={true}
           loading={isLoading}
           onContextMenu={
             (hasWebformWritePermissions &&
@@ -1171,14 +1179,14 @@ export const DataViewer = ({
           onPaste={e => onPaste(e)}
           onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
           onSort={onSort}
-          paginator
+          paginator={true}
           paginatorRight={renderPaginatorRecordsCount()}
           ref={datatableRef}
-          reorderableColumns
-          resizableColumns
+          reorderableColumns={true}
+          resizableColumns={true}
           rows={records.recordsPerPage}
           rowsPerPageOptions={[5, 10, 20, 100]}
-          scrollable
+          scrollable={true}
           scrollHeight="70vh"
           selectionMode="single"
           sortable
@@ -1203,7 +1211,7 @@ export const DataViewer = ({
           onHide={() => setIsColumnInfoVisible(false)}
           visible={isColumnInfoVisible}>
           <DataTable
-            autoLayout
+            autoLayout={true}
             className={styles.itemTable}
             value={DataViewerUtils.getFieldValues(colsSchema, selectedHeader, [
               'header',
@@ -1253,7 +1261,7 @@ export const DataViewer = ({
           dialogVisible={isAttachFileVisible}
           infoTooltip={infoAttachTooltip}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
-          isDialog
+          isDialog={true}
           maxFileSize={
             !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'
               ? records.selectedMaxSize * config.MB_SIZE
@@ -1286,7 +1294,7 @@ export const DataViewer = ({
             className={`edit-table calendar-table ${styles.addEditRecordDialog}`}
             footer={addRowDialogFooter}
             header={resourcesContext.messages['addRecord']}
-            modal
+            modal={true}
             onHide={() => setAddDialogVisible(false)}
             visible={addDialogVisible}
             zIndex={3003}>
@@ -1318,7 +1326,7 @@ export const DataViewer = ({
           className={`calendar-table ${styles.addEditRecordDialog}`}
           footer={editRowDialogFooter}
           header={resourcesContext.messages['editRow']}
-          modal
+          modal={true}
           onHide={() => setEditDialogVisible(false)}
           visible={editDialogVisible}
           zIndex={3003}>
@@ -1405,7 +1413,7 @@ export const DataViewer = ({
           className="map-data"
           footer={saveMapGeoJsonDialogFooter}
           header={resourcesContext.messages['geospatialData']}
-          modal
+          modal={true}
           onHide={() => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })}
           visible={records.isMapOpen}>
           <div className="p-grid p-fluid">{mapRender()}</div>
@@ -1417,7 +1425,7 @@ export const DataViewer = ({
           className={styles.coordinatesMoreInfo}
           footer={coordinatesMoreInfoDialogFooter}
           header={resourcesContext.messages['geospatialDataMoreInfo']}
-          modal
+          modal={true}
           onHide={onHideCoordinatesMoreInfo}
           visible={records.isCoordinatesMoreInfoVisible}>
           <div className="p-grid p-fluid">{renderCoordinatesMoreInfo()}</div>
