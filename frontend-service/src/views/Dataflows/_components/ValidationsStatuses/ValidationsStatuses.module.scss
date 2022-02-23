@@ -24,6 +24,15 @@
 .actionsColumn {
   width: 44px;
 }
+.dataflowColumn,
+.datasetColumn {
+  width: 26%;
+}
+
+.dateColumn,
+.statusColumn {
+  width: 8em;
+}
 
 .footer {
   display: flex;

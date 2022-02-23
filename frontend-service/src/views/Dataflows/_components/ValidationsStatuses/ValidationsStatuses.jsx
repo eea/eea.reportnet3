@@ -149,24 +149,42 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getTableColumns = () => {
     const columns = [
-      { key: 'dataflow', header: resourcesContext.messages['dataflow'], template: getDataflowTemplate },
-      { key: 'dataset', header: resourcesContext.messages['dataset'], template: getDatasetTemplate },
+      {
+        key: 'dataflow',
+        header: resourcesContext.messages['dataflow'],
+        template: getDataflowTemplate,
+        className: styles.dataflowColumn
+      },
+      {
+        key: 'dataset',
+        header: resourcesContext.messages['dataset'],
+        template: getDatasetTemplate,
+        className: styles.datasetColumn
+      },
       { key: 'user', header: resourcesContext.messages['user'] },
-      { key: 'status', header: resourcesContext.messages['status'], template: getStatusTemplate },
+      {
+        key: 'status',
+        header: resourcesContext.messages['status'],
+        template: getStatusTemplate,
+        className: styles.statusColumn
+      },
       {
         key: 'queuedDate',
         header: resourcesContext.messages['queuedDate'],
-        template: validation => getDateTemplate(validation, 'queuedDate')
+        template: validation => getDateTemplate(validation, 'queuedDate'),
+        className: styles.dateColumn
       },
       {
         key: 'processStartingDate',
         header: resourcesContext.messages['processStartingDate'],
-        template: validation => getDateTemplate(validation, 'processStartingDate')
+        template: validation => getDateTemplate(validation, 'processStartingDate'),
+        className: styles.dateColumn
       },
       {
         key: 'processFinishingDate',
         header: resourcesContext.messages['processFinishingDate'],
-        template: validation => getDateTemplate(validation, 'processFinishingDate')
+        template: validation => getDateTemplate(validation, 'processFinishingDate'),
+        className: styles.dateColumn
       }
       // {
       //   key: 'actions',
