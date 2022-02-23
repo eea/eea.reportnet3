@@ -290,7 +290,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           rowsPerPageOptions={[5, 10, 15]}
           sortField={sort.field}
           sortOrder={sort.order}
-          totalRecords={totalRecords}
+          totalRecords={isFiltered ? filteredRecords : totalRecords}
           value={validationsStatuses}>
           {getTableColumns()}
         </DataTable>
