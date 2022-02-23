@@ -133,7 +133,7 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
       stringQuery.append(asc ? " asc" : " desc");
       if (null != pageable) {
         stringQuery.append(" LIMIT " + pageable.getPageSize());
-        stringQuery.append(" OFFSET " + pageable.getPageSize() * pageable.getPageNumber());
+        stringQuery.append(" OFFSET " + pageable.getOffset());
       }
       stringQuery.append(") table_aux");
     }
