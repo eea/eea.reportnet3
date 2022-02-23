@@ -15,6 +15,7 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -60,87 +61,73 @@ import org.springframework.test.util.ReflectionTestUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class ValidationHelperTest {
 
-  /**
-   * The validation helper.
-   */
+  /** The validation helper. */
   @InjectMocks
   private ValidationHelper validationHelper;
 
-  /**
-   * The validation service.
-   */
+  /** The validation service. */
   @Mock
   private ValidationService validationService;
 
-  /**
-   * The kie base.
-   */
+  /** The kie base. */
   @Mock
   private KieBase kieBase;
 
-  /**
-   * The kafka admin utils.
-   */
+  /** The kafka admin utils. */
   @Mock
   private KafkaAdminUtils kafkaAdminUtils;
 
-  /**
-   * The kafka sender utils.
-   */
+  /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The table repository.
-   */
+  /** The table repository. */
   @Mock
   private TableRepository tableRepository;
 
-  /**
-   * The lock service.
-   */
+  /** The lock service. */
   @Mock
   private LockService lockService;
 
-  /**
-   * The dataset metabase controller zuul.
-   */
+  /** The dataset metabase controller zuul. */
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  /** The reference dataset controller zuul. */
   @Mock
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
-  /**
-   * The data.
-   */
+  /** The data. */
   private Map<String, Object> data;
 
-  /**
-   * The eea event VO.
-   */
+  /** The eea event VO. */
   private EEAEventVO eeaEventVO;
 
-  /**
-   * The processes map.
-   */
+  /** The processes map. */
   private Map<String, ValidationProcessVO> processesMap;
 
-  /**
-   * The executor service.
-   */
+  /** The executor service. */
   private ExecutorService executorService;
 
+  /** The security context. */
   @Mock
   private SecurityContext securityContext;
+
+  /** The authentication. */
   @Mock
   private Authentication authentication;
 
+  /** The rules repository. */
   @Mock
   private RulesRepository rulesRepository;
 
+  /** The schemas repository. */
   @Mock
   private SchemasRepository schemasRepository;
+
+  /** The process controller zuul. */
+  @Mock
+  private ProcessControllerZuul processControllerZuul;
 
   /**
    * Inits the mocks.
@@ -174,7 +161,6 @@ public class ValidationHelperTest {
    * Gets the kie base.
    *
    * @return the kie base
-   *
    * @throws EEAException the EEA exception
    */
   @Test
@@ -192,7 +178,6 @@ public class ValidationHelperTest {
    * Gets the kie base exception.
    *
    * @return the kie base exception
-   *
    * @throws EEAException the EEA exception
    */
   @Test(expected = EEAException.class)
@@ -259,7 +244,7 @@ public class ValidationHelperTest {
   /**
    * Execute validation.
    *
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Test
   public void executeValidation() throws EEAException {
@@ -300,6 +285,11 @@ public class ValidationHelperTest {
   }
 
 
+  /**
+   * Execute validation 2.
+   *
+   * @throws EEAException the EEA exception
+   */
   @Test
   public void executeValidation2() throws EEAException {
     ReflectionTestUtils.setField(validationHelper, "fieldBatchSize", 20);
@@ -309,6 +299,9 @@ public class ValidationHelperTest {
     TableValue table = new TableValue();
     table.setId(1l);
     tables.add(table);
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
 
     ConsumerGroupVO consumerGroups = new ConsumerGroupVO();
     Collection<MemberDescriptionVO> members = new ArrayList<>();
@@ -360,6 +353,8 @@ public class ValidationHelperTest {
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
     Mockito.when(datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(Mockito.eq(1l)))
         .thenReturn(null);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     validationHelper.reducePendingTasks(1l, "1");
 
     Mockito.verify(kafkaSenderUtils, Mockito.times(1))
@@ -384,6 +379,8 @@ public class ValidationHelperTest {
         new ValidationProcessVO(1, pendingValidations, null, true, "user1", false));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
 
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
     validationHelper.reducePendingTasks(1l, "1");

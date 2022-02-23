@@ -141,6 +141,8 @@ public enum ResourceGroupEnum {
   /** The referencedataset custodian. */
   REFERENCEDATASET_CUSTODIAN("ReferenceDataset-%s-DATA_CUSTODIAN"),
 
+  /** The referencedataset lead reporter. */
+  REFERENCEDATASET_LEAD_REPORTER("ReferenceDataset-%s-LEAD_REPORTER"),
 
   /** The referencedataset steward. */
   REFERENCEDATASET_STEWARD("ReferenceDataset-%s-DATA_STEWARD"),

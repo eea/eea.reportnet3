@@ -709,8 +709,8 @@ public final class EEAErrorMessage {
   /** The Constant DATAFLOW_NAME: {@value}. */
   public static final String DATAFLOW_NAME_EMPTY = "Dataflow Name empty";
 
-  /** The Constant DATAFLOW_BUSINESS_UPDATE_ERROR: {@value}. */
-  public static final String DATAFLOW_BUSINESS_UPDATE_ERROR = "Business dataflow can't be updated";
+  /** The Constant DATAFLOW_UPDATE_ERROR: {@value}. */
+  public static final String DATAFLOW_UPDATE_ERROR = "Dataflow can't be updated";
 
   /**
    * Instantiates a new EEA error message.

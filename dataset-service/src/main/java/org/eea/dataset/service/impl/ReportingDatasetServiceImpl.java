@@ -130,7 +130,7 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
    */
   private void setRestrictFromPublic(List<ReportingDatasetPublicVO> reportings, Long dataflowId) {
     List<Long> providerIds = reportings.stream().map(ReportingDatasetPublicVO::getDataProviderId)
-        .collect(Collectors.toList());
+        .distinct().collect(Collectors.toList());
     if (!providerIds.isEmpty()) {
       List<RepresentativeVO> representatives = representativeControllerZuul
           .findRepresentativesByDataFlowIdAndProviderIdList(dataflowId, providerIds);

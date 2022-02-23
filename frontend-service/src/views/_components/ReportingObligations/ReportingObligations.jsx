@@ -26,6 +26,8 @@ import { reportingObligationReducer } from './_functions/Reducers/reportingOblig
 
 import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
 import { ReportingObligationUtils } from './_functions/Utils/ReportingObligationUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
+
 import { RodUrl } from 'repositories/config/RodUrl';
 
 export const ReportingObligations = ({ obligationChecked, setCheckedObligation }) => {
@@ -33,37 +35,52 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const { getFilterBy, isFiltered, filteredData } = useApplyFilters('reportingObligations');
+  const { getFilterBy } = useApplyFilters('reportingObligations');
 
   const data = useRecoilValue(filteredDataStore('reportingObligations'));
 
   const setData = useRecoilCallback(
     ({ snapshot, set }) =>
       async data => {
-        const searchValue = await snapshot.getPromise(searchByStore('reportingObligations'));
-        const searchKeys = await snapshot.getPromise(filterByKeySearchStore('reportingObligations'));
-
-        const parsedData = data.filter(item =>
-          FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: searchValue })
-        );
+        const filteredData = await getValuesFilteredData(snapshot, data);
 
         set(dataStore('reportingObligations'), data);
-        set(filteredDataStore('reportingObligations'), parsedData);
+        set(filteredDataStore('reportingObligations'), filteredData);
       },
+    []
+  );
+
+  const getFilteredData = useRecoilCallback(
+    ({ snapshot }) =>
+      async data =>
+        await getValuesFilteredData(snapshot, data),
     []
   );
 
   const [reportingObligationState, reportingObligationDispatch] = useReducer(reportingObligationReducer, {
     countries: [],
     data: [],
+    filteredRecords: 0,
     issues: [],
+    isFiltered: false,
     isLoading: true,
     organizations: [],
     pagination: { first: 0, rows: 10, page: 0 },
+    totalRecords: 0,
     selectedObligation: obligationChecked
   });
 
-  const { countries, issues, isLoading, organizations, pagination, selectedObligation } = reportingObligationState;
+  const {
+    countries,
+    filteredRecords,
+    issues,
+    isLoading,
+    isFiltered,
+    organizations,
+    pagination,
+    selectedObligation,
+    totalRecords
+  } = reportingObligationState;
 
   useEffect(() => {
     onLoadCountries();
@@ -71,6 +88,17 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     onLoadOrganizations();
     onLoadReportingObligations();
   }, []);
+
+  const getValuesFilteredData = async (snapshot, data) => {
+    const searchValue = await snapshot.getPromise(searchByStore('reportingObligations'));
+    const searchKeys = await snapshot.getPromise(filterByKeySearchStore('reportingObligations'));
+
+    const filteredData = data.filter(item =>
+      FiltersUtils.applySearch({ filteredKeys: searchKeys.keys, item, value: searchValue })
+    );
+
+    return filteredData;
+  };
 
   const onLoadCountries = async () => {
     try {
@@ -111,9 +139,14 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     try {
       const filterBy = await getFilterBy();
       const response = await ObligationService.getOpen(filterBy);
-      const data = ReportingObligationUtils.initialValues(response, userContext.userProps.dateFormat);
+      const { obligations, totalRecords } = response;
+      const data = ReportingObligationUtils.initialValues(obligations, userContext.userProps.dateFormat);
+      const filteredData = await getFilteredData(data);
 
-      reportingObligationDispatch({ type: 'ON_LOAD_DATA', payload: { data } });
+      reportingObligationDispatch({
+        type: 'ON_LOAD_DATA',
+        payload: { data: data, filteredRecords: filteredData.length, totalRecords, filteredData }
+      });
       setData(data);
     } catch (error) {
       console.error('ReportingObligations - onLoadReportingObligations.', error);
@@ -182,7 +215,7 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
     return (
       <Fragment>
         {renderView()}
-        <span className={`${styles.selectedObligation} ${isEmpty(data || filteredData) ? styles.selected : ''}`}>
+        <span className={`${styles.selectedObligation} ${isEmpty(data) ? styles.selected : ''}`}>
           <span>{`${resourcesContext.messages['selectedObligation']}: `}</span>
           {selectedObligation.title || '-'}
         </span>
@@ -191,11 +224,16 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
   };
 
   const renderPaginationCount = () => (
-    <Fragment>
-      {resourcesContext.messages['totalRecords']} {reportingObligationState.data.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-    </Fragment>
+    <PaginatorRecordsCount dataLength={totalRecords} filteredDataLength={filteredRecords} isFiltered={isFiltered} />
   );
+
+  const updateFilter = () => {
+    reportingObligationDispatch({
+      type: 'ON_PAGINATE',
+      payload: { pagination: { first: 0, rows: pagination.rows, page: 0 } }
+    });
+    onLoadReportingObligations();
+  };
 
   const filterOptions = [
     {
@@ -237,8 +275,8 @@ export const ReportingObligations = ({ obligationChecked, setCheckedObligation }
 
       <Filters
         className="reportingObligations"
-        onFilter={onLoadReportingObligations}
-        onReset={onLoadReportingObligations}
+        onFilter={updateFilter}
+        onReset={updateFilter}
         options={filterOptions}
         recoilId="reportingObligations"
       />
