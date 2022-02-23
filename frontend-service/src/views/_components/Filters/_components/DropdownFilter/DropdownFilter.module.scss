@@ -37,6 +37,13 @@
     border-bottom: var(--inputtext-border) !important;
   }
 
+  .elementFilter:focus-within {
+    label {
+      top: -0.75em;
+      font-size: 12px;
+    }
+  }
+
   .elementFilterSelected {
     border-bottom: var(--active-filter-border) !important;
     box-shadow: var(--active-filter-shadow) !important;
