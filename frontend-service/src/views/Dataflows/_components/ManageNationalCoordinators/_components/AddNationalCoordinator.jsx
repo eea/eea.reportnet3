@@ -1,7 +1,6 @@
-import { Fragment, useContext, useLayoutEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
-import isNil from 'lodash/isNil';
 
 import styles from './AddNationalCoordinator.module.scss';
 
@@ -23,16 +22,28 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const [groupOfCountries, setGroupOfCountries] = useState([]);
   const [hasEmailError, setHasEmailError] = useState(false);
   const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [nationalCoordinator, setNationalCoordinator] = useState({});
 
-  const [groupOfCountries, setGroupOfCountries] = useState([]);
+  useEffect(() => {
+    getDropdownOptions();
+  }, []);
+
+  useEffect(() => {
+    if (!isAddDialogVisible) {
+      setIsAdding(false);
+      setNationalCoordinator({});
+      setHasEmailError(false);
+    }
+  }, [isAddDialogVisible]);
 
   const getDropdownOptions = async () => {
     setIsLoading(true);
+
     const allCountries = { dataProviderGroupId: 2 };
 
     try {
@@ -45,10 +56,6 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
       setIsLoading(false);
     }
   };
-
-  useLayoutEffect(() => {
-    getDropdownOptions();
-  }, []);
 
   const addNationalCoordinator = async () => {
     try {
@@ -65,13 +72,11 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
       console.error('NationalCoordinators - createNationalCoordinator.', error);
     } finally {
       setIsAdding(false);
-      setNationalCoordinator({});
     }
   };
 
   const onAddDialogClose = () => {
     setIsAddDialogVisible(false);
-    setNationalCoordinator({});
   };
 
   const onChangeEmail = email => setNationalCoordinator({ email: email, countryCode: nationalCoordinator.countryCode });
@@ -150,6 +155,7 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
           confirmTooltip={getTooltipMessage()}
           disabledConfirm={
             checkDuplicateNationalCoordinator(nationalCoordinator) ||
+            !isValidEmail(nationalCoordinator.email) ||
             isEmpty(nationalCoordinator.email) ||
             isEmpty(nationalCoordinator.countryCode)
           }
