@@ -2,6 +2,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
+import uniqBy from 'lodash/uniqBy';
 
 import styles from './ManageNationalCoordinators.module.scss';
 
@@ -133,7 +134,10 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
   };
 
   const parseMultiSelectOptions = () =>
-    nationalCoordinatorsData.map(option => ({ type: option.countryName, value: option.countryCode }));
+    uniqBy(nationalCoordinatorsData, 'countryName').map(option => ({
+      type: option.countryName,
+      value: option.countryCode
+    }));
 
   const filterOptions = [
     {
