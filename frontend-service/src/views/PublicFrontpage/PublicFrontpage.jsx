@@ -119,7 +119,7 @@ export const PublicFrontpage = () => {
                         role="presentation"
                       />
                     </div>
-                    <h4>Support documents:</h4>
+                    <h4>Supporting documents:</h4>
                     <ul>
                       <li>
                         <a
