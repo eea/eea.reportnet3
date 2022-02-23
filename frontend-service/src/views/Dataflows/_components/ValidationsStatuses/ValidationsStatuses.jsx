@@ -266,6 +266,8 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       );
     }
 
+    console.log('pagination', pagination);
+
     return (
       <div className={styles.dialogContent}>
         {renderFilters()}
@@ -274,6 +276,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           className={styles.validationStatusesTable}
           first={firstRow}
           hasDefaultCurrentPage
+          lazy
           loading={loadingStatus === 'pending' && isNil(validationStatusId)}
           onPage={onChangePage}
           onSort={onSort}

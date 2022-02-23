@@ -555,7 +555,7 @@ export class DataTable extends Component {
                 }
               }
         }
-        totalRecords={40}
+        totalRecords={totalRecords}
       />
     );
   }
