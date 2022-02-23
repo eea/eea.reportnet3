@@ -2,6 +2,8 @@ import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
 const getEndOfDay = date => new Date(dayjs(date).endOf('day').format()).getTime();
 const getStartOfDay = date => new Date(dayjs(date).startOf('day').format()).getTime();
 
@@ -74,9 +76,11 @@ const getIsFiltered = filterBy => {
     return false;
   }
 
-  return Object.values(filterBy)
-    .map(key => isEmpty(key))
-    .includes(false);
+  return Object.values(filterBy).some(
+    element =>
+      (Array.isArray(element) && element.length > 0) ||
+      (!Array.isArray(element) && !TextUtils.areEquals(element.trim(), ''))
+  );
 };
 
 export const FiltersUtils = { applyCheckBox, applyDates, applyInputs, applyMultiSelects, applySearch, getIsFiltered };

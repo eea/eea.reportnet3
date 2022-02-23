@@ -136,16 +136,6 @@ export const PublicCountryInformation = () => {
     }
   };
 
-  const getSortOrder = () => {
-    if (sortOrder === -1) {
-      return 0;
-    } else if (isNil(sortOrder)) {
-      return undefined;
-    } else {
-      return sortOrder;
-    }
-  };
-
   const onLoadPublicCountryInformation = async () => {
     setIsLoading(true);
     try {
@@ -153,7 +143,7 @@ export const PublicCountryInformation = () => {
 
       const data = await DataflowService.getPublicDataflowsByCountryCode({
         countryCode,
-        sortOrder: getSortOrder(),
+        sortOrder,
         pageNum,
         numberRows,
         sortField,

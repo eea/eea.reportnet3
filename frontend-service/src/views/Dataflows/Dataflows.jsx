@@ -30,6 +30,7 @@ import { Paginator } from 'views/_components/DataTable/_components/Paginator';
 import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { TabMenu } from './_components/TabMenu';
 import { UserList } from 'views/_components/UserList';
+import { ValidationsStatuses } from './_components/ValidationsStatuses';
 
 import { BusinessDataflowService } from 'services/BusinessDataflowService';
 import { CitizenScienceDataflowService } from 'services/CitizenScienceDataflowService';
@@ -93,6 +94,7 @@ export const Dataflows = () => {
     isReportingObligationsDialogVisible: false,
     isUserListVisible: false,
     isValidatingAllDataflowsUsers: false,
+    isValidationStatusDialogVisible: false,
     loadingStatus: { reporting: true, business: true, citizenScience: true, reference: true },
     pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
     pagination: { firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 },
@@ -163,11 +165,12 @@ export const Dataflows = () => {
 
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
   const { resetFiltersState: resetReportingObligationsFiltersState } = useFilters('reportingObligations');
+  const { resetFilterState: resetValidationsStatusesFilterState } = useApplyFilters('validationsStatuses');
+  const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
   const { setData, sortByOptions } = useApplyFilters(tabId);
-  const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
 
   useEffect(() => {
     getDataflowsCount();
@@ -244,6 +247,15 @@ export const Dataflows = () => {
       title: 'manageWebformsLeftBarButton'
     };
 
+    const adminValidationStatusBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'listClipboard',
+      isVisible: isAdmin,
+      label: 'validationStatusLeftBarButton',
+      onClick: () => manageDialogs('isValidationStatusDialogVisible', true),
+      title: 'validationStatusLeftBarButton'
+    };
+
     const adminManageNationalCoordinatorsBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'userTie',
@@ -258,6 +270,7 @@ export const Dataflows = () => {
         adminCreateNewPermissionsBtn,
         adminManageNationalCoordinatorsBtn,
         adminManageWebformsBtn,
+        adminValidationStatusBtn,
         createBusinessDataflowBtn,
         createCitizenScienceDataflowBtn,
         createReferenceDataflowBtn,
@@ -468,11 +481,7 @@ export const Dataflows = () => {
   };
 
   const onReorderPinnedDataflows = async (pinnedItem, isPinned) => {
-    const { business, citizenScience, reference, reporting } = dataflowsState;
-
-    const copyData = [...reporting, ...reference, ...business, ...citizenScience];
-
-    const userProperties = updateUserPropertiesPinnedDataflows({ pinnedItem, data: copyData });
+    const userProperties = updateUserPropertiesPinnedDataflows(pinnedItem);
 
     await onUpdateUserProperties(userProperties);
     userContext.onChangePinnedDataflows(userProperties.pinnedDataflows);
@@ -523,7 +532,7 @@ export const Dataflows = () => {
     }
   };
 
-  const updateUserPropertiesPinnedDataflows = ({ data = [], pinnedItem }) => {
+  const updateUserPropertiesPinnedDataflows = pinnedItem => {
     const userProperties = { ...userContext.userProps };
     const pinnedDataflows = userProperties.pinnedDataflows;
 
@@ -786,6 +795,11 @@ export const Dataflows = () => {
     }
   };
 
+  const onCloseValidationStatusDialog = () => {
+    manageDialogs('isValidationStatusDialogVisible', false);
+    resetValidationsStatusesFilterState();
+  };
+
   const onChangePagination = pagination => dataflowsDispatch({ type: 'ON_PAGINATE', payload: { pagination } });
 
   const onPaginate = event => {
@@ -946,6 +960,13 @@ export const Dataflows = () => {
         <ManageWebforms
           isDialogVisible={dataflowsState.isManageWebformsDialogVisible}
           onCloseDialog={() => manageDialogs('isManageWebformsDialogVisible', false)}
+        />
+      )}
+
+      {dataflowsState.isValidationStatusDialogVisible && (
+        <ValidationsStatuses
+          isDialogVisible={dataflowsState.isValidationStatusDialogVisible}
+          onCloseDialog={onCloseValidationStatusDialog}
         />
       )}
 
