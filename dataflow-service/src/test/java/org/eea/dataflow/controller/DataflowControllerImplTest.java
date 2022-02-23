@@ -35,6 +35,7 @@ import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
@@ -562,6 +563,9 @@ public class DataflowControllerImplTest {
     dataflowVO.setDescription("description");
     dataflowVO.setName("name");
     dataflowVO.setObligation(obligation);
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowService.isAdmin()).thenReturn(false);
+    Mockito.when(dataflowService.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     doNothing().when(dataflowService).updateDataFlow(dataflowVO);
     dataflowControllerImpl.updateDataFlow(dataflowVO);
     Mockito.verify(dataflowService, times(1)).updateDataFlow(dataflowVO);
@@ -585,6 +589,9 @@ public class DataflowControllerImplTest {
     dataflowVO.setDescription("description");
     dataflowVO.setName("name");
     dataflowVO.setObligation(obligation);
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowService.isAdmin()).thenReturn(false);
+    Mockito.when(dataflowService.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     doThrow(EEAException.class).when(dataflowService).updateDataFlow(dataflowVO);
     ResponseEntity<?> value = dataflowControllerImpl.updateDataFlow(dataflowVO);
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, value.getStatusCode());
@@ -604,6 +611,9 @@ public class DataflowControllerImplTest {
     dataflowVO.setDeadlineDate(date);
     dataflowVO.setDescription("description");
     dataflowVO.setName("name");
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowService.isAdmin()).thenReturn(false);
+    Mockito.when(dataflowService.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     ResponseEntity<?> value = dataflowControllerImpl.updateDataFlow(dataflowVO);
     assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
     assertEquals(EEAErrorMessage.DATAFLOW_OBLIGATION, value.getBody());
@@ -625,6 +635,9 @@ public class DataflowControllerImplTest {
     dataflowVO.setDescription("description");
     dataflowVO.setName("name");
     dataflowVO.setObligation(obligation);
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowService.isAdmin()).thenReturn(false);
+    Mockito.when(dataflowService.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     ResponseEntity<?> value = dataflowControllerImpl.updateDataFlow(dataflowVO);
     assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
     assertEquals(EEAErrorMessage.DATAFLOW_OBLIGATION, value.getBody());
@@ -699,6 +712,9 @@ public class DataflowControllerImplTest {
     dataflowVO.setName("name");
     dataflowVO.setObligation(obligation);
     dataflowVO.setType(TypeDataflowEnum.REFERENCE);
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowService.isAdmin()).thenReturn(false);
+    Mockito.when(dataflowService.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     doNothing().when(dataflowService).updateDataFlow(dataflowVO);
     dataflowControllerImpl.updateDataFlow(dataflowVO);
     Mockito.verify(dataflowService, times(1)).updateDataFlow(dataflowVO);
@@ -1435,5 +1451,23 @@ public class DataflowControllerImplTest {
     assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
   }
 
-
+  @Test
+  public void updatDataflowCitizenScienceUpdateErrorTest() throws ParseException, EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    dataflowVO.setObligation(obligation);
+    dataflowVO.setStatus(TypeStatusEnum.DRAFT);
+    dataflowVO.setType(TypeDataflowEnum.CITIZEN_SCIENCE);
+    Mockito.when(dataflowService.isAdmin()).thenReturn(false);
+    Mockito.when(dataflowService.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
+    ResponseEntity<?> value = dataflowControllerImpl.updateDataFlow(dataflowVO);
+    assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
+    assertEquals(EEAErrorMessage.DATAFLOW_UPDATE_ERROR, value.getBody());
+  }
 }

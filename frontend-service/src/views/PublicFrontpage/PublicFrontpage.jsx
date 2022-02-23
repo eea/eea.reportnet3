@@ -119,7 +119,7 @@ export const PublicFrontpage = () => {
                         role="presentation"
                       />
                     </div>
-                    <h4>Support documents:</h4>
+                    <h4>Supporting documents:</h4>
                     <ul>
                       <li>
                         <a
@@ -151,6 +151,14 @@ export const PublicFrontpage = () => {
                           rel="noopener noreferrer"
                           target="_blank">
                           Webforms
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/api_howto_reportnet3`}
+                          rel="noopener noreferrer"
+                          target="_blank">
+                          API
                         </a>
                       </li>
                     </ul>

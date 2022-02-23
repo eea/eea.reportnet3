@@ -591,8 +591,8 @@ public class ValidationHelper implements DisposableBean {
       // We add a lock to the validation processs itself
       Map<String, Object> mapCriteriaValidation = new HashMap<>();
       mapCriteriaValidation.put(LiteralConstants.DATASETID, datasetId);
-      createLockWithSignature(LockSignature.EXECUTE_VALIDATION, mapCriteriaValidation,
-          SecurityContextHolder.getContext().getAuthentication().getName());
+      // createLockWithSignature(LockSignature.EXECUTE_VALIDATION, mapCriteriaValidation,
+      // SecurityContextHolder.getContext().getAuthentication().getName());
       createLockWithSignature(LockSignature.FORCE_EXECUTE_VALIDATION, mapCriteriaValidation,
           SecurityContextHolder.getContext().getAuthentication().getName());
 
@@ -650,7 +650,7 @@ public class ValidationHelper implements DisposableBean {
     mapCriteriaValidation.put(LiteralConstants.SIGNATURE,
         LockSignature.EXECUTE_VALIDATION.getValue());
     mapCriteriaValidation.put(LiteralConstants.DATASETID, datasetId);
-    lockService.removeLockByCriteria(mapCriteriaValidation);
+    // lockService.removeLockByCriteria(mapCriteriaValidation);
     Map<String, Object> mapCriteriaValidationDataset = new HashMap<>();
     mapCriteriaValidationDataset.put(LiteralConstants.SIGNATURE,
         LockSignature.FORCE_EXECUTE_VALIDATION.getValue());

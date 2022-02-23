@@ -277,6 +277,7 @@ public interface DatasetController {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    * @return the ETL dataset VO
    */
   @GetMapping("/v1/{datasetId}/etlExport")
@@ -287,8 +288,8 @@ public interface DatasetController {
       @RequestParam(value = "limit", required = false) Integer limit,
       @RequestParam(value = "offset", required = false) Integer offset,
       @RequestParam(value = "filterValue", required = false) String filterValue,
-      @RequestParam(value = "columnName", required = false) String columnName);
-
+      @RequestParam(value = "columnName", required = false) String columnName,
+      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
 
   /**
    * Etl export dataset legacy.

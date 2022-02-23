@@ -1,7 +1,7 @@
-.Footer {
-  background-color: var(--c-corporate-blue);
+.footer {
   display: flex;
-  padding: 8px 0;
+  border: solid var(--c-corporate-blue);
+  border-width: 8px 0;
   .footerContent {
     display: flex;
     justify-content: space-between;
@@ -35,8 +35,6 @@
             width: 200px;
             height: auto;
           }
-        }
-        &:nth-of-type(2) {
         }
       }
     }

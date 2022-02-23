@@ -687,7 +687,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
-    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
+    notificationContext.add({ type: 'EXTERNAL_EXPORT_DESIGN_INIT' });
 
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
@@ -705,7 +705,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
-    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
+    notificationContext.add({ type: 'EXTERNAL_EXPORT_DESIGN_INIT' });
 
     try {
       await DatasetService.exportDatasetData(datasetId, fileType);
@@ -1106,19 +1106,19 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         onClick={() => onDownloadQCRules()}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createFieldValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('field', 'validationsListDialog')}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createRowValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('row', 'validationsListDialog')}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className="p-button-animated-blink"
         icon="plus"
         label={resourcesContext.messages['createTableValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
@@ -1327,7 +1327,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     <Fragment>
       <div className="p-toolbar-group-left">
         <Button
-          className="p-button-secondary p-button-animated-blink"
+          className="p-button-animated-blink"
           icon="plus"
           label={resourcesContext.messages['addUniqueConstraint']}
           onClick={() => manageDialogs('isManageUniqueConstraintDialogVisible', true)}

@@ -3153,11 +3153,16 @@ public class DatasetServiceTest {
     tSchema.setIdTableSchema(id);
     tSchema.setRecordSchema(rSchema);
     dsSchema.setTableSchemas(Arrays.asList(tSchema));
+    Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
+        .thenReturn("5cf0e9b3b793310e9ceca192");
+
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(dsSchema));
     Mockito
-        .when(recordRepository.findAndGenerateETLJson(Mockito.anyLong(), Mockito.any(),
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .when(
+            recordRepository.findAndGenerateETLJson(Mockito.anyLong(), Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn("");
-    datasetService.etlExportDataset(0l, outputStream, id.toString(), 10, 10, "", "");
+    datasetService.etlExportDataset(0l, outputStream, id.toString(), 10, 10, "", "", "");
     Mockito.verify(outputStream, times(1)).flush();
   }
 
@@ -3178,13 +3183,19 @@ public class DatasetServiceTest {
     tSchema.setIdTableSchema(id);
     tSchema.setRecordSchema(rSchema);
     dsSchema.setTableSchemas(Arrays.asList(tSchema));
+    Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
+        .thenReturn("5cf0e9b3b793310e9ceca192");
+
+    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(dsSchema));
     Mockito
-        .when(recordRepository.findAndGenerateETLJson(Mockito.anyLong(), Mockito.any(),
-            Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        .when(
+            recordRepository.findAndGenerateETLJson(Mockito.anyLong(), Mockito.any(), Mockito.any(),
+                Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenThrow(EEAException.class);
-    datasetService.etlExportDataset(0l, outputStream, id.toString(), 10, 10, "", "");
+    datasetService.etlExportDataset(0l, outputStream, id.toString(), 10, 10, "", "", "");
     Mockito.verify(recordRepository, times(1)).findAndGenerateETLJson(Mockito.anyLong(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any());
   }
 
   /**

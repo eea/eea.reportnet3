@@ -934,6 +934,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    * @return the ETL dataset VO
    */
   @Override
@@ -957,13 +958,15 @@ public class DatasetControllerImpl implements DatasetController {
           example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
               required = false) String tableSchemaId,
       @ApiParam(type = "Integer", value = "Limit", example = "0") @RequestParam(value = "limit",
-          required = false) Integer limit,
+          defaultValue = "10000") Integer limit,
       @ApiParam(type = "Integer", value = "Offset", example = "0") @RequestParam(value = "offset",
-          required = false) Integer offset,
+          defaultValue = "0") Integer offset,
       @ApiParam(type = "String", value = "Filter value", example = "value") @RequestParam(
           value = "filterValue", required = false) String filterValue,
       @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
-          value = "columnName", required = false) String columnName) {
+          value = "columnName", required = false) String columnName,
+      @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
+          value = "dataProviderCodes", required = false) String dataProviderCodes) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -974,7 +977,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
     StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
-        outputStream, tableSchemaId, limit, offset, filterValue, columnName);
+        outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
 
     return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
   }
@@ -1012,15 +1015,15 @@ public class DatasetControllerImpl implements DatasetController {
           example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
               required = false) String tableSchemaId,
       @ApiParam(type = "Integer", value = "Limit", example = "0") @RequestParam(value = "limit",
-          required = false) Integer limit,
+          defaultValue = "10000") Integer limit,
       @ApiParam(type = "Integer", value = "Offset", example = "0") @RequestParam(value = "offset",
-          required = false) Integer offset,
+          defaultValue = "0") Integer offset,
       @ApiParam(type = "String", value = "Filter value", example = "value") @RequestParam(
           value = "filterValue", required = false) String filterValue,
       @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
           value = "columnName", required = false) String columnName) {
     return this.etlExportDataset(datasetId, dataflowId, providerId, tableSchemaId, limit, offset,
-        filterValue, columnName);
+        filterValue, columnName, "");
   }
 
   /**

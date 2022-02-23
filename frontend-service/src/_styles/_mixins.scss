@@ -55,6 +55,16 @@
   }
 }
 
+@mixin responsiveBigDialog {
+  @include for-phone-landscape-up {
+    width: 90vw !important;
+  }
+
+  @include for-desktop-up {
+    width: 80vw !important;
+  }
+}
+
 @mixin responsiveCardsGrid {
   display: grid;
   grid-gap: 1em;

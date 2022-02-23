@@ -227,7 +227,7 @@ export const IntegrationsList = ({
           paginatorRight={
             <PaginatorRecordsCount
               dataLength={integrationListState.data.length}
-              filteredData={filteredData}
+              filteredDataLength={filteredData.length}
               isFiltered={isFiltered}
             />
           }
