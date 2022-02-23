@@ -998,32 +998,40 @@ export const DataViewer = ({
       selectedCRS={records.crs}></Map>
   );
 
-  const requiredTemplate = rowData => {
-    return (
-      <div className={styles.requiredTemplateWrapper}>
-        {rowData.field === 'Required' || rowData.field === 'Read only' ? (
-          <FontAwesomeIcon className={styles.requiredTemplateCheck} icon={AwesomeIcons('check')} />
-        ) : rowData.field === 'Single select items' || rowData.field === 'Multiple select items' ? (
-          <Chips
-            className={styles.chips}
-            disabled={true}
-            name={resourcesContext.messages['multipleSingleMessage']}
-            pasteSeparator=";"
-            value={rowData.value.split(';')}></Chips>
-        ) : rowData.field === 'Valid extensions' ? (
-          <Chips
-            className={styles.chips}
-            disabled={true}
-            name={resourcesContext.messages['validExtensionsShort']}
-            value={rowData.value.split(',')}></Chips>
-        ) : rowData.field === 'Maximum file size' ? (
-          `${rowData.value} ${resourcesContext.messages['MB']}`
-        ) : (
-          rowData.value
-        )}
-      </div>
-    );
+  const requiredTemplateContent = rowData => {
+    if (rowData.field === 'Required' || rowData.field === 'Read only') {
+      return <FontAwesomeIcon className={styles.requiredTemplateCheck} icon={AwesomeIcons('check')} />;
+    }
+
+    if (rowData.field === 'Single select items' || rowData.field === 'Multiple select items') {
+      return (
+        <Chips
+          className={styles.chips}
+          disabled={true}
+          name={resourcesContext.messages['multipleSingleMessage']}
+          pasteSeparator=";"
+          value={rowData.value.split(';')}
+        />
+      );
+    }
+
+    if (rowData.field === 'Valid extensions') {
+      return (
+        <Chips
+          className={styles.chips}
+          disabled={true}
+          name={resourcesContext.messages['validExtensionsShort']}
+          value={rowData.value.split(',')}
+        />
+      );
+    }
+
+    return rowData.value;
   };
+
+  const requiredTemplate = rowData => (
+    <div className={styles.requiredTemplateWrapper}>{requiredTemplateContent(rowData)}</div>
+  );
 
   const renderPaginatorRecordsCount = () => {
     const renderFilteredRowsLabel = () => {
@@ -1419,7 +1427,6 @@ export const DataViewer = ({
           header={resourcesContext.messages['geospatialDataMoreInfo']}
           modal={true}
           onHide={onHideCoordinatesMoreInfo}
-          style={{}}
           visible={records.isCoordinatesMoreInfoVisible}>
           <div className="p-grid p-fluid">{renderCoordinatesMoreInfo()}</div>
         </Dialog>
