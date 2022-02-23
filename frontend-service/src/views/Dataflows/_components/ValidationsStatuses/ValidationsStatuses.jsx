@@ -328,7 +328,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         blockScroll={false}
         className="responsiveBigDialog"
         footer={dialogFooter}
-        header={resourcesContext.messages['validationsStatusesDialogHeader']}
+        header={resourcesContext.messages['validationsStatus']}
         modal={true}
         onHide={onCloseDialog}
         visible={isDialogVisible}>
