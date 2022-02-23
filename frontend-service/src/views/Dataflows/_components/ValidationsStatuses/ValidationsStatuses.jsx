@@ -153,38 +153,38 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         key: 'dataflow',
         header: resourcesContext.messages['dataflow'],
         template: getDataflowTemplate,
-        className: styles.dataflowColumn
+        className: styles.largeColumn
       },
       {
         key: 'dataset',
         header: resourcesContext.messages['dataset'],
         template: getDatasetTemplate,
-        className: styles.datasetColumn
+        className: styles.largeColumn
       },
       { key: 'user', header: resourcesContext.messages['user'] },
       {
         key: 'status',
         header: resourcesContext.messages['status'],
         template: getStatusTemplate,
-        className: styles.statusColumn
+        className: styles.smallColumn
       },
       {
         key: 'queuedDate',
         header: resourcesContext.messages['queuedDate'],
         template: validation => getDateTemplate(validation, 'queuedDate'),
-        className: styles.dateColumn
+        className: styles.smallColumn
       },
       {
         key: 'processStartingDate',
         header: resourcesContext.messages['processStartingDate'],
         template: validation => getDateTemplate(validation, 'processStartingDate'),
-        className: styles.dateColumn
+        className: styles.smallColumn
       },
       {
         key: 'processFinishingDate',
         header: resourcesContext.messages['processFinishingDate'],
         template: validation => getDateTemplate(validation, 'processFinishingDate'),
-        className: styles.dateColumn
+        className: styles.smallColumn
       }
       // {
       //   key: 'actions',
