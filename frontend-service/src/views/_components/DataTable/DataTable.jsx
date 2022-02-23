@@ -548,7 +548,6 @@ export class DataTable extends Component {
                         {`${this.context.messages['of']} ${
                           totalRecords > 0 ? ` ${Math.ceil(totalRecords / this.getRows())}` : 1
                         }`}
-                        {console.log('totalRecords', totalRecords)}
                       </label>
                     </span>
                   );
