@@ -291,7 +291,6 @@ export const Dataflows = () => {
   useLayoutEffect(() => {
     if (!isNil(userContext.contextRoles)) {
       onLoadPermissions();
-      getDataflows();
     }
   }, [userContext.contextRoles]);
 
@@ -299,7 +298,7 @@ export const Dataflows = () => {
     if (!isNil(userContext.contextRoles)) {
       getDataflows();
     }
-  }, [tabId, pagination]);
+  }, [userContext.contextRoles, tabId, pagination]);
 
   useEffect(() => {
     setActiveIndexTabOnBack();
