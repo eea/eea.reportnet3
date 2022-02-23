@@ -37,7 +37,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const notificationContext = useContext(NotificationContext);
 
   const [filteredRecords, setFilteredRecords] = useState(0);
-  const [goToPage, setGoToPage] = useState(1);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -115,14 +114,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const onSort = event => setSort({ field: event.sortField, order: event.sortOrder });
 
-  const onChangePagination = event =>
-    setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
-
-  const onChangePage = event => {
-    setGoToPage(event.page + 1);
-    onChangePagination(event);
-  };
-
   const filterOptions = [
     {
       nestedOptions: [
@@ -158,24 +149,42 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getTableColumns = () => {
     const columns = [
-      { key: 'dataflow', header: resourcesContext.messages['dataflow'], template: getDataflowTemplate },
-      { key: 'dataset', header: resourcesContext.messages['dataset'], template: getDatasetTemplate },
+      {
+        key: 'dataflow',
+        header: resourcesContext.messages['dataflow'],
+        template: getDataflowTemplate,
+        className: styles.largeColumn
+      },
+      {
+        key: 'dataset',
+        header: resourcesContext.messages['dataset'],
+        template: getDatasetTemplate,
+        className: styles.largeColumn
+      },
       { key: 'user', header: resourcesContext.messages['user'] },
-      { key: 'status', header: resourcesContext.messages['status'], template: getStatusTemplate },
+      {
+        key: 'status',
+        header: resourcesContext.messages['status'],
+        template: getStatusTemplate,
+        className: styles.smallColumn
+      },
       {
         key: 'queuedDate',
         header: resourcesContext.messages['queuedDate'],
-        template: validation => getDateTemplate(validation, 'queuedDate')
+        template: validation => getDateTemplate(validation, 'queuedDate'),
+        className: styles.smallColumn
       },
       {
         key: 'processStartingDate',
         header: resourcesContext.messages['processStartingDate'],
-        template: validation => getDateTemplate(validation, 'processStartingDate')
+        template: validation => getDateTemplate(validation, 'processStartingDate'),
+        className: styles.smallColumn
       },
       {
         key: 'processFinishingDate',
         header: resourcesContext.messages['processFinishingDate'],
-        template: validation => getDateTemplate(validation, 'processFinishingDate')
+        template: validation => getDateTemplate(validation, 'processFinishingDate'),
+        className: styles.smallColumn
       }
       // {
       //   key: 'actions',
@@ -193,7 +202,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         field={column.key}
         header={column.header}
         key={column.key}
-        sortable
+        sortable={true}
       />
     ));
   };
@@ -226,6 +235,12 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const dialogFooter = (
     <div className={styles.footer}>
       <Button
+        className="p-button-primary"
+        icon="refresh"
+        label={resourcesContext.messages['refresh']}
+        onClick={getValidationsStatuses}
+      />
+      <Button
         className={`p-button-secondary ${styles.buttonPushRight}`}
         icon="cancel"
         label={resourcesContext.messages['close']}
@@ -238,8 +253,8 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     <Filters
       className="lineItems"
       isLoading={isLoading}
-      onFilter={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
-      onReset={() => onChangePagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+      onFilter={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+      onReset={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
       options={filterOptions}
       recoilId="validationsStatuses"
     />
@@ -277,13 +292,15 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       <div className={styles.dialogContent}>
         {renderFilters()}
         <DataTable
-          autoLayout
+          autoLayout={true}
+          className={styles.validationStatusesTable}
           first={firstRow}
-          hasDefaultCurrentPage
+          hasDefaultCurrentPage={true}
+          lazy={true}
           loading={loadingStatus === 'pending' && isNil(validationStatusId)}
-          onPage={onChangePage}
+          onPage={event => setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page })}
           onSort={onSort}
-          paginator
+          paginator={true}
           paginatorRight={
             <PaginatorRecordsCount
               dataLength={totalRecords}
@@ -291,13 +308,13 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               isFiltered={isFiltered}
             />
           }
-          reorderableColumns
-          resizableColumns
+          reorderableColumns={true}
+          resizableColumns={true}
           rows={numberRows}
           rowsPerPageOptions={[5, 10, 15]}
           sortField={sort.field}
           sortOrder={sort.order}
-          totalRecords={validationsStatuses.length}
+          totalRecords={isFiltered ? filteredRecords : totalRecords}
           value={validationsStatuses}>
           {getTableColumns()}
         </DataTable>
@@ -312,7 +329,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         className="responsiveBigDialog"
         footer={dialogFooter}
         header={resourcesContext.messages['validationsStatusesDialogHeader']}
-        modal
+        modal={true}
         onHide={onCloseDialog}
         visible={isDialogVisible}>
         {renderDialogContent()}
