@@ -114,8 +114,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const onSort = event => setSort({ field: event.sortField, order: event.sortOrder });
 
-  const onChangePage = event => setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page });
-
   const filterOptions = [
     {
       nestedOptions: [
@@ -231,8 +229,8 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     <Filters
       className="lineItems"
       isLoading={isLoading}
-      onFilter={() => onChangePage({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
-      onReset={() => onChangePage({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+      onFilter={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+      onReset={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
       options={filterOptions}
       recoilId="validationsStatuses"
     />
@@ -266,8 +264,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       );
     }
 
-    console.log('pagination', pagination);
-
     return (
       <div className={styles.dialogContent}>
         {renderFilters()}
@@ -278,7 +274,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           hasDefaultCurrentPage
           lazy
           loading={loadingStatus === 'pending' && isNil(validationStatusId)}
-          onPage={onChangePage}
+          onPage={event => setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page })}
           onSort={onSort}
           paginator
           paginatorRight={
