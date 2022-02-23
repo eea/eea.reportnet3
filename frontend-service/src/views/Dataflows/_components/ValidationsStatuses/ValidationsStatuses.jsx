@@ -217,6 +217,12 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const dialogFooter = (
     <div className={styles.footer}>
       <Button
+        className="p-button-primary"
+        icon="refresh"
+        label={resourcesContext.messages['refresh']}
+        onClick={getValidationsStatuses}
+      />
+      <Button
         className={`p-button-secondary ${styles.buttonPushRight}`}
         icon="cancel"
         label={resourcesContext.messages['close']}
