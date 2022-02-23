@@ -12,6 +12,7 @@ import org.eea.interfaces.controller.communication.NotificationController.Notifi
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -25,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -146,6 +148,128 @@ public class DataCollectionControllerImplTest {
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
 
+  /**
+   * Creates the empty data collection type dataflow reference test.
+   */
+  @Test
+  public void createEmptyDataCollectionTypeDataflowReferenceTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    dataflow.setType(TypeDataflowEnum.REFERENCE);
+    Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
+    Mockito.doNothing().when(dataCollectionService).createEmptyDataCollection(Mockito.any(),
+        Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(),
+        Mockito.anyBoolean(), Mockito.anyBoolean());
+    DataCollectionVO dc = new DataCollectionVO();
+    dc.setIdDataflow(1L);
+    dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
+    dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true);
+    Mockito.verify(dataCollectionService, times(1)).createEmptyDataCollection(Mockito.any(),
+        Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(),
+        Mockito.anyBoolean(), Mockito.anyBoolean());
+  }
+
+  /**
+   * Creates the empty data collection type dataflow null test.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyDataCollectionTypeDataflowNullTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(null);
+
+    DataCollectionVO dc = new DataCollectionVO();
+    dc.setIdDataflow(1L);
+    dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
+    try {
+      dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.NOT_DESIGN_DATAFLOW, e.getReason());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the empty data collection due date null test.
+   */
+  @Test
+  public void createEmptyDataCollectionDueDateNullTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    dataflow.setType(TypeDataflowEnum.REFERENCE);
+    Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
+    Mockito.doNothing().when(dataCollectionService).createEmptyDataCollection(Mockito.any(),
+        Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(),
+        Mockito.anyBoolean(), Mockito.anyBoolean());
+    DataCollectionVO dc = new DataCollectionVO();
+    dc.setIdDataflow(1L);
+    dc.setDueDate(null);
+    dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true);
+    Mockito.verify(dataCollectionService, times(1)).createEmptyDataCollection(Mockito.any(),
+        Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(),
+        Mockito.anyBoolean(), Mockito.anyBoolean());
+  }
+
+  /**
+   * Creates the empty data collection reference dataflow false test.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyDataCollectionReferenceDataflowFalseTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
+
+    DataCollectionVO dc = new DataCollectionVO();
+    dc.setIdDataflow(1L);
+    try {
+      dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.NOT_DESIGN_DATAFLOW, e.getReason());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the empty data collection dataflow id null test.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyDataCollectionDataflowIdNullTest() {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
+
+    DataCollectionVO dc = new DataCollectionVO();
+    dc.setIdDataflow(null);
+    dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
+    try {
+      dataCollectionControllerImpl.createEmptyDataCollection(false, false, false, dc, true);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.NOT_DESIGN_DATAFLOW, e.getReason());
+      throw e;
+    }
+  }
+
+
   @Test(expected = ResponseStatusException.class)
   public void updateDataCollectionTestException() {
     DataFlowVO dataflow = new DataFlowVO();
@@ -170,6 +294,46 @@ public class DataCollectionControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setStatus(TypeStatusEnum.DRAFT);
+    Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
+    Mockito.doNothing().when(dataCollectionService).updateDataCollection(Mockito.any(),
+        Mockito.anyBoolean());
+    DataCollectionVO dc = new DataCollectionVO();
+    dc.setIdDataflow(1L);
+    dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
+    dataCollectionControllerImpl.updateDataCollection(1L);
+    Mockito.verify(dataCollectionService, times(1)).updateDataCollection(Mockito.any(),
+        Mockito.anyBoolean());
+  }
+
+  /**
+   * Update data collection dataflow null test.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void updateDataCollectionDataflowNullTest() {
+    Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(null);
+    DataCollectionVO dc = new DataCollectionVO();
+    dc.setIdDataflow(1L);
+    dc.setDueDate(new Date(System.currentTimeMillis() + 100000));
+
+    try {
+      dataCollectionControllerImpl.updateDataCollection(1L);
+    } catch (ResponseStatusException e) {
+      Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      Assert.assertEquals(EEAErrorMessage.NOT_DRAFT_DATAFLOW, e.getReason());
+      throw e;
+    }
+  }
+
+  /**
+   * Update data collection dataflow type reference test.
+   */
+  @Test
+  public void updateDataCollectionDataflowTypeReferenceTest() {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+    dataflow.setType(TypeDataflowEnum.REFERENCE);
     Mockito.when(dataCollectionService.getDataflowMetabase(Mockito.any())).thenReturn(dataflow);
     Mockito.doNothing().when(dataCollectionService).updateDataCollection(Mockito.any(),
         Mockito.anyBoolean());
