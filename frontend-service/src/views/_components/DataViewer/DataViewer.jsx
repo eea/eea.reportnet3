@@ -1189,7 +1189,7 @@ export const DataViewer = ({
           scrollable={true}
           scrollHeight="70vh"
           selectionMode="single"
-          sortable
+          sortable={true}
           sortField={sort.sortField}
           sortOrder={sort.sortOrder}
           totalRecords={
@@ -1382,7 +1382,7 @@ export const DataViewer = ({
           className="edit-table"
           disabledConfirm={isEmpty(records.pastedRecords)}
           divRef={divRef}
-          hasPasteOption
+          hasPasteOption={true}
           header={resourcesContext.messages['pasteRecords']}
           isPasting={isPasting}
           labelCancel={resourcesContext.messages['cancel']}
