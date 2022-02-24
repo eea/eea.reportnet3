@@ -40,6 +40,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
   const [sort, setSort] = useState({ field: '', order: 0 });
@@ -82,6 +83,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       notificationContext.add({ type: 'GET_VALIDATIONS_STATUSES_ERROR' }, true);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -229,6 +231,11 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     </p>
   );
 
+  const onRefresh = () => {
+    setIsRefreshing(true);
+    getValidationsStatuses();
+  };
+
   const getDateTemplate = (validation, field) =>
     isNil(validation[field]) ? '-' : getDateTimeFormatByUserPreferences(validation[field]);
 
@@ -236,9 +243,10 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     <div className={styles.footer}>
       <Button
         className="p-button-primary"
-        icon="refresh"
+        disabled={loadingStatus === 'pending'}
+        icon={isRefreshing ? 'spinnerAnimate' : 'refresh'}
         label={resourcesContext.messages['refresh']}
-        onClick={getValidationsStatuses}
+        onClick={onRefresh}
       />
       <Button
         className={`p-button-secondary ${styles.buttonPushRight}`}
@@ -252,7 +260,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const renderFilters = () => (
     <Filters
       className="lineItems"
-      isLoading={isLoading}
+      isLoading={loadingStatus === 'pending'}
       onFilter={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
       onReset={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
       options={filterOptions}
@@ -328,7 +336,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         blockScroll={false}
         className="responsiveBigDialog"
         footer={dialogFooter}
-        header={resourcesContext.messages['validationsStatusesDialogHeader']}
+        header={resourcesContext.messages['validationsStatus']}
         modal={true}
         onHide={onCloseDialog}
         visible={isDialogVisible}>

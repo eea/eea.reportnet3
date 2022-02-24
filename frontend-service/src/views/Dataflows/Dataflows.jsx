@@ -251,9 +251,9 @@ export const Dataflows = () => {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'listClipboard',
       isVisible: isAdmin,
-      label: 'validationStatusLeftBarButton',
+      label: 'validationsStatus',
       onClick: () => manageDialogs('isValidationStatusDialogVisible', true),
-      title: 'validationStatusLeftBarButton'
+      title: 'validationsStatus'
     };
 
     const adminManageNationalCoordinatorsBtn = {
