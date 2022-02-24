@@ -1,10 +1,12 @@
 package org.eea.rod.service.impl;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.rod.LegalInstrumentVO;
@@ -23,6 +25,8 @@ import org.eea.rod.persistence.repository.CountryFeignRepository;
 import org.eea.rod.persistence.repository.IssueFeignRepository;
 import org.eea.rod.persistence.repository.ObligationFeignRepository;
 import org.eea.rod.service.ObligationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -32,6 +36,9 @@ import org.springframework.util.CollectionUtils;
  */
 @Service
 public class ObligationServiceImpl implements ObligationService {
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The obligation feign repository. */
   @Autowired
@@ -78,11 +85,12 @@ public class ObligationServiceImpl implements ObligationService {
   @Override
   public ObligationListVO findOpenedObligation(Integer clientId, Integer spatialId, Integer issueId,
       Date deadlineDateFrom, Date deadlineDateTo) {
-    Long dateFrom = Optional.ofNullable(deadlineDateFrom).map(Date::getTime).orElse(null);
-    Long dateTo = Optional.ofNullable(deadlineDateTo).map(Date::getTime).orElse(null);
+    Long dateFrom = convertDateToLong(deadlineDateFrom);
+    Long dateTo = convertDateToLong(deadlineDateTo);
     if (dateTo == null && dateFrom != null) {
       dateTo = dateFrom;
     }
+
     List<Obligation> obligations = obligationFeignRepository.findOpenedObligations(clientId,
         issueId, spatialId, dateFrom, dateTo);
     List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(obligations);
@@ -183,5 +191,30 @@ public class ObligationServiceImpl implements ObligationService {
 
     }
 
+  }
+
+  /**
+   * Convert date to long.
+   *
+   * @param date the date
+   * @return the long
+   */
+  private Long convertDateToLong(Date date) {
+    Long milliseconds = null;
+
+    if (date != null) {
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+      String dateString = sdf.format(date);
+      try {
+        SimpleDateFormat newSdf = new SimpleDateFormat("yyyy-MM-dd");
+        newSdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date newDate = newSdf.parse(dateString);
+        milliseconds = newDate.getTime();
+      } catch (ParseException e) {
+        LOG_ERROR.error("Error parsing the date {} due to reason {}", dateString, e.getMessage(),
+            e);
+      }
+    }
+    return milliseconds;
   }
 }
