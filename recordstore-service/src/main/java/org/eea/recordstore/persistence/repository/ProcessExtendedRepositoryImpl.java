@@ -155,7 +155,7 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
     query.append(" where process_type = :process_type ");
     query.append(StringUtils.isNotBlank(status) ? " and process.status IN :status " : "");
     query.append(dataflowId != null ? " and dataflow_id = :dataflowId " : "");
-    query.append(StringUtils.isNotBlank(user) ? " and username = :user " : "");
+    query.append(StringUtils.isNotBlank(user) ? " and username LIKE lower(:user) " : "");
 
   }
 
@@ -179,7 +179,7 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
       query.setParameter("dataflowId", dataflowId);
     }
     if (StringUtils.isNotBlank(user)) {
-      query.setParameter("user", user);
+      query.setParameter("user", "%" + user + "%");
     }
   }
 }
