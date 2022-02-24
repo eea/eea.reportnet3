@@ -15,6 +15,7 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Filters } from 'views/_components/Filters';
+import { LevelError } from 'views/_components/LevelError';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { Spinner } from 'views/_components/Spinner';
 
@@ -141,12 +142,18 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           value: config.datasetRunningStatus.FINISHED.key
         }
       ],
+      template: 'ValidationsStatus',
       type: 'MULTI_SELECT'
     }
   ];
 
   const getStatusTemplate = rowData => (
-    <div>{resourcesContext.messages[config.datasetRunningStatus[rowData.status].label].toUpperCase()}</div>
+    <div>
+      <LevelError
+        className={config.datasetRunningStatus[rowData.status].label}
+        type={resourcesContext.messages[config.datasetRunningStatus[rowData.status].label]}
+      />
+    </div>
   );
 
   const getTableColumns = () => {
