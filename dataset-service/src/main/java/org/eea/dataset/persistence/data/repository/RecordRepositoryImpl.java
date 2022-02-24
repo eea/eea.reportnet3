@@ -512,20 +512,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query.setParameter(2, filterValue);
       query.setParameter(3, columnName);
       query.setParameter(4, filterValue);
-      query.setParameter(5, columnName);
-      query.setParameter(6, filterValue);
-      query.setParameter(7, columnName);
-      query.setParameter(8, filterValue);
     } else if (null != columnName && null == filterValue) {
       query.setParameter(1, columnName);
       query.setParameter(2, columnName);
-      query.setParameter(3, columnName);
-      query.setParameter(4, columnName);
     } else if (null == columnName && null != filterValue) {
       query.setParameter(1, filterValue);
       query.setParameter(2, filterValue);
-      query.setParameter(3, filterValue);
-      query.setParameter(4, filterValue);
     }
 
     Object result = null;
