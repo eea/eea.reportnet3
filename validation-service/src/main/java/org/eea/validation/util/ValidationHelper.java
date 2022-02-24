@@ -254,6 +254,7 @@ public class ValidationHelper implements DisposableBean {
     if (Boolean.FALSE.equals(updateViews)) {
       executeValidationProcess(datasetId, processId, released);
     } else {
+      deleteLockToReleaseProcess(datasetId);
       Map<String, Object> values = new HashMap<>();
       values.put(LiteralConstants.DATASET_ID, datasetId);
       values.put("released", released);
@@ -261,7 +262,6 @@ public class ValidationHelper implements DisposableBean {
           List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
               dataset.getDataflowId(), dataset.getDatasetSchema())));
       kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
-      deleteLockToReleaseProcess(datasetId);
     }
     dataset = null;
   }
@@ -576,14 +576,13 @@ public class ValidationHelper implements DisposableBean {
       // We add a lock to the validation processs itself
       Map<String, Object> mapCriteriaValidation = new HashMap<>();
       mapCriteriaValidation.put(LiteralConstants.DATASETID, datasetId);
-      // createLockWithSignature(LockSignature.EXECUTE_VALIDATION, mapCriteriaValidation,
-      // SecurityContextHolder.getContext().getAuthentication().getName());
       createLockWithSignature(LockSignature.FORCE_EXECUTE_VALIDATION, mapCriteriaValidation,
           SecurityContextHolder.getContext().getAuthentication().getName());
 
     } catch (Exception e) {
       LOG_ERROR.error("There's an error putting the lock to validation process in dataset {}",
           datasetId);
+      deleteLockToReleaseProcess(datasetId);
     }
 
   }
@@ -593,7 +592,7 @@ public class ValidationHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    */
-  private void deleteLockToReleaseProcess(Long datasetId) {
+  public void deleteLockToReleaseProcess(Long datasetId) {
     DataSetMetabaseVO datasetMetabaseVO =
         datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     Map<String, Object> mapCriteriaRestoreSnapshot = new HashMap<>();
@@ -636,6 +635,7 @@ public class ValidationHelper implements DisposableBean {
         LockSignature.EXECUTE_VALIDATION.getValue());
     mapCriteriaValidation.put(LiteralConstants.DATASETID, datasetId);
     // lockService.removeLockByCriteria(mapCriteriaValidation);
+
     Map<String, Object> mapCriteriaValidationDataset = new HashMap<>();
     mapCriteriaValidationDataset.put(LiteralConstants.SIGNATURE,
         LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
