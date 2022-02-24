@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import orderBy from 'lodash/orderBy';
 import uniq from 'lodash/uniq';
 import uniqBy from 'lodash/uniqBy';
 
@@ -191,14 +190,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         dataflowType,
         'historicReleaseDataProviderFilterLabel'
       ),
-      multiSelectOptions: orderBy(
-        historicReleasesState.data.map(dataProvider => ({
-          type: dataProvider.dataProviderCode,
-          value: dataProvider.dataProviderCode
-        })),
-        'value',
-        'asc'
-      )
+      multiSelectOptions: historicReleasesState.data
+        .map(dataProvider => ({ type: dataProvider.dataProviderCode, value: dataProvider.dataProviderCode }))
+        .sort((a, b) => a.value.localeCompare(b.value))
     },
     {
       type: 'CHECKBOX',
@@ -232,14 +226,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             dataflowType,
             'historicReleaseDataProviderFilterLabel'
           ),
-          multiSelectOptions: orderBy(
-            historicReleasesState.data.map(dataProvider => ({
-              type: dataProvider.dataProviderCode,
-              value: dataProvider.dataProviderCode
-            })),
-            'value',
-            'asc'
-          )
+          multiSelectOptions: historicReleasesState.data
+            .map(dataProvider => ({ type: dataProvider.dataProviderCode, value: dataProvider.dataProviderCode }))
+            .sort((a, b) => a.value.localeCompare(b.value))
         },
         {
           key: 'isPublic',
