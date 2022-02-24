@@ -1,9 +1,8 @@
 package org.eea.rod.service.impl;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -203,17 +202,18 @@ public class ObligationServiceImpl implements ObligationService {
     Long milliseconds = null;
 
     if (date != null) {
-      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-      String dateString = sdf.format(date);
-      try {
-        SimpleDateFormat newSdf = new SimpleDateFormat("yyyy-MM-dd");
-        newSdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date newDate = newSdf.parse(dateString);
-        milliseconds = newDate.getTime();
-      } catch (ParseException e) {
-        LOG_ERROR.error("Error parsing the date {} due to reason {}", dateString, e.getMessage(),
-            e);
-      }
+      Calendar entrada = Calendar.getInstance();
+      entrada.setTime(date);
+
+      Calendar gmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+      gmt.set(Calendar.DAY_OF_MONTH, entrada.get(Calendar.DAY_OF_MONTH));
+      gmt.set(Calendar.MONTH, entrada.get(Calendar.MONTH));
+      gmt.set(Calendar.YEAR, entrada.get(Calendar.YEAR));
+      gmt.set(Calendar.HOUR_OF_DAY, 0);
+      gmt.set(Calendar.MINUTE, 0);
+      gmt.set(Calendar.SECOND, 0);
+      gmt.set(Calendar.MILLISECOND, 0);
+      milliseconds = gmt.getTimeInMillis();
     }
     return milliseconds;
   }
