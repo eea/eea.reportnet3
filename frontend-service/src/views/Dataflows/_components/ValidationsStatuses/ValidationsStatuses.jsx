@@ -175,7 +175,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         key: 'status',
         header: resourcesContext.messages['status'],
         template: getStatusTemplate,
-        className: styles.smallColumn
+        className: styles.middleColumn
       },
       {
         key: 'queuedDate',
