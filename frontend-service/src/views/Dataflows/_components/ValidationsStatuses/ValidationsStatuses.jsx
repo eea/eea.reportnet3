@@ -244,7 +244,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       <Button
         className="p-button-primary"
         disabled={loadingStatus === 'pending'}
-        icon={`${isRefreshing ? 'spinnerAnimate' : 'refresh'}`}
+        icon={isRefreshing ? 'spinnerAnimate' : 'refresh'}
         label={resourcesContext.messages['refresh']}
         onClick={onRefresh}
       />

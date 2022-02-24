@@ -1528,7 +1528,7 @@
     "validationsStatus": "Validations status",
     "queuedDate": "Queued date",
     "processStartingDate": "Starting date",
-    "processFinishingDate": "Fininshing date",
+    "processFinishingDate": "Finishing date",
     "validationRemoveQueueDialogHeader": "Remove from queue",
     "validationRemoveQueueDialogContent": "Are you sure you want to remove this validation from queue?",
     "inQueue": "In queue",
