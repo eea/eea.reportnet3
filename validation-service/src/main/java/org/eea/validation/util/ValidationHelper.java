@@ -634,7 +634,7 @@ public class ValidationHelper implements DisposableBean {
     mapCriteriaValidation.put(LiteralConstants.SIGNATURE,
         LockSignature.EXECUTE_VALIDATION.getValue());
     mapCriteriaValidation.put(LiteralConstants.DATASETID, datasetId);
-    // lockService.removeLockByCriteria(mapCriteriaValidation);
+    lockService.removeLockByCriteria(mapCriteriaValidation);
 
     Map<String, Object> mapCriteriaValidationDataset = new HashMap<>();
     mapCriteriaValidationDataset.put(LiteralConstants.SIGNATURE,
