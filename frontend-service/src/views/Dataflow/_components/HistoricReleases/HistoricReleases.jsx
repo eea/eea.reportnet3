@@ -189,7 +189,10 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         resourcesContext.messages,
         dataflowType,
         'historicReleaseDataProviderFilterLabel'
-      )
+      ),
+      multiSelectOptions: historicReleasesState.data
+        .map(dataProvider => ({ type: dataProvider.dataProviderCode, value: dataProvider.dataProviderCode }))
+        .sort((a, b) => a.value.localeCompare(b.value))
     },
     {
       type: 'CHECKBOX',
@@ -222,7 +225,10 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             resourcesContext.messages,
             dataflowType,
             'historicReleaseDataProviderFilterLabel'
-          )
+          ),
+          multiSelectOptions: historicReleasesState.data
+            .map(dataProvider => ({ type: dataProvider.dataProviderCode, value: dataProvider.dataProviderCode }))
+            .sort((a, b) => a.value.localeCompare(b.value))
         },
         {
           key: 'isPublic',
