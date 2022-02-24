@@ -1,6 +1,8 @@
 import { useContext } from 'react';
 import { useRecoilValue } from 'recoil';
 
+import { config } from 'conf';
+
 import sharedStyles from 'views/_components/Filters/Filters.module.scss';
 import styles from './MultiSelectFilter.module.scss';
 
@@ -39,12 +41,16 @@ export const MultiSelectFilter = ({
     recoilId
   });
 
-  const renderTemplate = (template, type) => {
+  const renderTemplate = (template, item) => {
     if (template === 'LevelError') {
-      return <LevelError type={type} />;
+      return <LevelError type={item.type} />;
     }
 
-    return <span>{type?.toString()}</span>;
+    if (template === 'ValidationsStatus') {
+      return <LevelError className={`${config.datasetRunningStatus[item.value].label}`} type={item.type} />;
+    }
+
+    return <span>{item.type?.toString()}</span>;
   };
 
   return (
@@ -71,7 +77,7 @@ export const MultiSelectFilter = ({
         inputClassName={`p-float-label ${styles.label}`}
         inputId={`${option.key}_input`}
         isFilter={true}
-        itemTemplate={item => renderTemplate(option.template, item.type)}
+        itemTemplate={item => renderTemplate(option.template, item)}
         key={option.key}
         label={option.label || ''}
         notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
