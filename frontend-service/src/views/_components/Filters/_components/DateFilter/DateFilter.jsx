@@ -21,6 +21,7 @@ export const DateFilter = ({
   getFilterBy,
   hasCustomSort,
   isLoading,
+  isReset,
   onFilterData,
   onSort,
   option,
@@ -71,6 +72,13 @@ export const DateFilter = ({
     }
   };
 
+  const getViewDate = () => {
+    if (!isReset) {
+      return undefined;
+    }
+    return new Date();
+  };
+
   const parseDateValues = values => {
     if (!values) {
       return [];
@@ -117,6 +125,7 @@ export const DateFilter = ({
           readOnlyInput={true}
           selectionMode="range"
           value={parseDateValues(filterBy[option.key])}
+          viewDate={getViewDate()}
           yearNavigator={true}
         />
 

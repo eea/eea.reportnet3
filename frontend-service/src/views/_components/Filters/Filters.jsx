@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { noWait, useRecoilCallback } from 'recoil';
 
 import isNil from 'lodash/isNil';
@@ -59,6 +59,8 @@ export const Filters = ({
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
+  const [isReset, setIsReset] = useState(false);
+
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
   const clearDateInputs = () => {
@@ -81,6 +83,7 @@ export const Filters = ({
   );
 
   const onApplyFilters = async () => {
+    setIsReset(false);
     await getFilterBy();
     await onFilter();
   };
@@ -164,6 +167,7 @@ export const Filters = ({
         getFilterBy={getFilterBy}
         hasCustomSort={hasCustomSort}
         isLoading={isLoading}
+        isReset={isReset}
         key={option.key}
         onCustomFilter={onFilter}
         onFilterData={onFilterData}
@@ -215,6 +219,7 @@ export const Filters = ({
             icon="undo"
             label={resourcesContext.messages['reset']}
             onClick={async () => {
+              setIsReset(true);
               await onResetFilters();
               await onReset({ sortByHeader: '', sortByOption: 'idle' });
             }}
