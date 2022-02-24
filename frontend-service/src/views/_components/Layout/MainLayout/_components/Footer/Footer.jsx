@@ -22,7 +22,7 @@ export const Footer = () => {
   const themeContext = useContext(ThemeContext);
 
   return (
-    <div className={styles.Footer}>
+    <div className={styles.footer}>
       <div className={styles.footerContent}>
         <div className={styles.reportnetLogo}>
           <a className={styles.title} href="https://www.eea.europa.eu/" title={resourcesContext.messages['eea']}>

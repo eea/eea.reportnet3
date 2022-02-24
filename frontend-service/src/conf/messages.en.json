@@ -269,7 +269,7 @@
     "dataProviderName": "Country",
     "dataset": "Dataset",
     "datasetComparison": "Dataset comparison",
-    "datasetDataLoadingInit": "<strong>{:datasetLoadingMessage} <strong>{:title}</strong> {:datasetLoading}",
+    "datasetDataLoadingInit": "{:datasetLoadingMessage} <strong>{:title}</strong> {:datasetLoading}",
     "datasetDesigner": "Dataset designer",
     "datasetDesignerAddTable": "Create a table to start editing the dataset schema",
     "datasetDesignerNoFields": "There are no fields created for the table schema",
@@ -1489,6 +1489,8 @@
     "y": "Y",
     "yes": "Yes",
     "zipCsvTable": "ZIP (.csv for each table)",
+    "getMetadataError": "Error getting metadata",
+    "externalExportDesignInit": "External design export init",
     "deleteUsersNotificationsHeader": "Delete user notifications",
     "deleteUsersNotificationsConfirm": "Are you sure you want to delete all user notifications?",
     "deleteUsersNotificationsData": "Delete user notifications",
@@ -1519,6 +1521,19 @@
     "loadNationalCoordinatorsError": "Error loading national coordinators",
     "deleteNationalCoordinatorsError": "National coordinator deleting error",
     "createNationalCoordinatorsError": "Error creating national coordinator",
-    "emptyNationalCoordinatorsCountryError": "Please select a country"
+    "emptyNationalCoordinatorsCountryError": "Please select a country",
+    "addedDuplicateNationalCoordinatorsError": "The national coordinator already exists in this country",
+    "getValidationsStatusesError": "Error loading validations statuses",
+    "deleteValidationFromQueueError": "Error deleting validation from queue",
+    "validationsStatus": "Validations status",
+    "queuedDate": "Queued date",
+    "processStartingDate": "Starting date",
+    "processFinishingDate": "Finishing date",
+    "validationRemoveQueueDialogHeader": "Remove from queue",
+    "validationRemoveQueueDialogContent": "Are you sure you want to remove this validation from queue?",
+    "inQueue": "In queue",
+    "finished": "Finished",
+    "inProgress": "In progress",
+    "validationsStatusesNotMatchingFilter": "There are no validations with the selected parameters"
   }
 }

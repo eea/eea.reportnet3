@@ -1,7 +1,7 @@
 package org.eea.recordstore.persistence.repository;
 
 import java.util.Optional;
-import org.eea.recordstore.persistence.domain.Process;
+import org.eea.recordstore.persistence.domain.EEAProcess;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
@@ -9,7 +9,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * The Interface ProcessRepository.
  */
 public interface ProcessRepository
-    extends PagingAndSortingRepository<Process, Long>, ProcessExtendedRepository {
+    extends PagingAndSortingRepository<EEAProcess, Long>, ProcessExtendedRepository {
 
   /**
    * Find one by uuid.
@@ -17,7 +17,7 @@ public interface ProcessRepository
    * @param uuid the uuid
    * @return the optional
    */
-  Optional<Process> findOneByProcessId(String processId);
+  Optional<EEAProcess> findOneByProcessId(String processId);
 
   /**
    * Count processes.

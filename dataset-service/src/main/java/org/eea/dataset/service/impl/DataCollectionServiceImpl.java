@@ -1222,7 +1222,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       for (int i = 0; i < size; i += 10) {
         resourceManagementControllerZuul
             .deleteResourceByDatasetId(groups.subList(i, i + 10 > size ? size : i + 10).stream()
-                .map(ResourceInfoVO::getResourceId).collect(Collectors.toList()));
+                .map(ResourceInfoVO::getResourceId).distinct().collect(Collectors.toList()));
       }
       throw new EEAException(e);
     }

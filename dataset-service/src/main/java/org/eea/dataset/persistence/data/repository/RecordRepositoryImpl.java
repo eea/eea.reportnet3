@@ -171,7 +171,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant MASTER_QUERY_COUNT: {@value}. */
   private static final String MASTER_QUERY_COUNT =
-      "SELECT count(rv) from RecordValue rv INNER JOIN rv.tableValue tv " + WHERE_ID_TABLE_SCHEMA;
+      "SELECT count(rv.id) from RecordValue rv INNER JOIN rv.tableValue tv "
+          + WHERE_ID_TABLE_SCHEMA;
 
   /** The Constant FINAL_MASTER_QUERY: {@value}. */
   private static final String FINAL_MASTER_QUERY = " order by %s";
@@ -1220,7 +1221,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     for (TableSchema tableSchemaIdAux : tableSchemaList) {
       String tableSchemaIdString = tableSchemaIdAux.getIdTableSchema().toString();
       stringQuery.append(String.format(
-          "when id_table_schema = '%s'  then ( select count(*)  as \"totalRecords\" from ( ",
+          "when id_table_schema = '%s'  then ( select count(tablesAux.id_record)  as \"totalRecords\" from ( ",
           tableSchemaIdString));
       stringQuery.append(
           " select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
@@ -1244,7 +1245,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
       }
       stringQuery.append(String.format(
-          " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
+          " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table) fieldsAux",
           datasetId, datasetId, datasetId));
 
       if (null != tableSchemaIdString) {
@@ -1255,7 +1256,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
       }
       stringQuery.append(
-          ") records group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position ");
+          ") records group by id_table_schema,id_record,data_provider_code, rdata_position ");
       stringQuery.append(" ) tablesAux ");
       if (null != filterValue || null != columnName) {
         stringQuery.append(

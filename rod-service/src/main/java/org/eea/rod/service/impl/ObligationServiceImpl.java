@@ -80,6 +80,9 @@ public class ObligationServiceImpl implements ObligationService {
       Date deadlineDateFrom, Date deadlineDateTo) {
     Long dateFrom = Optional.ofNullable(deadlineDateFrom).map(Date::getTime).orElse(null);
     Long dateTo = Optional.ofNullable(deadlineDateTo).map(Date::getTime).orElse(null);
+    if (dateTo == null && dateFrom != null) {
+      dateTo = dateFrom;
+    }
     List<Obligation> obligations = obligationFeignRepository.findOpenedObligations(clientId,
         issueId, spatialId, dateFrom, dateTo);
     List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(obligations);

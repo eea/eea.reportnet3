@@ -586,7 +586,6 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         query.setParameter(key, new Date(Long.valueOf(value)));
         break;
       case DELIVERY_STATUS:
-        List<String> deliveryStatus = Arrays.asList(value.split(","));
         query.setParameter(key, Arrays.asList(value.split(",")));
         break;
       case "status":

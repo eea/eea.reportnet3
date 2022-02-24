@@ -833,6 +833,22 @@ public class DocumentControllerImplTest {
     documentController.uploadCollaborationDocument(fileMock.getBytes(), 1L, "desc", "json", 1L);
   }
 
+  /**
+   * Test upload collaboration IO exception.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testUploadCollaborationIOException() throws EEAException, IOException {
+    IOException ioException = new IOException(EEAErrorMessage.DOCUMENT_NOT_FOUND);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    doThrow(ioException).when(documentService).uploadCollaborationDocument(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.uploadCollaborationDocument(fileMock.getBytes(), 1L, "desc", "json", 1L);
+  }
+
 
   @Test(expected = ResponseStatusException.class)
   public void testGetCollaborationDocumentExceptionNull() throws EEAException {

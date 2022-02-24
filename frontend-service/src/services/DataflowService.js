@@ -18,6 +18,7 @@ import { DatasetTableRecord } from 'entities/DatasetTableRecord';
 
 import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
+import { ServiceUtils } from 'services/_utils/ServiceUtils';
 
 export const DataflowService = {
   countByType: async () => {
@@ -324,7 +325,7 @@ export const DataflowService = {
 
     const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode({
       countryCode,
-      sortOrder,
+      sortOrder: ServiceUtils.getSortOrder(sortOrder),
       pageNum,
       numberRows,
       sortField: parsedSortField,

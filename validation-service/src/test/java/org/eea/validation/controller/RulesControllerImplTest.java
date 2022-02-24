@@ -4,10 +4,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -30,6 +32,7 @@ import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -66,6 +69,7 @@ public class RulesControllerImplTest {
   @Mock
   private NotificationControllerZuul notificationControllerZuul;
 
+  /** The http servlet response. */
   @Mock
   private HttpServletResponse httpServletResponse;
 
@@ -74,6 +78,10 @@ public class RulesControllerImplTest {
 
   /** The authentication. */
   Authentication authentication;
+
+  /** The folder. */
+  @org.junit.Rule
+  public TemporaryFolder folder = new TemporaryFolder();
 
   /**
    * Inits the mocks.
@@ -827,6 +835,50 @@ public class RulesControllerImplTest {
     }
   }
 
+  /**
+   * Run sql rule string EEA invalid SQL exception message test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void runSqlRuleStringEEAInvalidSQLExceptionMessageTest() throws EEAException {
+    EEAInvalidSQLException exception = new EEAInvalidSQLException("",
+        new EEAException("message", new EEAException("message", new EEAException("message"))));
+    Mockito.doThrow(exception).when(sqlRulesService).runSqlRule(Mockito.anyLong(), Mockito.any(),
+        Mockito.anyBoolean());
+    try {
+      SqlRuleVO sql = new SqlRuleVO();
+      sql.setSqlRule("sql");
+      rulesControllerImpl.runSqlRule(1L, sql, false);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  /**
+   * Run sql rule string EEA invalid SQL exception message null test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void runSqlRuleStringEEAInvalidSQLExceptionMessageNullTest() throws EEAException {
+    EEAInvalidSQLException exception = new EEAInvalidSQLException("",
+        new EEAException("message", new EEAException("message", new EEAException())));
+    Mockito.doThrow(exception).when(sqlRulesService).runSqlRule(Mockito.anyLong(), Mockito.any(),
+        Mockito.anyBoolean());
+    try {
+      SqlRuleVO sql = new SqlRuleVO();
+      sql.setSqlRule("sql");
+      rulesControllerImpl.runSqlRule(1L, sql, false);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
   @Test(expected = ResponseStatusException.class)
   public void downloadQCCSVExceptionTest() throws IOException {
     try {
@@ -837,5 +889,24 @@ public class RulesControllerImplTest {
       assertNotNull(e);
       throw e;
     }
+  }
+
+  /**
+   * Download QCCSV.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void downloadQCCSV() throws IOException {
+    File file = folder.newFile("filename.txt");
+
+    ServletOutputStream outputStream = Mockito.mock(ServletOutputStream.class);
+
+    Mockito.when(rulesService.downloadQCCSV(Mockito.any(), Mockito.any())).thenReturn(file);
+    Mockito.when(httpServletResponse.getOutputStream()).thenReturn(outputStream);
+    Mockito.doNothing().when(outputStream).close();
+
+    rulesControllerImpl.downloadQCCSV(1L, "FILENAME", httpServletResponse);
+    Mockito.verify(outputStream, times(1)).close();
   }
 }
