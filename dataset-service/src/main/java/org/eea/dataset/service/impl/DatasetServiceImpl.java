@@ -1314,22 +1314,6 @@ public class DatasetServiceImpl implements DatasetService {
   public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream,
       String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName) {
     try {
-
-      String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-      DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
-          .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
-      if (tableSchemaId != null) {
-        List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-        Optional<TableSchema> table = tableSchemaList.stream()
-            .filter(
-                tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
-            .findFirst();
-        limit = limit < 10000 ? limit / 2
-            : limit
-                / (table.isPresent() ? table.get().getRecordSchema().getFieldSchema().size() : 2);
-      } else {
-        limit = limit < 10000 ? limit / 2 : limit / 10;
-      }
       long startTime = System.currentTimeMillis();
       LOG.info("ETL Export process initiated to DatasetId: {}", datasetId);
       exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset, filterValue,
