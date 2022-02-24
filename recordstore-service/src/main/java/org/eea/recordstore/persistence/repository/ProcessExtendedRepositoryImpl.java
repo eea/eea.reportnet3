@@ -32,7 +32,7 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
           + "        process.date_finish as \"processFinishingDate\",\r\n"
           + "        process.queued_date as \"queuedDate\",\r\n"
           + "        process.process_id as \"processId\",\r\n"
-          + "        process.username as \"user\",\r\n"
+          + "        lower(process.username) as \"user\",\r\n"
           + "        process.process_type as \"processType\",\r\n" + "        process.status,\r\n"
           + "        d.\"name\" as \"dataflowName\",\r\n"
           + "        d2.dataset_name as \"datasetName\" " + "from\r\n" + "    process\r\n"
