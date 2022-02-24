@@ -27,7 +27,7 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
   const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [nationalCoordinator, setNationalCoordinator] = useState({});
+  const [nationalCoordinator, setNationalCoordinator] = useState({ email: '' });
 
   useEffect(() => {
     getDropdownOptions();
@@ -36,7 +36,7 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
   useEffect(() => {
     if (!isAddDialogVisible) {
       setIsAdding(false);
-      setNationalCoordinator({});
+      setNationalCoordinator({ email: '' });
       setHasEmailError(false);
     }
   }, [isAddDialogVisible]);
@@ -154,6 +154,7 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
           classNameConfirm="p-button-primary"
           confirmTooltip={getTooltipMessage()}
           disabledConfirm={
+            isAdding ||
             checkDuplicateNationalCoordinator(nationalCoordinator) ||
             !isValidEmail(nationalCoordinator.email) ||
             isEmpty(nationalCoordinator.email) ||
