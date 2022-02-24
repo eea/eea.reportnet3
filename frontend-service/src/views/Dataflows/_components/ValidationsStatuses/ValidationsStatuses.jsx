@@ -142,6 +142,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           value: config.datasetRunningStatus.FINISHED.key
         }
       ],
+      template: 'ValidationsStatus',
       type: 'MULTI_SELECT'
     }
   ];
