@@ -1,5 +1,7 @@
 import styles from './LevelError.module.scss';
 
-export const LevelError = ({ type }) => (
-  <span className={`${styles[type.toLowerCase()]} ${styles.statusBox}`}>{type.toUpperCase()}</span>
+export const LevelError = ({ className = '', type }) => (
+  <span className={`${className === '' ? styles[type.toLowerCase()] : styles[className]} ${styles.statusBox}`}>
+    {type.toUpperCase()}
+  </span>
 );

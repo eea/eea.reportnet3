@@ -148,7 +148,7 @@ public enum ResourceGroupEnum {
   REFERENCEDATASET_STEWARD("ReferenceDataset-%s-DATA_STEWARD"),
 
   /** The referencedataset steward support. */
-  REFERENCEDATASET_STEWARD_SUPPORT("ReferenceDataset-%s-DATA_STEWARD_SUPPORT"),
+  REFERENCEDATASET_STEWARD_SUPPORT("ReferenceDataset-%s-STEWARD_SUPPORT"),
 
   /** The provider national coordinator. */
   // DATAPROVIDER-%-NATIONAL_COORDINATOR

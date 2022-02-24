@@ -139,6 +139,7 @@ public class ValidationControllerImpl implements ValidationController {
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
       LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);
+      validationHelper.deleteLockToReleaseProcess(datasetId);
     }
   }
 

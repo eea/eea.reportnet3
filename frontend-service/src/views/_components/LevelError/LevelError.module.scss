@@ -60,12 +60,14 @@
   color: var(--statusBox-false-color);
 }
 
-.info {
+.info,
+.inQueue {
   background-color: var(--statusBox-info-bg);
   color: var(--statusBox-info-color);
 }
 
-.success {
+.success,
+.finished {
   background-color: var(--c-growl-success-lighter-green);
   color: var(--c-growl-success-darker-green);
 }
@@ -76,7 +78,8 @@
 }
 
 .warning,
-.warn {
+.warn,
+.inProgress {
   background-color: var(--statusBox-warning-bg);
   color: var(--statusBox-warning-color);
 }

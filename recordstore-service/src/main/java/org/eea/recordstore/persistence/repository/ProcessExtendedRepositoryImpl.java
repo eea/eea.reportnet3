@@ -32,12 +32,12 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
           + "        process.date_finish as \"processFinishingDate\",\r\n"
           + "        process.queued_date as \"queuedDate\",\r\n"
           + "        process.process_id as \"processId\",\r\n"
-          + "        process.username as \"user\",\r\n"
+          + "        lower(process.username) as \"user\",\r\n"
           + "        process.process_type as \"processType\",\r\n" + "        process.status,\r\n"
           + "        d.\"name\" as \"dataflowName\",\r\n"
           + "        d2.dataset_name as \"datasetName\" " + "from\r\n" + "    process\r\n"
-          + "inner join dataflow d on\r\n" + "    process.dataflow_id = d.id\r\n"
-          + "inner join dataset d2 on\r\n" + "    process.dataset_id = d2.id";
+          + "left join dataflow d on\r\n" + "    process.dataflow_id = d.id\r\n"
+          + "left join dataset d2 on\r\n" + "    process.dataset_id = d2.id";
 
   /** The Constant COUNT_PROCESS_QUERY: {@value}. */
   private static final String COUNT_PROCESS_QUERY = "select count(*) from process";
@@ -155,7 +155,7 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
     query.append(" where process_type = :process_type ");
     query.append(StringUtils.isNotBlank(status) ? " and process.status IN :status " : "");
     query.append(dataflowId != null ? " and dataflow_id = :dataflowId " : "");
-    query.append(StringUtils.isNotBlank(user) ? " and username = :user " : "");
+    query.append(StringUtils.isNotBlank(user) ? " and username LIKE lower(:user) " : "");
 
   }
 
@@ -179,7 +179,7 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
       query.setParameter("dataflowId", dataflowId);
     }
     if (StringUtils.isNotBlank(user)) {
-      query.setParameter("user", user);
+      query.setParameter("user", "%" + user + "%");
     }
   }
 }
