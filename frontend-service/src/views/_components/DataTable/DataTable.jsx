@@ -247,6 +247,7 @@ export class DataTable extends Component {
     this.onColumnDragLeave = this.onColumnDragLeave.bind(this);
     this.onColumnDrop = this.onColumnDrop.bind(this);
     this.onVirtualScroll = this.onVirtualScroll.bind(this);
+    this.setGoToPage = this.setGoToPage.bind(this);
     this.frozenSelectionMode = null;
   }
 
@@ -443,6 +444,10 @@ export class DataTable extends Component {
     }
   }
 
+  setGoToPage(currentPage) {
+    this.setState({ currentPage });
+  }
+
   onChangeCurrentPage(event) {
     if (event.key === 'Enter' && this.state.currentPage !== '' && this.state.currentPage !== this.props.first) {
       var pc = Math.ceil(this.props.totalRecords / this.getRows()) || 1;
@@ -510,6 +515,7 @@ export class DataTable extends Component {
         rightContent={this.props.paginatorRight}
         rows={this.getRows()}
         rowsPerPageOptions={this.props.rowsPerPageOptions}
+        setGoToPage={this.setGoToPage}
         template={
           !this.props.hasDefaultCurrentPage
             ? this.props.paginatorTemplate

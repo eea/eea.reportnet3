@@ -30,6 +30,7 @@ export class Paginator extends Component {
     rightContent: null,
     rows: 0,
     rowsPerPageOptions: null,
+    setGoToPage: () => {},
     style: null,
     template: 'FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink',
     totalRecords: 0
@@ -49,6 +50,7 @@ export class Paginator extends Component {
     rightContent: PropTypes.any,
     rows: PropTypes.number,
     rowsPerPageOptions: PropTypes.array,
+    setGoToPage: PropTypes.func,
     style: PropTypes.object,
     template: PropTypes.any,
     totalRecords: PropTypes.number
@@ -130,6 +132,9 @@ export class Paginator extends Component {
   }
 
   getPage() {
+    console.log('this.props.first :>> ', this.props.first);
+    console.log('this.props.rows :>> ', this.props.rows);
+    console.log('Math.floor(this.props.first / this.props.rows); :>> ', Math.floor(this.props.first / this.props.rows));
     return Math.floor(this.props.first / this.props.rows);
   }
 
@@ -167,8 +172,11 @@ export class Paginator extends Component {
       prevProps.totalRecords !== this.props.totalRecords &&
       this.props.first >= this.props.totalRecords
     ) {
+      console.log('this.props.setGoToPage', this.props.setGoToPage);
       this.changePage((this.getPageCount() - 1) * this.props.rows, this.props.rows);
     }
+
+    // this.props.setGoToPage((this.getPageCount() - 1) * this.props.rows, this.props.rows);
   }
 
   renderElement(key, template) {
