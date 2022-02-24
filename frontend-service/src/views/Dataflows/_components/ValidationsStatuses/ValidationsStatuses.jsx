@@ -175,7 +175,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         key: 'status',
         header: resourcesContext.messages['status'],
         template: getStatusTemplate,
-        className: styles.smallColumn
+        className: styles.middleColumn
       },
       {
         key: 'queuedDate',
@@ -249,7 +249,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const dialogFooter = (
     <div className={styles.footer}>
       <Button
-        className="p-button-primary"
+        className="p-button-secondary"
         disabled={loadingStatus === 'pending'}
         icon={isRefreshing ? 'spinnerAnimate' : 'refresh'}
         label={resourcesContext.messages['refresh']}
