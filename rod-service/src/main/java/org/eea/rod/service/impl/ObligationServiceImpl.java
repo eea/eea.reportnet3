@@ -38,6 +38,9 @@ public class ObligationServiceImpl implements ObligationService {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(ObligationServiceImpl.class);
+
   /** The obligation feign repository. */
   @Autowired
   private ObligationFeignRepository obligationFeignRepository;
@@ -88,21 +91,28 @@ public class ObligationServiceImpl implements ObligationService {
 
     if (dateTo == null && dateFrom != null) {
       dateTo = dateFrom;
+      deadlineDateTo = deadlineDateFrom;
     }
 
     List<Obligation> obligations =
         obligationFeignRepository.findOpenedObligations(clientId, issueId, spatialId, null, null);
     List<Obligation> filteredObligations = new ArrayList<>();
     if (dateTo != null && dateFrom != null) {
+      LOG.info("Date range from {} to {}, (in milliseconds {} and {})", deadlineDateFrom,
+          deadlineDateTo, dateFrom, dateTo);
       for (Obligation obligation : obligations) {
         if (obligation.getNextDeadline() != null
             && obligation.getNextDeadline().getTime() >= dateFrom
             && obligation.getNextDeadline().getTime() <= dateTo) {
           filteredObligations.add(obligation);
+          LOG.info("Obligation with id {} and nextDeadLine date {} added (in milliseconds {})",
+              obligation.getObligationId(), obligation.getNextDeadline(),
+              obligation.getNextDeadline().getTime());
         }
       }
     } else {
       filteredObligations = obligations;
+      LOG.info("No date range detected");
     }
 
     List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(filteredObligations);
