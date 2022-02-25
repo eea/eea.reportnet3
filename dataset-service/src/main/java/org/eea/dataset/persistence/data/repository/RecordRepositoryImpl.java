@@ -428,7 +428,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         resultTable.put("totalRecords", totalRecords);
       }
       if (totalRecords == null || totalRecords != 0L) {
-        for (int offsetAux = offset; offsetAux < limit; offsetAux += limitAux) {
+        for (int offsetAux = offset; offsetAux < offset + limit; offsetAux += limitAux) {
+          if (offsetAux + limitAux > offset + limit) {
+            limitAux = limit % nHeaders;
+          }
           // ask for records with offset
           StringBuilder stringQuery = new StringBuilder();
           stringQuery.append(
