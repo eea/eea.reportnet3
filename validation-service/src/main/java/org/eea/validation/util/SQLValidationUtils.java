@@ -168,7 +168,7 @@ public class SQLValidationUtils {
     try {
       if (query != null) {
         String preparedquery = query.contains(";") ? query.replace(";", "") : query;
-        if (dataProviderCode != null) {
+        if (dataProviderCode != null && !"null".equals(dataProviderCode)) {
           DataProviderVO providerCode =
               representativeControllerZuul.findDataProviderById(Long.valueOf(dataProviderCode));
           if (null != providerCode && StringUtils.isNotBlank(providerCode.getCode())) {
