@@ -83,10 +83,6 @@ export const Calendar = forwardRef((props, _) => {
       ? `${new Date().getFullYear() - selectableYears}:${new Date().getFullYear() + selectableYears}`
       : yearRange;
 
-  const onChageMonthYear = event => {
-    setViewDateState(event.value);
-  };
-
   return (
     <PrimeCalendar
       appendTo={appendTo}
@@ -108,7 +104,7 @@ export const Calendar = forwardRef((props, _) => {
       onFocus={onFocus}
       onSelect={onSelect}
       onTodayButtonClick={onTodayButtonClick}
-      onViewDateChange={onChageMonthYear}
+      onViewDateChange={event => setViewDateState(event.value)}
       panelClassName={panelClassName}
       placeholder={placeholder}
       readOnlyInput={readOnlyInput}
