@@ -176,10 +176,10 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
       finalQuery = finalQuery.replace(":conditionalId", "'" + conditionalSchemaId + "'")
           .replace(":conditionalValue", "'" + conditionalValue + "'");
     }
-    System.out.println(finalQuery);
+    LOG.info("Query to execute in links: {}", finalQuery);
     Session session = (Session) entityManager.getDelegate();
 
-    fieldsVO = executeQueryfindByIdFieldSchemaWithTagOrdered(session, finalQuery);
+    fieldsVO = executeQueryfindByIdFieldSchemaWithTagOrdered(session, finalQuery, resultsNumber);
 
     // Remove the duplicate values
     HashSet<String> seen = new HashSet<>();
@@ -257,16 +257,17 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * Execute queryfind by id field schema with tag ordered.
    *
    * @param session the session
-   * @param quericita the quericita
+   * @param query the query
    * @return the list
    */
-  private List<FieldVO> executeQueryfindByIdFieldSchemaWithTagOrdered(Session session,
-      String quericita) {
+  private List<FieldVO> executeQueryfindByIdFieldSchemaWithTagOrdered(Session session, String query,
+      Integer resultsNumber) {
     return session.doReturningWork(new ReturningWork<List<FieldVO>>() {
       @Override
       public List<FieldVO> execute(Connection conn) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement(quericita);
-            ResultSet rs = stmt.executeQuery();) {
+        try (PreparedStatement stmt = conn.prepareStatement(query);) {
+          stmt.setMaxRows(resultsNumber);
+          ResultSet rs = stmt.executeQuery();
           List<FieldVO> fields = new ArrayList<>();
           while (rs.next()) {
             FieldVO fieldVO = new FieldVO();

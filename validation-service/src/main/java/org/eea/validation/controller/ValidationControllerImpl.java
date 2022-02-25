@@ -122,6 +122,7 @@ public class ValidationControllerImpl implements ValidationController {
       validationHelper.addLockToReleaseProcess(datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);
+      validationHelper.deleteLockToReleaseProcess(datasetId);
     }
   }
 
