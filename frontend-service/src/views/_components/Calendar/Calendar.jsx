@@ -1,7 +1,6 @@
 import { forwardRef, useEffect, useState } from 'react';
 
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 export const Calendar = forwardRef((props, _) => {
@@ -67,30 +66,26 @@ export const Calendar = forwardRef((props, _) => {
     weekHeader: 'Wk'
   };
 
+  useEffect(() => {
+    const isValidDate = date => {
+      return date instanceof Date && !isNaN(date);
+    };
+
+    if (isValidDate(viewDate)) {
+      setViewDateState(viewDate);
+    }
+  }, [viewDate]);
+
+  const [viewDateState, setViewDateState] = useState(viewDate);
+
   const yearRangeValue =
     yearNavigator && isNil(yearRange)
       ? `${new Date().getFullYear() - selectableYears}:${new Date().getFullYear() + selectableYears}`
       : yearRange;
 
-  useEffect(() => {
-    if (viewDate !== undefined && isEmpty(value)) {
-      setViewDataState(viewDate);
-    }
-  }, [viewDate]);
-
-  const getViewDateInitial = () => {
-    if (!isEmpty(value)) {
-      if (value.length === 2 && !isNil(value[1])) {
-        return value[1];
-      } else if (!isNil(value[0])) {
-        return value[0];
-      }
-    }
-
-    return new Date();
+  const onChageMonthYear = event => {
+    setViewDateState(event.value);
   };
-
-  const [viewDataState, setViewDataState] = useState(getViewDateInitial());
 
   return (
     <PrimeCalendar
@@ -113,7 +108,7 @@ export const Calendar = forwardRef((props, _) => {
       onFocus={onFocus}
       onSelect={onSelect}
       onTodayButtonClick={onTodayButtonClick}
-      onViewDateChange={event => setViewDataState(event.value)}
+      onViewDateChange={onChageMonthYear}
       panelClassName={panelClassName}
       placeholder={placeholder}
       readOnlyInput={readOnlyInput}
@@ -126,7 +121,7 @@ export const Calendar = forwardRef((props, _) => {
       style={style}
       todayButtonClassName={todayButtonClassName}
       value={value}
-      viewDate={viewDataState}
+      viewDate={viewDateState || new Date()}
       yearNavigator={yearNavigator}
       yearRange={yearRangeValue}
     />

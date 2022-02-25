@@ -59,7 +59,7 @@ export const Filters = ({
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
-  const [isReset, setIsReset] = useState(false);
+  const [viewDate, setViewData] = useState(undefined);
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
@@ -83,7 +83,6 @@ export const Filters = ({
   );
 
   const onApplyFilters = async () => {
-    setIsReset(false);
     await getFilterBy();
     await onFilter();
   };
@@ -167,7 +166,6 @@ export const Filters = ({
         getFilterBy={getFilterBy}
         hasCustomSort={hasCustomSort}
         isLoading={isLoading}
-        isReset={isReset}
         key={option.key}
         onCustomFilter={onFilter}
         onFilterData={onFilterData}
@@ -175,6 +173,7 @@ export const Filters = ({
         option={option}
         panelClassName={panelClassName}
         recoilId={recoilId}
+        viewDate={viewDate}
       />
     );
   };
@@ -219,7 +218,7 @@ export const Filters = ({
             icon="undo"
             label={resourcesContext.messages['reset']}
             onClick={async () => {
-              setIsReset(true);
+              setViewData(new Date());
               await onResetFilters();
               await onReset({ sortByHeader: '', sortByOption: 'idle' });
             }}

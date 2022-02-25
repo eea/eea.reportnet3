@@ -21,12 +21,12 @@ export const DateFilter = ({
   getFilterBy,
   hasCustomSort,
   isLoading,
-  isReset,
   onFilterData,
   onSort,
   option,
   panelClassName,
-  recoilId
+  recoilId,
+  viewDate
 }) => {
   const { userProps } = useContext(UserContext);
 
@@ -70,13 +70,6 @@ export const DateFilter = ({
     if (!hasCustomSort) {
       await onFilterData({ key: option.key, value, type: option.type });
     }
-  };
-
-  const getViewDate = () => {
-    if (!isReset) {
-      return undefined;
-    }
-    return new Date();
   };
 
   const parseDateValues = values => {
@@ -125,7 +118,7 @@ export const DateFilter = ({
           readOnlyInput={true}
           selectionMode="range"
           value={parseDateValues(filterBy[option.key])}
-          viewDate={getViewDate()}
+          viewDate={viewDate}
           yearNavigator={true}
         />
 
