@@ -36,7 +36,6 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
    * @return the docket
    */
   @Bean
-  @Profile("!production")
   public Docket api() {
     return new Docket(DocumentationType.SWAGGER_2)
         .securityContexts(Lists.newArrayList(securityContext()))
@@ -54,7 +53,7 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
   }
 
   /**
-   * Security context. Prod api docket.
+   * Security context.
    *
    * @return the security context
    */
