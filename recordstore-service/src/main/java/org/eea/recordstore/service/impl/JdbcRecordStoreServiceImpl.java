@@ -842,8 +842,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         });
   }
 
-
-
   /**
    * Update materialized query view.
    *
@@ -1056,6 +1054,69 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
     });
   }
+
+  /**
+   * Modify snapshot file.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param nameFiles the name files
+   * @param datasetId the dataset id
+   */
+  private void modifySnapshotFile(Map<String, String> dictionaryOriginTargetObjectId,
+      List<String> nameFiles, Long datasetId) {
+
+    if (!CollectionUtils.isEmpty(nameFiles)) {
+      nameFiles.stream().forEach(f -> {
+
+        Path pathFile = Paths.get(f);
+        List<String> replaced = new ArrayList<>();
+
+        try (Stream<String> lines = Files.lines(pathFile)) {
+          replaced = lines
+              .map(line -> line = modifyingLine(dictionaryOriginTargetObjectId, line, f, datasetId))
+              .collect(Collectors.toList());
+          Files.write(pathFile, replaced);
+        } catch (IOException e) {
+          LOG_ERROR.error("Error modifying the file {} during the data copy in cloning process", f);
+        }
+      });
+    }
+  }
+
+
+  /**
+   * Modifying line.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param line the line
+   * @param fileName the file name
+   * @param datasetId the dataset id
+   * @return the string
+   */
+  private String modifyingLine(Map<String, String> dictionaryOriginTargetObjectId, String line,
+      String fileName, Long datasetId) {
+
+    String[] lineSplitted = line.split("\t");
+
+    if (fileName.contains("RecordValue")) {
+      String recordSchema = lineSplitted[1];
+      line = line.replace(recordSchema, dictionaryOriginTargetObjectId.get(recordSchema));
+    }
+    if (fileName.contains("FieldValue")) {
+      String fieldSchema = lineSplitted[3];
+      line = line.replace(fieldSchema, dictionaryOriginTargetObjectId.get(fieldSchema));
+    }
+    if (fileName.contains("TableValue")) {
+      String oldDatasetId = lineSplitted[2];
+      String tableSchemaId = lineSplitted[1];
+      line = line.replace(oldDatasetId, datasetId.toString());
+      if (null != dictionaryOriginTargetObjectId) {
+        line = line.replace(tableSchemaId, dictionaryOriginTargetObjectId.get(tableSchemaId));
+      }
+    }
+    return line;
+  }
+
 
   /**
    * Delete file.
@@ -1284,66 +1345,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         lockService.removeLockByCriteria(lockCriteria);
       }
     }
-  }
-
-  /**
-   * Modify snapshot file.
-   *
-   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
-   * @param nameFiles the name files
-   */
-  private void modifySnapshotFile(Map<String, String> dictionaryOriginTargetObjectId,
-      List<String> nameFiles, Long datasetId) {
-
-    if (!CollectionUtils.isEmpty(nameFiles)) {
-      nameFiles.stream().forEach(f -> {
-
-        Path pathFile = Paths.get(f);
-        List<String> replaced = new ArrayList<>();
-
-        try (Stream<String> lines = Files.lines(pathFile)) {
-          replaced = lines
-              .map(line -> line = modifyingLine(dictionaryOriginTargetObjectId, line, f, datasetId))
-              .collect(Collectors.toList());
-          Files.write(pathFile, replaced);
-        } catch (IOException e) {
-          LOG_ERROR.error("Error modifying the file {} during the data copy in cloning process", f);
-        }
-      });
-    }
-  }
-
-
-  /**
-   * Modifying line.
-   *
-   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
-   * @param line the line
-   * @param fileName the file name
-   * @return the string
-   */
-  private String modifyingLine(Map<String, String> dictionaryOriginTargetObjectId, String line,
-      String fileName, Long datasetId) {
-
-    String[] lineSplitted = line.split("\t");
-
-    if (fileName.contains("RecordValue")) {
-      String recordSchema = lineSplitted[1];
-      line = line.replace(recordSchema, dictionaryOriginTargetObjectId.get(recordSchema));
-    }
-    if (fileName.contains("FieldValue")) {
-      String fieldSchema = lineSplitted[3];
-      line = line.replace(fieldSchema, dictionaryOriginTargetObjectId.get(fieldSchema));
-    }
-    if (fileName.contains("TableValue")) {
-      String oldDatasetId = lineSplitted[2];
-      String tableSchemaId = lineSplitted[1];
-      line = line.replace(oldDatasetId, datasetId.toString());
-      if (null != dictionaryOriginTargetObjectId) {
-        line = line.replace(tableSchemaId, dictionaryOriginTargetObjectId.get(tableSchemaId));
-      }
-    }
-    return line;
   }
 
   /**
