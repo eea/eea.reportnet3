@@ -2,10 +2,9 @@ package org.eea.rod.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.rod.LegalInstrumentVO;
@@ -84,28 +83,42 @@ public class ObligationServiceImpl implements ObligationService {
   @Override
   public ObligationListVO findOpenedObligation(Integer clientId, Integer spatialId, Integer issueId,
       Date deadlineDateFrom, Date deadlineDateTo) {
-    Long dateFrom = convertDateToLong(deadlineDateFrom);
-    Long dateTo = convertDateToLong(deadlineDateTo);
+    Long dateFrom = Optional.ofNullable(deadlineDateFrom).map(Date::getTime).orElse(null);
+    Long dateTo = Optional.ofNullable(deadlineDateTo).map(Date::getTime).orElse(null);
+
     if (dateTo == null && dateFrom != null) {
       dateTo = dateFrom;
     }
 
-    List<Obligation> obligations = obligationFeignRepository.findOpenedObligations(clientId,
-        issueId, spatialId, dateFrom, dateTo);
-    List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(obligations);
+    List<Obligation> obligations =
+        obligationFeignRepository.findOpenedObligations(clientId, issueId, spatialId, null, null);
+    List<Obligation> filteredObligations = new ArrayList<>();
+    if (dateTo != null && dateFrom != null) {
+      for (Obligation obligation : obligations) {
+        if (obligation.getNextDeadline() != null
+            && obligation.getNextDeadline().getTime() >= dateFrom
+            && obligation.getNextDeadline().getTime() <= dateTo) {
+          filteredObligations.add(obligation);
+        }
+      }
+    } else {
+      filteredObligations = obligations;
+    }
+
+    List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(filteredObligations);
     List<Client> clients = this.clientFeignRepository.findAll();
     List<Country> countries = new ArrayList<>();// this.countryFeignRepository.findAll(); this will
                                                 // not be necessary at the moment
     List<Issue> issues = new ArrayList<>();// this.issueFeignRepository.findAll();this will not be
                                            // necessary at the moment
 
-    for (int i = 0; i < obligations.size(); i++) {
-      fillObligationSubentityFields(obligationVOS.get(i), obligations.get(i), clients, countries,
-          issues);
+    for (int i = 0; i < filteredObligations.size(); i++) {
+      fillObligationSubentityFields(obligationVOS.get(i), filteredObligations.get(i), clients,
+          countries, issues);
     }
     ObligationListVO obligationListVO = new ObligationListVO();
     obligationListVO.setObligations(obligationVOS);
-    obligationListVO.setFilteredRecords(Long.valueOf(obligations.size()));
+    obligationListVO.setFilteredRecords(Long.valueOf(filteredObligations.size()));
     obligationListVO.setTotalRecords(Long.valueOf(
         obligationFeignRepository.findOpenedObligations(null, null, null, null, null).size()));
 
@@ -190,31 +203,5 @@ public class ObligationServiceImpl implements ObligationService {
 
     }
 
-  }
-
-  /**
-   * Convert date to long.
-   *
-   * @param date the date
-   * @return the long
-   */
-  private Long convertDateToLong(Date date) {
-    Long milliseconds = null;
-
-    if (date != null) {
-      Calendar entrada = Calendar.getInstance();
-      entrada.setTime(date);
-
-      Calendar gmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-      gmt.set(Calendar.DAY_OF_MONTH, entrada.get(Calendar.DAY_OF_MONTH));
-      gmt.set(Calendar.MONTH, entrada.get(Calendar.MONTH));
-      gmt.set(Calendar.YEAR, entrada.get(Calendar.YEAR));
-      gmt.set(Calendar.HOUR_OF_DAY, 0);
-      gmt.set(Calendar.MINUTE, 0);
-      gmt.set(Calendar.SECOND, 0);
-      gmt.set(Calendar.MILLISECOND, 0);
-      milliseconds = gmt.getTimeInMillis();
-    }
-    return milliseconds;
   }
 }
