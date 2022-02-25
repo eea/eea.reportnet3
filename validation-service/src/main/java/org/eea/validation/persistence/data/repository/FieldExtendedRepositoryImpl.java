@@ -7,6 +7,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
+import org.hibernate.annotations.QueryHints;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -56,7 +57,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   @Override
   public List<FieldValue> querySinglePK(String generatedQuery) {
     Query query = entityManager.createNativeQuery(generatedQuery, FieldValue.class);
-    return query.getResultList();
+    return query.setHint(QueryHints.READ_ONLY, true).getResultList();
 
   }
 
@@ -82,7 +83,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   @Override
   public Long getCount(String generatedQuery) {
     Query query = entityManager.createNativeQuery(generatedQuery);
-    BigInteger result = (BigInteger) query.getSingleResult();
+    BigInteger result = (BigInteger) query.setHint(QueryHints.READ_ONLY, true).getSingleResult();
     return result.longValue();
   }
 

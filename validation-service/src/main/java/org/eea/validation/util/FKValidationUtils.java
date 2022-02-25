@@ -252,7 +252,7 @@ public class FKValidationUtils {
       if (!pkMustBeUsed) {
         // Counts fks
         Integer totalRecords = getSinglesFKs(Long.valueOf(datasetIdReference), idFieldSchema);
-        int batchSize = 10000;
+        int batchSize = 2000;
         for (int i = 0; i < totalRecords; i += batchSize) {
           List<FieldValue> fkFields =
               fieldRepository.querySinglePK(String.format(FK_SINGLE_WRONG, datasetIdReference,
