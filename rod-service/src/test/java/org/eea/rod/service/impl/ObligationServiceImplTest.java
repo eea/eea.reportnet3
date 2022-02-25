@@ -94,7 +94,7 @@ public class ObligationServiceImplTest {
     Mockito.when(clientMapper.entityToClass(Mockito.eq(client))).thenReturn(clientVO);
   }
 
-  @Test
+  // @Test
   public void findOpenedObligation() {
     List<Obligation> obligations = new ArrayList<>();
     Obligation obligation = new Obligation();
