@@ -29,7 +29,6 @@ import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Component;
 
 /**
@@ -632,9 +631,7 @@ public class FKValidationUtils {
    * @param fieldValues the field values
    */
   @Transactional
-  @Modifying(clearAutomatically = true)
   private static void saveFieldValidations(List<FieldValue> fieldValues) {
-    fieldRepository.flush();
     fieldRepository.saveAll(fieldValues);
     fieldRepository.flush();
   }
