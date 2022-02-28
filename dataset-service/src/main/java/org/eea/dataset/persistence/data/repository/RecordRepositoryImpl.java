@@ -1251,7 +1251,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       stringQuery.append(" ) ");
     }
 
-    System.err.println(stringQuery.toString());
+    LOG.info(stringQuery.toString());
     return stringQuery.toString();
   }
 }
