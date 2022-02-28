@@ -318,7 +318,6 @@ public class FKValidationUtils {
    */
   private static Integer getSinglesFKs(Long datasetIdFK, String fkFieldSchema) {
     String queryPks = String.format(FK_COUNT_VALUES, datasetIdFK, fkFieldSchema);
-
     return fieldRepository.getCount(queryPks).intValue();
   }
 

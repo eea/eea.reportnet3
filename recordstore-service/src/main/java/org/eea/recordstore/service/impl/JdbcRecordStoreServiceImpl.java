@@ -842,8 +842,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         });
   }
 
-
-
   /**
    * Update materialized query view.
    *
@@ -1118,6 +1116,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
     return line;
   }
+
 
   /**
    * Delete file.
