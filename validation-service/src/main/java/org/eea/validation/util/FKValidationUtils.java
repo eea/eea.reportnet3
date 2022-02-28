@@ -251,13 +251,14 @@ public class FKValidationUtils {
       if (!pkMustBeUsed) {
         // Counts fks
         Integer totalRecords = getSinglesFKs(Long.valueOf(datasetIdReference), idFieldSchema);
-        int batchSize = 10000;
+        int batchSize = 2000;
         for (int i = 0; i < totalRecords; i += batchSize) {
           List<FieldValue> fkFields =
               fieldRepository.querySinglePK(String.format(FK_SINGLE_WRONG, datasetIdReference,
                   idFieldSchema, datasetIdRefered, idFieldSchemaPKString, batchSize, i));
           createFieldValueValidationV2(fkFields, pkValidation, errorFields);
           saveFieldValidations(errorFields);
+          fkFields.clear();
         }
         // Force true because we only need Field Validations
         return true;
@@ -318,7 +319,6 @@ public class FKValidationUtils {
    */
   private static Integer getSinglesFKs(Long datasetIdFK, String fkFieldSchema) {
     String queryPks = String.format(FK_COUNT_VALUES, datasetIdFK, fkFieldSchema);
-
     return fieldRepository.getCount(queryPks).intValue();
   }
 
@@ -633,6 +633,7 @@ public class FKValidationUtils {
   @Transactional
   private static void saveFieldValidations(List<FieldValue> fieldValues) {
     fieldRepository.saveAll(fieldValues);
+    fieldRepository.flush();
   }
 
   /**
