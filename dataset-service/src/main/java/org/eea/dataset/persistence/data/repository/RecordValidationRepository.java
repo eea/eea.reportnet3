@@ -140,8 +140,6 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
       + "from FieldValidation fv  WHERE  fv.fieldValue.record.tableValue.idTableSchema=:idTableSchema")
   Long countRecordIdFromFieldWithErrors(@Param("idTableSchema") String idTableSchema);
 
-
-
   /**
    * Find by validation ids.
    *

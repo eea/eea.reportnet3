@@ -25,6 +25,9 @@ import org.springframework.data.domain.Pageable;
  */
 public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepository {
 
+  /** The Constant STATUS_CREATION_DATE. */
+  private static final String STATUS_CREATION_DATE = "status, creation_date";
+
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -58,9 +61,17 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "cast((docaux ->> 'legalInstrument' )as json)->>'sourceTitle' as legal_instrument,\r\n"
       + "(docaux ->> 'client' ) as client,\r\n" + "(docaux ->> 'countries' ) as countries,\r\n"
       + "(docaux ->> 'issues' ) as issues,\r\n" + "(docaux ->> 'reportFreq' ) as reportFreq,\r\n"
-      + "(docaux ->> 'reportFreqDetail' ) as reportFreqDetail\r\n" + "from doc)\r\n"
-      + "select d.*,ot.legal_instrument,ot.obligation from obligationtable ot right join dataflow d \r\n"
-      + "on d.obligation_id  = cast(ot.obligation_id as integer)";
+      + "(docaux ->> 'reportFreqDetail' ) as reportFreqDetail\r\n" + "from doc)\r\n";
+
+  private static final String QUERY_DATAFLOW_BASIC =
+      "select d.*,ot.legal_instrument,ot.obligation from obligationtable ot right join dataflow d \r\n"
+          + "on d.obligation_id  = cast(ot.obligation_id as integer)";
+
+  private static final String QUERY_DATAFLOW_PINNED =
+      "select * from (select (case when cast(id as text) IN :pinned then true else false end) as pinned,\r\n"
+          + "d.*,ot.legal_Instrument,ot.obligation \r\n" + "from obligationtable ot \r\n"
+          + "right join dataflow d \r\n"
+          + "on d.obligation_id  = cast(ot.obligation_id as integer))tablePinned ";
 
   /** The Constant QUERY_JSON_COUNTRY. */
   private static final String QUERY_JSON_COUNTRY = "with doc as (    \r\n"
@@ -137,11 +148,11 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   private static final String DATAFLOW_TYPE = " type = :dataflowType ";
 
   /** The Constant DATAFLOW_IN. */
-  private static final String DATAFLOW_IN = " d.id IN :dataflowList ";
+  private static final String DATAFLOW_IN = " %sid IN :dataflowList ";
 
   /** The Constant REFERENCE_IN. */
   private static final String REFERENCE_IN =
-      " (status = :status1 or d.id IN :dataflowList and status = :status2) ";
+      " (status = :status1 or %sid IN :dataflowList and status = :status2) ";
 
   /** The Constant REFERENCE_STATUS. */
   private static final String REFERENCE_STATUS = " (status = :status1 or status = :status2) ";
@@ -150,10 +161,25 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   private static final String DELIVERY_STATUS_IN = " %s IN :%s ";
 
   /** The Constant RELEASABLE. */
-  private static final String RELEASABLE = " releasable = :releasable";
+  private static final String RELEASABLE = " releasable = :releasable ";
 
   /** The Constant STATUS. */
   private static final String STATUS = " status = :status";
+
+  /** The Constant ASC. */
+  private static final String ASC = " asc";
+
+  /** The Constant DESC. */
+  private static final String DESC = " desc";
+
+  /** The Constant PINNED. */
+  private static final String PINNED = " pinned ";
+
+  /** The Constant COMMA. */
+  private static final String COMMA = ",";
+
+  /** The Constant PINNED_FILTER. */
+  private static final String PINNED_FILTER = " pinned = :pinnedFilter";
 
 
   /**
@@ -193,14 +219,15 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   @Override
   public List<Dataflow> findPaginated(String json, Pageable pageable, boolean isPublic,
       Map<String, String> filters, String orderHeader, boolean asc, TypeDataflowEnum type,
-      List<Long> dataflowIds) throws EEAException {
+      List<Long> dataflowIds, List<String> pinnedDataflows) throws EEAException {
     List<Dataflow> result = new ArrayList<>();
     try {
       StringBuilder stringQuery = new StringBuilder();
       stringQuery.append(QUERY_JSON);
-      createQuery(isPublic, filters, orderHeader, asc, stringQuery, type, dataflowIds);
+      createQuery(isPublic, filters, orderHeader, asc, stringQuery, type, dataflowIds,
+          pinnedDataflows);
       Query query = entityManager.createNativeQuery(stringQuery.toString(), Dataflow.class);
-      setParameters(json, isPublic, filters, query, type, dataflowIds);
+      setParameters(json, isPublic, filters, query, type, dataflowIds, pinnedDataflows);
 
       if (null != pageable) {
         query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
@@ -234,7 +261,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     StringBuilder sb = new StringBuilder();
     constructPublicDataflowsQuery(sb, orderHeader, asc, filters, true);
     Query query = entityManager.createNativeQuery(sb.toString(), Dataflow.class);
-    setParameters(obligationJson, true, filters, query, null, null);
+    setParameters(obligationJson, true, filters, query, null, null, null);
 
     query.setParameter(COUNTRY_CODE, countryCode);
 
@@ -301,7 +328,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
     Query query = entityManager.createNativeQuery(sb.toString());
 
-    setParameters(obligationJson, true, filters, query, null, null);
+    setParameters(obligationJson, true, filters, query, null, null, null);
 
     query.setParameter(COUNTRY_CODE, countryCode);
 
@@ -325,16 +352,17 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   @Override
   public Long countPaginated(String json, Pageable pageable, boolean isPublic,
       Map<String, String> filters, String orderHeader, boolean asc, TypeDataflowEnum type,
-      List<Long> dataflowIds) throws EEAException {
+      List<Long> dataflowIds, List<String> pinnedDataflows) throws EEAException {
     Long result = Long.valueOf(0);
     try {
       StringBuilder stringQuery = new StringBuilder();
       stringQuery.append("with tableAux as (");
       stringQuery.append(QUERY_JSON);
-      createQuery(isPublic, filters, orderHeader, asc, stringQuery, type, dataflowIds);
+      createQuery(isPublic, filters, orderHeader, asc, stringQuery, type, dataflowIds,
+          pinnedDataflows);
       stringQuery.append(")select count(*) from tableaux");
       Query query = entityManager.createNativeQuery(stringQuery.toString());
-      setParameters(json, isPublic, filters, query, type, dataflowIds);
+      setParameters(json, isPublic, filters, query, type, dataflowIds, pinnedDataflows);
       result = Long.valueOf(query.getResultList().get(0).toString());
     } catch (Exception e) {
       LOG_ERROR.error(e.getMessage());
@@ -354,7 +382,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @param dataflowIds the dataflow ids
    */
   private void setParameters(String json, boolean isPublic, Map<String, String> filters,
-      Query query, TypeDataflowEnum type, List<Long> dataflowIds) {
+      Query query, TypeDataflowEnum type, List<Long> dataflowIds, List<String> pinnedDataflows) {
     query.setParameter("aux", json);
     if (MapUtils.isNotEmpty(filters)) {
       for (String key : filters.keySet()) {
@@ -363,6 +391,11 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     }
     if (isPublic) {
       query.setParameter("public", isPublic);
+    }
+
+
+    if (CollectionUtils.isNotEmpty(pinnedDataflows)) {
+      query.setParameter("pinned", pinnedDataflows);
     }
 
     if (null != type) {
@@ -399,18 +432,28 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @throws EEAException
    */
   private void createQuery(boolean isPublic, Map<String, String> filters, String orderHeader,
-      boolean asc, StringBuilder stringQuery, TypeDataflowEnum type, List<Long> dataflowIds)
-      throws EEAException {
+      boolean asc, StringBuilder stringQuery, TypeDataflowEnum type, List<Long> dataflowIds,
+      List<String> pinnedDataflows) throws EEAException {
     boolean addAnd = false;
+    stringQuery.append(
+        CollectionUtils.isEmpty(pinnedDataflows) ? QUERY_DATAFLOW_BASIC : QUERY_DATAFLOW_PINNED);
+
+    if (MapUtils.isNotEmpty(filters)) {
+      if (filters.containsKey("pinned") && CollectionUtils.isEmpty(pinnedDataflows)) {
+        filters.remove("pinned");
+      }
+    }
+
     if (MapUtils.isNotEmpty(filters) || StringUtils.isNotBlank(orderHeader) || isPublic
         || null != type || CollectionUtils.isNotEmpty(dataflowIds)) {
+
       stringQuery.append(" where ");
 
       if (MapUtils.isNotEmpty(filters)) {
-
         for (String key : filters.keySet()) {
           addAnd(stringQuery, addAnd);
-          setFilters(stringQuery, key, filters.get(key));
+          setFilters(stringQuery, key, filters.get(key),
+              CollectionUtils.isNotEmpty(pinnedDataflows));
           addAnd = true;
         }
       }
@@ -425,11 +468,13 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       if (CollectionUtils.isNotEmpty(dataflowIds)) {
         if (null != type && TypeDataflowEnum.REFERENCE.equals(type)) {
           addAnd(stringQuery, addAnd);
-          stringQuery.append(REFERENCE_IN);
+          stringQuery.append(String.format(REFERENCE_IN,
+              CollectionUtils.isEmpty(pinnedDataflows) ? "d." : "tablePinned."));
           addAnd = true;
         } else {
           addAnd(stringQuery, addAnd);
-          stringQuery.append(DATAFLOW_IN);
+          stringQuery.append(String.format(DATAFLOW_IN,
+              CollectionUtils.isEmpty(pinnedDataflows) ? "d." : "tablePinned."));
           addAnd = true;
         }
       } else {
@@ -448,13 +493,23 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
       if (StringUtils.isNotBlank(orderHeader)) {
         if ("status".equals(orderHeader)) {
-          stringQuery.append(
-              String.format(ORDER_BY, orderHeader + (asc ? " asc" : " desc"), " ,releasable "));
+          stringQuery
+              .append(String.format(ORDER_BY, orderHeader + (asc ? ASC : DESC), " ,releasable "));
         } else {
-          stringQuery.append(String.format(ORDER_BY, orderHeader, asc ? "asc" : "desc"));
+          if (CollectionUtils.isEmpty(pinnedDataflows)) {
+            stringQuery.append(String.format(ORDER_BY, orderHeader, asc ? ASC : DESC));
+          } else {
+            stringQuery.append(
+                String.format(ORDER_BY, PINNED + DESC + COMMA + orderHeader, asc ? ASC : DESC));
+          }
         }
       } else {
-        stringQuery.append("order by status, creation_date desc");
+        if (CollectionUtils.isEmpty(pinnedDataflows)) {
+          stringQuery.append(String.format(ORDER_BY, STATUS_CREATION_DATE, DESC));
+        } else {
+          stringQuery
+              .append(String.format(ORDER_BY, PINNED + DESC + COMMA + STATUS_CREATION_DATE, DESC));
+        }
       }
 
     }
@@ -468,7 +523,8 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @param value the value
    * @throws EEAException
    */
-  private void setFilters(StringBuilder stringQuery, String key, String value) throws EEAException {
+  private void setFilters(StringBuilder stringQuery, String key, String value, boolean hasPinned)
+      throws EEAException {
     switch (key) {
       case "creation_date_from":
         stringQuery.append(String.format(DATE_FROM, "creation_date", key));
@@ -502,8 +558,11 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
             break;
         }
         break;
+      case "pinned":
+        stringQuery.append(PINNED_FILTER);
+        break;
       default:
-        stringQuery.append(String.format(LIKE, getTablePrefix(key), key));
+        stringQuery.append(String.format(LIKE, getTablePrefix(key, hasPinned), key));
         break;
     }
   }
@@ -527,7 +586,6 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         query.setParameter(key, new Date(Long.valueOf(value)));
         break;
       case DELIVERY_STATUS:
-        List<String> deliveryStatus = Arrays.asList(value.split(","));
         query.setParameter(key, Arrays.asList(value.split(",")));
         break;
       case "status":
@@ -545,6 +603,9 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
             break;
         }
         break;
+      case "pinned":
+        query.setParameter("pinnedFilter", Boolean.valueOf(value));
+        break;
       default:
         query.setParameter(key, "%" + value + "%");
         break;
@@ -558,17 +619,19 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @return the table prefix
    * @throws EEAException the EEA exception
    */
-  private String getTablePrefix(String key) throws EEAException {
+  private String getTablePrefix(String key, boolean hasPinned) throws EEAException {
     StringBuilder stringPrefix = new StringBuilder();
     switch (key) {
       case "description":
       case "name":
       case "obligation_id":
-        stringPrefix.append("d.");
+        stringPrefix.append(hasPinned ? "tablePinned." : "d.");
         break;
       case "obligation":
       case "legal_instrument":
-        stringPrefix.append("ot.");
+        stringPrefix.append(hasPinned ? "tablePinned." : "ot.");
+        break;
+      case "pinned":
         break;
       default:
         throw new EEAException(EEAErrorMessage.HEADER_NOT_VALID);
@@ -613,16 +676,16 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     if (MapUtils.isNotEmpty(filters) && applyFilters) {
       for (String key : filters.keySet()) {
         addAnd(sb, addAnd);
-        setFilters(sb, key, filters.get(key));
+        setFilters(sb, key, filters.get(key), Boolean.FALSE);
       }
     }
 
     if (StringUtils.isNotBlank(orderHeader)) {
       if ("status".equals(orderHeader)) {
-        sb.append(String.format(ORDER_BY, orderHeader + (asc ? " asc" : " desc"), " ,releasable "));
+        sb.append(String.format(ORDER_BY, orderHeader + (asc ? ASC : DESC), " ,releasable "));
       } else {
         orderHeader = orderHeader.equals("delivery_date") ? DATE_RELEASED : orderHeader;
-        sb.append(String.format(ORDER_BY, orderHeader, asc ? "asc" : "desc"));
+        sb.append(String.format(ORDER_BY, orderHeader, asc ? ASC : DESC));
       }
     } else {
       sb.append(" order by status, creation_date desc ");

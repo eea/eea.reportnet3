@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
@@ -23,6 +23,7 @@ import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 import { constraintsReducer } from './_functions/Reducers/constraintsReducer';
 
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { UniqueConstraintsUtils } from './_functions/Utils/UniqueConstraintsUtils';
 
 export const UniqueConstraints = ({
@@ -82,19 +83,6 @@ export const UniqueConstraints = ({
       rowDeletingId={constraintManagingId}
       rowUpdatingId={constraintManagingId}
     />
-  );
-
-  const getPaginatorRecordsCount = () => (
-    <Fragment>
-      {isFiltered && constraintsState.data.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {constraintsState.data.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-      {isFiltered && constraintsState.data.length === filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
-    </Fragment>
   );
 
   const isDataUpdated = value => constraintsDispatch({ type: 'IS_DATA_UPDATED', payload: { value } });
@@ -203,7 +191,13 @@ export const UniqueConstraints = ({
         autoLayout={true}
         onRowClick={event => getManageUniqueConstraint(event.data)}
         paginator={true}
-        paginatorRight={getPaginatorRecordsCount()}
+        paginatorRight={
+          <PaginatorRecordsCount
+            dataLength={constraintsState.data.length}
+            filteredDataLength={filteredData.length}
+            isFiltered={isFiltered}
+          />
+        }
         rows={10}
         rowsPerPageOptions={[5, 10, 15]}
         summary={resourcesContext.messages['uniqueConstraints']}

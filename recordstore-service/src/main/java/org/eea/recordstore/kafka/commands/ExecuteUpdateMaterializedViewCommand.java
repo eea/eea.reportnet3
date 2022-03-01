@@ -2,6 +2,11 @@ package org.eea.recordstore.kafka.commands;
 
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -11,6 +16,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -23,6 +29,14 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
   /** The database management service. */
   @Autowired
   private RecordStoreService recordStoreService;
+
+  /** The process controller zuul. */
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
+  /** The dataset metabase controller zuul. */
+  @Autowired
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   /**
    * The Constant LOG_ERROR.
@@ -52,6 +66,7 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
         Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
     String user = String.valueOf(eeaEventVO.getData().get(LiteralConstants.USER));
     Boolean released = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("released")));
+    String processId = String.valueOf(eeaEventVO.getData().get("processId"));
     List<Integer> referencesToRefresh =
         (List<Integer>) eeaEventVO.getData().get("referencesToRefresh");
 
@@ -61,10 +76,15 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
           recordStoreService.launchUpdateMaterializedQueryView(Long.valueOf(dataset));
         } catch (RecordStoreAccessException e) {
           LOG_ERROR.error("Error refreshing the materialized view of the dataset {}", dataset, e);
+          processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.CANCELED,
+              ProcessTypeEnum.VALIDATION, processId, processId,
+              SecurityContextHolder.getContext().getAuthentication().getName());
+          datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+              DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
         }
       });
     }
-    recordStoreService.updateMaterializedQueryView(datasetId, user, released);
+    recordStoreService.updateMaterializedQueryView(datasetId, user, released, processId);
   }
 
 }

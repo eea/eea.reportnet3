@@ -37,6 +37,13 @@
     border-bottom: var(--inputtext-border) !important;
   }
 
+  .elementFilter:focus-within {
+    label {
+      top: -0.75em;
+      font-size: 12px;
+    }
+  }
+
   .elementFilterSelected {
     border-bottom: var(--active-filter-border) !important;
     box-shadow: var(--active-filter-shadow) !important;
@@ -48,6 +55,7 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         display: block;
+        padding-bottom: 0.01em;
       }
     }
   }
@@ -57,4 +65,12 @@
   .block {
     height: 3rem;
   }
+}
+
+.dropdownFilterWrapper {
+  padding-left: 0px !important;
+}
+
+.noSortFilterWrapper {
+  padding-left: 2.5em;
 }

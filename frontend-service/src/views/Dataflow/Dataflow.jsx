@@ -98,6 +98,7 @@ export const Dataflow = () => {
     isDataSchemaCorrect: [],
     isDatasetsInfoDialogVisible: false,
     isDataUpdated: false,
+    isDeleteAllLeadReportersDialogVisible: false,
     isDeleteDialogVisible: false,
     isDownloadingUsers: false,
     isExportDialogVisible: false,
@@ -147,7 +148,6 @@ export const Dataflow = () => {
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
   const { resetFiltersState: resetShareRightsFiltersState } = useFilters('shareRights');
-
   const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
 
   const {
@@ -333,8 +333,8 @@ export const Dataflow = () => {
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       datasetsInfoBtn: isAdmin && isNil(dataProviderId),
-      editBtn: isDesign && isLeadDesigner && !isBusinessDataflow,
-      editBusinessBtn: (isAdmin || isLeadDesigner) && isBusinessDataflow,
+      editBtn: !isBusinessDataflow && ((isDesign && isLeadDesigner) || isAdmin),
+      editBusinessBtn: isBusinessDataflow && ((isDesign && isLeadDesigner) || isAdmin),
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
@@ -432,7 +432,7 @@ export const Dataflow = () => {
       if (!isAddButtonHidden) {
         return (
           <Button
-            className={`${styles.buttonLeft} p-button-secondary p-button-animated-blink`}
+            className={`${styles.buttonLeft} p-button-animated-blink`}
             icon="plus"
             label={resourcesContext.messages['add']}
             onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
@@ -491,13 +491,11 @@ export const Dataflow = () => {
   const setUpdatedDatasetSchema = updatedData =>
     dataflowDispatch({ type: 'SET_UPDATED_DATASET_SCHEMA', payload: { updatedData } });
 
-  const setIsReceiptLoading = isReceiptLoading => {
+  const setIsReceiptLoading = isReceiptLoading =>
     dataflowDispatch({ type: 'SET_IS_RECEIPT_LOADING', payload: { isReceiptLoading } });
-  };
 
-  const setIsReceiptOutdated = isReceiptOutdated => {
+  const setIsReceiptOutdated = isReceiptOutdated =>
     dataflowDispatch({ type: 'SET_IS_RECEIPT_OUTDATED', payload: { isReceiptOutdated } });
-  };
 
   const setIsShowPublicInfoUpdating = isShowPublicInfoUpdating =>
     dataflowDispatch({ type: 'SHOW_PUBLIC_INFO_IS_UPDATING', payload: { isShowPublicInfoUpdating } });
@@ -507,12 +505,11 @@ export const Dataflow = () => {
   const setRestrictFromPublic = restrictFromPublicValue =>
     dataflowDispatch({ type: 'SET_RESTRICT_FROM_PUBLIC', payload: restrictFromPublicValue });
 
-  const setRestrictFromPublicIsUpdating = (value, dataProviderId) => {
+  const setRestrictFromPublicIsUpdating = (value, dataProviderId) =>
     dataflowDispatch({
       type: 'RESTRICT_FROM_PUBLIC_IS_UPDATING',
       payload: { value: value, dataProviderId: dataProviderId }
     });
-  };
 
   const setIsUpdatingPermissions = isUpdatingPermissions =>
     dataflowDispatch({ type: 'SET_IS_UPDATING_PERMISSIONS', payload: { isUpdatingPermissions } });
@@ -531,9 +528,8 @@ export const Dataflow = () => {
     false
   );
 
-  const onCleanUpReceipt = () => {
+  const onCleanUpReceipt = () =>
     dataflowDispatch({ type: 'ON_CLEAN_UP_RECEIPT', payload: { isReceiptLoading: false, isReceiptOutdated: false } });
-  };
 
   const onEditDataflow = (newName, newDescription) => {
     dataflowDispatch({
@@ -609,6 +605,17 @@ export const Dataflow = () => {
     }
   };
 
+  const onConfirmDeleteAllLeadReporters = async () => {
+    try {
+      await RepresentativeService.deleteAllLeadReporters(dataflowId);
+    } catch (error) {
+      console.error('Dataflow - onDeleteAllLeadReporters.', error);
+      notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_ERROR' }, true);
+    } finally {
+      manageDialogs('isDeleteAllLeadReportersDialogVisible', false);
+    }
+  };
+
   const manageRoleDialogFooter = (
     <Fragment>
       <Button
@@ -638,6 +645,14 @@ export const Dataflow = () => {
         icon={dataflowState.isUpdatingPermissions ? 'spinnerAnimate' : 'refresh'}
         label={resourcesContext.messages['updateUsersPermissionsButton']}
         onClick={() => manageDialogs('isValidateLeadReportersDialogVisible', true)}
+      />
+      <Button
+        className="p-button-animated-blink"
+        disabled={dataflowState.isDeleteAllLeadReportersDialogVisible}
+        icon="trash"
+        label={resourcesContext.messages['deleteAllLeadReportersButton']}
+        onClick={() => manageDialogs('isDeleteAllLeadReportersDialogVisible', true)}
+        style={{ display: 'none' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
@@ -714,10 +729,8 @@ export const Dataflow = () => {
       return null;
     }
 
-    const { datasets } = dataflowState.data;
-
     return first(
-      datasets
+      dataflowState.data.datasets
         .filter(dataset => dataset.dataProviderId === parseInt(representativeId))
         .map(dataset => dataset.datasetId)
     );
@@ -875,6 +888,8 @@ export const Dataflow = () => {
     });
   };
 
+  const goToDataflowsPage = () => navigate(getUrl(routes.DATAFLOWS));
+
   useCheckNotifications(['RELEASE_COMPLETED_EVENT', 'RELEASE_PROVIDER_COMPLETED_EVENT'], onLoadReportingDataflow);
   useCheckNotifications(['DELETE_DATAFLOW_COMPLETED_EVENT'], goToDataflowsPage);
 
@@ -893,10 +908,6 @@ export const Dataflow = () => {
     const validationResult = await DataflowService.getSchemasValidation(dataflowId);
     dataflowDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult: validationResult.data } });
   };
-
-  function goToDataflowsPage() {
-    navigate(getUrl(routes.DATAFLOWS));
-  }
 
   const onSaveName = async (value, index) => {
     try {
@@ -1400,6 +1411,18 @@ export const Dataflow = () => {
           </ConfirmDialog>
         )}
 
+        {dataflowState.isDeleteAllLeadReportersDialogVisible && (
+          <ConfirmDialog
+            header={resourcesContext.messages['deleteAllLeadReportersDialogHeader']}
+            labelCancel={resourcesContext.messages['no']}
+            labelConfirm={resourcesContext.messages['yes']}
+            onConfirm={onConfirmDeleteAllLeadReporters}
+            onHide={() => manageDialogs('isDeleteAllLeadReportersDialogVisible', false)}
+            visible={dataflowState.isDeleteAllLeadReportersDialogVisible}>
+            {resourcesContext.messages['delateAllLeadReportersDialogMessage']}
+          </ConfirmDialog>
+        )}
+
         {dataflowState.isValidateReportersDialogVisible && (
           <ConfirmDialog
             header={resourcesContext.messages['updateUsersPermissionsDialogHeader']}
@@ -1611,7 +1634,7 @@ export const Dataflow = () => {
           <ManageDataflow
             dataflowId={dataflowId}
             isCustodian={isLeadDesigner}
-            isEditForm
+            isEditing={true}
             isVisible={dataflowState.isReportingDataflowDialogVisible}
             manageDialogs={manageDialogs}
             obligation={obligation}
@@ -1628,7 +1651,7 @@ export const Dataflow = () => {
             dataflowId={dataflowId}
             hasRepresentatives={dataflowState.data.representatives.length !== 0}
             isAdmin={dataflowState.isAdmin}
-            isEditing
+            isEditing={true}
             isVisible={dataflowState.isBusinessDataflowDialogVisible}
             manageDialogs={manageDialogs}
             obligation={obligation}

@@ -20,16 +20,11 @@
       overflow: visible;
       width: 90%;
     }
-
-    ul > li {
-      text-transform: uppercase;
-    }
-
-    ul > li > label > span {
-      color: var(--font-filters) !important;
-      font-weight: bold !important;
-    }
   }
+}
+
+.selectHeader {
+  color: var(--font-filters) !important;
 }
 
 .block + span {

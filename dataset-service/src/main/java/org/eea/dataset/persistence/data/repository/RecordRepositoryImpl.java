@@ -383,13 +383,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    * @return the string
    * @throws EEAException the EEA exception
    */
   @Override
   public String findAndGenerateETLJson(Long datasetId, OutputStream outputStream,
-      String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName)
-      throws EEAException {
+      String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
+      String dataProviderCodes) throws EEAException {
     checkSql(filterValue);
     checkSql(columnName);
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
@@ -423,13 +424,20 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         resultTable.put("totalRecords", totalRecords);
       }
       if (null != columnName || null != filterValue) {
-        totalRecords = getCount(totalRecordsQuery(datasetId, tableSchema, filterValue, columnName),
+        totalRecords = getCount(
+            totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
             columnName, filterValue);
         resultTable.put("totalRecords", totalRecords);
       }
+
+      Integer offsetAux = (limit * offset) - limit;
+      if (offsetAux < 0) {
+        offsetAux = 0;
+      }
+
       if (totalRecords == null || totalRecords != 0L) {
-        for (int offsetAux = offset; offsetAux < offset + limit; offsetAux += limitAux) {
-          if (offsetAux + limitAux > offset + limit) {
+        for (int offsetAux2 = offsetAux; offsetAux2 < offsetAux + limit; offsetAux2 += limitAux) {
+          if (offsetAux2 + limitAux > offsetAux + limit) {
             limitAux = limit % nHeaders;
           }
           // ask for records with offset
@@ -454,11 +462,28 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                     : "");
             stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
           }
+
+          stringQuery.append(") records where ");
+          if (StringUtils.isNotBlank(dataProviderCodes)) {
+            List<String> countryCodesList =
+                new ArrayList<>(Arrays.asList(dataProviderCodes.split(",")));
+            StringBuilder countries = new StringBuilder();
+            for (int i = 0; i < countryCodesList.size(); i++) {
+              countries.append("'" + countryCodesList.get(i) + "'");
+              if (i + 1 != countryCodesList.size()) {
+                countries.append(",");
+              }
+            }
+            stringQuery.append(null != countryCodesList
+                ? String.format("data_provider_code in (%s) and ", countries)
+                : "");
+          }
           stringQuery.append(String.format(
-              ") records where id_table_schema = '%s' group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position ",
+              "id_table_schema = '%s' group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position ",
               tableSchema.getIdTableSchema().toString()));
+
           if (null != filterValue || null != columnName) {
-            stringQuery.append(String.format(" offset %s limit %s ", offsetAux, limitAux));
+            stringQuery.append(String.format(" offset %s limit %s ", offsetAux2, limitAux));
             stringQuery.append(
                 ") as tableAux where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
                 .append(null != columnName ? " x.o ->> 'fieldName' = ? and " : "")
@@ -467,7 +492,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             stringQuery.append(" ) ");
           } else {
             stringQuery
-                .append(String.format(" offset %s limit %s ) tableAux", offsetAux, limitAux));
+                .append(String.format(" offset %s limit %s ) tableAux", offsetAux2, limitAux));
           }
           LOG.info("Query: {} ", stringQuery);
           Query query = entityManager.createNativeQuery(stringQuery.toString());
@@ -1201,7 +1226,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return the string
    */
   private String totalRecordsQuery(Long datasetId, TableSchema tableSchema, String filterValue,
-      String columnName) {
+      String columnName, String dataProviderCodes) {
     StringBuilder stringQuery = new StringBuilder();
     String tableSchemaIdString = tableSchema.getIdTableSchema().toString();
     stringQuery.append("select count(tablesAux.id_record)  as \"totalRecords\" from ( ");
@@ -1224,8 +1249,21 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           .append(String.format(" id_table_schema like '%s' and ", tableSchemaIdString));
       stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
     }
-    stringQuery
-        .append(") records group by id_table_schema,id_record,data_provider_code, rdata_position ");
+    stringQuery.append(") records ");
+    if (StringUtils.isNotBlank(dataProviderCodes)) {
+      List<String> countryCodesList = new ArrayList<>(Arrays.asList(dataProviderCodes.split(",")));
+      StringBuilder countries = new StringBuilder();
+      for (int i = 0; i < countryCodesList.size(); i++) {
+        countries.append("'" + countryCodesList.get(i) + "'");
+        if (i + 1 != countryCodesList.size()) {
+          countries.append(",");
+        }
+      }
+      stringQuery.append(
+          null != countryCodesList ? String.format("where data_provider_code in (%s) ", countries)
+              : "");
+    }
+    stringQuery.append("group by id_table_schema,id_record,data_provider_code, rdata_position ");
     stringQuery.append(" ) tablesAux ");
     if (null != filterValue || null != columnName) {
       stringQuery.append(
@@ -1236,7 +1274,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       stringQuery.append(" ) ");
     }
 
-    System.err.println(stringQuery.toString());
+    LOG.info(stringQuery.toString());
     return stringQuery.toString();
   }
 }

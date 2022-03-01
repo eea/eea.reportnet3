@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.TokenVO;
+import org.eea.interfaces.vo.ums.UserNationalCoordinatorVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.UserRoleVO;
 import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
@@ -364,5 +365,31 @@ public interface UserManagementController {
   @GetMapping("/downloadUsersByCountry/{dataflowId}")
   void downloadUsersByCountry(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam String fileName, HttpServletResponse response);
+
+
+  /**
+   * Creates the national coordinator.
+   *
+   * @param nationalCoordinatorVO the national coordinator VO
+   */
+  @PostMapping("/nationalCoordinator")
+  void createNationalCoordinator(@RequestBody UserNationalCoordinatorVO nationalCoordinatorVO);
+
+  /**
+   * Gets the user national coordinator.
+   *
+   * @return the user national coordinator
+   */
+  @GetMapping("/nationalCoordinator")
+  List<UserNationalCoordinatorVO> getUserNationalCoordinator();
+
+
+  /**
+   * Delete national coordinator.
+   *
+   * @param nationalCoordinatorVO the national coordinator VO
+   */
+  @DeleteMapping("/nationalCoordinator")
+  void deleteNationalCoordinator(@RequestBody UserNationalCoordinatorVO nationalCoordinatorVO);
 
 }

@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -24,6 +24,7 @@ import { cloneSchemasReducer } from './_functions/Reducers/cloneSchemasReducer';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 
 export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow = false }) => {
   const notificationContext = useContext(NotificationContext);
@@ -32,7 +33,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
 
   const [cloneSchemasState, cloneSchemasDispatch] = useReducer(cloneSchemasReducer, {
     allDataflows: [],
-    chosenDataflow: { id: null, name: '' },
+    chosenDataflow: { id: null, name: '-' },
     isLoading: true,
     pagination: { first: 0, rows: 10, page: 0 }
   });
@@ -47,17 +48,12 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
     getCloneDataflow(cloneSchemasState.chosenDataflow);
   }, [cloneSchemasState.chosenDataflow]);
 
-  const getPaginatorRecordsCount = () => (
-    <Fragment>
-      {isFiltered && cloneSchemasState.allDataflows.length !== filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${filteredData.length} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {cloneSchemasState.allDataflows.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-      {isFiltered && cloneSchemasState.allDataflows.length === filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
-    </Fragment>
+  const getPaginatorRight = () => (
+    <PaginatorRecordsCount
+      dataLength={cloneSchemasState.allDataflows.length}
+      filteredDataLength={filteredData.length}
+      isFiltered={isFiltered}
+    />
   );
 
   const isLoading = value => cloneSchemasDispatch({ type: 'IS_LOADING', payload: { value } });
@@ -126,32 +122,37 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
         { type: 'DATE', key: 'expirationDate', label: resourcesContext.messages['expirationDate'] }
       ];
 
-  const renderData = () =>
-    userContext.userProps.listView ? (
-      <TableViewSchemas
-        checkedDataflow={cloneSchemasState.chosenDataflow}
-        data={filteredData}
-        handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
-        isReferenceDataflow={isReferenceDataflow}
-        onChangePagination={onChangePagination}
-        onSelectDataflow={onSelectDataflow}
-        pagination={cloneSchemasState.pagination}
-        paginatorRightText={getPaginatorRecordsCount()}
-      />
-    ) : (
-      <CardsView
-        checkedCard={cloneSchemasState.chosenDataflow}
-        contentType={'Dataflows'}
-        data={filteredData}
-        handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
-        isReferenceDataflow={isReferenceDataflow}
-        onChangePagination={onChangePagination}
-        onSelectCard={onSelectDataflow}
-        pagination={cloneSchemasState.pagination}
-        paginatorRightText={getPaginatorRecordsCount()}
-        type={'cloneSchemas'}
-      />
-    );
+  const renderData = () => {
+    if (userContext.userProps.listView) {
+      return (
+        <TableViewSchemas
+          checkedDataflow={cloneSchemasState.chosenDataflow}
+          data={filteredData}
+          handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
+          isReferenceDataflow={isReferenceDataflow}
+          onChangePagination={onChangePagination}
+          onSelectDataflow={onSelectDataflow}
+          pagination={cloneSchemasState.pagination}
+          paginatorRightText={getPaginatorRight()}
+        />
+      );
+    } else {
+      return (
+        <CardsView
+          checkedCard={cloneSchemasState.chosenDataflow}
+          contentType={'Dataflows'}
+          data={filteredData}
+          handleRedirect={isReferenceDataflow ? onOpenReferenceDataflow : onOpenDataflow}
+          isReferenceDataflow={isReferenceDataflow}
+          onChangePagination={onChangePagination}
+          onSelectCard={onSelectDataflow}
+          pagination={cloneSchemasState.pagination}
+          paginatorRightText={getPaginatorRight()}
+          type={'cloneSchemas'}
+        />
+      );
+    }
+  };
 
   const cloneSchemaStyles = {
     justifyContent:
@@ -183,7 +184,7 @@ export const CloneSchemas = ({ dataflowId, getCloneDataflow, isReferenceDataflow
           isEmpty(cloneSchemasState.data || filteredData) ? styles.filteredSelected : ''
         }`}>
         <span>{`${resourcesContext.messages['selectedDataflow']}: `}</span>
-        {!isEmpty(cloneSchemasState.chosenDataflow) ? cloneSchemasState.chosenDataflow.name : '-'}
+        {cloneSchemasState.chosenDataflow.name}
       </span>
     </div>
   );

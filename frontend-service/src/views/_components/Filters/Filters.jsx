@@ -16,6 +16,7 @@ import { StrictModeToggle } from './_components/StrictModeToggle';
 
 import {
   dataStore,
+  filterByCustomFilterStore,
   filterByStore,
   filteredDataStore,
   isFilteredStore,
@@ -53,13 +54,38 @@ export const Filters = ({
   onReset = () => {},
   onSort,
   options = [],
+  panelClassName,
   recoilId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
-  const onFilterFilteredData = useRecoilCallback(
+  const clearDateInputs = () => {
+    [...document.getElementsByClassName('date-filter-input')].forEach(input => (input.value = ''));
+  };
+
+  const getFilterBy = useRecoilCallback(
+    ({ snapshot, set }) =>
+      async () => {
+        const filterByKeys = await snapshot.getPromise(filterByAllKeys(recoilId));
+        const response = await Promise.all(
+          filterByKeys.map(key => snapshot.getPromise(filterByStore(`${key}_${recoilId}`)))
+        );
+
+        const filterBy = Object.assign({}, ...response);
+
+        set(filterByCustomFilterStore(recoilId), filterBy);
+      },
+    [recoilId]
+  );
+
+  const onApplyFilters = async () => {
+    await getFilterBy();
+    await onFilter();
+  };
+
+  const onFilterData = useRecoilCallback(
     ({ snapshot, set }) =>
       async newData => {
         const data = await snapshot.getPromise(dataStore(recoilId));
@@ -110,12 +136,6 @@ export const Filters = ({
     [recoilId]
   );
 
-  const clearDateInputs = () => {
-    [...document.getElementsByClassName('date-filter-input')].forEach(input => {
-      input.value = '';
-    });
-  };
-
   const onResetFilters = useRecoilCallback(
     ({ snapshot, reset }) =>
       async () => {
@@ -125,13 +145,12 @@ export const Filters = ({
         reset(sortByStore(recoilId));
         reset(filteredDataStore(recoilId));
         reset(isFilteredStore(recoilId));
+        reset(filterByCustomFilterStore(recoilId));
         clearDateInputs();
         await Promise.all(filterByKeys.map(key => reset(filterByStore(`${key}_${recoilId}`))));
       },
     [recoilId]
   );
-
-  const renderFilters = () => options.map(option => renderFilter(option, option.type));
 
   const renderFilter = (option, type) => {
     if (option.nestedOptions) {
@@ -142,13 +161,15 @@ export const Filters = ({
 
     return (
       <FilterComponent
+        getFilterBy={getFilterBy}
         hasCustomSort={hasCustomSort}
         isLoading={isLoading}
         key={option.key}
         onCustomFilter={onFilter}
-        onFilterData={onFilterFilteredData}
+        onFilterData={onFilterData}
         onSort={onSort}
         option={option}
+        panelClassName={panelClassName}
         recoilId={recoilId}
       />
     );
@@ -159,7 +180,7 @@ export const Filters = ({
       return null;
     }
 
-    return <StrictModeToggle onFilter={onFilterFilteredData} onToggle={onFilterFilteredData} />;
+    return <StrictModeToggle onFilter={onFilterData} onToggle={onFilterData} />;
   };
 
   const renderCustomFiltersButton = () => {
@@ -174,7 +195,7 @@ export const Filters = ({
           disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}
-          onClick={() => onFilter()}
+          onClick={onApplyFilters}
         />
       </div>
     );
@@ -182,7 +203,7 @@ export const Filters = ({
 
   return (
     <div className={`${className ? styles[className] : styles.default}`}>
-      {renderFilters()}
+      {options.map(option => renderFilter(option, option.type))}
       {renderStrictModeToggle()}
 
       <div className={styles.buttonWrapper}>

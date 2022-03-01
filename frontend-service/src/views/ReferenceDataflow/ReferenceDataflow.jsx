@@ -99,11 +99,12 @@ export const ReferenceDataflow = () => {
   const getLeftSidebarButtonsVisibility = () => ({
     apiKeyBtn: dataflowState.isCustodian,
     datasetsInfoBtn: dataflowState.isAdmin,
-    editBtn: dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian,
+    editBtn:
+      (dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian) || dataflowState.isAdmin,
     manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
     propertiesBtn: true,
     reportingDataflowsBtn:
-      dataflowState.status === config.dataflowStatus.OPEN &&
+      dataflowState.status !== config.dataflowStatus.DESIGN &&
       (dataflowState.isCustodian || dataflowState.isCustodianUser)
   });
 
@@ -296,7 +297,7 @@ export const ReferenceDataflow = () => {
   const shareRightsFooterDialogFooter = (
     <div className={styles.buttonsRolesFooter}>
       <Button
-        className="p-button-secondary p-button-animated-blink p-button-left-aligned"
+        className="p-button-animated-blink p-button-left-aligned"
         icon="plus"
         label={resourcesContext.messages['add']}
         onClick={() => manageDialogs('isUserRightManagementDialogVisible', true)}
@@ -304,7 +305,7 @@ export const ReferenceDataflow = () => {
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon="cancel"
-        label={resourcesContext.messages['cancel']}
+        label={resourcesContext.messages['close']}
         onClick={() => onCloseShareRightsDialog()}
       />
     </div>
@@ -321,7 +322,9 @@ export const ReferenceDataflow = () => {
     </MainLayout>
   );
 
-  if (dataflowState.requestStatus === 'pending' || dataflowState.isLoading) return layout(<Spinner />);
+  if (dataflowState.requestStatus === 'pending' || dataflowState.isLoading) {
+    return layout(<Spinner />);
+  }
 
   return layout(
     <div className="rep-row">
@@ -368,7 +371,7 @@ export const ReferenceDataflow = () => {
       {dataflowState.isEditDialogVisible && (
         <ManageReferenceDataflow
           dataflowId={referenceDataflowId}
-          isEditing
+          isEditing={true}
           isVisible={dataflowState.isEditDialogVisible}
           manageDialogs={manageDialogs}
           metadata={{ name: dataflowState.name, description: dataflowState.description, status: dataflowState.status }}
