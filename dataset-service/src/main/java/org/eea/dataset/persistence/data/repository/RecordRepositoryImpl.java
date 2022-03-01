@@ -456,9 +456,26 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                     : "");
             stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
           }
+
+          stringQuery.append(") records where ");
+          if (StringUtils.isNotBlank(dataProviderCodes)) {
+            List<String> countryCodesList =
+                new ArrayList<>(Arrays.asList(dataProviderCodes.split(",")));
+            StringBuilder countries = new StringBuilder();
+            for (int i = 0; i < countryCodesList.size(); i++) {
+              countries.append("'" + countryCodesList.get(i) + "'");
+              if (i + 1 != countryCodesList.size()) {
+                countries.append(",");
+              }
+            }
+            stringQuery.append(null != countryCodesList
+                ? String.format("data_provider_code in (%s) and ", countries)
+                : "");
+          }
           stringQuery.append(String.format(
-              ") records where id_table_schema = '%s' group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position ",
+              "id_table_schema = '%s' group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position ",
               tableSchema.getIdTableSchema().toString()));
+
           if (null != filterValue || null != columnName) {
             stringQuery.append(String.format(" offset %s limit %s ", offsetAux, limitAux));
             stringQuery.append(
