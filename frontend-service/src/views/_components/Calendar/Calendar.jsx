@@ -67,9 +67,7 @@ export const Calendar = forwardRef((props, _) => {
   };
 
   useEffect(() => {
-    const isValidDate = date => {
-      return date instanceof Date && !isNaN(date);
-    };
+    const isValidDate = date => date instanceof Date && !isNaN(date);
 
     if (isValidDate(viewDate)) {
       setViewDateState(viewDate);
