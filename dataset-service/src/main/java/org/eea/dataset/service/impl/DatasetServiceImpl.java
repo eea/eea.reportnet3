@@ -153,6 +153,9 @@ public class DatasetServiceImpl implements DatasetService {
   /** The Constant DATASET_ID: {@value}. */
   private static final String DATASET_ID = "dataset_%s";
 
+  /** The Constant NUMBER_ERROR_RETRIEVING_STATS. */
+  private static final Integer NUMBER_ERROR_RETRIEVING_STATS = 100000;
+
   /** The field max length. */
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
@@ -1304,16 +1307,30 @@ public class DatasetServiceImpl implements DatasetService {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    */
   @Override
   @Transactional
   public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream,
-      String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName) {
+      String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
+      String dataProviderCodes) {
     try {
+      // LIMIT
+      /*
+       * String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+       * DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
+       * .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND)); if (tableSchemaId
+       * != null) { List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+       * Optional<TableSchema> table = tableSchemaList.stream() .filter( tableSchema ->
+       * tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId))) .findFirst(); limit =
+       * limit < 10000 ? limit / 2 : limit / (table.isPresent() ?
+       * table.get().getRecordSchema().getFieldSchema().size() : 2); } else { limit = limit < 10000
+       * ? limit / 2 : limit / 10; }
+       */
       long startTime = System.currentTimeMillis();
       LOG.info("ETL Export process initiated to DatasetId: {}", datasetId);
       exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset, filterValue,
-          columnName);
+          columnName, dataProviderCodes);
       outputStream.flush();
       long endTime = System.currentTimeMillis() - startTime;
       LOG.info("ETL Export process completed for DatasetId: {} in {} seconds", datasetId,
@@ -2039,11 +2056,30 @@ public class DatasetServiceImpl implements DatasetService {
       final Map<String, String> mapIdNameDatasetSchema) {
     // Find record ids with errors
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    List<IDError> recordIdsFromRecordWithValidationBlocker =
-        recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
-            tableValue.getIdTableSchema());
-    List<IDError> recordIdsFromFieldWithValidationBlocker = recordValidationRepository
-        .findRecordIdFromFieldWithValidationsByLevelError(datasetId, tableValue.getIdTableSchema());
+
+    Long errorRecords =
+        recordValidationRepository.countRecordIdFromRecordWithErrors(tableValue.getIdTableSchema());
+    int pageCountErrorRecords = (errorRecords.intValue() + NUMBER_ERROR_RETRIEVING_STATS - 1)
+        / NUMBER_ERROR_RETRIEVING_STATS;
+    List<IDError> recordIdsFromRecordWithValidationBlocker = new ArrayList<>();
+    for (int i = 0; i < pageCountErrorRecords; i++) {
+      Pageable pageable = PageRequest.of(i, NUMBER_ERROR_RETRIEVING_STATS);
+      recordIdsFromRecordWithValidationBlocker.addAll(
+          recordValidationRepository.findRecordIdFromRecordWithValidationsByLevelError(datasetId,
+              tableValue.getIdTableSchema(), pageable));
+    }
+
+    Long errorFields =
+        recordValidationRepository.countRecordIdFromFieldWithErrors(tableValue.getIdTableSchema());
+    int pageCountErrorFields = (errorFields.intValue() + NUMBER_ERROR_RETRIEVING_STATS - 1)
+        / NUMBER_ERROR_RETRIEVING_STATS;
+    List<IDError> recordIdsFromFieldWithValidationBlocker = new ArrayList<>();
+    for (int i = 0; i < pageCountErrorFields; i++) {
+      Pageable pageable = PageRequest.of(i, NUMBER_ERROR_RETRIEVING_STATS);
+      recordIdsFromFieldWithValidationBlocker.addAll(
+          recordValidationRepository.findRecordIdFromFieldWithValidationsByLevelError(datasetId,
+              tableValue.getIdTableSchema(), pageable));
+    }
 
     Set<String> idsBlockers = new HashSet<>();
     Set<String> idsErrors = new HashSet<>();
@@ -2998,14 +3034,16 @@ public class DatasetServiceImpl implements DatasetService {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    * @throws EEAException the EEA exception
    */
   private void exportDatasetETLSQL(Long datasetId, OutputStream outputStream, String tableSchemaId,
-      Integer limit, Integer offset, String filterValue, String columnName) throws EEAException {
+      Integer limit, Integer offset, String filterValue, String columnName,
+      String dataProviderCodes) throws EEAException {
     try {
       // Delete the query log and the timestamp part later, once the tests are finished.
       outputStream.write(recordRepository.findAndGenerateETLJson(datasetId, outputStream,
-          tableSchemaId, limit, offset, filterValue, columnName).getBytes());
+          tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes).getBytes());
       LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
     } catch (IOException e) {
       LOG.error("ETLExport error in  Dataset: {}", datasetId, e);

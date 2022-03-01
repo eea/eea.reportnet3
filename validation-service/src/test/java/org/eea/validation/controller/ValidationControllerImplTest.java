@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.lock.service.impl.LockServiceImpl;
@@ -66,6 +67,10 @@ public class ValidationControllerImplTest {
 
   /** The failed validations dataset VO. */
   private FailedValidationsDatasetVO failedValidationsDatasetVO;
+
+  /** The process controller zuul. */
+  @Mock
+  private ProcessControllerZuul processControllerZuul;
 
   /** The security context. */
   SecurityContext securityContext;

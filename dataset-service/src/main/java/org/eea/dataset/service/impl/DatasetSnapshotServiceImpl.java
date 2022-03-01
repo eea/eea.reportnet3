@@ -1071,7 +1071,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // List of the datasets involved
     List<Long> datasetsFilters = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
         .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
-        .collect(Collectors.toList());
+        .distinct().collect(Collectors.toList());
 
     // Lock all the operations related to the datasets involved
     addLocksRelatedToRelease(datasetsFilters, dataflowId);

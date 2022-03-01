@@ -1,9 +1,9 @@
 package org.eea.rod.controller;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import org.eea.interfaces.controller.rod.ObligationController;
+import org.eea.interfaces.vo.rod.ObligationListVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.rod.service.ObligationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,6 @@ public class ObligationControllerImpl implements ObligationController {
   @Autowired
   private ObligationService obligationService;
 
-
   /**
    * Find opened obligations.
    *
@@ -38,13 +37,13 @@ public class ObligationControllerImpl implements ObligationController {
    * @param issueId the issue id
    * @param deadlineDateFrom the deadline date from
    * @param deadlineDateTo the deadline date to
-   * @return the list
+   * @return the obligation list VO
    */
   @Override
   @GetMapping(value = "/findOpened")
   @ApiOperation(value = "Gets a list with all the opened obligations",
       response = ObligationVO.class, responseContainer = "List", hidden = true)
-  public List<ObligationVO> findOpenedObligations(
+  public ObligationListVO findOpenedObligations(
       @ApiParam(value = "Client Id", example = "0") @RequestParam(value = "clientId",
           required = false) Integer clientId,
       @ApiParam(value = "Spatial Id", example = "0") @RequestParam(value = "spatialId",

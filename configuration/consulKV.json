@@ -1746,5 +1746,17 @@
   {
     "key": "config/dataset/dataset.import.batchRecordSave",
     "value": "JHtEQVRBU0VUX0lNUE9SVF9CQVRDSFJFQ09SRFNBVkU6MjUwMH0="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.process.path",
+    "value": "L3Byb2Nlc3MvKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.process.serviceId",
+    "value": "cmVjb3Jkc3RvcmU="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.process.stripPrefix",
+    "value": "ZmFsc2U="
   }
 ]

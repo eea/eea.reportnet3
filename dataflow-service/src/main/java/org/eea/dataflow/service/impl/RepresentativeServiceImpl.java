@@ -874,7 +874,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
             .findReferenceDatasetByDataflowId(representative.getDataflow().getId());
         for (ReferenceDatasetVO referenceDatasetVO : references) {
           assignments.add(createAssignments(referenceDatasetVO.getId(), email,
-              ResourceGroupEnum.REFERENCEDATASET_CUSTODIAN));
+              ResourceGroupEnum.REFERENCEDATASET_LEAD_REPORTER));
         }
 
         // Assign Dataflow-%s-LEAD_REPORTER
