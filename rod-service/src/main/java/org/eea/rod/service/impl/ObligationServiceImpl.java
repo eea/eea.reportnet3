@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.rod.LegalInstrumentVO;
+import org.eea.interfaces.vo.rod.ObligationListVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.rod.mapper.ClientMapper;
 import org.eea.rod.mapper.CountryMapper;
@@ -22,6 +23,8 @@ import org.eea.rod.persistence.repository.CountryFeignRepository;
 import org.eea.rod.persistence.repository.IssueFeignRepository;
 import org.eea.rod.persistence.repository.ObligationFeignRepository;
 import org.eea.rod.service.ObligationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -31,6 +34,12 @@ import org.springframework.util.CollectionUtils;
  */
 @Service
 public class ObligationServiceImpl implements ObligationService {
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(ObligationServiceImpl.class);
 
   /** The obligation feign repository. */
   @Autowired
@@ -72,27 +81,58 @@ public class ObligationServiceImpl implements ObligationService {
    * @param issueId the issue id
    * @param deadlineDateFrom the deadline date from
    * @param deadlineDateTo the deadline date to
-   * @return the list
+   * @return the obligation list VO
    */
   @Override
-  public List<ObligationVO> findOpenedObligation(Integer clientId, Integer spatialId,
-      Integer issueId, Date deadlineDateFrom, Date deadlineDateTo) {
+  public ObligationListVO findOpenedObligation(Integer clientId, Integer spatialId, Integer issueId,
+      Date deadlineDateFrom, Date deadlineDateTo) {
     Long dateFrom = Optional.ofNullable(deadlineDateFrom).map(Date::getTime).orElse(null);
     Long dateTo = Optional.ofNullable(deadlineDateTo).map(Date::getTime).orElse(null);
-    List<Obligation> obligations = obligationFeignRepository.findOpenedObligations(clientId,
-        issueId, spatialId, dateFrom, dateTo);
-    List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(obligations);
+
+    if (dateTo == null && dateFrom != null) {
+      dateTo = dateFrom;
+      deadlineDateTo = deadlineDateFrom;
+    }
+
+    List<Obligation> obligations =
+        obligationFeignRepository.findOpenedObligations(clientId, issueId, spatialId, null, null);
+    List<Obligation> filteredObligations = new ArrayList<>();
+    if (dateTo != null && dateFrom != null) {
+      LOG.info("Date range from {} to {}, (in milliseconds {} and {})", deadlineDateFrom,
+          deadlineDateTo, dateFrom, dateTo);
+      for (Obligation obligation : obligations) {
+        if (obligation.getNextDeadline() != null
+            && obligation.getNextDeadline().getTime() >= dateFrom
+            && obligation.getNextDeadline().getTime() <= dateTo) {
+          filteredObligations.add(obligation);
+          LOG.info("Obligation with id {} and nextDeadLine date {} added (in milliseconds {})",
+              obligation.getObligationId(), obligation.getNextDeadline(),
+              obligation.getNextDeadline().getTime());
+        }
+      }
+    } else {
+      filteredObligations = obligations;
+      LOG.info("No date range detected");
+    }
+
+    List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(filteredObligations);
     List<Client> clients = this.clientFeignRepository.findAll();
     List<Country> countries = new ArrayList<>();// this.countryFeignRepository.findAll(); this will
                                                 // not be necessary at the moment
     List<Issue> issues = new ArrayList<>();// this.issueFeignRepository.findAll();this will not be
                                            // necessary at the moment
 
-    for (int i = 0; i < obligations.size(); i++) {
-      fillObligationSubentityFields(obligationVOS.get(i), obligations.get(i), clients, countries,
-          issues);
+    for (int i = 0; i < filteredObligations.size(); i++) {
+      fillObligationSubentityFields(obligationVOS.get(i), filteredObligations.get(i), clients,
+          countries, issues);
     }
-    return obligationVOS;
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(obligationVOS);
+    obligationListVO.setFilteredRecords(Long.valueOf(filteredObligations.size()));
+    obligationListVO.setTotalRecords(Long.valueOf(
+        obligationFeignRepository.findOpenedObligations(null, null, null, null, null).size()));
+
+    return obligationListVO;
   }
 
   /**

@@ -1256,6 +1256,11 @@ public class RulesServiceImplTest {
         .thenReturn(dataset);
     Mockito.when(rulesRepository.findRule(Mockito.any(), Mockito.any())).thenReturn(new Rule());
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(new Rule());
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setId(1L);
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
+
     try {
       rulesServiceImpl.updateRule(1L, ruleVO);
     } catch (EEAException e) {
@@ -1346,6 +1351,12 @@ public class RulesServiceImplTest {
     ruleVO.setDescription("description");
     ruleVO.setShortCode("shortCode");
     ruleVO.setThenCondition(Arrays.asList("ERROR", "error message"));
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setId(1L);
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
+
     try {
       rulesServiceImpl.updateRule(1L, ruleVO);
     } catch (EEAException e) {

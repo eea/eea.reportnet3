@@ -74,4 +74,9 @@ public interface FieldRepository
   @Query("SELECT fv from FieldValue fv WHERE value='' ")
   Page<FieldValue> findEmptyFields(Pageable pageable);
 
+  /**
+   * Flush.
+   */
+  void flush();
+
 }

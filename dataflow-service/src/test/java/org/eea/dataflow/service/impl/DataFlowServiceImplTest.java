@@ -64,6 +64,7 @@ import org.eea.interfaces.vo.dataset.TestDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
+import org.eea.interfaces.vo.rod.ObligationListVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -364,6 +365,9 @@ public class DataFlowServiceImplTest {
    */
   @Test
   public void getDataflows() throws EEAException {
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
+
     DataFlowVO dfVO = new DataFlowVO();
     dfVO.setId(1L);
     ObligationVO obligation = new ObligationVO();
@@ -389,6 +393,11 @@ public class DataFlowServiceImplTest {
       public Long getId() {
         return 1L;
       }
+
+      @Override
+      public Long getDataProviderId() {
+        return 2L;
+      }
     };
     IDatasetStatus ida2 = new IDatasetStatus() {
 
@@ -401,18 +410,24 @@ public class DataFlowServiceImplTest {
       public Long getId() {
         return 2L;
       }
+
+      @Override
+      public Long getDataProviderId() {
+        return 2L;
+      }
     };
     List<IDatasetStatus> listObject = Arrays.asList(ida1, ida2);
     when(dataflowRepository.getDatasetsStatus(Mockito.any())).thenReturn(listObject);
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
 
     List<Dataflow> list = new ArrayList<>();
     list.add(new Dataflow());
-    Mockito
-        .when(dataflowRepository.findPaginated(Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-            Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any()))
-        .thenReturn(list);
+    Mockito.when(dataflowRepository.findPaginated(Mockito.any(), Mockito.any(),
+        Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(),
+        Mockito.any(), Mockito.any())).thenReturn(list);
     Mockito.when(dataflowNoContentMapper.entityToClass(Mockito.any())).thenReturn(dfVO);
     assertNotNull("fail",
         dataflowServiceImpl
@@ -524,7 +539,10 @@ public class DataFlowServiceImplTest {
     obligation.setObligationId(1);
     dataflowVO.setId(1L);
     dataflowVO.setName("test");
+    dataflowVO.setDescription("descriptionTest");
     dataflowVO.setObligation(obligation);
+    dataflowVO.setFmeUserId(1L);
+    dataflowVO.setDataProviderGroupId(1L);
     when(dataflowRepository.findByNameIgnoreCase(dataflowVO.getName()))
         .thenReturn(Optional.empty());
     when(dataflowRepository.findById(dataflowVO.getId())).thenReturn(Optional.of(new Dataflow()));
@@ -936,11 +954,16 @@ public class DataFlowServiceImplTest {
    */
   @Test
   public void getPublicDataflowsTest() throws EEAException {
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
+
     DataflowPublicVO dataflow = new DataflowPublicVO();
     dataflow.setId(1L);
     ObligationVO obligation = new ObligationVO();
     obligation.setObligationId(1);
     dataflow.setObligation(obligation);
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
     Mockito.when(dataflowPublicMapper.entityListToClass(Mockito.any()))
         .thenReturn(Arrays.asList(dataflow));
     assertNotNull(dataflowServiceImpl.getPublicDataflows(null, null, false, null, null));
@@ -1013,6 +1036,11 @@ public class DataFlowServiceImplTest {
 
   @Test
   public void getPublicDataflowsByCountrySortName() throws EEAException {
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
+
     DataflowPublicVO dataflowPublicVO = new DataflowPublicVO();
     DataProviderVO dataprovider = new DataProviderVO();
     Mockito.when(dataflowPublicMapper.entityListToClass(Mockito.any()))
@@ -1023,36 +1051,66 @@ public class DataFlowServiceImplTest {
 
   @Test
   public void getPublicDataflowsByCountrySortObligation() throws EEAException {
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
+
     assertNotNull("assertion error",
         dataflowServiceImpl.getPublicDataflowsByCountry("FR", "obligation", false, 0, 12, null));
   }
 
   @Test
   public void getPublicDataflowsByCountrySortLegalInstrument() throws EEAException {
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
+
     assertNotNull("assertion error", dataflowServiceImpl.getPublicDataflowsByCountry("FR",
         "legalInstrument", false, 0, 12, null));
   }
 
   @Test
   public void getPublicDataflowsByCountrySortStatus() throws EEAException {
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
+
     assertNotNull("assertion error",
         dataflowServiceImpl.getPublicDataflowsByCountry("FR", "status", true, 0, 12, null));
   }
 
   @Test
   public void getPublicDataflowsByCountrySortDeadline() throws EEAException {
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
+
     assertNotNull("assertion error",
         dataflowServiceImpl.getPublicDataflowsByCountry("FR", "deadline", false, 0, 12, null));
   }
 
   @Test
   public void getPublicDataflowsByCountrySortIsReleased() throws EEAException {
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
+
     assertNotNull("assertion error",
         dataflowServiceImpl.getPublicDataflowsByCountry("FR", "isReleased", false, 0, 12, null));
   }
 
   @Test
   public void getPublicDataflowsByCountrySortReleaseDate() throws EEAException {
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
+
     assertNotNull("assertion error",
         dataflowServiceImpl.getPublicDataflowsByCountry("FR", "releaseDate", false, 0, 12, null));
   }
@@ -1095,6 +1153,9 @@ public class DataFlowServiceImplTest {
 
   @Test
   public void getReferenceDataflowsTest() throws EEAException {
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
+
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
     resourceAccessVO.setId(0L);
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
@@ -1103,12 +1164,17 @@ public class DataFlowServiceImplTest {
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
         .thenReturn(Arrays.asList(resourceAccessVO));
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
     assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.REFERENCE, null, null,
         false, null, null));
   }
 
   @Test
   public void getBusinessDataflowsTest() throws EEAException {
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
+
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
     resourceAccessVO.setId(0L);
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
@@ -1117,6 +1183,8 @@ public class DataFlowServiceImplTest {
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
         .thenReturn(Arrays.asList(resourceAccessVO));
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
 
     assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.BUSINESS, null, null, false,
         null, null));
@@ -1125,6 +1193,8 @@ public class DataFlowServiceImplTest {
 
   @Test
   public void getCitizenScienceDataflowsTest() throws EEAException {
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
 
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
     resourceAccessVO.setId(0L);
@@ -1134,6 +1204,8 @@ public class DataFlowServiceImplTest {
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
         .thenReturn(Arrays.asList(resourceAccessVO));
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
 
     assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.CITIZEN_SCIENCE, null, null,
         false, null, null));
@@ -1234,6 +1306,9 @@ public class DataFlowServiceImplTest {
 
   @Test
   public void getDataflowsExceptReferenceTest() throws EEAException {
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
+
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DRAFT);
     dataflowVO.setType(TypeDataflowEnum.CITIZEN_SCIENCE);
@@ -1246,6 +1321,8 @@ public class DataFlowServiceImplTest {
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     Mockito.when(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW))
         .thenReturn(Arrays.asList(resourceAccessVO));
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
     Mockito
         .when(dataflowRepository.findDataflowsExceptReferenceInOrderByStatusDescCreationDateDesc())
         .thenReturn(dataflows);
@@ -1469,6 +1546,23 @@ public class DataFlowServiceImplTest {
     when(authentication.getName()).thenReturn("name");
 
     dataflowServiceImpl.validateAllReporters("user");
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateDataflowEEAExceptionTest() throws EEAException {
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setId(2L);
+    dataflowVO.setName("name");
+    try {
+      Mockito.when(dataflowRepository.findByNameIgnoreCase(Mockito.anyString()))
+          .thenReturn(Optional.of(dataflow));
+      dataflowServiceImpl.updateDataFlow(dataflowVO);
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
   }
 
 }

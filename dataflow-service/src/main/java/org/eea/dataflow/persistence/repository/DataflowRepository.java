@@ -79,6 +79,16 @@ public interface DataflowRepository
   List<Dataflow> findByIdInOrderByStatusDescCreationDateDesc(@Param("ids") List<Long> ids);
 
   /**
+   * Find metabase by dataflow ids.
+   *
+   * @param ids the ids
+   * @return the list
+   */
+  @Modifying
+  @Query("select df from Dataflow df where df.id IN :ids")
+  List<Dataflow> findMetabaseByDataflowIds(@Param("ids") List<Long> ids);
+
+  /**
    * Find in order by status desc creation date desc.
    *
    * @return the list
@@ -177,7 +187,7 @@ public interface DataflowRepository
    * @return the datasets status
    */
   @Query(nativeQuery = true,
-      value = "select  df.id as id ,ds.status as status from dataflow df join dataset ds on df.id = ds.dataflowid where ds.id IN :datasetIds")
+      value = "select  df.id as id ,ds.status as status, ds.data_provider_id as dataProviderId from dataflow df join dataset ds on df.id = ds.dataflowid where ds.id IN :datasetIds")
   List<IDatasetStatus> getDatasetsStatus(@Param("datasetIds") List<Long> datasetIds);
 
 
@@ -321,6 +331,13 @@ public interface DataflowRepository
      * @return the status
      */
     String getStatus();
+
+    /**
+     * Gets the data provider id.
+     *
+     * @return the data provider id
+     */
+    Long getDataProviderId();
   }
 
 

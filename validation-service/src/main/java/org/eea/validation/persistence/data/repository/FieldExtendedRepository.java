@@ -1,6 +1,7 @@
 package org.eea.validation.persistence.data.repository;
 
 import java.util.List;
+import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
 
 /**
@@ -33,5 +34,22 @@ public interface FieldExtendedRepository {
    * @return the list
    */
   List<Object[]> queryPKExecution(String generatedQuery);
+
+
+  /**
+   * Single F kscount.
+   *
+   * @param generatedQuery the generated query
+   * @return the long
+   */
+  Long getCount(String generatedQuery);
+
+  /**
+   * Query single PK.
+   *
+   * @param generatedQuery the generated query
+   * @return the list
+   */
+  List<FieldValue> querySinglePK(String generatedQuery);
 
 }

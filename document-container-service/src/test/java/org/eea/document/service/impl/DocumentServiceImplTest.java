@@ -124,6 +124,24 @@ public class DocumentServiceImplTest {
   }
 
   /**
+   * Upload document exception 4 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws RepositoryException the repository exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void uploadDocumentException4Test() throws EEAException, RepositoryException, IOException {
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    try {
+      documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
+          "filename", documentVO, 1L);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e.getMessage());
+    }
+  }
+
+  /**
    * Upload document success test.
    *
    * @throws EEAException the EEA exception
@@ -266,6 +284,24 @@ public class DocumentServiceImplTest {
     doNothing().when(oakRepositoryUtils).deleteBlobsFromRepository(Mockito.any());
     doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     documentService.deleteDocument(1L, 1L, Boolean.TRUE);
+    Mockito.verify(oakRepositoryUtils, times(1)).cleanUp(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Delete document success delete metabase false test.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void deleteDocumentSuccessDeleteMetabaseFalseTest() throws Exception {
+    when(oakRepositoryUtils.initializeNodeStore()).thenReturn(null);
+    when(oakRepositoryUtils.initializeRepository(Mockito.any())).thenReturn(null);
+    when(oakRepositoryUtils.initializeSession(Mockito.any())).thenReturn(null);
+    doNothing().when(oakRepositoryUtils).deleteFileNode(Mockito.any(), Mockito.any(),
+        Mockito.any());
+    doNothing().when(oakRepositoryUtils).deleteBlobsFromRepository(Mockito.any());
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.deleteDocument(1L, 1L, Boolean.FALSE);
     Mockito.verify(oakRepositoryUtils, times(1)).cleanUp(Mockito.any(), Mockito.any());
   }
 
@@ -542,6 +578,20 @@ public class DocumentServiceImplTest {
         fileMock.getContentType(), fileMock.getOriginalFilename(), 1L, 1L);
   }
 
+  /**
+   * Test upload collaboration document exception 6 test.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws RepositoryException the repository exception
+   */
+  @Test(expected = EEAException.class)
+  public void testUploadCollaborationDocumentException6Test()
+      throws EEAException, IOException, RepositoryException {
+    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
+    documentService.uploadCollaborationDocument(fileMock.getInputStream(),
+        fileMock.getContentType(), "filename", 1L, 1L);
+  }
 
 
   @Test

@@ -11,8 +11,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.exception.EEAInvalidSQLException;
@@ -70,6 +73,10 @@ public class SQLValidationUtils {
   /** The record repository. */
   @Autowired
   private RecordRepository recordRepository;
+
+  /** The representative controller zuul. */
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -161,10 +168,15 @@ public class SQLValidationUtils {
     try {
       if (query != null) {
         String preparedquery = query.contains(";") ? query.replace(";", "") : query;
-        if (dataProviderCode != null) {
-          preparedquery = preparedquery.replace("{%R3_COUNTRY_CODE%}", dataProviderCode);
-          preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", dataProviderCode);
-          preparedquery = preparedquery.replace("{%R3_ORGANIZATION_CODE%}", dataProviderCode);
+        if (dataProviderCode != null && !"null".equals(dataProviderCode)) {
+          DataProviderVO providerCode =
+              representativeControllerZuul.findDataProviderById(Long.valueOf(dataProviderCode));
+          if (null != providerCode && StringUtils.isNotBlank(providerCode.getCode())) {
+            preparedquery = preparedquery.replace("{%R3_COUNTRY_CODE%}", providerCode.getCode());
+            preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", providerCode.getCode());
+            preparedquery =
+                preparedquery.replace("{%R3_ORGANIZATION_CODE%}", providerCode.getCode());
+          }
         }
         queryVO = sqlRulesService.retrieveTableData(preparedquery, queryVO, Boolean.FALSE);
       } else {

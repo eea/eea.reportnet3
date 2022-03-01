@@ -55,8 +55,8 @@ public class ExecuteUpdateMaterializedViewCommandTest {
   @Test
   public void testExecute() throws Exception {
     executeUpdateMaterializedViewCommand.execute(eeaEventVO);
-    Mockito.verify(recordStoreService, Mockito.times(1))
-        .updateMaterializedQueryView(Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean());
+    Mockito.verify(recordStoreService, Mockito.times(1)).updateMaterializedQueryView(
+        Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean(), Mockito.any());
   }
 
 }
