@@ -128,7 +128,7 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
         field={column.key}
         header={column.header}
         key={column.key}
-        sortable={column.key !== 'actions' ? true : false}
+        sortable={column.key !== 'actions'}
       />
     ));
   };
