@@ -429,9 +429,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             columnName, filterValue);
         resultTable.put("totalRecords", totalRecords);
       }
+
+      Integer offsetAux = (limit * offset) - limit;
+      if (offsetAux < 0) {
+        offsetAux = 0;
+      }
+
       if (totalRecords == null || totalRecords != 0L) {
-        for (int offsetAux = offset; offsetAux < offset + limit; offsetAux += limitAux) {
-          if (offsetAux + limitAux > offset + limit) {
+        for (int offsetAux2 = offsetAux; offsetAux2 < offsetAux + limit; offsetAux2 += limitAux) {
+          if (offsetAux2 + limitAux > offsetAux + limit) {
             limitAux = limit % nHeaders;
           }
           // ask for records with offset
@@ -477,7 +483,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
               tableSchema.getIdTableSchema().toString()));
 
           if (null != filterValue || null != columnName) {
-            stringQuery.append(String.format(" offset %s limit %s ", offsetAux, limitAux));
+            stringQuery.append(String.format(" offset %s limit %s ", offsetAux2, limitAux));
             stringQuery.append(
                 ") as tableAux where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
                 .append(null != columnName ? " x.o ->> 'fieldName' = ? and " : "")
@@ -486,7 +492,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             stringQuery.append(" ) ");
           } else {
             stringQuery
-                .append(String.format(" offset %s limit %s ) tableAux", offsetAux, limitAux));
+                .append(String.format(" offset %s limit %s ) tableAux", offsetAux2, limitAux));
           }
           LOG.info("Query: {} ", stringQuery);
           Query query = entityManager.createNativeQuery(stringQuery.toString());
