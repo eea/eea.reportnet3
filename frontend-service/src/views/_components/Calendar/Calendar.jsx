@@ -1,7 +1,7 @@
 import { forwardRef, useEffect, useState } from 'react';
 
-import { Calendar as PrimeCalendar } from 'primereact/calendar';
 import isNil from 'lodash/isNil';
+import { Calendar as PrimeCalendar } from 'primereact/calendar';
 
 export const Calendar = forwardRef((props, _) => {
   const {
