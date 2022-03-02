@@ -999,57 +999,6 @@ export const FieldsDesigner = ({
             <label className={isCodelistOrLink ? styles.withCodelistOrLink : ''}></label>
             <label></label>
             <label></label>
-            {/* <label>
-            <div
-              className={`${styles.bulkDeleteButton} ${
-                markedForDeletion.length === 0 && bulkDelete ? styles.disabledButton : ''
-              } ${bulkDelete ? styles.bulkConfirmDeleteButton : ''}`}
-              data-for="bulkDeleteTooltip"
-              data-tip
-              onClick={e => {
-                e.preventDefault();
-                if (markedForDeletion.length > 0) {
-                  setIsDeleteDialogVisible(true);
-                } else {
-                  setBulkDelete(!bulkDelete);
-                }
-              }}>
-              <FontAwesomeIcon
-                aria-label={resourcesContext.messages['deleteFieldLabel']}
-                icon={AwesomeIcons(!bulkDelete ? 'check' : 'delete')}
-              />
-              <span className="srOnly">{resourcesContext.messages['deleteFieldLabel']}</span>
-            </div>
-            {bulkDelete && (
-              <div
-                className={`${styles.bulkDeleteButton} ${styles.bulkCancelDeleteButton}`}
-                data-for="bulkDeleteCancelTooltip"
-                data-tip
-                onClick={e => {
-                  e.preventDefault();
-                  setMarkedForDeletion([]);
-                  setBulkDelete(false);
-                }}>
-                <FontAwesomeIcon aria-label={resourcesContext.messages['cancel']} icon={AwesomeIcons('cross')} />
-                <span className="srOnly">{resourcesContext.messages['cancel']}</span>
-              </div>
-            )}
-            <ReactTooltip border={true} effect="solid" id="bulkDeleteTooltip" place="top">
-              {!bulkDelete ? (
-                <div>
-                  <p>{resourcesContext.messages['bulkDeleteCheckTooltip']}</p>
-                  <p className={styles.bulkCancelDeleteButtonTooltip}>
-                    {resourcesContext.messages['bulkDeleteCheckTooltipShift']}
-                  </p>
-                </div>
-              ) : (
-                resourcesContext.messages['bulkDeleteConfirmTooltip']
-              )}
-            </ReactTooltip>
-            <ReactTooltip border={true} effect="solid" id="bulkDeleteCancelTooltip" place="top">
-              {resourcesContext.messages['cancel']}
-            </ReactTooltip>
-          </label> */}
           </div>
         )}
         {renderAllFields()}

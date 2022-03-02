@@ -1282,7 +1282,6 @@ export const FieldDesigner = ({
             keyfilter="schemaTableFields"
             maxLength={60}
             name={resourcesContext.messages['newFieldPlaceHolder']}
-            // key={`${fieldId}_${index}`} --> Problem with DOM modification
             onBlur={e => {
               dispatchFieldDesigner({ type: 'TOGGLE_IS_EDITING', payload: false });
               onBlurFieldName(e.target.value.trim());

@@ -437,7 +437,7 @@ export const BigButtonListReference = ({
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogHeader={`${resourcesContext.messages['importSchema']}`}
-          dialogOnHide={() => onImportSchema(false)} //allowTypes="/(\.|\/)(csv)$/"
+          dialogOnHide={() => onImportSchema(false)}
           dialogVisible={dialogVisibility.isImportSchemaVisible}
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .zip`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
