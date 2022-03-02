@@ -580,6 +580,17 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false, completed: false, withError: false });
     }
 
+    const validationFinishedWithError = notificationContext.toShow.find(
+      notification => notification.key === 'IMPORT_REPORTING_FAILED_EVENT'
+    );
+    if (
+      validationFinishedWithError &&
+      validationFinishedWithError.content.datasetId?.toString() === datasetId.toString()
+    ) {
+      onHighlightRefresh(true);
+      changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false, completed: false, withError: true });
+    }
+
     const isImportDataCompleted = notificationContext.toShow.some(
       notification => notification.key === 'IMPORT_REPORTING_COMPLETED_EVENT'
     );
