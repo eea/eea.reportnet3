@@ -214,7 +214,8 @@ export class DataTable extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentPage: 1
+      currentPage: 1,
+      editingGoTo: false
     };
 
     if (!this.props.onPage) {
@@ -510,6 +511,7 @@ export class DataTable extends Component {
         rightContent={this.props.paginatorRight}
         rows={this.getRows()}
         rowsPerPageOptions={this.props.rowsPerPageOptions}
+        setGoToPage={this.setGoToPage}
         template={
           !this.props.hasDefaultCurrentPage
             ? this.props.paginatorTemplate
@@ -525,7 +527,9 @@ export class DataTable extends Component {
                         disabled={this.props.paginatorDisabled}
                         id="currentPageInput"
                         keyfilter="pint"
+                        onBlur={() => this.setState({ editingGoTo: false })}
                         onChange={this.onChangeCurrentPage}
+                        onFocus={() => this.setState({ editingGoTo: true })}
                         onKeyDown={this.onChangeCurrentPage}
                         style={{
                           border:
@@ -1453,6 +1457,9 @@ export class DataTable extends Component {
     if (this.isStateful()) {
       this.saveState();
     }
+    if (this.getFirst() === 0 && this.state.currentPage !== 1 && !this.state.editingGoTo) {
+      this.setState({ currentPage: 1 });
+    }
   }
 
   render() {
@@ -1472,6 +1479,7 @@ export class DataTable extends Component {
       },
       this.props.className
     );
+
     let paginatorTop =
       this.props.paginator && this.props.paginatorPosition !== 'bottom' && this.createPaginator('top', totalRecords);
     let paginatorBottom =
