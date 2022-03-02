@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -300,6 +301,16 @@ public interface DatasetMetabaseController {
       @RequestParam("dataflowIds") List<Long> dataflowIds);
 
   /**
+   * Find data set by dataflow ids.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the list
+   */
+  @GetMapping(value = "/private/datasets/dataflowIds", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataSetMetabaseVO> findDataSetByDataflowIds(
+      @RequestParam("dataflowIds") List<Long> dataflowIds);
+
+  /**
    * Gets the datasets summary list.
    *
    * @param dataflowId the dataflow id
@@ -307,5 +318,26 @@ public interface DatasetMetabaseController {
    */
   @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
   List<DatasetsSummaryVO> getDatasetsSummaryList(@PathVariable("id") Long dataflowId);
+
+
+  /**
+   * Update dataset running status.
+   *
+   * @param datasetRunningStatus the dataset running status
+   */
+  @PutMapping(value = "/private/updateDatasetRunningStatus/{id}")
+  void updateDatasetRunningStatus(@PathVariable("id") Long datasetId,
+      @RequestParam("datasetRunningStatus") DatasetRunningStatusEnum datasetRunningStatus);
+
+  /**
+   * Find reporting data set by provider ids.
+   *
+   * @param providerIds the provider ids
+   * @return the list
+   */
+  @GetMapping(value = "/private/providerIds", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataSetMetabaseVO> findReportingDataSetByProviderIds(
+      @RequestParam("providerIds") List<Long> providerIds);
+
 
 }

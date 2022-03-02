@@ -27,7 +27,6 @@ export const WebformDataForm = ({ colsSchema, datasetId, onChangeForm, selectedR
               width: ['CODELIST', 'EXTERNAL_LINK', 'EXTERNAL_LINK', 'LINK'].includes(column.type) ? '30%' : ''
             }}>
             <WebformDataFormFieldEditor
-              // autoFocus={i === 0}
               column={column}
               datasetId={datasetId}
               field={column.header}

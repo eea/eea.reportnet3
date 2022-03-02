@@ -497,7 +497,7 @@ export const ShowValidationsList = memo(
           onSelectValidation(event.data.tableSchemaId, event.data.ruleId, event.data.message, event.data.levelError);
           break;
         case 'TABLE':
-          const ruleSchema = getRuleSchema(event.data);
+          const ruleSchema = getRuleSchema(event.data.ruleId);
           if (TextUtils.areEquals(ruleSchema.automaticType, 'TABLE_UNIQUENESS')) {
             onSelectValidation(event.data.tableSchemaId, event.data.ruleId, event.data.message, event.data.levelError);
           } else {

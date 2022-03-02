@@ -277,6 +277,7 @@ public interface DatasetController {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    * @return the ETL dataset VO
    */
   @GetMapping("/v1/{datasetId}/etlExport")
@@ -287,8 +288,32 @@ public interface DatasetController {
       @RequestParam(value = "limit", required = false) Integer limit,
       @RequestParam(value = "offset", required = false) Integer offset,
       @RequestParam(value = "filterValue", required = false) String filterValue,
-      @RequestParam(value = "columnName", required = false) String columnName);
+      @RequestParam(value = "columnName", required = false) String columnName,
+      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
 
+  /**
+   * Etl export dataset V2.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @return the response entity
+   */
+  @GetMapping("/v2/etlExport/{datasetId}")
+  ResponseEntity<StreamingResponseBody> etlExportDatasetV2(
+      @PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam(value = "limit", required = false) Integer limit,
+      @RequestParam(value = "offset", required = false) Integer offset,
+      @RequestParam(value = "filterValue", required = false) String filterValue,
+      @RequestParam(value = "columnName", required = false) String columnName,
+      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
 
   /**
    * Etl export dataset legacy.

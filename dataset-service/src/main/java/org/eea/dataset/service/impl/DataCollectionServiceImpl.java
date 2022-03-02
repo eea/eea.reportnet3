@@ -1222,7 +1222,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       for (int i = 0; i < size; i += 10) {
         resourceManagementControllerZuul
             .deleteResourceByDatasetId(groups.subList(i, i + 10 > size ? size : i + 10).stream()
-                .map(ResourceInfoVO::getResourceId).collect(Collectors.toList()));
+                .map(ResourceInfoVO::getResourceId).distinct().collect(Collectors.toList()));
       }
       throw new EEAException(e);
     }
@@ -1429,6 +1429,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
             SecurityRoleEnum.DATA_OBSERVER));
 
+        // Create ReferenceDataset-%s-STEWARD_SUPPORT
+        groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
+            SecurityRoleEnum.STEWARD_SUPPORT));
+
+        // Create ReferenceDataset-%s-LEAD_REPORTER
+        groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
+            SecurityRoleEnum.LEAD_REPORTER));
+
         // Assign ReferenceDataset-%s-DATA_STEWARD
         for (UserRepresentationVO steward : stewards) {
           assignments.add(createAssignments(referenceDatasetId, steward.getEmail(),
@@ -1454,6 +1462,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               ResourceGroupEnum.REFERENCEDATASET_STEWARD_SUPPORT));
         }
 
+
       }
 
       // Assign reporters
@@ -1462,7 +1471,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           for (String email : entry.getValue()) {
             LOG.info("Assign to the user {} reference dataset {}", email, referenceDatasetId);
             assignments.add(createAssignments(referenceDatasetId, email,
-                ResourceGroupEnum.REFERENCEDATASET_OBSERVER));
+                ResourceGroupEnum.REFERENCEDATASET_LEAD_REPORTER));
 
             // Assign Dataflow-%s-LEAD_REPORTER
             assignments.add(
