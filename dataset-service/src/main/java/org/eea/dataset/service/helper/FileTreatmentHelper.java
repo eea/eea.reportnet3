@@ -391,6 +391,16 @@ public class FileTreatmentHelper implements DisposableBean {
           throw new EEAException("Empty zip file");
         }
       } else {
+        // if the import goes to FME and it's a zip file, check if the zip is not empty to show
+        // error and avoid the call to FME
+        if (null != integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
+          try (ZipInputStream zip = new ZipInputStream(input)) {
+            ZipEntry entry = zip.getNextEntry();
+            if (null == entry) {
+              throw new EEAException("Empty zip file");
+            }
+          }
+        }
         File file = new File(folder, originalFileName);
 
         // Store the file in the persistence volume
