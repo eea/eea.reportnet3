@@ -379,4 +379,14 @@ public interface DataFlowController {
   @PutMapping("/{dataflowId}/updateAutomaticDelete")
   void updateDataFlowAutomaticReportingDeletion(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("automaticDelete") boolean automaticReportingDelete);
+
+  /**
+   * Gets the dataflows metabase by id.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the dataflows metabase by id
+   */
+  @PostMapping(value = "/private/dataflows/getmetabase",
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataFlowVO> getDataflowsMetabaseById(@RequestBody List<Long> dataflowIds);
 }

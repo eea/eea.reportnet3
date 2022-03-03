@@ -291,6 +291,14 @@ public class DatasetSnapshotServiceTest {
 
   }
 
+  @Test
+  public void testGetSnapshotsEnabledByIdDataset() throws Exception {
+    when(snapshotMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    datasetSnapshotService.getSnapshotsEnabledByIdDataset(Mockito.anyLong());
+    assertEquals("failed assertion", new ArrayList<>(),
+        datasetSnapshotService.getSnapshotsEnabledByIdDataset(Mockito.anyLong()));
+  }
+
   /**
    * Test add snapshots.
    *

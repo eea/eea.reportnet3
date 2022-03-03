@@ -55,7 +55,7 @@ export const useSnapshotReducer = (
         };
 
       case 'ON_SNAPSHOT_ACTION':
-        return { ...state, isConfirmDisabled: true };
+        return { ...state, isConfirmDisabled: true, isRestoring: true };
 
       case 'ON_SNAPSHOT_RESET':
         return {
@@ -68,8 +68,12 @@ export const useSnapshotReducer = (
           dialogConfirmQuestion: '',
           dialogMessage: '',
           isConfirmDisabled: false,
+          isRestoring: false,
           snapShotId: ''
         };
+
+      case 'SET_IS_RESTORING':
+        return { ...state, isRestoring: payload };
 
       default:
         return state;

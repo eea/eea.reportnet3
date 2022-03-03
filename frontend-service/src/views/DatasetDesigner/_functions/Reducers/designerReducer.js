@@ -192,6 +192,17 @@ export const designerReducer = (state, { type, payload }) => {
     case 'ON_CHANGE_VIEW':
       return { ...state, viewType: payload.viewType };
 
+    case 'SET_PROGRESS_STEP_BAR':
+      const inmDatasetProgressBarSteps = [...state.datasetProgressBarSteps];
+      inmDatasetProgressBarSteps[payload.step].isRunning = payload.isRunning;
+      inmDatasetProgressBarSteps[payload.step].completed = payload.completed || false;
+      inmDatasetProgressBarSteps[payload.step].withError = payload.withError || false;
+      return {
+        ...state,
+        datasetProgressBarCurrentStep: payload.currentStep,
+        datasetProgressBarSteps: inmDatasetProgressBarSteps
+      };
+
     case 'SET_SELECTED_WEBFORM':
       return { ...state, selectedWebform: payload.selectedWebform };
 

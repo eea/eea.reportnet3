@@ -7,7 +7,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.ums.UserRoleVO;
 
 /**
- * The Interface BackupManagmentControlerService.
+ * The Interface UserRoleService.
  */
 public interface UserRoleService {
 

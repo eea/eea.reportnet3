@@ -370,7 +370,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * Gets the connection data for dataset.
    *
    * @param datasetName the dataset name
-   *
    * @return the connection data for dataset
    */
   @Override
@@ -410,6 +409,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idSnapshot the id snapshot
    * @param idPartitionDataset the id partition dataset
    * @param dateRelease the date release
+   * @param prefillingReference the prefilling reference
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
@@ -711,7 +711,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param datasetType the dataset type
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
-   *
+   * @param prefillingReference the prefilling reference
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -742,7 +742,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @param idReportingDataset the id reporting dataset
    * @param idSnapshot the id snapshot
-   *
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Override
@@ -843,18 +842,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         });
   }
 
-
-
   /**
    * Update materialized query view.
    *
    * @param datasetId the dataset id
    * @param user the user
    * @param released the released
+   * @param processId the process id
    */
   @Override
   @Async
-  public void updateMaterializedQueryView(Long datasetId, String user, Boolean released) {
+  public void updateMaterializedQueryView(Long datasetId, String user, Boolean released,
+      String processId) {
     LOG.info(" Update Materialized Views from Dataset id: %s", datasetId);
 
     DataSetMetabaseVO datasetMetabaseVO =
@@ -919,6 +918,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         SecurityContextHolder.getContext().getAuthentication().getName());
     values.put("released", released);
     values.put("updateViews", false);
+    values.put("processId", processId);
     LOG.info(
         "The user set on updateMaterializedQueryView threadPropertiesManager is {}, dataset {}",
         SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
@@ -957,6 +957,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * Refresh materialized query.
    *
    * @param datasetIds the dataset ids
+   * @param continueValidation the continue validation
+   * @param released the released
+   * @param datasetId the dataset id
    */
   @Override
   @Async
@@ -1026,9 +1029,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     LOG.info("Deleted dataset data from dataset: {}, dataflow: {}", datasetId, dataflowId);
   }
 
+  /**
+   * Matching files snapshot.
+   *
+   * @param released the released
+   * @param listSnapshotVO the list snapshot VO
+   * @return the file[]
+   */
   private File[] matchingFilesSnapshot(boolean released, List<SnapshotVO> listSnapshotVO) {
     File snapshotFolder = new File(pathSnapshot);
     return snapshotFolder.listFiles(new FilenameFilter() {
+      @Override
       public boolean accept(File dir, String name) {
         boolean exists = false;
         for (SnapshotVO snapshotVO : listSnapshotVO) {
@@ -1044,6 +1055,67 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     });
   }
 
+  /**
+   * Modify snapshot file.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param nameFiles the name files
+   * @param datasetId the dataset id
+   */
+  private void modifySnapshotFile(Map<String, String> dictionaryOriginTargetObjectId,
+      List<String> nameFiles, Long datasetId) {
+
+    if (!CollectionUtils.isEmpty(nameFiles)) {
+      nameFiles.stream().forEach(f -> {
+
+        Path pathFile = Paths.get(f);
+        List<String> replaced = new ArrayList<>();
+
+        try (Stream<String> lines = Files.lines(pathFile)) {
+          replaced = lines
+              .map(line -> line = modifyingLine(dictionaryOriginTargetObjectId, line, f, datasetId))
+              .collect(Collectors.toList());
+          Files.write(pathFile, replaced);
+        } catch (IOException e) {
+          LOG_ERROR.error("Error modifying the file {} during the data copy in cloning process", f);
+        }
+      });
+    }
+  }
+
+
+  /**
+   * Modifying line.
+   *
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param line the line
+   * @param fileName the file name
+   * @param datasetId the dataset id
+   * @return the string
+   */
+  private String modifyingLine(Map<String, String> dictionaryOriginTargetObjectId, String line,
+      String fileName, Long datasetId) {
+
+    String[] lineSplitted = line.split("\t");
+
+    if (fileName.contains("RecordValue")) {
+      String recordSchema = lineSplitted[1];
+      line = line.replace(recordSchema, dictionaryOriginTargetObjectId.get(recordSchema));
+    }
+    if (fileName.contains("FieldValue")) {
+      String fieldSchema = lineSplitted[3];
+      line = line.replace(fieldSchema, dictionaryOriginTargetObjectId.get(fieldSchema));
+    }
+    if (fileName.contains("TableValue")) {
+      String oldDatasetId = lineSplitted[2];
+      String tableSchemaId = lineSplitted[1];
+      line = line.replace(oldDatasetId, datasetId.toString());
+      if (null != dictionaryOriginTargetObjectId) {
+        line = line.replace(tableSchemaId, dictionaryOriginTargetObjectId.get(tableSchemaId));
+      }
+    }
+    return line;
+  }
 
 
   /**
@@ -1093,7 +1165,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
-   *
    * @return the string
    */
   private String checkType(Long idDataset, Long idSnapshot) {
@@ -1111,13 +1182,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   /**
-   * Notification and release.
+   * Notification create and check release.
    *
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
    * @param type the type
-   *
-   * @return the event type
+   * @param dateRelease the date release
+   * @param prefillingReference the prefilling reference
    */
   private void notificationCreateAndCheckRelease(Long idDataset, Long idSnapshot, String type,
       String dateRelease, boolean prefillingReference) {
@@ -1178,6 +1249,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param deleteData the delete data
    * @param successEventType the success event type
    * @param failEventType the fail event type
+   * @param prefillingReference the prefilling reference
    */
   private void restoreSnapshot(Long datasetId, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
@@ -1276,66 +1348,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   /**
-   * Modify snapshot file.
-   *
-   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
-   * @param nameFiles the name files
-   */
-  private void modifySnapshotFile(Map<String, String> dictionaryOriginTargetObjectId,
-      List<String> nameFiles, Long datasetId) {
-
-    if (!CollectionUtils.isEmpty(nameFiles)) {
-      nameFiles.stream().forEach(f -> {
-
-        Path pathFile = Paths.get(f);
-        List<String> replaced = new ArrayList<>();
-
-        try (Stream<String> lines = Files.lines(pathFile)) {
-          replaced = lines
-              .map(line -> line = modifyingLine(dictionaryOriginTargetObjectId, line, f, datasetId))
-              .collect(Collectors.toList());
-          Files.write(pathFile, replaced);
-        } catch (IOException e) {
-          LOG_ERROR.error("Error modifying the file {} during the data copy in cloning process", f);
-        }
-      });
-    }
-  }
-
-
-  /**
-   * Modifying line.
-   *
-   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
-   * @param line the line
-   * @param fileName the file name
-   * @return the string
-   */
-  private String modifyingLine(Map<String, String> dictionaryOriginTargetObjectId, String line,
-      String fileName, Long datasetId) {
-
-    String[] lineSplitted = line.split("\t");
-
-    if (fileName.contains("RecordValue")) {
-      String recordSchema = lineSplitted[1];
-      line = line.replace(recordSchema, dictionaryOriginTargetObjectId.get(recordSchema));
-    }
-    if (fileName.contains("FieldValue")) {
-      String fieldSchema = lineSplitted[3];
-      line = line.replace(fieldSchema, dictionaryOriginTargetObjectId.get(fieldSchema));
-    }
-    if (fileName.contains("TableValue")) {
-      String oldDatasetId = lineSplitted[2];
-      String tableSchemaId = lineSplitted[1];
-      line = line.replace(oldDatasetId, datasetId.toString());
-      if (null != dictionaryOriginTargetObjectId) {
-        line = line.replace(tableSchemaId, dictionaryOriginTargetObjectId.get(tableSchemaId));
-      }
-    }
-    return line;
-  }
-
-  /**
    * Copy process.
    *
    * @param datasetId the dataset id
@@ -1391,7 +1403,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idReportingDataset the id reporting dataset
    * @param partitionId the partition id
    * @param datasetType the dataset type
-   *
    * @return the string
    */
   private String composeDeleteSql(Long idReportingDataset, Long partitionId,
@@ -1473,7 +1484,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * Creates the connection data VO.
    *
    * @param datasetName the dataset name
-   *
    * @return the connection data VO
    */
   private ConnectionDataVO createConnectionDataVO(final String datasetName) {
@@ -1489,7 +1499,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * Gets the all data sets name.
    *
    * @param datasetName the dataset name
-   *
    * @return the all data sets name
    */
   private List<String> getAllDataSetsName(String datasetName) {
@@ -1519,7 +1528,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param fileName the file name
    * @param query the query
    * @param copyManager the copy manager
-   *
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
@@ -1546,7 +1554,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param query the query
    * @param fileName the file name
    * @param copyManager the copy manager
-   *
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
@@ -1649,7 +1656,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   /**
-   * Query view query.
+   * Execute view query.
    *
    * @param columns the columns
    * @param queryViewName the query view name

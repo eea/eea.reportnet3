@@ -1,8 +1,4 @@
-import { useEffect } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
-
 import isNil from 'lodash/isNil';
-import uniq from 'lodash/uniq';
 
 import styles from './DropdownFilter.module.scss';
 
@@ -10,25 +6,27 @@ import { Dropdown } from 'views/_components/Dropdown';
 import { LevelError } from 'views/_components/LevelError';
 import { SortButton } from 'views/_components/Filters/_components/SortButton';
 
-import { filterByStore } from 'views/_components/Filters/_functions/Stores/filterStore';
-import { filterByAllKeys } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
+import { filterByKeyDropdownStore } from 'views/_components/Filters/_functions/Stores/filterKeysStore';
 
-export const DropdownFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, option, recoilId }) => {
-  const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));
+import { useFilters } from 'views/_components/Filters/_functions/Hooks/useFilters';
 
-  const [filterBy, setFilterBy] = useRecoilState(filterByStore(`${option.key}_${recoilId}`));
-
-  useEffect(() => {
-    setFilterByAllKeys(prevState => uniq([...prevState, option.key]));
-  }, [recoilId]);
-
-  const onFilter = async value => {
-    setFilterBy({ [option.key]: value });
-
-    if (!hasCustomSort) {
-      await onFilterData({ key: option.key, value, type: option.type });
-    }
-  };
+export const DropdownFilter = ({
+  getFilterBy,
+  hasCustomSort,
+  isLoading,
+  onFilterData,
+  onSort,
+  option,
+  panelClassName,
+  recoilId
+}) => {
+  const { filterBy, onFilter } = useFilters({
+    hasCustomSort,
+    keyStore: filterByKeyDropdownStore,
+    onFilterData,
+    option,
+    recoilId
+  });
 
   const renderTemplate = (template, type) => {
     if (template === 'LevelError') {
@@ -39,8 +37,13 @@ export const DropdownFilter = ({ hasCustomSort, isLoading, onFilterData, onSort,
   };
 
   return (
-    <div className={`${styles.block}`} key={option.key}>
+    <div
+      className={`${styles.block} ${styles[option.className]} ${
+        !option.isSortable && !isNil(option.isSortable) ? styles.noSortFilterWrapper : ''
+      }`}
+      key={option.key}>
       <SortButton
+        getFilterBy={getFilterBy}
         id={option.key}
         isLoading={isLoading}
         isVisible={option.isSortable}
@@ -66,6 +69,7 @@ export const DropdownFilter = ({ hasCustomSort, isLoading, onFilterData, onSort,
         }}
         optionLabel="label"
         options={option.dropdownOptions}
+        panelClassName={panelClassName}
         showClear={true}
         showFilterClear={true}
         value={filterBy[option.key]}

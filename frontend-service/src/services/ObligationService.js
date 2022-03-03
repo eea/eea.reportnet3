@@ -27,25 +27,26 @@ export const ObligationService = {
   },
 
   getOpen: async filterData => {
-    if (!isEmpty(filterData)) {
-      const countryId = !isNil(filterData.countries) ? filterData.countries.value : '';
-      const dateFrom =
-        !isNil(filterData.expirationDate) && filterData.expirationDate[0] ? filterData.expirationDate[0] : '';
-      const dateTo =
-        !isNil(filterData.expirationDate) && filterData.expirationDate[1] ? filterData.expirationDate[1] : '';
-      const issueId = !isNil(filterData.issues) ? filterData.issues.value : '';
-      const organizationId = !isNil(filterData.organizations) ? filterData.organizations.value : '';
-      const openedObligationsDTO = await ObligationRepository.getOpen(
-        countryId,
-        dateFrom,
-        dateTo,
-        issueId,
-        organizationId
-      );
-      return ObligationUtils.parseObligationList(openedObligationsDTO.data);
-    } else {
-      const openedObligationsDTO = await ObligationRepository.getOpen();
-      return ObligationUtils.parseObligationList(openedObligationsDTO.data);
-    }
+    const getOpenedObligationsDTO = async () => {
+      if (!isEmpty(filterData)) {
+        const countryId = !isNil(filterData.countries) ? filterData.countries.value : '';
+        const dateFrom =
+          !isNil(filterData.expirationDate) && filterData.expirationDate[0] ? filterData.expirationDate[0] : '';
+        const dateTo =
+          !isNil(filterData.expirationDate) && filterData.expirationDate[1] ? filterData.expirationDate[1] : '';
+        const issueId = !isNil(filterData.issues) ? filterData.issues.value : '';
+        const organizationId = !isNil(filterData.organizations) ? filterData.organizations.value : '';
+
+        return await ObligationRepository.getOpen(countryId, dateFrom, dateTo, issueId, organizationId);
+      } else {
+        return await ObligationRepository.getOpen();
+      }
+    };
+
+    const openedObligationsDTO = await getOpenedObligationsDTO();
+    const { totalRecords, filteredRecords, obligations } = openedObligationsDTO?.data;
+    const parseobligationList = ObligationUtils.parseObligationList(obligations);
+
+    return { filteredRecords, obligations: parseobligationList, totalRecords };
   }
 };

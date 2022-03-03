@@ -44,5 +44,21 @@
   background-color: var(--dataflows-list-paginator-bg-color) !important;
   border-radius: 5px;
   border: none !important;
-  box-shadow: var(--paginator-dataflows-pages-highlight-box-shadow) !important;
+  color: var(--tabview-highlight-color);
+
+  label,
+  button,
+  div:last-child {
+    color: var(--tabview-highlight-color) !important;
+    font-weight: bold;
+  }
+
+  button {
+    border-radius: 3px !important;
+  }
+
+  button:hover {
+    border: none !important;
+    background-color: var(--paginator-dataflows-bg-hover) !important;
+  }
 }

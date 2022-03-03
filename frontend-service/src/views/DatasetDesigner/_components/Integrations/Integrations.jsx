@@ -43,7 +43,7 @@ export const Integrations = ({ dataflowId, datasetId, designerState, manageDialo
     <Fragment>
       <div className="p-toolbar-group-left">
         <Button
-          className="p-button-secondary p-button-animated-blink"
+          className="p-button-animated-blink"
           icon="plus"
           label={resourcesContext.messages['createExternalIntegration']}
           onClick={() => {

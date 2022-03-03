@@ -311,9 +311,11 @@ public interface DatasetService {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    */
   void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream, String tableSchemaId,
-      Integer limit, Integer offset, String filterValue, String columnName);
+      Integer limit, Integer offset, String filterValue, String columnName,
+      String dataProviderCodes);
 
   /**
    * Gets the table read only.

@@ -1,0 +1,55 @@
+.noDataContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  flex-direction: column;
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
+  button {
+    padding: 0.5em 1em;
+  }
+}
+
+.containerAddDialog {
+  width: 80%;
+  max-width: 400px;
+}
+
+.addDialog {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 0.5em;
+  input {
+    margin-bottom: 1em;
+  }
+  div {
+    width: 100%;
+    span {
+      display: block;
+      width: 100% !important;
+      text-align: left;
+    }
+  }
+}
+
+.buttonsDialogFooter {
+  display: flex;
+  justify-content: space-between;
+}
+
+.confirmDialog {
+  min-width: auto !important;
+  max-width: auto !important;
+}
+
+.error {
+  border-color: var(--errors) !important;
+  box-shadow: inset 0px 0px 0px 1px var(--errors) !important;
+  outline: none;
+  overflow: hidden;
+}

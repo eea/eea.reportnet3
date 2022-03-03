@@ -1,7 +1,7 @@
 package org.eea.rod.service;
 
 import java.util.Date;
-import java.util.List;
+import org.eea.interfaces.vo.rod.ObligationListVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 
 /**
@@ -10,17 +10,16 @@ import org.eea.interfaces.vo.rod.ObligationVO;
 public interface ObligationService {
 
   /**
-   * Find opened obligation list.
+   * Find opened obligation.
    *
    * @param clientId the client id
    * @param spatialId the spatial id
    * @param issueId the issue id
    * @param deadlineDateFrom the deadline date from
    * @param deadlineDateTo the deadline date to
-   *
-   * @return the list
+   * @return the obligation list VO
    */
-  List<ObligationVO> findOpenedObligation(Integer clientId, Integer spatialId, Integer issueId,
+  ObligationListVO findOpenedObligation(Integer clientId, Integer spatialId, Integer issueId,
       Date deadlineDateFrom, Date deadlineDateTo);
 
   /**

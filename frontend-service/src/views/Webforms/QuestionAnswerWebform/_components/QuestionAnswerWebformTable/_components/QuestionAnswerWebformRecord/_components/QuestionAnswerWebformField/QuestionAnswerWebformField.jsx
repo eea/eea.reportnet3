@@ -190,7 +190,6 @@ export const QuestionAnswerWebformField = ({
             <InputTextarea
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
-              hasMaxCharCounter
               id={field.fieldId}
               onBlur={event => onEditorSubmitValue(field, fieldSchemaId, event.target.value)}
               onChange={event => onFillField(field, fieldSchemaId, event.target.value)}
@@ -349,7 +348,6 @@ export const QuestionAnswerWebformField = ({
           accept={getAttachExtensions || '*'}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.fileUpload}
-          dialogClassName={styles.dialog}
           dialogHeader={resourcesContext.messages['uploadAttachment']}
           dialogOnHide={() => handleDialogs('uploadFile', false)}
           dialogVisible={isDialogVisible.uploadFile}

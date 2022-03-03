@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import ReactTooltip from 'react-tooltip';
@@ -33,9 +33,11 @@ import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
+import { CountryUtils } from 'views/_functions/Utils/CountryUtils';
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 
 export const PublicCountryInformation = () => {
   const { countryCode } = useParams();
@@ -84,7 +86,9 @@ export const PublicCountryInformation = () => {
   }, [isReset]);
 
   useEffect(() => {
-    !isNil(countryCode) && getCountryName();
+    if (!isNil(countryCode)) {
+      setCountryName(CountryUtils.getCountryName(countryCode));
+    }
   }, [countryCode]);
 
   useEffect(() => {
@@ -95,27 +99,16 @@ export const PublicCountryInformation = () => {
     }
   }, [themeContext.headerCollapse]);
 
-  const getCountryName = () => {
-    if (!isNil(config.countriesByGroup)) {
-      const allCountries = config.countriesByGroup['eeaCountries']
-        .concat(config.countriesByGroup['cooperatingCountries'])
-        .concat(config.countriesByGroup['otherCountries']);
-      allCountries.forEach(country => {
-        if (countryCode === country.code) {
-          setCountryName(country.name);
-        }
-      });
-    }
-  };
-
   const getDeliveryStatus = (dataflow, dataset) => {
     if (!dataset?.isReleased) {
-      return config.datasetStatus.PENDING.label;
+      return resourcesContext.messages[config.datasetStatus.PENDING.label];
     } else {
       if (!dataflow.manualAcceptance) {
-        return config.datasetStatus.DELIVERED.label;
+        return resourcesContext.messages[config.datasetStatus.DELIVERED.label];
       } else {
-        return DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets.map(dataset => dataset.status));
+        return resourcesContext.messages[
+          DataflowUtils.getTechnicalAcceptanceStatus(dataflow.datasets.map(dataset => dataset.status))
+        ];
       }
     }
   };
@@ -143,16 +136,6 @@ export const PublicCountryInformation = () => {
     }
   };
 
-  const getSortOrder = () => {
-    if (sortOrder === -1) {
-      return 0;
-    } else if (isNil(sortOrder)) {
-      return undefined;
-    } else {
-      return sortOrder;
-    }
-  };
-
   const onLoadPublicCountryInformation = async () => {
     setIsLoading(true);
     try {
@@ -160,7 +143,7 @@ export const PublicCountryInformation = () => {
 
       const data = await DataflowService.getPublicDataflowsByCountryCode({
         countryCode,
-        sortOrder: getSortOrder(),
+        sortOrder,
         pageNum,
         numberRows,
         sortField,
@@ -374,18 +357,24 @@ export const PublicCountryInformation = () => {
       key: 'deliveryStatus',
       label: resourcesContext.messages['deliveryStatus'],
       multiSelectOptions: [
-        { type: config.datasetStatus.PENDING.label.toUpperCase(), value: config.datasetStatus.PENDING.key },
-        { type: config.datasetStatus.DELIVERED.label.toUpperCase(), value: config.datasetStatus.DELIVERED.key },
         {
-          type: config.datasetStatus.CORRECTION_REQUESTED.label.toUpperCase(),
+          type: resourcesContext.messages[config.datasetStatus.PENDING.label].toUpperCase(),
+          value: config.datasetStatus.PENDING.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetStatus.DELIVERED.label].toUpperCase(),
+          value: config.datasetStatus.DELIVERED.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetStatus.CORRECTION_REQUESTED.label].toUpperCase(),
           value: config.datasetStatus.CORRECTION_REQUESTED.key
         },
         {
-          type: config.datasetStatus.FINAL_FEEDBACK.label.toUpperCase(),
+          type: resourcesContext.messages[config.datasetStatus.FINAL_FEEDBACK.label].toUpperCase(),
           value: config.datasetStatus.FINAL_FEEDBACK.key
         },
         {
-          type: config.datasetStatus.TECHNICALLY_ACCEPTED.label.toUpperCase(),
+          type: resourcesContext.messages[config.datasetStatus.TECHNICALLY_ACCEPTED.label].toUpperCase(),
           value: config.datasetStatus.TECHNICALLY_ACCEPTED.key
         }
       ]
@@ -409,6 +398,7 @@ export const PublicCountryInformation = () => {
           setSortOrder(0);
         }}
         options={filterOptions}
+        panelClassName="overwriteZindexPanel"
         recoilId="publicCountryInformation"
       />
     );
@@ -455,15 +445,6 @@ export const PublicCountryInformation = () => {
     </span>
   );
 
-  const renderPaginatorRecordsCount = () => (
-    <Fragment>
-      {isFiltered ? `${resourcesContext.messages['filtered']}: ${filteredRecords} | ` : ''}
-      {`${resourcesContext.messages['totalRecords']} ${totalRecords} ${' '} ${resourcesContext.messages[
-        'records'
-      ].toLowerCase()}`}
-    </Fragment>
-  );
-
   const renderPublicCountryInformationTitle = () => {
     if (!isEmpty(countryName)) {
       return (
@@ -498,7 +479,13 @@ export const PublicCountryInformation = () => {
         onPage={onChangePage}
         onSort={onSort}
         paginator={true}
-        paginatorRight={renderPaginatorRecordsCount()}
+        paginatorRight={
+          <PaginatorRecordsCount
+            dataLength={totalRecords}
+            filteredDataLength={filteredRecords}
+            isFiltered={isFiltered}
+          />
+        }
         rows={numberRows}
         rowsPerPageOptions={[5, 10, 15]}
         sortable={true}

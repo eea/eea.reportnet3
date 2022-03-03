@@ -14,7 +14,11 @@ export const RepresentativeService = {
 
   getDataProviders: async dataProviderGroup => {
     const dataProvidersDTO = await RepresentativeRepository.getDataProviders(dataProviderGroup.dataProviderGroupId);
-    return dataProvidersDTO.data.map(dataProvider => ({ dataProviderId: dataProvider.id, label: dataProvider.label }));
+    return dataProvidersDTO.data.map(dataProvider => ({
+      dataProviderId: dataProvider.id,
+      label: dataProvider.label,
+      code: dataProvider.code
+    }));
   },
 
   getRepresentatives: async dataflowId => {
@@ -34,6 +38,8 @@ export const RepresentativeService = {
 
   deleteLeadReporter: async (leadReporterId, dataflowId) =>
     await RepresentativeRepository.deleteLeadReporter(leadReporterId, dataflowId),
+
+  deleteAllLeadReporters: async dataflowId => await RepresentativeRepository.deleteAllLeadReporters(dataflowId),
 
   exportFile: async dataflowId => await RepresentativeRepository.exportFile(dataflowId),
 

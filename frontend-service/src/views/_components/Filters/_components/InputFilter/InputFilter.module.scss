@@ -15,6 +15,11 @@
       box-shadow: 0 0 0 0 var(--c-blue-120) !important;
     }
   }
+
+  .label {
+    font-size: 0.8333rem;
+    color: var(--font-filters) !important;
+  }
 }
 
 @media (min-width: 600px) {

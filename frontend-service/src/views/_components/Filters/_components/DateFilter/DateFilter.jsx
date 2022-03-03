@@ -17,7 +17,16 @@ import { filterByStore } from 'views/_components/Filters/_functions/Stores/filte
 
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-export const DateFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, option, recoilId }) => {
+export const DateFilter = ({
+  getFilterBy,
+  hasCustomSort,
+  isLoading,
+  onFilterData,
+  onSort,
+  option,
+  panelClassName,
+  recoilId
+}) => {
   const { userProps } = useContext(UserContext);
 
   const setFilterByAllKeys = useSetRecoilState(filterByAllKeys(recoilId));
@@ -83,6 +92,7 @@ export const DateFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, opt
   return (
     <div className={styles.block} key={option.key}>
       <SortButton
+        getFilterBy={getFilterBy}
         id={option.key}
         isLoading={isLoading}
         isVisible={option.isSortable}
@@ -103,6 +113,7 @@ export const DateFilter = ({ hasCustomSort, isLoading, onFilterData, onSort, opt
           monthNavigator={true}
           onChange={event => onFilter(parseDateValues(event.target.value))}
           onFocus={() => setIsLabelAnimated(true)}
+          panelClassName={panelClassName}
           readOnlyInput={true}
           selectionMode="range"
           value={parseDateValues(filterBy[option.key])}
