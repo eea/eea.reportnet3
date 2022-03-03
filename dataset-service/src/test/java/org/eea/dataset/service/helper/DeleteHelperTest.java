@@ -64,8 +64,7 @@ public class DeleteHelperTest {
   public void executeDeleteProcessTest() throws EEAException, IOException, InterruptedException {
     Mockito.doNothing().when(datasetService).deleteTableBySchema(Mockito.any(), Mockito.any());
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
+
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
     DataSetMetabaseVO dsmbVO = new DataSetMetabaseVO();
@@ -85,8 +84,7 @@ public class DeleteHelperTest {
   public void executeDeleteDatasetProcessTest()
       throws EEAException, IOException, InterruptedException {
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseDatasetKafkaEvent(Mockito.any(),
-        Mockito.any());
+
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
     DataSetMetabaseVO dsmbVO = new DataSetMetabaseVO();

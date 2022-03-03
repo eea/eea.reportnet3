@@ -698,7 +698,7 @@ public class FileTreatmentHelper implements DisposableBean {
         eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
             ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
             : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
-        kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, value);
+
       }
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
