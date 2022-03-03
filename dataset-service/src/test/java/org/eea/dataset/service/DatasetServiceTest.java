@@ -1643,6 +1643,7 @@ public class DatasetServiceTest {
     DataSetMetabase dsMetabase = new DataSetMetabase();
     dsMetabase.setDataSetName("prueba");
     dsMetabase.setId(1L);
+    dsMetabase.setDatasetSchema("5cf0e9b3b793310e9ceca190");
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     when(dataSetMetabaseRepository.findById(Mockito.any())).thenReturn(Optional.of(dsMetabase));

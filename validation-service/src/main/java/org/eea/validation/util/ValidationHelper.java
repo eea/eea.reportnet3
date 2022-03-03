@@ -257,6 +257,12 @@ public class ValidationHelper implements DisposableBean {
   public void executeValidation(@LockCriteria(name = "datasetId") final Long datasetId,
       String processId, boolean released, boolean updateViews) throws EEAException {
 
+    // In case there's no processId, set a new one (because the processId is set in
+    // ValidationControlleriImpl)
+    if (StringUtils.isBlank(processId) || "null".equals(processId)) {
+      processId = UUID.randomUUID().toString();
+    }
+
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId, processId,

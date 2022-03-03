@@ -578,7 +578,7 @@ public class DatasetServiceImpl implements DatasetService {
           dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
 
       DataSetSchema schema =
-          schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
+          schemasRepository.findByIdDataSetSchema(new ObjectId(datasetMb.getDatasetSchema()));
 
       Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
       for (TableSchema tableSchema : schema.getTableSchemas()) {
@@ -603,7 +603,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
 
-      statsList.add(fillStat(datasetId, null, "idDataSetSchema", dataset.getIdDatasetSchema()));
+      statsList.add(fillStat(datasetId, null, "idDataSetSchema", datasetMb.getDatasetSchema()));
       statsList.add(fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName()));
       statsList.add(fillStat(datasetId, null, "datasetErrors", datasetErrors.toString()));
 
