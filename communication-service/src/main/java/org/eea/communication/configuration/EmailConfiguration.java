@@ -51,6 +51,7 @@ public class EmailConfiguration {
     mailSender.setHost(mailServerHost);
     mailSender.setPort(mailServerPort);
 
+    // these lines are commented by the server configuration.
     // mailSender.setUsername(mailServerUsername);
     // mailSender.setPassword(mailServerPassword);
 
