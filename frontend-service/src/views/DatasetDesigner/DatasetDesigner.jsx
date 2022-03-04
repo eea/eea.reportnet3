@@ -767,6 +767,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     );
 
     if (isImportDataCompleted || isRestoreSnapshotDataCompleted || isDeletedDataCompleted) {
+      onHighlightRefresh(true);
       designerDispatch({
         type: 'SET_PROGRESS_STEP_BAR',
         payload: { step: 1, currentStep: 2, isRunning: true, completed: false, withError: false }

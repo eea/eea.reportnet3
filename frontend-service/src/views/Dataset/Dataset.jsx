@@ -604,6 +604,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
 
     if (isImportDataCompleted || isRestoreSnapshotDataCompleted || isDeletedDataCompleted) {
+      onHighlightRefresh(true);
       changeProgressStepBar({ step: 1, currentStep: 2, isRunning: true, completed: false, withError: false });
     }
   }, [notificationContext]);
