@@ -2,9 +2,11 @@ package org.eea.rod.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.interfaces.vo.rod.LegalInstrumentVO;
@@ -86,6 +88,8 @@ public class ObligationServiceImpl implements ObligationService {
   @Override
   public ObligationListVO findOpenedObligation(Integer clientId, Integer spatialId, Integer issueId,
       Date deadlineDateFrom, Date deadlineDateTo) {
+    deadlineDateFrom = convertDateWithoutTime(deadlineDateFrom);
+    deadlineDateTo = convertDateWithoutTime(deadlineDateTo);
     Long dateFrom = Optional.ofNullable(deadlineDateFrom).map(Date::getTime).orElse(null);
     Long dateTo = Optional.ofNullable(deadlineDateTo).map(Date::getTime).orElse(null);
 
@@ -102,8 +106,9 @@ public class ObligationServiceImpl implements ObligationService {
           deadlineDateTo, dateFrom, dateTo);
       for (Obligation obligation : obligations) {
         if (obligation.getNextDeadline() != null
-            && obligation.getNextDeadline().getTime() >= dateFrom
-            && obligation.getNextDeadline().getTime() <= dateTo) {
+            && ((obligation.getNextDeadline().getTime() >= dateFrom
+                && obligation.getNextDeadline().getTime() <= dateTo)
+                || isSameDay(deadlineDateFrom, obligation.getNextDeadline()))) {
           filteredObligations.add(obligation);
           LOG.info("Obligation with id {} and nextDeadLine date {} added (in milliseconds {})",
               obligation.getObligationId(), obligation.getNextDeadline(),
@@ -213,5 +218,53 @@ public class ObligationServiceImpl implements ObligationService {
 
     }
 
+  }
+
+  /**
+   * Convert date without time.
+   *
+   * @param date the date
+   * @return the date
+   */
+  private Date convertDateWithoutTime(Date date) {
+    Date dateWithoutTime = null;
+
+    if (date != null) {
+      Calendar cal = Calendar.getInstance();
+      cal.setTime(date);
+
+      Calendar gmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+      gmt.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH));
+      gmt.set(Calendar.MONTH, cal.get(Calendar.MONTH));
+      gmt.set(Calendar.YEAR, cal.get(Calendar.YEAR));
+      gmt.set(Calendar.HOUR_OF_DAY, 0);
+      gmt.set(Calendar.MINUTE, 0);
+      gmt.set(Calendar.SECOND, 0);
+      gmt.set(Calendar.MILLISECOND, 0);
+      dateWithoutTime = gmt.getTime();
+    }
+    return dateWithoutTime;
+  }
+
+  /**
+   * Checks if is same day.
+   *
+   * @param dateRequest the date request
+   * @param dateResponse the date response
+   * @return true, if is same day
+   */
+  private boolean isSameDay(Date dateRequest, Date dateResponse) {
+    boolean result = false;
+    if (dateRequest != null && dateResponse != null) {
+      Calendar calendarRequest = Calendar.getInstance();
+      calendarRequest.setTime(dateRequest);
+      Calendar calendarResponse = Calendar.getInstance();
+      calendarResponse.setTime(dateResponse);
+      result = calendarRequest.get(Calendar.YEAR) == calendarResponse.get(Calendar.YEAR)
+          && calendarRequest.get(Calendar.MONTH) == calendarResponse.get(Calendar.MONTH)
+          && calendarRequest.get(Calendar.DAY_OF_MONTH) == calendarResponse
+              .get(Calendar.DAY_OF_MONTH);
+    }
+    return result;
   }
 }

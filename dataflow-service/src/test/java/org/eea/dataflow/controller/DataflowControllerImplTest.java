@@ -1464,6 +1464,8 @@ public class DataflowControllerImplTest {
     dataflowVO.setObligation(obligation);
     dataflowVO.setStatus(TypeStatusEnum.DRAFT);
     dataflowVO.setType(TypeDataflowEnum.CITIZEN_SCIENCE);
+    dataflowVO.setReleasable(false);
+    dataflowVO.setShowPublicInfo(false);
     Mockito.when(dataflowService.isAdmin()).thenReturn(false);
     Mockito.when(dataflowService.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
     ResponseEntity<?> value = dataflowControllerImpl.updateDataFlow(dataflowVO);

@@ -13,7 +13,6 @@ axios.interceptors.request.use(
     if (!isNil(tokens)) {
       config.headers['Authorization'] = 'Bearer ' + tokens.accessToken;
     }
-    // config.headers['Content-Type'] = 'application/json';
     return config;
   },
   error => {

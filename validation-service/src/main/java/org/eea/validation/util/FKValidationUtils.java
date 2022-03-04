@@ -204,11 +204,6 @@ public class FKValidationUtils {
     Long datasetIdRefered =
         dataSetControllerZuul.getReferencedDatasetId(datasetIdReference, idFieldSchemaPKString);
 
-    // Get PK Schema
-    String pkSchemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdRefered);
-    DataSetSchema datasetSchemaPK =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(pkSchemaId));
-
     // get Orig name
     TableSchema tableName = getTableSchemaFromIdFieldSchema(datasetSchemaFK, idFieldSchema);
 

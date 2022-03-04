@@ -22,9 +22,6 @@ const useSocket = () => {
 
       const stompClient = new Client({
         brokerURL: socket_url,
-        // debug: function (str) {
-        //   console.log(str);
-        // },
         reconnectDelay: 30000,
         connectionTimeout: 30000,
         beforeConnect: () => {

@@ -32,7 +32,7 @@ import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
-import { StepProgressBar } from 'views/_components/StepProgressBar';
+// import { StepProgressBar } from 'views/_components/StepProgressBar';
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -580,6 +580,17 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false, completed: false, withError: false });
     }
 
+    const validationFinishedWithError = notificationContext.toShow.find(
+      notification => notification.key === 'IMPORT_REPORTING_FAILED_EVENT'
+    );
+    if (
+      validationFinishedWithError &&
+      validationFinishedWithError.content.datasetId?.toString() === datasetId.toString()
+    ) {
+      onHighlightRefresh(true);
+      changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false, completed: false, withError: true });
+    }
+
     const isImportDataCompleted = notificationContext.toShow.some(
       notification => notification.key === 'IMPORT_REPORTING_COMPLETED_EVENT'
     );
@@ -1055,15 +1066,15 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   );
 
   const renderStepProgressBar = () => {
-    if (hasWritePermissions) {
-      return (
-        <StepProgressBar
-          className={styles.stepProgressBar}
-          currentStep={datasetProgressBarSteps.currentStep}
-          steps={datasetProgressBarSteps.steps}
-        />
-      );
-    }
+    // if (hasWritePermissions) {
+    //   return (
+    //     <StepProgressBar
+    //       className={styles.stepProgressBar}
+    //       currentStep={datasetProgressBarSteps.currentStep}
+    //       steps={datasetProgressBarSteps.steps}
+    //     />
+    //   );
+    // }
   };
 
   const renderTableWebformView = () => {

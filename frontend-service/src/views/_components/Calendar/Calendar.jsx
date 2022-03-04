@@ -1,7 +1,7 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 
+import isNil from 'lodash/isNil';
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
-import { isNil } from 'lodash';
 
 export const Calendar = forwardRef((props, _) => {
   const {
@@ -36,6 +36,7 @@ export const Calendar = forwardRef((props, _) => {
     style,
     todayButtonClassName,
     value,
+    viewDate = undefined,
     yearNavigator,
     yearRange
   } = props;
@@ -65,6 +66,16 @@ export const Calendar = forwardRef((props, _) => {
     weekHeader: 'Wk'
   };
 
+  useEffect(() => {
+    const isValidDate = date => date instanceof Date && !isNaN(date);
+
+    if (isValidDate(viewDate)) {
+      setViewDateState(viewDate);
+    }
+  }, [viewDate]);
+
+  const [viewDateState, setViewDateState] = useState(viewDate);
+
   const yearRangeValue =
     yearNavigator && isNil(yearRange)
       ? `${new Date().getFullYear() - selectableYears}:${new Date().getFullYear() + selectableYears}`
@@ -91,6 +102,7 @@ export const Calendar = forwardRef((props, _) => {
       onFocus={onFocus}
       onSelect={onSelect}
       onTodayButtonClick={onTodayButtonClick}
+      onViewDateChange={event => setViewDateState(event.value)}
       panelClassName={panelClassName}
       placeholder={placeholder}
       readOnlyInput={readOnlyInput}
@@ -103,6 +115,7 @@ export const Calendar = forwardRef((props, _) => {
       style={style}
       todayButtonClassName={todayButtonClassName}
       value={value}
+      viewDate={viewDateState || new Date()}
       yearNavigator={yearNavigator}
       yearRange={yearRangeValue}
     />

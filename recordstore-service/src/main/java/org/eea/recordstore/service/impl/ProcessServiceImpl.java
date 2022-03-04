@@ -3,7 +3,6 @@ package org.eea.recordstore.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
@@ -48,10 +47,6 @@ public class ProcessServiceImpl implements ProcessService {
   /** The dataset metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
-
-  /** The dataflow controller zuul. */
-  @Autowired
-  private DataFlowControllerZuul dataflowControllerZuul;
 
 
   /**
