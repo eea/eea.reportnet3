@@ -32,7 +32,7 @@ import { QCGenericHistory } from './_components/QCGenericHistory';
 import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
-import { StepProgressBar } from 'views/_components/StepProgressBar';
+// import { StepProgressBar } from 'views/_components/StepProgressBar';
 import { TabsDesigner } from './_components/TabsDesigner';
 import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
@@ -195,8 +195,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const {
     arePrefilledTablesDeleted,
     datasetDescription,
-    datasetProgressBarCurrentStep,
-    datasetProgressBarSteps,
+    // datasetProgressBarCurrentStep,
+    // datasetProgressBarSteps,
     datasetSchemaAllTables,
     dataViewerOptions,
     isDataflowOpen,
@@ -735,6 +735,21 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         payload: { step: 1, currentStep: 2, isRunning: false, completed: false, withError: false }
       });
     }
+
+    const validationFinishedWithError = notificationContext.toShow.find(
+      notification => notification.key === 'IMPORT_DESIGN_FAILED_EVENT'
+    );
+
+    if (
+      validationFinishedWithError &&
+      validationFinishedWithError.content.datasetId?.toString() === datasetId.toString()
+    ) {
+      onHighlightRefresh(true);
+      designerDispatch({
+        type: 'SET_PROGRESS_STEP_BAR',
+        payload: { step: 1, currentStep: 2, isRunning: false, completed: false, withError: false }
+      });
+    }
     const isImportFieldSchemaCompleted = notificationContext.toShow.some(
       notification => notification.key === 'IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'
     );
@@ -1229,15 +1244,15 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const renderSwitchView = () => {
     const renderStepProgressBar = () => {
-      if (!isDesignDatasetEditorRead) {
-        return (
-          <StepProgressBar
-            className={styles.stepProgressBar}
-            currentStep={datasetProgressBarCurrentStep}
-            steps={datasetProgressBarSteps}
-          />
-        );
-      }
+      // if (!isDesignDatasetEditorRead) {
+      //   return (
+      //     <StepProgressBar
+      //       className={styles.stepProgressBar}
+      //       currentStep={datasetProgressBarCurrentStep}
+      //       steps={datasetProgressBarSteps}
+      //     />
+      //   );
+      // }
     };
 
     const viewModes = [
