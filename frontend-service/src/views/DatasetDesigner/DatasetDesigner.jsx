@@ -735,6 +735,21 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         payload: { step: 1, currentStep: 2, isRunning: false, completed: false, withError: false }
       });
     }
+
+    const validationFinishedWithError = notificationContext.toShow.find(
+      notification => notification.key === 'IMPORT_DESIGN_FAILED_EVENT'
+    );
+
+    if (
+      validationFinishedWithError &&
+      validationFinishedWithError.content.datasetId?.toString() === datasetId.toString()
+    ) {
+      onHighlightRefresh(true);
+      designerDispatch({
+        type: 'SET_PROGRESS_STEP_BAR',
+        payload: { step: 1, currentStep: 2, isRunning: false, completed: false, withError: false }
+      });
+    }
     const isImportFieldSchemaCompleted = notificationContext.toShow.some(
       notification => notification.key === 'IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'
     );
