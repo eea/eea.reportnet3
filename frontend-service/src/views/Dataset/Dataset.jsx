@@ -32,7 +32,7 @@ import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
-import { StepProgressBar } from 'views/_components/StepProgressBar';
+// import { StepProgressBar } from 'views/_components/StepProgressBar';
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -1066,15 +1066,15 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   );
 
   const renderStepProgressBar = () => {
-    if (hasWritePermissions) {
-      return (
-        <StepProgressBar
-          className={styles.stepProgressBar}
-          currentStep={datasetProgressBarSteps.currentStep}
-          steps={datasetProgressBarSteps.steps}
-        />
-      );
-    }
+    // if (hasWritePermissions) {
+    //   return (
+    //     <StepProgressBar
+    //       className={styles.stepProgressBar}
+    //       currentStep={datasetProgressBarSteps.currentStep}
+    //       steps={datasetProgressBarSteps.steps}
+    //     />
+    //   );
+    // }
   };
 
   const renderTableWebformView = () => {
