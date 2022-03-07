@@ -391,6 +391,16 @@ public class FileTreatmentHelper implements DisposableBean {
           throw new EEAException("Empty zip file");
         }
       } else {
+        // if the import goes to FME and it's a zip file, check if the zip is not empty to show
+        // error and avoid the call to FME
+        if (null != integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
+          try (ZipInputStream zip = new ZipInputStream(input)) {
+            ZipEntry entry = zip.getNextEntry();
+            if (null == entry) {
+              throw new EEAException("Empty zip file");
+            }
+          }
+        }
         File file = new File(folder, originalFileName);
 
         // Store the file in the persistence volume
@@ -688,7 +698,7 @@ public class FileTreatmentHelper implements DisposableBean {
         eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
             ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
             : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
-        kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, value);
+
       }
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);

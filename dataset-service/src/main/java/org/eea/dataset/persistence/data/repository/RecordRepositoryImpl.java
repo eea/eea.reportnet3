@@ -429,9 +429,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             columnName, filterValue);
         resultTable.put("totalRecords", totalRecords);
       }
+
+      Integer offsetAux = (limit * offset) - limit;
+      if (offsetAux < 0) {
+        offsetAux = 0;
+      }
+
       if (totalRecords == null || totalRecords != 0L) {
-        for (int offsetAux = offset; offsetAux < offset + limit; offsetAux += limitAux) {
-          if (offsetAux + limitAux > offset + limit) {
+        for (int offsetAux2 = offsetAux; offsetAux2 < offsetAux + limit; offsetAux2 += limitAux) {
+          if (offsetAux2 + limitAux > offsetAux + limit) {
             limitAux = limit % nHeaders;
           }
           // ask for records with offset
@@ -456,11 +462,28 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                     : "");
             stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
           }
+
+          stringQuery.append(") records where ");
+          if (StringUtils.isNotBlank(dataProviderCodes)) {
+            List<String> countryCodesList =
+                new ArrayList<>(Arrays.asList(dataProviderCodes.split(",")));
+            StringBuilder countries = new StringBuilder();
+            for (int i = 0; i < countryCodesList.size(); i++) {
+              countries.append("'" + countryCodesList.get(i) + "'");
+              if (i + 1 != countryCodesList.size()) {
+                countries.append(",");
+              }
+            }
+            stringQuery.append(null != countryCodesList
+                ? String.format("data_provider_code in (%s) and ", countries)
+                : "");
+          }
           stringQuery.append(String.format(
-              ") records where id_table_schema = '%s' group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position ",
+              "id_table_schema = '%s' group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position ",
               tableSchema.getIdTableSchema().toString()));
+
           if (null != filterValue || null != columnName) {
-            stringQuery.append(String.format(" offset %s limit %s ", offsetAux, limitAux));
+            stringQuery.append(String.format(" offset %s limit %s ", offsetAux2, limitAux));
             stringQuery.append(
                 ") as tableAux where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
                 .append(null != columnName ? " x.o ->> 'fieldName' = ? and " : "")
@@ -469,7 +492,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             stringQuery.append(" ) ");
           } else {
             stringQuery
-                .append(String.format(" offset %s limit %s ) tableAux", offsetAux, limitAux));
+                .append(String.format(" offset %s limit %s ) tableAux", offsetAux2, limitAux));
           }
           LOG.info("Query: {} ", stringQuery);
           Query query = entityManager.createNativeQuery(stringQuery.toString());

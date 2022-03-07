@@ -106,7 +106,7 @@ public class DeleteHelper {
         dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
 
     value.put(LiteralConstants.DATASET_ID, datasetId);
-    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
@@ -153,7 +153,7 @@ public class DeleteHelper {
           dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
 
       value.put(LiteralConstants.DATASET_ID, datasetId);
-      kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
       } catch (EEAException e) {

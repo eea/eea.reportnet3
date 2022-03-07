@@ -125,7 +125,7 @@ export const ImportTableDataDialog = ({
           accept=".csv"
           chooseLabel={resourcesContext.messages['selectFile']}
           dialogHeader={`${resourcesContext.messages['uploadTable']}${tableName}`}
-          dialogOnHide={() => setImportTableDialogVisible(false)} //allowTypes="/(\.|\/)(csv)$/"
+          dialogOnHide={() => setImportTableDialogVisible(false)}
           dialogVisible={importTableDialogVisible}
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
