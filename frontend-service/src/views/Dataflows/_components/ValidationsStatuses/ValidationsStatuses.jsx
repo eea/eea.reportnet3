@@ -93,7 +93,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     setIsDeleteDialogVisible(false);
 
     try {
-      // await DataflowService.removeFromQueue(validationStatusId); // TODO CORRECT SERVICE CALL
       getValidationsStatuses();
     } catch (error) {
       console.error('ValidationsStatus - onConfirmDeleteDialog.', error);
@@ -104,11 +103,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       setValidationStatusId(null);
     }
   };
-
-  // const onShowDeleteDialog = validation => {
-  //   setValidationStatusId(validation);
-  //   setIsDeleteDialogVisible(true);
-  // };
 
   const onHideDeleteDialog = () => {
     setIsDeleteDialogVisible(false);
@@ -195,12 +189,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         template: validation => getDateTemplate(validation, 'processFinishingDate'),
         className: styles.smallColumn
       }
-      // {
-      //   key: 'actions',
-      //   header: resourcesContext.messages['actions'],
-      //   template: getActionsTemplate,
-      //   className: styles.actionsColumn
-      // }
     ];
 
     return columns.map(column => (
@@ -215,16 +203,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       />
     ));
   };
-
-  // const getActionsTemplate = validation => (
-  //   <Button
-  //     className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink ${styles.deleteRowButton}`}
-  //     disabled={loadingStatus === 'pending'}
-  //     icon={validation.id === validationStatusId && loadingStatus === 'pending' ? 'spinnerAnimate' : 'trash'}
-  //     onClick={() => onShowDeleteDialog(validation)}
-  //     status="button"
-  //   />
-  // );
 
   const getDataflowTemplate = validation => (
     <p>

@@ -488,8 +488,10 @@ public class DataflowControllerImpl implements DataFlowController {
       try {
         DataFlowVO dataflow = dataflowService.getMetabaseById(dataFlowVO.getId());
         if (!TypeStatusEnum.DESIGN.equals(dataflow.getStatus())
-            && (TypeDataflowEnum.CITIZEN_SCIENCE.equals(dataflow.getType())
-                || TypeDataflowEnum.REPORTING.equals(dataflow.getType()))) {
+            && ((TypeDataflowEnum.CITIZEN_SCIENCE.equals(dataflow.getType())
+                || TypeDataflowEnum.REPORTING.equals(dataflow.getType()))
+                && (dataflow.isReleasable() == dataFlowVO.isReleasable()
+                    && dataflow.isShowPublicInfo() == dataFlowVO.isShowPublicInfo()))) {
           message = EEAErrorMessage.DATAFLOW_UPDATE_ERROR;
           status = HttpStatus.BAD_REQUEST;
         }

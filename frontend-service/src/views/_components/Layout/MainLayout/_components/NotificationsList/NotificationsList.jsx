@@ -91,7 +91,7 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
   };
 
   const linkTemplate = rowData => {
-    if (rowData.downloadButton) {      
+    if (rowData.downloadButton) {
       return rowData.downloadButton;
     }
 
@@ -130,7 +130,6 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
   };
 
   const notificationsFooter = (
-    // <div className={styles.notificationsFooter}>
     <div>
       <Button
         className="p-button-rounded p-button-secondary"
@@ -241,7 +240,7 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
         };
       });
 
-      setTotalRecords(unparsedNotifications.totalRecords);      
+      setTotalRecords(unparsedNotifications.totalRecords);
       setNotifications(notificationsArray);
     } catch (error) {
       console.error('NotificationsList - onLoadNotifications.', error);

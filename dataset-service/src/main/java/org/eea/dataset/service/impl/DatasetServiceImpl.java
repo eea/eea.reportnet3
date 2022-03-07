@@ -578,7 +578,7 @@ public class DatasetServiceImpl implements DatasetService {
           dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
 
       DataSetSchema schema =
-          schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getIdDatasetSchema()));
+          schemasRepository.findByIdDataSetSchema(new ObjectId(datasetMb.getDatasetSchema()));
 
       Map<String, String> mapIdNameDatasetSchema = new HashMap<>();
       for (TableSchema tableSchema : schema.getTableSchemas()) {
@@ -603,7 +603,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
 
-      statsList.add(fillStat(datasetId, null, "idDataSetSchema", dataset.getIdDatasetSchema()));
+      statsList.add(fillStat(datasetId, null, "idDataSetSchema", datasetMb.getDatasetSchema()));
       statsList.add(fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName()));
       statsList.add(fillStat(datasetId, null, "datasetErrors", datasetErrors.toString()));
 
@@ -1315,22 +1315,18 @@ public class DatasetServiceImpl implements DatasetService {
       String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
       String dataProviderCodes) {
     try {
-
-      String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-      DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
-          .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
-      if (tableSchemaId != null) {
-        List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-        Optional<TableSchema> table = tableSchemaList.stream()
-            .filter(
-                tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
-            .findFirst();
-        limit = limit < 10000 ? limit / 2
-            : limit
-                / (table.isPresent() ? table.get().getRecordSchema().getFieldSchema().size() : 2);
-      } else {
-        limit = limit < 10000 ? limit / 2 : limit / 10;
-      }
+      // LIMIT
+      /*
+       * String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+       * DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
+       * .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND)); if (tableSchemaId
+       * != null) { List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+       * Optional<TableSchema> table = tableSchemaList.stream() .filter( tableSchema ->
+       * tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId))) .findFirst(); limit =
+       * limit < 10000 ? limit / 2 : limit / (table.isPresent() ?
+       * table.get().getRecordSchema().getFieldSchema().size() : 2); } else { limit = limit < 10000
+       * ? limit / 2 : limit / 10; }
+       */
       long startTime = System.currentTimeMillis();
       LOG.info("ETL Export process initiated to DatasetId: {}", datasetId);
       exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset, filterValue,

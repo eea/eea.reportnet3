@@ -1643,6 +1643,7 @@ public class DatasetServiceTest {
     DataSetMetabase dsMetabase = new DataSetMetabase();
     dsMetabase.setDataSetName("prueba");
     dsMetabase.setId(1L);
+    dsMetabase.setDatasetSchema("5cf0e9b3b793310e9ceca190");
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     when(dataSetMetabaseRepository.findById(Mockito.any())).thenReturn(Optional.of(dsMetabase));
@@ -3153,10 +3154,10 @@ public class DatasetServiceTest {
     tSchema.setIdTableSchema(id);
     tSchema.setRecordSchema(rSchema);
     dsSchema.setTableSchemas(Arrays.asList(tSchema));
-    Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
-        .thenReturn("5cf0e9b3b793310e9ceca192");
+    // Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
+    // .thenReturn("5cf0e9b3b793310e9ceca192");
 
-    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(dsSchema));
+    // Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(dsSchema));
     Mockito
         .when(
             recordRepository.findAndGenerateETLJson(Mockito.anyLong(), Mockito.any(), Mockito.any(),
@@ -3183,10 +3184,10 @@ public class DatasetServiceTest {
     tSchema.setIdTableSchema(id);
     tSchema.setRecordSchema(rSchema);
     dsSchema.setTableSchemas(Arrays.asList(tSchema));
-    Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
-        .thenReturn("5cf0e9b3b793310e9ceca192");
+    // Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
+    // .thenReturn("5cf0e9b3b793310e9ceca192");
 
-    Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(dsSchema));
+    // Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(dsSchema));
     Mockito
         .when(
             recordRepository.findAndGenerateETLJson(Mockito.anyLong(), Mockito.any(), Mockito.any(),

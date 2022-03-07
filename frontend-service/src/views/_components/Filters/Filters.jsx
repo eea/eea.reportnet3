@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { noWait, useRecoilCallback } from 'recoil';
 
 import isNil from 'lodash/isNil';
@@ -58,6 +58,8 @@ export const Filters = ({
   recoilId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
+
+  const [viewDate, setViewData] = useState(undefined);
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
@@ -171,6 +173,7 @@ export const Filters = ({
         option={option}
         panelClassName={panelClassName}
         recoilId={recoilId}
+        viewDate={viewDate}
       />
     );
   };
@@ -215,6 +218,7 @@ export const Filters = ({
             icon="undo"
             label={resourcesContext.messages['reset']}
             onClick={async () => {
+              setViewData(new Date());
               await onResetFilters();
               await onReset({ sortByHeader: '', sortByOption: 'idle' });
             }}

@@ -182,6 +182,10 @@ public class CSVReaderStrategy implements ReaderStrategy {
       // Get the first Line
       List<String> firstLine = Arrays.asList(reader.readNext());
 
+      if (firstLine.size() == 1) {
+        firstLine.set(0, firstLine.get(0).replace(" ", ""));
+      }
+
       // if first line is empty throw an error
       lineEmpty(firstLine);
 

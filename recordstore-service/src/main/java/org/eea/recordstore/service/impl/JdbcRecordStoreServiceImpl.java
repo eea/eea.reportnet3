@@ -842,8 +842,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         });
   }
 
-
-
   /**
    * Update materialized query view.
    *
@@ -1119,6 +1117,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     return line;
   }
 
+
   /**
    * Delete file.
    *
@@ -1291,8 +1290,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
           && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
-        // Send kafka event to launch Validation
-        kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
         releaseNotificableKafkaEvent(successEventType, value, datasetId, null);
       }
       if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
