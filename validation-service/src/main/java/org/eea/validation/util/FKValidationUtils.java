@@ -204,11 +204,6 @@ public class FKValidationUtils {
     Long datasetIdRefered =
         dataSetControllerZuul.getReferencedDatasetId(datasetIdReference, idFieldSchemaPKString);
 
-    // Get PK Schema
-    // String pkSchemaId = datasetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdRefered);
-    // DataSetSchema datasetSchemaPK =
-    // schemasRepository.findByIdDataSetSchema(new ObjectId(pkSchemaId));
-
     // get Orig name
     TableSchema tableName = getTableSchemaFromIdFieldSchema(datasetSchemaFK, idFieldSchema);
 
@@ -248,35 +243,54 @@ public class FKValidationUtils {
             fkConditionalLinkedFieldSchemaId, pkValidation, pkMustBeUsed);
       }
     } else {
-      if (!pkMustBeUsed) {
-        // Counts fks
-        Integer totalRecords = getSinglesFKs(Long.valueOf(datasetIdReference), idFieldSchema);
-        int batchSize = 5000;
-        int pkBatchSize = batchSize / 2;
-        for (int fkindex = 0; fkindex < totalRecords; fkindex += batchSize) {
-          for (int pkindex = 0; pkindex < totalRecords; pkindex += pkBatchSize) {
-            List<FieldValue> fkFields = fieldRepository.querySinglePK(
-                String.format(FK_SINGLE_WRONG, datasetIdReference, idFieldSchema, datasetIdRefered,
-                    idFieldSchemaPKString, pkBatchSize, pkindex, batchSize, fkindex));
-            if (null != fkFields && !fkFields.isEmpty()) {
-              fkFields.get(0);
-              createFieldValueValidationV2(fkFields, pkValidation, errorFields);
-              saveFieldValidations(errorFields);
-              fkFields.clear();
-            }
+      return calculateFKsimple(idFieldSchema, pkMustBeUsed, datasetIdReference,
+          idFieldSchemaPKString, fkFieldSchema, datasetIdRefered, pkValidation, errorFields);
+    }
+  }
+
+  /**
+   * Calculate Fk simple.
+   *
+   * @param idFieldSchema the id field schema
+   * @param pkMustBeUsed the pk must be used
+   * @param datasetIdReference the dataset id reference
+   * @param idFieldSchemaPKString the id field schema PK string
+   * @param fkFieldSchema the fk field schema
+   * @param datasetIdRefered the dataset id refered
+   * @param pkValidation the pk validation
+   * @param errorFields the error fields
+   * @return the boolean
+   */
+  private static Boolean calculateFKsimple(String idFieldSchema, boolean pkMustBeUsed,
+      long datasetIdReference, String idFieldSchemaPKString, FieldSchema fkFieldSchema,
+      Long datasetIdRefered, Validation pkValidation, List<FieldValue> errorFields) {
+    if (!pkMustBeUsed) {
+      // Counts fks
+      Integer totalRecords = getSinglesFKs(Long.valueOf(datasetIdReference), idFieldSchema);
+      int batchSize = 5000;
+      int pkBatchSize = batchSize / 2;
+      for (int fkindex = 0; fkindex < totalRecords; fkindex += batchSize) {
+        for (int pkindex = 0; pkindex < totalRecords; pkindex += pkBatchSize) {
+          List<FieldValue> fkFields = fieldRepository.queryPKNativeFieldValue(
+              String.format(FK_SINGLE_WRONG, datasetIdReference, idFieldSchema, datasetIdRefered,
+                  idFieldSchemaPKString, pkBatchSize, pkindex, batchSize, fkindex));
+          if (null != fkFields && !fkFields.isEmpty()) {
+            createFieldValueValidationV2(fkFields, pkValidation, errorFields);
+            saveFieldValidations(errorFields);
+            fkFields.clear();
           }
         }
-        // Force true because we only need Field Validations
-        return true;
-      } else {
-        // only count < 0 pk are not used
-        if (null != fkFieldSchema && null != fkFieldSchema.getPkMustBeUsed()) {
-          return getSinglesPKsMustBeUsed(datasetIdReference, idFieldSchema, datasetIdRefered,
-              idFieldSchemaPKString);
-        }
       }
+      // Force true because we only need Field Validations
       return true;
+    } else {
+      // only count < 0 pk are not used
+      if (null != fkFieldSchema && null != fkFieldSchema.getPkMustBeUsed()) {
+        return getSinglesPKsMustBeUsed(datasetIdReference, idFieldSchema, datasetIdRefered,
+            idFieldSchemaPKString);
+      }
     }
+    return true;
   }
 
   /**
