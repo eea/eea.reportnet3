@@ -60,17 +60,19 @@ public class RefreshReferenceDatasetCommand extends AbstractEEAEventHandlerComma
     Boolean released = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("released")));
     List<Integer> referenceDatasets =
         (List<Integer>) eeaEventVO.getData().get("referencesToRefresh");
+    String processId = String.valueOf(eeaEventVO.getData().get("processId"));
 
     List<Long> referencesToRefresh = referenceDatasets.stream().mapToLong(Integer::longValue)
         .boxed().collect(Collectors.toList());
 
     if (referencesToRefresh != null && !CollectionUtils.isEmpty(referencesToRefresh)) {
-      recordStoreService.refreshMaterializedQuery(referencesToRefresh, true, released, datasetId);
+      recordStoreService.refreshMaterializedQuery(referencesToRefresh, true, released, datasetId,
+          processId);
     } else {
       Map<String, Object> values = new HashMap<>();
       values.put(LiteralConstants.DATASET_ID, datasetId);
       values.put("released", released);
-      values.put("processId", String.valueOf(eeaEventVO.getData().get("processId")));
+      values.put("processId", processId);
       kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
     }
   }
