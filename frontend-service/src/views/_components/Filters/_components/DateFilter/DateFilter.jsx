@@ -25,7 +25,8 @@ export const DateFilter = ({
   onSort,
   option,
   panelClassName,
-  recoilId
+  recoilId,
+  viewDate
 }) => {
   const { userProps } = useContext(UserContext);
 
@@ -117,6 +118,7 @@ export const DateFilter = ({
           readOnlyInput={true}
           selectionMode="range"
           value={parseDateValues(filterBy[option.key])}
+          viewDate={viewDate}
           yearNavigator={true}
         />
 

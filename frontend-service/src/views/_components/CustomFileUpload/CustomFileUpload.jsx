@@ -210,7 +210,7 @@ export const CustomFileUpload = ({
     return false;
   };
 
-  const validate = async file => {
+  const validate = file => {
     if (maxFileSize && file.size > maxFileSize) {
       messagesUI.current.show({
         life: config.IMPORT_ERROR_LIFETIME,
@@ -231,7 +231,7 @@ export const CustomFileUpload = ({
 
     if (onValidateFile) {
       setIsValidating(true);
-      const validations = await onValidateFile(file);
+      const validations = onValidateFile(file);
       if (!isEmpty(validations)) {
         let hasErrors = false;
         validations.forEach(validation => {
