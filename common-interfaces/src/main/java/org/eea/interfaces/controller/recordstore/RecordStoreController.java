@@ -148,9 +148,11 @@ public interface RecordStoreController {
    * Refresh materialized view.
    *
    * @param datasetId the dataset id
+   * @param processId the process id
    */
   @PutMapping("/private/refreshMaterializedView")
-  void refreshMaterializedView(@RequestParam("datasetId") Long datasetId);
+  void refreshMaterializedView(@RequestParam("datasetId") Long datasetId,
+      @RequestParam(value = "processId", required = false) String processId);
 
 
   /**

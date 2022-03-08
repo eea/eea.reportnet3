@@ -59,7 +59,7 @@ public class RefreshReferenceDatasetCommandTest {
   public void testExecute() throws Exception {
     refreshReferenceDatasetCommand.execute(eeaEventVO);
     Mockito.verify(recordStoreService, Mockito.times(1)).refreshMaterializedQuery(Mockito.any(),
-        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyLong());
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyString());
   }
 
 }
