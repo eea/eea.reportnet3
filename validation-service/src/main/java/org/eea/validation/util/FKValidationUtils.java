@@ -190,6 +190,7 @@ public class FKValidationUtils {
    */
   public static Boolean isfieldFK(DatasetValue datasetValue, String idFieldSchema, String idRule,
       boolean pkMustBeUsed) {
+    boolean result = true;
     // Id dataset to Validate
     long datasetIdReference = datasetValue.getId();
 
@@ -209,43 +210,70 @@ public class FKValidationUtils {
 
     // GetValidationData
     Validation pkValidation = createValidation(idRule, fkSchemaId, tableName, fkFieldSchema);
-    List<FieldValue> errorFields = new ArrayList<>();
+
     // Optionals FK fields
     if (null != fkFieldSchema && null != fkFieldSchema.getReferencedField()
         && null != fkFieldSchema.getReferencedField().getLinkedConditionalFieldId()
         && null != fkFieldSchema.getReferencedField().getMasterConditionalFieldId()) {
-      String fkConditionalLinkedFieldSchemaId =
-          fkFieldSchema.getReferencedField().getLinkedConditionalFieldId().toString();
-      String fkConditionalMasterFieldSchemaId =
-          fkFieldSchema.getReferencedField().getMasterConditionalFieldId().toString();
-
-      String datasetIdFK = Long.toString(datasetIdReference);
-      String fkFieldSchemaId = fkFieldSchema.getIdFieldSchema().toString();
-      String datasetIdPK = Long.toString(datasetIdRefered);
-
-      String query = String.format(COMPOSE_PK_LIST, datasetIdFK, fkFieldSchemaId, datasetIdFK,
-          fkFieldSchemaId, datasetIdFK, fkConditionalMasterFieldSchemaId, datasetIdFK, datasetIdPK,
-          idFieldSchemaPKString, datasetIdPK, fkConditionalLinkedFieldSchemaId, datasetIdPK);
-
-      List<String> ifFKs = createAndExecuteQuery(query);
-      List<FieldValue> fieldsToValidate = new ArrayList<>();
-      if (!ifFKs.isEmpty()) {
-        fieldsToValidate = fieldRepository.findByIds(ifFKs);
-      }
-      if (!pkMustBeUsed && Boolean.FALSE.equals(fkFieldSchema.getPkHasMultipleValues())) {
-        createFieldValueValidationQuery(fieldsToValidate, pkValidation, errorFields);
-        saveFieldValidations(errorFields);
-        // Force true because we only need Field Validations
-        return true;
-      } else {
-        return setValuesToValidateQuery(fkFieldSchema, datasetIdFK,
-            fkConditionalMasterFieldSchemaId, datasetIdPK, idFieldSchemaPKString,
-            fkConditionalLinkedFieldSchemaId, pkValidation, pkMustBeUsed);
-      }
+      result = calculateFKCompose(pkMustBeUsed, datasetIdReference, idFieldSchemaPKString,
+          fkFieldSchema, datasetIdRefered, pkValidation);
     } else {
-      return calculateFKsimple(idFieldSchema, pkMustBeUsed, datasetIdReference,
-          idFieldSchemaPKString, fkFieldSchema, datasetIdRefered, pkValidation, errorFields);
+      result = calculateFKsimple(idFieldSchema, pkMustBeUsed, datasetIdReference,
+          idFieldSchemaPKString, fkFieldSchema, datasetIdRefered, pkValidation);
     }
+    return result;
+  }
+
+  /**
+   * Calculate FK compose.
+   *
+   * @param pkMustBeUsed the pk must be used
+   * @param datasetIdReference the dataset id reference
+   * @param idFieldSchemaPKString the id field schema PK string
+   * @param fkFieldSchema the fk field schema
+   * @param datasetIdRefered the dataset id refered
+   * @param pkValidation the pk validation
+   * @return true, if successful
+   */
+  private static boolean calculateFKCompose(boolean pkMustBeUsed, long datasetIdReference,
+      String idFieldSchemaPKString, FieldSchema fkFieldSchema, Long datasetIdRefered,
+      Validation pkValidation) {
+    boolean result;
+    String fkConditionalLinkedFieldSchemaId =
+        fkFieldSchema.getReferencedField().getLinkedConditionalFieldId().toString();
+    String fkConditionalMasterFieldSchemaId =
+        fkFieldSchema.getReferencedField().getMasterConditionalFieldId().toString();
+
+    String datasetIdFK = Long.toString(datasetIdReference);
+    String fkFieldSchemaId = fkFieldSchema.getIdFieldSchema().toString();
+    String datasetIdPK = Long.toString(datasetIdRefered);
+
+    String query = String.format(COMPOSE_PK_LIST, datasetIdFK, fkFieldSchemaId, datasetIdFK,
+        fkFieldSchemaId, datasetIdFK, fkConditionalMasterFieldSchemaId, datasetIdFK, datasetIdPK,
+        idFieldSchemaPKString, datasetIdPK, fkConditionalLinkedFieldSchemaId, datasetIdPK);
+
+
+    List<FieldValue> errorFields = new ArrayList<>();
+    if (!pkMustBeUsed && Boolean.FALSE.equals(fkFieldSchema.getPkHasMultipleValues())) {
+      List<String> ifFKs = createAndExecuteQuery(query);
+      while (!ifFKs.isEmpty()) {
+        int pkCount = ifFKs.size();
+        int batchSize = pkCount < 5000 ? pkCount : 5000;
+        List<String> fkAuxLsit = ifFKs.subList(0, batchSize);
+        createFieldValueValidationQuery(fieldRepository.findByIds(fkAuxLsit), pkValidation,
+            errorFields);
+        saveFieldValidations(errorFields);
+        errorFields.clear();
+        ifFKs = ifFKs.subList(batchSize, pkCount);
+      }
+      // Force true because we only need Field Validations
+      result = true;
+    } else {
+      result = setValuesToValidateQuery(fkFieldSchema, datasetIdFK,
+          fkConditionalMasterFieldSchemaId, datasetIdPK, idFieldSchemaPKString,
+          fkConditionalLinkedFieldSchemaId, pkValidation, pkMustBeUsed);
+    }
+    return result;
   }
 
   /**
@@ -258,14 +286,15 @@ public class FKValidationUtils {
    * @param fkFieldSchema the fk field schema
    * @param datasetIdRefered the dataset id refered
    * @param pkValidation the pk validation
-   * @param errorFields the error fields
    * @return the boolean
    */
   private static Boolean calculateFKsimple(String idFieldSchema, boolean pkMustBeUsed,
       long datasetIdReference, String idFieldSchemaPKString, FieldSchema fkFieldSchema,
-      Long datasetIdRefered, Validation pkValidation, List<FieldValue> errorFields) {
+      Long datasetIdRefered, Validation pkValidation) {
+    boolean result = true;
     if (!pkMustBeUsed) {
       // Counts fks
+      List<FieldValue> errorFields = new ArrayList<>();
       Integer totalRecords = getSinglesFKs(Long.valueOf(datasetIdReference), idFieldSchema);
       int batchSize = 5000;
       int pkBatchSize = batchSize / 2;
@@ -278,19 +307,20 @@ public class FKValidationUtils {
             createFieldValueValidationV2(fkFields, pkValidation, errorFields);
             saveFieldValidations(errorFields);
             fkFields.clear();
+            errorFields.clear();
           }
         }
       }
       // Force true because we only need Field Validations
-      return true;
+      result = true;
     } else {
       // only count < 0 pk are not used
       if (null != fkFieldSchema && null != fkFieldSchema.getPkMustBeUsed()) {
-        return getSinglesPKsMustBeUsed(datasetIdReference, idFieldSchema, datasetIdRefered,
+        result = getSinglesPKsMustBeUsed(datasetIdReference, idFieldSchema, datasetIdRefered,
             idFieldSchemaPKString);
       }
     }
-    return true;
+    return result;
   }
 
   /**
