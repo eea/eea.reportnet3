@@ -44,12 +44,14 @@ public interface FieldExtendedRepository {
    */
   Long getCount(String generatedQuery);
 
+
+
   /**
-   * Query single PK.
+   * Query PK native field value.
    *
    * @param generatedQuery the generated query
    * @return the list
    */
-  List<FieldValue> querySinglePK(String generatedQuery);
+  List<FieldValue> queryPKNativeFieldValue(String generatedQuery);
 
 }
