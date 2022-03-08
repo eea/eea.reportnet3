@@ -854,7 +854,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Async
   public void updateMaterializedQueryView(Long datasetId, String user, Boolean released,
       String processId) {
-    LOG.info(" Update Materialized Views from Dataset id: %s", datasetId);
+    LOG.info(" Update Materialized Views from Dataset id: {}", datasetId);
 
     DataSetMetabaseVO datasetMetabaseVO =
         dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
