@@ -16,6 +16,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAException;
@@ -268,7 +269,16 @@ public class ValidationHelper implements DisposableBean {
         ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId, processId,
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    if (Boolean.FALSE.equals(updateViews)) {
+    // If there's no SQL rules enabled, no need to refresh the views, so directly start the
+    // validation
+    List<Rule> listSql =
+        rulesRepository.findSqlRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
+    Boolean hasSqlEnabled = true;
+    if (CollectionUtils.isEmpty(listSql)) {
+      hasSqlEnabled = false;
+    }
+
+    if (Boolean.FALSE.equals(updateViews) || Boolean.FALSE.equals(hasSqlEnabled)) {
       executeValidationProcess(datasetId, processId, released);
     } else {
       deleteLockToReleaseProcess(datasetId);
@@ -330,8 +340,8 @@ public class ValidationHelper implements DisposableBean {
         for (Map.Entry<Long, Long> auxDatasetOldAndNew : datasetIdOldNew.entrySet()) {
           datasetsNotChanged.remove(auxDatasetOldAndNew.getKey().toString());
         }
-        datasetsToRefresh
-            .addAll(datasetsNotChanged.stream().map(Long::parseLong).collect(Collectors.toList()));
+        datasetsToRefresh.addAll(datasetsNotChanged.stream().map(Long::parseLong).distinct()
+            .collect(Collectors.toList()));
 
       }
     }
