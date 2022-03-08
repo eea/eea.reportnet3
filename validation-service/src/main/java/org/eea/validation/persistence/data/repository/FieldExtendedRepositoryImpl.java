@@ -49,13 +49,13 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
 
 
   /**
-   * Query single PK.
+   * Query PK native field value.
    *
    * @param generatedQuery the generated query
    * @return the list
    */
   @Override
-  public List<FieldValue> querySinglePK(String generatedQuery) {
+  public List<FieldValue> queryPKNativeFieldValue(String generatedQuery) {
     Query query = entityManager.createNativeQuery(generatedQuery, FieldValue.class);
     return query.setHint(QueryHints.READ_ONLY, true).getResultList();
 
