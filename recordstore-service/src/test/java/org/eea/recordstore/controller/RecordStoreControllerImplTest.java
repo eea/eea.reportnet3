@@ -219,9 +219,9 @@ public class RecordStoreControllerImplTest {
 
   @Test
   public void testRefreshMaterializedView() {
-    recordStoreControllerImpl.refreshMaterializedView(1L);
+    recordStoreControllerImpl.refreshMaterializedView(1L, null);
     Mockito.verify(recordStoreService, times(1)).refreshMaterializedQuery(Mockito.any(),
-        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any());
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
   }
 
   @Test
