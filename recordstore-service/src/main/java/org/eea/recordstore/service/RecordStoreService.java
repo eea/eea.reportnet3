@@ -164,9 +164,10 @@ public interface RecordStoreService {
    * @param continueValidation the continue validation
    * @param released the released
    * @param datasetId the dataset id
+   * @param processId the process id
    */
   void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation, boolean released,
-      Long datasetId);
+      Long datasetId, String processId);
 
   /**
    * Update snapshot disabled.

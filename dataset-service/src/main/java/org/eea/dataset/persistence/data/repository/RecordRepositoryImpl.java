@@ -508,7 +508,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
           Object result = null;
           try {
-            result = query.setHint(QueryHints.READ_ONLY, true).getResultList();
+            result = query.getResultList();
           } catch (NoResultException nre) {
             LOG.info("no result, ignore message");
           }

@@ -345,16 +345,20 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * Refresh materialized view.
    *
    * @param datasetId the dataset id
+   * @param processId the process id
    */
   @Override
   @PutMapping("/private/refreshMaterializedView")
   @ApiOperation(value = "Refreshes a materialized view", hidden = true)
   public void refreshMaterializedView(
-      @ApiParam(value = "Dataset Id", example = "0") @RequestParam("datasetId") Long datasetId) {
+      @ApiParam(value = "Dataset Id", example = "0") @RequestParam("datasetId") Long datasetId,
+      @ApiParam(value = "ProcessId", example = "0") @RequestParam(value = "processId",
+          required = false) String processId) {
 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
-    recordStoreService.refreshMaterializedQuery(Arrays.asList(datasetId), false, false, null);
+    recordStoreService.refreshMaterializedQuery(Arrays.asList(datasetId), false, false, datasetId,
+        processId);
   }
 
   /**
