@@ -218,10 +218,11 @@ public interface DatasetSnapshotService {
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
    * @param restrictFromPublic the restrict from public
+   * @param validate the validate
    * @throws EEAException the EEA exception
    */
-  void createReleaseSnapshots(Long dataflowId, Long dataProviderId, boolean restrictFromPublic)
-      throws EEAException;
+  void createReleaseSnapshots(Long dataflowId, Long dataProviderId, boolean restrictFromPublic,
+      boolean validate) throws EEAException;
 
 
   /**
@@ -257,4 +258,5 @@ public interface DatasetSnapshotService {
    * @param datasetId the dataset id
    */
   public void deleteSnapshotByDatasetIdAndDateReleasedIsNull(Long datasetId);
+
 }
