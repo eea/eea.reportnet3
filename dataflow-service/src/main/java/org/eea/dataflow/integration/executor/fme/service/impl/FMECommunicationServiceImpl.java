@@ -1,6 +1,9 @@
 package org.eea.dataflow.integration.executor.fme.service.impl;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -63,6 +66,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import com.google.common.io.ByteStreams;
 
 /**
  * The Class FMECommunicationServiceImpl.
@@ -214,16 +218,13 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   /**
    * Send file.
    *
-   * @param file the file
    * @param idDataset the id dataset
    * @param idProvider the id provider
    * @param fileName the file name
-   *
    * @return the file submit result
    */
   @Override
-  public FileSubmitResult sendFile(byte[] file, Long idDataset, String idProvider,
-      String fileName) {
+  public FileSubmitResult sendFile(Long idDataset, String idProvider, String fileName) {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(DATASETID, String.valueOf(idDataset));
@@ -237,26 +238,38 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     }
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
-
+    File file = new File(fileName);
     try {
-      headerInfo.put("Content-Disposition",
-          "attachment; filename*=UTF-8''\"" + URLEncoder.encode(fileName, "UTF-8") + "\"");
+      if (null != file) {
+        headerInfo.put("Content-Disposition",
+            "attachment; filename*=UTF-8''\"" + URLEncoder.encode(file.getName(), "UTF-8") + "\"");
+      }
     } catch (UnsupportedEncodingException e) {
-      LOG_ERROR.error("Error encoding file: {}", fileName);
+      LOG_ERROR.error("Error encoding file: {}", file.getName());
     }
     headerInfo.put(CONTENT_TYPE, "application/octet-stream");
     headerInfo.put(ACCEPT, APPLICATION_JSON);
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(idDataset);
-    HttpEntity<byte[]> request =
-        createHttpRequest(file, uriParams, headerInfo, dataset.getDataflowId());
-    String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
-        .buildAndExpand(uriParams).toString();
-    ResponseEntity<FileSubmitResult> checkResult =
-        this.restTemplate.exchange(url, HttpMethod.POST, request, FileSubmitResult.class);
 
+    byte[] filedata = null;
     FileSubmitResult result = new FileSubmitResult();
-    if (null != checkResult && null != checkResult.getBody()) {
-      result = checkResult.getBody();
+    try (InputStream inputStream = new FileInputStream(file)) {
+      filedata = ByteStreams.toByteArray(inputStream);
+
+      HttpEntity<byte[]> request =
+          createHttpRequest(filedata, uriParams, headerInfo, dataset.getDataflowId());
+      String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
+          .buildAndExpand(uriParams).toString();
+
+      ResponseEntity<FileSubmitResult> checkResult =
+          this.restTemplate.exchange(url, HttpMethod.POST, request, FileSubmitResult.class);
+
+      if (null != checkResult && null != checkResult.getBody()) {
+        result = checkResult.getBody();
+      }
+    } catch (IOException e) {
+      LOG_ERROR.error("Error getting the file to send it to FME. File {}, datasetId {}",
+          file.getName(), dataset.getId());
     }
     return result;
 

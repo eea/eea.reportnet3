@@ -5,7 +5,6 @@ package org.eea.dataflow.integration.executor.fme;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -279,11 +278,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
 
-        byte[] decodedBytes = Base64.getDecoder()
-            .decode(integration.getExternalParameters().get(IntegrationParams.FILE_IS));
-
         LOG.info("Upload {} to FME", fileName);
-        fmeCommunicationService.sendFile(decodedBytes, datasetId, paramDataProvider, fileName);
+        fmeCommunicationService.sendFile(datasetId, paramDataProvider, fileName);
         LOG.info("File uploaded");
 
         LOG.info("Executing FME Import: fmeAsyncJob={}", fmeAsyncJob);

@@ -30,14 +30,12 @@ public interface FMECommunicationService {
   /**
    * Send file.
    *
-   * @param file the file
    * @param idDataset the id dataset
    * @param idProvider the id provider
    * @param fileName the file name
-   *
    * @return the file submit result
    */
-  FileSubmitResult sendFile(byte[] file, Long idDataset, String idProvider, String fileName);
+  FileSubmitResult sendFile(Long idDataset, String idProvider, String fileName);
 
   /**
    * Creates the directory.
