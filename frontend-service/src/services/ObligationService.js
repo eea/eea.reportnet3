@@ -1,5 +1,8 @@
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+
+import utc from 'dayjs/plugin/utc';
 
 import { ObligationUtils } from 'services/_utils/ObligationUtils';
 
@@ -27,13 +30,19 @@ export const ObligationService = {
   },
 
   getOpen: async filterData => {
+    dayjs.extend(utc);
+
     const getOpenedObligationsDTO = async () => {
       if (!isEmpty(filterData)) {
         const countryId = !isNil(filterData.countries) ? filterData.countries.value : '';
         const dateFrom =
-          !isNil(filterData.expirationDate) && filterData.expirationDate[0] ? filterData.expirationDate[0] : '';
+          !isNil(filterData.expirationDate) && filterData.expirationDate[0]
+            ? new Date(dayjs(filterData.expirationDate[0]).utc(true).valueOf()).getTime()
+            : '';
         const dateTo =
-          !isNil(filterData.expirationDate) && filterData.expirationDate[1] ? filterData.expirationDate[1] : '';
+          !isNil(filterData.expirationDate) && filterData.expirationDate[1]
+            ? new Date(dayjs(filterData.expirationDate[1]).utc(true).endOf('day').valueOf()).getTime()
+            : '';
         const issueId = !isNil(filterData.issues) ? filterData.issues.value : '';
         const organizationId = !isNil(filterData.organizations) ? filterData.organizations.value : '';
 
