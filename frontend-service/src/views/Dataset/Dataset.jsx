@@ -1203,7 +1203,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             <DatasetDashboardDialog
               disabled={!datasetHasData}
               levelErrorTypes={levelErrorTypes}
-              tableSchemaNames={schemaTables.map(table => table.name)}
+              tableSchemas={schemaTables.map(table => table.name)}
             />
             <Button
               className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${

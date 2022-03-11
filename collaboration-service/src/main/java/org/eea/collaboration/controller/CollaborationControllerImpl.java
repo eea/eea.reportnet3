@@ -76,7 +76,7 @@ public class CollaborationControllerImpl implements CollaborationController {
   @Override
   @HystrixCommand
   @PostMapping("/createMessage/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_STEWARD_SUPPORT')OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Creates a new message assigned to a Dataflow", hidden = true,
       response = MessageVO.class)
   @ApiResponses(value = {@ApiResponse(code = 400, message = "Error creating message"),
