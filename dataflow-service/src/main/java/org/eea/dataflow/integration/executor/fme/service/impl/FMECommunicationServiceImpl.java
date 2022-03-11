@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
@@ -240,7 +241,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     Map<String, String> headerInfo = new HashMap<>();
     File file = new File(fileName);
     try {
-      if (null != file) {
+      if (StringUtils.isNotBlank(file.getName())) {
         headerInfo.put("Content-Disposition",
             "attachment; filename*=UTF-8''\"" + URLEncoder.encode(file.getName(), "UTF-8") + "\"");
       }
