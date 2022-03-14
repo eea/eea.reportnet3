@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -49,7 +50,6 @@ import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
@@ -59,7 +59,6 @@ import org.eea.interfaces.controller.validation.RulesController.RulesControllerZ
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -76,6 +75,7 @@ import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -225,10 +225,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The validation controller zuul. */
   @Autowired
   private ValidationControllerZuul validationControllerZuul;
-
-  /** The collaboration controller zuul. */
-  @Autowired
-  private CollaborationControllerZuul collaborationControllerZuul;
 
   /**
    * Gets the by id.
@@ -1062,7 +1058,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   @Async
   public void createReleaseSnapshots(Long dataflowId, Long dataProviderId,
-      boolean restrictFromPublic) throws EEAException {
+      boolean restrictFromPublic, boolean validate) throws EEAException {
     LOG.info("Releasing datasets process begins. DataflowId: {} DataProviderId: {}", dataflowId,
         dataProviderId);
     // First dataset involved in the process
@@ -1080,19 +1076,19 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     representativeControllerZuul.updateRepresentativeVisibilityRestrictions(dataflowId,
         dataProviderId, restrictFromPublic);
 
-    validationControllerZuul.validateDataSetData(dataset.getId(), true);
+    // if the user is admin can release without validations
+    if (!isAdmin() || validate) {
+      validationControllerZuul.validateDataSetData(dataset.getId(), true);
+    } else {
+      String processId = UUID.randomUUID().toString();
+      String notificationUser = SecurityContextHolder.getContext().getAuthentication().getName();
+      Map<String, Object> value = new HashMap<>();
+      value.put(LiteralConstants.DATASET_ID, dataset.getId());
+      value.put("uuid", processId);
+      value.put("user", notificationUser);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
+    }
 
-    String country = dataset.getDataSetName();
-    DataFlowVO dataflowVO = dataflowControllerZuul.findById(dataflowId, dataProviderId);
-    String dataflowName = dataflowVO.getName();
-
-    MessageVO messageVO = new MessageVO();
-    messageVO.setProviderId(dataProviderId);
-    messageVO.setContent(country + " released " + dataflowName + " successfully");
-    messageVO.setAutomatic(true);
-    collaborationControllerZuul.createMessage(dataflowId, messageVO);
-    LOG.info("Automatic feedback message created of dataflow {}. Message: {}", dataflowId,
-        messageVO.getContent());
   }
 
 
@@ -1215,6 +1211,17 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void deleteSnapshotByDatasetIdAndDateReleasedIsNull(Long datasetId) {
     snapshotRepository.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
     LOG.info("Snapshots deleted from dataset: {}", datasetId);
+  }
+
+  /**
+   * Checks if is admin.
+   *
+   * @return true, if is admin
+   */
+  private boolean isAdmin() {
+    String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
+    return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+        .anyMatch(role -> roleAdmin.equals(role.getAuthority()));
   }
 
   /**

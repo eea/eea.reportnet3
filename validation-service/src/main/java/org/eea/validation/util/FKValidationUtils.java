@@ -296,7 +296,7 @@ public class FKValidationUtils {
       // Counts fks
       List<FieldValue> errorFields = new ArrayList<>();
       Integer totalRecords = getSinglesFKs(Long.valueOf(datasetIdReference), idFieldSchema);
-      int batchSize = 5000;
+      int batchSize = 50000;
       int pkBatchSize = batchSize / 2;
       for (int fkindex = 0; fkindex < totalRecords; fkindex += batchSize) {
         for (int pkindex = 0; pkindex < totalRecords; pkindex += pkBatchSize) {

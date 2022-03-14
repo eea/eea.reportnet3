@@ -1,8 +1,9 @@
-import dayjs from 'dayjs';
-
 import camelCase from 'lodash/camelCase';
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+
+import utc from 'dayjs/plugin/utc';
 
 import { config } from 'conf';
 
@@ -199,6 +200,8 @@ const replacements = {
 };
 
 const parseRequestFilterBy = filterBy => {
+  dayjs.extend(utc);
+
   if (isEmpty(filterBy)) {
     return {};
   }
@@ -218,11 +221,15 @@ const parseRequestFilterBy = filterBy => {
 
       if (TextUtils.areEquals(key, 'creationDate') || TextUtils.areEquals(key, 'expirationDate')) {
         if (filterBy[key][0] && !filterBy[key][1]) {
-          results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-          results[`${replacements[key]}_to`] = `${new Date(dayjs(filterBy[key][0]).endOf('day').format()).getTime()}`;
+          results[`${replacements[key]}_from`] = new Date(dayjs(filterBy[key][0]).utc(true).valueOf()).getTime();
+          results[`${replacements[key]}_to`] = new Date(
+            dayjs(filterBy[key][0]).utc(true).endOf('day').valueOf()
+          ).getTime();
         } else {
-          results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-          results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
+          results[`${replacements[key]}_from`] = new Date(dayjs(filterBy[key][0]).utc(true).valueOf()).getTime();
+          results[`${replacements[key]}_to`] = new Date(
+            dayjs(filterBy[key][1]).utc(true).endOf('day').valueOf()
+          ).getTime();
         }
 
         delete results[replacements[key]];
@@ -254,6 +261,8 @@ const parseRequestPublicCountrySortField = sortField => {
 };
 
 const parseRequestPublicCountryFilterBy = filterBy => {
+  dayjs.extend(utc);
+
   if (isEmpty(filterBy)) {
     return {};
   }
@@ -287,11 +296,15 @@ const parseRequestPublicCountryFilterBy = filterBy => {
 
       if (TextUtils.areEquals(key, 'deadline') || TextUtils.areEquals(key, 'deliveryDate')) {
         if (filterBy[key][0] && !filterBy[key][1]) {
-          results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-          results[`${replacements[key]}_to`] = `${new Date(dayjs(filterBy[key][0]).endOf('day').format()).getTime()}`;
+          results[`${replacements[key]}_from`] = new Date(dayjs(filterBy[key][0]).utc(true).valueOf()).getTime();
+          results[`${replacements[key]}_to`] = new Date(
+            dayjs(filterBy[key][0]).utc(true).endOf('day').valueOf()
+          ).getTime();
         } else {
-          results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-          results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
+          results[`${replacements[key]}_from`] = new Date(dayjs(filterBy[key][0]).utc(true).valueOf()).getTime();
+          results[`${replacements[key]}_to`] = new Date(
+            dayjs(filterBy[key][1]).utc(true).endOf('day').valueOf()
+          ).getTime();
         }
 
         delete results[replacements[key]];

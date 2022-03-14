@@ -3,8 +3,8 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import isDate from 'lodash/isDate';
 import isEmpty from 'lodash/isEmpty';
-import uniqueId from 'lodash/uniqueId';
 import uniq from 'lodash/uniq';
+import uniqueId from 'lodash/uniqueId';
 
 import styles from './DateFilter.module.scss';
 
