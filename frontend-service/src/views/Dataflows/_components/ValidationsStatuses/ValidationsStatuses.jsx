@@ -5,16 +5,19 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import styles from './ValidationsStatuses.module.scss';
 
 import { Column } from 'primereact/column';
 
+import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Filters } from 'views/_components/Filters';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LevelError } from 'views/_components/LevelError';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { Spinner } from 'views/_components/Spinner';
@@ -62,7 +65,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     setLoadingStatus('pending');
 
     try {
-      const { data } = await BackgroundProcessService.getValidationsStatuses({
+      const data = await BackgroundProcessService.getValidationsStatuses({
         pageNum,
         numberRows,
         sortOrder: sort.order,
@@ -141,6 +144,29 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     }
   ];
 
+  console.log(validationsStatuses);
+
+  const getPriorityTemplate = rowData => {
+    const getLowHighPriority = priority => {
+      if (priority <= 50) {
+        return 'high';
+      } else if (priority > 50) {
+        return 'low';
+      }
+    };
+
+    return (
+      <div>
+        {rowData.priority}
+        <FontAwesomeIcon
+          data-for={rowData.priority}
+          data-tip
+          icon={getLowHighPriority(rowData.priority) === 'high' ? AwesomeIcons('arrowUp') : AwesomeIcons('arrowDown')}
+        />
+      </div>
+    );
+  };
+
   const getStatusTemplate = rowData => (
     <div>
       <LevelError
@@ -166,6 +192,12 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       },
       { key: 'user', header: resourcesContext.messages['user'] },
       {
+        key: 'priority',
+        header: resourcesContext.messages['priority'],
+        template: getPriorityTemplate,
+        className: styles.smallColumn
+      },
+      {
         key: 'status',
         header: resourcesContext.messages['status'],
         template: getStatusTemplate,
@@ -188,6 +220,11 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         header: resourcesContext.messages['processFinishingDate'],
         template: validation => getDateTemplate(validation, 'processFinishingDate'),
         className: styles.smallColumn
+      },
+      {
+        key: 'buttonsUniqueId',
+        header: resourcesContext.messages['actions'],
+        template: getEditButton
       }
     ];
 
@@ -199,10 +236,12 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         field={column.key}
         header={column.header}
         key={column.key}
-        sortable={true}
+        sortable={column.key !== 'buttonsUniqueId'}
       />
     ));
   };
+
+  const getEditButton = rowData => <ActionsColumn onEditClick={() => {}} rowDataId={rowData.id} />;
 
   const getDataflowTemplate = validation => (
     <p>
