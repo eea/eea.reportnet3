@@ -1,6 +1,5 @@
 package org.eea.rod.service.impl;
 
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -101,9 +100,6 @@ public class ObligationServiceImpl implements ObligationService {
     List<Obligation> filteredObligations = new ArrayList<>();
 
     if (dateTo != null && dateFrom != null) {
-      int offset = ZonedDateTime.now().getOffset().getTotalSeconds();
-      dateFrom += offset * 1000;
-      dateTo += offset * 1000;
       LOG.info("Date range from {} to {}, (in milliseconds {} and {})", deadlineDateFrom,
           deadlineDateTo, dateFrom, dateTo);
       for (Obligation obligation : obligations) {
