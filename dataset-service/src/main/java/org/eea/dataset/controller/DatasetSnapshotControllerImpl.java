@@ -639,7 +639,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       @ApiParam(type = "boolean", value = "Restric from public", example = "true") @RequestParam(
           name = "restrictFromPublic", required = true,
           defaultValue = "false") boolean restrictFromPublic,
-      @ApiParam(type = "boolean", value = "Validate", example = "true") @RequestParam(
+      @ApiParam(type = "boolean", value = "Execute validations", example = "true") @RequestParam(
           name = "validate", required = false, defaultValue = "true") boolean validate) {
 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
