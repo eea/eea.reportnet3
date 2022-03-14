@@ -8,11 +8,13 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.communication.EmailVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -59,6 +61,10 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   /** The user management controller zuul. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZuul;
+
+  /** The collaboration controller zuul. */
+  @Autowired
+  private CollaborationControllerZuul collaborationControllerZuul;
 
   /** The file treatment helper. */
   @Autowired
@@ -121,6 +127,18 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
       // Send email to requesters
       sendMail(dateRelease, dataset, dataflowVO);
+
+      // send feedback message
+      String country = dataset.getDataSetName();
+      String dataflowName = dataflowVO.getName();
+
+      MessageVO messageVO = new MessageVO();
+      messageVO.setProviderId(dataset.getDataProviderId());
+      messageVO.setContent(country + " released " + dataflowName + " successfully");
+      messageVO.setAutomatic(true);
+      collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO);
+      LOG.info("Automatic feedback message created of dataflow {}. Message: {}", dataflowVO.getId(),
+          messageVO.getContent());
 
       // At this point the process of releasing all the datasets has been finished so we unlock
       // everything involved
