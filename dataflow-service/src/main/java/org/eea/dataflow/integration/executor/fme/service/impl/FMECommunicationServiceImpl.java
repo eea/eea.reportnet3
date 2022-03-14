@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
@@ -67,7 +68,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import com.google.common.io.ByteStreams;
 
 /**
  * The Class FMECommunicationServiceImpl.
@@ -255,7 +255,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     byte[] filedata = null;
     FileSubmitResult result = new FileSubmitResult();
     try (InputStream inputStream = new FileInputStream(file)) {
-      filedata = ByteStreams.toByteArray(inputStream);
+      filedata = IOUtils.toByteArray(inputStream);
 
       HttpEntity<byte[]> request =
           createHttpRequest(filedata, uriParams, headerInfo, dataset.getDataflowId());

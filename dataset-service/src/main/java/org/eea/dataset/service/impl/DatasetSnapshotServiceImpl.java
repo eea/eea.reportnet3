@@ -50,7 +50,6 @@ import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
@@ -60,7 +59,6 @@ import org.eea.interfaces.controller.validation.RulesController.RulesControllerZ
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -227,10 +225,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The validation controller zuul. */
   @Autowired
   private ValidationControllerZuul validationControllerZuul;
-
-  /** The collaboration controller zuul. */
-  @Autowired
-  private CollaborationControllerZuul collaborationControllerZuul;
 
   /**
    * Gets the by id.
@@ -1095,17 +1089,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
     }
 
-    String country = dataset.getDataSetName();
-    DataFlowVO dataflowVO = dataflowControllerZuul.findById(dataflowId, dataProviderId);
-    String dataflowName = dataflowVO.getName();
-
-    MessageVO messageVO = new MessageVO();
-    messageVO.setProviderId(dataProviderId);
-    messageVO.setContent(country + " released " + dataflowName + " successfully");
-    messageVO.setAutomatic(true);
-    collaborationControllerZuul.createMessage(dataflowId, messageVO);
-    LOG.info("Automatic feedback message created of dataflow {}. Message: {}", dataflowId,
-        messageVO.getContent());
   }
 
 
