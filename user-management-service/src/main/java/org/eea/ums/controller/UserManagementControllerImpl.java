@@ -62,7 +62,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
-import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * The Class UserManagementControllerImpl.
@@ -70,7 +69,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping("/user")
 @Api(tags = "Users Management : Users Management  Manager")
-@ApiIgnore
+// @ApiIgnore
 public class UserManagementControllerImpl implements UserManagementController {
 
   /**
@@ -133,7 +132,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PostMapping("/generateToken")
   @ApiOperation(value = "Generate an Access Token (valid only for 5 minutes)",
-      response = TokenVO.class, hidden = true)
+      response = TokenVO.class, hidden = false)
   public TokenVO generateToken(
       @ApiParam(value = "User Name") @RequestParam("username") String username,
       @ApiParam(value = "User Password") @RequestParam("password") String password) {

@@ -24,7 +24,6 @@ import org.eea.kafka.domain.ConsumerGroupVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.MemberDescriptionVO;
-import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaAdminUtils;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
@@ -190,18 +189,18 @@ public class ValidationHelperTest {
     validationHelper.getKieBase("", 1l, null);
   }
 
-  /**
-   * Checks if is process coordinator.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void isProcessCoordinator() throws EEAException {
-    processesMap.put("1", new ValidationProcessVO(0, null, null, true, "user1", false));
-    ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
-
-    Assert.assertTrue(validationHelper.isProcessCoordinator("1"));
-  }
+  // /**
+  // * Checks if is process coordinator.
+  // *
+  // * @throws EEAException the EEA exception
+  // */
+  // @Test
+  // public void isProcessCoordinator() throws EEAException {
+  // processesMap.put("1", new ValidationProcessVO(0, null, null, true, "user1", false));
+  // ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
+  //
+  // Assert.assertTrue(validationHelper.isProcessCoordinator("1"));
+  // }
 
 
   /**
@@ -214,32 +213,32 @@ public class ValidationHelperTest {
     Assert.assertNull(processesMap.get("1"));
   }
 
-  /**
-   * Initialize process as coordinator.
-   */
-  @Test
-  public void initializeProcessAsCoordinator() {
-    ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    validationHelper.initializeProcess("1", true, false);
-    Assert.assertNotNull(processesMap.get("1"));
-    Assert.assertTrue(processesMap.get("1").isCoordinatorProcess());
-  }
+  // /**
+  // * Initialize process as coordinator.
+  // */
+  // @Test
+  // public void initializeProcessAsCoordinator() {
+  // ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
+  // Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+  // Mockito.when(authentication.getName()).thenReturn("user");
+  // validationHelper.initializeProcess("1", true, false);
+  // Assert.assertNotNull(processesMap.get("1"));
+  // Assert.assertTrue(processesMap.get("1").isCoordinatorProcess());
+  // }
 
-  /**
-   * Initialize process as worker.
-   */
-  @Test
-  public void initializeProcessAsWorker() {
-    ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-
-    validationHelper.initializeProcess("1", false, false);
-    Assert.assertNotNull(processesMap.get("1"));
-    Assert.assertFalse(processesMap.get("1").isCoordinatorProcess());
-  }
+  // /**
+  // * Initialize process as worker.
+  // */
+  // @Test
+  // public void initializeProcessAsWorker() {
+  // ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
+  // Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+  // Mockito.when(authentication.getName()).thenReturn("user");
+  //
+  // validationHelper.initializeProcess("1", false, false);
+  // Assert.assertNotNull(processesMap.get("1"));
+  // Assert.assertFalse(processesMap.get("1").isCoordinatorProcess());
+  // }
 
   /**
    * Execute validation.
@@ -340,110 +339,109 @@ public class ValidationHelperTest {
   }
 
 
-  /**
-   * Reduce pending tasks finishing process.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void reducePendingTasksFinishingProcess() throws EEAException {
+  // /**
+  // * Reduce pending tasks finishing process.
+  // *
+  // * @throws EEAException the EEA exception
+  // */
+  // @Test
+  // public void reducePendingTasksFinishingProcess() throws EEAException {
+  //
+  // Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
+  // processesMap.put("1", new ValidationProcessVO(null, "user1", true));
+  // ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
+  // Mockito.when(datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(Mockito.eq(1l)))
+  // .thenReturn(null);
+  // Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+  // Mockito.when(authentication.getName()).thenReturn("user");
+  // validationHelper.reducePendingTasks(1l, "1");
+  //
+  // Mockito.verify(kafkaSenderUtils, Mockito.times(1))
+  // .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_CLEAN_KYEBASE), Mockito.anyMap());
+  //
+  // Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseKafkaEvent(
+  // Mockito.eq(EventType.VALIDATION_RELEASE_FINISHED_EVENT), Mockito.anyMap());
+  // Assert.assertNull(processesMap.get("1"));
+  // }
 
-    Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
-    processesMap.put("1",
-        new ValidationProcessVO(1, pendingValidations, null, true, "user1", true));
-    ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
-    Mockito.when(datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(Mockito.eq(1l)))
-        .thenReturn(null);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    validationHelper.reducePendingTasks(1l, "1");
+  // /**
+  // * Reduce pending tasks finishing process abnormal situation.
+  // *
+  // * @throws EEAException the EEA exception
+  // */
+  // @Test
+  // public void reducePendingTasksFinishingProcessAbnormalSituation() throws EEAException {
+  //
+  // Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
+  // pendingValidations.add(eeaEventVO);
+  // processesMap.put("1",
+  // new ValidationProcessVO(null, "user1", false));
+  // ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
+  //
+  // Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+  // Mockito.when(authentication.getName()).thenReturn("user");
+  // Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+  // .thenReturn(new DataSetMetabaseVO());
+  // validationHelper.reducePendingTasks(1l, "1");
+  //
+  // Mockito.verify(kafkaSenderUtils, Mockito.times(1))
+  // .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_CLEAN_KYEBASE), Mockito.anyMap());
+  //
+  // Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(
+  // Mockito.eq(EventType.VALIDATION_FINISHED_EVENT), Mockito.anyMap(),
+  // Mockito.any(NotificationVO.class));
+  // Assert.assertNull(processesMap.get("1"));
+  // }
 
-    Mockito.verify(kafkaSenderUtils, Mockito.times(1))
-        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_CLEAN_KYEBASE), Mockito.anyMap());
+  // /**
+  // * Reduce pending tasks process not finished.
+  // *
+  // * @throws EEAException the EEA exception
+  // */
+  // @Test
+  // public void reducePendingTasksProcessNotFinished() throws EEAException {
+  // Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
+  // pendingValidations.add(eeaEventVO);
+  //
+  // processesMap.put("1",
+  // new ValidationProcessVO(null, "user1", false));
+  // ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
+  // ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 2);
+  //
+  // validationHelper.reducePendingTasks(1l, "1");
+  // Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseKafkaEvent(Mockito.eq(eeaEventVO));
+  // // Checking that no VALIDATION_FINISHED_EVENT message has been sent since process is not over
+  // // yet
+  // Mockito.verify(kafkaSenderUtils, Mockito.times(0)).releaseNotificableKafkaEvent(
+  // Mockito.eq(EventType.VALIDATION_FINISHED_EVENT), Mockito.anyMap(),
+  // Mockito.any(NotificationVO.class));
+  // Assert.assertNotNull(processesMap.get("1"));
+  // }
 
-    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseKafkaEvent(
-        Mockito.eq(EventType.VALIDATION_RELEASE_FINISHED_EVENT), Mockito.anyMap());
-    Assert.assertNull(processesMap.get("1"));
-  }
-
-  /**
-   * Reduce pending tasks finishing process abnormal situation.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void reducePendingTasksFinishingProcessAbnormalSituation() throws EEAException {
-
-    Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
-    pendingValidations.add(eeaEventVO);
-    processesMap.put("1",
-        new ValidationProcessVO(1, pendingValidations, null, true, "user1", false));
-    ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
-
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(new DataSetMetabaseVO());
-    validationHelper.reducePendingTasks(1l, "1");
-
-    Mockito.verify(kafkaSenderUtils, Mockito.times(1))
-        .releaseKafkaEvent(Mockito.eq(EventType.COMMAND_CLEAN_KYEBASE), Mockito.anyMap());
-
-    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(
-        Mockito.eq(EventType.VALIDATION_FINISHED_EVENT), Mockito.anyMap(),
-        Mockito.any(NotificationVO.class));
-    Assert.assertNull(processesMap.get("1"));
-  }
-
-  /**
-   * Reduce pending tasks process not finished.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void reducePendingTasksProcessNotFinished() throws EEAException {
-    Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
-    pendingValidations.add(eeaEventVO);
-
-    processesMap.put("1",
-        new ValidationProcessVO(2, pendingValidations, null, true, "user1", false));
-    ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
-    ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 2);
-
-    validationHelper.reducePendingTasks(1l, "1");
-    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseKafkaEvent(Mockito.eq(eeaEventVO));
-    // Checking that no VALIDATION_FINISHED_EVENT message has been sent since process is not over
-    // yet
-    Mockito.verify(kafkaSenderUtils, Mockito.times(0)).releaseNotificableKafkaEvent(
-        Mockito.eq(EventType.VALIDATION_FINISHED_EVENT), Mockito.anyMap(),
-        Mockito.any(NotificationVO.class));
-    Assert.assertNotNull(processesMap.get("1"));
-  }
-
-  /**
-   * Reduce pending tasks process not finished send several tasks.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void reducePendingTasksProcessNotFinishedSendSeveralTasks() throws EEAException {
-    Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
-    pendingValidations.add(eeaEventVO);
-    pendingValidations.add(eeaEventVO);
-    processesMap.put("1",
-        new ValidationProcessVO(2, pendingValidations, null, true, "user1", false));
-    ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
-    ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 2);
-
-    validationHelper.reducePendingTasks(1l, "1");
-    Mockito.verify(kafkaSenderUtils, Mockito.times(2)).releaseKafkaEvent(Mockito.eq(eeaEventVO));
-    // Checking that no VALIDATION_FINISHED_EVENT message has been sent since process is not over
-    // yet
-    Mockito.verify(kafkaSenderUtils, Mockito.times(0)).releaseNotificableKafkaEvent(
-        Mockito.eq(EventType.VALIDATION_FINISHED_EVENT), Mockito.anyMap(),
-        Mockito.any(NotificationVO.class));
-    Assert.assertNotNull(processesMap.get("1"));
-  }
+  // /**
+  // * Reduce pending tasks process not finished send several tasks.
+  // *
+  // * @throws EEAException the EEA exception
+  // */
+  // @Test
+  // public void reducePendingTasksProcessNotFinishedSendSeveralTasks() throws EEAException {
+  // Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
+  // pendingValidations.add(eeaEventVO);
+  // pendingValidations.add(eeaEventVO);
+  // processesMap.put("1",
+  // new ValidationProcessVO(null, "user1", false));
+  // ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
+  // ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 2);
+  //
+  // validationHelper.reducePendingTasks(1l, "1");
+  // Mockito.verify(kafkaSenderUtils, Mockito.times(2)).releaseKafkaEvent(Mockito.eq(eeaEventVO));
+  // // Checking that no VALIDATION_FINISHED_EVENT message has been sent since process is not over
+  // // yet
+  // Mockito.verify(kafkaSenderUtils, Mockito.times(0)).releaseNotificableKafkaEvent(
+  // Mockito.eq(EventType.VALIDATION_FINISHED_EVENT), Mockito.anyMap(),
+  // Mockito.any(NotificationVO.class));
+  // Assert.assertNotNull(processesMap.get("1"));
+  // }
 
   /**
    * Process validation exceding maximum parallelism.
@@ -476,17 +474,17 @@ public class ValidationHelperTest {
         e.printStackTrace();
       }
     };
-    validationHelper.processValidation(eeaEventVO, "1", 0l, validator,
+    validationHelper.processValidation(1L, eeaEventVO, "1", 0l, validator,
         EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
-    validationHelper.processValidation(eeaEventVO, "1", 1l, validator,
+    validationHelper.processValidation(1L, eeaEventVO, "1", 1l, validator,
         EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
-    validationHelper.processValidation(eeaEventVO, "1", 2l, validator,
+    validationHelper.processValidation(1L, eeaEventVO, "1", 2l, validator,
         EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
-    validationHelper.processValidation(eeaEventVO, "1", 2l, validator,
+    validationHelper.processValidation(1L, eeaEventVO, "1", 2l, validator,
         EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
-    validationHelper.processValidation(eeaEventVO, "1", 2l, validator,
+    validationHelper.processValidation(1L, eeaEventVO, "1", 2l, validator,
         EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
-    validationHelper.processValidation(eeaEventVO, "1", 2l, validator,
+    validationHelper.processValidation(1L, eeaEventVO, "1", 2l, validator,
         EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
 
     Thread.sleep(1000);// giving some time to the threads to update the counter
@@ -510,8 +508,7 @@ public class ValidationHelperTest {
     pendingValidations.add(eeaEventVO);
     pendingValidations.add(eeaEventVO);
 
-    processesMap.put("1",
-        new ValidationProcessVO(2, pendingValidations, null, false, "user1", false));
+    processesMap.put("1", new ValidationProcessVO(null, "user1", false));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
     ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 2);
 
@@ -521,7 +518,7 @@ public class ValidationHelperTest {
       // before the test ends
       eeaEventVO.getData().put("counter", 0);
     };
-    validationHelper.processValidation(eeaEventVO, "1", 0l, validator,
+    validationHelper.processValidation(1L, eeaEventVO, "1", 0l, validator,
         EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
 
     Thread.sleep(1000);// giving some time to the threads to update the counter
@@ -545,8 +542,7 @@ public class ValidationHelperTest {
     pendingValidations.add(eeaEventVO);
     eeaEventVO.getData().put("user", "user");
     eeaEventVO.getData().put("token", "credentials");
-    processesMap.put("1",
-        new ValidationProcessVO(2, pendingValidations, null, true, "user1", false));
+    processesMap.put("1", new ValidationProcessVO(null, "user1", false));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
     ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 1);
 
@@ -557,7 +553,7 @@ public class ValidationHelperTest {
       // before the test ends
       eeaEventVO.getData().put("counter", 0);
     };
-    validationHelper.processValidation(eeaEventVO, "1", 0l, validator,
+    validationHelper.processValidation(1L, eeaEventVO, "1", 0l, validator,
         EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
 
     Thread.sleep(1000);// giving some time to the threads to update the counter

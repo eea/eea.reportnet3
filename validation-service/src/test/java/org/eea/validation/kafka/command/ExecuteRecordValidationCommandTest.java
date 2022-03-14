@@ -2,7 +2,6 @@ package org.eea.validation.kafka.command;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
-
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
@@ -101,8 +100,8 @@ public class ExecuteRecordValidationCommandTest {
     ReflectionTestUtils.setField(executeRecordValidationCommand, "recordBatchSize", 20);
 
     executeRecordValidationCommand.execute(eeaEventVO);
-    Mockito.verify(validationHelper, times(1)).processValidation(Mockito.eq(eeaEventVO),
-        Mockito.eq("uuid"), Mockito.eq(1l), Mockito.any(),
+    Mockito.verify(validationHelper, times(1)).processValidation(Mockito.anyLong(),
+        Mockito.eq(eeaEventVO), Mockito.eq("uuid"), Mockito.eq(1l), Mockito.any(),
         Mockito.eq(EventType.COMMAND_VALIDATED_RECORD_COMPLETED));
   }
 
