@@ -1,8 +1,10 @@
 package org.eea.dataflow.persistence.repository;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
@@ -583,7 +585,8 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       case "deadline_date_to":
       case "delivery_date_from":
       case "delivery_date_to":
-        query.setParameter(key, new Date(Long.valueOf(value)));
+        query.setParameter(key,
+            LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.valueOf(value)), ZoneOffset.UTC));
         break;
       case DELIVERY_STATUS:
         query.setParameter(key, Arrays.asList(value.split(",")));
