@@ -61,7 +61,7 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
     DataSetMetabase dataset = datasetMetabaseRepository.findById(datasetId).orElse(null);
     if (null != dataset) {
       try {
-        recordStoreControllerZuul.refreshMaterializedView(datasetId);
+        recordStoreControllerZuul.refreshMaterializedView(datasetId, null);
         fileTreatmentHelper.createReferenceDatasetFiles(dataset);
       } catch (IOException e) {
         LOG_ERROR.error(

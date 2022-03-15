@@ -331,7 +331,8 @@ public class ValidationHelperTest {
     reference.setDatasetSchema(new ObjectId().toString());
 
     Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(Arrays.asList(rule));
-
+    Mockito.when(rulesRepository.findSqlRulesEnabled(Mockito.any()))
+        .thenReturn(Arrays.asList(rule));
     validationHelper.executeValidation(1l, "1", false, true);
     Mockito.verify(referenceDatasetControllerZuul, Mockito.times(1))
         .findReferenceDatasetByDataflowId(Mockito.any());

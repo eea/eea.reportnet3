@@ -854,7 +854,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Async
   public void updateMaterializedQueryView(Long datasetId, String user, Boolean released,
       String processId) {
-    LOG.info(" Update Materialized Views from Dataset id: %s", datasetId);
+    LOG.info(" Update Materialized Views from Dataset id: {}", datasetId);
 
     DataSetMetabaseVO datasetMetabaseVO =
         dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
@@ -960,11 +960,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param continueValidation the continue validation
    * @param released the released
    * @param datasetId the dataset id
+   * @param processId the process id
    */
   @Override
   @Async
   public void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation,
-      boolean released, Long datasetId) {
+      boolean released, Long datasetId, String processId) {
     datasetIds.forEach(id -> {
       if (!Boolean.TRUE.equals(datasetControllerZuul.getCheckView(id))) {
         datasetControllerZuul.updateCheckView(id, true);
@@ -990,6 +991,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       Map<String, Object> values = new HashMap<>();
       values.put(LiteralConstants.DATASET_ID, datasetId);
       values.put("released", released);
+      values.put("processId", processId);
       kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
     }
   }

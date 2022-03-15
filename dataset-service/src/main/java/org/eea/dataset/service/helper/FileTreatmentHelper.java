@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import javax.annotation.PostConstruct;
@@ -343,14 +344,24 @@ public class FileTreatmentHelper implements DisposableBean {
       MultipartFile multipartFile, boolean replace, Long integrationId, String delimiter)
       throws EEAException {
 
+    String originalFileName = multipartFile.getOriginalFilename();
+    String multipartFileMimeType = datasetService.getMimetype(originalFileName);
+    IntegrationVO integrationVO;
+    if (null == integrationId) {
+      integrationVO = null;
+    } else {
+      integrationVO = getIntegrationVO(integrationId);
+      if (null == integrationVO) {
+        LOG_ERROR.error("Error. Integration {} not found", integrationId);
+      }
+    }
+
     try (InputStream input = multipartFile.getInputStream()) {
 
       // Prepare the folder where files will be stored
       File root = new File(importPath);
       File folder = new File(root, datasetId.toString());
       String saveLocationPath = folder.getCanonicalPath();
-      String originalFileName = multipartFile.getOriginalFilename();
-      String multipartFileMimeType = datasetService.getMimetype(originalFileName);
 
       // Delete dataset temporary folder first in case that for any reason still exists before
       // creating again
@@ -363,15 +374,6 @@ public class FileTreatmentHelper implements DisposableBean {
       }
 
       List<File> files = new ArrayList<>();
-      IntegrationVO integrationVO;
-      if (null == integrationId) {
-        integrationVO = null;
-      } else {
-        integrationVO = getIntegrationVO(integrationId);
-        if (null == integrationVO) {
-          LOG_ERROR.error("Error. Integration {} not found", integrationId);
-        }
-      }
       if (null == integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
 
         try (ZipInputStream zip = new ZipInputStream(input)) {
@@ -391,16 +393,7 @@ public class FileTreatmentHelper implements DisposableBean {
           throw new EEAException("Empty zip file");
         }
       } else {
-        // if the import goes to FME and it's a zip file, check if the zip is not empty to show
-        // error and avoid the call to FME
-        if (null != integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
-          try (ZipInputStream zip = new ZipInputStream(input)) {
-            ZipEntry entry = zip.getNextEntry();
-            if (null == entry) {
-              throw new EEAException("Empty zip file");
-            }
-          }
-        }
+
         File file = new File(folder, originalFileName);
 
         // Store the file in the persistence volume
@@ -408,6 +401,23 @@ public class FileTreatmentHelper implements DisposableBean {
           IOUtils.copyLarge(input, output);
           files.add(file);
           LOG.info("Stored file {}", file.getPath());
+        }
+
+        // if the import goes it's a zip file, check if the zip is not empty to show
+        // error and avoid the call to FME
+        if (null != integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
+          try {
+            ZipFile zipFile = new ZipFile(file);
+            if (zipFile.size() == 0) {
+              zipFile.close();
+              releaseLock(datasetId);
+              throw new EEAException("Empty zip file");
+            }
+            zipFile.close();
+          } catch (IOException e) {
+            releaseLock(datasetId);
+            throw new EEAException("Empty zip file");
+          }
         }
 
         // Queue import task for the stored file
