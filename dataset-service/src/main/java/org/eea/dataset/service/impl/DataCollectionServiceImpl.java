@@ -7,7 +7,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -390,7 +389,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   @Override
   @Async
-  public void createEmptyDataCollection(Long dataflowId, Date dueDate,
+  public void createEmptyDataCollection(Long dataflowId, LocalDateTime dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
       boolean referenceDataflow, boolean stopAndNotifyPKError) {
 
@@ -413,7 +412,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   }
 
-
   /**
    * Manage data collection.
    *
@@ -425,7 +423,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param referenceDataflow the reference dataflow
    * @param stopAndNotifyPKError the stop and notify PK error
    */
-  private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
+  private void manageDataCollection(Long dataflowId, LocalDateTime dueDate, boolean isCreation,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow,
       boolean stopAndNotifyPKError) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
@@ -647,8 +645,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param referenceDataflow the reference dataflow
    * @throws SQLException the SQL exception
    */
-  private void processDataCollectionAndRoles(Long dataflowId, Date dueDate, boolean isCreation,
-      boolean manualCheck, String time, List<DesignDatasetVO> designs,
+  private void processDataCollectionAndRoles(Long dataflowId, LocalDateTime dueDate,
+      boolean isCreation, boolean manualCheck, String time, List<DesignDatasetVO> designs,
       List<DesignDatasetVO> referenceDatasets, List<RepresentativeVO> representatives,
       Map<Long, String> map, List<Long> dataCollectionIds, Map<Long, List<String>> datasetIdsEmails,
       Map<Long, List<String>> referenceDatasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
@@ -1097,7 +1095,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @throws SQLException the SQL exception
    */
   private Long persistDC(Statement metabaseStatement, DesignDatasetVO design, String time,
-      Long dataflowId, Date dueDate) throws SQLException {
+      Long dataflowId, LocalDateTime dueDate) throws SQLException {
     try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_DC_INTO_DATASET, time,
         dataflowId, String.format(NAME_DC, design.getDataSetName().replace("'", "''")),
         design.getDatasetSchema()))) {
