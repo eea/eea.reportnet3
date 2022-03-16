@@ -24,7 +24,7 @@ import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
@@ -84,7 +84,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
   /** The user management controller. */
   @Autowired
-  private UserManagementController userManagementController;
+  private UserManagementControllerZull userManagementControllerZuul;
 
   /** The FME job repository. */
   @Autowired
@@ -362,11 +362,11 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    */
   private String getApiKey(Long dataflowId, Long dataproviderId) {
 
-    String apiKey = userManagementController.getApiKey(dataflowId, dataproviderId);
+    String apiKey = userManagementControllerZuul.getApiKey(dataflowId, dataproviderId);
 
     if (null == apiKey) {
       LOG.info("ApiKey not exits");
-      apiKey = userManagementController.createApiKey(dataflowId, dataproviderId);
+      apiKey = userManagementControllerZuul.createApiKey(dataflowId, dataproviderId);
       if (null != dataproviderId) {
         LOG.info("ApiKey created for Provider ID: {} and Dataflow ID: {} ", dataproviderId,
             dataflowId);
