@@ -135,7 +135,7 @@ public class ValidationControllerImpl implements ValidationController {
       // changed when processes table is implemented
       processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.CANCELED,
           ProcessTypeEnum.VALIDATION, processId, processId,
-          SecurityContextHolder.getContext().getAuthentication().getName());
+          SecurityContextHolder.getContext().getAuthentication().getName(), 0);
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
       LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);

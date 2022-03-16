@@ -1,6 +1,9 @@
 package org.eea.validation.util;
 
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,6 +22,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -149,6 +153,9 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private TaskRepository taskRepository;
 
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
   /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
 
@@ -250,7 +257,8 @@ public class ValidationHelper implements DisposableBean {
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId, processId,
-        SecurityContextHolder.getContext().getAuthentication().getName());
+        SecurityContextHolder.getContext().getAuthentication().getName(),
+        getPriority(dataset.getDataflowId()));
 
     // If there's no SQL rules enabled, no need to refresh the views, so directly start the
     // validation
@@ -275,6 +283,24 @@ public class ValidationHelper implements DisposableBean {
       kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
     }
     dataset = null;
+  }
+
+  private int getPriority(Long dataflowId) {
+    int priority = 0;
+    Date date = dataFlowControllerZuul.getMetabaseById(dataflowId).getDeadlineDate();
+    final LocalDate today = LocalDate.now();
+    Long days = Duration.between(today, (Temporal) date).toDays();
+    if (days > 30) {
+      priority = 5;
+    } else if (days < 30 && days > 15) {
+      priority = 4;
+    } else if (days < 15 && days > 7) {
+      priority = 3;
+    } else {
+      priority = 2;
+    }
+    return priority;
+
   }
 
   /**
@@ -408,10 +434,9 @@ public class ValidationHelper implements DisposableBean {
     releaseTableValidation(dataset, processId);
     processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId, processId,
-        SecurityContextHolder.getContext().getAuthentication().getName());
+        SecurityContextHolder.getContext().getAuthentication().getName(), 0);
     datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
         DatasetRunningStatusEnum.VALIDATING);
-    // startProcess(processId);
   }
 
 
@@ -1083,7 +1108,7 @@ public class ValidationHelper implements DisposableBean {
 
         processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
             ProcessTypeEnum.VALIDATION, processId, processId,
-            SecurityContextHolder.getContext().getAuthentication().getName());
+            SecurityContextHolder.getContext().getAuthentication().getName(), 0);
         datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
             DatasetRunningStatusEnum.VALIDATED);
         isFinished = true;

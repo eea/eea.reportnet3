@@ -98,8 +98,9 @@ public class ProcessControllerImpl implements ProcessController {
       @RequestParam(required = false) Long dataflowId,
       @RequestParam("status") ProcessStatusEnum status, @RequestParam("type") ProcessTypeEnum type,
       @RequestParam("processId") String processId, @RequestParam("threadId") String threadId,
-      @RequestParam("user") String user) {
-    processService.updateProcess(datasetId, dataflowId, status, type, processId, threadId, user);
+      @RequestParam("user") String user, @RequestParam("priority") int priority) {
+    processService.updateProcess(datasetId, dataflowId, status, type, processId, threadId, user,
+        priority);
   }
 
   /**

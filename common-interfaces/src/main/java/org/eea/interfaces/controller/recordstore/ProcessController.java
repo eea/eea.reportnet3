@@ -58,7 +58,7 @@ public interface ProcessController {
       @RequestParam(required = false) Long dataflowId,
       @RequestParam("status") ProcessStatusEnum status, @RequestParam("type") ProcessTypeEnum type,
       @RequestParam("processId") String processId, @RequestParam("threadId") String threadId,
-      @RequestParam("user") String user);
+      @RequestParam("user") String user, @RequestParam("priority") int priority);
 
   /**
    * Update priority.
