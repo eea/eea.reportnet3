@@ -10,11 +10,10 @@ import org.springframework.data.repository.query.Param;
  */
 public interface DataProviderRepository extends CrudRepository<DataProvider, Long> {
 
-
   /**
-   * Find all by group id.
+   * Find all by data provider group id.
    *
-   * @param groupId the group id
+   * @param id the id
    * @return the list
    */
   List<DataProvider> findAllByDataProviderGroup_id(@Param("id") Long id);

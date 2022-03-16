@@ -11,8 +11,6 @@ import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 @FunctionalInterface
 public interface ReaderStrategy {
 
-
-
   /**
    * Parses the file.
    *
@@ -25,7 +23,6 @@ public interface ReaderStrategy {
    * @param replace the replace
    * @param schema the schema
    * @param connectionDataVO the connection data VO
-   * @return the data set VO
    * @throws EEAException the EEA exception
    */
   void parseFile(InputStream inputStream, Long dataflowId, Long partitionId, String idTableSchema,

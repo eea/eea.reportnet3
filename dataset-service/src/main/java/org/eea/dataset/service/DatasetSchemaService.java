@@ -562,7 +562,6 @@ public interface DatasetSchemaService {
   byte[] exportFieldsSchema(final Long datasetId, final String datasetSchemaId,
       final String tableSchemaId) throws EEAException;
 
-
   /**
    * Import fields schema.
    *
@@ -571,12 +570,9 @@ public interface DatasetSchemaService {
    * @param datasetId the dataset id
    * @param file the file
    * @param replace the replace
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
    */
   void importFieldsSchema(String tableSchemaId, String datasetSchemaId, Long datasetId,
       InputStream file, boolean replace);
-
 
   /**
    * Export zip field schemas.

@@ -23,8 +23,8 @@ public interface ProcessExtendedRepository {
    * @param type the type
    * @param header the header
    * @return the processes paginated
-   * @throws JsonProcessingException
-   * @throws JsonMappingException
+   * @throws JsonMappingException the json mapping exception
+   * @throws JsonProcessingException the json processing exception
    */
   List<EEAProcess> getProcessesPaginated(Pageable pageable, boolean asc, String status,
       Long dataflowId, String user, ProcessTypeEnum type, String header)

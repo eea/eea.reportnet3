@@ -37,9 +37,9 @@ public interface DatasetMetabaseController {
   }
 
   /**
-   * Find data set id by dataflow id.
+   * Find reporting data set id by dataflow id.
    *
-   * @param idDataflow the id dataflow
+   * @param dataflowId the dataflow id
    * @return the list
    */
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -319,10 +319,10 @@ public interface DatasetMetabaseController {
   @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
   List<DatasetsSummaryVO> getDatasetsSummaryList(@PathVariable("id") Long dataflowId);
 
-
   /**
    * Update dataset running status.
    *
+   * @param datasetId the dataset id
    * @param datasetRunningStatus the dataset running status
    */
   @PutMapping(value = "/private/updateDatasetRunningStatus/{id}")

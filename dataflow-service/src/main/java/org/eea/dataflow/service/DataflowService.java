@@ -83,6 +83,7 @@ public interface DataflowService {
    * Gets the dataflows count.
    *
    * @return the dataflows count
+   * @throws EEAException the EEA exception
    */
   List<DataflowCountVO> getDataflowsCount() throws EEAException;
 
@@ -264,7 +265,7 @@ public interface DataflowService {
   /**
    * Validate all reporters.
    *
-   * @param user the user
+   * @param userId the user id
    * @throws EEAException the EEA exception
    */
   void validateAllReporters(String userId) throws EEAException;

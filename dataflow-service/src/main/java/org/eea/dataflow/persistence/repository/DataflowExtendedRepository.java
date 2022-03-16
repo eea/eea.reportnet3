@@ -64,8 +64,6 @@ public interface DataflowExtendedRepository {
       String orderHeader, boolean asc, TypeDataflowEnum type, List<Long> dataflowIds,
       List<String> pinnedDataflows) throws EEAException;
 
-
-
   /**
    * Find paginated by country.
    *
@@ -76,15 +74,14 @@ public interface DataflowExtendedRepository {
    * @param asc the asc
    * @param countryCode the country code
    * @return the list
+   * @throws EEAException the EEA exception
    */
   List<Dataflow> findPaginatedByCountry(String obligationJson, Pageable pageable,
       Map<String, String> filters, String orderHeader, boolean asc, String countryCode)
       throws EEAException;
 
-
-
   /**
-   * Count paginated by country.
+   * Count by country.
    *
    * @param obligationJson the obligation json
    * @param filters the filters
@@ -92,6 +89,7 @@ public interface DataflowExtendedRepository {
    * @param asc the asc
    * @param countryCode the country code
    * @return the long
+   * @throws EEAException the EEA exception
    */
   Long countByCountry(String obligationJson, Map<String, String> filters, String orderHeader,
       boolean asc, String countryCode) throws EEAException;
@@ -105,6 +103,7 @@ public interface DataflowExtendedRepository {
    * @param asc the asc
    * @param countryCode the country code
    * @return the long
+   * @throws EEAException the EEA exception
    */
   Long countByCountryFiltered(String obligationJson, Map<String, String> filters,
       String orderHeader, boolean asc, String countryCode) throws EEAException;

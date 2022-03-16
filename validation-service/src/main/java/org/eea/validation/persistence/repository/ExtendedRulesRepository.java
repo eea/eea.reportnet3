@@ -210,10 +210,11 @@ public interface ExtendedRulesRepository {
   boolean emptyRulesOfSchemaByDatasetSchemaId(ObjectId datasetSchemaId);
 
   /**
-   * Find rules byreference id.
+   * Find geometry rules byreference id.
    *
+   * @param datasetSchemaId the dataset schema id
    * @param referenceId the reference id
-   * @return the rule
+   * @return the rules schema
    */
   RulesSchema findGeometryRulesByreferenceId(ObjectId datasetSchemaId, ObjectId referenceId);
 

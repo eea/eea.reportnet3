@@ -190,11 +190,9 @@ public interface DataflowRepository
       value = "select  df.id as id ,ds.status as status, ds.data_provider_id as dataProviderId from dataflow df join dataset ds on df.id = ds.dataflowid where ds.id IN :datasetIds")
   List<IDatasetStatus> getDatasetsStatus(@Param("datasetIds") List<Long> datasetIds);
 
-
   /**
-   * Count dataflow by type used by Admin users.
+   * Count dataflow by type.
    *
-   * @param datasetIds the dataset ids
    * @return the list
    */
   @Query(nativeQuery = true,
@@ -202,29 +200,28 @@ public interface DataflowRepository
   List<IDataflowCount> countDataflowByType();
 
   /**
-   * Count reference dataflows available to the user in DESIGN status.
+   * Count reference dataflows design by user.
    *
-   * @param datasetIds the dataset ids
-   * @return the dataflow count
+   * @param ids the ids
+   * @return the i dataflow count
    */
   @Query(nativeQuery = true,
       value = "select df.type as type , count(*) as amount from dataflow df where df.type='REFERENCE' and df.status='DESIGN' and df.id IN :ids group by type")
   IDataflowCount countReferenceDataflowsDesignByUser(@Param("ids") List<Long> ids);
 
-
   /**
-   * Count reference dataflows in DRAFT status.
+   * Count reference dataflows draft.
    *
-   * @return the dataflow count
+   * @return the i dataflow count
    */
   @Query(nativeQuery = true,
       value = "select df.type as type , count(*) as amount from dataflow df where df.type='REFERENCE' and df.status='DRAFT' group by type")
   IDataflowCount countReferenceDataflowsDraft();
 
   /**
-   * Count dataflow by type based on the user access rights.
+   * Count dataflow by type and user.
    *
-   * @param datasetIds the dataset ids
+   * @param ids the ids
    * @return the list
    */
   @Query(nativeQuery = true,
@@ -232,12 +229,11 @@ public interface DataflowRepository
   List<IDataflowCount> countDataflowByTypeAndUser(@Param("ids") List<Long> ids);
 
   /**
-   * Find by available true.
+   * Find by show public info true.
    *
    * @return the list
    */
   List<Dataflow> findByShowPublicInfoTrue();
-
 
   /**
    * Count by show public info.

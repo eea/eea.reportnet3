@@ -287,10 +287,9 @@ public class ValidationControllerImpl implements ValidationController {
   }
 
   /**
-   * Export CSV file of grouped validations.
+   * Export validation data CSV.
    *
    * @param datasetId the dataset id
-   * @return the response entity
    */
   @Override
   @HystrixCommand
