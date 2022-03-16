@@ -32,10 +32,14 @@ public interface CollaborationService {
    *
    * @param dataflowId the dataflow id
    * @param providerId the provider id
-   * @param fileAttachment the file attachment
+   * @param is the is
+   * @param fileName the file name
+   * @param fileSize the file size
+   * @param contentType the content type
    * @return the message VO
    * @throws EEAIllegalArgumentException the EEA illegal argument exception
    * @throws EEAForbiddenException the EEA forbidden exception
+   * @throws IOException Signals that an I/O exception has occurred.
    */
   MessageVO createMessageAttachment(Long dataflowId, Long providerId, InputStream is,
       String fileName, String fileSize, String contentType)
@@ -74,10 +78,10 @@ public interface CollaborationService {
       throws EEAForbiddenException;
 
   /**
-   * Gets the message attachment.
+   * Gets the message.
    *
-   * @param messageAttachmentId the message attachment id
-   * @return the message attachment
+   * @param message the message
+   * @return the message
    * @throws EEAException the EEA exception
    */
   Message getMessage(Long message) throws EEAException;

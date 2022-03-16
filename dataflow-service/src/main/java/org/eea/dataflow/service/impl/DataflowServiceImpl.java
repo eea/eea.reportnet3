@@ -774,8 +774,9 @@ public class DataflowServiceImpl implements DataflowService {
    * @param asc the asc
    * @param page the page
    * @param pageSize the page size
+   * @param filters the filters
    * @return the public dataflows by country
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public PaginatedDataflowVO getPublicDataflowsByCountry(String countryCode, String header,

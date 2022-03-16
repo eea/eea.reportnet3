@@ -48,8 +48,7 @@ public class StringToLongConverterFactory implements ConverterFactory<String, Lo
    * Gets the converter.
    *
    * @param <T> the generic type
-   * @param targetType the target type
-   *
+   * @param longValue the long value
    * @return the converter
    */
   @Override

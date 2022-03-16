@@ -74,10 +74,9 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
-   * Find data set id by dataflow id.
+   * Find reporting data set id by dataflow id.
    *
-   * @param idDataflow the id dataflow
-   *
+   * @param dataflowId the dataflow id
    * @return the list
    */
   @Override
@@ -579,8 +578,8 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
       @ApiParam(value = "Dataflow Ids list") @RequestParam("dataflowIds") List<Long> dataflowIds) {
     return reportingDatasetService.getReportingsByDataflowIds(dataflowIds);
   }
-  
-  
+
+
   /**
    * Find data set by dataflow ids.
    *
@@ -595,8 +594,8 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
       @ApiParam(value = "Dataflow Ids list") @RequestParam("dataflowIds") List<Long> dataflowIds) {
     return datasetMetabaseService.findDataSetByDataflowIds(dataflowIds);
   }
-  
-    /**
+
+  /**
    * Find reporting data set by provider ids.
    *
    * @param providerIds the provider ids

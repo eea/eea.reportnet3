@@ -33,9 +33,9 @@ public interface SchemasRepository
   List<DataSetSchema> findByIdDataFlow(Long idDataflow);
 
   /**
-   * Find by webform.
+   * Find by webform name.
    *
-   * @param webform the webform
+   * @param name the name
    * @return the list
    */
   List<DataSetSchema> findByWebformName(String name);
