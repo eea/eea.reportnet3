@@ -132,7 +132,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @HystrixCommand
   @PostMapping("/generateToken")
   @ApiOperation(value = "Generate an Access Token (valid only for 5 minutes)",
-      response = TokenVO.class, hidden = false)
+      response = TokenVO.class, hidden = true)
   public TokenVO generateToken(
       @ApiParam(value = "User Name") @RequestParam("username") String username,
       @ApiParam(value = "User Password") @RequestParam("password") String password) {
