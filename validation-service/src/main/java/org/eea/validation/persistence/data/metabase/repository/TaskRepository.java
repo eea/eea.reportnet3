@@ -12,8 +12,16 @@ import org.springframework.data.repository.query.Param;
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
   @Query(nativeQuery = true,
-      value = "select * from task where status= 'IN_QUEUE' and process_id= (select process_id from (select count(id) as ntasks, process_id from task where status= 'IN_QUEUE' group by task.process_id order by ntasks limit 1) aux) limit :numberTasks")
+      value = "with numberOfPendingTaks as (select count(id) as ntasks, process_id from task where status= 'IN_QUEUE' group by task.process_id)"
+          + " select  t.*, p.*,npt.ntasks from process p join numberOfPendingTaks npt on p.process_id=npt.process_id join task t on t.process_id= p.process_id "
+          + "where t.status= 'IN_QUEUE' order by p.priority, npt.ntasks asc limit :numberTasks")
   List<Task> findLastTask(@Param("numberTasks") int numberTasks);
+
+  @Query(nativeQuery = true,
+      value = "with numberOfPendingTaks as (select count(id) as ntasks, process_id from task where status= 'IN_QUEUE' group by task.process_id)"
+          + " select  t.*, p.*,npt.ntasks from process p join numberOfPendingTaks npt on p.process_id=npt.process_id join task t on t.process_id= p.process_id "
+          + "where t.status= 'IN_QUEUE' and p.priority>5 order by p.priority, npt.ntasks asc limit :numberTasks")
+  List<Task> findLastLowPriorityTask(@Param("numberTasks") int numberTasks);
 
   @Query(nativeQuery = true,
       value = "select case when (exists (select id from task where process_id=:processId and status !='FINISHED' limit 1)) then FALSE else TRUE end")
