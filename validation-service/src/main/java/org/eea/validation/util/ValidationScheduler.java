@@ -42,30 +42,33 @@ public class ValidationScheduler extends MessageReceiver {
   @Autowired
   private ValidationHelper validationHelper;
 
+  /** The scheduler. */
   @Autowired
   private JobScheduler scheduler;
 
+  /** The delay. */
   @Value("${validation.scheduled.consumer}")
   private Long delay;
 
+  /** The max running tasks. */
   @Value("${validation.tasks.parallelism}")
   private int maxRunningTasks;
 
+  /** The service instance id. */
   @Value("${spring.cloud.consul.discovery.instanceId}")
   private String serviceInstanceId;
 
 
+  /**
+   * Inits the SCHEDULER.
+   */
   @PostConstruct
   void init() {
-    scheduler.schedule(() -> {
-      scheduledConsumer();
-    }, delay, TimeUnit.MILLISECONDS);
+    scheduler.schedule(() -> scheduledConsumer(), delay, TimeUnit.MILLISECONDS);
   }
 
   /**
    * Scheduled consumer.
-   *
-   * @throws EEAException the EEA exception
    */
   public void scheduledConsumer() {
     Long newDelay = delay;
@@ -122,7 +125,7 @@ public class ValidationScheduler extends MessageReceiver {
   /**
    * Check free threads.
    *
-   * @return true, if successful
+   * @return the int
    */
   private int checkFreeThreads() {
     return maxRunningTasks - validationHelper.getAvailableExecutionThreads();
