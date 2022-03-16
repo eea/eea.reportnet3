@@ -18,7 +18,6 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -31,11 +30,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @EnableTransactionManagement
 @EnableAspectJAutoProxy
-@EnableJpaRepositories(entityManagerFactoryRef = "metadataSetsEntityManagerFactory",
-    transactionManagerRef = "metabaseDataSetsTransactionManager",
+@EnableJpaRepositories(entityManagerFactoryRef = "validationMetabaseEntityManagerFactory",
+    transactionManagerRef = "validationMetabaseTransactionManager",
     basePackages = "org.eea.validation.persistence.data.metabase.repository")
 @EnableCaching
-@EnableScheduling
 public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
 
   /** The dll. */
@@ -90,8 +88,8 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
    * @return the local container entity manager factory bean
    */
   @Bean
-  @Qualifier("metadataSetsEntityManagerFactory")
-  public LocalContainerEntityManagerFactoryBean metadataSetsEntityManagerFactory() {
+  @Qualifier("validationMetabaseEntityManagerFactory")
+  public LocalContainerEntityManagerFactoryBean validationMetabaseEntityManagerFactory() {
     LocalContainerEntityManagerFactoryBean metadataSetsEM =
         new LocalContainerEntityManagerFactoryBean();
     metadataSetsEM.setDataSource(metabaseDatasource());
@@ -121,11 +119,11 @@ public class DataSetMetabaseConfiguration implements WebMvcConfigurer {
    * @return the platform transaction manager
    */
   @Bean
-  public PlatformTransactionManager metabaseDataSetsTransactionManager() {
+  public PlatformTransactionManager validationMetabaseTransactionManager() {
 
     JpaTransactionManager metabasetransactionManager = new JpaTransactionManager();
     metabasetransactionManager
-        .setEntityManagerFactory(metadataSetsEntityManagerFactory().getObject());
+        .setEntityManagerFactory(validationMetabaseEntityManagerFactory().getObject());
     return metabasetransactionManager;
   }
 

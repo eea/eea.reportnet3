@@ -10,10 +10,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Version;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.springframework.data.annotation.Version;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -26,6 +27,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "task")
 public class Task {
 
@@ -64,7 +66,7 @@ public class Task {
 
   /** The version. */
   @Version
-  private Long version;
+  private int version;
 
   /** The pod. */
   @Column(name = "pod")

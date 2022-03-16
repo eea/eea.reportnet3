@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -45,7 +46,7 @@ public class ProcessControllerImpl implements ProcessController {
   private static final Logger LOG = LoggerFactory.getLogger(ProcessControllerImpl.class);
 
   List<String> validHeaders = Arrays.asList("name", "dataset_name", "username", "status",
-      "queued_date", "date_start", "date_finish");
+      "queued_date", "date_start", "date_finish", "priority");
 
 
   /**
@@ -99,6 +100,21 @@ public class ProcessControllerImpl implements ProcessController {
       @RequestParam("processId") String processId, @RequestParam("threadId") String threadId,
       @RequestParam("user") String user) {
     processService.updateProcess(datasetId, dataflowId, status, type, processId, threadId, user);
+  }
+
+  /**
+   * Update priority.
+   *
+   * @param processId the process id
+   * @param priority the priority
+   */
+  @Override
+  @PostMapping(value = "/{processId}/priority/{priority}")
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Updates the process priority in the process table", hidden = false)
+  public void updatePriority(@PathVariable("processId") Long processId,
+      @PathVariable("priority") int priority) {
+    processService.updatePriority(processId, priority);
   }
 
 }

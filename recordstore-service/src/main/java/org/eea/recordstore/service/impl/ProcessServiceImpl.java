@@ -132,4 +132,20 @@ public class ProcessServiceImpl implements ProcessService {
         datasetId, processToUpdate.getDataflowId(), type, status, processId, user));
     processRepository.save(processToUpdate);
   }
+
+  /**
+   * Update priority.
+   *
+   * @param processId the process id
+   * @param priority the priority
+   */
+  @Override
+  public void updatePriority(Long processId, int priority) {
+    EEAProcess process = processRepository.findById(processId).orElse(null);
+    if (process != null) {
+      process.setPriority(priority);
+      processRepository.save(process);
+    }
+  }
+
 }

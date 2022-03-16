@@ -5,6 +5,7 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -58,5 +59,15 @@ public interface ProcessController {
       @RequestParam("status") ProcessStatusEnum status, @RequestParam("type") ProcessTypeEnum type,
       @RequestParam("processId") String processId, @RequestParam("threadId") String threadId,
       @RequestParam("user") String user);
+
+  /**
+   * Update priority.
+   *
+   * @param processId the process id
+   * @param priority the priority
+   */
+  @PostMapping(value = "/{processId}/priority/{priority}")
+  void updatePriority(@PathVariable("processId") Long processId,
+      @PathVariable("priority") int priority);
 
 }

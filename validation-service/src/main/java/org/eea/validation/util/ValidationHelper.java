@@ -15,7 +15,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import javax.persistence.OptimisticLockException;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
@@ -35,7 +34,6 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
-import org.eea.kafka.utils.KafkaAdminUtils;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -68,10 +66,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lombok.AllArgsConstructor;
 
 /**
@@ -125,16 +122,9 @@ public class ValidationHelper implements DisposableBean {
   @Value("${validation.tasks.parallelism}")
   private int maxRunningTasks;
 
-  @Value("${spring.cloud.consul.discovery.instanceId}")
-  private String serviceInstanceId;
-
   /** The table repository. */
   @Autowired
   private TableRepository tableRepository;
-
-  /** The kafka admin utils. */
-  @Autowired
-  private KafkaAdminUtils kafkaAdminUtils;
 
   /** The dataset metabase controller zuul. */
   @Autowired
@@ -178,6 +168,7 @@ public class ValidationHelper implements DisposableBean {
   private void init() {
     validationExecutorService = new EEADelegatingSecurityContextExecutorService(
         Executors.newFixedThreadPool(maxRunningTasks));
+    validationExecutorService.submit(() -> LOG.info("initializer validation executor service"));
   }
 
   /**
@@ -523,7 +514,7 @@ public class ValidationHelper implements DisposableBean {
       rule = (String) (eeaEventVO.getData().get("sqlRule"));
     }
     ValidationTask validationTask = new ValidationTask(taskId, eeaEventVO, validator, datasetId,
-        getKieBase(processId, datasetId, rule), processId, notificationEventType);
+        getKieBase(processId, datasetId, rule), processId);
 
     // first every task is always queued up to ensure the order
 
@@ -893,11 +884,19 @@ public class ValidationHelper implements DisposableBean {
       EEAEventVO eeaEventVO = new EEAEventVO();
       eeaEventVO.setEventType(eventType);
       value.put("processId", processId);
+      value.put("user", SecurityContextHolder.getContext().getAuthentication().getName());
+      value.put("token",
+          String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
       eeaEventVO.setData(value);
-      Gson gson = new GsonBuilder().create();
-      String json = gson.toJson(eeaEventVO);
+      ObjectMapper objectMapper = new ObjectMapper();
+      String json = "";
+      try {
+        json = objectMapper.writeValueAsString(eeaEventVO);
+      } catch (JsonProcessingException e) {
+        LOG_ERROR.error("error processing json");
+      }
       Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
-          json, 0L, null);
+          json, 0, null);
       taskRepository.save(task);
     }
   }
@@ -959,8 +958,6 @@ public class ValidationHelper implements DisposableBean {
     /** The process id. */
     String processId;
 
-    /** The notification event type. */
-    EventType notificationEventType;
   }
 
   /**
@@ -990,14 +987,6 @@ public class ValidationHelper implements DisposableBean {
     public void run() {
       Task task = taskRepository.findById(validationTask.taskId).orElse(null);
       if (task != null) {
-        task.setStartingDate(new Date());
-        task.setPod(serviceInstanceId);
-        task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-        try {
-          taskRepository.save(task);
-        } catch (OptimisticLockException e) {
-          return;
-        }
         Long currentTime = System.currentTimeMillis();
         int workingThreads =
             ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
@@ -1018,6 +1007,7 @@ public class ValidationHelper implements DisposableBean {
           task.setFinishDate(new Date());
         } finally {
           if (!ProcessStatusEnum.CANCELED.equals(task.getStatus())) {
+            task.setFinishDate(new Date());
             task.setStatus(ProcessStatusEnum.FINISHED);
           }
           taskRepository.save(task);
