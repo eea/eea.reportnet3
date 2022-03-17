@@ -1762,5 +1762,9 @@
   {
     "key": "config/apiGateway/zuul.routes.process.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/validation/validation.instance.priority",
+    "value": "JHtWQUxJREFUSU9OX0lOU1RBTkNFX1BST1JJVFk6SElHSH0="
   }
 ]
