@@ -6,6 +6,8 @@ import isNull from 'lodash/isNull';
 import orderBy from 'lodash/orderBy';
 import sortBy from 'lodash/sortBy';
 
+import utc from 'dayjs/plugin/utc';
+
 import { DataflowRepository } from 'repositories/DataflowRepository';
 
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
@@ -47,9 +49,12 @@ export const DataflowService = {
   },
 
   getCloneableDataflows: async () => {
+    dayjs.extend(utc);
+
     const dataflowsDTO = await DataflowRepository.getCloneableDataflows();
     return dataflowsDTO.data.map(dataflow => {
-      dataflow.expirationDate = dataflow.deadlineDate > 0 ? dayjs(dataflow.deadlineDate).format('YYYY-MM-DD') : '-';
+      dataflow.expirationDate =
+        dataflow.deadlineDate > 0 ? dayjs(dataflow.deadlineDate).utc().format('YYYY-MM-DD') : '-';
       dataflow.obligationTitle = dataflow.obligation?.oblTitle;
       dataflow.legalInstrument = dataflow.obligation?.legalInstrument?.sourceAlias;
       return dataflow;
