@@ -27,9 +27,12 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -265,8 +268,7 @@ public class ValidationHelper implements DisposableBean {
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId, processId,
-        SecurityContextHolder.getContext().getAuthentication().getName(),
-        getPriority(dataset.getDataflowId()));
+        SecurityContextHolder.getContext().getAuthentication().getName(), getPriority(dataset));
 
     // If there's no SQL rules enabled, no need to refresh the views, so directly start the
     // validation
@@ -299,20 +301,28 @@ public class ValidationHelper implements DisposableBean {
    * @param dataflowId the dataflow id
    * @return the priority
    */
-  private int getPriority(Long dataflowId) {
+  private int getPriority(DataSetMetabaseVO dataset) {
     int priority = 0;
-    Date date = dataFlowControllerZuul.getMetabaseById(dataflowId).getDeadlineDate();
-    final LocalDateTime today = LocalDateTime.now();
-    Long days = Duration
-        .between(today, LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())).toDays();
-    if (days > periodDays.get(0)) {
-      priority = 50;
-    } else if (days <= periodDays.get(0) && days > periodDays.get(1)) {
-      priority = 40;
-    } else if (days <= periodDays.get(2) && days > periodDays.get(3)) {
-      priority = 30;
+    DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
+    dataflow.getDeadlineDate();
+
+    if (dataflow.getDeadlineDate() == null || TypeStatusEnum.DESIGN.equals(dataflow.getStatus())
+        || DatasetTypeEnum.TEST.equals(datasetMetabaseControllerZuul.getType(dataset.getId()))) {
+      priority = 70;
     } else {
-      priority = 20;
+      final LocalDateTime today = LocalDateTime.now();
+      Long days = Duration.between(today,
+          LocalDateTime.ofInstant(dataflow.getDeadlineDate().toInstant(), ZoneId.systemDefault()))
+          .toDays();
+      if (days > periodDays.get(0)) {
+        priority = 50;
+      } else if (days <= periodDays.get(0) && days > periodDays.get(1)) {
+        priority = 40;
+      } else if (days <= periodDays.get(2) && days > periodDays.get(3)) {
+        priority = 30;
+      } else {
+        priority = 20;
+      }
     }
     return priority;
   }

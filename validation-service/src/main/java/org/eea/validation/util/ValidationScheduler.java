@@ -68,8 +68,9 @@ public class ValidationScheduler extends MessageReceiver {
   /** The task read strategy. */
   private TaskReadStrategy taskReadStrategy;
 
+
   /**
-   * Inits the SCHEDULER.
+   * Inits the scheduler.
    */
   @PostConstruct
   void init() {
