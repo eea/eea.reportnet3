@@ -1,5 +1,6 @@
 package org.eea.swagger;
 
+import com.google.common.collect.Lists;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +11,6 @@ import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import com.google.common.collect.Lists;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.service.ApiKey;
@@ -27,8 +27,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration
 @EnableSwagger2
 @EnableWebMvc
-@Profile("!production")
-public class SwaggerConfiguration implements WebMvcConfigurer {
+@Profile("production")
+public class ProductionSwaggerConfiguration implements WebMvcConfigurer {
 
   /**
    * Api docket.
@@ -38,42 +38,11 @@ public class SwaggerConfiguration implements WebMvcConfigurer {
   @Bean
   public Docket api() {
     return new Docket(DocumentationType.SWAGGER_2)
-        .securityContexts(Lists.newArrayList(securityContext()))
-        .securitySchemes(Lists.newArrayList(apiKey())).select()
+        .select()
         .apis(RequestHandlerSelectors.basePackage("org.eea")).paths(PathSelectors.any()).build();
   }
 
-  /**
-   * Api key.
-   *
-   * @return the api key
-   */
-  private static ApiKey apiKey() {
-    return new ApiKey("JWT", "Authorization", "header");
-  }
 
-  /**
-   * Security context.
-   *
-   * @return the security context
-   */
-  private SecurityContext securityContext() {
-    return SecurityContext.builder().securityReferences(defaultAuth())
-        .forPaths(PathSelectors.regex("/.*")).build();
-  }
-
-  /**
-   * Default auth list.
-   *
-   * @return the list
-   */
-  List<SecurityReference> defaultAuth() {
-    final AuthorizationScope authorizationScope =
-        new AuthorizationScope("global", "accessEverything");
-    final AuthorizationScope[] authorizationScopes = new AuthorizationScope[1];
-    authorizationScopes[0] = authorizationScope;
-    return Lists.newArrayList(new SecurityReference("JWT", authorizationScopes));
-  }
 
   /**
    * Adds the resource handlers.
