@@ -290,17 +290,16 @@ public class ValidationHelper implements DisposableBean {
     Date date = dataFlowControllerZuul.getMetabaseById(dataflowId).getDeadlineDate();
     final LocalDate today = LocalDate.now();
     Long days = Duration.between(today, (Temporal) date).toDays();
-    if (days > 30) {
-      priority = 5;
-    } else if (days < 30 && days > 15) {
-      priority = 4;
-    } else if (days < 15 && days > 7) {
-      priority = 3;
+    if (days > 29) {
+      priority = 50;
+    } else if (days <= 29 && days > 8) {
+      priority = 40;
+    } else if (days <= 7 && days > 4) {
+      priority = 30;
     } else {
-      priority = 2;
+      priority = 20;
     }
     return priority;
-
   }
 
   /**

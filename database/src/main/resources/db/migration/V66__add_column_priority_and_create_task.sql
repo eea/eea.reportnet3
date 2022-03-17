@@ -1,4 +1,4 @@
-ALTER TABLE public.process ADD column if not exists priority int4 default 5;
+ALTER TABLE public.process ADD column if not exists priority int4 default 50;
 
 CREATE TABLE if not exists public.task (
 	process_id varchar NOT NULL,
