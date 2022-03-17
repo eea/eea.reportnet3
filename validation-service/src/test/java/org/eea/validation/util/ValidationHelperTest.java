@@ -3,6 +3,7 @@ package org.eea.validation.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
@@ -13,9 +14,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -30,6 +33,7 @@ import org.eea.lock.service.LockService;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
@@ -96,6 +100,10 @@ public class ValidationHelperTest {
   @Mock
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
+  /** The data flow controller zuul. */
+  @Mock
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
   /** The data. */
   private Map<String, Object> data;
 
@@ -127,6 +135,10 @@ public class ValidationHelperTest {
   /** The process controller zuul. */
   @Mock
   private ProcessControllerZuul processControllerZuul;
+
+  /** The task repository. */
+  @Mock
+  private TaskRepository taskRepository;
 
   /**
    * Inits the mocks.
@@ -273,14 +285,17 @@ public class ValidationHelperTest {
     Rule rule = new Rule();
     rule.setType(EntityTypeEnum.RECORD);
     rules.setRules(Arrays.asList(rule));
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setDeadlineDate(new Date());
+
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rules);
     Mockito.when(validationService.countRecordsDataset(Mockito.eq(1l))).thenReturn(1);
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any()))
         .thenReturn(new DataSetSchema());
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflow);
+
     validationHelper.executeValidation(1l, "1", false, false);
     Mockito.verify(validationService, Mockito.times(1)).deleteAllValidation(Mockito.eq(1l));
-    Mockito.verify(kafkaSenderUtils, Mockito.times(2))
-        .releaseKafkaEvent(Mockito.any(EEAEventVO.class));
   }
 
 
@@ -329,9 +344,13 @@ public class ValidationHelperTest {
     reference.setId(23L);
     reference.setDatasetSchema(new ObjectId().toString());
 
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setDeadlineDate(new Date());
+
     Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(Arrays.asList(rule));
     Mockito.when(rulesRepository.findSqlRulesEnabled(Mockito.any()))
         .thenReturn(Arrays.asList(rule));
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     validationHelper.executeValidation(1l, "1", false, true);
     Mockito.verify(referenceDatasetControllerZuul, Mockito.times(1))
         .findReferenceDatasetByDataflowId(Mockito.any());

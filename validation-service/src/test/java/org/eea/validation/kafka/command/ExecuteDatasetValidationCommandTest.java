@@ -62,6 +62,7 @@ public class ExecuteDatasetValidationCommandTest {
     data.put("dataset_id", "1");
     data.put("kieBase", kieBase);
     data.put("numPag", 1);
+    data.put("task_id", 1);
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATE_DATASET);
     eeaEventVO.setData(data);
