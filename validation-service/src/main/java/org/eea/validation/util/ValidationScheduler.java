@@ -10,6 +10,9 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.message.MessageReceiver;
 import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
+import org.eea.validation.util.priority.HighPriorityTaskReaderStrategy;
+import org.eea.validation.util.priority.LowPriorityTaskReaderStrategy;
+import org.eea.validation.util.priority.TaskReadStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +61,12 @@ public class ValidationScheduler extends MessageReceiver {
   @Value("${spring.cloud.consul.discovery.instanceId}")
   private String serviceInstanceId;
 
+  /** The instance priority. */
+  @Value("${validation.instance.priority}")
+  private String instancePriority;
+
+  /** The task read strategy. */
+  private TaskReadStrategy taskReadStrategy;
 
   /**
    * Inits the SCHEDULER.
@@ -65,6 +74,11 @@ public class ValidationScheduler extends MessageReceiver {
   @PostConstruct
   void init() {
     scheduler.schedule(() -> scheduledConsumer(), delay, TimeUnit.MILLISECONDS);
+    if ("HIGH".equals(instancePriority)) {
+      taskReadStrategy = new HighPriorityTaskReaderStrategy();
+    } else {
+      taskReadStrategy = new LowPriorityTaskReaderStrategy();
+    }
   }
 
   /**
@@ -75,7 +89,7 @@ public class ValidationScheduler extends MessageReceiver {
     try {
       int freeThreads = checkFreeThreads();
       if (freeThreads > 0) {
-        for (Task task : taskRepository.findLastTask(freeThreads)) {
+        for (Task task : taskReadStrategy.getTasks(freeThreads)) {
           try {
             task.setStartingDate(new Date());
             task.setPod(serviceInstanceId);
@@ -89,7 +103,7 @@ public class ValidationScheduler extends MessageReceiver {
             message.getPayload().getData().put("task_id", task.getId());
             consumeMessage(message);
           } catch (EEAException | JsonProcessingException e) {
-            LOG_ERROR.error("failed the validation task shedule because of {} ", e);// ObjectOptimisticLockingFailureException
+            LOG_ERROR.error("failed the validation task shedule because of {} ", e);
           } catch (ObjectOptimisticLockingFailureException e) {
             newDelay = 1L;
           }
