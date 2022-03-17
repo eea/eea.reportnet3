@@ -36,7 +36,7 @@ public class Task {
   @SequenceGenerator(name = "task_sequence_generator", sequenceName = "task_id_seq",
       allocationSize = 1)
   @GeneratedValue(strategy = GenerationType.AUTO, generator = "task_sequence_generator")
-  @Column(name = "ID", columnDefinition = "serial")
+  @Column(name = "id", columnDefinition = "serial")
   private Long id;
 
   /** The process id. */

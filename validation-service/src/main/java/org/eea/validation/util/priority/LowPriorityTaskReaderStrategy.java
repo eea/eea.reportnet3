@@ -3,8 +3,7 @@ package org.eea.validation.util.priority;
 import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 import org.eea.validation.persistence.data.metabase.domain.Task;
-import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.eea.validation.util.ValidationHelper;
 import lombok.NoArgsConstructor;
 
 /**
@@ -13,9 +12,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LowPriorityTaskReaderStrategy implements TaskReadStrategy {
 
-  /** The task repository. */
-  @Autowired
-  private TaskRepository taskRepository;
+  /** The validation helper. */
+  private ValidationHelper validationHelper;
+
+  /**
+   * Instantiates a new low priority task reader strategy.
+   *
+   * @param validationHelper the validation helper
+   */
+  public LowPriorityTaskReaderStrategy(ValidationHelper validationHelper) {
+    this.validationHelper = validationHelper;
+  }
 
   /**
    * Gets the tasks.
@@ -25,11 +32,11 @@ public class LowPriorityTaskReaderStrategy implements TaskReadStrategy {
    */
   @Override
   public List<Task> getTasks(int limit) {
-    List<Long> tasksIds = taskRepository.findLastLowPriorityTask(limit);
+    List<Long> tasksIds = validationHelper.getLastLowPriorityTask(limit);
     if (CollectionUtils.isEmpty(tasksIds)) {
-      tasksIds = taskRepository.findLastTask(limit);
+      tasksIds = validationHelper.getLastHighPriorityTask(limit);
     }
-    return taskRepository.findAllWithIds(tasksIds);
+    return validationHelper.getTasksByIds(tasksIds);
   }
 
 }

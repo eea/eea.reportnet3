@@ -967,6 +967,36 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
+   * Gets the tasks by ids.
+   *
+   * @param ids the ids
+   * @return the tasks by ids
+   */
+  public List<Task> getTasksByIds(List<Long> ids) {
+    return CollectionUtils.isNotEmpty(ids) ? taskRepository.findByIdIn(ids) : new ArrayList<>();
+  }
+
+  /**
+   * Gets the last low priority task.
+   *
+   * @param limit the limit
+   * @return the last low priority task
+   */
+  public List<Long> getLastLowPriorityTask(int limit) {
+    return taskRepository.findLastLowPriorityTask(limit);
+  }
+
+  /**
+   * Gets the last high priority task.
+   *
+   * @param limit the limit
+   * @return the last high priority task
+   */
+  public List<Long> getLastHighPriorityTask(int limit) {
+    return taskRepository.findLastTask(limit);
+  }
+
+  /**
    * Instantiates a new validation task.
    *
    * @param eeaEventVO the eea event VO

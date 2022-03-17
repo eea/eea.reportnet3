@@ -29,8 +29,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
       value = "select case when (exists (select id from task where process_id=:processId and status !='FINISHED' limit 1)) then FALSE else TRUE end")
   boolean isProcessFinished(@Param("processId") String processId);
 
-  @Query("select t from Task where id in :ids")
-  List<Task> findAllWithIds(@Param("ids") List<Long> ids);
+  @Query(nativeQuery = true, value = "select * from task WHERE id in(:ids)")
+  List<Task> findByIdIn(@Param("ids") List<Long> ids);
 }
 
 

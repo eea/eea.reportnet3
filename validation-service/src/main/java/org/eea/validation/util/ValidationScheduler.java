@@ -73,12 +73,12 @@ public class ValidationScheduler extends MessageReceiver {
    */
   @PostConstruct
   void init() {
-    scheduler.schedule(() -> scheduledConsumer(), delay, TimeUnit.MILLISECONDS);
     if ("HIGH".equals(instancePriority)) {
-      taskReadStrategy = new HighPriorityTaskReaderStrategy();
+      taskReadStrategy = new HighPriorityTaskReaderStrategy(validationHelper);
     } else {
-      taskReadStrategy = new LowPriorityTaskReaderStrategy();
+      taskReadStrategy = new LowPriorityTaskReaderStrategy(validationHelper);
     }
+    scheduler.schedule(() -> scheduledConsumer(), delay, TimeUnit.MILLISECONDS);
   }
 
   /**
