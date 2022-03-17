@@ -259,10 +259,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * Retrieve table data.
    *
    * @param query the query
-   * @param dataSetMetabaseVO the data set metabase VO
-   * @param rule the rule
+   * @param queryVO the query VO
    * @param ischeckDC the ischeck DC
-   * @return the table value
+   * @return the query VO
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
   @Override

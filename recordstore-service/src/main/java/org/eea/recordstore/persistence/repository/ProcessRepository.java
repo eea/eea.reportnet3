@@ -12,9 +12,9 @@ public interface ProcessRepository
     extends PagingAndSortingRepository<EEAProcess, Long>, ProcessExtendedRepository {
 
   /**
-   * Find one by uuid.
+   * Find one by process id.
    *
-   * @param uuid the uuid
+   * @param processId the process id
    * @return the optional
    */
   Optional<EEAProcess> findOneByProcessId(String processId);

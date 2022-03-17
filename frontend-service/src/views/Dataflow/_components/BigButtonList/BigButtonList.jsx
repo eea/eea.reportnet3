@@ -4,6 +4,8 @@ import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
 import remove from 'lodash/remove';
 
+import utc from 'dayjs/plugin/utc';
+
 import { config } from 'conf';
 import { DataflowConfig } from 'repositories/config/DataflowConfig';
 
@@ -70,6 +72,8 @@ export const BigButtonList = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+
+  dayjs.extend(utc);
 
   const [errorDialogData, setErrorDialogData] = useState({ isVisible: false, message: '' });
 
@@ -460,7 +464,7 @@ export const BigButtonList = ({
 
   const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
 
-  const getDate = () => new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime();
+  const getDate = () => new Date(dayjs(dataCollectionDueDate).utc(true).endOf('day').valueOf()).getTime();
 
   const onCreateDataCollectionsWithNotValids = async () => {
     setIsActiveButton(false);

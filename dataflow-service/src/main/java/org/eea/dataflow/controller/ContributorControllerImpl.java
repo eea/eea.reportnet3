@@ -195,8 +195,7 @@ public class ContributorControllerImpl implements ContributorController {
    * Find reporters by group.
    *
    * @param dataflowId the dataflow id
-   * @param dataproviderId the dataprovider id
-   *
+   * @param dataProviderId the data provider id
    * @return the list
    */
   @Override
@@ -339,11 +338,10 @@ public class ContributorControllerImpl implements ContributorController {
   }
 
   /**
-   * Updates the reporters permissions checking if they are now registered in the system.
+   * Validate reporters.
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
-   * @param contributorVO the contributor VO
    * @return the response entity
    */
   @Override

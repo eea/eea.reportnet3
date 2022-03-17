@@ -23,7 +23,6 @@ public interface IFileParseContext {
    * @param replace the replace
    * @param schema the schema
    * @param connectionDataVO the connection data VO
-   * @return the data set VO
    * @throws EEAException the EEA exception
    */
   void parse(InputStream inputStream, Long dataflowId, Long partitionId, String idTableSchema,

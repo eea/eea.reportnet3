@@ -5,9 +5,9 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;
@@ -433,8 +433,8 @@ public class DataCollectionServiceImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
 
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false,
-        true);
+    dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
+        false, true);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
@@ -527,8 +527,8 @@ public class DataCollectionServiceImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
 
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), false, false, false, false,
-        true);
+    dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), false, false, false,
+        false, true);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
@@ -553,8 +553,8 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false,
-        true);
+    dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
+        false, true);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
 
@@ -571,8 +571,8 @@ public class DataCollectionServiceImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false,
-        true);
+    dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
+        false, true);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
   }
 
@@ -611,8 +611,8 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false,
-        true);
+    dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
+        false, true);
     Mockito.verify(connection, times(1)).rollback();
   }
 
@@ -664,8 +664,8 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    dataCollectionService.createEmptyDataCollection(1L, new Date(), true, false, false, false,
-        true);
+    dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
+        false, true);
     Mockito.verify(connection, times(1)).rollback();
   }
 

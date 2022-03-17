@@ -292,7 +292,7 @@ public interface DatasetController {
       @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
 
   /**
-   * Etl export dataset V2.
+   * Etl export dataset V 2.
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
@@ -302,6 +302,7 @@ public interface DatasetController {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    * @return the response entity
    */
   @GetMapping("/v2/etlExport/{datasetId}")

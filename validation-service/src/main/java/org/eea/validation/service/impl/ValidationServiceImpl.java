@@ -843,7 +843,6 @@ public class ValidationServiceImpl implements ValidationService {
    *
    * @param dataset the dataset
    * @param errors the errors
-   * @return the rule message
    */
   @Override
   public void getRuleMessage(DatasetValue dataset, List<GroupValidationVO> errors) {
