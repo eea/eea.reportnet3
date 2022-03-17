@@ -24,7 +24,7 @@ public class HighPriorityTaskReaderStrategy implements TaskReadStrategy {
    */
   @Override
   public List<Task> getTasks(int limit) {
-    return taskRepository.findLastTask(limit);
+    return taskRepository.findAllWithIds(taskRepository.findLastTask(limit));
   }
 
 }

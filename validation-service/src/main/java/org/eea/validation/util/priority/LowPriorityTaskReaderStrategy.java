@@ -25,11 +25,11 @@ public class LowPriorityTaskReaderStrategy implements TaskReadStrategy {
    */
   @Override
   public List<Task> getTasks(int limit) {
-    List<Task> tasks = taskRepository.findLastLowPriorityTask(limit);
-    if (CollectionUtils.isEmpty(tasks)) {
-      tasks = taskRepository.findLastTask(limit);
+    List<Long> tasksIds = taskRepository.findLastLowPriorityTask(limit);
+    if (CollectionUtils.isEmpty(tasksIds)) {
+      tasksIds = taskRepository.findLastTask(limit);
     }
-    return tasks;
+    return taskRepository.findAllWithIds(tasksIds);
   }
 
 }

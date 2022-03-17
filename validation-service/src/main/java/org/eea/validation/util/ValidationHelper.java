@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -126,6 +127,11 @@ public class ValidationHelper implements DisposableBean {
   @Value("${validation.tasks.parallelism}")
   private int maxRunningTasks;
 
+  @Value("${validation.priority.days}")
+  private String priorityDays;
+
+  private List<Long> periodDays;
+
   /** The table repository. */
   @Autowired
   private TableRepository tableRepository;
@@ -173,6 +179,8 @@ public class ValidationHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
+    periodDays = Arrays.asList(priorityDays.split(" ")).stream().map(Long::parseLong)
+        .collect(Collectors.toList());
     validationExecutorService = new EEADelegatingSecurityContextExecutorService(
         Executors.newFixedThreadPool(maxRunningTasks));
     validationExecutorService.submit(() -> LOG.info("initializer validation executor service"));
@@ -297,11 +305,11 @@ public class ValidationHelper implements DisposableBean {
     final LocalDateTime today = LocalDateTime.now();
     Long days = Duration
         .between(today, LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())).toDays();
-    if (days > 29) {
+    if (days > periodDays.get(0)) {
       priority = 50;
-    } else if (days <= 29 && days > 8) {
+    } else if (days <= periodDays.get(0) && days > periodDays.get(1)) {
       priority = 40;
-    } else if (days <= 7 && days > 4) {
+    } else if (days <= periodDays.get(2) && days > periodDays.get(3)) {
       priority = 30;
     } else {
       priority = 20;
