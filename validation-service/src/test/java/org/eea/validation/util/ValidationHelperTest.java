@@ -157,6 +157,12 @@ public class ValidationHelperTest {
     executorService =
         new EEADelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2));
     MockitoAnnotations.openMocks(this);
+    List<Long> periodDays = new ArrayList<>();
+    periodDays.add(1L);
+    periodDays.add(2L);
+    periodDays.add(3L);
+    periodDays.add(4L);
+    ReflectionTestUtils.setField(validationHelper, "periodDays", periodDays);
     SecurityContextHolder.setContext(securityContext);
   }
 
