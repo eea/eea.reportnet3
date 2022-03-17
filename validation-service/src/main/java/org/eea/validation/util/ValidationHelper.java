@@ -2,8 +2,8 @@ package org.eea.validation.util;
 
 import java.sql.Timestamp;
 import java.time.Duration;
-import java.time.LocalDate;
-import java.time.temporal.Temporal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -285,11 +285,18 @@ public class ValidationHelper implements DisposableBean {
     dataset = null;
   }
 
+  /**
+   * Gets the priority.
+   *
+   * @param dataflowId the dataflow id
+   * @return the priority
+   */
   private int getPriority(Long dataflowId) {
     int priority = 0;
     Date date = dataFlowControllerZuul.getMetabaseById(dataflowId).getDeadlineDate();
-    final LocalDate today = LocalDate.now();
-    Long days = Duration.between(today, (Temporal) date).toDays();
+    final LocalDateTime today = LocalDateTime.now();
+    Long days = Duration
+        .between(today, LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())).toDays();
     if (days > 29) {
       priority = 50;
     } else if (days <= 29 && days > 8) {
