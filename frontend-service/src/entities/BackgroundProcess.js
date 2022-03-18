@@ -17,7 +17,7 @@ export class BackgroundProcess {
     this.datasetId = datasetId;
     this.datasetName = datasetName;
     this.id = id;
-    this.priority = Math.floor(Math.random() * 100) + 1; //priority;
+    this.priority = priority;
     this.processFinishingDate = processFinishingDate;
     this.processStartingDate = processStartingDate;
     this.queuedDate = queuedDate;

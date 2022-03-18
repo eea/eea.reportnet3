@@ -20,5 +20,7 @@ export const BackgroundProcessService = {
     response.data.processList = BackgroundProcessUtils.parseValidationsStatusListDTO(response.data.processList);
 
     return response.data;
-  }
+  },
+
+  update: async ({ processId, priority }) => await BackgroundProcessRepository.update({ processId, priority })
 };
