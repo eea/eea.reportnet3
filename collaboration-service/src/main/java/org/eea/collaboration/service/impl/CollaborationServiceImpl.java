@@ -27,6 +27,7 @@ import org.eea.interfaces.vo.dataflow.MessageAttachmentVO;
 import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.slf4j.Logger;
@@ -352,7 +353,8 @@ public class CollaborationServiceImpl implements CollaborationService {
           || authorities.contains(new SimpleGrantedAuthority(
               ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)))
           || authorities.contains(new SimpleGrantedAuthority(
-              ObjectAccessRoleEnum.DATAFLOW_STEWARD_SUPPORT.getAccessRole(dataflowId)));
+              ObjectAccessRoleEnum.DATAFLOW_STEWARD_SUPPORT.getAccessRole(dataflowId)))
+          || authorities.contains(new SimpleGrantedAuthority("ROLE_" + SecurityRoleEnum.ADMIN));
       if (custodianSteward) {
         direction = false;
       }

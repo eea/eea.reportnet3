@@ -303,7 +303,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @PutMapping(value = "/private/{idSnapshot}/dataset/{idDataset}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Release snapshot", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER') OR hasAnyRole('ADMIN')")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
       @ApiResponse(code = 400, message = "Dataset id incorrect or execution error")})
   public void releaseSnapshot(
@@ -625,7 +625,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @HystrixCommand
   @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Create release snapshots", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create"),
       @ApiResponse(code = 400, message = "Execution error"),
@@ -638,7 +638,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
               required = true) Long dataProviderId,
       @ApiParam(type = "boolean", value = "Restric from public", example = "true") @RequestParam(
           name = "restrictFromPublic", required = true,
-          defaultValue = "false") boolean restrictFromPublic) {
+          defaultValue = "false") boolean restrictFromPublic,
+      @ApiParam(type = "boolean", value = "Execute validations", example = "true") @RequestParam(
+          name = "validate", required = false, defaultValue = "true") boolean validate) {
 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDataflowId(dataflowId);
@@ -656,7 +658,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     if (null != dataflow && dataflow.isReleasable()) {
       try {
         datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId,
-            restrictFromPublic);
+            restrictFromPublic, validate);
       } catch (EEAException e) {
         LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
         try {

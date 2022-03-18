@@ -1,6 +1,8 @@
 package org.eea.dataset.controller;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +135,9 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     userNotificationContentVO.setDataflowId(dataCollectionVO.getIdDataflow());
     userNotificationContentVO.setDatasetName(dataCollectionVO.getDataSetName());
 
-    Date date = dataCollectionVO.getDueDate();
+    LocalDateTime date = (dataCollectionVO.getDueDate() != null) ? LocalDateTime.ofInstant(
+        Instant.ofEpochMilli(dataCollectionVO.getDueDate().getTime()), ZoneOffset.UTC) : null;
+
     Long dataflowId = dataCollectionVO.getIdDataflow();
     // new check: dataflow is Reference dataset?
     DataFlowVO dataflow = dataCollectionService.getDataflowMetabase(dataflowId);

@@ -77,12 +77,13 @@ public interface SqlRulesService {
       throws EEAException;
 
   /**
-   * Evaluates the SQL rule and returns its total cost.
+   * Evaluate sql rule.
    *
    * @param datasetId the dataset id
-   * @param sqlRule the sql rule about to be evaluated
-   * @return the double containing the total cost
+   * @param sqlRule the sql rule
+   * @return the double
    * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
    */
   Double evaluateSqlRule(Long datasetId, String sqlRule) throws EEAException, ParseException;
 

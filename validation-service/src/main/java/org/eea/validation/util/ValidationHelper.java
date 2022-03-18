@@ -70,6 +70,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -83,6 +84,7 @@ import lombok.AllArgsConstructor;
  * The Class ValidationHelper.
  */
 @Component
+@RefreshScope
 public class ValidationHelper implements DisposableBean {
 
   /** The Constant LOG. */

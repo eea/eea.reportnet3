@@ -1,14 +1,10 @@
 package org.eea.dataset.io.kafka.commands;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
@@ -81,33 +77,33 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
     IntegrationVO integrationVO = integrationController.findIntegrationById(integrationId);
     boolean error = false;
 
-    try (InputStream inputStream = new FileInputStream(file)) {
+    try {
       // TODO. Encode and copy the file content into the IntegrationVO. This method load the entire
       // file in memory. To solve it, the FME connector should be redesigned.
-      byte[] byteArray = IOUtils.toByteArray(inputStream);
-      String encodedString = Base64.getEncoder().encodeToString(byteArray);
+
       Map<String, String> externalParameters = new HashMap<>();
-      externalParameters.put("fileIS", encodedString);
+      externalParameters.put("fileIS", "");
       integrationVO.setExternalParameters(externalParameters);
 
       if ((Integer) integrationController
           .executeIntegrationProcess(IntegrationToolTypeEnum.FME,
-              IntegrationOperationTypeEnum.IMPORT, file.getName(), datasetId, integrationVO)
+              IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationVO)
           .getExecutionResultParams().get("id") == 0) {
         error = true;
       }
-
-      FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
-    } catch (IOException e) {
-      if (integrationVO != null && integrationVO.getExternalParameters() != null) {
-        integrationVO.getExternalParameters().put("fileIS", "contentFileNotShowedInTheLog");
+    } finally {
+      try {
+        FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
+      } catch (IOException e) {
+        if (integrationVO != null && integrationVO.getExternalParameters() != null) {
+          integrationVO.getExternalParameters().put("fileIS", "contentFileNotShowedInTheLog");
+        }
+        LOG_ERROR.error(
+            "Error processing the call to FME executing integration: datasetId={}, fileName={}, IntegrationVO={}",
+            datasetId, file.getName(), integrationVO);
+        manageLock(datasetId);
       }
-      LOG_ERROR.error(
-          "Error processing the call to FME executing integration: datasetId={}, fileName={}, IntegrationVO={}",
-          datasetId, file.getName(), integrationVO);
-      manageLock(datasetId);
     }
-
     if (error) {
       if (integrationVO != null && integrationVO.getExternalParameters() != null) {
         integrationVO.getExternalParameters().put("fileIS", "contentFileNotShowedInTheLog");

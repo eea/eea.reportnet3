@@ -3,13 +3,14 @@
  */
 package org.eea.dataflow.integration.executor.fme;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.transaction.Transactional;
+import org.apache.commons.lang.StringUtils;
 import org.eea.dataflow.integration.executor.fme.domain.Directive;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.NMDirectives;
@@ -23,7 +24,7 @@ import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
@@ -83,7 +84,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
 
   /** The user management controller. */
   @Autowired
-  private UserManagementController userManagementController;
+  private UserManagementControllerZull userManagementControllerZuul;
 
   /** The FME job repository. */
   @Autowired
@@ -272,18 +273,18 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         break;
       case IMPORT:
         parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
-        parameters.add(saveParameter(IntegrationParams.INPUT_FILE, fileName));
+        File file = new File(fileName);
+        if (StringUtils.isNotBlank(file.getName())) {
+          parameters.add(saveParameter(IntegrationParams.INPUT_FILE, file.getName()));
+        }
         parameters
             .add(saveParameter(IntegrationParams.FOLDER, datasetId + "/" + paramDataProvider));
 
         parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
 
-        byte[] decodedBytes = Base64.getDecoder()
-            .decode(integration.getExternalParameters().get(IntegrationParams.FILE_IS));
-
         LOG.info("Upload {} to FME", fileName);
-        fmeCommunicationService.sendFile(decodedBytes, datasetId, paramDataProvider, fileName);
+        fmeCommunicationService.sendFile(datasetId, paramDataProvider, fileName);
         LOG.info("File uploaded");
 
         LOG.info("Executing FME Import: fmeAsyncJob={}", fmeAsyncJob);
@@ -361,11 +362,11 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    */
   private String getApiKey(Long dataflowId, Long dataproviderId) {
 
-    String apiKey = userManagementController.getApiKey(dataflowId, dataproviderId);
+    String apiKey = userManagementControllerZuul.getApiKey(dataflowId, dataproviderId);
 
     if (null == apiKey) {
       LOG.info("ApiKey not exits");
-      apiKey = userManagementController.createApiKey(dataflowId, dataproviderId);
+      apiKey = userManagementControllerZuul.createApiKey(dataflowId, dataproviderId);
       if (null != dataproviderId) {
         LOG.info("ApiKey created for Provider ID: {} and Dataflow ID: {} ", dataproviderId,
             dataflowId);

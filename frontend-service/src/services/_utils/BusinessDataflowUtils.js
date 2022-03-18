@@ -1,5 +1,7 @@
 import dayjs from 'dayjs';
 
+import utc from 'dayjs/plugin/utc';
+
 import { ObligationUtils } from 'services/_utils/ObligationUtils';
 
 import { BusinessDataflow } from 'entities/BusinessDataflow';
@@ -7,13 +9,15 @@ import { BusinessDataflow } from 'entities/BusinessDataflow';
 const parseBusinessDataflows = businessDataflowDTOs =>
   businessDataflowDTOs?.map(dataflowDTO => parseBusinessDataflowDTO(dataflowDTO));
 
-const parseBusinessDataflowDTO = businessDataflowDTO =>
-  new BusinessDataflow({
+const parseBusinessDataflowDTO = businessDataflowDTO => {
+  dayjs.extend(utc);
+
+  return new BusinessDataflow({
     creationDate:
       businessDataflowDTO.creationDate > 0 ? dayjs(businessDataflowDTO.creationDate).format('YYYY-MM-DD') : '-',
     description: businessDataflowDTO.description,
     expirationDate:
-      businessDataflowDTO.deadlineDate > 0 ? dayjs(businessDataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
+      businessDataflowDTO.deadlineDate > 0 ? dayjs(businessDataflowDTO.deadlineDate).utc().format('YYYY-MM-DD') : '-',
     id: businessDataflowDTO.id,
     isReleasable: businessDataflowDTO.releasable,
     name: businessDataflowDTO.name,
@@ -23,5 +27,6 @@ const parseBusinessDataflowDTO = businessDataflowDTO =>
     type: businessDataflowDTO.type,
     userRole: businessDataflowDTO.userRole
   });
+};
 
 export const BusinessDataflowUtils = { parseBusinessDataflows };

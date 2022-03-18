@@ -33,7 +33,9 @@ public interface ProcessService {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param status the status
+   * @param type the type
    * @param processId the process id
+   * @param threadId the thread id
    * @param user the user
    */
   void updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,

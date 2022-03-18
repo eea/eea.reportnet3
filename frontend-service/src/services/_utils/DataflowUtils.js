@@ -1,8 +1,9 @@
-import dayjs from 'dayjs';
-
 import camelCase from 'lodash/camelCase';
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+
+import utc from 'dayjs/plugin/utc';
 
 import { config } from 'conf';
 
@@ -46,13 +47,15 @@ const parseSortedDataflowListDTO = dataflowDTOs => {
 const parsePublicDataflowListDTO = dataflowsDTO =>
   dataflowsDTO?.map(dataflowDTO => parsePublicDataflowDTO(dataflowDTO));
 
-const parsePublicDataflowDTO = publicDataflowDTO =>
-  new Dataflow({
+const parsePublicDataflowDTO = publicDataflowDTO => {
+  dayjs.extend(utc);
+
+  return new Dataflow({
     datasets: DatasetUtils.parseDatasetListDTO(publicDataflowDTO.reportingDatasets),
     description: publicDataflowDTO.description,
     documents: DocumentUtils.parseDocumentListDTO(publicDataflowDTO.documents),
     expirationDate:
-      publicDataflowDTO.deadlineDate > 0 ? dayjs(publicDataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
+      publicDataflowDTO.deadlineDate > 0 ? dayjs(publicDataflowDTO.deadlineDate).utc().format('YYYY-MM-DD') : '-',
     id: publicDataflowDTO.id,
     manualAcceptance: publicDataflowDTO.manualAcceptance,
     name: publicDataflowDTO.name,
@@ -63,9 +66,12 @@ const parsePublicDataflowDTO = publicDataflowDTO =>
     type: publicDataflowDTO.type,
     webLinks: WebLinksUtils.parseWebLinkListDTO(publicDataflowDTO.weblinks)
   });
+};
 
-const parseDataflowDTO = dataflowDTO =>
-  new Dataflow({
+const parseDataflowDTO = dataflowDTO => {
+  dayjs.extend(utc);
+
+  return new Dataflow({
     anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
     creationDate: dataflowDTO.creationDate > 0 ? dayjs(dataflowDTO.creationDate).format('YYYY-MM-DD') : '-',
     dataCollections: DataCollectionUtils.parseDataCollectionListDTO(dataflowDTO.dataCollections),
@@ -76,7 +82,7 @@ const parseDataflowDTO = dataflowDTO =>
     designDatasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: DocumentUtils.parseDocumentListDTO(dataflowDTO.documents),
     euDatasets: EUDatasetUtils.parseEUDatasetListDTO(dataflowDTO.euDatasets),
-    expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
+    expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate).utc().format('YYYY-MM-DD') : '-',
     fmeUserId: dataflowDTO.fmeUserId,
     fmeUserName: dataflowDTO.fmeUserName,
     id: dataflowDTO.id,
@@ -96,6 +102,7 @@ const parseDataflowDTO = dataflowDTO =>
     userRole: dataflowDTO.userRole,
     webLinks: WebLinksUtils.parseWebLinkListDTO(dataflowDTO.weblinks)
   });
+};
 
 const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   allDataflowsUserListDTO.forEach((dataflow, dataflowIndex) => {
@@ -199,6 +206,8 @@ const replacements = {
 };
 
 const parseRequestFilterBy = filterBy => {
+  dayjs.extend(utc);
+
   if (isEmpty(filterBy)) {
     return {};
   }
@@ -218,11 +227,15 @@ const parseRequestFilterBy = filterBy => {
 
       if (TextUtils.areEquals(key, 'creationDate') || TextUtils.areEquals(key, 'expirationDate')) {
         if (filterBy[key][0] && !filterBy[key][1]) {
-          results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-          results[`${replacements[key]}_to`] = `${new Date(dayjs(filterBy[key][0]).endOf('day').format()).getTime()}`;
+          results[`${replacements[key]}_from`] = new Date(dayjs(filterBy[key][0]).utc(true).valueOf()).getTime();
+          results[`${replacements[key]}_to`] = new Date(
+            dayjs(filterBy[key][0]).utc(true).endOf('day').valueOf()
+          ).getTime();
         } else {
-          results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-          results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
+          results[`${replacements[key]}_from`] = new Date(dayjs(filterBy[key][0]).utc(true).valueOf()).getTime();
+          results[`${replacements[key]}_to`] = new Date(
+            dayjs(filterBy[key][1]).utc(true).endOf('day').valueOf()
+          ).getTime();
         }
 
         delete results[replacements[key]];
@@ -254,6 +267,8 @@ const parseRequestPublicCountrySortField = sortField => {
 };
 
 const parseRequestPublicCountryFilterBy = filterBy => {
+  dayjs.extend(utc);
+
   if (isEmpty(filterBy)) {
     return {};
   }
@@ -287,11 +302,15 @@ const parseRequestPublicCountryFilterBy = filterBy => {
 
       if (TextUtils.areEquals(key, 'deadline') || TextUtils.areEquals(key, 'deliveryDate')) {
         if (filterBy[key][0] && !filterBy[key][1]) {
-          results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-          results[`${replacements[key]}_to`] = `${new Date(dayjs(filterBy[key][0]).endOf('day').format()).getTime()}`;
+          results[`${replacements[key]}_from`] = new Date(dayjs(filterBy[key][0]).utc(true).valueOf()).getTime();
+          results[`${replacements[key]}_to`] = new Date(
+            dayjs(filterBy[key][0]).utc(true).endOf('day').valueOf()
+          ).getTime();
         } else {
-          results[`${replacements[key]}_from`] = `${filterBy[key][0]}`;
-          results[`${replacements[key]}_to`] = `${filterBy[key][1]}`;
+          results[`${replacements[key]}_from`] = new Date(dayjs(filterBy[key][0]).utc(true).valueOf()).getTime();
+          results[`${replacements[key]}_to`] = new Date(
+            dayjs(filterBy[key][1]).utc(true).endOf('day').valueOf()
+          ).getTime();
         }
 
         delete results[replacements[key]];
