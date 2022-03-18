@@ -75,9 +75,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   /** The Constant REGEX: {@value}. */
   private static final String REGEX = "-";
 
-  /** The email regex. */
-  @Value("${emailRegex}")
-  private String emailRegex;
+  /** The Constant EMAIL_REGEX: {@value}. */
+  private static final String EMAIL_REGEX =
+      "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"; // NOSONAR
 
   /** The Constant ROLE_PROVIDER: {@value}. */
   private static final String ROLE_PROVIDER = "ROLE_PROVIDER-";
@@ -1033,7 +1033,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
           .orElse(representativeRepository.findOneByDataflow_IdAndDataProvider_Id(dataflow.getId(),
               dataProvider.getId()));
 
-      Pattern p = Pattern.compile(emailRegex);
+      Pattern p = Pattern.compile(EMAIL_REGEX);
       Matcher m = p.matcher(email);
 
       if (m.matches()) {

@@ -28,7 +28,6 @@ import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,6 +36,10 @@ import org.springframework.stereotype.Service;
 @Service("UserNationalCoordinatorService")
 
 public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinatorService {
+
+  /** The Constant EMAIL_REGEX: {@value}. */
+  private static final String EMAIL_REGEX =
+      "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"; // NOSONAR
 
   /** The keycloak connector service. */
   @Autowired
@@ -53,10 +56,6 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
   /** The security provider interface service. */
   @Autowired
   private SecurityProviderInterfaceService securityProviderInterfaceService;
-
-  /** The email regex. */
-  @Value("{$emailRegex}")
-  private String emailRegex;
 
   /**
    * Gets the national coordinators.
@@ -212,7 +211,7 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
       throw new EEAException(EEAErrorMessage.USER_REQUEST_NOTFOUND);
     }
     userNationalCoordinatorVO.setEmail(userNationalCoordinatorVO.getEmail().toLowerCase());
-    Pattern p = Pattern.compile(emailRegex);
+    Pattern p = Pattern.compile(EMAIL_REGEX);
     Matcher m = p.matcher(userNationalCoordinatorVO.getEmail().toLowerCase());
     boolean result = m.matches();
     if (!result) {

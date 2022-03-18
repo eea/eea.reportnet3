@@ -1764,18 +1764,6 @@
     "value": "ZmFsc2U="
   },
   {
-	"key": "config/ums/emailRegex",
-	"value": "JHtFTUFJTF9SRUdFWDpeW2EtejAtOSEjJCUmJyorLz0/Xl9ge3x9fi1dKyg/OlwuW2EtejAtOSEjJCUmJyorLz0/Xl9ge3x9fi1dKykqQCg/OlthLXowLTldKD86W2EtejAtOS1dKlthLXowLTldKT9cLikrW2EtejAtOV0oPzpbYS16MC05LV0qW2EtejAtOV0pPyR9"   
-  },
-  {
-	"key":"config/dataflow/emailRegex",
-	"value": "JHtFTUFJTF9SRUdFWDpeW2EtejAtOSEjJCUmJyorLz0/Xl9ge3x9fi1dKyg/OlwuW2EtejAtOSEjJCUmJyorLz0/Xl9ge3x9fi1dKykqQCg/OlthLXowLTldKD86W2EtejAtOS1dKlthLXowLTldKT9cLikrW2EtejAtOV0oPzpbYS16MC05LV0qW2EtejAtOV0pPyR9"
-  },
-  {
-	"key":"config/dataflow/regexUrl",
-	"value":"JHtSRUdFWF9VUkw6XihzZnRwOlwvXC93d3dcLnxzZnRwOlwvXC98ZnRwOlwvXC93d3dcLnxmdHA6XC9cL3xodHRwOlwvXC93d3dcLnxodHRwczpcL1wvd3d3XC58aHR0cDpcL1wvfGh0dHBzOlwvXC8pP1thLXpBLVowLTldKyhbXC1cLl17MX1bYS16QS1aMC05XSspKlwuW2EtekEtWl17Miw2M30oOlswLTldezEsNX0pPyhcLy4qKT8kfQ=="
-  },
-  {
     "key": "config/validation/validation.instance.priority",
     "value": "JHtWQUxJREFUSU9OX0lOU1RBTkNFX1BSSU9SSVRZOkhJR0h9"
   },

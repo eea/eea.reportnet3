@@ -22,7 +22,6 @@ import org.eea.lock.annotation.LockMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -60,9 +59,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The email regex. */
-  @Value("${emailRegex}")
-  private String emailRegex;
+  /** The Constant EMAIL_REGEX: {@value}. */
+  private static final String EMAIL_REGEX =
+      "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"; // NOSONAR
+
 
   /** The representative service. */
   @Autowired
@@ -431,7 +431,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.USER_NOTFOUND);
     }
     leadReporterVO.setEmail(leadReporterVO.getEmail().toLowerCase());
-    Pattern p = Pattern.compile(emailRegex);
+    Pattern p = Pattern.compile(EMAIL_REGEX);
     Matcher m = p.matcher(leadReporterVO.getEmail().toLowerCase());
     boolean result = m.matches();
     if (Boolean.FALSE.equals(result)) {
@@ -476,7 +476,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     }
 
     // Validate email
-    if (null == leadReporterVO.getEmail() || !leadReporterVO.getEmail().matches(emailRegex)) {
+    if (null == leadReporterVO.getEmail() || !leadReporterVO.getEmail().matches(EMAIL_REGEX)) {
       LOG_ERROR.error("Error updating lead reporter: invalid email. leadReporterVO={}",
           leadReporterVO);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid email");

@@ -33,7 +33,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * The Class DataFlowServiceImplTest.
@@ -137,8 +136,6 @@ public class DataFlowWebLinkServiceImplTest {
 
     dataflowVO = new DataFlowVO();
 
-    ReflectionTestUtils.setField(dataflowServiceWebLinkImpl, "regexUrl",
-        "^(sftp:\\/\\/www\\.|sftp:\\/\\/|ftp:\\/\\/www\\.|ftp:\\/\\/|http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-zA-Z0-9]+([\\-\\.]{1}[a-zA-Z0-9]+)*\\.[a-zA-Z]{2,63}(:[0-9]{1,5})?(\\/.*)?$");
     MockitoAnnotations.openMocks(this);
   }
 

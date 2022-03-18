@@ -34,7 +34,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 /** The Class RepresentativeControllerImplTest. */
@@ -87,8 +86,6 @@ public class RepresentativeControllerImplTest {
     representativeVO.setLeadReporters(leadReporters);
     representativeVOs = new ArrayList<>();
     representativeVOs.add(representativeVO);
-    ReflectionTestUtils.setField(representativeControllerImpl, "emailRegex",
-        "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
     MockitoAnnotations.openMocks(this);
   }
 
