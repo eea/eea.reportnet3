@@ -25,6 +25,7 @@ import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -60,9 +61,9 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant REGEX_URL. */
-  private static final String REGEX_URL =
-      "^(sftp:\\/\\/www\\.|sftp:\\/\\/|ftp:\\/\\/www\\.|ftp:\\/\\/|http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-zA-Z0-9]+([\\-\\.]{1}[a-zA-Z0-9]+)*\\.[a-zA-Z]{2,63}(:[0-9]{1,5})?(\\/.*)?$";
+  /** The regex url. */
+  @Value("${regexUrl}")
+  private String regexUrl;
 
   /**
    * Gets the web link.
@@ -112,7 +113,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
 
     Weblink weblink = dataflowWebLinkMapper.classToEntity(weblinkVO);
 
-    Pattern patN = Pattern.compile(REGEX_URL);
+    Pattern patN = Pattern.compile(regexUrl);
 
     Matcher matN = patN.matcher(weblink.getUrl());
 
@@ -180,7 +181,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     Long dataFlowId = dataFlow.getId();
 
 
-    Pattern urlPattern = Pattern.compile(REGEX_URL);
+    Pattern urlPattern = Pattern.compile(regexUrl);
 
     Matcher urlMatcher = urlPattern.matcher(weblink.getUrl());
 

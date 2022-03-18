@@ -18,15 +18,19 @@ import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 /**
  * The Class UserNationalCoordinatorServiceImplTest.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class UserNationalCoordinatorServiceImplTest {
 
   /** The user national coordinator service impl. */
@@ -56,6 +60,8 @@ public class UserNationalCoordinatorServiceImplTest {
    */
   @Before
   public void setUp() throws Exception {
+    ReflectionTestUtils.setField(userNationalCoordinatorServiceImpl, "emailRegex",
+        "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
     MockitoAnnotations.openMocks(this);
   }
 

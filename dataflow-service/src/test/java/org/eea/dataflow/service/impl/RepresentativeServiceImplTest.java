@@ -49,10 +49,12 @@ import org.eea.thread.ThreadPropertiesManager;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -62,6 +64,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
 
+@RunWith(MockitoJUnitRunner.class)
 public class RepresentativeServiceImplTest {
 
   @InjectMocks
@@ -159,6 +162,8 @@ public class RepresentativeServiceImplTest {
     leadReporter = new LeadReporter(1L, "email@host.com", representative, null);
     leadReporters = new ArrayList<>();
     leadReporters.add(leadReporter);
+    ReflectionTestUtils.setField(representativeServiceImpl, "emailRegex",
+        "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$");
     MockitoAnnotations.openMocks(this);
   }
 
@@ -314,9 +319,9 @@ public class RepresentativeServiceImplTest {
 
     Mockito.when(dataflowRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new Dataflow()));
-    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+    Mockito.lenient().when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(new UserRepresentationVO());
-    Mockito.when(
+    Mockito.lenient().when(
         representativeRepository.findByDataProviderIdAndDataflowId(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.empty());
     Mockito.when(representativeMapper.classToEntity(Mockito.any())).thenReturn(representative);
@@ -387,7 +392,7 @@ public class RepresentativeServiceImplTest {
 
     Mockito.when(dataflowRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new Dataflow()));
-    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+    Mockito.lenient().when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(new UserRepresentationVO());
     Mockito.when(representativeRepository.findOneByDataflow_IdAndDataProvider_Id(Mockito.any(),
         Mockito.any())).thenReturn(repre);
@@ -541,7 +546,7 @@ public class RepresentativeServiceImplTest {
 
     Mockito.when(representativeRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(representative));
-    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.any()))
+    Mockito.lenient().when(userManagementControllerZull.getUserByEmail(Mockito.any()))
         .thenReturn(new UserRepresentationVO());
     try {
       representativeServiceImpl.createLeadReporter(1L, leadReporterVO);
@@ -578,7 +583,8 @@ public class RepresentativeServiceImplTest {
         .when(datasetMetabaseController
             .findReportingDataSetIdByDataflowIdAndProviderId(Mockito.any(), Mockito.any()))
         .thenReturn(datasets);
-    Mockito.when(leadReporterMapper.classToEntity(Mockito.any())).thenReturn(leadReporter);
+    Mockito.lenient().when(leadReporterMapper.classToEntity(Mockito.any()))
+        .thenReturn(leadReporter);
     Mockito.when(leadReporterRepository.save(Mockito.any())).thenReturn(leadReporter);
 
     Assert.assertEquals(1L,
@@ -811,7 +817,8 @@ public class RepresentativeServiceImplTest {
     try {
       Mockito.when(representativeRepository.findAllByDataflow_Id(Mockito.anyLong()))
           .thenReturn(null);
-      Mockito.when(representativeMapper.entityListToClass(Mockito.anyList())).thenReturn(null);
+      Mockito.lenient().when(representativeMapper.entityListToClass(Mockito.anyList()))
+          .thenReturn(null);
       Mockito.when(representativeServiceImpl.getRepresetativesByIdDataFlow(Mockito.anyLong()))
           .thenReturn(null);
       representativeServiceImpl.checkRestrictFromPublic(1L, 1L);
@@ -859,7 +866,8 @@ public class RepresentativeServiceImplTest {
     snapshots.add(snapshot);
     Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong()))
         .thenReturn(reportings);
-    Mockito.when(datasetSnapshotController.getSnapshotsEnabledByIdDataset(Mockito.anyLong()))
+    Mockito.lenient()
+        .when(datasetSnapshotController.getSnapshotsEnabledByIdDataset(Mockito.anyLong()))
         .thenReturn(snapshots);
     assertTrue(representativeServiceImpl.checkDataHaveBeenRelease(1L, 1L));
   }
