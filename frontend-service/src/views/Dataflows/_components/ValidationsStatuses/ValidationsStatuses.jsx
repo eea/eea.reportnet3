@@ -5,16 +5,20 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
+import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import styles from './ValidationsStatuses.module.scss';
 
 import { Column } from 'primereact/column';
 
+import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Filters } from 'views/_components/Filters';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { InputText } from 'views/_components/InputText';
 import { LevelError } from 'views/_components/LevelError';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { Spinner } from 'views/_components/Spinner';
@@ -37,17 +41,20 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
+  const [editedValidationStatusPriority, setEditedValidationStatusPriority] = useState();
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
   const [sort, setSort] = useState({ field: '', order: 0 });
   const [totalRecords, setTotalRecords] = useState(0);
   const [validationsStatuses, setValidationsStatusesList] = useState([]);
-  const [validationStatusId, setValidationStatusId] = useState(null);
+  const [validationStatus, setValidationStatus] = useState(null);
 
   const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
   const { setData } = useApplyFilters('validationsStatuses');
@@ -58,11 +65,17 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     getValidationsStatuses();
   }, [pagination, sort]);
 
+  useEffect(() => {
+    if (isEditDialogVisible) {
+      setEditedValidationStatusPriority(validationStatus.priority);
+    }
+  }, [isEditDialogVisible]);
+
   const getValidationsStatuses = async () => {
     setLoadingStatus('pending');
 
     try {
-      const { data } = await BackgroundProcessService.getValidationsStatuses({
+      const data = await BackgroundProcessService.getValidationsStatuses({
         pageNum,
         numberRows,
         sortOrder: sort.order,
@@ -100,13 +113,18 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
       notificationContext.add({ status: 'DELETE_VALIDATION_FROM_QUEUE_ERROR' }, true);
     } finally {
-      setValidationStatusId(null);
+      setValidationStatus(null);
     }
   };
 
   const onHideDeleteDialog = () => {
     setIsDeleteDialogVisible(false);
-    setValidationStatusId(null);
+    setValidationStatus(null);
+  };
+
+  const onHideEditDialog = () => {
+    setIsEditDialogVisible(false);
+    setValidationStatus(null);
   };
 
   const onSort = event => setSort({ field: event.sortField, order: event.sortOrder });
@@ -114,7 +132,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const filterOptions = [
     {
       nestedOptions: [
-        { key: 'dataflowId', label: resourcesContext.messages['dataflowId'], keyfilter: 'num' },
+        { key: 'dataflowId', label: resourcesContext.messages['dataflowId'], keyfilter: 'pint' },
         { key: 'user', label: resourcesContext.messages['user'] }
       ],
       type: 'INPUT'
@@ -141,6 +159,27 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     }
   ];
 
+  const getPriorityTemplate = rowData => {
+    const getLowHighPriority = priority => {
+      if (priority <= 50) {
+        return 'high';
+      } else if (priority > 50) {
+        return 'low';
+      }
+    };
+
+    return (
+      <div>
+        {rowData.priority}
+        <FontAwesomeIcon
+          data-for={rowData.priority}
+          data-tip
+          icon={getLowHighPriority(rowData.priority) === 'high' ? AwesomeIcons('arrowUp') : AwesomeIcons('arrowDown')}
+        />
+      </div>
+    );
+  };
+
   const getStatusTemplate = rowData => (
     <div>
       <LevelError
@@ -166,6 +205,12 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       },
       { key: 'user', header: resourcesContext.messages['user'] },
       {
+        key: 'priority',
+        header: resourcesContext.messages['priority'],
+        template: getPriorityTemplate,
+        className: styles.smallColumn
+      },
+      {
         key: 'status',
         header: resourcesContext.messages['status'],
         template: getStatusTemplate,
@@ -188,6 +233,11 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         header: resourcesContext.messages['processFinishingDate'],
         template: validation => getDateTemplate(validation, 'processFinishingDate'),
         className: styles.smallColumn
+      },
+      {
+        key: 'buttonsUniqueId',
+        header: resourcesContext.messages['actions'],
+        template: getEditButton
       }
     ];
 
@@ -199,10 +249,21 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         field={column.key}
         header={column.header}
         key={column.key}
-        sortable={true}
+        sortable={column.key !== 'buttonsUniqueId'}
       />
     ));
   };
+
+  const getEditButton = rowData => (
+    <ActionsColumn
+      isUpdating={isUpdating}
+      onEditClick={() => {
+        setIsEditDialogVisible(true);
+        setValidationStatus(rowData);
+      }}
+      rowDataId={rowData.id}
+    />
+  );
 
   const getDataflowTemplate = validation => (
     <p>
@@ -238,6 +299,41 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={onCloseDialog}
+      />
+    </div>
+  );
+
+  const onUpdatePriority = async () => {
+    try {
+      setIsUpdating(true);
+      await BackgroundProcessService.update({
+        processId: validationStatus.id,
+        priority: editedValidationStatusPriority
+      });
+
+      getValidationsStatuses();
+    } catch (error) {
+      console.error('ValidationsStatus - onUpdatePriority.', error);
+      notificationContext.add({ type: 'SET_VALIDATIONS_STATUS_PRIORITY_ERROR' }, true);
+    } finally {
+      setIsUpdating(false);
+      setIsEditDialogVisible(false);
+    }
+  };
+
+  const editDialogFooter = (
+    <div>
+      <Button
+        disabled={isUpdating || editedValidationStatusPriority < 1 || editedValidationStatusPriority > 100}
+        icon={isUpdating ? 'spinnerAnimate' : 'check'}
+        label={resourcesContext.messages['update']}
+        onClick={onUpdatePriority}
+      />
+      <Button
+        className={`p-button-secondary ${styles.buttonPushRight}`}
+        icon="cancel"
+        label={resourcesContext.messages['cancel']}
+        onClick={onHideEditDialog}
       />
     </div>
   );
@@ -290,7 +386,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           first={firstRow}
           hasDefaultCurrentPage={true}
           lazy={true}
-          loading={loadingStatus === 'pending' && isNil(validationStatusId)}
+          loading={loadingStatus === 'pending' && isNil(validationStatus)}
           onPage={event => setPagination({ firstRow: event.first, numberRows: event.rows, pageNum: event.page })}
           onSort={onSort}
           paginator={true}
@@ -314,6 +410,20 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       </div>
     );
   };
+
+  const renderEditDialogContent = () => (
+    <div>
+      <label>{resourcesContext.messages['priority']}</label>
+      <InputText
+        className={
+          editedValidationStatusPriority < 1 || editedValidationStatusPriority > 100 ? styles.error : styles.priority
+        }
+        keyfilter="pint"
+        onChange={e => setEditedValidationStatusPriority(e.target.value)}
+        value={editedValidationStatusPriority}
+      />
+    </div>
+  );
 
   return (
     <Fragment>
@@ -339,6 +449,17 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           visible={isDeleteDialogVisible}>
           {resourcesContext.messages['validationRemoveQueueDialogContent']}
         </ConfirmDialog>
+      )}
+
+      {isEditDialogVisible && (
+        <Dialog
+          footer={editDialogFooter}
+          header={resourcesContext.messages['editValidationsStatus']}
+          modal={true}
+          onHide={onHideEditDialog}
+          visible={isEditDialogVisible}>
+          {renderEditDialogContent()}
+        </Dialog>
       )}
     </Fragment>
   );

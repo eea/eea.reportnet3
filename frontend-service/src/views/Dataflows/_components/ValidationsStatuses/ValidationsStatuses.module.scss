@@ -76,6 +76,17 @@
   }
 }
 
+.error {
+  border-color: var(--errors) !important;
+  box-shadow: inset 0px 0px 0px 1px var(--errors) !important;
+  outline: none;
+  overflow: hidden;
+}
+
+.priority {
+  margin-top: 0.25rem;
+}
+
 .validationStatusesTable {
   p {
     margin: 0 !important;
