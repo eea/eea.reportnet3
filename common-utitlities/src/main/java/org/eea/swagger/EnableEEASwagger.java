@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 @Documented
-@Import({SwaggerConfiguration.class})
+@Import({SwaggerConfiguration.class, ProductionSwaggerConfiguration.class})
 public @interface EnableEEASwagger {
 
 }
