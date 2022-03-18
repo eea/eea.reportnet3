@@ -205,7 +205,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   }
 
   /**
-   * Find completed.
+   * Find paginated.
    *
    * @param json the json
    * @param pageable the pageable
@@ -215,8 +215,9 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @param asc the asc
    * @param type the type
    * @param dataflowIds the dataflow ids
+   * @param pinnedDataflows the pinned dataflows
    * @return the list
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public List<Dataflow> findPaginated(String json, Pageable pageable, boolean isPublic,
@@ -253,7 +254,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @param asc the asc
    * @param countryCode the country code
    * @return the list
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public List<Dataflow> findPaginatedByCountry(String obligationJson, Pageable pageable,
@@ -278,16 +279,15 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   }
 
   /**
-   * Count paginated by country.
+   * Count by country.
    *
    * @param obligationJson the obligation json
-   * @param pageable the pageable
    * @param filters the filters
    * @param orderHeader the order header
    * @param asc the asc
    * @param countryCode the country code
    * @return the long
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public Long countByCountry(String obligationJson, Map<String, String> filters, String orderHeader,
@@ -316,7 +316,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @param asc the asc
    * @param countryCode the country code
    * @return the long
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public Long countByCountryFiltered(String obligationJson, Map<String, String> filters,
@@ -348,8 +348,9 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @param asc the asc
    * @param type the type
    * @param dataflowIds the dataflow ids
+   * @param pinnedDataflows the pinned dataflows
    * @return the long
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   @Override
   public Long countPaginated(String json, Pageable pageable, boolean isPublic,

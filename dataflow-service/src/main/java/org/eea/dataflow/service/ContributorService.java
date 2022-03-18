@@ -46,20 +46,22 @@ public interface ContributorService {
       String role);
 
   /**
-   * Find temp user by email and dataflow id.
+   * Find temp user by account and dataflow.
    *
-   * @param account the email
+   * @param account the account
    * @param dataflowId the dataflow id
-   * @return the list
+   * @param dataProviderId the data provider id
+   * @return the contributor VO
    */
   ContributorVO findTempUserByAccountAndDataflow(String account, Long dataflowId,
       Long dataProviderId);
 
   /**
-   * Find temp user by role and dataflow id.
+   * Find temp user by role and dataflow.
    *
    * @param role the role
    * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
    * @return the list
    */
   List<ContributorVO> findTempUserByRoleAndDataflow(String role, Long dataflowId,
@@ -70,7 +72,7 @@ public interface ContributorService {
    *
    * @param dataflowId the dataflow id
    * @param contributorVO the contributor VO
-   * @param dataproviderId the dataprovider id
+   * @param dataProviderId the data provider id
    */
   void createTempUser(Long dataflowId, ContributorVO contributorVO, Long dataProviderId);
 
@@ -109,6 +111,7 @@ public interface ContributorService {
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
+   * @param sendNotification the send notification
    * @throws EEAException the EEA exception
    */
   void validateReporters(Long dataflowId, Long dataProviderId, boolean sendNotification)

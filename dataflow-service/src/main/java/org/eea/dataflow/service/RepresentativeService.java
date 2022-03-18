@@ -156,9 +156,10 @@ public interface RepresentativeService {
   void deleteLeadReporter(Long leadReporterId) throws EEAException;
 
   /**
-   * Validate lead reporters checking if they are already registered in the system.
+   * Validate lead reporters.
    *
    * @param dataflowId the dataflow id
+   * @param sendNotification the send notification
    * @throws EEAException the EEA exception
    */
   void validateLeadReporters(Long dataflowId, boolean sendNotification) throws EEAException;

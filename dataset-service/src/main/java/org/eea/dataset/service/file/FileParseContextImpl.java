@@ -36,7 +36,6 @@ public class FileParseContextImpl implements IFileParseContext {
    * @param replace the replace
    * @param schema the schema
    * @param connectionDataVO the connection data VO
-   * @return the data set VO
    * @throws EEAException the EEA exception
    */
   @Override

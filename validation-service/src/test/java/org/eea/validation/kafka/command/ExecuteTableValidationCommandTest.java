@@ -2,7 +2,6 @@ package org.eea.validation.kafka.command;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
-
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
@@ -70,6 +69,7 @@ public class ExecuteTableValidationCommandTest {
     data.put("kieBase", kieBase);
     data.put("numPag", 1);
     data.put("idTable", 1);
+    data.put("task_id", 1);
     eeaEventVO = new EEAEventVO();
     eeaEventVO.setEventType(EventType.COMMAND_VALIDATE_TABLE);
     eeaEventVO.setData(data);
@@ -103,8 +103,8 @@ public class ExecuteTableValidationCommandTest {
   @Test
   public void executeTest() throws EEAException {
     executeTableValidationCommand.execute(eeaEventVO);
-    Mockito.verify(validationHelper, times(1)).processValidation(Mockito.eq(eeaEventVO),
-        Mockito.eq("uuid"), Mockito.eq(1l), Mockito.any(),
+    Mockito.verify(validationHelper, times(1)).processValidation(Mockito.anyLong(),
+        Mockito.eq(eeaEventVO), Mockito.eq("uuid"), Mockito.eq(1l), Mockito.any(),
         Mockito.eq(EventType.COMMAND_VALIDATED_TABLE_COMPLETED));
   }
 

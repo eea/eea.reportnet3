@@ -84,15 +84,13 @@ public class SQLValidationUtils {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(SQLValidationUtils.class);
 
-
-
   /**
    * Execute validation SQL rule.
    *
    * @param datasetId the dataset id
    * @param ruleId the rule id
    * @param dataProviderCode the data provider code
-   * @throws EEAInvalidSQLException
+   * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
   public void executeValidationSQLRule(Long datasetId, String ruleId, String dataProviderCode)
       throws EEAInvalidSQLException {

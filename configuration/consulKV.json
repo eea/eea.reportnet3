@@ -844,8 +844,12 @@
     "value": "JHtWQUxJREFUSU9OX1RBU0tTX0lOSVRJQUxfVEFYOjF9"
   },
   {
-    "key": "config/validation/validation.tasks.parallelism",
+    "key": "config/application/validation.tasks.parallelism",
     "value": "JHtWQUxJREFUSU9OX1RBU0tTX1BBUkFMTEVMSVNNOjR9"
+  },
+  {
+    "key": "config/application/validation.scheduled.consumer",
+    "value": "JHtWQUxJREFUSU9OX1NDSEVEVUxFUl9DT05TVU1FUjoxMDAwMH0="
   },
   {
     "key": "config/ums/management.endpoints.web.exposure.include",
@@ -1769,6 +1773,14 @@
   },
   {
 	"key":"config/dataflow/regexUrl",
-	"value":"JHtSRUdFWF9VUkw6XihzZnRwOlwvXC93d3dcLnxzZnRwOlwvXC98ZnRwOlwvXC93d3dcLnxmdHA6XC9cL3xodHRwOlwvXC93d3dcLnxodHRwczpcL1wvd3d3XC58aHR0cDpcL1wvfGh0dHBzOlwvXC8pP1thLXpBLVowLTldKyhbXC1cLl17MX1bYS16QS1aMC05XSspKlwuW2EtekEtWl17Miw2M30oOlswLTldezEsNX0pPyhcLy4qKT8kfQ=="  
+	"value":"JHtSRUdFWF9VUkw6XihzZnRwOlwvXC93d3dcLnxzZnRwOlwvXC98ZnRwOlwvXC93d3dcLnxmdHA6XC9cL3xodHRwOlwvXC93d3dcLnxodHRwczpcL1wvd3d3XC58aHR0cDpcL1wvfGh0dHBzOlwvXC8pP1thLXpBLVowLTldKyhbXC1cLl17MX1bYS16QS1aMC05XSspKlwuW2EtekEtWl17Miw2M30oOlswLTldezEsNX0pPyhcLy4qKT8kfQ=="
+  },
+  {
+    "key": "config/validation/validation.instance.priority",
+    "value": "JHtWQUxJREFUSU9OX0lOU1RBTkNFX1BSSU9SSVRZOkhJR0h9"
+  },
+  {
+    "key": "config/validation/validation.priority.days",
+    "value": "JHtWQUxJREFUSU9OX1BSSU9SSVRZX0RBWVM6MjkgOCA3IDR9"
   }
 ]

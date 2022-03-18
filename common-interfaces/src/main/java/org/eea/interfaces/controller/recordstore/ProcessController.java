@@ -5,6 +5,7 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -49,7 +50,9 @@ public interface ProcessController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param status the status
+   * @param type the type
    * @param processId the process id
+   * @param threadId the thread id
    * @param user the user
    */
   @PostMapping(value = "/private/updateProcess")
@@ -57,6 +60,16 @@ public interface ProcessController {
       @RequestParam(required = false) Long dataflowId,
       @RequestParam("status") ProcessStatusEnum status, @RequestParam("type") ProcessTypeEnum type,
       @RequestParam("processId") String processId, @RequestParam("threadId") String threadId,
-      @RequestParam("user") String user);
+      @RequestParam("user") String user, @RequestParam("priority") int priority);
+
+  /**
+   * Update priority.
+   *
+   * @param processId the process id
+   * @param priority the priority
+   */
+  @PostMapping(value = "/{processId}/priority/{priority}")
+  void updatePriority(@PathVariable("processId") Long processId,
+      @PathVariable("priority") int priority);
 
 }

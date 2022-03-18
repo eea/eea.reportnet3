@@ -33,9 +33,19 @@ public interface ProcessService {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param status the status
+   * @param type the type
    * @param processId the process id
+   * @param threadId the thread id
    * @param user the user
    */
   void updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
-      ProcessTypeEnum type, String processId, String threadId, String user);
+      ProcessTypeEnum type, String processId, String threadId, String user, int priority);
+
+  /**
+   * Update priority.
+   *
+   * @param processId the process id
+   * @param priority the priority
+   */
+  void updatePriority(Long processId, int priority);
 }

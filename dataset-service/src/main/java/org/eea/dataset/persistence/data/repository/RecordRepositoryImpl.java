@@ -414,32 +414,30 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       tableName = tableSchema.getNameTableSchema();
       resultTable.put("tableName", tableName);
       int nHeaders = tableSchema.getRecordSchema().getFieldSchema().size();
-      int limitAux = limit / nHeaders > 0 ? limit / nHeaders : 1;
+      int limitAux = (limit / nHeaders > 0 ? limit / (nHeaders / 2) : 1) * 2;
       JSONArray tableRecords = new JSONArray();
       Long totalRecords = null;
-      if (null != tableSchemaId) {
+      if (StringUtils.isNotBlank(tableSchemaId)) {
         totalRecords = getCount(String.format(
             "select count(rv.id) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table ",
             datasetId, datasetId, tableSchemaId), null, null);
         resultTable.put("totalRecords", totalRecords);
       }
-      if (null != columnName || null != filterValue) {
+      if (StringUtils.isNotBlank(columnName) || StringUtils.isNotBlank(filterValue)
+          || StringUtils.isNotBlank(dataProviderCodes)) {
         totalRecords = getCount(
             totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
             columnName, filterValue);
         resultTable.put("totalRecords", totalRecords);
       }
-
       Integer offsetAux = (limit * offset) - limit;
       if (offsetAux < 0) {
         offsetAux = 0;
       }
 
-      if (totalRecords == null || totalRecords != 0L) {
-        for (int offsetAux2 = offsetAux; offsetAux2 < offsetAux + limit; offsetAux2 += limitAux) {
-          if (offsetAux2 + limitAux > offsetAux + limit) {
-            limitAux = limit % nHeaders;
-          }
+      if (totalRecords != null && totalRecords > 0L) {
+        for (int offsetAux2 = offsetAux; offsetAux2 < offsetAux + limit
+            && offsetAux2 < totalRecords; offsetAux2 += limitAux) {
           // ask for records with offset
           StringBuilder stringQuery = new StringBuilder();
           stringQuery.append(
@@ -516,6 +514,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           if (result != null) {
             tableRecords.addAll(gsonparser.parseList(result.toString()));
           }
+          result = null;
+          System.gc();
         }
       }
       resultTable.put("records", tableRecords);

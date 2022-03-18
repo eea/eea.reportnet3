@@ -236,15 +236,13 @@ public interface ValidationService {
   Integer countEmptyFieldsDataset(@DatasetId Long datasetId);
 
   /**
-   * Exports validation data file.
+   * Export validation file.
    *
    * @param datasetId the dataset id
-   * @return the byte[]
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   void exportValidationFile(@DatasetId Long datasetId) throws EEAException, IOException;
-
 
   /**
    * Download validation exported file.
@@ -256,13 +254,11 @@ public interface ValidationService {
    */
   File downloadExportedFile(Long datasetId, String fileName) throws IOException;
 
-
   /**
    * Gets the rule message.
    *
    * @param dataset the dataset
    * @param errors the errors
-   * @return the rule message
    */
   void getRuleMessage(DatasetValue dataset, List<GroupValidationVO> errors);
 

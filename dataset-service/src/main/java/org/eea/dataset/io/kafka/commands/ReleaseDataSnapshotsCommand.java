@@ -125,6 +125,11 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         }
       }
 
+      // At this point the process of releasing all the datasets has been finished so we unlock
+      // everything involved
+      datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
+          dataset.getDataProviderId());
+
       // Send email to requesters
       sendMail(dateRelease, dataset, dataflowVO);
 
@@ -140,15 +145,10 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       LOG.info("Automatic feedback message created of dataflow {}. Message: {}", dataflowVO.getId(),
           messageVO.getContent());
 
-      // At this point the process of releasing all the datasets has been finished so we unlock
-      // everything involved
-      datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
-          dataset.getDataProviderId());
+
 
       LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {}",
           dataset.getDataflowId(), dataset.getDataProviderId());
-
-
       List<Long> datasetMetabaseListIds =
           datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(dataflowVO.getId(),
               dataset.getDataProviderId());
