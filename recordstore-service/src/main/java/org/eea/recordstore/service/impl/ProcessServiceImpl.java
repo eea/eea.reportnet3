@@ -98,7 +98,7 @@ public class ProcessServiceImpl implements ProcessService {
    */
   @Override
   public void updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
-      ProcessTypeEnum type, String processId, String threadId, String user) {
+      ProcessTypeEnum type, String processId, String threadId, String user, int priority) {
 
     EEAProcess processToUpdate =
         processRepository.findOneByProcessId(processId).orElse(new EEAProcess());
@@ -126,10 +126,28 @@ public class ProcessServiceImpl implements ProcessService {
         processToUpdate.setProcessFinishingDate(new Date());
         break;
     }
-
+    if (priority != 0) {
+      processToUpdate.setPriority(priority);
+    }
     LOG.info(String.format(
         "Adding or updating process for datasetId %s, dataflowId %s: %s %s with processId %s made by user %s",
         datasetId, processToUpdate.getDataflowId(), type, status, processId, user));
     processRepository.save(processToUpdate);
   }
+
+  /**
+   * Update priority.
+   *
+   * @param processId the process id
+   * @param priority the priority
+   */
+  @Override
+  public void updatePriority(Long processId, int priority) {
+    EEAProcess process = processRepository.findById(processId).orElse(null);
+    if (process != null) {
+      process.setPriority(priority);
+      processRepository.save(process);
+    }
+  }
+
 }

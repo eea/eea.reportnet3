@@ -35,9 +35,10 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
           + "        lower(process.username) as \"user\",\r\n"
           + "        process.process_type as \"processType\",\r\n" + "        process.status,\r\n"
           + "        d.\"name\" as \"dataflowName\",\r\n"
-          + "        d2.dataset_name as \"datasetName\" " + "from\r\n" + "    process\r\n"
-          + "left join dataflow d on\r\n" + "    process.dataflow_id = d.id\r\n"
-          + "left join dataset d2 on\r\n" + "    process.dataset_id = d2.id";
+          + "        d2.dataset_name as \"datasetName\", process.priority as \"priority\""
+          + " from\r\n" + "    process\r\n" + "left join dataflow d on\r\n"
+          + "    process.dataflow_id = d.id\r\n" + "left join dataset d2 on\r\n"
+          + "    process.dataset_id = d2.id";
 
   /** The Constant COUNT_PROCESS_QUERY: {@value}. */
   private static final String COUNT_PROCESS_QUERY = "select count(*) from process";

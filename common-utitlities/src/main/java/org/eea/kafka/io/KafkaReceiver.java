@@ -1,32 +1,11 @@
 package org.eea.kafka.io;
 
-import org.eea.exception.EEAException;
-import org.eea.kafka.domain.EEAEventVO;
-import org.eea.kafka.handler.EEAEventHandler;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
+import org.eea.message.MessageReceiver;
 
 /**
  * The type Kafka receiver.
  */
 
-public abstract class KafkaReceiver {
-
-  /**
-   * The handler.
-   */
-  @Autowired(required = false)
-  protected EEAEventHandler handler;
-
-
-
-  /**
-   * Listen message.
-   *
-   * @param message the message
-   * @throws EEAException the EEA exception
-   */
-
-  public abstract void listenMessage(Message<EEAEventVO> message) throws EEAException;
+public abstract class KafkaReceiver extends MessageReceiver {
 
 }

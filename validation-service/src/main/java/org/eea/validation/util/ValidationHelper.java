@@ -1,8 +1,12 @@
 package org.eea.validation.util;
 
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Deque;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -20,23 +23,25 @@ import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
-import org.eea.kafka.domain.ConsumerGroupVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
-import org.eea.kafka.utils.KafkaAdminUtils;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -46,6 +51,8 @@ import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.kafka.command.Validator;
 import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.data.metabase.domain.Task;
+import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
@@ -67,6 +74,8 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -123,13 +132,14 @@ public class ValidationHelper implements DisposableBean {
   @Value("${validation.tasks.parallelism}")
   private int maxRunningTasks;
 
+  @Value("${validation.priority.days}")
+  private String priorityDays;
+
+  private List<Long> periodDays;
+
   /** The table repository. */
   @Autowired
   private TableRepository tableRepository;
-
-  /** The kafka admin utils. */
-  @Autowired
-  private KafkaAdminUtils kafkaAdminUtils;
 
   /** The dataset metabase controller zuul. */
   @Autowired
@@ -138,7 +148,6 @@ public class ValidationHelper implements DisposableBean {
   /** The rules repository. */
   @Autowired
   private RulesRepository rulesRepository;
-
 
   /** The reference dataset controller zuul. */
   @Autowired
@@ -152,6 +161,11 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private SchemasRepository schemasRepository;
 
+  @Autowired
+  private TaskRepository taskRepository;
+
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
 
   /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
@@ -170,8 +184,11 @@ public class ValidationHelper implements DisposableBean {
    */
   @PostConstruct
   private void init() {
+    periodDays = Arrays.asList(priorityDays.split(" ")).stream().map(Long::parseLong)
+        .collect(Collectors.toList());
     validationExecutorService = new EEADelegatingSecurityContextExecutorService(
         Executors.newFixedThreadPool(maxRunningTasks));
+    validationExecutorService.submit(() -> LOG.info("initializer validation executor service"));
   }
 
   /**
@@ -204,22 +221,6 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
-   * Return true if the a validation process was launched from this service instance. false
-   * otherwise
-   *
-   * @param processId the process id
-   *
-   * @return the boolean
-   */
-  public boolean isProcessCoordinator(final String processId) {
-    boolean isProcessCoordinator = false;
-    if (checkStartedProcess(processId)) {
-      isProcessCoordinator = processesMap.get(processId).isCoordinatorProcess();
-    }
-    return isProcessCoordinator;
-  }
-
-  /**
    * Finish process removing all the data related to the given processId .
    *
    * @param processId the process id
@@ -238,8 +239,8 @@ public class ValidationHelper implements DisposableBean {
    * @param released the released
    */
   public void initializeProcess(String processId, boolean isCoordinator, boolean released) {
-    ValidationProcessVO process = new ValidationProcessVO(0, new ConcurrentLinkedDeque<>(), null,
-        isCoordinator, SecurityContextHolder.getContext().getAuthentication().getName(), released);
+    ValidationProcessVO process = new ValidationProcessVO(null,
+        SecurityContextHolder.getContext().getAuthentication().getName(), released);
 
     synchronized (processesMap) {
       processesMap.put(processId, process);
@@ -269,7 +270,7 @@ public class ValidationHelper implements DisposableBean {
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId, processId,
-        SecurityContextHolder.getContext().getAuthentication().getName());
+        SecurityContextHolder.getContext().getAuthentication().getName(), getPriority(dataset));
 
     // If there's no SQL rules enabled, no need to refresh the views, so directly start the
     // validation
@@ -294,6 +295,38 @@ public class ValidationHelper implements DisposableBean {
       kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
     }
     dataset = null;
+  }
+
+  /**
+   * Gets the priority.
+   *
+   * @param dataflowId the dataflow id
+   * @return the priority
+   */
+  private int getPriority(DataSetMetabaseVO dataset) {
+    int priority = 0;
+    DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
+    dataflow.getDeadlineDate();
+
+    if (dataflow.getDeadlineDate() == null || TypeStatusEnum.DESIGN.equals(dataflow.getStatus())
+        || DatasetTypeEnum.TEST.equals(datasetMetabaseControllerZuul.getType(dataset.getId()))) {
+      priority = 70;
+    } else {
+      final LocalDateTime today = LocalDateTime.now();
+      Long days = Duration.between(today,
+          LocalDateTime.ofInstant(dataflow.getDeadlineDate().toInstant(), ZoneId.systemDefault()))
+          .toDays();
+      if (days > periodDays.get(0)) {
+        priority = 50;
+      } else if (days <= periodDays.get(0) && days > periodDays.get(1)) {
+        priority = 40;
+      } else if (days <= periodDays.get(2) && days > periodDays.get(3)) {
+        priority = 30;
+      } else {
+        priority = 20;
+      }
+    }
+    return priority;
   }
 
   /**
@@ -427,10 +460,9 @@ public class ValidationHelper implements DisposableBean {
     releaseTableValidation(dataset, processId);
     processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId, processId,
-        SecurityContextHolder.getContext().getAuthentication().getName());
+        SecurityContextHolder.getContext().getAuthentication().getName(), 0);
     datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
         DatasetRunningStatusEnum.VALIDATING);
-    startProcess(processId);
   }
 
 
@@ -458,47 +490,48 @@ public class ValidationHelper implements DisposableBean {
    *
    * @throws EEAException the eea exception
    */
-  public void reducePendingTasks(final Long datasetId, final String processId) throws EEAException {
-    if (checkStartedProcess(processId)) {
-      synchronized (processesMap) {
-        Integer pendingOk = processesMap.get(processId).getPendingOks();
-        processesMap.get(processId).setPendingOks(--pendingOk);
-        if (!this.checkFinishedValidations(datasetId, processId)) {
-          // process is not over, but still it could happen that there is no task to be sent
-          // remember pendingOks > pendingValidations.size()
-          Integer pendingValidations = processesMap.get(processId).getPendingValidations().size();
-          if (pendingValidations > 0) {
-            pendingValidationProcess(processId);
-          }
-          LOG.info(
-              "There are still {} tasks to be sent and {} pending Ok's to be received for process {}",
-              processesMap.get(processId).getPendingValidations().size(), pendingOk, processId);
-        }
-      }
-    }
-  }
+  // public void reducePendingTasks(final Long datasetId, final String processId) throws
+  // EEAException {
+  // if (checkStartedProcess(processId)) {
+  // synchronized (processesMap) {
+  // Integer pendingOk = processesMap.get(processId).getPendingOks();
+  // processesMap.get(processId).setPendingOks(--pendingOk);
+  // if (!this.checkFinishedValidations(datasetId, processId)) {
+  // // process is not over, but still it could happen that there is no task to be sent
+  // // remember pendingOks > pendingValidations.size()
+  // Integer pendingValidations = processesMap.get(processId).getPendingValidations().size();
+  // if (pendingValidations > 0) {
+  // pendingValidationProcess(processId);
+  // }
+  // LOG.info(
+  // "There are still {} tasks to be sent and {} pending Ok's to be received for process {}",
+  // processesMap.get(processId).getPendingValidations().size(), pendingOk, processId);
+  // }
+  // }
+  // }
+  // }
 
   /**
    * Pending validation process.
    *
    * @param processId the process id
    */
-  private void pendingValidationProcess(final String processId) {
-    // there are more tasks to be sent, just send them out, at least, one more task
-    int tasksToBeSent = this.taskReleasedTax;
-    int sentTasks = 0;
-    while (tasksToBeSent > 0) {
-      if (!processesMap.get(processId).getPendingValidations().isEmpty()) {
-        this.kafkaSenderUtils
-            .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
-        sentTasks++;
-      } else {
-        break;
-      }
-      tasksToBeSent--;
-    }
-    LOG.info("Sent next {} tasks for process {}", sentTasks, processId);
-  }
+  // private void pendingValidationProcess(final String processId) {
+  // // there are more tasks to be sent, just send them out, at least, one more task
+  // int tasksToBeSent = this.taskReleasedTax;
+  // int sentTasks = 0;
+  // while (tasksToBeSent > 0) {
+  // if (!processesMap.get(processId).getPendingValidations().isEmpty()) {
+  // this.kafkaSenderUtils
+  // .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
+  // sentTasks++;
+  // } else {
+  // break;
+  // }
+  // tasksToBeSent--;
+  // }
+  // LOG.info("Sent next {} tasks for process {}", sentTasks, processId);
+  // }
 
   /**
    * Destroy.
@@ -524,15 +557,15 @@ public class ValidationHelper implements DisposableBean {
    *
    * @throws EEAException the eea exception
    */
-  public void processValidation(EEAEventVO eeaEventVO, String processId, Long datasetId,
-      Validator validator, EventType notificationEventType) throws EEAException {
+  public void processValidation(Long taskId, EEAEventVO eeaEventVO, String processId,
+      Long datasetId, Validator validator, EventType notificationEventType) throws EEAException {
     String rule = null;
     if (eeaEventVO.getData().get("sqlRule") != null) {
       new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       rule = (String) (eeaEventVO.getData().get("sqlRule"));
     }
-    ValidationTask validationTask = new ValidationTask(eeaEventVO, validator, datasetId,
-        getKieBase(processId, datasetId, rule), processId, notificationEventType);
+    ValidationTask validationTask = new ValidationTask(taskId, eeaEventVO, validator, datasetId,
+        getKieBase(processId, datasetId, rule), processId);
 
     // first every task is always queued up to ensure the order
 
@@ -681,35 +714,36 @@ public class ValidationHelper implements DisposableBean {
    *
    * @param processId the process id
    */
-  private void startProcess(final String processId) {
-    if (checkStartedProcess(processId)) {
-      ConsumerGroupVO consumerGroupVO = kafkaAdminUtils.getConsumerGroupInfo();
-      // get the number of validation instances in the system.
-      // at least there should be one, the coordinator node :)
-      Integer initialTasks = consumerGroupVO.getMembers().size() * this.initialTax;
-      synchronized (processesMap) {
-
-        // Sending initial tasks, 1 per validation instance in the system
-        // Due to this initial work load there will be always more pendingOks to be received than
-        // pendingValidation to be sent
-        // This will affect to the reducePendingTasks method since it will need to know whether to
-        // send more tasks or not
-        Deque pendingTasks = processesMap.get(processId).getPendingValidations();
-        LOG.info(
-            "started proces {}. Pending Ok's to be received: {}, pending tasks to be sent: {} initial workload: {}",
-            processId, processesMap.get(processId).getPendingOks(),
-            pendingTasks.size() - initialTasks, initialTasks);
-        while (initialTasks > 0) {
-          EEAEventVO event = (EEAEventVO) pendingTasks.poll();
-          if (null != event) {
-            kafkaSenderUtils.releaseKafkaEvent(event);
-          }
-          initialTasks--;
-        }
-
-      }
-    }
-  }
+  // private void startProcess(final String processId) {
+  // if (checkStartedProcess(processId)) {
+  // ConsumerGroupVO consumerGroupVO = kafkaAdminUtils.getConsumerGroupInfo();
+  // // get the number of validation instances in the system.
+  // // at least there should be one, the coordinator node :)
+  // Integer initialTasks = consumerGroupVO.getMembers().size() * this.initialTax;
+  // synchronized (processesMap) {
+  //
+  // // Sending initial tasks, 1 per validation instance in the system
+  // // Due to this initial work load there will be always more pendingOks to be received than
+  // // pendingValidation to be sent
+  // // This will affect to the reducePendingTasks method since it will need to know whether to
+  // // send more tasks or not
+  // Deque pendingTasks = processesMap.get(processId).getPendingValidations();
+  // LOG.info(
+  // "started proces {}. Pending Ok's to be received: {}, pending tasks to be sent: {} initial
+  // workload: {}",
+  // processId, processesMap.get(processId).getPendingOks(),
+  // pendingTasks.size() - initialTasks, initialTasks);
+  // while (initialTasks > 0) {
+  // EEAEventVO event = (EEAEventVO) pendingTasks.poll();
+  // if (null != event) {
+  // kafkaSenderUtils.releaseKafkaEvent(event);
+  // }
+  // initialTasks--;
+  // }
+  //
+  // }
+  // }
+  // }
 
   /**
    * Release fields validation.
@@ -888,106 +922,33 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
-   * Check finished validations. If process is finished then it releases kafka notifications and
-   * finishes the process Returns true if process is over. false otherwise
-   *
-   * @param datasetId the dataset id
-   * @param processId the uuid
-   *
-   * @return true, if successful
-   *
-   * @throws EEAException the EEA exception
-   */
-  private boolean checkFinishedValidations(final Long datasetId, final String processId)
-      throws EEAException {
-    boolean isFinished = false;
-    // remember pendingOks > pendingValidations.size()
-    if (processesMap.get(processId).getPendingOks() == 0) {
-      // Release the lock manually
-      Map<String, Object> executeValidation = new HashMap<>();
-      executeValidation.put(LiteralConstants.SIGNATURE,
-          LockSignature.EXECUTE_VALIDATION.getValue());
-      executeValidation.put(LiteralConstants.DATASETID, datasetId);
-      lockService.removeLockByCriteria(executeValidation);
-
-      Map<String, Object> forceExecuteValidation = new HashMap<>();
-      forceExecuteValidation.put(LiteralConstants.SIGNATURE,
-          LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
-      forceExecuteValidation.put(LiteralConstants.DATASETID, datasetId);
-      lockService.removeLockByCriteria(forceExecuteValidation);
-
-      // after last dataset validations have been saved, an event is sent to notify it
-      String notificationUser = processesMap.get(processId).getRequestingUser();
-      Map<String, Object> value = new HashMap<>();
-      value.put(LiteralConstants.DATASET_ID, datasetId);
-      value.put("uuid", processId);
-      // Setting as user the requesting one as it is being taken from ThreadPropertiesManager and
-      // validation threads inheritances from it. This is a side effect.
-      value.put("user", notificationUser);
-      Integer pendingValidations = processesMap.get(processId).getPendingValidations().size();
-      if (pendingValidations > 0) {
-        // this is just a warning messages to show an abnormal situation finishing validation
-        // process
-        LOG.warn(
-            "There are still {} pending tasks to be sent for process {}, they will not be sent as process is finished",
-            pendingValidations, processId);
-      }
-
-      boolean isRelease = processesMap.get(processId).isReleased();
-      this.finishProcess(processId);
-
-      kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
-      if (isRelease) {
-        Long nextDatasetId =
-            datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(datasetId);
-        if (null != nextDatasetId) {
-          this.executeValidation(nextDatasetId, UUID.randomUUID().toString(), true, false);
-        } else {
-          kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
-        }
-
-      } else {
-        // Delete the lock to the Release process
-        deleteLockToReleaseProcess(datasetId);
-
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
-            NotificationVO.builder().user(notificationUser).datasetId(datasetId).build());
-      }
-
-      processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
-          ProcessTypeEnum.VALIDATION, processId, processId,
-          SecurityContextHolder.getContext().getAuthentication().getName());
-      datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
-          DatasetRunningStatusEnum.VALIDATED);
-      isFinished = true;
-    }
-    return isFinished;
-  }
-
-  /**
    * Adds the validation task to process.
    *
    * @param processId the process id
    * @param eventType the event type
    * @param value the value
    */
-  private void addValidationTaskToProcess(final String processId, final EventType eventType,
+  @Transactional
+  public void addValidationTaskToProcess(final String processId, final EventType eventType,
       final Map<String, Object> value) {
     if (checkStartedProcess(processId)) {
-      synchronized (processesMap) {
-        Integer pendingOk = processesMap.get(processId).getPendingOks();
-        if (null == pendingOk) {
-          pendingOk = 0;
-        }
-
-        processesMap.get(processId).setPendingOks(++pendingOk);
-        EEAEventVO eeaEventVO = new EEAEventVO();
-        eeaEventVO.setEventType(eventType);
-        value.put("processId", processId);
-        eeaEventVO.setData(value);
-
-        processesMap.get(processId).getPendingValidations().add(eeaEventVO);
+      EEAEventVO eeaEventVO = new EEAEventVO();
+      eeaEventVO.setEventType(eventType);
+      value.put("processId", processId);
+      value.put("user", SecurityContextHolder.getContext().getAuthentication().getName());
+      value.put("token",
+          String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
+      eeaEventVO.setData(value);
+      ObjectMapper objectMapper = new ObjectMapper();
+      String json = "";
+      try {
+        json = objectMapper.writeValueAsString(eeaEventVO);
+      } catch (JsonProcessingException e) {
+        LOG_ERROR.error("error processing json");
       }
+      Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
+          json, 0, null);
+      taskRepository.save(task);
     }
   }
 
@@ -1007,6 +968,45 @@ public class ValidationHelper implements DisposableBean {
     return isProcessStarted;
   }
 
+  /**
+   * Gets the available execution threads.
+   *
+   * @return the available execution threads
+   */
+  public int getAvailableExecutionThreads() {
+    return ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
+        .getDelegateExecutorService()).getActiveCount();
+  }
+
+  /**
+   * Gets the tasks by ids.
+   *
+   * @param ids the ids
+   * @return the tasks by ids
+   */
+  public List<Task> getTasksByIds(List<Long> ids) {
+    return CollectionUtils.isNotEmpty(ids) ? taskRepository.findByIdIn(ids) : new ArrayList<>();
+  }
+
+  /**
+   * Gets the last low priority task.
+   *
+   * @param limit the limit
+   * @return the last low priority task
+   */
+  public List<Long> getLastLowPriorityTask(int limit) {
+    return taskRepository.findLastLowPriorityTask(limit);
+  }
+
+  /**
+   * Gets the last high priority task.
+   *
+   * @param limit the limit
+   * @return the last high priority task
+   */
+  public List<Long> getLastHighPriorityTask(int limit) {
+    return taskRepository.findLastTask(limit);
+  }
 
   /**
    * Instantiates a new validation task.
@@ -1020,6 +1020,9 @@ public class ValidationHelper implements DisposableBean {
    */
   @AllArgsConstructor
   private static class ValidationTask {
+
+    /** The task id. */
+    Long taskId;
 
     /** The eea event VO. */
     EEAEventVO eeaEventVO;
@@ -1036,8 +1039,6 @@ public class ValidationHelper implements DisposableBean {
     /** The process id. */
     String processId;
 
-    /** The notification event type. */
-    EventType notificationEventType;
   }
 
   /**
@@ -1065,44 +1066,110 @@ public class ValidationHelper implements DisposableBean {
      */
     @Override
     public void run() {
+      Task task = taskRepository.findById(validationTask.taskId).orElse(null);
+      if (task != null) {
+        Long currentTime = System.currentTimeMillis();
+        int workingThreads =
+            ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
+                .getDelegateExecutorService()).getActiveCount();
 
-      Long currentTime = System.currentTimeMillis();
-      int workingThreads =
-          ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
-              .getDelegateExecutorService()).getActiveCount();
+        LOG.info(
+            "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
+            validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
 
-      LOG.info(
-          "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
-          validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
-
-      try {
-        validationTask.validator.performValidation(validationTask.eeaEventVO,
-            validationTask.datasetId, validationTask.kieBase);
-      } catch (EEAException e) {
-        LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
-            validationTask.datasetId, e.getMessage(), e);
-        validationTask.eeaEventVO.getData().put("error", e);
-      } finally {
-        // if this is the coordinator validation instance, then no need to send message, just to
-        // update
-        // expected pending ok's and verify if process is finished
-        if (isProcessCoordinator(validationTask.processId)) {
-          // if it's not finished a message with the next task will be sent as part of the
-          // reducePendingTasks execution
-          try {
-            reducePendingTasks(validationTask.datasetId, validationTask.processId);
-          } catch (EEAException e) {
-            LOG_ERROR.error("Error trying to reduce pending tasks due to {}", e.getMessage(), e);
+        try {
+          validationTask.validator.performValidation(validationTask.eeaEventVO,
+              validationTask.datasetId, validationTask.kieBase);
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
+              validationTask.datasetId, e.getMessage(), e);
+          validationTask.eeaEventVO.getData().put("error", e);
+          task.setStatus(ProcessStatusEnum.CANCELED);
+          task.setFinishDate(new Date());
+        } finally {
+          if (!ProcessStatusEnum.CANCELED.equals(task.getStatus())) {
+            task.setFinishDate(new Date());
+            task.setStatus(ProcessStatusEnum.FINISHED);
           }
-        } else {
-          // send the message to coordinator validation instance
-          kafkaSenderUtils.releaseKafkaEvent(validationTask.notificationEventType,
-              validationTask.eeaEventVO.getData());
+          taskRepository.save(task);
+          Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
+          LOG.info("Validation task {} finished, it has taken taken {} seconds",
+              validationTask.eeaEventVO, totalTime);
+          try {
+            checkFinishedValidations(validationTask.datasetId, validationTask.processId);
+          } catch (EEAException e) {
+            LOG_ERROR.error("Error finishing validations for dataset {} due to exception {}",
+                validationTask.datasetId, e.getMessage(), e);
+          }
         }
-        Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
-        LOG.info("Validation task {} finished, it has taken taken {} seconds",
-            validationTask.eeaEventVO, totalTime);
       }
+    }
+
+    /**
+     * Check finished validations. If process is finished then it releases kafka notifications and
+     * finishes the process Returns true if process is over. false otherwise
+     *
+     * @param datasetId the dataset id
+     * @param processId the uuid
+     *
+     * @return true, if successful
+     *
+     * @throws EEAException the EEA exception
+     */
+    private boolean checkFinishedValidations(final Long datasetId, final String processId)
+        throws EEAException {
+      boolean isFinished = false;
+      if (taskRepository.isProcessFinished(processId)) {
+        // Release the lock manually
+        Map<String, Object> executeValidation = new HashMap<>();
+        executeValidation.put(LiteralConstants.SIGNATURE,
+            LockSignature.EXECUTE_VALIDATION.getValue());
+        executeValidation.put(LiteralConstants.DATASETID, datasetId);
+        lockService.removeLockByCriteria(executeValidation);
+
+        Map<String, Object> forceExecuteValidation = new HashMap<>();
+        forceExecuteValidation.put(LiteralConstants.SIGNATURE,
+            LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
+        forceExecuteValidation.put(LiteralConstants.DATASETID, datasetId);
+        lockService.removeLockByCriteria(forceExecuteValidation);
+
+        // after last dataset validations have been saved, an event is sent to notify it
+        String notificationUser = processesMap.get(processId).getRequestingUser();
+        Map<String, Object> value = new HashMap<>();
+        value.put(LiteralConstants.DATASET_ID, datasetId);
+        value.put("uuid", processId);
+        // Setting as user the requesting one as it is being taken from ThreadPropertiesManager and
+        // validation threads inheritances from it. This is a side effect.
+        value.put("user", notificationUser);
+        boolean isRelease = processesMap.get(processId).isReleased();
+        finishProcess(processId);
+
+        kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
+        if (isRelease) {
+          Long nextDatasetId =
+              datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(datasetId);
+          if (null != nextDatasetId) {
+            executeValidation(nextDatasetId, UUID.randomUUID().toString(), true, false);
+          } else {
+            kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
+          }
+
+        } else {
+          // Delete the lock to the Release process
+          deleteLockToReleaseProcess(datasetId);
+
+          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
+              NotificationVO.builder().user(notificationUser).datasetId(datasetId).build());
+        }
+
+        processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
+            ProcessTypeEnum.VALIDATION, processId, processId,
+            SecurityContextHolder.getContext().getAuthentication().getName(), 0);
+        datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+            DatasetRunningStatusEnum.VALIDATED);
+        isFinished = true;
+      }
+      return isFinished;
     }
   }
 }
