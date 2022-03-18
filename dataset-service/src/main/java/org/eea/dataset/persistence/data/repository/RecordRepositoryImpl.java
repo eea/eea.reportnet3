@@ -1259,9 +1259,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           countries.append(",");
         }
       }
-      stringQuery.append(
-          null != countryCodesList ? String.format("where data_provider_code in (%s) ", countries)
-              : "");
+      stringQuery.append(String.format("where data_provider_code in (%s) ", countries));
     }
     stringQuery.append("group by id_table_schema,id_record,data_provider_code, rdata_position ");
     stringQuery.append(" ) tablesAux ");

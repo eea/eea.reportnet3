@@ -1011,16 +1011,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     File[] matchingFilesToDelete = matchingFilesSnapshot(false, listSnapshotVO);
     for (File file : matchingFilesToDelete) {
-      file.delete();
-      LOG.info("File deleted: {}", file.getAbsolutePath());
+      if (file.delete()) {
+        LOG.info("File deleted: {}", file.getAbsolutePath());
+      }
     }
     dataSetSnapshotControllerZuul.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
     LOG.info("Deleted user snapshots files from dataset: {}", datasetId);
 
     File[] matchingFilesToMove = matchingFilesSnapshot(true, listSnapshotVO);
     for (File file : matchingFilesToMove) {
-      file.renameTo(new File(pathSnapshotDisabled + file.getName()));
-      LOG.info("File: {} moved to: {}", file.getName(), file.getAbsolutePath());
+      if (file.renameTo(new File(pathSnapshotDisabled + file.getName()))) {
+        LOG.info("File: {} moved to: {}", file.getName(), file.getAbsolutePath());
+      }
     }
     dataSetSnapshotControllerZuul.updateSnapshotDisabled(datasetId);
     LOG.info("Moved released snapshots files to disabled folder: {}, from dataset: {}",
