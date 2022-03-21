@@ -13,6 +13,7 @@ import org.eea.recordstore.persistence.domain.EEAProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -182,5 +183,14 @@ public class ProcessExtendedRepositoryImpl implements ProcessExtendedRepository 
     if (StringUtils.isNotBlank(user)) {
       query.setParameter("user", "%" + user + "%");
     }
+  }
+
+  /**
+   * Flush.
+   */
+  @Override
+  @Transactional
+  public void flush() {
+    entityManager.flush();
   }
 }
