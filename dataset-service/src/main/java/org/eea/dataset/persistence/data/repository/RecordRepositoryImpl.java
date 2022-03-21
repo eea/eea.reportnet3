@@ -407,6 +407,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           .filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
           .collect(Collectors.toList());
     }
+    if (offset == 0) {
+      offset = 1;
+    }
     GsonJsonParser gsonparser = new GsonJsonParser();
     // get json for each table requested
     for (TableSchema tableSchema : tableSchemaList) {
@@ -435,9 +438,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         offsetAux = 0;
       }
 
+
       if (totalRecords != null && totalRecords > 0L) {
         for (int offsetAux2 = offsetAux; offsetAux2 < offsetAux + limit
             && offsetAux2 < totalRecords; offsetAux2 += limitAux) {
+          if (offsetAux2 + limitAux > (limit * offset)) {
+            limitAux = (limit * offset) - offsetAux2;
+          }
           // ask for records with offset
           StringBuilder stringQuery = new StringBuilder();
           stringQuery.append(
