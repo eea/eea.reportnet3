@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.kafka.io.KafkaSender;
@@ -71,6 +72,9 @@ public class ValidationControllerImplTest {
   /** The process controller zuul. */
   @Mock
   private ProcessControllerZuul processControllerZuul;
+
+  @Mock
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
   /** The security context. */
   SecurityContext securityContext;
@@ -137,6 +141,17 @@ public class ValidationControllerImplTest {
       Assert.assertEquals(HttpStatus.LOCKED, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.METHOD_LOCKED, e.getReason());
     }
+  }
+
+  @Test
+  public void validateDataSetDataTestEEAException() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    doThrow(new EEAException("e")).when(validationHelper).executeValidation(Mockito.anyLong(),
+        Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean());
+    validationController.validateDataSetData(1L, false);
+
+    Mockito.verify(validationHelper, times(1)).deleteLockToReleaseProcess(Mockito.any());
   }
 
   /**

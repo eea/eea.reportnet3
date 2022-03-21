@@ -377,41 +377,6 @@ public class ValidationHelperTest {
 
 
   /**
-   * Process validation one task as not coordinator.
-   *
-   * @throws EEAException the EEA exception
-   * @throws InterruptedException the interrupted exception
-   */
-  // @Test
-  public void processValidationOneTaskAsNotCoordinator() throws EEAException, InterruptedException {
-    Deque<EEAEventVO> pendingValidations = new ConcurrentLinkedDeque<>();
-    eeaEventVO.getData().put("user", "user");
-    eeaEventVO.getData().put("token", "credentials");
-    pendingValidations.add(eeaEventVO);
-    pendingValidations.add(eeaEventVO);
-
-    processesMap.put("1", new ValidationProcessVO(null, "user1", false));
-    ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
-    ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 2);
-
-    ReflectionTestUtils.setField(validationHelper, "validationExecutorService", executorService);
-    Validator validator = (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
-      // Thiss counter will be usefull to verify how many threads has been executed simultaneously
-      // before the test ends
-      eeaEventVO.getData().put("counter", 0);
-    };
-    validationHelper.processValidation(1L, eeaEventVO, "1", 0l, validator,
-        EventType.COMMAND_VALIDATED_RECORD_COMPLETED);
-
-    Thread.sleep(1000);// giving some time to the threads to update the counter
-
-    Assert.assertTrue(eeaEventVO.getData().containsKey("counter"));
-    Assert.assertTrue(Integer.valueOf(eeaEventVO.getData().get("counter").toString()) == 0);
-    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseKafkaEvent(
-        Mockito.eq(EventType.COMMAND_VALIDATED_RECORD_COMPLETED), Mockito.eq(eeaEventVO.getData()));
-  }
-
-  /**
    * Process validation one task as coordinator.
    *
    * @throws EEAException the EEA exception
