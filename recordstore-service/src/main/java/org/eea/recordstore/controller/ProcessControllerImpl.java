@@ -64,7 +64,7 @@ public class ProcessControllerImpl implements ProcessController {
   @HystrixCommand
   @GetMapping
   @ApiOperation(value = "Gets all the system processes", response = ProcessVO.class,
-      responseContainer = "List", hidden = true)
+      responseContainer = "List", hidden = false)
   @PreAuthorize("hasAnyRole('ADMIN')")
   public ProcessesVO getProcesses(Integer pageNum, Integer pageSize, boolean asc, String status,
       Long dataflowId, String user, String header) {
@@ -115,6 +115,9 @@ public class ProcessControllerImpl implements ProcessController {
   @ApiOperation(value = "Updates the process priority in the process table", hidden = false)
   public void updatePriority(@PathVariable("processId") Long processId,
       @PathVariable("priority") int priority) {
+    if (priority > 100 || priority < 1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong priority range.");
+    }
     processService.updatePriority(processId, priority);
   }
 
