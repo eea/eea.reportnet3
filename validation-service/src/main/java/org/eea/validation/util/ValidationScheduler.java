@@ -143,7 +143,7 @@ public class ValidationScheduler extends MessageReceiver {
    * @return the int
    */
   private int checkFreeThreads() {
-    return maxRunningTasks - validationHelper.getAvailableExecutionThreads();
+    return maxRunningTasks - validationHelper.getUsedExecutionThreads();
   }
 
 }

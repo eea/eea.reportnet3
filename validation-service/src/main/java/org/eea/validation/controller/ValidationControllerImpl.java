@@ -131,8 +131,6 @@ public class ValidationControllerImpl implements ValidationController {
       // Add lock to the release process if necessary
       validationHelper.addLockToReleaseProcess(datasetId);
     } catch (EEAException e) {
-      // TO DO Status will be updated based on the running process in the dataset, this call will be
-      // changed when processes table is implemented
       processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.CANCELED,
           ProcessTypeEnum.VALIDATION, processId, processId,
           SecurityContextHolder.getContext().getAuthentication().getName(), 0);

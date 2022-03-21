@@ -478,62 +478,6 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
-   * Reduce pending tasks for the given processId.
-   *
-   * If as a consequence of the reduction the number of the pending tasks reaches 0 then the process
-   * is finished and notifications are sent via Kafka
-   *
-   * If there are more task after the reduction then more tasks are sent
-   *
-   * @param datasetId the dataset id
-   * @param processId the process id
-   *
-   * @throws EEAException the eea exception
-   */
-  // public void reducePendingTasks(final Long datasetId, final String processId) throws
-  // EEAException {
-  // if (checkStartedProcess(processId)) {
-  // synchronized (processesMap) {
-  // Integer pendingOk = processesMap.get(processId).getPendingOks();
-  // processesMap.get(processId).setPendingOks(--pendingOk);
-  // if (!this.checkFinishedValidations(datasetId, processId)) {
-  // // process is not over, but still it could happen that there is no task to be sent
-  // // remember pendingOks > pendingValidations.size()
-  // Integer pendingValidations = processesMap.get(processId).getPendingValidations().size();
-  // if (pendingValidations > 0) {
-  // pendingValidationProcess(processId);
-  // }
-  // LOG.info(
-  // "There are still {} tasks to be sent and {} pending Ok's to be received for process {}",
-  // processesMap.get(processId).getPendingValidations().size(), pendingOk, processId);
-  // }
-  // }
-  // }
-  // }
-
-  /**
-   * Pending validation process.
-   *
-   * @param processId the process id
-   */
-  // private void pendingValidationProcess(final String processId) {
-  // // there are more tasks to be sent, just send them out, at least, one more task
-  // int tasksToBeSent = this.taskReleasedTax;
-  // int sentTasks = 0;
-  // while (tasksToBeSent > 0) {
-  // if (!processesMap.get(processId).getPendingValidations().isEmpty()) {
-  // this.kafkaSenderUtils
-  // .releaseKafkaEvent(processesMap.get(processId).getPendingValidations().poll());
-  // sentTasks++;
-  // } else {
-  // break;
-  // }
-  // tasksToBeSent--;
-  // }
-  // LOG.info("Sent next {} tasks for process {}", sentTasks, processId);
-  // }
-
-  /**
    * Destroy.
    *
    * @throws Exception the exception
@@ -708,42 +652,6 @@ public class ValidationHelper implements DisposableBean {
     mapCriteriaValidationDataset.put(LiteralConstants.DATASETID, datasetId);
     lockService.removeLockByCriteria(mapCriteriaValidationDataset);
   }
-
-  /**
-   * Start process.
-   *
-   * @param processId the process id
-   */
-  // private void startProcess(final String processId) {
-  // if (checkStartedProcess(processId)) {
-  // ConsumerGroupVO consumerGroupVO = kafkaAdminUtils.getConsumerGroupInfo();
-  // // get the number of validation instances in the system.
-  // // at least there should be one, the coordinator node :)
-  // Integer initialTasks = consumerGroupVO.getMembers().size() * this.initialTax;
-  // synchronized (processesMap) {
-  //
-  // // Sending initial tasks, 1 per validation instance in the system
-  // // Due to this initial work load there will be always more pendingOks to be received than
-  // // pendingValidation to be sent
-  // // This will affect to the reducePendingTasks method since it will need to know whether to
-  // // send more tasks or not
-  // Deque pendingTasks = processesMap.get(processId).getPendingValidations();
-  // LOG.info(
-  // "started proces {}. Pending Ok's to be received: {}, pending tasks to be sent: {} initial
-  // workload: {}",
-  // processId, processesMap.get(processId).getPendingOks(),
-  // pendingTasks.size() - initialTasks, initialTasks);
-  // while (initialTasks > 0) {
-  // EEAEventVO event = (EEAEventVO) pendingTasks.poll();
-  // if (null != event) {
-  // kafkaSenderUtils.releaseKafkaEvent(event);
-  // }
-  // initialTasks--;
-  // }
-  //
-  // }
-  // }
-  // }
 
   /**
    * Release fields validation.
@@ -973,7 +881,7 @@ public class ValidationHelper implements DisposableBean {
    *
    * @return the available execution threads
    */
-  public int getAvailableExecutionThreads() {
+  public int getUsedExecutionThreads() {
     return ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
         .getDelegateExecutorService()).getActiveCount();
   }
@@ -1091,7 +999,7 @@ public class ValidationHelper implements DisposableBean {
             task.setFinishDate(new Date());
             task.setStatus(ProcessStatusEnum.FINISHED);
           }
-          taskRepository.save(task);
+          taskRepository.saveAndFlush(task);
           Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
           LOG.info("Validation task {} finished, it has taken taken {} seconds",
               validationTask.eeaEventVO, totalTime);
