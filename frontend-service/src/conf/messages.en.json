@@ -1079,6 +1079,7 @@
     "previewNotificationMessage": "Launch notification to preview it",
     "primaryKey": "Primary key",
     "priority": "Priority",
+    "priorityMessage": " Value must be between 1 (max. priority) and 100 (min. priority)",
     "privacyPolicy": "Privacy policy",
     "privacyPolicySubtitle": "Specific privacy statement for Reportnet 3",
     "privacyPolicyTitle": "Privacy policy",

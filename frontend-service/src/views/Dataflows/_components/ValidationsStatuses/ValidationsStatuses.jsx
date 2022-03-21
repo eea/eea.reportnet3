@@ -22,6 +22,7 @@ import { InputText } from 'views/_components/InputText';
 import { LevelError } from 'views/_components/LevelError';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { Spinner } from 'views/_components/Spinner';
+import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { BackgroundProcessService } from 'services/BackgroundProcessService';
 
@@ -414,6 +415,9 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const renderEditDialogContent = () => (
     <div>
       <label>{resourcesContext.messages['priority']}</label>
+      <TooltipButton
+        message={resourcesContext.messages['priorityMessage']}
+        uniqueIdentifier={'process_priority'}></TooltipButton>
       <InputText
         className={
           editedValidationStatusPriority < 1 || editedValidationStatusPriority > 100 ? styles.error : styles.priority
