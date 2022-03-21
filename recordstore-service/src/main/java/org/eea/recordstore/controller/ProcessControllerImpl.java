@@ -64,7 +64,7 @@ public class ProcessControllerImpl implements ProcessController {
   @HystrixCommand
   @GetMapping
   @ApiOperation(value = "Gets all the system processes", response = ProcessVO.class,
-      responseContainer = "List", hidden = false)
+      responseContainer = "List", hidden = true)
   @PreAuthorize("hasAnyRole('ADMIN')")
   public ProcessesVO getProcesses(Integer pageNum, Integer pageSize, boolean asc, String status,
       Long dataflowId, String user, String header) {
