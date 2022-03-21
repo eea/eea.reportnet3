@@ -974,42 +974,43 @@ public class ValidationHelper implements DisposableBean {
      */
     @Override
     public void run() {
-      Task task = taskRepository.findById(validationTask.taskId).orElse(null);
-      if (task != null) {
-        Long currentTime = System.currentTimeMillis();
-        int workingThreads =
-            ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
-                .getDelegateExecutorService()).getActiveCount();
+      Task task = null;
+      ProcessStatusEnum status = ProcessStatusEnum.FINISHED;
+      Long currentTime = System.currentTimeMillis();
+      int workingThreads =
+          ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
+              .getDelegateExecutorService()).getActiveCount();
 
-        LOG.info(
-            "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
-            validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
+      LOG.info(
+          "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
+          validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
 
-        try {
-          validationTask.validator.performValidation(validationTask.eeaEventVO,
-              validationTask.datasetId, validationTask.kieBase);
-        } catch (EEAException e) {
-          LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
-              validationTask.datasetId, e.getMessage(), e);
-          validationTask.eeaEventVO.getData().put("error", e);
-          task.setStatus(ProcessStatusEnum.CANCELED);
+      try {
+        validationTask.validator.performValidation(validationTask.eeaEventVO,
+            validationTask.datasetId, validationTask.kieBase);
+        task = taskRepository.findById(validationTask.taskId).orElse(null);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
+            validationTask.datasetId, e.getMessage(), e);
+        validationTask.eeaEventVO.getData().put("error", e);
+        status = ProcessStatusEnum.CANCELED;
+      } finally {
+        task = taskRepository.findById(validationTask.taskId).orElse(null);
+        if (task != null) {
           task.setFinishDate(new Date());
-        } finally {
-          if (!ProcessStatusEnum.CANCELED.equals(task.getStatus())) {
-            task.setFinishDate(new Date());
-            task.setStatus(ProcessStatusEnum.FINISHED);
-          }
+          task.setStatus(status);
           taskRepository.saveAndFlush(task);
-          Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
-          LOG.info("Validation task {} finished, it has taken taken {} seconds",
-              validationTask.eeaEventVO, totalTime);
-          try {
-            checkFinishedValidations(validationTask.datasetId, validationTask.processId);
-          } catch (EEAException e) {
-            LOG_ERROR.error("Error finishing validations for dataset {} due to exception {}",
-                validationTask.datasetId, e.getMessage(), e);
-          }
         }
+        Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
+        LOG.info("Validation task {} finished, it has taken taken {} seconds",
+            validationTask.eeaEventVO, totalTime);
+        try {
+          checkFinishedValidations(validationTask.datasetId, validationTask.processId);
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error finishing validations for dataset {} due to exception {}",
+              validationTask.datasetId, e.getMessage(), e);
+        }
+
       }
     }
 

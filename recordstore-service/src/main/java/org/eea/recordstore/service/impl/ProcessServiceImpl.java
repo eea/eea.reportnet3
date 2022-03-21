@@ -133,6 +133,7 @@ public class ProcessServiceImpl implements ProcessService {
         "Adding or updating process for datasetId %s, dataflowId %s: %s %s with processId %s made by user %s",
         datasetId, processToUpdate.getDataflowId(), type, status, processId, user));
     processRepository.save(processToUpdate);
+    processRepository.flush();
   }
 
   /**
@@ -147,6 +148,7 @@ public class ProcessServiceImpl implements ProcessService {
     if (process != null) {
       process.setPriority(priority);
       processRepository.save(process);
+      processRepository.flush();
     }
   }
 
