@@ -917,6 +917,22 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
+   * Update task.
+   *
+   * @param taskId the task id
+   * @param status the status
+   */
+  @Transactional
+  public void updateTask(Long taskId, ProcessStatusEnum status) {
+    Task task = taskRepository.findById(taskId).orElse(null);
+    if (task != null) {
+      task.setFinishDate(new Date());
+      task.setStatus(status);
+      taskRepository.saveAndFlush(task);
+    }
+  }
+
+  /**
    * Instantiates a new validation task.
    *
    * @param eeaEventVO the eea event VO
@@ -974,7 +990,6 @@ public class ValidationHelper implements DisposableBean {
      */
     @Override
     public void run() {
-      Task task = null;
       ProcessStatusEnum status = ProcessStatusEnum.FINISHED;
       Long currentTime = System.currentTimeMillis();
       int workingThreads =
@@ -995,12 +1010,7 @@ public class ValidationHelper implements DisposableBean {
         status = ProcessStatusEnum.CANCELED;
       } finally {
         try {
-          task = taskRepository.findById(validationTask.taskId).orElse(null);
-          if (task != null) {
-            task.setFinishDate(new Date());
-            task.setStatus(status);
-            taskRepository.saveAndFlush(task);
-          }
+          updateTask(validationTask.taskId, status);
           Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
           LOG.info("Validation task {} finished, it has taken taken {} seconds",
               validationTask.eeaEventVO, totalTime);

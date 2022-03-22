@@ -3,6 +3,7 @@ package org.eea.recordstore.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.transaction.Transactional;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
@@ -97,6 +98,7 @@ public class ProcessServiceImpl implements ProcessService {
    * @param user the user
    */
   @Override
+  @Transactional
   public void updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
       ProcessTypeEnum type, String processId, String threadId, String user, int priority) {
 
@@ -143,6 +145,7 @@ public class ProcessServiceImpl implements ProcessService {
    * @param priority the priority
    */
   @Override
+  @Transactional
   public void updatePriority(Long processId, int priority) {
     EEAProcess process = processRepository.findById(processId).orElse(null);
     if (process != null) {
