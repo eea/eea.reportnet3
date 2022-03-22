@@ -988,25 +988,24 @@ public class ValidationHelper implements DisposableBean {
       try {
         validationTask.validator.performValidation(validationTask.eeaEventVO,
             validationTask.datasetId, validationTask.kieBase);
-        task = taskRepository.findById(validationTask.taskId).orElse(null);
-      } catch (EEAException e) {
+      } catch (Exception e) {
         LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
             validationTask.datasetId, e.getMessage(), e);
         validationTask.eeaEventVO.getData().put("error", e);
         status = ProcessStatusEnum.CANCELED;
       } finally {
-        task = taskRepository.findById(validationTask.taskId).orElse(null);
-        if (task != null) {
-          task.setFinishDate(new Date());
-          task.setStatus(status);
-          taskRepository.saveAndFlush(task);
-        }
-        Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
-        LOG.info("Validation task {} finished, it has taken taken {} seconds",
-            validationTask.eeaEventVO, totalTime);
         try {
+          task = taskRepository.findById(validationTask.taskId).orElse(null);
+          if (task != null) {
+            task.setFinishDate(new Date());
+            task.setStatus(status);
+            taskRepository.saveAndFlush(task);
+          }
+          Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
+          LOG.info("Validation task {} finished, it has taken taken {} seconds",
+              validationTask.eeaEventVO, totalTime);
           checkFinishedValidations(validationTask.datasetId, validationTask.processId);
-        } catch (EEAException e) {
+        } catch (Exception e) {
           LOG_ERROR.error("Error finishing validations for dataset {} due to exception {}",
               validationTask.datasetId, e.getMessage(), e);
         }
