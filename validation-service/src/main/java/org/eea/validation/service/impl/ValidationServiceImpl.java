@@ -250,6 +250,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public List<DatasetValidation> runDatasetValidations(DatasetValue dataset,
       KieSession kieSession) {
+    List<DatasetValidation> result = new ArrayList<>();
     kieSession.insert(dataset);
     try {
       kieSession.fireAllRules();
@@ -257,7 +258,15 @@ public class ValidationServiceImpl implements ValidationService {
       LOG_ERROR.error("The Dataset Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(dataset, e);
     }
-    return dataset.getDatasetValidations();
+    try {
+      if (null != dataset.getDatasetValidations() && !dataset.getDatasetValidations().isEmpty()) {
+        result = dataset.getDatasetValidations();
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Problem accessing to the db getting the datasetValidations: { } ",
+          e.getMessage(), e);
+    }
+    return result;
   }
 
   /**
@@ -270,6 +279,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<TableValidation> runTableValidations(TableValue table, KieSession kieSession) {
+    List<TableValidation> result = new ArrayList<>();
     kieSession.insert(table);
     try {
       kieSession.fireAllRules();
@@ -277,7 +287,15 @@ public class ValidationServiceImpl implements ValidationService {
       LOG_ERROR.error("The Table Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(table, e);
     }
-    return table.getTableValidations() == null ? new ArrayList<>() : table.getTableValidations();
+    try {
+      if (null != table.getTableValidations() && !table.getTableValidations().isEmpty()) {
+        result = table.getTableValidations();
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Problem accessing to the db getting the tableValidations: { } ",
+          e.getMessage(), e);
+    }
+    return result;
   }
 
   /**
@@ -291,6 +309,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   @Transactional
   public List<RecordValidation> runRecordValidations(RecordValue record, KieSession kieSession) {
+    List<RecordValidation> result = new ArrayList<>();
     if (StringUtils.isNotBlank(record.getIdRecordSchema())) {
       kieSession.insert(record);
     }
@@ -301,9 +320,15 @@ public class ValidationServiceImpl implements ValidationService {
       rulesErrorUtils.createRuleErrorException(record, e);
     }
 
-    return null == record.getRecordValidations() || record.getRecordValidations().isEmpty()
-        ? new ArrayList<>()
-        : record.getRecordValidations();
+    try {
+      if (null != record.getRecordValidations() && !record.getRecordValidations().isEmpty()) {
+        result = record.getRecordValidations();
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Problem accessing to the db getting the datasetValidations: { } ",
+          e.getMessage(), e);
+    }
+    return result;
   }
 
   /**
@@ -316,6 +341,7 @@ public class ValidationServiceImpl implements ValidationService {
    */
   @Override
   public List<FieldValidation> runFieldValidations(FieldValue field, KieSession kieSession) {
+    List<FieldValidation> result = new ArrayList<>();
     if (StringUtils.isNotBlank(field.getIdFieldSchema())) {
       kieSession.insert(field);
     }
@@ -325,10 +351,15 @@ public class ValidationServiceImpl implements ValidationService {
       LOG_ERROR.error("The Field Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(field, e);
     }
-    return null == field.getFieldValidations() || field.getFieldValidations().isEmpty()
-        ? new ArrayList<>()
-        : field.getFieldValidations();
-
+    try {
+      if (null != field.getFieldValidations() && !field.getFieldValidations().isEmpty()) {
+        result = field.getFieldValidations();
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Problem accessing to the db  getting the fieldValidations: { } ",
+          e.getMessage(), e);
+    }
+    return result;
   }
 
 
