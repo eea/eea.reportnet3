@@ -2,6 +2,7 @@ package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -504,4 +505,13 @@ public class IntegrationServiceImplTest {
     integrationService.deleteExportEuDataset("5ce524fad31fc52540abae73");
     Mockito.verify(crudManager, times(1)).delete(Mockito.any());
   }
+
+  @Test
+  public void getIntegrationNullTest() {
+    Mockito.when(integrationRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.ofNullable(null));
+    assertNull(integrationService.getIntegration(1L));
+  }
+
+
 }
