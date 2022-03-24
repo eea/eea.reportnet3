@@ -123,11 +123,11 @@ public class DataflowControllerImpl implements DataFlowController {
   @GetMapping(value = "/v1/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Get dataflow by dataflow id", produces = MediaType.APPLICATION_JSON_VALUE,
       response = DataFlowVO.class,
-      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN")
+      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN.\nReporters must include providerId to get dataflow data.")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public DataFlowVO findById(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId,
-      @RequestParam(value = "Provider id", required = false) Long providerId) {
+      @ApiParam(value = "Provider id", example = "0", required = false) @RequestParam(value = "providerId", required = false) Long providerId) {
 
     if (dataflowId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -162,7 +162,7 @@ public class DataflowControllerImpl implements DataFlowController {
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public DataFlowVO findByIdLegacy(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId) {
+      @ApiParam(value = "Provider Id", example = "0", required = false) @RequestParam(value = "providerId", required = false) Long providerId) {
     return this.findById(dataflowId, providerId);
   }
 
@@ -206,7 +206,8 @@ public class DataflowControllerImpl implements DataFlowController {
   public PaginatedDataflowVO findDataflows(
       @RequestBody(required = false) Map<String, String> filters,
       @RequestParam(required = false) String orderHeader,
-      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) boolean asc, 
+      @RequestParam(required = false) Integer pageSize,
       @RequestParam(required = false) Integer pageNum) {
     PaginatedDataflowVO dataflows = new PaginatedDataflowVO();
     String userId =
@@ -237,7 +238,8 @@ public class DataflowControllerImpl implements DataFlowController {
   public PaginatedDataflowVO findReferenceDataflows(
       @RequestBody(required = false) Map<String, String> filters,
       @RequestParam(required = false) String orderHeader,
-      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) boolean asc, 
+      @RequestParam(required = false) Integer pageSize,
       @RequestParam(required = false) Integer pageNum) {
     PaginatedDataflowVO dataflows = new PaginatedDataflowVO();
     String userId =
@@ -267,7 +269,8 @@ public class DataflowControllerImpl implements DataFlowController {
   public PaginatedDataflowVO findBusinessDataflows(
       @RequestBody(required = false) Map<String, String> filters,
       @RequestParam(required = false) String orderHeader,
-      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) boolean asc, 
+      @RequestParam(required = false) Integer pageSize,
       @RequestParam(required = false) Integer pageNum)
 
   {
