@@ -924,12 +924,7 @@ public class ValidationHelper implements DisposableBean {
    */
   @Transactional
   public void updateTask(Long taskId, ProcessStatusEnum status) {
-    Task task = taskRepository.findById(taskId).orElse(null);
-    if (task != null) {
-      task.setFinishDate(new Date());
-      task.setStatus(status);
-      taskRepository.saveAndFlush(task);
-    }
+    taskRepository.updateStatusAndFinishDate(taskId, status.toString(), new Date());
   }
 
   /**

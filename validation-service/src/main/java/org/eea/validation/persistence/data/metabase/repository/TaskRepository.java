@@ -1,10 +1,13 @@
 package org.eea.validation.persistence.data.metabase.repository;
 
+import java.util.Date;
 import java.util.List;
 import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The Interface TaskRepository.
@@ -31,6 +34,13 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
   @Query(nativeQuery = true, value = "select * from task WHERE id in(:ids)")
   List<Task> findByIdIn(@Param("ids") List<Long> ids);
+
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true,
+      value = "update task set status= :status ,date_finish= :dateFinish where id=:taskId ")
+  void updateStatusAndFinishDate(@Param("taskId") Long taskId, @Param("status") String status,
+      @Param("dateFinish") Date dateFinish);
 }
 
 
