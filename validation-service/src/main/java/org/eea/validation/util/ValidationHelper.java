@@ -995,18 +995,16 @@ public class ValidationHelper implements DisposableBean {
           "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
 
-      Date finishDate = null;
       try {
         validationTask.validator.performValidation(validationTask.eeaEventVO,
             validationTask.datasetId, validationTask.kieBase);
-        finishDate = new Date();
       } catch (Exception e) {
         LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
             validationTask.datasetId, e.getMessage(), e);
         status = ProcessStatusEnum.IN_QUEUE;
       } finally {
         try {
-          updateTask(validationTask.taskId, status, finishDate);
+          updateTask(validationTask.taskId, status, new Date());
           Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
           LOG.info("Validation task {} finished, it has taken taken {} seconds",
               validationTask.eeaEventVO, totalTime);
