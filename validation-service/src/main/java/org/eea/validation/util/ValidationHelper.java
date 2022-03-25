@@ -226,7 +226,7 @@ public class ValidationHelper implements DisposableBean {
    * @param processId the process id
    */
   public void finishProcess(String processId) {
-    LOG.info("Process {} finished ", processId);
+    LOG.info("Removing process {} from processesMap ", processId);
     processesMap.remove(processId);
     System.gc();
   }
@@ -923,8 +923,8 @@ public class ValidationHelper implements DisposableBean {
    * @param status the status
    */
   @Transactional
-  public void updateTask(Long taskId, ProcessStatusEnum status) {
-    taskRepository.updateStatusAndFinishDate(taskId, status.toString(), new Date());
+  public void updateTask(Long taskId, ProcessStatusEnum status, Date finishDate) {
+    taskRepository.updateStatusAndFinishDate(taskId, status.toString(), finishDate);
   }
 
   /**
@@ -995,24 +995,33 @@ public class ValidationHelper implements DisposableBean {
           "Executing validation for event {}. Working validating threads {}, Available validating threads {}",
           validationTask.eeaEventVO, workingThreads, maxRunningTasks - workingThreads);
 
+      Date finishDate = null;
       try {
         validationTask.validator.performValidation(validationTask.eeaEventVO,
             validationTask.datasetId, validationTask.kieBase);
+        finishDate = new Date();
       } catch (Exception e) {
         LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
             validationTask.datasetId, e.getMessage(), e);
-        validationTask.eeaEventVO.getData().put("error", e);
-        status = ProcessStatusEnum.CANCELED;
+        status = ProcessStatusEnum.IN_QUEUE;
       } finally {
         try {
-          updateTask(validationTask.taskId, status);
+          updateTask(validationTask.taskId, status, finishDate);
           Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
           LOG.info("Validation task {} finished, it has taken taken {} seconds",
               validationTask.eeaEventVO, totalTime);
-          checkFinishedValidations(validationTask.datasetId, validationTask.processId);
         } catch (Exception e) {
-          LOG_ERROR.error("Error finishing validations for dataset {} due to exception {}",
+          LOG_ERROR.error("Error updating validations for dataset {} due to exception {}",
               validationTask.datasetId, e.getMessage(), e);
+        } finally {
+          try {
+            Thread.sleep(1000);
+            checkFinishedValidations(validationTask.datasetId, validationTask.processId);
+          } catch (EEAException | InterruptedException eeaEx) {
+            LOG_ERROR.error("Error finishing validations for dataset {} due to exception {}",
+                validationTask.datasetId, eeaEx.getMessage(), eeaEx);
+          }
+
         }
 
       }
@@ -1033,6 +1042,7 @@ public class ValidationHelper implements DisposableBean {
         throws EEAException {
       boolean isFinished = false;
       if (taskRepository.isProcessFinished(processId)) {
+        LOG.info("Process {} finished for dataset {}", processId, datasetId);
         // Release the lock manually
         Map<String, Object> executeValidation = new HashMap<>();
         executeValidation.put(LiteralConstants.SIGNATURE,
@@ -1051,7 +1061,8 @@ public class ValidationHelper implements DisposableBean {
         Map<String, Object> value = new HashMap<>();
         value.put(LiteralConstants.DATASET_ID, datasetId);
         value.put("uuid", processId);
-        // Setting as user the requesting one as it is being taken from ThreadPropertiesManager and
+        // Setting as user the requesting one as it is being taken from ThreadPropertiesManager
+        // and
         // validation threads inheritances from it. This is a side effect.
         value.put("user", notificationUser);
         boolean isRelease = processesMap.get(processId).isReleased();
