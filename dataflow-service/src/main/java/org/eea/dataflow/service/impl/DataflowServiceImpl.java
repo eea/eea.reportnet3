@@ -220,7 +220,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   @Transactional
   public DataFlowVO getById(Long id, boolean removeWeblinksAndDocuments) throws EEAException {
-    DataFlowVO result = getByIdWithCondition(id, true);
+    DataFlowVO result = getByIdWithCondition(id, true, null);
     if (removeWeblinksAndDocuments) {
       removeWebLinksAndDocuments(result);
     }
@@ -231,13 +231,15 @@ public class DataflowServiceImpl implements DataflowService {
    * Gets the by id with representatives filtered by user email.
    *
    * @param id the id
+   * @param providerId the provider id
    * @return the by id with representatives filtered by user email
    * @throws EEAException the EEA exception
    */
   @Override
   @Transactional
-  public DataFlowVO getByIdWithRepresentativesFilteredByUserEmail(Long id) throws EEAException {
-    DataFlowVO result = getByIdWithCondition(id, false);
+  public DataFlowVO getByIdWithRepresentativesFilteredByUserEmail(Long id, Long providerId)
+      throws EEAException {
+    DataFlowVO result = getByIdWithCondition(id, false, providerId);
     removeWebLinksAndDocuments(result);
     return result;
   }
@@ -1180,11 +1182,12 @@ public class DataflowServiceImpl implements DataflowService {
    *
    * @param id the id
    * @param includeAllRepresentatives the include all representatives
+   * @param providerId the provider id
    * @return the by id with condition
    * @throws EEAException the EEA exception
    */
-  private DataFlowVO getByIdWithCondition(Long id, boolean includeAllRepresentatives)
-      throws EEAException {
+  private DataFlowVO getByIdWithCondition(Long id, boolean includeAllRepresentatives,
+      Long providerId) throws EEAException {
 
     DataFlowVO dataflowVO = new DataFlowVO();
     ThreadPropertiesManager.setVariable("user",
@@ -1236,9 +1239,17 @@ public class DataflowServiceImpl implements DataflowService {
       // save some calls
       if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
         // Set the reporting datasets
-        dataflowVO.setReportingDatasets(datasetMetabaseControllerZuul
-            .findReportingDataSetIdByDataflowId(id).stream()
-            .filter(dataset -> datasetsIds.contains(dataset.getId())).collect(Collectors.toList()));
+        if (providerId == null) {
+          dataflowVO.setReportingDatasets(
+              datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(id).stream()
+                  .filter(dataset -> datasetsIds.contains(dataset.getId()))
+                  .collect(Collectors.toList()));
+        } else {
+          dataflowVO.setReportingDatasets(datasetMetabaseControllerZuul
+              .findReportingDataSetIdByDataflowIdAndProviderId(id, providerId).stream()
+              .filter(dataset -> datasetsIds.contains(dataset.getId()))
+              .collect(Collectors.toList()));
+        }
 
         // Add the data collections
         dataflowVO.setDataCollections(dataCollectionControllerZuul
