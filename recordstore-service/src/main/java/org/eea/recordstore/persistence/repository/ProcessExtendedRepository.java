@@ -43,4 +43,9 @@ public interface ProcessExtendedRepository {
    */
   Long countProcessesPaginated(boolean asc, String status, Long dataflowId, String user,
       ProcessTypeEnum type, String header);
+
+  /**
+   * Flush.
+   */
+  void flush();
 }

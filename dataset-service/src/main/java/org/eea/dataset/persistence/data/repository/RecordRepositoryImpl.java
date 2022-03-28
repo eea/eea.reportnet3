@@ -407,6 +407,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           .filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
           .collect(Collectors.toList());
     }
+    if (offset == 0) {
+      offset = 1;
+    }
     GsonJsonParser gsonparser = new GsonJsonParser();
     // get json for each table requested
     for (TableSchema tableSchema : tableSchemaList) {
@@ -416,18 +419,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       int nHeaders = tableSchema.getRecordSchema().getFieldSchema().size();
       int limitAux = (limit / nHeaders > 0 ? limit / (nHeaders / 2) : 1) * 2;
       JSONArray tableRecords = new JSONArray();
-      Long totalRecords = null;
-      if (StringUtils.isNotBlank(tableSchemaId)) {
-        totalRecords = getCount(String.format(
-            "select count(rv.id) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table ",
-            datasetId, datasetId, tableSchemaId), null, null);
-        resultTable.put("totalRecords", totalRecords);
-      }
-      if (StringUtils.isNotBlank(columnName) || StringUtils.isNotBlank(filterValue)
-          || StringUtils.isNotBlank(dataProviderCodes)) {
-        totalRecords = getCount(
-            totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
-            columnName, filterValue);
+
+      Long totalRecords = getCount(
+          totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
+          columnName, filterValue);
+      if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
+          || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
         resultTable.put("totalRecords", totalRecords);
       }
       Integer offsetAux = (limit * offset) - limit;
@@ -435,9 +432,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         offsetAux = 0;
       }
 
-      if (totalRecords != null && totalRecords > 0L) {
+
+      if (totalRecords != null && totalRecords > 0) {
         for (int offsetAux2 = offsetAux; offsetAux2 < offsetAux + limit
             && offsetAux2 < totalRecords; offsetAux2 += limitAux) {
+          if (offsetAux2 + limitAux > (limit * offset)) {
+            limitAux = (limit * offset) - offsetAux2;
+          }
           // ask for records with offset
           StringBuilder stringQuery = new StringBuilder();
           stringQuery.append(
@@ -456,7 +457,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           if (null != tableSchemaId) {
             stringQuery.append(" where ")
                 .append(null != tableSchemaId
-                    ? String.format(" id_table_schema like '%s' and ", tableSchemaId)
+                    ? String.format(" id_table_schema = '%s' and ", tableSchemaId)
                     : "");
             stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
           }
@@ -1246,7 +1247,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     if (null != tableSchemaIdString) {
       stringQuery.append(" where ")
-          .append(String.format(" id_table_schema like '%s' and ", tableSchemaIdString));
+          .append(String.format(" id_table_schema = '%s' and ", tableSchemaIdString));
       stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
     }
     stringQuery.append(") records ");
@@ -1259,9 +1260,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           countries.append(",");
         }
       }
-      stringQuery.append(
-          null != countryCodesList ? String.format("where data_provider_code in (%s) ", countries)
-              : "");
+      stringQuery.append(String.format("where data_provider_code in (%s) ", countries));
     }
     stringQuery.append("group by id_table_schema,id_record,data_provider_code, rdata_position ");
     stringQuery.append(" ) tablesAux ");

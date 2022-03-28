@@ -43,4 +43,7 @@ public class ProcessVO {
   /** The user. */
   private String user;
 
+  /** The priority. */
+  private int priority;
+
 }

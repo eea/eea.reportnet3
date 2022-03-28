@@ -46,6 +46,7 @@ import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.persistence.data.domain.TableValidation;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.domain.Validation;
+import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.data.repository.FieldRepository;
 import org.eea.validation.persistence.data.repository.FieldValidationRepository;
@@ -174,6 +175,10 @@ public class ValidationServiceTest {
    */
   @Mock
   private RecordValidationRepository recordValidationRepository;
+
+  /** The task repository. */
+  @Mock
+  private TaskRepository taskRepository;
 
   /**
    * The dataset value.
@@ -504,7 +509,7 @@ public class ValidationServiceTest {
     when(kieBase.newKieSession()).thenReturn(kieSession);
     when(kieSession.fireAllRules()).thenReturn(1);
 
-    validationServiceImpl.validateRecord(1L, kieBase, PageRequest.of(0, 5000));
+    validationServiceImpl.validateRecord(1L, kieBase, PageRequest.of(0, 5000), 1L);
 
   }
 
@@ -536,7 +541,7 @@ public class ValidationServiceTest {
     when(fieldRepository.findAll(Mockito.any(Pageable.class))).thenReturn(page);
     when(kieBase.newKieSession()).thenReturn(kieSession);
     when(kieSession.fireAllRules()).thenReturn(1);
-    validationServiceImpl.validateFields(1L, kieBase, PageRequest.of(0, 5000), false);
+    validationServiceImpl.validateFields(1L, kieBase, PageRequest.of(0, 5000), false, 1L);
 
   }
 
@@ -854,15 +859,6 @@ public class ValidationServiceTest {
         validationServiceImpl.getDatasetErrors(1L, datasetValue, new ArrayList<>()));
   }
 
-  /**
-   * Validate data set error.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test(expected = EEAException.class)
-  public void validateDataSetError() throws EEAException {
-    validationServiceImpl.validateDataSet(1L, kieBase);
-  }
 
   /**
    * Validate data error.
@@ -875,7 +871,7 @@ public class ValidationServiceTest {
         .setLevelError(ErrorTypeEnum.ERROR);
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
-    validationServiceImpl.validateDataSet(1L, kieBase);
+    validationServiceImpl.validateDataSet(1L, kieBase, 1L);
   }
 
   /**
@@ -887,7 +883,7 @@ public class ValidationServiceTest {
   public void validateDataWarning() throws EEAException {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
-    validationServiceImpl.validateDataSet(1L, kieBase);
+    validationServiceImpl.validateDataSet(1L, kieBase, 1L);
     Mockito.verify(validationDatasetRepository, times(1)).saveAll(Mockito.any());
   }
 
@@ -901,7 +897,7 @@ public class ValidationServiceTest {
   public void validateTable() throws EEAException {
     when(tableRepository.findById(Mockito.any())).thenReturn(Optional.of(tableValue));
     when(kieBase.newKieSession()).thenReturn(kieSession);
-    validationServiceImpl.validateTable(1L, 1L, kieBase, "null", "providerId");
+    validationServiceImpl.validateTable(1L, 1L, kieBase, "null", "providerId", 1L);
     Mockito.verify(tableValidationRepository, times(1)).saveAll(Mockito.any());
   }
 

@@ -25,7 +25,6 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -1583,7 +1582,6 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  @Transactional
   public byte[] createFile(Long datasetId, String mimeType, final String tableSchemaId,
       ExportFilterVO filters) throws EEAException, IOException {
     // Get the dataFlowId from the metabase

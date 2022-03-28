@@ -1,9 +1,9 @@
 package org.eea.recordstore.persistence.repository;
 
-import java.util.Optional;
 import org.eea.recordstore.persistence.domain.EEAProcess;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * The Interface ProcessRepository.
@@ -17,7 +17,8 @@ public interface ProcessRepository
    * @param processId the process id
    * @return the optional
    */
-  Optional<EEAProcess> findOneByProcessId(String processId);
+  @Query(nativeQuery = true, value = "select * from process where process_id = :processId limit 1")
+  EEAProcess findOneByProcessId(@Param("processId") String processId);
 
   /**
    * Count processes.

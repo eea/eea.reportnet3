@@ -80,6 +80,10 @@ public class EEAProcess {
   @Column(name = "date_finish")
   private Date processFinishingDate;
 
+  /** The priority. */
+  @Column(name = "priority")
+  private int priority;
+
   /**
    * Equals.
    *

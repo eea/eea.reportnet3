@@ -3,6 +3,7 @@ package org.eea.recordstore.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.transaction.Transactional;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
@@ -57,6 +58,8 @@ public class ProcessServiceImpl implements ProcessService {
    * @param status the status
    * @param dataflowId the dataflow id
    * @param user the user
+   * @param type the type
+   * @param header the header
    * @return the processes
    */
   @Override
@@ -95,14 +98,18 @@ public class ProcessServiceImpl implements ProcessService {
    * @param processId the process id
    * @param threadId the thread id
    * @param user the user
+   * @param priority the priority
    */
   @Override
+  @Transactional
   public void updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
-      ProcessTypeEnum type, String processId, String threadId, String user) {
+      ProcessTypeEnum type, String processId, String threadId, String user, int priority) {
 
-    EEAProcess processToUpdate =
-        processRepository.findOneByProcessId(processId).orElse(new EEAProcess());
+    EEAProcess processToUpdate = processRepository.findOneByProcessId(processId);
 
+    if (processToUpdate == null) {
+      processToUpdate = new EEAProcess();
+    }
     if (processToUpdate.getDatasetId() == null) {
       processToUpdate.setDatasetId(datasetId);
     }
@@ -126,10 +133,31 @@ public class ProcessServiceImpl implements ProcessService {
         processToUpdate.setProcessFinishingDate(new Date());
         break;
     }
-
+    if (priority != 0) {
+      processToUpdate.setPriority(priority);
+    }
     LOG.info(String.format(
         "Adding or updating process for datasetId %s, dataflowId %s: %s %s with processId %s made by user %s",
         datasetId, processToUpdate.getDataflowId(), type, status, processId, user));
     processRepository.save(processToUpdate);
+    processRepository.flush();
   }
+
+  /**
+   * Update priority.
+   *
+   * @param processId the process id
+   * @param priority the priority
+   */
+  @Override
+  @Transactional
+  public void updatePriority(Long processId, int priority) {
+    EEAProcess process = processRepository.findById(processId).orElse(null);
+    if (process != null) {
+      process.setPriority(priority);
+      processRepository.save(process);
+      processRepository.flush();
+    }
+  }
+
 }

@@ -40,11 +40,11 @@ public class ExecuteTableValidationCommand extends ExecuteValidationCommand {
    */
   @Override
   public Validator getValidationAction() {
-    return (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
+    return (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase, Long taskId) -> {
       final Long idTable = Long.parseLong(String.valueOf(eeaEventVO.getData().get("idTable")));
       final String sqlRule = String.valueOf(eeaEventVO.getData().get("sqlRule"));
       final String dataProviderId = String.valueOf(eeaEventVO.getData().get("dataProviderId"));
-      validationService.validateTable(datasetId, idTable, kieBase, sqlRule, dataProviderId);
+      validationService.validateTable(datasetId, idTable, kieBase, sqlRule, dataProviderId, taskId);
     };
   }
 }
