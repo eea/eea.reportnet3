@@ -1,11 +1,20 @@
 package org.eea.dataset.persistence.data.repository;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -36,14 +45,21 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.utils.LiteralConstants;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.annotations.QueryHints;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.postgresql.copy.CopyIn;
+import org.postgresql.copy.CopyManager;
+import org.postgresql.copy.CopyOut;
+import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -84,6 +100,26 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /** The entity manager. */
   @PersistenceContext
   private EntityManager entityManager;
+
+  @Value("${pathSnapshot}")
+  private String pathSnapshot;
+
+  /** The user postgre db. */
+  @Value("${spring.datasource.dataset.username}")
+  private String userPostgreDb;
+
+  /** The pass postgre db. */
+  @Value("${spring.datasource.dataset.password}")
+  private String passPostgreDb;
+
+  /** The conn string postgre. */
+  @Value("${spring.datasource.url}")
+  private String connStringPostgre;
+
+  /** The sql get datasets name. */
+  @Value("${sqlGetAllDatasetsName}")
+  private String sqlGetDatasetsName;
+
 
   /** The Constant WHERE_ID_TABLE_SCHEMA: {@value}. */
   private static final String WHERE_ID_TABLE_SCHEMA = "WHERE tv.idTableSchema = :idTableSchema ";
@@ -247,7 +283,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       "USAGE", "USER", "VACUUM", "VALID", "VALIDATOR", "VARCHAR", "VARYING", "VERBOSE", "VERSION",
       "VIEW", "VOLATILE", "WITH", "WITHOUT", "WORK", "WRITE", "YEAR", "ZONE"};
 
-
+  /** The Constant FILE_PATTERN_NAME: {@value}. */
+  private static final String FILE_PATTERN_NAME = "etlExport_%s%s";
 
   /**
    * Find by table value with order.
@@ -407,8 +444,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           .filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
           .collect(Collectors.toList());
     }
-    if (offset == 0) {
-      offset = 1;
+    if (offset == 1) {
+      offset = 0;
     }
     GsonJsonParser gsonparser = new GsonJsonParser();
     // get json for each table requested
@@ -417,20 +454,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       tableName = tableSchema.getNameTableSchema();
       resultTable.put("tableName", tableName);
       int nHeaders = tableSchema.getRecordSchema().getFieldSchema().size();
-      int limitAux = (limit / nHeaders > 0 ? limit / (nHeaders / 2) : 1) * 2;
+      Long limitAux = (limit / nHeaders > 0 ? Long.valueOf(limit) / (nHeaders / 2) : 1) * 2;
       JSONArray tableRecords = new JSONArray();
-      Long totalRecords = null;
-      if (StringUtils.isNotBlank(tableSchemaId)) {
-        totalRecords = getCount(String.format(
-            "select count(rv.id) from dataset_%s.record_value rv where  (select tv.id from dataset_%s.table_value tv where tv.id_table_schema = '%s') = rv.id_table ",
-            datasetId, datasetId, tableSchemaId), null, null);
-        resultTable.put("totalRecords", totalRecords);
-      }
-      if (StringUtils.isNotBlank(columnName) || StringUtils.isNotBlank(filterValue)
-          || StringUtils.isNotBlank(dataProviderCodes)) {
-        totalRecords = getCount(
-            totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
-            columnName, filterValue);
+      Long totalRecords = getCount(
+          totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
+          columnName, filterValue);
+
+      if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
+          || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
         resultTable.put("totalRecords", totalRecords);
       }
       Integer offsetAux = (limit * offset) - limit;
@@ -438,82 +469,131 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         offsetAux = 0;
       }
 
+      String filterChain = "blank";
+      if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
+          || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
+        filterChain = tableSchemaId + columnName + filterValue + dataProviderCodes;
+      }
 
       if (totalRecords != null && totalRecords > 0L) {
-        for (int offsetAux2 = offsetAux; offsetAux2 < offsetAux + limit
-            && offsetAux2 < totalRecords; offsetAux2 += limitAux) {
-          if (offsetAux2 + limitAux > (limit * offset)) {
-            limitAux = (limit * offset) - offsetAux2;
-          }
-          // ask for records with offset
-          StringBuilder stringQuery = new StringBuilder();
+        // for (int offsetAux2 = offsetAux; offsetAux2 < offsetAux + limit
+        // && offsetAux2 < totalRecords; offsetAux2 += limitAux) {
+        // if (offsetAux2 + limitAux > (limit * offset)) {
+        // limitAux = (limit * offset) - offsetAux2;
+        // }
+        // ask for records with offset
+        StringBuilder stringQuery = new StringBuilder();
+        stringQuery.append("select ").append("'" + filterChain + "'").append(
+            " as filters, cast(records as text) from ( select json_build_object('id_table_schema',id_table_schema,'id_record', id_record, 'countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
+            .append(
+                " select data_provider_code,id_table_schema,id_record,rdata_position,json_build_object('fieldName',\"fieldName\",'value',value,'field_value_id',field_value_id) as fields from( ")
+            .append(" select case ");
+        String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
+        for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
           stringQuery.append(
-              "select cast(records as text) from ( select json_build_object('id_table_schema',id_table_schema,'id_record', id_record, 'countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
-              .append(
-                  " select data_provider_code,id_table_schema,id_record,rdata_position,json_build_object('fieldName',\"fieldName\",'value',value,'field_value_id',field_value_id) as fields from( ")
-              .append(" select case ");
-          String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-          for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
-            stringQuery.append(String.format(fieldSchemaQueryPart, field.getIdFieldSchema(),
-                field.getHeaderName()));
-          }
-          stringQuery.append(String.format(
-              " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
-              datasetId, datasetId, datasetId));
-          if (null != tableSchemaId) {
-            stringQuery.append(" where ")
-                .append(null != tableSchemaId
-                    ? String.format(" id_table_schema like '%s' and ", tableSchemaId)
-                    : "");
-            stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
-          }
+              String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
+        }
+        stringQuery.append(String.format(
+            " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table order by fv.data_position ) fieldsAux",
+            datasetId, datasetId, datasetId));
+        if (null != tableSchemaId) {
+          stringQuery.append(" where ")
+              .append(null != tableSchemaId
+                  ? String.format(" id_table_schema = '%s' and ", tableSchemaId)
+                  : "");
+          stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
+        }
 
-          stringQuery.append(") records where ");
-          if (StringUtils.isNotBlank(dataProviderCodes)) {
-            List<String> countryCodesList =
-                new ArrayList<>(Arrays.asList(dataProviderCodes.split(",")));
-            StringBuilder countries = new StringBuilder();
-            for (int i = 0; i < countryCodesList.size(); i++) {
-              countries.append("'" + countryCodesList.get(i) + "'");
-              if (i + 1 != countryCodesList.size()) {
-                countries.append(",");
-              }
+        stringQuery.append(") records where ");
+        if (StringUtils.isNotBlank(dataProviderCodes)) {
+          List<String> countryCodesList =
+              new ArrayList<>(Arrays.asList(dataProviderCodes.split(",")));
+          StringBuilder countries = new StringBuilder();
+          for (int i = 0; i < countryCodesList.size(); i++) {
+            countries.append("'" + countryCodesList.get(i) + "'");
+            if (i + 1 != countryCodesList.size()) {
+              countries.append(",");
             }
-            stringQuery.append(null != countryCodesList
-                ? String.format("data_provider_code in (%s) and ", countries)
-                : "");
           }
-          stringQuery.append(String.format(
-              "id_table_schema = '%s' group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position ",
-              tableSchema.getIdTableSchema().toString()));
+          stringQuery.append(
+              null != countryCodesList ? String.format("data_provider_code in (%s) and ", countries)
+                  : "");
+        }
+        stringQuery.append(String.format(
+            "id_table_schema = '%s' group by id_table_schema,id_record,data_provider_code, rdata_position order by rdata_position ",
+            tableSchema.getIdTableSchema().toString()));
 
-          if (null != filterValue || null != columnName) {
-            stringQuery.append(String.format(" offset %s limit %s ", offsetAux2, limitAux));
-            stringQuery.append(
-                ") as tableAux where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
-                .append(null != columnName ? " x.o ->> 'fieldName' = ? and " : "")
-                .append(null != filterValue ? " x.o ->> 'value' = ? and " : "");
-            stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
-            stringQuery.append(" ) ");
-          } else {
-            stringQuery
-                .append(String.format(" offset %s limit %s ) tableAux", offsetAux2, limitAux));
+        if (null != filterValue || null != columnName) {
+          // stringQuery.append(String.format(" offset %s limit %s ", offsetAux2, limitAux));
+          stringQuery.append(
+              ") as tableAux where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
+              .append(null != columnName ? " x.o ->> 'fieldName' = ? and " : "")
+              .append(null != filterValue ? " x.o ->> 'value' = ? and " : "");
+          stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
+          stringQuery.append(" ) ");
+        } else {
+          // stringQuery
+          // .append(String.format(" offset %s limit %s ) tableAux", offsetAux2, limitAux));
+          stringQuery.append(" ) tableAux");
+        }
+        LOG.info("Query: {} ", stringQuery);
+        Query query = entityManager.createNativeQuery(stringQuery.toString());
+
+        if (null != columnName && null != filterValue) {
+          query.setParameter(1, columnName);
+          query.setParameter(2, filterValue);
+        } else if (null != columnName && null == filterValue) {
+          query.setParameter(1, columnName);
+        } else if (null == columnName && null != filterValue) {
+          query.setParameter(1, filterValue);
+        }
+
+        Object resultPosition = null;
+        Object result = null;
+
+
+
+        String queryPosition = "SELECT id from dataset_" + datasetId + ".temp_etlexport "
+            + "WHERE filter_value='" + filterChain + "' order by id limit 1";
+        Query queryPositionResult = entityManager.createNativeQuery(queryPosition);
+        try {
+          resultPosition = queryPositionResult.getSingleResult();
+          LOG.info("lA PRIMERA position es {}", resultPosition.toString());
+        } catch (NoResultException nre) {
+          LOG.info("temp table etlexport empty for this filter. Have to fill it");
+          fileTempEtlExport(datasetId, stringQuery.toString(), filterChain);
+          fileTempEtlImport(datasetId, filterChain);
+          resultPosition = queryPositionResult.getSingleResult();
+          LOG.info("lA PRIMERA position es {}", resultPosition.toString());
+        }
+
+        // if (resultPosition != null && StringUtils.isBlank(resultPosition.toString())) {
+        // fileTempEtlExport(datasetId, stringQuery.toString(), filterChain);
+        //
+        // fileTempEtlImport(datasetId, filterChain);
+        //
+        // resultPosition = queryPositionResult.getSingleResult();
+        // LOG.info("lA PRIMERA position es {}", resultPosition.toString());
+        // }
+
+        Long firstPosition = Long.valueOf(resultPosition.toString());
+        Long initExtract = (Long.valueOf(offset) * limit) + firstPosition;
+        for (Long offsetAux2 = initExtract; offsetAux2 < initExtract + limit
+            && offsetAux2 < initExtract + totalRecords; offsetAux2 += limitAux) {
+          if (offsetAux2 + limitAux > initExtract + limit) {
+            limitAux = initExtract + limit - offsetAux2;
           }
-          LOG.info("Query: {} ", stringQuery);
-          Query query = entityManager.createNativeQuery(stringQuery.toString());
+          LOG.info("offsetAux: {}", offsetAux);
+          LOG.info("offsetAux2: {}", offsetAux2);
+          LOG.info("limitAux: {}", limitAux);
 
-          if (null != columnName && null != filterValue) {
-            query.setParameter(1, columnName);
-            query.setParameter(2, filterValue);
-          } else if (null != columnName && null == filterValue) {
-            query.setParameter(1, columnName);
-          } else if (null == columnName && null != filterValue) {
-            query.setParameter(1, filterValue);
-          }
-
-          Object result = null;
+          String queryFromTemp = "SELECT record_json from dataset_" + datasetId + ".temp_etlexport "
+              + "WHERE filter_value='" + filterChain + "' and id> " + offsetAux2 + " and id<"
+              + (offsetAux2 + limitAux);
+          LOG.info("LA QUERY BUENA: {}", queryFromTemp);
+          Query queryResult = entityManager.createNativeQuery(queryFromTemp);
           try {
-            result = query.getResultList();
+            result = queryResult.getResultList();
           } catch (NoResultException nre) {
             LOG.info("no result, ignore message");
           }
@@ -534,6 +614,109 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     // return resultjson.tostring
     return resultjson.toString();
   }
+
+  private void fileTempEtlExport(Long datasetId, String query, String filter) {
+
+    ConnectionDataVO connectionDataVO =
+        createConnectionDataVO(LiteralConstants.DATASET_PREFIX + datasetId);
+
+    try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+        connectionDataVO.getUser(), connectionDataVO.getPassword())) {
+
+      File fileFolder = new File(pathSnapshot, "etlExport");
+      fileFolder.mkdirs();
+
+      CopyManager cm = new CopyManager((BaseConnection) con);
+
+      // Copy
+      String nameFile = pathSnapshot + "/etlExport/"
+          + String.format(FILE_PATTERN_NAME, datasetId, "_" + filter + ".bin");
+      String copyQueryDataset = "COPY (" + query + ") to STDOUT";
+      LOG.info("QUERY DEL COPY: {}", copyQueryDataset);
+      printToFile(nameFile, copyQueryDataset, cm);
+    } catch (SQLException | IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  private void fileTempEtlImport(Long datasetId, String filter) {
+    ConnectionDataVO connectionDataVO =
+        createConnectionDataVO(LiteralConstants.DATASET_PREFIX + datasetId);
+
+    try (
+        Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+            connectionDataVO.getUser(), connectionDataVO.getPassword());
+        Statement stmt = con.createStatement()) {
+      con.setAutoCommit(true);
+
+      CopyManager cm = new CopyManager((BaseConnection) con);
+
+      String nameFile = pathSnapshot + "/etlExport/"
+          + String.format(FILE_PATTERN_NAME, datasetId, "_" + filter + ".bin");
+
+      String copyQuery =
+          "COPY dataset_" + datasetId + ".temp_etlexport(filter_value, record_json) FROM STDIN";
+      copyFromFile(copyQuery, nameFile, cm);
+      LOG.info("IMPORTADO");
+
+    } catch (SQLException | IOException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+  }
+
+  private void copyFromFile(String query, String fileName, CopyManager copyManager)
+      throws IOException, SQLException {
+    Path path = Paths.get(fileName);
+    // bufferFile it's a size in bytes defined in consul variable. It can be 65536
+    char[] cbuf = new char[65536];
+    int len = 0;
+    CopyIn cp = copyManager.copyIn(query);
+    // Copy the data from the file by chunks
+    try (FileReader from = new FileReader(path.toString())) {
+      while ((len = from.read(cbuf)) > 0) {
+        byte[] buf = new String(cbuf, 0, len).getBytes();
+        cp.writeToCopy(buf, 0, buf.length);
+      }
+      cp.endCopy();
+      if (cp.isActive()) {
+        cp.cancelCopy();
+      }
+    } finally {
+      Files.deleteIfExists(path);
+    }
+    LOG.info("FICHERO IMPORTADO");
+  }
+
+  private void printToFile(String fileName, String query, CopyManager copyManager)
+      throws SQLException, IOException {
+    byte[] buffer;
+    CopyOut copyOut = copyManager.copyOut(query);
+
+    try (OutputStream to = new FileOutputStream(fileName)) {
+      while ((buffer = copyOut.readFromCopy()) != null) {
+        to.write(buffer);
+      }
+    } finally {
+      if (copyOut.isActive()) {
+        copyOut.cancelCopy();
+      }
+    }
+    LOG.info("FICHERO CREADO");
+  }
+
+
+  private ConnectionDataVO createConnectionDataVO(final String datasetName) {
+    final ConnectionDataVO result = new ConnectionDataVO();
+    result.setConnectionString(connStringPostgre);
+    result.setUser(userPostgreDb);
+    result.setPassword(passPostgreDb);
+    result.setSchema(datasetName);
+    return result;
+  }
+
+
 
   /**
    * Gets the count.

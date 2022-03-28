@@ -49,4 +49,8 @@ public interface DatasetRepository
    */
   @Query("SELECT viewUpdated FROM DatasetValue WHERE id=:datasetId")
   Boolean findViewUpdatedById(@Param("datasetId") Long datasetId);
+
+  @Modifying
+  @Query(nativeQuery = true, value = "truncate table temp_etlexport")
+  void removeTempEtlExport(Long datasetId);
 }
