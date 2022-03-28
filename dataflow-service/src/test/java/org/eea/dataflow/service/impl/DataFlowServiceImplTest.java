@@ -1585,4 +1585,33 @@ public class DataFlowServiceImplTest {
     assertNotNull(dataflowServiceImpl.getDataflowsMetabaseById(Arrays.asList(1L)));
   }
 
+  @Test(expected = EEAException.class)
+  public void createDataFlowCompanyGroupNotFound() throws EEAException {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setName("dataflow");
+    dataFlowVO.setType(TypeDataflowEnum.BUSINESS);
+    try {
+      dataflowServiceImpl.createDataFlow(dataFlowVO);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.COMPANY_GROUP_NOTFOUND, ex.getMessage());
+      throw ex;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void createDataFlowCompanyUserFMENotFound() throws EEAException {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setName("dataflow");
+    dataFlowVO.setType(TypeDataflowEnum.BUSINESS);
+    dataFlowVO.setDataProviderGroupId(1L);
+    when(dataProviderGroupRepository.existsById(Mockito.anyLong())).thenReturn(true);
+    try {
+      dataflowServiceImpl.createDataFlow(dataFlowVO);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.USERFME_NOTFOUND, ex.getMessage());
+      throw ex;
+    }
+  }
+
+
 }

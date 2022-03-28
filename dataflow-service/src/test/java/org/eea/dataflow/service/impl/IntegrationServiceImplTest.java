@@ -513,5 +513,32 @@ public class IntegrationServiceImplTest {
     assertNull(integrationService.getIntegration(1L));
   }
 
+  @Test(expected = EEAException.class)
+  public void executeExternalIntegrationEEAExceptionTest() throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setId(1L);
+    IntegrationExecutorService executor = Mockito.mock(IntegrationExecutorService.class);
+    Map<String, Object> executionResultParams = new HashMap<>();
+    executionResultParams.put("id", 0);
+    ExecutionResultVO executionResultVO = new ExecutionResultVO();
+    executionResultVO.setExecutionResultParams(executionResultParams);
+
+    Mockito.when(integrationRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new Integration()));
+    Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(integrationVO);
+
+    Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
+
+    Mockito.when(executor.execute(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, null, 1L,
+        integrationVO)).thenReturn(executionResultVO);
+    try {
+      integrationService.executeExternalIntegration(1L, 1L,
+          IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, false);
+    } catch (EEAException e) {
+      assertEquals("Error executing external integration", e.getMessage());
+      throw e;
+    }
+  }
+
 
 }
