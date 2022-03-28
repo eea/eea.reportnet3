@@ -138,7 +138,8 @@ public class DataflowControllerImpl implements DataFlowController {
       if (isUserRequester(dataflowId)) {
         result = dataflowService.getById(dataflowId, true);
       } else {
-        result = dataflowService.getByIdWithRepresentativesFilteredByUserEmail(dataflowId);
+        result =
+            dataflowService.getByIdWithRepresentativesFilteredByUserEmail(dataflowId, providerId);
       }
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());

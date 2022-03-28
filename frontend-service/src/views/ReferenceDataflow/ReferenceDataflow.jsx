@@ -322,6 +322,14 @@ export const ReferenceDataflow = () => {
     </MainLayout>
   );
 
+  const parseStatus = status => {
+    if (status === config.dataflowStatus.OPEN) {
+      return resourcesContext.messages['published'].toUpperCase();
+    } else {
+      return resourcesContext.messages['design'].toUpperCase();
+    }
+  };
+
   if (dataflowState.requestStatus === 'pending' || dataflowState.isLoading) {
     return layout(<Spinner />);
   }
@@ -363,7 +371,7 @@ export const ReferenceDataflow = () => {
             {resourcesContext.messages['propertiesModalDataflowDescriptionLabel']}: {dataflowState.description}
           </p>
           <p>
-            {resourcesContext.messages['propertiesModalDataflowStatusLabel']}: {dataflowState.status}
+            {resourcesContext.messages['propertiesModalDataflowStatusLabel']}: {parseStatus(dataflowState.status)}
           </p>
         </Dialog>
       )}

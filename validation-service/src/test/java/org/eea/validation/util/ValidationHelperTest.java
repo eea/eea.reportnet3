@@ -341,7 +341,7 @@ public class ValidationHelperTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     eeaEventVO.getData().put("user", "user");
     eeaEventVO.getData().put("token", "credentials");
-    Validator validator = (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
+    Validator validator = (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase, Long taskId) -> {
       try {
         // Thiss counter will be usefull to verify how many threads has been executed simultaneously
         // before the test ends
@@ -395,8 +395,8 @@ public class ValidationHelperTest {
 
     ReflectionTestUtils.setField(validationHelper, "validationExecutorService", executorService);
 
-    Validator validator = (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase) -> {
-      // This counter will be usefull to verify how many threads has been executed simultaneously
+    Validator validator = (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase, Long taskId) -> {
+      // This counter will be useful to verify how many threads has been executed simultaneously
       // before the test ends
       eeaEventVO.getData().put("counter", 0);
     };

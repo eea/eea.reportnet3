@@ -32,13 +32,15 @@ public interface DataflowService {
   DataFlowVO getById(Long id, boolean removeWeblinksAndDocuments) throws EEAException;
 
   /**
-   * Get the dataflow by its id filtering representatives by the user email.
+   * Gets the by id with representatives filtered by user email.
    *
    * @param id the id
-   * @return the by id no representatives
+   * @param providerId the provider id
+   * @return the by id with representatives filtered by user email
    * @throws EEAException the EEA exception
    */
-  DataFlowVO getByIdWithRepresentativesFilteredByUserEmail(Long id) throws EEAException;
+  DataFlowVO getByIdWithRepresentativesFilteredByUserEmail(Long id, Long providerId)
+      throws EEAException;
 
   /**
    * Gets the by status.

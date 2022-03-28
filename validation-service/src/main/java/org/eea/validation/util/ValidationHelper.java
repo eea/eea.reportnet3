@@ -132,9 +132,11 @@ public class ValidationHelper implements DisposableBean {
   @Value("${validation.tasks.parallelism}")
   private int maxRunningTasks;
 
+  /** The priority days. */
   @Value("${validation.priority.days}")
   private String priorityDays;
 
+  /** The period days. */
   private List<Long> periodDays;
 
   /** The table repository. */
@@ -161,9 +163,11 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private SchemasRepository schemasRepository;
 
+  /** The task repository. */
   @Autowired
   private TaskRepository taskRepository;
 
+  /** The data flow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
 
@@ -192,18 +196,13 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
-   * Gets kie base for given process. If the processId is not registered as an active process then a
-   * new process entry is created as worker (coordinator=false). This will occurr when a
-   * microservice receives a validation command for the first time for the given process If kie base
-   * does not exist then it is created.
-   *
-   * Throws exception if process has not been initialized
+   * Gets the kie base.
    *
    * @param processId the process id
    * @param datasetId the dataset id
    * @param rule the rule
    * @return the kie base
-   * @throws EEAException the eea exception
+   * @throws EEAException the EEA exception
    */
   public KieBase getKieBase(String processId, Long datasetId, String rule) throws EEAException {
     KieBase kieBase = null;
@@ -221,18 +220,18 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
-   * Finish process removing all the data related to the given processId .
+   * Finish process.
    *
    * @param processId the process id
    */
   public void finishProcess(String processId) {
-    LOG.info("Process {} finished ", processId);
+    LOG.info("Removing process {} from processesMap ", processId);
     processesMap.remove(processId);
     System.gc();
   }
 
   /**
-   * Initialize process control structure for the given processId as coordinator or as a worker.
+   * Initialize process.
    *
    * @param processId the process id
    * @param isCoordinator the is coordinator
@@ -248,10 +247,10 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
-   * Execute validation. The lock would be released on ValidationHelper.checkFinishedValidations(..)
+   * Execute validation.
    *
    * @param datasetId the dataset id
-   * @param processId the uu id
+   * @param processId the process id
    * @param released the released
    * @param updateViews the update views
    * @throws EEAException the EEA exception
@@ -300,7 +299,7 @@ public class ValidationHelper implements DisposableBean {
   /**
    * Gets the priority.
    *
-   * @param dataflowId the dataflow id
+   * @param dataset the dataset
    * @return the priority
    */
   private int getPriority(DataSetMetabaseVO dataset) {
@@ -490,16 +489,15 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
-   * Submits the validation task to the validation executor thread pool. If any thread is available
-   * the task will start automatically. Otherwise it will wait in a FIFO queue
+   * Process validation.
    *
-   * @param eeaEventVO the eea event vo
+   * @param taskId the task id
+   * @param eeaEventVO the eea event VO
    * @param processId the process id
    * @param datasetId the dataset id
    * @param validator the validator
    * @param notificationEventType the notification event type
-   *
-   * @throws EEAException the eea exception
+   * @throws EEAException the EEA exception
    */
   public void processValidation(Long taskId, EEAEventVO eeaEventVO, String processId,
       Long datasetId, Validator validator, EventType notificationEventType) throws EEAException {
@@ -877,9 +875,9 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
-   * Gets the available execution threads.
+   * Gets the used execution threads.
    *
-   * @return the available execution threads
+   * @return the used execution threads
    */
   public int getUsedExecutionThreads() {
     return ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
@@ -921,21 +919,26 @@ public class ValidationHelper implements DisposableBean {
    *
    * @param taskId the task id
    * @param status the status
+   * @param finishDate the finish date
    */
   @Transactional
-  public void updateTask(Long taskId, ProcessStatusEnum status) {
-    taskRepository.updateStatusAndFinishDate(taskId, status.toString(), new Date());
+  public void updateTask(Long taskId, ProcessStatusEnum status, Date finishDate) {
+    taskRepository.updateStatusAndFinishDate(taskId, status.toString(), finishDate);
   }
+
+  /**
+   * The Class ValidationTask.
+   */
 
   /**
    * Instantiates a new validation task.
    *
+   * @param taskId the task id
    * @param eeaEventVO the eea event VO
    * @param validator the validator
    * @param datasetId the dataset id
    * @param kieBase the kie base
    * @param processId the process id
-   * @param notificationEventType the notification event type
    */
   @AllArgsConstructor
   private static class ValidationTask {
@@ -997,42 +1000,47 @@ public class ValidationHelper implements DisposableBean {
 
       try {
         validationTask.validator.performValidation(validationTask.eeaEventVO,
-            validationTask.datasetId, validationTask.kieBase);
+            validationTask.datasetId, validationTask.kieBase, validationTask.taskId);
       } catch (Exception e) {
         LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
             validationTask.datasetId, e.getMessage(), e);
-        validationTask.eeaEventVO.getData().put("error", e);
-        status = ProcessStatusEnum.CANCELED;
+        status = ProcessStatusEnum.IN_QUEUE;
       } finally {
         try {
-          updateTask(validationTask.taskId, status);
+          updateTask(validationTask.taskId, status, new Date());
           Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
           LOG.info("Validation task {} finished, it has taken taken {} seconds",
               validationTask.eeaEventVO, totalTime);
-          checkFinishedValidations(validationTask.datasetId, validationTask.processId);
         } catch (Exception e) {
-          LOG_ERROR.error("Error finishing validations for dataset {} due to exception {}",
+          LOG_ERROR.error("Error updating validations for dataset {} due to exception {}",
               validationTask.datasetId, e.getMessage(), e);
+        } finally {
+          try {
+            Thread.sleep(1000);
+            checkFinishedValidations(validationTask.datasetId, validationTask.processId);
+          } catch (EEAException | InterruptedException eeaEx) {
+            LOG_ERROR.error("Error finishing validations for dataset {} due to exception {}",
+                validationTask.datasetId, eeaEx.getMessage(), eeaEx);
+          }
+
         }
 
       }
     }
 
     /**
-     * Check finished validations. If process is finished then it releases kafka notifications and
-     * finishes the process Returns true if process is over. false otherwise
+     * Check finished validations.
      *
      * @param datasetId the dataset id
-     * @param processId the uuid
-     *
+     * @param processId the process id
      * @return true, if successful
-     *
      * @throws EEAException the EEA exception
      */
     private boolean checkFinishedValidations(final Long datasetId, final String processId)
         throws EEAException {
       boolean isFinished = false;
       if (taskRepository.isProcessFinished(processId)) {
+        LOG.info("Process {} finished for dataset {}", processId, datasetId);
         // Release the lock manually
         Map<String, Object> executeValidation = new HashMap<>();
         executeValidation.put(LiteralConstants.SIGNATURE,
@@ -1051,7 +1059,8 @@ public class ValidationHelper implements DisposableBean {
         Map<String, Object> value = new HashMap<>();
         value.put(LiteralConstants.DATASET_ID, datasetId);
         value.put("uuid", processId);
-        // Setting as user the requesting one as it is being taken from ThreadPropertiesManager and
+        // Setting as user the requesting one as it is being taken from ThreadPropertiesManager
+        // and
         // validation threads inheritances from it. This is a side effect.
         value.put("user", notificationUser);
         boolean isRelease = processesMap.get(processId).isReleased();

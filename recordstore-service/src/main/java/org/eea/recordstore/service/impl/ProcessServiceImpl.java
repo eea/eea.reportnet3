@@ -58,6 +58,8 @@ public class ProcessServiceImpl implements ProcessService {
    * @param status the status
    * @param dataflowId the dataflow id
    * @param user the user
+   * @param type the type
+   * @param header the header
    * @return the processes
    */
   @Override
@@ -96,15 +98,18 @@ public class ProcessServiceImpl implements ProcessService {
    * @param processId the process id
    * @param threadId the thread id
    * @param user the user
+   * @param priority the priority
    */
   @Override
   @Transactional
   public void updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
       ProcessTypeEnum type, String processId, String threadId, String user, int priority) {
 
-    EEAProcess processToUpdate =
-        processRepository.findOneByProcessId(processId).orElse(new EEAProcess());
+    EEAProcess processToUpdate = processRepository.findOneByProcessId(processId);
 
+    if (processToUpdate == null) {
+      processToUpdate = new EEAProcess();
+    }
     if (processToUpdate.getDatasetId() == null) {
       processToUpdate.setDatasetId(datasetId);
     }
