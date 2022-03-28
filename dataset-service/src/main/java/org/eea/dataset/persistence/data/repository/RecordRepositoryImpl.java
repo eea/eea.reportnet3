@@ -116,10 +116,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Value("${spring.datasource.url}")
   private String connStringPostgre;
 
-  /** The sql get datasets name. */
-  @Value("${sqlGetAllDatasetsName}")
-  private String sqlGetDatasetsName;
-
 
   /** The Constant WHERE_ID_TABLE_SCHEMA: {@value}. */
   private static final String WHERE_ID_TABLE_SCHEMA = "WHERE tv.idTableSchema = :idTableSchema ";
@@ -660,7 +656,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       copyFromFile(copyQuery, nameFile, cm);
       LOG.info("IMPORTADO");
 
-    } catch (SQLException | IOException e) {
+      Thread.sleep(10000);
+
+    } catch (SQLException | IOException | InterruptedException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
     }

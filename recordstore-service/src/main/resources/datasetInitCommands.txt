@@ -42,6 +42,8 @@ GRANT ALL ON SEQUENCE %dataset_name%.record_sequence TO %user%;
 ALTER SEQUENCE %dataset_name%.table_sequence OWNER TO %user%;
 GRANT ALL ON SEQUENCE %dataset_name%.table_sequence TO %user%;
 
+GRANT ALL ON SEQUENCE %dataset_name%.temp_etlexport_id_seq TO %user%;
+
 CREATE INDEX idx_record_value ON %dataset_name%.field_value(id_record);
 CREATE INDEX idx_field_schema ON %dataset_name%.field_value(id_field_schema);
 CREATE INDEX idx_dataset_value ON %dataset_name%.table_value(dataset_id);
