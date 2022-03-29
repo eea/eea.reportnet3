@@ -13,8 +13,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,17 +46,22 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,6 +73,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
@@ -293,6 +301,34 @@ public class DatasetMetabaseServiceTest {
   }
 
   /**
+   * Find dataset metabase optional not present.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void findDatasetMetabaseOptionalNotPresent() throws Exception {
+    when(dataSetMetabaseRepository.findById(Mockito.eq(1l))).thenReturn(Optional.empty());
+    DataSetMetabaseVO result = datasetMetabaseService.findDatasetMetabase(1l);
+    Mockito.verify(dataSetMetabaseRepository, times(1)).findById(Mockito.anyLong());
+    Assert.assertNotNull(result);
+    Assert.assertNull(result.getDatasetTypeEnum());
+  }
+
+  /**
+   * Test find data set by dataflow ids.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testFindDataSetByDataflowIds() throws Exception {
+    List<Long> ids = new ArrayList<>();
+    ids.add(1L);
+    List<DataSetMetabaseVO> result = datasetMetabaseService.findDataSetByDataflowIds(ids);
+    Mockito.verify(dataSetMetabaseRepository, times(1)).findDataSetByDataflowIds(Mockito.any());
+    Assert.assertNotNull(result);
+  }
+
+  /**
    * Creates the empty dataset test.
    *
    * @throws EEAException the EEA exception
@@ -517,6 +553,32 @@ public class DatasetMetabaseServiceTest {
   }
 
   /**
+   * Test get dataset destination foreign relation list null.
+   */
+  @Test
+  public void testGetDatasetDestinationForeignRelationListNull() {
+    Mockito.when(foreignRelationsRepository.findDatasetDestinationByOriginAndPk(1L,
+        "5ce524fad31fc52540abae73")).thenReturn(null);
+    datasetMetabaseService.getDatasetDestinationForeignRelation(1L, "5ce524fad31fc52540abae73");
+    Mockito.verify(foreignRelationsRepository, times(1))
+        .findDatasetDestinationByOriginAndPk(Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Test get dataset destination foreign relation list not empty.
+   */
+  @Test
+  public void testGetDatasetDestinationForeignRelationListNotEmpty() {
+    List<Long> ids = new ArrayList<>();
+    ids.add(1L);
+    Mockito.when(foreignRelationsRepository.findDatasetDestinationByOriginAndPk(1L,
+        "5ce524fad31fc52540abae73")).thenReturn(ids);
+    datasetMetabaseService.getDatasetDestinationForeignRelation(1L, "5ce524fad31fc52540abae73");
+    Mockito.verify(foreignRelationsRepository, times(1))
+        .findDatasetDestinationByOriginAndPk(Mockito.any(), Mockito.any());
+  }
+
+  /**
    * Gets the dataset type enum return design test.
    *
    * @return the dataset type enum return design test
@@ -684,6 +746,25 @@ public class DatasetMetabaseServiceTest {
   }
 
   /**
+   * Test last dataset validation for releasing by id return null.
+   */
+  @Test
+  public void testLastDatasetValidationForReleasingByIdReturnNull() {
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setId(1L);
+    datasetMetabase.setDataflowId(1L);
+    datasetMetabase.setDataProviderId(1L);
+    List<Long> datasetsId = new ArrayList();
+    datasetsId.add(1L);
+    Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
+    Mockito
+        .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
+            datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
+        .thenReturn(datasetsId);
+    Assert.assertNull(datasetMetabaseService.getLastDatasetValidationForRelease(1L));
+  }
+
+  /**
    * Update dataset status exception test.
    *
    * @throws EEAException the EEA exception
@@ -712,6 +793,96 @@ public class DatasetMetabaseServiceTest {
         Mockito.any());
   }
 
+  /**
+   * Update dataset status automatic deletion test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateDatasetStatusAutomaticDeletionTest() throws EEAException {
+    DatasetStatusMessageVO dsMetabaseVO = new DatasetStatusMessageVO();
+    dsMetabaseVO.setStatus(DatasetStatusEnum.TECHNICALLY_ACCEPTED);
+    dsMetabaseVO.setDataflowId(1L);
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setAutomaticReportingDeletion(true);
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dfVO);
+    datasetMetabaseService.updateDatasetStatus(dsMetabaseVO);
+    Mockito.verify(recordStoreControllerZuul, times(1)).updateSnapshotDisabled(Mockito.any());
+  }
+
+  /**
+   * Update dataset status not automatic deletion test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateDatasetStatusNotAutomaticDeletionTest() throws EEAException {
+    DatasetStatusMessageVO dsMetabaseVO = new DatasetStatusMessageVO();
+    dsMetabaseVO.setStatus(DatasetStatusEnum.TECHNICALLY_ACCEPTED);
+    dsMetabaseVO.setDataflowId(1L);
+    DataFlowVO dfVO = new DataFlowVO();
+    dfVO.setAutomaticReportingDeletion(false);
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new DataSetMetabase()));
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dfVO);
+    datasetMetabaseService.updateDatasetStatus(dsMetabaseVO);
+    Mockito.verify(dataFlowControllerZuul, times(1)).getMetabaseById(Mockito.any());
+  }
+
+  /**
+   * Update dataset status correction requested test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateDatasetStatusCorrectionRequestedTest() throws EEAException {
+    DatasetStatusMessageVO dsMetabaseVO = new DatasetStatusMessageVO();
+    dsMetabaseVO.setStatus(DatasetStatusEnum.CORRECTION_REQUESTED);
+    dsMetabaseVO.setDataflowId(1L);
+    DataSetMetabase dsMetabase = new DataSetMetabase();
+    dsMetabase.setDatasetSchema("datasetSchema");
+    DesignDataset designDataset = new DesignDataset();
+    designDataset.setDataSetName("datasetName");
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(dsMetabase));
+    Mockito.when(designDatasetRepository.findFirstByDatasetSchema(Mockito.anyString()))
+        .thenReturn(Optional.of(designDataset));
+    datasetMetabaseService.updateDatasetStatus(dsMetabaseVO);
+    Mockito.verify(collaborationControllerZuul, times(1)).notifyNewMessages(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Update dataset running status test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateDatasetRunningStatusTest() throws EEAException {
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+
+    Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
+    datasetMetabaseService.updateDatasetRunningStatus(1L, DatasetRunningStatusEnum.IMPORTING);
+
+    Mockito.verify(dataSetMetabaseRepository, times(1)).save(Mockito.any());
+  }
+
+  /**
+   * Update dataset running status EEA exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void updateDatasetRunningStatusEEAExceptionTest() throws EEAException {
+    try {
+      datasetMetabaseService.updateDatasetRunningStatus(1L, DatasetRunningStatusEnum.IMPORTING);
+    } catch (EEAException e) {
+      Assert.assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getMessage());
+      throw e;
+    }
+  }
 
   /**
    * Gets the datasets summary list from dataset type test.
@@ -781,6 +952,37 @@ public class DatasetMetabaseServiceTest {
   }
 
   /**
+   * Find dataset metabase external test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void findDatasetMetabaseExternalTest() throws EEAException {
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+
+    Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
+    Mockito.when(dataSetMetabaseMapper.entityToClass(datasetMetabase))
+        .thenReturn(datasetMetabaseVO);
+    datasetMetabaseService.findDatasetMetabaseExternal(1L);
+
+    Mockito.verify(dataSetMetabaseMapper, times(1)).entityToClass(Mockito.any());
+  }
+
+  /**
+   * Find dataset metabase external not present test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void findDatasetMetabaseExternalNotPresentTest() throws EEAException {
+    datasetMetabaseService.findDatasetMetabaseExternal(1L);
+
+    Mockito.verify(dataSetMetabaseMapper, times(0)).entityToClass(Mockito.any());
+  }
+
+
+  /**
    * Gets the dataset ids by dataflow id and data provider id test.
    *
    * @return the dataset ids by dataflow id and data provider id test
@@ -790,6 +992,44 @@ public class DatasetMetabaseServiceTest {
     datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(1L, 1L);
     Mockito.verify(dataSetMetabaseRepository, times(1))
         .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong());
+  }
+
+  /**
+   * Gets the user provider ids by dataflow id test.
+   *
+   * @return the user provider ids by dataflow id test
+   */
+  @Test
+  public void getUserProviderIdsByDataflowIdTest() {
+    List<DataSetMetabase> listDatasetMetabase = new ArrayList<>();
+    DataSetMetabase datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setId(1L);
+    listDatasetMetabase.add(datasetMetabase);
+    datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setId(2L);
+    listDatasetMetabase.add(datasetMetabase);
+    datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setId(3L);
+    listDatasetMetabase.add(datasetMetabase);
+    datasetMetabase = new DataSetMetabase();
+    datasetMetabase.setId(4L);
+    listDatasetMetabase.add(datasetMetabase);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(
+        new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_LEAD_REPORTER.getAccessRole(1L)));
+    authorities.add(
+        new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_REPORTER_READ.getAccessRole(2L)));
+    authorities.add(
+        new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(3L)));
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito.when(dataSetMetabaseRepository.findByDataflowIdAndProviderIdNotNull(1L))
+        .thenReturn(listDatasetMetabase);
+
+    datasetMetabaseService.getUserProviderIdsByDataflowId(1L);
+    Mockito.verify(dataSetMetabaseRepository, times(1))
+        .findByDataflowIdAndProviderIdNotNull(Mockito.anyLong());
   }
 
   /**
@@ -849,6 +1089,88 @@ public class DatasetMetabaseServiceTest {
     doNothing().when(recordStoreControllerZuul).createEmptyDataset(Mockito.any(), Mockito.any());
     datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.TEST, "testName",
         "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new ArrayList<>(), 0);
+    Mockito.verify(recordStoreControllerZuul, times(1)).createEmptyDataset(Mockito.any(),
+        Mockito.any());
+
+  }
+
+  @Test(expected = EEAException.class)
+  public void createEmptyDatasetExceptionDataflowIdNullTest() throws EEAException {
+    try {
+      datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.TEST, "datasetName",
+          (new ObjectId()).toString(), null, null, new ArrayList<>(), 0);
+    } catch (EEAException e) {
+      assertEquals("createEmptyDataset: Bad arguments", e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the empty dataset exception unsupported dataset type test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyDatasetExceptionUnsupportedDatasetTypeTest() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setType(TypeDataflowEnum.REFERENCE);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataflowVO);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+    try {
+      datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.REFERENCE, "testName",
+          "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new ArrayList<>(), 0);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(EEAErrorMessage.EXECUTION_ERROR, e.getReason());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the empty test dataset type dataflow business test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createEmptyTestDatasetTypeDataflowBusinessTest() throws EEAException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setType(TypeDataflowEnum.BUSINESS);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataflowVO);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+    try {
+      datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.REFERENCE, "testName",
+          "5d0c822ae1ccd34cfcd97e20", 1L, new Date(), new ArrayList<>(), 0);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(EEAErrorMessage.EXECUTION_ERROR, e.getReason());
+      throw e;
+    }
+  }
+
+  /**
+   * Test create empty dataset interation DC not equals 0.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testCreateEmptyDatasetInterationDCNotEquals0() throws Exception {
+    DataProviderVO dataprovider = new DataProviderVO();
+    dataprovider.setLabel("test");
+
+    doNothing().when(recordStoreControllerZuul).createEmptyDataset(Mockito.any(), Mockito.any());
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
+        .thenReturn(dataprovider);
+    ReportingDataset reporting = new ReportingDataset();
+    reporting.setId(1L);
+    Mockito.when(reportingDatasetRepository.save(Mockito.any())).thenReturn(reporting);
+    RepresentativeVO representative = new RepresentativeVO();
+    representative.setDataProviderId(1L);
+    representative.setLeadReporters(leadReportersVO);
+    datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.REPORTING, "",
+        "5d0c822ae1ccd34cfcd97e20", 1L, null, Arrays.asList(representative), 1);
+
     Mockito.verify(recordStoreControllerZuul, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any());
 
