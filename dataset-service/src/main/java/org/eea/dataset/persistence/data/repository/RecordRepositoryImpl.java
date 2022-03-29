@@ -565,7 +565,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           }
 
           String queryFromTemp = "SELECT record_json from dataset_" + datasetId + ".temp_etlexport "
-              + "WHERE filter_value='" + filterChain + "' and id> " + offsetAux2 + " and id<"
+              + "WHERE filter_value='" + filterChain + "' and id>= " + offsetAux2 + " and id<"
               + (offsetAux2 + limitAux);
           LOG.info("Partial query from the temp_etlexport table: {}", queryFromTemp);
           Query queryResult = entityManager.createNativeQuery(queryFromTemp);
