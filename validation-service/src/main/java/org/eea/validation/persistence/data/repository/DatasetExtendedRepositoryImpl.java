@@ -233,7 +233,6 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       EntityTypeEnum entityTypeEnum, Long datasetId, Long idTable) throws SQLException {
     conn.setSchema("dataset_" + datasetId);
     TableValue tableValue;
-    conn.setAutoCommit(false);
     Statement stmt = conn.createStatement();
     stmt.setFetchSize(sqlFetchSize);
     try (ResultSet rs = stmt.executeQuery(query)) {
@@ -293,7 +292,6 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       stmt.setFetchSize(0);
     } finally {
       stmt.close();
-      conn.setAutoCommit(true);
       entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAll();
     }
     System.gc();
