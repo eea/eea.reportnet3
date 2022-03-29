@@ -103,9 +103,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @PersistenceContext
   private EntityManager entityManager;
 
-  /** The path snapshot. */
-  @Value("${pathSnapshot}")
-  private String pathSnapshot;
+  /** The import path. */
+  @Value("${importPath}")
+  private String importPath;
 
   /** The record store controller zuul. */
   @Autowired
@@ -607,13 +607,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
         connectionDataVO.getUser(), connectionDataVO.getPassword())) {
 
-      File fileFolder = new File(pathSnapshot, "etlExport");
+      File fileFolder = new File(importPath, "etlExport");
       fileFolder.mkdirs();
 
       CopyManager cm = new CopyManager((BaseConnection) con);
 
       // Copy
-      String nameFile = pathSnapshot + ETL_EXPORT
+      String nameFile = importPath + ETL_EXPORT
           + String.format(FILE_PATTERN_NAME, datasetId, "_" + filter + ".snap");
       String copyQueryDataset = "COPY (" + query + ") to STDOUT";
       LOG.info("EtlExport copy query: {}", copyQueryDataset);
@@ -642,7 +642,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
       CopyManager cm = new CopyManager((BaseConnection) con);
 
-      String nameFile = pathSnapshot + ETL_EXPORT
+      String nameFile = importPath + ETL_EXPORT
           + String.format(FILE_PATTERN_NAME, datasetId, "_" + filter + ".snap");
 
       String copyQuery =
