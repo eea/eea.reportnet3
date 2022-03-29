@@ -2,6 +2,7 @@ package org.eea.dataflow.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -504,4 +505,40 @@ public class IntegrationServiceImplTest {
     integrationService.deleteExportEuDataset("5ce524fad31fc52540abae73");
     Mockito.verify(crudManager, times(1)).delete(Mockito.any());
   }
+
+  @Test
+  public void getIntegrationNullTest() {
+    Mockito.when(integrationRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.ofNullable(null));
+    assertNull(integrationService.getIntegration(1L));
+  }
+
+  @Test(expected = EEAException.class)
+  public void executeExternalIntegrationEEAExceptionTest() throws EEAException {
+    IntegrationVO integrationVO = new IntegrationVO();
+    integrationVO.setId(1L);
+    IntegrationExecutorService executor = Mockito.mock(IntegrationExecutorService.class);
+    Map<String, Object> executionResultParams = new HashMap<>();
+    executionResultParams.put("id", 0);
+    ExecutionResultVO executionResultVO = new ExecutionResultVO();
+    executionResultVO.setExecutionResultParams(executionResultParams);
+
+    Mockito.when(integrationRepository.findById(Mockito.any()))
+        .thenReturn(Optional.of(new Integration()));
+    Mockito.when(integrationMapper.entityToClass(Mockito.any())).thenReturn(integrationVO);
+
+    Mockito.when(integrationExecutorFactory.getExecutor(Mockito.any())).thenReturn(executor);
+
+    Mockito.when(executor.execute(IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, null, 1L,
+        integrationVO)).thenReturn(executionResultVO);
+    try {
+      integrationService.executeExternalIntegration(1L, 1L,
+          IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, false);
+    } catch (EEAException e) {
+      assertEquals("Error executing external integration", e.getMessage());
+      throw e;
+    }
+  }
+
+
 }
