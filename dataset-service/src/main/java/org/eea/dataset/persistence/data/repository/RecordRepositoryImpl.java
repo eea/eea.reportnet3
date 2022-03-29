@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -40,6 +41,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -101,20 +103,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @PersistenceContext
   private EntityManager entityManager;
 
+  /** The path snapshot. */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
 
-  /** The user postgre db. */
-  @Value("${spring.datasource.dataset.username}")
-  private String userPostgreDb;
-
-  /** The pass postgre db. */
-  @Value("${spring.datasource.dataset.password}")
-  private String passPostgreDb;
-
-  /** The conn string postgre. */
-  @Value("${spring.datasource.url}")
-  private String connStringPostgre;
+  /** The record store controller zuul. */
+  @Autowired
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
 
   /** The Constant WHERE_ID_TABLE_SCHEMA: {@value}. */
@@ -247,6 +242,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant CORRECT: {@value}. */
   private static final String CORRECT = "CORRECT";
+
+  /** The Constant ETL_EXPORT. */
+  private static final String ETL_EXPORT = "/etlExport/";
 
 
   /** The Constant RESERVED_SQL_WORDS. */
@@ -468,16 +466,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       String filterChain = "blank";
       if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
           || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-        filterChain = tableSchemaId + columnName + filterValue + dataProviderCodes;
+        filterChain = Stream.of(tableSchemaId, tableSchemaId, filterValue, dataProviderCodes)
+            .filter(s -> StringUtils.isNotBlank(s)).collect(Collectors.joining(","));
       }
 
+
       if (totalRecords != null && totalRecords > 0L) {
-        // for (int offsetAux2 = offsetAux; offsetAux2 < offsetAux + limit
-        // && offsetAux2 < totalRecords; offsetAux2 += limitAux) {
-        // if (offsetAux2 + limitAux > (limit * offset)) {
-        // limitAux = (limit * offset) - offsetAux2;
-        // }
-        // ask for records with offset
+
         StringBuilder stringQuery = new StringBuilder();
         stringQuery.append("select ").append("'" + filterChain + "'").append(
             " as filters, cast(records as text) from ( select json_build_object('id_table_schema',id_table_schema,'id_record', id_record, 'countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
@@ -520,7 +515,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             tableSchema.getIdTableSchema().toString()));
 
         if (null != filterValue || null != columnName) {
-          // stringQuery.append(String.format(" offset %s limit %s ", offsetAux2, limitAux));
           stringQuery.append(
               ") as tableAux where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
               .append(null != columnName ? " x.o ->> 'fieldName' = ? and " : "")
@@ -528,8 +522,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
           stringQuery.append(" ) ");
         } else {
-          // stringQuery
-          // .append(String.format(" offset %s limit %s ) tableAux", offsetAux2, limitAux));
           stringQuery.append(" ) tableAux");
         }
         LOG.info("Query: {} ", stringQuery);
@@ -548,29 +540,21 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         Object result = null;
 
 
-
+        // We need to know which is the first position in the temp table to take the results
+        // If there's no position that means we have to import the data from that request
         String queryPosition = "SELECT id from dataset_" + datasetId + ".temp_etlexport "
             + "WHERE filter_value='" + filterChain + "' order by id limit 1";
         Query queryPositionResult = entityManager.createNativeQuery(queryPosition);
         try {
           resultPosition = queryPositionResult.getSingleResult();
-          LOG.info("lA PRIMERA position es {}", resultPosition.toString());
+
         } catch (NoResultException nre) {
           LOG.info("temp table etlexport empty for this filter. Have to fill it");
           fileTempEtlExport(datasetId, stringQuery.toString(), filterChain);
           fileTempEtlImport(datasetId, filterChain);
           resultPosition = queryPositionResult.getSingleResult();
-          LOG.info("lA PRIMERA position es {}", resultPosition.toString());
         }
-
-        // if (resultPosition != null && StringUtils.isBlank(resultPosition.toString())) {
-        // fileTempEtlExport(datasetId, stringQuery.toString(), filterChain);
-        //
-        // fileTempEtlImport(datasetId, filterChain);
-        //
-        // resultPosition = queryPositionResult.getSingleResult();
-        // LOG.info("lA PRIMERA position es {}", resultPosition.toString());
-        // }
+        LOG.info("First position in the temp_etlexport {}", resultPosition.toString());
 
         Long firstPosition = Long.valueOf(resultPosition.toString());
         Long initExtract = (Long.valueOf(offset) * limit) + firstPosition;
@@ -579,14 +563,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           if (offsetAux2 + limitAux > initExtract + limit) {
             limitAux = initExtract + limit - offsetAux2;
           }
-          LOG.info("offsetAux: {}", offsetAux);
-          LOG.info("offsetAux2: {}", offsetAux2);
-          LOG.info("limitAux: {}", limitAux);
 
           String queryFromTemp = "SELECT record_json from dataset_" + datasetId + ".temp_etlexport "
               + "WHERE filter_value='" + filterChain + "' and id> " + offsetAux2 + " and id<"
               + (offsetAux2 + limitAux);
-          LOG.info("LA QUERY BUENA: {}", queryFromTemp);
+          LOG.info("Partial query from the temp_etlexport table: {}", queryFromTemp);
           Query queryResult = entityManager.createNativeQuery(queryFromTemp);
           try {
             result = queryResult.getResultList();
@@ -611,10 +592,17 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return resultjson.toString();
   }
 
+  /**
+   * File temp etl export.
+   *
+   * @param datasetId the dataset id
+   * @param query the query
+   * @param filter the filter
+   */
   private void fileTempEtlExport(Long datasetId, String query, String filter) {
 
-    ConnectionDataVO connectionDataVO =
-        createConnectionDataVO(LiteralConstants.DATASET_PREFIX + datasetId);
+    ConnectionDataVO connectionDataVO = recordStoreControllerZuul
+        .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
 
     try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
         connectionDataVO.getUser(), connectionDataVO.getPassword())) {
@@ -625,20 +613,26 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       CopyManager cm = new CopyManager((BaseConnection) con);
 
       // Copy
-      String nameFile = pathSnapshot + "/etlExport/"
-          + String.format(FILE_PATTERN_NAME, datasetId, "_" + filter + ".bin");
+      String nameFile = pathSnapshot + ETL_EXPORT
+          + String.format(FILE_PATTERN_NAME, datasetId, "_" + filter + ".snap");
       String copyQueryDataset = "COPY (" + query + ") to STDOUT";
-      LOG.info("QUERY DEL COPY: {}", copyQueryDataset);
+      LOG.info("EtlExport copy query: {}", copyQueryDataset);
       printToFile(nameFile, copyQueryDataset, cm);
     } catch (SQLException | IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      LOG_ERROR.error("Error creating a file into the temp_etlexport from dataset {}", datasetId);
     }
   }
 
+  /**
+   * File temp etl import.
+   *
+   * @param datasetId the dataset id
+   * @param filter the filter
+   */
   private void fileTempEtlImport(Long datasetId, String filter) {
-    ConnectionDataVO connectionDataVO =
-        createConnectionDataVO(LiteralConstants.DATASET_PREFIX + datasetId);
+
+    ConnectionDataVO connectionDataVO = recordStoreControllerZuul
+        .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
 
     try (
         Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
@@ -648,22 +642,30 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
       CopyManager cm = new CopyManager((BaseConnection) con);
 
-      String nameFile = pathSnapshot + "/etlExport/"
-          + String.format(FILE_PATTERN_NAME, datasetId, "_" + filter + ".bin");
+      String nameFile = pathSnapshot + ETL_EXPORT
+          + String.format(FILE_PATTERN_NAME, datasetId, "_" + filter + ".snap");
 
       String copyQuery =
           "COPY dataset_" + datasetId + ".temp_etlexport(filter_value, record_json) FROM STDIN";
       copyFromFile(copyQuery, nameFile, cm);
-      LOG.info("IMPORTADO");
 
+      // wait to finish the copy into the temp_table
       Thread.sleep(10000);
 
     } catch (SQLException | IOException | InterruptedException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      LOG_ERROR.error("Error restoring a file into the temp_etlexport from dataset {}", datasetId);
     }
   }
 
+  /**
+   * Copy from file.
+   *
+   * @param query the query
+   * @param fileName the file name
+   * @param copyManager the copy manager
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
+   */
   private void copyFromFile(String query, String fileName, CopyManager copyManager)
       throws IOException, SQLException {
     Path path = Paths.get(fileName);
@@ -684,9 +686,18 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     } finally {
       Files.deleteIfExists(path);
     }
-    LOG.info("FICHERO IMPORTADO");
+    LOG.info("File {} imported into the temp_etlexport table", fileName);
   }
 
+  /**
+   * Prints the to file.
+   *
+   * @param fileName the file name
+   * @param query the query
+   * @param copyManager the copy manager
+   * @throws SQLException the SQL exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
   private void printToFile(String fileName, String query, CopyManager copyManager)
       throws SQLException, IOException {
     byte[] buffer;
@@ -701,17 +712,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         copyOut.cancelCopy();
       }
     }
-    LOG.info("FICHERO CREADO");
-  }
-
-
-  private ConnectionDataVO createConnectionDataVO(final String datasetName) {
-    final ConnectionDataVO result = new ConnectionDataVO();
-    result.setConnectionString(connStringPostgre);
-    result.setUser(userPostgreDb);
-    result.setPassword(passPostgreDb);
-    result.setSchema(datasetName);
-    return result;
+    LOG.info("File {} to restore into the temp_etlexport table", fileName);
   }
 
 
