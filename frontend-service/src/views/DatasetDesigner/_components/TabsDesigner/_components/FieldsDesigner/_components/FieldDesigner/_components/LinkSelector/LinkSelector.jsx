@@ -357,7 +357,7 @@ export const LinkSelector = ({
             <Button
               className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
               icon="infoCircle"
-              tooltip={resourcesContext.messages['closedReferenceDataflowsInfo']}
+              tooltip={resourcesContext.messages['publishedReferenceDataflowsInfo']}
               tooltipOptions={{ position: 'top' }}
             />
             <Dropdown
