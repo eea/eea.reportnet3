@@ -1396,7 +1396,7 @@ public class FileTreatmentHelper implements DisposableBean {
       ExportFilterVO filters) throws EEAException, IOException {
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .fileName(tableName).datasetSchemaId(tableSchemaId).error("Error exporting table data")
+        .fileName(tableName).mimeType(mimeType).datasetSchemaId(tableSchemaId).error("Error exporting table data")
         .build();
     File fileFolder = new File(pathPublicFile, "dataset-" + datasetId);
     String creatingFileError = String.format(
