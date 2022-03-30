@@ -619,7 +619,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       LOG.info("EtlExport copy query: {}", copyQueryDataset);
       printToFile(nameFile, copyQueryDataset, cm);
     } catch (SQLException | IOException e) {
-      LOG_ERROR.error("Error creating a file into the temp_etlexport from dataset {}", datasetId);
+      LOG_ERROR.error("Error creating a file into the temp_etlexport from dataset {}", datasetId,
+          e);
     }
   }
 
@@ -653,7 +654,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       Thread.sleep(10000);
 
     } catch (SQLException | IOException | InterruptedException e) {
-      LOG_ERROR.error("Error restoring a file into the temp_etlexport from dataset {}", datasetId);
+      LOG_ERROR.error("Error restoring a file into the temp_etlexport from dataset {}", datasetId,
+          e);
     }
   }
 
