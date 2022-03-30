@@ -645,7 +645,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
       String nameFile = importPath + ETL_EXPORT
           + String.format(FILE_PATTERN_NAME, datasetId, "_" + filter + ".snap");
-
+      LOG.info("File {} to restore into temp table in dataset {}", nameFile, datasetId);
       String copyQuery =
           "COPY dataset_" + datasetId + ".temp_etlexport(filter_value, record_json) FROM STDIN";
       copyFromFile(copyQuery, nameFile, cm);
