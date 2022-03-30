@@ -438,8 +438,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           .filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
           .collect(Collectors.toList());
     }
-    if (offset == 1) {
-      offset = 0;
+    if (offset == 0) {
+      offset = 1;
     }
     GsonJsonParser gsonparser = new GsonJsonParser();
     // get json for each table requested
@@ -557,7 +557,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         LOG.info("First position in the temp_etlexport {}", resultPosition.toString());
 
         Long firstPosition = Long.valueOf(resultPosition.toString());
-        Long initExtract = (Long.valueOf(offset) * limit) + firstPosition;
+        Long initExtract = (Long.valueOf(offset - 1) * limit) + firstPosition;
         for (Long offsetAux2 = initExtract; offsetAux2 < initExtract + limit
             && offsetAux2 < initExtract + totalRecords; offsetAux2 += limitAux) {
           if (offsetAux2 + limitAux > initExtract + limit) {
