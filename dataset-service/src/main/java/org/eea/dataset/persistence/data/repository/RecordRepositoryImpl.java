@@ -441,33 +441,21 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     if (offset == 0) {
       offset = 1;
     }
-    GsonJsonParser gsonparser = new GsonJsonParser();
-    // get json for each table requested
+
+    // First loop to fill the temporary table according to the filter
     for (TableSchema tableSchema : tableSchemaList) {
-      JSONObject resultTable = new JSONObject();
-      tableName = tableSchema.getNameTableSchema();
-      resultTable.put("tableName", tableName);
-      int nHeaders = tableSchema.getRecordSchema().getFieldSchema().size();
-      Long limitAux = (limit / nHeaders > 0 ? Long.valueOf(limit) / (nHeaders / 2) : 1) * 2;
-      JSONArray tableRecords = new JSONArray();
+
       Long totalRecords = getCount(
           totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
           columnName, filterValue);
 
-      if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
-          || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-        resultTable.put("totalRecords", totalRecords);
-      }
-      Integer offsetAux = (limit * offset) - limit;
-      if (offsetAux < 0) {
-        offsetAux = 0;
-      }
 
-      String filterChain = "blank";
+      String filterChain = tableSchema.getIdTableSchema().toString();
       if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
           || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-        filterChain = Stream.of(tableSchemaId, tableSchemaId, filterValue, dataProviderCodes)
-            .filter(s -> StringUtils.isNotBlank(s)).collect(Collectors.joining(","));
+        filterChain =
+            filterChain + "_" + Stream.of(tableSchemaId, columnName, filterValue, dataProviderCodes)
+                .filter(s -> StringUtils.isNotBlank(s)).collect(Collectors.joining(","));
       }
 
 
@@ -525,21 +513,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           stringQuery.append(" ) tableAux");
         }
         LOG.info("Query: {} ", stringQuery);
-        Query query = entityManager.createNativeQuery(stringQuery.toString());
-
-        if (null != columnName && null != filterValue) {
-          query.setParameter(1, columnName);
-          query.setParameter(2, filterValue);
-        } else if (null != columnName && null == filterValue) {
-          query.setParameter(1, columnName);
-        } else if (null == columnName && null != filterValue) {
-          query.setParameter(1, filterValue);
-        }
 
         Object resultPosition = null;
-        Object result = null;
-
-
         // We need to know which is the first position in the temp table to take the results
         // If there's no position that means we have to import the data from that request
         String queryPosition = "SELECT id from dataset_" + datasetId + ".temp_etlexport "
@@ -553,6 +528,60 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           fileTempEtlExport(datasetId, stringQuery.toString(), filterChain);
           fileTempEtlImport(datasetId, filterChain);
           resultPosition = queryPositionResult.getSingleResult();
+        }
+      }
+    }
+
+
+    // Second loop. Now the temp table is filled and we have to take the data
+    GsonJsonParser gsonparser = new GsonJsonParser();
+    // get json for each table requested
+    for (TableSchema tableSchema : tableSchemaList) {
+
+      JSONObject resultTable = new JSONObject();
+      tableName = tableSchema.getNameTableSchema();
+      resultTable.put("tableName", tableName);
+      int nHeaders = tableSchema.getRecordSchema().getFieldSchema().size();
+      Long limitAux = (limit / nHeaders > 0 ? Long.valueOf(limit) / ((nHeaders + 1) / 2) : 1) * 2;
+      JSONArray tableRecords = new JSONArray();
+      Long totalRecords = getCount(
+          totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
+          columnName, filterValue);
+
+      if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
+          || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
+        resultTable.put("totalRecords", totalRecords);
+      }
+      Integer offsetAux = (limit * offset) - limit;
+      if (offsetAux < 0) {
+        offsetAux = 0;
+      }
+
+      String filterChain = tableSchema.getIdTableSchema().toString();
+      if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
+          || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
+        filterChain =
+            filterChain + "_" + Stream.of(tableSchemaId, columnName, filterValue, dataProviderCodes)
+                .filter(s -> StringUtils.isNotBlank(s)).collect(Collectors.joining(","));
+      }
+
+
+      if (totalRecords != null && totalRecords > 0L) {
+
+        Object resultPosition = null;
+        Object result = null;
+
+
+        // We need to know which is the first position in the temp table to take the results
+        // If there's no position that means we have to import the data from that request
+        String queryPosition = "SELECT id from dataset_" + datasetId + ".temp_etlexport "
+            + "WHERE filter_value='" + filterChain + "' order by id limit 1";
+        Query queryPositionResult = entityManager.createNativeQuery(queryPosition);
+        try {
+          resultPosition = queryPositionResult.getSingleResult();
+        } catch (NoResultException nre) {
+          LOG.info("temp table etlexport empty for this filter");
+          break;
         }
         LOG.info("First position in the temp_etlexport {}", resultPosition.toString());
 
@@ -588,7 +617,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
     resultjson.put("tables", tables);
     System.gc();
-    // return resultjson.tostring
+
     return resultjson.toString();
   }
 
@@ -651,7 +680,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       copyFromFile(copyQuery, nameFile, cm);
 
       // wait to finish the copy into the temp_table
-      Thread.sleep(10000);
+      Thread.sleep(5000);
 
     } catch (SQLException | IOException | InterruptedException e) {
       LOG_ERROR.error("Error restoring a file into the temp_etlexport from dataset {}", datasetId,
