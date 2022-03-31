@@ -701,7 +701,8 @@ public class ValidationHelper implements DisposableBean {
 
     List<TableValue> tableList = tableRepository.findAll();
     int i = 0;
-    List<Rule> rules = rulesRepository.findSqlRules(new ObjectId(dataset.getDatasetSchema()));
+    List<Rule> rules =
+        rulesRepository.findSqlRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
     DataSetSchema datasetSchema =
         schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
     for (Integer totalTables = tableList.size(); totalTables > 0; totalTables = totalTables - 1) {
