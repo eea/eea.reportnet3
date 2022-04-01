@@ -1,6 +1,7 @@
 package org.eea.validation.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1036,7 +1037,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       Map<String, Long> datasetSchemasMap, Long dataflowId, Map<Long, Long> datasetIdOldNew,
       List<ReferenceDatasetVO> referenceDatasets) {
     List<ReportingDatasetVO> reportingDatasetList =
-        datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
+        datasetMetabaseController.findReportingDataSetByDataflowIds(Arrays.asList(dataflowId));
     List<RepresentativeVO> dataprovidersVOList =
         representativeController.findRepresentativesByIdDataFlow(dataflowId);
     List<Long> dataprovidersIdList = new ArrayList<>();
