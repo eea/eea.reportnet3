@@ -816,7 +816,7 @@ public class FileTreatmentHelper implements DisposableBean {
     if (fileName == null) {
       throw new EEAException(EEAErrorMessage.FILE_NAME);
     }
-    final String mimeType = datasetService.getMimetype(fileName);
+    final String mimeType = datasetService.getMimetype(fileName).toLowerCase();
     // validates file types for the data load
     validateFileType(mimeType);
 

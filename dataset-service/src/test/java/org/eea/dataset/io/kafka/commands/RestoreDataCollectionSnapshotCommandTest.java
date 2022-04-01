@@ -5,6 +5,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
+import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.EUDatasetService;
@@ -50,6 +51,10 @@ public class RestoreDataCollectionSnapshotCommandTest {
   /** The kafka sender utils. */
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  /** The dataset repository. */
+  @Mock
+  private DatasetRepository datasetRepository;
 
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;

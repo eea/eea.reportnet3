@@ -133,18 +133,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       // Send email to requesters
       sendMail(dateRelease, dataset, dataflowVO);
 
-      // send feedback message
-      String country = dataset.getDataSetName();
-      String dataflowName = dataflowVO.getName();
-
-      MessageVO messageVO = new MessageVO();
-      messageVO.setProviderId(dataset.getDataProviderId());
-      messageVO.setContent(country + " released " + dataflowName + " successfully");
-      messageVO.setAutomatic(true);
-      collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO);
-      LOG.info("Automatic feedback message created of dataflow {}. Message: {}", dataflowVO.getId(),
-          messageVO.getContent());
-
 
 
       LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {}",
@@ -168,6 +156,18 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
                 .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
                 .providerId(dataset.getDataProviderId()).build());
       }
+
+      // send feedback message
+      String country = dataset.getDataSetName();
+      String dataflowName = dataflowVO.getName();
+
+      MessageVO messageVO = new MessageVO();
+      messageVO.setProviderId(dataset.getDataProviderId());
+      messageVO.setContent(country + " released " + dataflowName + " successfully");
+      messageVO.setAutomatic(true);
+      collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO);
+      LOG.info("Automatic feedback message created of dataflow {}. Message: {}", dataflowVO.getId(),
+          messageVO.getContent());
 
     }
 
