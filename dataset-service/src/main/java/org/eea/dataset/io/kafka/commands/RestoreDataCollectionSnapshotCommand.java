@@ -2,6 +2,7 @@ package org.eea.dataset.io.kafka.commands;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eea.dataset.persistence.data.repository.DatasetRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.EUDatasetService;
@@ -11,11 +12,13 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The Class PropagateNewFieldCommand.
@@ -40,6 +43,11 @@ public class RestoreDataCollectionSnapshotCommand extends AbstractEEAEventHandle
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
+  /** The dataset repository. */
+  @Autowired
+  private DatasetRepository datasetRepository;
+
+
   /**
    * Gets the event type.
    *
@@ -57,6 +65,7 @@ public class RestoreDataCollectionSnapshotCommand extends AbstractEEAEventHandle
    * @throws EEAException the EEA exception
    */
   @Override
+  @Transactional
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
     ThreadPropertiesManager.setVariable("user", String.valueOf(eeaEventVO.getData().get("user")));
@@ -73,6 +82,11 @@ public class RestoreDataCollectionSnapshotCommand extends AbstractEEAEventHandle
             NotificationVO.builder()
                 .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .datasetId(datasetId).build());
+
+        // remove the data from the temp_etlExport
+        TenantResolver
+            .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+        datasetRepository.removeTempEtlExport(datasetId);
       }
     }
 
