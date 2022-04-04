@@ -15,7 +15,7 @@ CREATE TABLE if not exists public.task (
 CREATE INDEX if not exists task_process_id_idx ON public.task USING btree (process_id);
 
 
-ALTER TABLE public.task OWNER TO testuser, dataflow, dataset, recordstore, validation;
+ALTER TABLE public.task OWNER TO testuser;
 GRANT ALL ON TABLE public.task TO testuser, dataflow, dataset, recordstore, validation;
 
 GRANT ALL ON sequence public.task_id_seq TO testuser, dataflow, dataset, recordstore, validation;

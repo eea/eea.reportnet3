@@ -25,7 +25,6 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -816,7 +815,7 @@ public class FileTreatmentHelper implements DisposableBean {
     if (fileName == null) {
       throw new EEAException(EEAErrorMessage.FILE_NAME);
     }
-    final String mimeType = datasetService.getMimetype(fileName);
+    final String mimeType = datasetService.getMimetype(fileName).toLowerCase();
     // validates file types for the data load
     validateFileType(mimeType);
 
@@ -1397,7 +1396,7 @@ public class FileTreatmentHelper implements DisposableBean {
       ExportFilterVO filters) throws EEAException, IOException {
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .fileName(tableName).datasetSchemaId(tableSchemaId).error("Error exporting table data")
+        .fileName(tableName).mimeType(mimeType).datasetSchemaId(tableSchemaId).error("Error exporting table data")
         .build();
     File fileFolder = new File(pathPublicFile, "dataset-" + datasetId);
     String creatingFileError = String.format(
@@ -1583,7 +1582,6 @@ public class FileTreatmentHelper implements DisposableBean {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  @Transactional
   public byte[] createFile(Long datasetId, String mimeType, final String tableSchemaId,
       ExportFilterVO filters) throws EEAException, IOException {
     // Get the dataFlowId from the metabase

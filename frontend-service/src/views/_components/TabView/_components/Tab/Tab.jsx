@@ -229,8 +229,8 @@ export const Tab = ({
     if (editingHeader) {
       event.preventDefault();
     } else {
-      //For firefox
-      event.dataTransfer.setData('text/plain', null);
+      const draggedTabHeader = event.target.getElementsByClassName('p-tabview-title')[0].textContent;
+      event.dataTransfer.setData('text/plain', draggedTabHeader);
       if (!isUndefined(onTabDragAndDropStart)) {
         onTabDragAndDropStart(index, tableSchemaId);
       }
@@ -285,15 +285,13 @@ export const Tab = ({
       //Get the dragged tab header
       event.currentTarget.style.border = '';
       event.currentTarget.style.opacity = '';
-      const dataString = event.dataTransfer.getData('text/html');
-      const range = document.createRange();
-      const draggedTabHeader = range.createContextualFragment(dataString).childNodes[0].innerText;
+      const dataString = event.dataTransfer.getData('text/plain');
       //currentTarget gets the child's target parent
       const childs = event.currentTarget.childNodes;
       for (let i = 0; i < childs.length; i++) {
         if (childs[i].nodeName === 'SPAN' && childs[i].className === 'p-tabview-title') {
           if (!isUndefined(onTabDragAndDrop)) {
-            onTabDragAndDrop(draggedTabHeader, childs[i].textContent);
+            onTabDragAndDrop(dataString, childs[i].textContent);
             setIsDragging(false);
           }
         }
@@ -553,7 +551,7 @@ export const Tab = ({
               uniqueIdentifier={uniqueId('table_more_info_')}
             />
           )}
-          {leftIcon && <span className={classNames('p-tabview-left-icon ', leftIcon)}></span>}
+          {leftIcon && <span className={classNames('p-tabview-left-icon', leftIcon)}></span>}
           {!isUndefined(editingHeader) && editingHeader ? (
             <InputText
               autoFocus={true}

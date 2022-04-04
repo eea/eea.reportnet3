@@ -38,6 +38,7 @@ public class ExportTableDataCompletedEvent implements NotificableEventHandler {
     notification.put("datasetId", notificationVO.getDatasetId());
     notification.put("datasetSchemaId", notificationVO.getDatasetSchemaId());
     notification.put("fileName", notificationVO.getFileName());
+    notification.put("mimeType", notificationVO.getMimeType());
     return notification;
   }
 

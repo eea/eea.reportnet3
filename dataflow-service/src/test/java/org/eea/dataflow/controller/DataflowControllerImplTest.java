@@ -158,8 +158,6 @@ public class DataflowControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     SecurityContextHolder.setContext(securityContext);
 
-    when(dataflowService.getByIdWithRepresentativesFilteredByUserEmail(Mockito.any()))
-        .thenThrow(EEAException.class);
     dataflowControllerImpl.findById(1L, null);
     assertEquals("fail", null, dataflowControllerImpl.findById(1L, null));
   }

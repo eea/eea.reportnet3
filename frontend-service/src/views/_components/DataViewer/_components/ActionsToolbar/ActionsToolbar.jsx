@@ -102,18 +102,12 @@ export const ActionsToolbar = ({
     }
   }, [isGroupedValidationSelected]);
 
-  const onDownloadTableData = async () => {
-    try {
-      const { data } = await DatasetService.downloadTableData(datasetId, exportTableDataName);
-      DownloadFile(data, exportTableDataName);
-    } catch (error) {
-      console.error('ActionsToolbar - onDownloadTableData.', error);
-    } finally {
+  useEffect(() => {
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_TABLE_DATA_COMPLETED_EVENT')) {
       setIsLoadingFile(false);
     }
-  };
+  }, [notificationContext.hidden]);
 
-  useCheckNotifications(['EXPORT_TABLE_DATA_COMPLETED_EVENT'], onDownloadTableData);
   useCheckNotifications(['EXPORT_TABLE_DATA_FAILED_EVENT'], setIsLoadingFile, false);
 
   const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({

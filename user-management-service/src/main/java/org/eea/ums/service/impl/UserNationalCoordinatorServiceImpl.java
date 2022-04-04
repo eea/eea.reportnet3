@@ -39,7 +39,7 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
 
   /** The Constant EMAIL_REGEX: {@value}. */
   private static final String EMAIL_REGEX =
-      "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$";
+      "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"; // NOSONAR
 
   /** The keycloak connector service. */
   @Autowired
@@ -56,8 +56,6 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
   /** The security provider interface service. */
   @Autowired
   private SecurityProviderInterfaceService securityProviderInterfaceService;
-
-
 
   /**
    * Gets the national coordinators.

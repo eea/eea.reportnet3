@@ -330,13 +330,24 @@ export const Dataflows = () => {
     }
   };
 
-  const setStatusDataflowLabel = dataflows =>
+  const setStatusReportingDataflowLabel = dataflows =>
     dataflows.map(dataflow => {
       dataflow.statusKey = dataflow.status;
       if (dataflow.status === config.dataflowStatus.OPEN) {
         dataflow.status = dataflow.isReleasable
           ? resourcesContext.messages['open'].toUpperCase()
           : resourcesContext.messages['closed'].toUpperCase();
+      } else {
+        dataflow.status = resourcesContext.messages['design'].toUpperCase();
+      }
+      return dataflow;
+    });
+
+  const setStatusReferenceDataflowLabel = dataflows =>
+    dataflows.map(dataflow => {
+      dataflow.statusKey = dataflow.status;
+      if (dataflow.status === config.dataflowStatus.OPEN) {
+        dataflow.status = resourcesContext.messages['published'].toUpperCase();
       } else {
         dataflow.status = resourcesContext.messages['design'].toUpperCase();
       }
@@ -354,7 +365,7 @@ export const Dataflows = () => {
         const data = await DataflowService.getAll({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy });
         const { dataflows, filteredRecords, totalRecords } = data;
 
-        setStatusDataflowLabel(dataflows);
+        setStatusReportingDataflowLabel(dataflows);
         setDataflows({ dataflows, filteredRecords, totalRecords, type: tabId });
       } else if (TextUtils.areEquals(tabId, 'reference')) {
         const data = await ReferenceDataflowService.getAll({
@@ -367,7 +378,7 @@ export const Dataflows = () => {
         });
         const { dataflows, filteredRecords, totalRecords } = data;
 
-        setStatusDataflowLabel(dataflows);
+        setStatusReferenceDataflowLabel(dataflows);
         setDataflows({ dataflows, filteredRecords, totalRecords, type: tabId });
       } else if (TextUtils.areEquals(tabId, 'business')) {
         const data = await BusinessDataflowService.getAll({
@@ -380,7 +391,7 @@ export const Dataflows = () => {
         });
         const { dataflows, filteredRecords, totalRecords } = data;
 
-        setStatusDataflowLabel(dataflows);
+        setStatusReportingDataflowLabel(dataflows);
         setDataflows({ dataflows, filteredRecords, totalRecords, type: tabId });
       } else if (TextUtils.areEquals(tabId, 'citizenScience')) {
         const data = await CitizenScienceDataflowService.getAll({
@@ -393,7 +404,7 @@ export const Dataflows = () => {
         });
         const { dataflows, filteredRecords, totalRecords } = data;
 
-        setStatusDataflowLabel(dataflows);
+        setStatusReportingDataflowLabel(dataflows);
         setDataflows({ dataflows, filteredRecords, totalRecords, type: tabId });
       }
     } catch (error) {

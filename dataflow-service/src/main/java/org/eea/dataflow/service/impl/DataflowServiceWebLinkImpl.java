@@ -62,7 +62,8 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
 
   /** The Constant REGEX_URL. */
   private static final String REGEX_URL =
-      "^(sftp:\\/\\/www\\.|sftp:\\/\\/|ftp:\\/\\/www\\.|ftp:\\/\\/|http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-zA-Z0-9]+([\\-\\.]{1}[a-zA-Z0-9]+)*\\.[a-zA-Z]{2,63}(:[0-9]{1,5})?(\\/.*)?$";
+      "^(sftp:\\/\\/www\\.|sftp:\\/\\/|ftp:\\/\\/www\\.|ftp:\\/\\/|http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-zA-Z0-9]+([\\-\\.]{1}[a-zA-Z0-9]+)*\\.[a-zA-Z]{2,63}(:[0-9]{1,5})?(\\/.*)?$"; // NOSONAR
+
 
   /**
    * Gets the web link.
