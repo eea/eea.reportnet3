@@ -816,7 +816,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void createUpdateQueryView(Long datasetId, boolean isMaterialized) {
     LOG.info("Executing createUpdateQueryView on the datasetId {}. Materialized: {}", datasetId,
         isMaterialized);
-    DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
+    DataSetSchemaVO datasetSchema =
+        datasetSchemaController.findDataSchemaByDatasetIdPrivate(datasetId);
     // delete all views because some names can be changed
     try {
       deleteAllViewsFromSchema(datasetId);
