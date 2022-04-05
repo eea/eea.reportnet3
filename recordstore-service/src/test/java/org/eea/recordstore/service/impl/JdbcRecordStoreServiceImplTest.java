@@ -507,7 +507,7 @@ public class JdbcRecordStoreServiceImplTest {
     List<TableSchemaVO> tableSchemas = new ArrayList<>();
     tableSchemas.add(table);
     datasetSchemaVO.setTableSchemas(tableSchemas);
-    Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetId(Mockito.anyLong()))
+    Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(Mockito.anyLong()))
         .thenReturn(datasetSchemaVO);
 
     jdbcRecordStoreService.createUpdateQueryView(1L, true);
@@ -520,7 +520,7 @@ public class JdbcRecordStoreServiceImplTest {
     List<TableSchemaVO> tableSchemas = new ArrayList<>();
     tableSchemas.add(table);
     datasetSchemaVO.setTableSchemas(tableSchemas);
-    Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetId(Mockito.anyLong()))
+    Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(Mockito.anyLong()))
         .thenReturn(datasetSchemaVO);
 
     jdbcRecordStoreService.createUpdateQueryView(1L, false);
@@ -637,7 +637,7 @@ public class JdbcRecordStoreServiceImplTest {
 
   @Test
   public void createSnapshotToCloneTest() throws SQLException {
-    Map<String, String> dictionaryOriginTargetObjectId = new HashMap<String, String>();
+    Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
     List<String> datasets = new ArrayList<>();
     datasets.add("dataset_1");
     Mockito
