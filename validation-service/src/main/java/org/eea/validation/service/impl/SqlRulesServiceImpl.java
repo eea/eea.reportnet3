@@ -728,7 +728,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     for (String id : datasetIds) {
       DataSetSchemaVO schema =
-          datasetSchemaControllerZuul.findDataSchemaByDatasetId(Long.parseLong(id));
+          datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(Long.parseLong(id));
       if (schema.getTableSchemas() != null) {
         tables.addAll(schema.getTableSchemas());
       }
