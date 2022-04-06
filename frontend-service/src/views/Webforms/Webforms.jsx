@@ -1,5 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 
+import isNil from 'lodash/isNil';
+
 import styles from './Webforms.module.scss';
 
 import { PaMsWebform } from './PaMsWebform';
@@ -68,19 +70,7 @@ export const Webforms = ({
           datasetId={datasetId}
           isReleasing={isReleasing}
           isReporting={isReporting}
-          state={state}
-          tables={selectedConfiguration.tables}
-        />
-      );
-    case 'PAMS2':
-      return (
-        <PaMsWebform
-          dataflowId={dataflowId}
-          dataProviderId={dataProviderId}
-          datasetId={datasetId}
-          isReleasing={isReleasing}
-          isReporting={isReporting}
-          overview={selectedConfiguration.overview}
+          overview={!isNil(selectedConfiguration.overviews) ? selectedConfiguration.overview : []}
           state={state}
           tables={selectedConfiguration.tables}
         />
