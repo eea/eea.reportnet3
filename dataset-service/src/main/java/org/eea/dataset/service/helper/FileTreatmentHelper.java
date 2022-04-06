@@ -283,6 +283,8 @@ public class FileTreatmentHelper implements DisposableBean {
     }
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
     fileManagement(datasetId, tableSchemaId, schema, file, replace, integrationId, delimiter);
   }
 
@@ -1127,6 +1129,8 @@ public class FileTreatmentHelper implements DisposableBean {
     LOG.info("Data saved into dataset {}", datasetId);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
   }
 
   /**
@@ -1396,8 +1400,8 @@ public class FileTreatmentHelper implements DisposableBean {
       ExportFilterVO filters) throws EEAException, IOException {
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .fileName(tableName).mimeType(mimeType).datasetSchemaId(tableSchemaId).error("Error exporting table data")
-        .build();
+        .fileName(tableName).mimeType(mimeType).datasetSchemaId(tableSchemaId)
+        .error("Error exporting table data").build();
     File fileFolder = new File(pathPublicFile, "dataset-" + datasetId);
     String creatingFileError = String.format(
         "Failed generating file from datasetId {} with schema {}.", datasetId, tableSchemaId);

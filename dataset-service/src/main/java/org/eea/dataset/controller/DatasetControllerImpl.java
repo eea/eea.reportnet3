@@ -1611,6 +1611,17 @@ public class DatasetControllerImpl implements DatasetController {
     return datasetService.getCheckView(datasetId);
   }
 
+  /**
+   * Delete temp etl export.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @DeleteMapping("/private/deleteTempEtlExport/{datasetId}")
+  public void deleteTempEtlExport(@PathVariable("datasetId") Long datasetId) {
+    datasetService.deleteTempEtlExport(datasetId);
+  }
+
 
 
   /**

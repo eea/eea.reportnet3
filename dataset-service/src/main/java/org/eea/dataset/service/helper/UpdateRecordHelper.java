@@ -65,6 +65,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     LOG.info("Records have been modified");
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_UPDATED_COMPLETED_EVENT, datasetId);
   }
@@ -83,6 +85,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     LOG.info("Records have been created");
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
   }
@@ -102,6 +106,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     LOG.info("Records have been created");
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
   }
@@ -120,6 +126,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     LOG.info("Records have been deleted");
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
     // after the records have been deleted, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_DELETED_COMPLETED_EVENT, datasetId);
   }
@@ -139,6 +147,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     LOG.info("Field is modified");
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
     // after the field has been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.FIELD_UPDATED_COMPLETED_EVENT, datasetId);
   }

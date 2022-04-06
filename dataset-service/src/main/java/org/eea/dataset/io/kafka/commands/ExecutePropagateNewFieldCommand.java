@@ -106,6 +106,7 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
       }
       // now the view is not updated, update the check to false
       datasetService.updateCheckView(datasetId, false);
+      datasetService.deleteTempEtlExport(datasetId);
     }
   }
 

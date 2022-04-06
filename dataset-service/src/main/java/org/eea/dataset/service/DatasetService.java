@@ -599,4 +599,11 @@ public interface DatasetService {
    * @return the check view
    */
   Boolean getCheckView(@DatasetId Long datasetId);
+
+  /**
+   * Delete temp etl export.
+   *
+   * @param datasetId the dataset id
+   */
+  void deleteTempEtlExport(@DatasetId Long datasetId);
 }

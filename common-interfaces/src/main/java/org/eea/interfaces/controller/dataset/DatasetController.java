@@ -621,4 +621,12 @@ public interface DatasetController {
   @GetMapping("/{datasetId}/viewUpdated")
   Boolean getCheckView(@PathVariable("datasetId") Long datasetId);
 
+  /**
+   * Delete temp etl export.
+   *
+   * @param datasetId the dataset id
+   */
+  @DeleteMapping("/private/deleteTempEtlExport/{datasetId}")
+  void deleteTempEtlExport(@PathVariable("datasetId") Long datasetId);
+
 }
