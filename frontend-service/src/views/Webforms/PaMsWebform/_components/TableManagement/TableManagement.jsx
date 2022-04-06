@@ -307,6 +307,7 @@ export const TableManagement = ({
 
     const pamsIdFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
     const pamsFieldSchemaValue = RecordUtils.getCellValue({ rowData: rowData }, pamsIdFieldSchemaId);
+
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Button
@@ -436,7 +437,9 @@ export const TableManagement = ({
     </DataTable>
   );
 
-  if (isLoading || isAddingPamsId) return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
+  if (isLoading || isAddingPamsId) {
+    return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
+  }
 
   return (
     <Fragment>
