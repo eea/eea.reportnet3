@@ -34,6 +34,7 @@ export const PaMsWebform = ({
   datasetId,
   isReleasing,
   isReporting,
+  overview = [],
   state,
   tables = []
 }) => {
@@ -338,6 +339,7 @@ export const PaMsWebform = ({
         onAddTableRecord={onAddTableRecord}
         onRefresh={onUpdateData}
         onSelectEditTable={onSelectEditTable}
+        overview={overview}
         records={pamsRecords}
         schemaTables={datasetSchema.tables}
         tables={tables}

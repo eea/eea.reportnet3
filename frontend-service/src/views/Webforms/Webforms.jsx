@@ -72,6 +72,19 @@ export const Webforms = ({
           tables={selectedConfiguration.tables}
         />
       );
+    case 'PAMS2':
+      return (
+        <PaMsWebform
+          dataflowId={dataflowId}
+          dataProviderId={dataProviderId}
+          datasetId={datasetId}
+          isReleasing={isReleasing}
+          isReporting={isReporting}
+          overview={selectedConfiguration.overview}
+          state={state}
+          tables={selectedConfiguration.tables}
+        />
+      );
     case 'TABLES':
       return (
         <TableWebform
