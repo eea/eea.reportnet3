@@ -31,7 +31,7 @@ export const Webforms = ({
 
   useEffect(() => {
     getWebformConfiguration();
-  }, []);
+  }, [webform.name]);
 
   const getWebformConfiguration = async () => {
     setLoadingStatus('pending');
