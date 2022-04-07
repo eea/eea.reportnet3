@@ -34,7 +34,7 @@ export const PaMsWebform = ({
   datasetId,
   isReleasing,
   isReporting,
-  overview = [],
+  overview,
   state,
   tables = []
 }) => {

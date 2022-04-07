@@ -1,7 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
 
-import isNil from 'lodash/isNil';
-
 import styles from './Webforms.module.scss';
 
 import { PaMsWebform } from './PaMsWebform';
@@ -70,7 +68,7 @@ export const Webforms = ({
           datasetId={datasetId}
           isReleasing={isReleasing}
           isReporting={isReporting}
-          overview={!isNil(selectedConfiguration.overviews) ? selectedConfiguration.overview : []}
+          overview={selectedConfiguration.overview}
           state={state}
           tables={selectedConfiguration.tables}
         />

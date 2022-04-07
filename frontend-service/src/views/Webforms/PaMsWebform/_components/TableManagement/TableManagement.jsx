@@ -183,7 +183,7 @@ export const TableManagement = ({
         payload: {
           records: parsedRecordsWithValidations,
           tableSchemaColumns,
-          tableColumns: isEmpty(overview) ? oldPaMs : parseOverview()
+          tableColumns: isNil(overview) ? oldPaMs : parseOverview()
         }
       });
     }
