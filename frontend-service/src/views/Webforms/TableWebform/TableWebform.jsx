@@ -30,7 +30,7 @@ export const TableWebform = ({ dataflowId, dataProviderId, datasetId, isReportin
     isVisible: {}
   });
 
-  useEffect(() => initialLoad(), []);
+  useEffect(() => initialLoad(), [tables]);
 
   const changeUrl = tabSchemaName => {
     const filteredTable = state.schemaTables.filter(schemaTable => schemaTable.name === tabSchemaName);
@@ -63,7 +63,9 @@ export const TableWebform = ({ dataflowId, dataProviderId, datasetId, isReportin
   };
 
   const onLoadData = () => {
-    if (!isEmpty(datasetSchema)) return onParseWebformData(datasetSchema, tables, datasetSchema.tables);
+    if (!isEmpty(datasetSchema)) {
+      return onParseWebformData(datasetSchema, tables, datasetSchema.tables);
+    }
   };
 
   const setIsLoading = value => tableWebformDispatch({ type: 'SET_IS_LOADING', payload: { value } });
@@ -81,7 +83,7 @@ export const TableWebform = ({ dataflowId, dataProviderId, datasetId, isReportin
         onTabChange={tableWebformState.isVisible}
         setIsLoading={setIsLoading}
         webform={visibleContent}
-        webformType={'TABLES'}
+        webformType="TABLES"
       />
     );
   };
@@ -128,7 +130,9 @@ export const TableWebform = ({ dataflowId, dataProviderId, datasetId, isReportin
     });
   };
 
-  if (isEmpty(tableWebformState.data)) return <Spinner className={styles.spinner} />;
+  if (isEmpty(tableWebformState.data)) {
+    return <Spinner className={styles.spinner} />;
+  }
 
   return (
     <div className={styles.webform}>

@@ -63,7 +63,7 @@ export const PaMsWebform = ({
 
   const { isDataUpdated, isLoading, pamsRecords, selectedTable, selectedTableName, tableList, view } = paMsWebformState;
 
-  useEffect(() => initialLoad(), []);
+  useEffect(() => initialLoad(), [tables]);
 
   useEffect(() => {
     if (!isEmpty(paMsWebformState.data)) {

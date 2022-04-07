@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
 import uniqueId from 'lodash/uniqueId';
 
 import styles from './QuestionAnswerWebformTable.module.scss';
@@ -53,6 +54,10 @@ export const QuestionAnswerWebformTable = ({
 
   const onLoadTableData = async () => {
     try {
+      if (isUndefined(schemaTables?.tableSchemaId)) {
+        return;
+      }
+
       const sortFieldSchemaId = !isNil(tables.sortBy)
         ? getFieldSchemaColumnIdByHeader(schemaTables.records, tables.sortBy)
         : undefined;
@@ -61,7 +66,7 @@ export const QuestionAnswerWebformTable = ({
         datasetId,
         tableSchemaId: schemaTables?.tableSchemaId,
         pageSize: 100,
-        fields: sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
+        fields: sortFieldSchemaId !== '' && !isUndefined(sortFieldSchemaId) ? `${sortFieldSchemaId}:${1}` : undefined,
         levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
       });
 
@@ -93,7 +98,9 @@ export const QuestionAnswerWebformTable = ({
   );
 
   const renderRecords = () => {
-    if (!isEmpty(errorMessages(schemaData, tables.name))) return renderErrors();
+    if (!isEmpty(errorMessages(schemaData, tables.name))) {
+      return renderErrors();
+    }
 
     return data.map(record => (
       <Fragment key={uniqueId()}>
