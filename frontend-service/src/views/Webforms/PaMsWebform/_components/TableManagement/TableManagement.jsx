@@ -165,10 +165,11 @@ export const TableManagement = ({
       }
     ];
 
-    const parseOverview = () => {
-      //TODO: edit overview to add fieldSchemaId and check TableSchemas field
-      return overview;
-    };
+    const parseOverview = () =>
+      overview.map(item => {
+        item.fieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, item.field);
+        return item;
+      });
 
     if (!isEmpty(records)) {
       const parsedTables = DataViewerUtils.parseData(parentTablesWithData[0].data);
@@ -439,7 +440,20 @@ export const TableManagement = ({
       return data;
     }
 
-    //TODO: render columns for overview
+    const data = tableColumns.map(col => (
+      <Column
+        body={col.type === 'table' ? addTableTemplate : dataTemplate}
+        field={col.field}
+        fieldSchemaId={col.fieldSchemaId}
+        header={col.header}
+        key={col.field}
+      />
+    ));
+
+    data.unshift(renderValidationColumn);
+    data.unshift(renderActionButtonsColumn);
+
+    return data;
   };
 
   const renderTable = () => {
