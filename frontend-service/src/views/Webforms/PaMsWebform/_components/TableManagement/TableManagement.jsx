@@ -166,6 +166,7 @@ export const TableManagement = ({
     ];
 
     const parseOverview = () => {
+      //TODO: edit overview to add fieldSchemaId and check TableSchemas field
       return overview;
     };
 
@@ -418,21 +419,27 @@ export const TableManagement = ({
   );
 
   const renderTableColumns = () => {
-    const data = tableColumns.map(col => (
-      <Column
-        body={!['TableSchemas', 'Table_1', 'Table_2', 'Table_3'].includes(col.field) ? dataTemplate : addTableTemplate}
-        className={col.field === 'TableSchemas' ? styles.invisibleHeader : ''}
-        field={col.field}
-        fieldSchemaId={col.fieldSchemaId}
-        header={col.header}
-        key={col.field}
-      />
-    ));
+    if (isNil(overview)) {
+      const data = tableColumns.map(col => (
+        <Column
+          body={
+            !['TableSchemas', 'Table_1', 'Table_2', 'Table_3'].includes(col.field) ? dataTemplate : addTableTemplate
+          }
+          className={col.field === 'TableSchemas' ? styles.invisibleHeader : ''}
+          field={col.field}
+          fieldSchemaId={col.fieldSchemaId}
+          header={col.header}
+          key={col.field}
+        />
+      ));
 
-    data.unshift(renderValidationColumn);
-    data.unshift(renderActionButtonsColumn);
+      data.unshift(renderValidationColumn);
+      data.unshift(renderActionButtonsColumn);
 
-    return data;
+      return data;
+    }
+
+    //TODO: render columns for overview
   };
 
   const renderTable = () => {
