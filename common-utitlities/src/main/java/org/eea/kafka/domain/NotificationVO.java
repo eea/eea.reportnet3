@@ -79,4 +79,7 @@ public class NotificationVO implements Serializable {
 
   /** The field schema name. */
   private String fieldSchemaName;
+
+  /** The mime type. */
+  private String mimeType;
 }

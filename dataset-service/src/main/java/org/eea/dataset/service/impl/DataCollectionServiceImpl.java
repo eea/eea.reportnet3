@@ -762,11 +762,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           referenceDatasetIds.add(r.getId());
           for (RepresentativeVO representative : representatives) {
             List<String> emails = representative.getLeadReporters().stream()
+                .filter(leadReporter -> !Boolean.TRUE.equals(leadReporter.getInvalid()))
                 .map(LeadReporterVO::getEmail).collect(Collectors.toList());
-            if (emails.isEmpty()) {
-              referenceDatasetIdsEmails.put(r.getId(), null);
+            if (!emails.isEmpty()) {
+              if (referenceDatasetIdsEmails.containsKey(r.getId())) {
+                referenceDatasetIdsEmails.get(r.getId()).addAll(emails);
+              } else {
+                referenceDatasetIdsEmails.put(r.getId(), emails);
+              }
             } else {
-              referenceDatasetIdsEmails.put(r.getId(), emails);
+              if (!referenceDatasetIdsEmails.containsKey(r.getId())) {
+                referenceDatasetIdsEmails.put(r.getId(), new ArrayList<>());
+              }
             }
           }
         });
