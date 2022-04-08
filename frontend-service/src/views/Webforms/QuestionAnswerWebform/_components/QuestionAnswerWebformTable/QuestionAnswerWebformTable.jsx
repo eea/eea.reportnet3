@@ -40,7 +40,7 @@ export const QuestionAnswerWebformTable = ({
 
   useEffect(() => {
     onLoadTableData();
-  }, []);
+  }, [tables]);
 
   const getFieldSchemaColumnIdByHeader = (records, fieldName) => {
     if (!isEmpty(records)) {
