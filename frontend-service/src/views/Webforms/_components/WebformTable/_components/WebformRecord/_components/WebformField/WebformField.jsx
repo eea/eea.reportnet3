@@ -253,7 +253,9 @@ export const WebformField = ({
 
   const onToggleDialogVisible = value => webformFieldDispatch({ type: 'ON_TOGGLE_DIALOG', payload: { value } });
 
-  const getAttachExtensions = [{ fileExtension: element.validExtensions || [] }]
+  const getAttachExtensions = [
+    { fileExtension: isNil(element) || isNil(element.validExtensions) ? [] : element.validExtensions }
+  ]
     .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
     .flat()
     .join(', ');
@@ -262,7 +264,7 @@ export const WebformField = ({
     getAttachExtensions || '*'
   }
   ${resourcesContext.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
-    !isNil(element.maxSize) && element.maxSize.toString() !== '0'
+    !isNil(element) && !isNil(element.maxSize) && element.maxSize.toString() !== '0'
       ? `${element.maxSize} ${resourcesContext.messages['MB']}`
       : resourcesContext.messages['maxSizeNotDefined']
   }`;

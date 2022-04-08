@@ -57,10 +57,12 @@ export const QuestionAnswerWebformField = ({
   const { field, isDialogVisible } = questionAnswerWebformFieldState;
 
   useEffect(() => {
-    getTableErrors(!isEmpty(recordValidations) || !isEmpty(field.validations));
+    getTableErrors(!isEmpty(recordValidations) || !isEmpty(field?.validations));
   }, []);
 
-  const getAttachExtensions = [{ fileExtension: field.validExtensions || [] }]
+  const getAttachExtensions = [
+    { fileExtension: isNil(field) || isNil(field.validExtensions) ? [] : field.validExtensions }
+  ]
     .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
     .flat()
     .join(', ');
@@ -69,7 +71,7 @@ export const QuestionAnswerWebformField = ({
     getAttachExtensions || '*'
   }
   ${resourcesContext.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
-    !isNil(field.maxSize) && field.maxSize.toString() !== '0'
+    !isNil(field) && !isNil(field.maxSize) && field.maxSize.toString() !== '0'
       ? `${field.maxSize} ${resourcesContext.messages['MB']}`
       : resourcesContext.messages['maxSizeNotDefined']
   }`;
@@ -140,7 +142,9 @@ export const QuestionAnswerWebformField = ({
   };
 
   const onFormatDate = (date, isInvalidDate) => {
-    if (isInvalidDate) return '';
+    if (isInvalidDate) {
+      return '';
+    }
 
     let d = new Date(date),
       month = '' + (d.getMonth() + 1),
@@ -163,6 +167,10 @@ export const QuestionAnswerWebformField = ({
   };
 
   const renderTemplate = () => {
+    if (isNil(field)) {
+      return null;
+    }
+
     const { fieldSchemaId, type } = field;
 
     switch (type) {
@@ -325,7 +333,7 @@ export const QuestionAnswerWebformField = ({
           <span className={styles.sectionTitle}>
             <h4 className={styles.title}>
               {!isNil(title?.value) ? title.value : title}
-              <span className={styles.requiredMark}>{field.required ? '*' : ''}</span>
+              <span className={styles.requiredMark}>{field?.required ? '*' : ''}</span>
               {!isNil(tooltip) && (
                 <Button
                   className={`${styles.infoButton} p-button-rounded p-button-secondary-transparent`}
@@ -341,7 +349,7 @@ export const QuestionAnswerWebformField = ({
       </div>
       <div className={styles.fieldWrapper}>
         <div className={styles.template}>{renderTemplate()}</div>
-        {renderValidations(field.validations)}
+        {renderValidations(field?.validations)}
       </div>
       {isDialogVisible.uploadFile && (
         <CustomFileUpload
@@ -355,7 +363,7 @@ export const QuestionAnswerWebformField = ({
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           maxFileSize={
-            !isNil(field.maxSize) && field.maxSize.toString() !== '0'
+            !isNil(field) && !isNil(field.maxSize) && field.maxSize.toString() !== '0'
               ? field.maxSize * config.MB_SIZE
               : config.MAX_ATTACHMENT_SIZE
           }
