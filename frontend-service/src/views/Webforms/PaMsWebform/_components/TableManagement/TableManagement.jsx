@@ -39,6 +39,7 @@ export const TableManagement = ({
   onAddTableRecord,
   onRefresh,
   onSelectEditTable,
+  overview,
   records,
   schemaTables,
   tables
@@ -110,9 +111,71 @@ export const TableManagement = ({
   );
 
   const initialLoad = () => {
+    const getOldPaMs = tableSchemaColumnsAux => {
+      return [
+        {
+          field: 'Id',
+          fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumnsAux, 'Id'),
+          header: 'PaM Number'
+        },
+        {
+          field: 'Title',
+          fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumnsAux, 'Title'),
+          header: 'Name of PaM or group of PaMs'
+        },
+        {
+          field: 'TitleNational',
+          fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumnsAux, 'TitleNational'),
+          header: 'Name of PaM or group of PaMs in national language'
+        },
+        {
+          field: 'IsGroup',
+          fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumnsAux, 'IsGroup'),
+          header: 'PaM or group of PaMs'
+        },
+        {
+          field: 'ListOfSinglePams',
+          fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumnsAux, 'ListOfSinglePams'),
+          header: 'Which policies or measures does it cover?'
+        },
+        {
+          field: 'ShortDescription',
+          fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumnsAux, 'ShortDescription'),
+          header: 'Short description'
+        },
+        {
+          field: 'Table_1',
+          fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumnsAux, 'Table_1'),
+          header:
+            'Table 1: Sectors and gases for reporting on policies and measures and groups of measures, and type of policy instrument'
+        },
+        {
+          field: 'Table_2',
+          fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumnsAux, 'Table_2'),
+          header:
+            'Table 2: Available results of ex-ante and ex-post assessments of the effects of individual or groups of policies and measures on mitigation of climate change'
+        },
+        {
+          field: 'Table_3',
+          fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumnsAux, 'Table_3'),
+          header:
+            'Table 3: Available projected and realised costs and benefits of individual or groups of policies and measures on mitigation of climate change'
+        },
+        {
+          field: 'TableSchemas'
+        }
+      ];
+    };
+
+    const parseOverview = tableSchemaColumnsAux =>
+      overview.map(item => {
+        item.fieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumnsAux, item.field);
+        return item;
+      });
+
     if (!isEmpty(records)) {
       const parsedTables = DataViewerUtils.parseData(parentTablesWithData[0].data);
-      const tableSchemaColumns = parseTableSchemaColumns(schemaTables, parsePamsRecords(records));
+      const tableSchemaColumnsAux = parseTableSchemaColumns(schemaTables, parsePamsRecords(records));
       const parsedRecordsWithValidations = parsePamsRecordsWithParentData(
         parsedTables,
         parentTablesWithData,
@@ -123,60 +186,8 @@ export const TableManagement = ({
         type: 'INITIAL_LOAD',
         payload: {
           records: parsedRecordsWithValidations,
-          tableSchemaColumns,
-          tableColumns: [
-            {
-              field: 'Id',
-              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id'),
-              header: 'PaM Number'
-            },
-            {
-              field: 'Title',
-              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Title'),
-              header: 'Name of PaM or group of PaMs'
-            },
-            {
-              field: 'TitleNational',
-              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'TitleNational'),
-              header: 'Name of PaM or group of PaMs in national language'
-            },
-            {
-              field: 'IsGroup',
-              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'IsGroup'),
-              header: 'PaM or group of PaMs'
-            },
-            {
-              field: 'ListOfSinglePams',
-              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'ListOfSinglePams'),
-              header: 'Which policies or measures does it cover?'
-            },
-            {
-              field: 'ShortDescription',
-              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'ShortDescription'),
-              header: 'Short description'
-            },
-            {
-              field: 'Table_1',
-              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Table_1'),
-              header:
-                'Table 1: Sectors and gases for reporting on policies and measures and groups of measures, and type of policy instrument'
-            },
-            {
-              field: 'Table_2',
-              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Table_2'),
-              header:
-                'Table 2: Available results of ex-ante and ex-post assessments of the effects of individual or groups of policies and measures on mitigation of climate change'
-            },
-            {
-              field: 'Table_3',
-              fieldSchemaId: getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Table_3'),
-              header:
-                'Table 3: Available projected and realised costs and benefits of individual or groups of policies and measures on mitigation of climate change'
-            },
-            {
-              field: 'TableSchemas'
-            }
-          ]
+          tableSchemaColumns: tableSchemaColumnsAux,
+          tableColumns: isNil(overview) ? getOldPaMs(tableSchemaColumnsAux) : parseOverview(tableSchemaColumnsAux)
         }
       });
     }
@@ -307,6 +318,7 @@ export const TableManagement = ({
 
     const pamsIdFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
     const pamsFieldSchemaValue = RecordUtils.getCellValue({ rowData: rowData }, pamsIdFieldSchemaId);
+
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Button
@@ -410,10 +422,30 @@ export const TableManagement = ({
   );
 
   const renderTableColumns = () => {
+    if (isNil(overview)) {
+      const data = tableColumns.map(col => (
+        <Column
+          body={
+            !['TableSchemas', 'Table_1', 'Table_2', 'Table_3'].includes(col.field) ? dataTemplate : addTableTemplate
+          }
+          className={col.field === 'TableSchemas' ? styles.invisibleHeader : ''}
+          field={col.field}
+          fieldSchemaId={col.fieldSchemaId}
+          header={col.header}
+          key={col.field}
+        />
+      ));
+
+      data.unshift(renderValidationColumn);
+      data.unshift(renderActionButtonsColumn);
+
+      return data;
+    }
+
     const data = tableColumns.map(col => (
       <Column
-        body={!['TableSchemas', 'Table_1', 'Table_2', 'Table_3'].includes(col.field) ? dataTemplate : addTableTemplate}
-        className={col.field === 'TableSchemas' ? styles.invisibleHeader : ''}
+        body={col.type === 'TABLE' ? addTableTemplate : dataTemplate}
+        className={col.type === 'TABLE' ? styles.tableColumn : ''}
         field={col.field}
         fieldSchemaId={col.fieldSchemaId}
         header={col.header}
@@ -427,34 +459,40 @@ export const TableManagement = ({
     return data;
   };
 
-  const renderEmptyTable = () => (
-    <DataTable
-      className={styles.table}
-      summary={resourcesContext.messages['overviewEmptyTableHeader']}
-      value={[{ emptyContent: resourcesContext.messages['noDataInDataTable'] }]}>
-      <Column field={'emptyContent'} header={resourcesContext.messages['overviewEmptyTableHeader']} />
-    </DataTable>
-  );
+  const renderTable = () => {
+    if (isEmpty(records)) {
+      return (
+        <DataTable
+          className={styles.table}
+          summary={resourcesContext.messages['overviewEmptyTableHeader']}
+          value={[{ emptyContent: resourcesContext.messages['noDataInDataTable'] }]}>
+          <Column field={'emptyContent'} header={resourcesContext.messages['overviewEmptyTableHeader']} />
+        </DataTable>
+      );
+    }
 
-  if (isLoading || isAddingPamsId) return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
+    return (
+      <DataTable
+        autoLayout={true}
+        className={styles.table}
+        loading={loading}
+        onRowClick={event =>
+          tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: { selectedRecord: event.data } })
+        }
+        summary={resourcesContext.messages['webformPaMsTitle']}
+        value={tableManagementState.records}>
+        {renderTableColumns()}
+      </DataTable>
+    );
+  };
+
+  if (isLoading || isAddingPamsId) {
+    return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
+  }
 
   return (
     <Fragment>
-      {isEmpty(records) ? (
-        renderEmptyTable()
-      ) : (
-        <DataTable
-          autoLayout={true}
-          className={styles.table}
-          loading={loading}
-          onRowClick={event =>
-            tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: { selectedRecord: event.data } })
-          }
-          summary={resourcesContext.messages['webformPaMsTitle']}
-          value={tableManagementState.records}>
-          {renderTableColumns()}
-        </DataTable>
-      )}
+      {renderTable()}
 
       {isDialogVisible.delete && (
         <ConfirmDialog
