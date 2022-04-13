@@ -10,7 +10,7 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import 'proj4leaflet';
 import L from 'leaflet';
 import proj4 from 'proj4';
-import * as ELG from 'esri-leaflet-geocoder';
+// import * as ELG from 'esri-leaflet-geocoder';
 import * as esri from 'esri-leaflet';
 
 import { Button } from 'views/_components/Button';

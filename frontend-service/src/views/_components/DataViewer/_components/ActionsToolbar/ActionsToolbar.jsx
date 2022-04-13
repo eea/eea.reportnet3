@@ -14,7 +14,6 @@ import styles from './ActionsToolbar.module.scss';
 import { Button } from 'views/_components/Button';
 import { ChipButton } from 'views/_components/ChipButton';
 import { DeleteDialog } from './_components/DeleteDialog';
-import { DownloadFile } from 'views/_components/DownloadFile';
 import { DropdownFilter } from 'views/Dataset/_components/DropdownFilter';
 import { ImportTableDataDialog } from './_components/ImportTableDataDialog';
 import { InputText } from 'views/_components/InputText';
