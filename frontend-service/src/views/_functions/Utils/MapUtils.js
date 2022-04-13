@@ -156,8 +156,7 @@ const getFirstPointComplexGeometry = (json, geometryType) =>
       )
     : [55.6811608, 12.5844761];
 
-const getGeometryType = json =>
-  !isNil(json) && isValidJSON(json) ? JSON.parse(json).geometry.type.toUpperCase() : 'POINT';
+const getGeometryType = json => (!isNil(json) && isValidJSON(json) ? JSON.parse(json).geometry.type.toUpperCase() : '');
 
 const getSrid = json => (!isNil(json) && json !== '' ? JSON.parse(json).properties.srid : 'EPSG:4326');
 
