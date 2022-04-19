@@ -844,8 +844,12 @@
     "value": "JHtWQUxJREFUSU9OX1RBU0tTX0lOSVRJQUxfVEFYOjF9"
   },
   {
-    "key": "config/validation/validation.tasks.parallelism",
+    "key": "config/application/validation.tasks.parallelism",
     "value": "JHtWQUxJREFUSU9OX1RBU0tTX1BBUkFMTEVMSVNNOjR9"
+  },
+  {
+    "key": "config/application/validation.scheduled.consumer",
+    "value": "JHtWQUxJREFUSU9OX1NDSEVEVUxFUl9DT05TVU1FUjoxMDAwMH0="
   },
   {
     "key": "config/ums/management.endpoints.web.exposure.include",
@@ -1758,5 +1762,13 @@
   {
     "key": "config/apiGateway/zuul.routes.process.stripPrefix",
     "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/validation/validation.instance.priority",
+    "value": "JHtWQUxJREFUSU9OX0lOU1RBTkNFX1BSSU9SSVRZOkhJR0h9"
+  },
+  {
+    "key": "config/validation/validation.priority.days",
+    "value": "JHtWQUxJREFUSU9OX1BSSU9SSVRZX0RBWVM6MjkgOCA3IDR9"
   }
 ]

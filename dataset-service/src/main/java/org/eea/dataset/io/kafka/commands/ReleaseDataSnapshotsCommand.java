@@ -133,8 +133,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       // Send email to requesters
       sendMail(dateRelease, dataset, dataflowVO);
 
-
-
       LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {}",
           dataset.getDataflowId(), dataset.getDataProviderId());
       List<Long> datasetMetabaseListIds =

@@ -78,7 +78,7 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
           LOG_ERROR.error("Error refreshing the materialized view of the dataset {}", dataset, e);
           processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.CANCELED,
               ProcessTypeEnum.VALIDATION, processId, processId,
-              SecurityContextHolder.getContext().getAuthentication().getName());
+              SecurityContextHolder.getContext().getAuthentication().getName(), 0);
           datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
               DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
         }

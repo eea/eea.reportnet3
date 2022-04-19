@@ -16,16 +16,19 @@ import java.util.List;
 import java.util.Optional;
 import org.eea.dataflow.mapper.DataProviderGroupMapper;
 import org.eea.dataflow.mapper.DataProviderMapper;
+import org.eea.dataflow.mapper.FMEUserMapper;
 import org.eea.dataflow.mapper.LeadReporterMapper;
 import org.eea.dataflow.mapper.RepresentativeMapper;
 import org.eea.dataflow.persistence.domain.DataProvider;
 import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.eea.dataflow.persistence.domain.Dataflow;
+import org.eea.dataflow.persistence.domain.FMEUser;
 import org.eea.dataflow.persistence.domain.LeadReporter;
 import org.eea.dataflow.persistence.domain.Representative;
 import org.eea.dataflow.persistence.repository.DataProviderGroupRepository;
 import org.eea.dataflow.persistence.repository.DataProviderRepository;
 import org.eea.dataflow.persistence.repository.DataflowRepository;
+import org.eea.dataflow.persistence.repository.FMEUserRepository;
 import org.eea.dataflow.persistence.repository.LeadReporterRepository;
 import org.eea.dataflow.persistence.repository.RepresentativeRepository;
 import org.eea.exception.EEAErrorMessage;
@@ -35,6 +38,7 @@ import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSn
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.FMEUserVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
@@ -108,6 +112,12 @@ public class RepresentativeServiceImplTest {
 
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Mock
+  private FMEUserRepository fmeUserRepository;
+
+  @Mock
+  private FMEUserMapper fmeUserMapper;
 
   private Representative representative;
 
@@ -889,4 +899,82 @@ public class RepresentativeServiceImplTest {
     assertFalse(representativeServiceImpl.checkDataHaveBeenRelease(1L, 1L));
   }
 
+  @Test
+  public void findFmeUsersTest() {
+    FMEUser user = new FMEUser();
+    FMEUserVO userVO = new FMEUserVO();
+    Mockito.when(fmeUserRepository.findAll()).thenReturn(Arrays.asList(user));
+    Mockito.when(fmeUserMapper.entityListToClass(Mockito.anyList()))
+        .thenReturn(Arrays.asList(userVO));
+    assertNotNull(representativeServiceImpl.findFmeUsers());
+  }
+
+  @Test(expected = EEAException.class)
+  public void getProviderIdsEEAExceptionTest() throws EEAException {
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("test"));
+
+    DataProvider dataProvider = new DataProvider();
+    dataProvider.setId(1L);
+    List<DataProvider> dataProviderList = new ArrayList<>();
+    dataProviderList.add(dataProvider);
+
+    DataProviderVO dataProviderVO = new DataProviderVO();
+    dataProviderVO.setId(1L);
+    List<DataProviderVO> dataProviderListVO = new ArrayList<>();
+    dataProviderListVO.add(dataProviderVO);
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito.when(dataProviderRepository.findByCode(Mockito.any())).thenReturn(dataProviderList);
+    Mockito.when(dataProviderMapper.entityListToClass(Mockito.any()))
+        .thenReturn(dataProviderListVO);
+    try {
+      representativeServiceImpl.getProviderIds();
+    } catch (EEAException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void updateLeadReporterRepresentativeNotFoundTest() throws EEAException {
+    LeadReporter leadReporter = new LeadReporter();
+    leadReporter.setId(1L);
+    Representative representative = new Representative();
+    representative.setId(1L);
+    leadReporter.setRepresentative(representative);
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setId(2L);
+    leadReporterVO.setRepresentativeId(2L);
+    Mockito.when(leadReporterRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(leadReporter));
+    Mockito.when(representativeRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(representative));
+    try {
+      representativeServiceImpl.updateLeadReporter(leadReporterVO);
+    } catch (EEAException e) {
+      assertEquals(EEAErrorMessage.REPRESENTATIVE_NOT_FOUND, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Test
+  public void createLeadReporterAndSetInvalidTest() throws EEAException {
+    LeadReporterVO leadReporterVO = new LeadReporterVO();
+    leadReporterVO.setEmail("email@email.com");
+    Representative representative = new Representative();
+    representative.setId(1L);
+    LeadReporter leadReporter = new LeadReporter();
+    leadReporter.setId(1L);
+    leadReporter.setEmail("email2@email.com");
+    representative.setLeadReporters(Arrays.asList(leadReporter));
+    Mockito.when(representativeRepository.findById(Mockito.anyLong()))
+        .thenReturn(Optional.of(representative));
+    Mockito.when(leadReporterMapper.classToEntity(Mockito.any())).thenReturn(leadReporter);
+    Mockito.when(userManagementControllerZull.getUserByEmail(Mockito.anyString())).thenReturn(null);
+    Mockito.when(leadReporterRepository.save(Mockito.any())).thenReturn(leadReporter);
+    representativeServiceImpl.createLeadReporter(1L, leadReporterVO);
+    assertTrue(leadReporter.getInvalid() == true);
+  }
 }

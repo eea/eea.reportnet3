@@ -789,7 +789,7 @@ public class SqlRulesServiceImplTest {
 
     Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabaseVO);
-    Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetId(1L))
+    Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(1L))
         .thenReturn(datasetSchemaVO);
 
     sqlRulesServiceImpl.runSqlRule(1L, sqlRule, false);

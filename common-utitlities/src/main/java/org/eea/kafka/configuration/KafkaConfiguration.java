@@ -15,6 +15,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.eea.kafka.domain.EEAEventVO;
+import org.eea.message.configuration.EnableMessageEventHandling;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -35,6 +36,7 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
  */
 @Configuration
 @EnableKafka
+@EnableMessageEventHandling
 @ComponentScan("org.eea.kafka")
 public class KafkaConfiguration {
 

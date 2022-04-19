@@ -35,7 +35,7 @@ public class BroadcastKafkaReceiver extends KafkaReceiver {
   @Override
   @KafkaListener(topics = "BROADCAST_TOPIC",
       containerFactory = "broadcastKafkaListenerContainerFactory")
-  public void listenMessage(Message<EEAEventVO> message) throws EEAException {
+  public void consumeMessage(Message<EEAEventVO> message) throws EEAException {
     LOG.info("Received message {}", message.getPayload());
     if (null != handler) {
       try {

@@ -1,13 +1,13 @@
 package org.eea.kafka.handler;
 
 import static org.mockito.Mockito.times;
-
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.kafka.commands.EEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.factory.EEAEventCommandFactory;
+import org.eea.message.EEAEventHandlerImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

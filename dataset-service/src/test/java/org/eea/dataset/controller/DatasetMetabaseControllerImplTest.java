@@ -11,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DesignDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -133,6 +134,34 @@ public class DatasetMetabaseControllerImplTest {
   }
 
   /**
+   * Find external dataset metabase by id test.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void findExternalDatasetMetabaseByIdTest() throws Exception {
+    datasetMetabaseControllerImpl.findExternalDatasetMetabaseById(Mockito.anyLong());
+    Mockito.verify(datasetMetabaseService, times(1)).findDatasetMetabaseExternal(Mockito.anyLong());
+  }
+
+  /**
+   * Find external dataset metabase by id EEA exception test.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void findExternalDatasetMetabaseByIdEEAExceptionTest() throws Exception {
+    Mockito.when(datasetMetabaseService.findDatasetMetabaseExternal(Mockito.anyLong()))
+        .thenThrow(EEAException.class);
+    try {
+      datasetMetabaseControllerImpl.findExternalDatasetMetabaseById(Mockito.anyLong());
+    } catch (ResponseStatusException e) {
+      assertEquals(e.getStatus(), HttpStatus.UNAUTHORIZED);
+      throw e;
+    }
+  }
+
+  /**
    * Test find design data set id by dataflow id.
    */
   @Test
@@ -163,6 +192,20 @@ public class DatasetMetabaseControllerImplTest {
     datasetMetabaseControllerImpl.updateDatasetName(1L, "datasetName");
     Mockito.verify(datasetMetabaseService, times(1)).updateDatasetName(Mockito.any(),
         Mockito.any());
+  }
+
+  /**
+   * Update dataset name bad name test.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void updateDatasetNameBadNameTest() {
+    try {
+      datasetMetabaseControllerImpl.updateDatasetName(1L, "bad$name");
+    } catch (ResponseStatusException e) {
+      assertEquals(e.getStatus(), HttpStatus.BAD_REQUEST);
+      assertEquals(e.getReason(), EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
+      throw e;
+    }
   }
 
 
@@ -304,6 +347,29 @@ public class DatasetMetabaseControllerImplTest {
   }
 
   /**
+   * Delete dataset foreign relationship dataset reference id null test.
+   */
+  @Test
+  public void deleteDatasetForeignRelationshipDatasetReferenceIdNullTest() {
+    Mockito.when(
+        datasetMetabaseService.getIntegrityDatasetId(Mockito.any(), Mockito.any(), Mockito.any()))
+        .thenReturn(1L);
+    datasetMetabaseControllerImpl.deleteForeignRelationship(1L, null, "1", "1");
+    Mockito.verify(datasetMetabaseService, times(1)).deleteForeignRelation(Mockito.anyLong(),
+        Mockito.anyLong(), Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Delete dataset foreign relationship reference id not equals origin id test.
+   */
+  @Test
+  public void deleteDatasetForeignRelationshipReferenceIdNotEqualsOriginIdTest() {
+    datasetMetabaseControllerImpl.deleteForeignRelationship(1L, 2L, "1", "1");
+    Mockito.verify(datasetMetabaseService, times(1)).deleteForeignRelation(Mockito.anyLong(),
+        Mockito.anyLong(), Mockito.any(), Mockito.any());
+  }
+
+  /**
    * Gets the last dataset validation for release.
    *
    * @return the last dataset validation for release
@@ -388,6 +454,36 @@ public class DatasetMetabaseControllerImplTest {
   }
 
   /**
+   * Update dataset running status test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void updateDatasetRunningStatusTest() throws EEAException {
+    datasetMetabaseControllerImpl.updateDatasetRunningStatus(Mockito.anyLong(), Mockito.any());
+    Mockito.verify(datasetMetabaseService, times(1)).updateDatasetRunningStatus(Mockito.anyLong(),
+        Mockito.any());
+  }
+
+  /**
+   * Update dataset running status EEA exception test.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void updateDatasetRunningStatusEEAExceptionTest() throws Exception {
+    Mockito.doThrow(EEAException.class).when(datasetMetabaseService)
+        .updateDatasetRunningStatus(Mockito.anyLong(), Mockito.any());
+    try {
+      datasetMetabaseControllerImpl.updateDatasetRunningStatus(Mockito.anyLong(), Mockito.any());
+    } catch (ResponseStatusException e) {
+      assertEquals(e.getStatus(), HttpStatus.INTERNAL_SERVER_ERROR);
+      assertEquals(e.getReason(), EEAErrorMessage.UPDATING_DATASET_STATUS);
+      throw e;
+    }
+  }
+
+  /**
    * Find reporting data set by dataflow ids test.
    */
   @Test
@@ -396,6 +492,17 @@ public class DatasetMetabaseControllerImplTest {
     dataflowIds.add(1L);
     datasetMetabaseControllerImpl.findReportingDataSetByDataflowIds(dataflowIds);
     Mockito.verify(reportingDatasetService, times(1)).getReportingsByDataflowIds(dataflowIds);
+  }
+
+  /**
+   * Find data set by dataflow ids test.
+   */
+  @Test
+  public void findDataSetByDataflowIdsTest() {
+    List<Long> dataflowIds = new ArrayList<>();
+    dataflowIds.add(1L);
+    datasetMetabaseControllerImpl.findDataSetByDataflowIds(dataflowIds);
+    Mockito.verify(datasetMetabaseService, times(1)).findDataSetByDataflowIds(dataflowIds);
   }
 
   /**

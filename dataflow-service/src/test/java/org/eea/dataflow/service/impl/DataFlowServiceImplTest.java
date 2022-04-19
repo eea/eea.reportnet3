@@ -1565,4 +1565,53 @@ public class DataFlowServiceImplTest {
     }
   }
 
+  @Test
+  public void updateDataFlowAutomaticReportingDeletionTest() {
+    dataflowServiceImpl.updateDataFlowAutomaticReportingDeletion(1L, false);
+    Mockito.verify(dataflowRepository, times(1)).updateAutomaticReportingDeletion(Mockito.anyLong(),
+        Mockito.anyBoolean());
+  }
+
+  @Test
+  public void getDataflowsMetabaseByIdTest() {
+    Dataflow dataflow = new Dataflow();
+    dataflow.setId(1L);
+    DataFlowVO dataflowVO = new DataFlowVO();
+    dataflowVO.setId(1L);
+    Mockito.when(dataflowRepository.findMetabaseByDataflowIds(Mockito.anyList()))
+        .thenReturn(Arrays.asList(dataflow));
+    Mockito.when(dataflowMapper.entityListToClass(Mockito.anyList()))
+        .thenReturn(Arrays.asList(dataflowVO));
+    assertNotNull(dataflowServiceImpl.getDataflowsMetabaseById(Arrays.asList(1L)));
+  }
+
+  @Test(expected = EEAException.class)
+  public void createDataFlowCompanyGroupNotFound() throws EEAException {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setName("dataflow");
+    dataFlowVO.setType(TypeDataflowEnum.BUSINESS);
+    try {
+      dataflowServiceImpl.createDataFlow(dataFlowVO);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.COMPANY_GROUP_NOTFOUND, ex.getMessage());
+      throw ex;
+    }
+  }
+
+  @Test(expected = EEAException.class)
+  public void createDataFlowCompanyUserFMENotFound() throws EEAException {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setName("dataflow");
+    dataFlowVO.setType(TypeDataflowEnum.BUSINESS);
+    dataFlowVO.setDataProviderGroupId(1L);
+    when(dataProviderGroupRepository.existsById(Mockito.anyLong())).thenReturn(true);
+    try {
+      dataflowServiceImpl.createDataFlow(dataFlowVO);
+    } catch (EEAException ex) {
+      assertEquals(EEAErrorMessage.USERFME_NOTFOUND, ex.getMessage());
+      throw ex;
+    }
+  }
+
+
 }

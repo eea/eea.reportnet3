@@ -68,10 +68,10 @@ public abstract class ExecuteValidationCommand extends AbstractEEAEventHandlerCo
   public void execute(final EEAEventVO eeaEventVO) throws EEAException {
     final Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
     final String processId = (String) eeaEventVO.getData().get("uuid");
+    final Long taskId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("task_id")));
     TenantResolver.setTenantName("dataset_" + datasetId);
 
-    validationHelper
-        .processValidation(eeaEventVO, processId, datasetId, this.getValidationAction(),
-            this.getNotificationEventType());
+    validationHelper.processValidation(taskId, eeaEventVO, processId, datasetId,
+        this.getValidationAction(), this.getNotificationEventType());
   }
 }
