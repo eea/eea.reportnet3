@@ -29,7 +29,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   List<Long> findLastLowPriorityTask(@Param("numberTasks") int numberTasks);
 
   @Query(nativeQuery = true,
-      value = "select case when (exists (select id from task where process_id=:processId and status !='FINISHED' limit 1)) then FALSE else TRUE end")
+      value = "select case when (exists (select id from task where process_id=:processId and (status !='FINISHED' and status !='CANCELED') limit 1)) then FALSE else TRUE end")
   boolean isProcessFinished(@Param("processId") String processId);
 
   @Query(nativeQuery = true, value = "select * from task WHERE id in(:ids)")
