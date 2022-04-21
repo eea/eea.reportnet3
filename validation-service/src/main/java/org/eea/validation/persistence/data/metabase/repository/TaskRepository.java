@@ -14,6 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
+  /**
+   * Find last task.
+   *
+   * @param numberTasks the number tasks
+   * @return the list
+   */
   @Query(nativeQuery = true, value = "with numberOfPendingTaks as (select count(id)\r\n"
       + " as ntasks, process_id from task where status= 'IN_QUEUE' group by task.process_id),\r\n"
       + " taskPriorityId as (\r\n"
@@ -21,6 +27,12 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
       + ")\r\n" + "select t.id from taskPriorityId t limit :numberTasks ;")
   List<Long> findLastTask(@Param("numberTasks") int numberTasks);
 
+  /**
+   * Find last low priority task.
+   *
+   * @param numberTasks the number tasks
+   * @return the list
+   */
   @Query(nativeQuery = true, value = "with numberOfPendingTaks as (select count(id)\r\n"
       + " as ntasks, process_id from task where status= 'IN_QUEUE' group by task.process_id),\r\n"
       + " taskPriorityId as (\r\n"
@@ -28,18 +40,50 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
       + ")\r\n" + "select t.id from taskPriorityId t limit :numberTasks ;")
   List<Long> findLastLowPriorityTask(@Param("numberTasks") int numberTasks);
 
+  /**
+   * Checks if is process finished.
+   *
+   * @param processId the process id
+   * @return true, if is process finished
+   */
   @Query(nativeQuery = true,
       value = "select case when (exists (select id from task where process_id=:processId and (status !='FINISHED' and status !='CANCELED') limit 1)) then FALSE else TRUE end")
   boolean isProcessFinished(@Param("processId") String processId);
 
+  /**
+   * Find by id in.
+   *
+   * @param ids the ids
+   * @return the list
+   */
   @Query(nativeQuery = true, value = "select * from task WHERE id in(:ids)")
   List<Task> findByIdIn(@Param("ids") List<Long> ids);
 
+  /**
+   * Update status and finish date.
+   *
+   * @param taskId the task id
+   * @param status the status
+   * @param dateFinish the date finish
+   */
   @Modifying
   @Transactional
   @Query(nativeQuery = true,
       value = "update task set status= :status ,date_finish= :dateFinish where id=:taskId ")
   void updateStatusAndFinishDate(@Param("taskId") Long taskId, @Param("status") String status,
+      @Param("dateFinish") Date dateFinish);
+
+  /**
+   * Cancel status and finish date.
+   *
+   * @param taskId the task id
+   * @param dateFinish the date finish
+   */
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true,
+      value = "update task set status= (case when (select \"version\" from task where id=:taskId) >20 then 'CANCELED' else 'IN_QUEUE' END) ,date_finish= :dateFinish where id=:taskId ")
+  void cancelStatusAndFinishDate(@Param("taskId") Long taskId,
       @Param("dateFinish") Date dateFinish);
 }
 
