@@ -17,8 +17,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -442,6 +444,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       offset = 1;
     }
 
+    Map<String, Long> totalRecordsByTableSchema = new HashMap<>();
     // First loop to fill the temporary table according to the filter
     for (TableSchema tableSchema : tableSchemaList) {
 
@@ -449,6 +452,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
           columnName, filterValue);
 
+      totalRecordsByTableSchema.put(tableSchema.getIdTableSchema().toString(), totalRecords);
 
       String filterChain = tableSchema.getIdTableSchema().toString();
       if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
@@ -544,9 +548,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       int nHeaders = tableSchema.getRecordSchema().getFieldSchema().size();
       Long limitAux = (limit / nHeaders > 0 ? Long.valueOf(limit) / ((nHeaders + 1) / 2) : 1) * 2;
       JSONArray tableRecords = new JSONArray();
-      Long totalRecords = getCount(
-          totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
-          columnName, filterValue);
+
+      Long totalRecords = totalRecordsByTableSchema.get(tableSchema.getIdTableSchema().toString());
 
       if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
           || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
@@ -1466,7 +1469,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     if (null != tableSchemaIdString) {
       stringQuery.append(" where ")
-          .append(String.format(" id_table_schema like '%s' and ", tableSchemaIdString));
+          .append(String.format(" id_table_schema = '%s' and ", tableSchemaIdString));
       stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
     }
     stringQuery.append(") records ");

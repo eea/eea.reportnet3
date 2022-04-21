@@ -928,6 +928,18 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
+   * Cancel task in case failed.
+   *
+   * @param taskId the task id
+   * @param status the status
+   * @param finishDate the finish date
+   */
+  @Transactional
+  public void cancelTask(Long taskId, Date finishDate) {
+    taskRepository.cancelStatusAndFinishDate(taskId, finishDate);
+  }
+
+  /**
    * The Class ValidationTask.
    */
 
@@ -1008,7 +1020,11 @@ public class ValidationHelper implements DisposableBean {
         status = ProcessStatusEnum.IN_QUEUE;
       } finally {
         try {
-          updateTask(validationTask.taskId, status, new Date());
+          if (ProcessStatusEnum.IN_QUEUE.equals(status)) {
+            cancelTask(validationTask.taskId, new Date());
+          } else {
+            updateTask(validationTask.taskId, status, new Date());
+          }
           Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
           LOG.info("Validation task {} finished, it has taken taken {} seconds",
               validationTask.eeaEventVO, totalTime);
