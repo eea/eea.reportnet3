@@ -50,6 +50,7 @@ import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -318,6 +319,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     // We don't want to do any query if the filter is empty and then return a new
     // result object
     if (levelErrorListFilled || idRulesListFilled) {
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       // Total records calculated.
       recordsCalc(idTableSchema, result, filter, errorList, idRules, fieldSchema, fieldValue);
 
