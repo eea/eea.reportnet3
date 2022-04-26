@@ -426,7 +426,7 @@ public class ValidationServiceImpl implements ValidationService {
       }
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error("The Table Validation failed: {}", e.getMessage(), e);
-      rulesErrorUtils.createRuleErrorException(table, new RuntimeException());
+      rulesErrorUtils.createRuleErrorException(table, new RuntimeException(e.getMessage()));
       taskRepository.updateStatusAndFinishDate(taskId, ProcessStatusEnum.IN_QUEUE.toString(),
           new Date());
     } finally {
