@@ -17,8 +17,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -48,6 +50,7 @@ import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -316,6 +319,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     // We don't want to do any query if the filter is empty and then return a new
     // result object
     if (levelErrorListFilled || idRulesListFilled) {
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       // Total records calculated.
       recordsCalc(idTableSchema, result, filter, errorList, idRules, fieldSchema, fieldValue);
 
@@ -442,6 +446,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       offset = 1;
     }
 
+    Map<String, Long> totalRecordsByTableSchema = new HashMap<>();
     // First loop to fill the temporary table according to the filter
     for (TableSchema tableSchema : tableSchemaList) {
 
@@ -449,6 +454,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
           columnName, filterValue);
 
+      totalRecordsByTableSchema.put(tableSchema.getIdTableSchema().toString(), totalRecords);
 
       String filterChain = tableSchema.getIdTableSchema().toString();
       if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
@@ -505,8 +511,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         if (null != filterValue || null != columnName) {
           stringQuery.append(
               ") as tableAux where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
-              .append(null != columnName ? " x.o ->> 'fieldName' = ? and " : "")
-              .append(null != filterValue ? " x.o ->> 'value' = ? and " : "");
+              .append(null != columnName ? " x.o ->> 'fieldName' = '" + columnName + "' and " : "")
+              .append(null != filterValue ? " x.o ->> 'value' = '" + filterValue + "' and " : "");
           stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
           stringQuery.append(" ) ");
         } else {
@@ -544,9 +550,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       int nHeaders = tableSchema.getRecordSchema().getFieldSchema().size();
       Long limitAux = (limit / nHeaders > 0 ? Long.valueOf(limit) / ((nHeaders + 1) / 2) : 1) * 2;
       JSONArray tableRecords = new JSONArray();
-      Long totalRecords = getCount(
-          totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
-          columnName, filterValue);
+
+      Long totalRecords = totalRecordsByTableSchema.get(tableSchema.getIdTableSchema().toString());
 
       if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
           || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
@@ -758,12 +763,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    */
   private Long getCount(String generatedQuery, String columnName, String filterValue) {
     Query query = entityManager.createNativeQuery(generatedQuery);
-    if (null != columnName && null != filterValue) {
-      query.setParameter(1, columnName);
-      query.setParameter(2, filterValue);
-    } else if (null != columnName) {
-      query.setParameter(1, columnName);
-    } else if (null != filterValue) {
+    if (null != filterValue) {
       query.setParameter(1, filterValue);
     }
     BigInteger result = (BigInteger) query.setHint(QueryHints.READ_ONLY, true).getSingleResult();
@@ -1436,6 +1436,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return fieldValue;
   }
 
+
+
   /**
    * Total records query.
    *
@@ -1443,33 +1445,55 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param tableSchema the table schema
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    * @return the string
    */
   private String totalRecordsQuery(Long datasetId, TableSchema tableSchema, String filterValue,
       String columnName, String dataProviderCodes) {
+
     StringBuilder stringQuery = new StringBuilder();
     String tableSchemaIdString = tableSchema.getIdTableSchema().toString();
-    stringQuery.append("select count(tablesAux.id_record)  as \"totalRecords\" from ( ");
-    stringQuery.append(
-        " select id_table_schema,id_record, json_build_object('countryCode',data_provider_code,'fields',json_agg(fields)) as records from ( ")
-        .append(
-            " select data_provider_code,id_table_schema,id_record,rdata_position,json_build_object('fieldName',\"fieldName\",'value',value,'field_value_id',field_value_id) as fields from( ")
-        .append(" select case ");
-    String fieldSchemaQueryPart = " when fv.id_field_schema = '%s' then '%s' ";
-    for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
-      stringQuery.append(
-          String.format(fieldSchemaQueryPart, field.getIdFieldSchema(), field.getHeaderName()));
-    }
-    stringQuery.append(String.format(
-        " end as \"fieldName\", fv.value as \"value\", case when fv.\"type\" = 'ATTACHMENT' and fv.value != '' then fv.id else null end as \"field_value_id\", tv.id_table_schema, rv.id as id_record , rv.data_provider_code, rv.data_position as rdata_position from dataset_%s.field_value fv inner join dataset_%s.record_value rv on fv.id_record = rv.id inner join dataset_%s.table_value tv on tv.id = rv.id_table) fieldsAux",
-        datasetId, datasetId, datasetId));
 
-    if (null != tableSchemaIdString) {
-      stringQuery.append(" where ")
-          .append(String.format(" id_table_schema like '%s' and ", tableSchemaIdString));
-      stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
+    if (null != filterValue || StringUtils.isNotBlank(columnName)) {
+      String selectQueryPart1 =
+          "with fieldValueAux as (select * from dataset_%s.field_value fv2 where ";
+      stringQuery.append(String.format(selectQueryPart1, datasetId));
+      if (StringUtils.isNotBlank(columnName)) {
+        String selectQueryPart2 = "fv2.id_field_schema = '%s' and ";
+        if (tableSchema.getRecordSchema().getFieldSchema().stream()
+            .anyMatch(f -> f.getHeaderName().equals(columnName))) {
+          String fieldSchemaId = tableSchema.getRecordSchema().getFieldSchema().stream()
+              .filter(f -> f.getHeaderName().equals(columnName)).findFirst().get()
+              .getIdFieldSchema().toString();
+          stringQuery.append(String.format(selectQueryPart2, fieldSchemaId));
+        }
+      }
+      if (null != filterValue) {
+        String selectQueryPart3 = "fv2.value = ?) ";
+        stringQuery.append(String.format(selectQueryPart3, filterValue));
+      } else {
+        stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
+        stringQuery.append(") ");
+      }
     }
-    stringQuery.append(") records ");
+    stringQuery.append("select count(rv.id)  as \"totalRecords\" from ");
+
+    String recordQueryPart = "dataset_%s.record_value rv ";
+    stringQuery.append(String.format(recordQueryPart, datasetId));
+
+    String firstJoinPart = "inner join dataset_%s.table_value tv on rv.id_table = tv.id ";
+    stringQuery.append(String.format(firstJoinPart, datasetId));
+
+    if (null != filterValue || StringUtils.isNotBlank(columnName)) {
+      stringQuery.append("inner join fieldValueAux fv on rv.id = fv.id_record ");
+    }
+
+    stringQuery.append(" where ");
+
+    if (StringUtils.isNotBlank(tableSchemaIdString)) {
+      stringQuery.append(String.format(" id_table_schema = '%s' and ", tableSchemaIdString));
+    }
+
     if (StringUtils.isNotBlank(dataProviderCodes)) {
       List<String> countryCodesList = new ArrayList<>(Arrays.asList(dataProviderCodes.split(",")));
       StringBuilder countries = new StringBuilder();
@@ -1480,21 +1504,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
       }
       stringQuery.append(
-          null != countryCodesList ? String.format("where data_provider_code in (%s) ", countries)
+          null != countryCodesList ? String.format(" rv.data_provider_code in (%s) ", countries)
               : "");
-    }
-    stringQuery.append("group by id_table_schema,id_record,data_provider_code, rdata_position ");
-    stringQuery.append(" ) tablesAux ");
-    if (null != filterValue || null != columnName) {
-      stringQuery.append(
-          " where exists (select * from jsonb_array_elements(cast(records as jsonb) -> 'fields') as x(o) where ")
-          .append(null != columnName ? " x.o ->> 'fieldName' = ? and " : "")
-          .append(null != filterValue ? " x.o ->> 'value' = ? and " : "");
+    } else {
       stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
-      stringQuery.append(" ) ");
     }
 
     LOG.info(stringQuery.toString());
     return stringQuery.toString();
   }
+
 }
