@@ -74,5 +74,12 @@ public interface DataCollectionService {
    */
   DataFlowVO getDataflowMetabase(Long dataflowId);
 
+  /**
+   * Gets the providers pending to copy into EU.
+   *
+   * @param dataCollectionId the data collection id
+   * @return the providers pending to copy into EU
+   */
+  List<String> getProvidersPendingToCopyIntoEU(Long dataCollectionId);
 
 }
