@@ -58,7 +58,6 @@ export const ActionsToolbar = ({
   selectedRuleMessage,
   selectedTableSchemaId,
   setColumns,
-  setImportTableDialogVisible,
   showGroupedValidationFilter,
   showValidationFilter,
   showValueFilter,
@@ -67,7 +66,6 @@ export const ActionsToolbar = ({
   tableId,
   tableName
 }) => {
-  const [exportTableDataName, setExportTableDataName] = useState('');
   const [isFilteredByValue, setIsFilteredByValue] = useState(false);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [filter, dispatchFilter] = useReducer(filterReducer, {
@@ -120,7 +118,6 @@ export const ActionsToolbar = ({
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
       const isExportFilteredCsv = TextUtils.areEquals(type.key, 'exportFilteredCsv');
-      setExportTableDataName(createTableName(tableName, type.code));
       await DatasetService.exportTableData(
         datasetId,
         tableId,
@@ -160,8 +157,6 @@ export const ActionsToolbar = ({
       showValueFilter(encodeURIComponent(valueFilter));
     }
   };
-
-  const createTableName = (tableName, fileType) => `${tableName}.${fileType}`;
 
   const getExportButtonPosition = e => {
     const exportButton = e.currentTarget;

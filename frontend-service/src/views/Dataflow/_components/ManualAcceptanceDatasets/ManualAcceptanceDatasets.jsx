@@ -4,6 +4,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import isEmpty from 'lodash/isEmpty';
+import uniqBy from 'lodash/uniqBy';
 
 import styles from './ManualAcceptanceDatasets.module.scss';
 
@@ -124,6 +125,12 @@ export const ManualAcceptanceDatasets = ({
             resourcesContext.messages,
             dataflowType,
             'manualAcceptanceDataProviderNameFilterLabel'
+          ),
+          multiSelectOptions: uniqBy(
+            manualAcceptanceDatasetsState.data
+              .map(dataProvider => ({ type: dataProvider.dataProviderName, value: dataProvider.dataProviderName }))
+              .sort((a, b) => a.value.localeCompare(b.value)),
+            'type'
           )
         },
         { key: 'feedbackStatus', label: resourcesContext.messages['feedbackStatus'] }
@@ -136,7 +143,10 @@ export const ManualAcceptanceDatasets = ({
   const renderColumns = datasets => {
     const fieldColumns = getOrderedValidations(Object.keys(datasets[0])).map(field => {
       let template = null;
-      if (field === 'isReleased') template = isReleasedTemplate;
+      if (field === 'isReleased') {
+        template = isReleasedTemplate;
+      }
+
       return (
         <Column
           body={template}
@@ -156,6 +166,7 @@ export const ManualAcceptanceDatasets = ({
         />
       );
     });
+
     fieldColumns.push(renderActionButtonsColumn);
     return fieldColumns;
   };
