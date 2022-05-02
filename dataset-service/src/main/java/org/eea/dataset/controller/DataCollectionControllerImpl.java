@@ -240,4 +240,21 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     return dataCollectionService.getDataCollectionIdByDataflowId(idDataflow);
   }
 
+  /**
+   * Find providers pending in eu dataset.
+   *
+   * @param id the id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/pendingProviders/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Providers pending to copy into EU Dataset",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = String.class,
+      responseContainer = "List", hidden = true)
+  public List<String> findProvidersPendingInEuDataset(
+      @ApiParam(value = "Datacollection Id", example = "0") @PathVariable("id") Long id) {
+    return dataCollectionService.getProvidersPendingToCopyIntoEU(id);
+  }
+
 }

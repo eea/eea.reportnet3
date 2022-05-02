@@ -13,10 +13,13 @@ import java.util.Optional;
 import javax.sql.DataSource;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DataCollectionMapper;
+import org.eea.dataset.persistence.metabase.domain.ChangesEUDataset;
+import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.TestDataset;
+import org.eea.dataset.persistence.metabase.repository.ChangesEUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
@@ -169,6 +172,9 @@ public class DataCollectionServiceImplTest {
 
   @Mock
   private IntegrationControllerZuul integrationControllerZuul;
+
+  @Mock
+  private ChangesEUDatasetRepository changesEUDatasetRepository;
 
   /** The lead reporters VO. */
   private List<LeadReporterVO> leadReportersVO;
@@ -704,6 +710,27 @@ public class DataCollectionServiceImplTest {
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any()))
         .thenThrow(new RuntimeException());
     Assert.assertNull(dataCollectionService.getDataflowMetabase(1L));
+  }
+
+  @Test
+  public void getProvidersPendingToCopyIntoEUTest() {
+
+    DataCollection dc = new DataCollection();
+    dc.setId(1L);
+    Mockito.when(dataSetMetabaseRepository.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn("test");
+    Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.anyString()))
+        .thenReturn(Optional.of(dc));
+    ChangesEUDataset changes = new ChangesEUDataset();
+    changes.setDatacollection(1L);
+    changes.setId(1L);
+    changes.setProvider("test");
+    Mockito.when(changesEUDatasetRepository.findDistinctByDatacollection(Mockito.anyLong()))
+        .thenReturn(Arrays.asList(changes));
+    List<String> providers = new ArrayList<>();
+    providers.add("test");
+    Assert.assertEquals("Changes in DC not in EU", providers,
+        dataCollectionService.getProvidersPendingToCopyIntoEU(1L));
   }
 
 }
