@@ -1,6 +1,7 @@
 package org.eea.validation.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -259,10 +260,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * Retrieve table data.
    *
    * @param query the query
-   * @param dataSetMetabaseVO the data set metabase VO
-   * @param rule the rule
+   * @param queryVO the query VO
    * @param ischeckDC the ischeck DC
-   * @return the table value
+   * @return the query VO
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
   @Override
@@ -728,7 +728,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     for (String id : datasetIds) {
       DataSetSchemaVO schema =
-          datasetSchemaControllerZuul.findDataSchemaByDatasetId(Long.parseLong(id));
+          datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(Long.parseLong(id));
       if (schema.getTableSchemas() != null) {
         tables.addAll(schema.getTableSchemas());
       }
@@ -1037,7 +1037,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       Map<String, Long> datasetSchemasMap, Long dataflowId, Map<Long, Long> datasetIdOldNew,
       List<ReferenceDatasetVO> referenceDatasets) {
     List<ReportingDatasetVO> reportingDatasetList =
-        datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
+        datasetMetabaseController.findReportingDataSetByDataflowIds(Arrays.asList(dataflowId));
     List<RepresentativeVO> dataprovidersVOList =
         representativeController.findRepresentativesByIdDataFlow(dataflowId);
     List<Long> dataprovidersIdList = new ArrayList<>();

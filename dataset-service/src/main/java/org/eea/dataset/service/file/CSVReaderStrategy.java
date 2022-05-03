@@ -119,8 +119,6 @@ public class CSVReaderStrategy implements ReaderStrategy {
     this.batchRecordSave = batchRecordSave;
   }
 
-
-
   /**
    * Parses the file.
    *
@@ -132,7 +130,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
    * @param fileName the file name
    * @param replace the replace
    * @param schema the schema
-   * @return the data set VO
+   * @param connectionDataVO the connection data VO
    * @throws EEAException the EEA exception
    */
   @Override
@@ -181,10 +179,6 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
       // Get the first Line
       List<String> firstLine = Arrays.asList(reader.readNext());
-
-      if (firstLine.size() == 1) {
-        firstLine.set(0, firstLine.get(0).replace(" ", ""));
-      }
 
       // if first line is empty throw an error
       lineEmpty(firstLine);

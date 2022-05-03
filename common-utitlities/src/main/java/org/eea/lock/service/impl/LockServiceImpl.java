@@ -9,14 +9,13 @@ import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockType;
+import org.eea.job.JobScheduler;
 import org.eea.lock.mapper.LockMapper;
 import org.eea.lock.persistence.domain.Lock;
 import org.eea.lock.persistence.repository.LockRepository;
@@ -44,7 +43,8 @@ public class LockServiceImpl implements LockService {
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant SCHEDULER. */
-  private static final ScheduledExecutorService SCHEDULER = Executors.newScheduledThreadPool(1);
+  @Autowired
+  private JobScheduler scheduler;
 
   /** The Constant TASKS. */
   private static final Map<Integer, ScheduledFuture<?>> TASKS = new ConcurrentHashMap<>();
@@ -178,7 +178,7 @@ public class LockServiceImpl implements LockService {
   @Override
   public void scheduleLockRemovalTask(Integer lockId) {
     ScheduledFuture<?> task =
-        SCHEDULER.schedule(() -> scheduledRemoveLock(lockId), delay, TimeUnit.MILLISECONDS);
+        scheduler.schedule(() -> scheduledRemoveLock(lockId), delay, TimeUnit.MILLISECONDS);
     TASKS.put(lockId, task);
   }
 
@@ -197,4 +197,5 @@ public class LockServiceImpl implements LockService {
     }
     LOG.warn("Lock removed by scheduler: {} - {}", lockId, isRemoved);
   }
+
 }

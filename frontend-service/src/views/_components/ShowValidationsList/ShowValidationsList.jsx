@@ -629,7 +629,7 @@ export const ShowValidationsList = memo(
               </DataTable>
             ) : (
               <div className={styles.emptyFilteredData}>
-                {resourcesContext.messages['noQCRulesWithSelectedParameters']}
+                {resourcesContext.messages['noValidationsWithSelectedParameters']}
               </div>
             )}
           </div>

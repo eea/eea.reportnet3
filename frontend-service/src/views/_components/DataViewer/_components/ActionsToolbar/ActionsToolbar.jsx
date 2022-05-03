@@ -14,7 +14,6 @@ import styles from './ActionsToolbar.module.scss';
 import { Button } from 'views/_components/Button';
 import { ChipButton } from 'views/_components/ChipButton';
 import { DeleteDialog } from './_components/DeleteDialog';
-import { DownloadFile } from 'views/_components/DownloadFile';
 import { DropdownFilter } from 'views/Dataset/_components/DropdownFilter';
 import { ImportTableDataDialog } from './_components/ImportTableDataDialog';
 import { InputText } from 'views/_components/InputText';
@@ -59,7 +58,6 @@ export const ActionsToolbar = ({
   selectedRuleMessage,
   selectedTableSchemaId,
   setColumns,
-  setImportTableDialogVisible,
   showGroupedValidationFilter,
   showValidationFilter,
   showValueFilter,
@@ -68,7 +66,6 @@ export const ActionsToolbar = ({
   tableId,
   tableName
 }) => {
-  const [exportTableDataName, setExportTableDataName] = useState('');
   const [isFilteredByValue, setIsFilteredByValue] = useState(false);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [filter, dispatchFilter] = useReducer(filterReducer, {
@@ -102,18 +99,12 @@ export const ActionsToolbar = ({
     }
   }, [isGroupedValidationSelected]);
 
-  const onDownloadTableData = async () => {
-    try {
-      const { data } = await DatasetService.downloadTableData(datasetId, exportTableDataName);
-      DownloadFile(data, exportTableDataName);
-    } catch (error) {
-      console.error('ActionsToolbar - onDownloadTableData.', error);
-    } finally {
+  useEffect(() => {
+    if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_TABLE_DATA_COMPLETED_EVENT')) {
       setIsLoadingFile(false);
     }
-  };
+  }, [notificationContext.hidden]);
 
-  useCheckNotifications(['EXPORT_TABLE_DATA_COMPLETED_EVENT'], onDownloadTableData);
   useCheckNotifications(['EXPORT_TABLE_DATA_FAILED_EVENT'], setIsLoadingFile, false);
 
   const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
@@ -127,7 +118,6 @@ export const ActionsToolbar = ({
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
       const isExportFilteredCsv = TextUtils.areEquals(type.key, 'exportFilteredCsv');
-      setExportTableDataName(createTableName(tableName, type.code));
       await DatasetService.exportTableData(
         datasetId,
         tableId,
@@ -167,8 +157,6 @@ export const ActionsToolbar = ({
       showValueFilter(encodeURIComponent(valueFilter));
     }
   };
-
-  const createTableName = (tableName, fileType) => `${tableName}.${fileType}`;
 
   const getExportButtonPosition = e => {
     const exportButton = e.currentTarget;

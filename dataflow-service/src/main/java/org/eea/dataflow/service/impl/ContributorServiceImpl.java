@@ -1065,8 +1065,8 @@ public class ContributorServiceImpl implements ContributorService {
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
-   * @param contributorVOList the contributor VO list
-   * @throws EEAException
+   * @param sendNotification the send notification
+   * @throws EEAException the EEA exception
    */
   @Override
   @Async

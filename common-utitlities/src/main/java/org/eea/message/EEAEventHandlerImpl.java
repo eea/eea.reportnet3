@@ -1,4 +1,4 @@
-package org.eea.kafka.handler;
+package org.eea.message;
 
 import java.util.HashSet;
 import org.eea.exception.EEAException;
@@ -6,7 +6,6 @@ import org.eea.kafka.commands.EEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.factory.EEAEventCommandFactory;
 import org.eea.security.jwt.utils.EeaUserDetails;
-import org.eea.security.jwt.utils.JwtTokenProvider;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +30,6 @@ public class EEAEventHandlerImpl implements EEAEventHandler {
    */
   @Autowired
   private EEAEventCommandFactory eeaEentCommandFactory;
-
-  @Autowired
-  private JwtTokenProvider jwtTokenProvider;
 
   /**
    * Gets the type.

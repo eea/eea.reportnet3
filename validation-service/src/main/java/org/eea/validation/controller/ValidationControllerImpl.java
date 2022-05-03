@@ -131,11 +131,9 @@ public class ValidationControllerImpl implements ValidationController {
       // Add lock to the release process if necessary
       validationHelper.addLockToReleaseProcess(datasetId);
     } catch (EEAException e) {
-      // TO DO Status will be updated based on the running process in the dataset, this call will be
-      // changed when processes table is implemented
       processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.CANCELED,
           ProcessTypeEnum.VALIDATION, processId, processId,
-          SecurityContextHolder.getContext().getAuthentication().getName());
+          SecurityContextHolder.getContext().getAuthentication().getName(), 0);
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
       LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);
@@ -287,10 +285,9 @@ public class ValidationControllerImpl implements ValidationController {
   }
 
   /**
-   * Export CSV file of grouped validations.
+   * Export validation data CSV.
    *
    * @param datasetId the dataset id
-   * @return the response entity
    */
   @Override
   @HystrixCommand

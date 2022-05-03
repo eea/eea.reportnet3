@@ -450,8 +450,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // Special case to make the snapshot to copy from DataCollection to EUDataset. The sql copy
       // all the values from the DC, no matter what partitionId has the origin, but we need to put
       // in the file the partitionId of the EUDataset destination
-      if (DatasetTypeEnum.COLLECTION.equals(typeDataset)
-          || Boolean.TRUE.equals(prefillingReference)) {
+      if (DatasetTypeEnum.COLLECTION.equals(typeDataset)) {
+        String providersCode = getProvidersCode(idDataset);
+        copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
+            + ",data_provider_code FROM dataset_" + idDataset
+            + ".record_value WHERE data_provider_code in (" + providersCode + ")) to STDOUT";
+        copyQueryField =
+            "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
+                + idDataset + ".field_value fv, dataset_" + idDataset
+                + ".record_value rv WHERE fv.id_record = rv.id " + "AND rv.data_provider_code in ("
+                + providersCode + ")) to STDOUT";
+      } else if (!DatasetTypeEnum.COLLECTION.equals(typeDataset)
+          && Boolean.TRUE.equals(prefillingReference)) {
         copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
             + ",data_provider_code FROM dataset_" + idDataset + ".record_value) to STDOUT";
         copyQueryField =
@@ -816,7 +826,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void createUpdateQueryView(Long datasetId, boolean isMaterialized) {
     LOG.info("Executing createUpdateQueryView on the datasetId {}. Materialized: {}", datasetId,
         isMaterialized);
-    DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetId(datasetId);
+    DataSetSchemaVO datasetSchema =
+        datasetSchemaController.findDataSchemaByDatasetIdPrivate(datasetId);
     // delete all views because some names can be changed
     try {
       deleteAllViewsFromSchema(datasetId);
@@ -1011,16 +1022,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     File[] matchingFilesToDelete = matchingFilesSnapshot(false, listSnapshotVO);
     for (File file : matchingFilesToDelete) {
-      file.delete();
-      LOG.info("File deleted: {}", file.getAbsolutePath());
+      if (file.delete()) {
+        LOG.info("File deleted: {}", file.getAbsolutePath());
+      }
     }
     dataSetSnapshotControllerZuul.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
     LOG.info("Deleted user snapshots files from dataset: {}", datasetId);
 
     File[] matchingFilesToMove = matchingFilesSnapshot(true, listSnapshotVO);
     for (File file : matchingFilesToMove) {
-      file.renameTo(new File(pathSnapshotDisabled + file.getName()));
-      LOG.info("File: {} moved to: {}", file.getName(), file.getAbsolutePath());
+      if (file.renameTo(new File(pathSnapshotDisabled + file.getName()))) {
+        LOG.info("File: {} moved to: {}", file.getName(), file.getAbsolutePath());
+      }
     }
     dataSetSnapshotControllerZuul.updateSnapshotDisabled(datasetId);
     LOG.info("Moved released snapshots files to disabled folder: {}, from dataset: {}",
@@ -1279,12 +1292,24 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         Statement stmt = con.createStatement()) {
       con.setAutoCommit(true);
 
-      if (Boolean.TRUE.equals(deleteData)
+      if (Boolean.TRUE.equals(deleteData) && !DatasetTypeEnum.EUDATASET.equals(datasetType)
           || (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference)) {
-        String sql = composeDeleteSql(datasetId, partitionId, datasetType);
+        String sql = composeDeleteSql(datasetId, partitionId, datasetType, null);
         LOG.info("Deleting previous data");
         stmt.executeUpdate(sql);
+      } else if (Boolean.TRUE.equals(deleteData) && DatasetTypeEnum.EUDATASET.equals(datasetType)) {
+
+        String providersCode = getProvidersCode(datasetId);
+        String sql = composeDeleteSql(datasetId, partitionId, datasetType, providersCode);
+        LOG.info("Deleting previous data of the providers {} in the EU dataset {}", providersCode,
+            datasetId);
+        stmt.executeUpdate(sql);
+
+        // Delete the temporary etlExport table
+        String sqlDeleteTempEtlExport = "truncate table dataset_" + datasetId + ".temp_etlexport";
+        stmt.executeUpdate(sqlDeleteTempEtlExport);
       }
+
 
       CopyManager cm = new CopyManager((BaseConnection) con);
       LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
@@ -1347,6 +1372,29 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+
+  /**
+   * Gets the providers code.
+   *
+   * @param datasetId the dataset id
+   * @return the providers code
+   */
+  private String getProvidersCode(Long datasetId) {
+    List<String> providers =
+        dataCollectionControllerZuul.findProvidersPendingInEuDataset(datasetId);
+    StringBuilder codes = new StringBuilder();
+    for (int i = 0; i < providers.size(); i++) {
+      codes.append("'" + providers.get(i) + "'");
+      if (i + 1 != providers.size()) {
+        codes.append(",");
+      }
+    }
+    if (StringUtils.isBlank(codes.toString())) {
+      codes.append("''");
+    }
+    return codes.toString();
+  }
+
   /**
    * Copy process.
    *
@@ -1403,14 +1451,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idReportingDataset the id reporting dataset
    * @param partitionId the partition id
    * @param datasetType the dataset type
+   * @param providersCode the providers code
    * @return the string
    */
   private String composeDeleteSql(Long idReportingDataset, Long partitionId,
-      DatasetTypeEnum datasetType) {
+      DatasetTypeEnum datasetType, String providersCode) {
     String sql = "";
     switch (datasetType) {
       case EUDATASET:
-        sql = DELETE_FROM_DATASET + idReportingDataset + ".record_value";
+        sql = DELETE_FROM_DATASET + idReportingDataset
+            + ".record_value WHERE data_provider_code in (" + providersCode + ")";
         break;
       case REPORTING:
       case TEST:
@@ -1426,6 +1476,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
     return sql;
   }
+
 
 
   /**

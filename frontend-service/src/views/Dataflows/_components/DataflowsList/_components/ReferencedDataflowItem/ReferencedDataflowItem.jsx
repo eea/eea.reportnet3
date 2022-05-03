@@ -60,7 +60,7 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }
         <p>{dataflow.description}</p>
       </div>
 
-      <div className={`${styles.status} ${styles[dataflow.status]}  dataflowList-status-help-step`}>
+      <div className={`${styles.status} ${styles[dataflow.status]} dataflowList-status-help-step`}>
         <p>
           <span>{`${resourcesContext.messages['dataflowStatus']}: `}</span>
           {dataflow.status}

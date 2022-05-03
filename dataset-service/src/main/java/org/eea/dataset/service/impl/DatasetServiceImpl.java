@@ -1315,18 +1315,6 @@ public class DatasetServiceImpl implements DatasetService {
       String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
       String dataProviderCodes) {
     try {
-      // LIMIT
-      /*
-       * String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-       * DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
-       * .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND)); if (tableSchemaId
-       * != null) { List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-       * Optional<TableSchema> table = tableSchemaList.stream() .filter( tableSchema ->
-       * tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId))) .findFirst(); limit =
-       * limit < 10000 ? limit / 2 : limit / (table.isPresent() ?
-       * table.get().getRecordSchema().getFieldSchema().size() : 2); } else { limit = limit < 10000
-       * ? limit / 2 : limit / 10; }
-       */
       long startTime = System.currentTimeMillis();
       LOG.info("ETL Export process initiated to DatasetId: {}", datasetId);
       exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset, filterValue,
@@ -1505,6 +1493,8 @@ public class DatasetServiceImpl implements DatasetService {
     fieldRepository.save(field);
     // now the view is not updated, update the check to false
     updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetRepository.removeTempEtlExport(datasetId);
   }
 
   /**
@@ -1551,6 +1541,8 @@ public class DatasetServiceImpl implements DatasetService {
     fieldRepository.save(field);
     // now the view is not updated, update the check to false
     updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetRepository.removeTempEtlExport(datasetId);
   }
 
   /**
@@ -1590,6 +1582,8 @@ public class DatasetServiceImpl implements DatasetService {
     fieldRepository.clearFieldValue(fieldSchemaId);
     // now the view is not updated, update the check to false
     updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetRepository.removeTempEtlExport(datasetId);
   }
 
 
@@ -1651,6 +1645,18 @@ public class DatasetServiceImpl implements DatasetService {
   public String findFieldSchemaIdById(Long datasetId, String idField) {
     FieldValue field = fieldRepository.findById(idField);
     return field.getIdFieldSchema();
+  }
+
+  /**
+   * Delete temp etl export.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @Transactional
+  public void deleteTempEtlExport(@DatasetId Long datasetId) {
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+    datasetRepository.removeTempEtlExport(datasetId);
   }
 
 

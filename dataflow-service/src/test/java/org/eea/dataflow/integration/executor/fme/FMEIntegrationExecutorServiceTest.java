@@ -13,7 +13,7 @@ import org.eea.dataflow.persistence.repository.IntegrationRepository;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.ums.UserManagementController;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
@@ -57,7 +57,7 @@ public class FMEIntegrationExecutorServiceTest {
 
   /** The user management controller. */
   @Mock
-  private UserManagementController userManagementController;
+  private UserManagementControllerZull userManagementControllerZuul;
 
   /** The FME job repository. */
   @Mock

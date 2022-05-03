@@ -204,7 +204,6 @@ public class EUDatasetServiceImpl implements EUDatasetService {
 
     List<Long> providersId = reportings.stream().map(ReportingDatasetVO::getDataProviderId)
         .distinct().collect(Collectors.toList());
-    providersId.stream().distinct().collect(Collectors.toList());
 
     for (Long providerId : providersId) {
       // Release locks to avoid a provider can release a snapshot

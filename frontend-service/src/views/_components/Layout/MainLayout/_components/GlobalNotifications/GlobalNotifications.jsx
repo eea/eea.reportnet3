@@ -24,6 +24,7 @@ export const GlobalNotifications = () => {
     downloadValidationsFile();
     downloadExportFMEFile();
     downloadExportDatasetFile();
+    downloadExportTableDataFile();
     getErrorExportDatasetNotification();
     clearSystemNotifications();
   }, [notificationContext.hidden]);
@@ -224,6 +225,30 @@ export const GlobalNotifications = () => {
     } catch (error) {
       console.error('GlobalNotifications - downloadExportDatasetFile.', error);
       notificationContext.add({ type: 'DOWNLOAD_EXPORT_DATASET_FILE_ERROR' }, true);
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
+  };
+
+  const downloadExportTableDataFile = async () => {
+    const notification = findHiddenNotification('EXPORT_TABLE_DATA_COMPLETED_EVENT');
+
+    if (isNil(notification)) {
+      return;
+    }
+
+    try {
+      notificationContext.add({ type: 'EXPORT_TABLE_DATA_FILE_AUTOMATICALLY_DOWNLOAD' });
+
+      const downloadFileName = `${notification.content.fileName}.${notification.content.mimeType}`;
+      const { data } = await DatasetService.downloadTableData(notification.content.datasetId, downloadFileName);
+
+      if (data.size !== 0) {
+        DownloadFile(data, downloadFileName);
+      }
+    } catch (error) {
+      console.error('GlobalNotifications - downloadExportTableDataFile.', error);
+      notificationContext.add({ type: 'DOWNLOAD_EXPORT_TABLE_DATA_FILE_ERROR' }, true);
     } finally {
       notificationContext.clearHiddenNotifications();
     }

@@ -149,13 +149,13 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
   @Query("SELECT rv FROM RecordValidation rv  WHERE rv.validation.id in(:ids) ")
   List<RecordValidation> findByValidationIds(@Param("ids") List<Long> ids);
 
-
   /**
    * Find record id from record with validations by level error.
    *
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
-   * @return the map
+   * @param pageable the pageable
+   * @return the list
    */
   @Query("SELECT rv.recordValue.id AS id,rv.validation.levelError AS levelError FROM RecordValidation rv  "
       + " WHERE rv.recordValue.tableValue.datasetId.id=:datasetId "
@@ -169,7 +169,8 @@ public interface RecordValidationRepository extends CrudRepository<RecordValidat
    *
    * @param datasetId the dataset id
    * @param idTableSchema the id table schema
-   * @return the map
+   * @param pageable the pageable
+   * @return the list
    */
   @Query("SELECT fv.fieldValue.record.id AS id, fv.validation.levelError AS levelError FROM FieldValidation fv  "
       + " WHERE  fv.fieldValue.record.tableValue.datasetId.id=:datasetId "

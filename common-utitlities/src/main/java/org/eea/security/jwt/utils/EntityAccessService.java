@@ -64,14 +64,12 @@ public class EntityAccessService {
     return dataflowControllerZuul.accessEntity(dataflowType, entity, entityId);
   }
 
-
   /**
    * Access super user.
    *
    * @param entity the entity
    * @param entityId the entity id
    * @return true, if successful
-   * @throws EEAException
    */
   public boolean accessSuperUser(EntityClassEnum entity, Long entityId) {
     boolean result = false;

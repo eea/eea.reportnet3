@@ -181,11 +181,7 @@ export const DataViewer = ({
   );
 
   const mapEditingEnabled =
-    areEquals(records.geometryType, 'POINT') &&
-    hasWritePermissions &&
-    !isDesignDatasetEditorRead &&
-    !isDataflowOpen &&
-    !records.geometryReadOnly;
+    hasWritePermissions && !isDesignDatasetEditorRead && !isDataflowOpen && !records.geometryReadOnly;
 
   const cellDataEditor = (cells, record) => {
     return (
@@ -318,7 +314,11 @@ export const DataViewer = ({
   }, [confirmDeleteVisible]);
 
   useEffect(() => {
-    if (records.mapGeoJson !== '' && areEquals(records.geometryType, 'POINT') && mapEditingEnabled) {
+    if (
+      records.mapGeoJson !== '' &&
+      areEquals(MapUtils.getGeometryType(records.mapGeoJson), 'POINT') &&
+      mapEditingEnabled
+    ) {
       onEditorValueChange(records.selectedMapCells, records.mapGeoJson);
       const inmMapGeoJson = cloneDeep(records.mapGeoJson);
       const parsedInmMapGeoJson = typeof inmMapGeoJson === 'object' ? inmMapGeoJson : JSON.parse(inmMapGeoJson);

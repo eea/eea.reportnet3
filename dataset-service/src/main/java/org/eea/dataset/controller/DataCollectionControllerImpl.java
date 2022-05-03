@@ -1,6 +1,8 @@
 package org.eea.dataset.controller;
 
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +135,9 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     userNotificationContentVO.setDataflowId(dataCollectionVO.getIdDataflow());
     userNotificationContentVO.setDatasetName(dataCollectionVO.getDataSetName());
 
-    Date date = dataCollectionVO.getDueDate();
+    LocalDateTime date = (dataCollectionVO.getDueDate() != null) ? LocalDateTime.ofInstant(
+        Instant.ofEpochMilli(dataCollectionVO.getDueDate().getTime()), ZoneOffset.UTC) : null;
+
     Long dataflowId = dataCollectionVO.getIdDataflow();
     // new check: dataflow is Reference dataset?
     DataFlowVO dataflow = dataCollectionService.getDataflowMetabase(dataflowId);
@@ -234,6 +238,23 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   public List<DataCollectionVO> findDataCollectionIdByDataflowId(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long idDataflow) {
     return dataCollectionService.getDataCollectionIdByDataflowId(idDataflow);
+  }
+
+  /**
+   * Find providers pending in eu dataset.
+   *
+   * @param id the id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/pendingProviders/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find Providers pending to copy into EU Dataset",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = String.class,
+      responseContainer = "List", hidden = true)
+  public List<String> findProvidersPendingInEuDataset(
+      @ApiParam(value = "Datacollection Id", example = "0") @PathVariable("id") Long id) {
+    return dataCollectionService.getProvidersPendingToCopyIntoEU(id);
   }
 
 }

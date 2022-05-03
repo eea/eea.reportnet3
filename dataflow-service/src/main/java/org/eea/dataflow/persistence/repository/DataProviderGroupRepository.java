@@ -15,15 +15,16 @@ public interface DataProviderGroupRepository extends CrudRepository<DataProvider
   /**
    * Find distinct code.
    *
+   * @param type the type
    * @return the list
    */
   @Query("SELECT DISTINCT r FROM DataProviderGroup r WHERE r.type = :type")
   List<DataProviderGroup> findDistinctCode(TypeDataProviderEnum type);
 
   /**
-   * Find by code.
+   * Find by type.
    *
-   * @param code the code
+   * @param type the type
    * @return the list
    */
   List<DataProvider> findByType(TypeDataProviderEnum type);

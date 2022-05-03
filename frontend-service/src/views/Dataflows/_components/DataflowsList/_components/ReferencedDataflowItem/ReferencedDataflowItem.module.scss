@@ -53,7 +53,7 @@
         background: var(--card-design-dataflow-bg-hover);
       }
     }
-    &.OPEN {
+    &.PUBLISHED {
       background-color: var(--c-lilac-300);
       &:hover {
         background-color: #6565a8;
@@ -75,7 +75,7 @@
     }
   }
   &.DESIGN,
-  &.OPEN,
+  &.PUBLISHED,
   &.CLOSED {
     box-shadow: var(--dataflow-item-box-shadow);
     transition: var(--dataflow-item-transition-box-shadow);

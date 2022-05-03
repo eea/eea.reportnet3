@@ -14,5 +14,8 @@ export const BackgroundProcessRepository = {
         dataflowId,
         status
       })
-    })
+    }),
+
+  update: async ({ processId, priority }) =>
+    await HTTPRequester.post({ url: getUrl(BackgroundProcessConfig.update, { processId, priority }) })
 };

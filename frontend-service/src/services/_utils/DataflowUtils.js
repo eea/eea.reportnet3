@@ -47,13 +47,15 @@ const parseSortedDataflowListDTO = dataflowDTOs => {
 const parsePublicDataflowListDTO = dataflowsDTO =>
   dataflowsDTO?.map(dataflowDTO => parsePublicDataflowDTO(dataflowDTO));
 
-const parsePublicDataflowDTO = publicDataflowDTO =>
-  new Dataflow({
+const parsePublicDataflowDTO = publicDataflowDTO => {
+  dayjs.extend(utc);
+
+  return new Dataflow({
     datasets: DatasetUtils.parseDatasetListDTO(publicDataflowDTO.reportingDatasets),
     description: publicDataflowDTO.description,
     documents: DocumentUtils.parseDocumentListDTO(publicDataflowDTO.documents),
     expirationDate:
-      publicDataflowDTO.deadlineDate > 0 ? dayjs(publicDataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
+      publicDataflowDTO.deadlineDate > 0 ? dayjs(publicDataflowDTO.deadlineDate).utc().format('YYYY-MM-DD') : '-',
     id: publicDataflowDTO.id,
     manualAcceptance: publicDataflowDTO.manualAcceptance,
     name: publicDataflowDTO.name,
@@ -64,9 +66,12 @@ const parsePublicDataflowDTO = publicDataflowDTO =>
     type: publicDataflowDTO.type,
     webLinks: WebLinksUtils.parseWebLinkListDTO(publicDataflowDTO.weblinks)
   });
+};
 
-const parseDataflowDTO = dataflowDTO =>
-  new Dataflow({
+const parseDataflowDTO = dataflowDTO => {
+  dayjs.extend(utc);
+
+  return new Dataflow({
     anySchemaAvailableInPublic: dataflowDTO.anySchemaAvailableInPublic,
     creationDate: dataflowDTO.creationDate > 0 ? dayjs(dataflowDTO.creationDate).format('YYYY-MM-DD') : '-',
     dataCollections: DataCollectionUtils.parseDataCollectionListDTO(dataflowDTO.dataCollections),
@@ -77,7 +82,7 @@ const parseDataflowDTO = dataflowDTO =>
     designDatasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: DocumentUtils.parseDocumentListDTO(dataflowDTO.documents),
     euDatasets: EUDatasetUtils.parseEUDatasetListDTO(dataflowDTO.euDatasets),
-    expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate).format('YYYY-MM-DD') : '-',
+    expirationDate: dataflowDTO.deadlineDate > 0 ? dayjs(dataflowDTO.deadlineDate).utc().format('YYYY-MM-DD') : '-',
     fmeUserId: dataflowDTO.fmeUserId,
     fmeUserName: dataflowDTO.fmeUserName,
     id: dataflowDTO.id,
@@ -97,6 +102,7 @@ const parseDataflowDTO = dataflowDTO =>
     userRole: dataflowDTO.userRole,
     webLinks: WebLinksUtils.parseWebLinkListDTO(dataflowDTO.weblinks)
   });
+};
 
 const parseAllDataflowsUserList = allDataflowsUserListDTO => {
   allDataflowsUserListDTO.forEach((dataflow, dataflowIndex) => {

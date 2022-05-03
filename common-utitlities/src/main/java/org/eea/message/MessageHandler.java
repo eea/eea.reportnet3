@@ -1,4 +1,4 @@
-package org.eea.kafka.handler;
+package org.eea.message;
 
 import org.eea.exception.EEAException;
 

@@ -66,4 +66,13 @@ public interface DataCollectionController {
    */
   @PutMapping("/update/{dataflowId}")
   void updateDataCollection(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Find providers pending in eu dataset.
+   *
+   * @param id the id
+   * @return the list
+   */
+  @GetMapping(value = "/private/pendingProviders/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<String> findProvidersPendingInEuDataset(@PathVariable("id") Long id);
 }

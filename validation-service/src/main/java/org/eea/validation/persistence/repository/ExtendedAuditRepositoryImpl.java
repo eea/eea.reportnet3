@@ -82,7 +82,7 @@ public class ExtendedAuditRepositoryImpl implements ExtendedAuditRepository {
    * @param status the status
    * @param expression the expression
    * @param metadata the metadata
-   * @throws JsonProcessingException
+   * @throws JsonProcessingException the json processing exception
    */
   @Override
   public void updateAudit(Audit audit, UserRepresentationVO user, Rule rule, boolean status,

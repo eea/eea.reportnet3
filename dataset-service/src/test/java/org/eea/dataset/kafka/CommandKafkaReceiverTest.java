@@ -4,8 +4,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
-import org.eea.kafka.handler.EEAEventHandler;
 import org.eea.kafka.io.KafkaReceiver;
+import org.eea.message.EEAEventHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -43,7 +43,7 @@ public class CommandKafkaReceiverTest {
   public void initMocks() {
     MockitoAnnotations.openMocks(this);
     ReflectionTestUtils.setField(kafkaReceiver, "handler", eEAEventHandler);
-    message = new Message<EEAEventVO>() {
+    message = new Message<>() {
 
       @Override
       public EEAEventVO getPayload() {
@@ -64,7 +64,7 @@ public class CommandKafkaReceiverTest {
    */
   @Test
   public void testListenMessage() throws EEAException {
-    commandKafkaReceiver.listenMessage(message);
+    commandKafkaReceiver.consumeMessage(message);
     Mockito.verify(eEAEventHandler, times(1)).processMessage(Mockito.any());
   }
 
@@ -76,7 +76,7 @@ public class CommandKafkaReceiverTest {
   @Test
   public void testListenMessageEEAException() throws EEAException {
     doThrow(new EEAException()).when(eEAEventHandler).processMessage(Mockito.any());
-    commandKafkaReceiver.listenMessage(message);
+    commandKafkaReceiver.consumeMessage(message);
     Mockito.verify(eEAEventHandler, times(1)).processMessage(Mockito.any());
   }
 

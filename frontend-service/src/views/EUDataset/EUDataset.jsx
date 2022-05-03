@@ -280,7 +280,14 @@ export const EUDataset = () => {
   const setIsLoadingFile = value => euDatasetDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
 
   useCheckNotifications(
-    ['DOWNLOAD_EXPORT_DATASET_FILE_ERROR', 'EXPORT_DATA_BY_ID_ERROR', 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD'],
+    [
+      'CALL_FME_PROCESS_FAILED_EVENT',
+      'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
+      'EXPORT_DATA_BY_ID_ERROR',
+      'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD',
+      'EXPORT_TABLE_DATA_FILE_AUTOMATICALLY_DOWNLOAD',
+      'DOWNLOAD_EXPORT_TABLE_DATA_FILE_ERROR'
+    ],
     setIsLoadingFile,
     false
   );
@@ -288,7 +295,7 @@ export const EUDataset = () => {
   const renderTabsSchema = () => (
     <TabsSchema
       dataflowType={dataflowType}
-      datasetSchemaId={euDatasetState.metaData.dataset?.datasetSchemaId}
+      datasetSchemaId={euDatasetState.metaData?.dataset?.datasetSchemaId}
       hasCountryCode={true}
       hasWritePermissions={false}
       isExportable={false}
@@ -304,7 +311,9 @@ export const EUDataset = () => {
     />
   );
 
-  if (euDatasetState.isLoading) return renderLayout(<Spinner />);
+  if (euDatasetState.isLoading) {
+    return renderLayout(<Spinner />);
+  }
 
   return renderLayout(
     <Fragment>

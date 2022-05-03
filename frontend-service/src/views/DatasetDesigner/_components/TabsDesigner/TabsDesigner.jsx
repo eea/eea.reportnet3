@@ -445,19 +445,17 @@ export const TabsDesigner = ({
       const inmTabs = [...tabs];
       const draggedTabIdx = TabsUtils.getIndexByHeader(draggedTabHeader, inmTabs);
       const droppedTabIdx = TabsUtils.getIndexByHeader(droppedTabHeader, inmTabs);
-      await DatasetService.updateTableOrder(
-        datasetId,
-        draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1,
-        tabs[draggedTabIdx].tableSchemaId
-      );
+      const index = draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1;
 
-      const shiftedTabs = arrayShift(inmTabs, draggedTabIdx, droppedTabIdx);
+      if (index > -1) {
+        await DatasetService.updateTableOrder(datasetId, index, tabs[draggedTabIdx].tableSchemaId);
 
-      shiftedTabs.forEach((tab, i) => (tab.index = !tab.addTab ? i : -1));
-      setActiveTableSchemaId(
-        shiftedTabs[draggedTabIdx > droppedTabIdx ? droppedTabIdx : droppedTabIdx - 1].tableSchemaId
-      );
-      setTabs([...shiftedTabs]);
+        const shiftedTabs = arrayShift(inmTabs, draggedTabIdx, droppedTabIdx);
+
+        shiftedTabs.forEach((tab, i) => (tab.index = !tab.addTab ? i : -1));
+        setActiveTableSchemaId(shiftedTabs[index].tableSchemaId);
+        setTabs([...shiftedTabs]);
+      }
     } catch (error) {
       console.error('TabsDesigner - reorderTable.', error);
     }

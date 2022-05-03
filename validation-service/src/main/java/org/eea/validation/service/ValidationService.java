@@ -25,22 +25,23 @@ import org.kie.api.runtime.KieSession;
 import org.springframework.data.domain.Pageable;
 
 /**
- * The Class ValidationService.
+ * The Interface ValidationService.
  */
 public interface ValidationService {
 
 
   /**
-   * Validate data set data.
+   * Validate fields.
    *
    * @param datasetId the dataset id
-   * @param kieBase the kie session
+   * @param kieBase the kie base
    * @param pageable the pageable
    * @param onlyEmptyFields the only empty fields
+   * @param taskId the task id
    * @throws EEAException the EEA exception
    */
   void validateFields(@DatasetId Long datasetId, KieBase kieBase, Pageable pageable,
-      boolean onlyEmptyFields) throws EEAException;
+      boolean onlyEmptyFields, Long taskId) throws EEAException;
 
 
   /**
@@ -48,7 +49,6 @@ public interface ValidationService {
    *
    * @param dataset the dataset
    * @param kieSession the kie session
-   *
    * @return the list
    */
   List<DatasetValidation> runDatasetValidations(DatasetValue dataset, KieSession kieSession);
@@ -68,9 +68,10 @@ public interface ValidationService {
    *
    * @param datasetId the dataset id
    * @param kieBase the kie base
+   * @param taskId the task id
    * @throws EEAException the EEA exception
    */
-  void validateDataSet(@DatasetId Long datasetId, KieBase kieBase) throws EEAException;
+  void validateDataSet(@DatasetId Long datasetId, KieBase kieBase, Long taskId) throws EEAException;
 
 
   /**
@@ -81,10 +82,11 @@ public interface ValidationService {
    * @param kieBase the kie base
    * @param sqlRule the sql rule
    * @param dataProviderId the data provider id
+   * @param taskId the task id
    * @throws EEAException the EEA exception
    */
   void validateTable(@DatasetId Long datasetId, Long idTable, KieBase kieBase, String sqlRule,
-      String dataProviderId) throws EEAException;
+      String dataProviderId, Long taskId) throws EEAException;
 
 
   /**
@@ -93,9 +95,10 @@ public interface ValidationService {
    * @param datasetId the dataset id
    * @param kieBase the kie base
    * @param pageable the pageable
+   * @param taskId the task id
    * @throws EEAException the EEA exception
    */
-  void validateRecord(@DatasetId Long datasetId, KieBase kieBase, Pageable pageable)
+  void validateRecord(@DatasetId Long datasetId, KieBase kieBase, Pageable pageable, Long taskId)
       throws EEAException;
 
 
@@ -104,7 +107,7 @@ public interface ValidationService {
    *
    * @param datasetId the dataset id
    * @param rule the rule
-   * @return the kie session
+   * @return the kie base
    * @throws EEAException the EEA exception
    */
   KieBase loadRulesKnowledgeBase(@DatasetId Long datasetId, String rule) throws EEAException;
@@ -141,10 +144,10 @@ public interface ValidationService {
       DatasetValue dataset, List<Long> idValidations);
 
   /**
-   * Gets the datase valuetby id.
+   * Gets the dataset valueby id.
    *
    * @param datasetId the dataset id
-   * @return the datase valuetby id
+   * @return the dataset valueby id
    * @throws EEAException the EEA exception
    */
   DatasetValue getDatasetValuebyId(@DatasetId Long datasetId) throws EEAException;
@@ -236,18 +239,16 @@ public interface ValidationService {
   Integer countEmptyFieldsDataset(@DatasetId Long datasetId);
 
   /**
-   * Exports validation data file.
+   * Export validation file.
    *
    * @param datasetId the dataset id
-   * @return the byte[]
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   void exportValidationFile(@DatasetId Long datasetId) throws EEAException, IOException;
 
-
   /**
-   * Download validation exported file.
+   * Download exported file.
    *
    * @param datasetId the dataset id
    * @param fileName the file name
@@ -255,7 +256,6 @@ public interface ValidationService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   File downloadExportedFile(Long datasetId, String fileName) throws IOException;
-
 
   /**
    * Gets the rule message.

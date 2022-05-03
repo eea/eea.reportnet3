@@ -10,7 +10,7 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import 'proj4leaflet';
 import L from 'leaflet';
 import proj4 from 'proj4';
-import * as ELG from 'esri-leaflet-geocoder';
+// import * as ELG from 'esri-leaflet-geocoder';
 import * as esri from 'esri-leaflet';
 
 import { Button } from 'views/_components/Button';
@@ -123,40 +123,42 @@ export const Map = ({
     const map = mapRef.current.leafletElement;
     esri.basemapLayer(currentTheme.value).addTo(map);
 
-    const searchControl = new ELG.Geosearch().addTo(map);
-    const results = new L.LayerGroup().addTo(map);
+    // Disabled. It now requires an API Key.
+    // const searchControl = new ELG.Geosearch().addTo(map);
+    // const results = new L.LayerGroup().addTo(map);
 
-    searchControl.on('results', function (data) {
-      results.clearLayers();
-      if (TextUtils.areEquals(geometryType, 'POINT')) {
-        for (let i = data.results.length - 1; i >= 0; i--) {
-          if (
-            !MapUtils.inBounds({
-              coord: data.results[i].latlng.lat,
-              coordType: 'latitude',
-              checkProjected: true
-            }) ||
-            !MapUtils.inBounds({
-              coord: data.results[i].latlng.lng,
-              coordType: 'longitude',
-              checkProjected: true
-            })
-          ) {
-            setHasErrors({ ...hasErrors, newPointError: true });
-            return false;
-          } else {
-            setNewPositionMarker([data.results[i].latlng.lat, data.results[i].latlng.lng]);
-            onSelectPoint(
-              projectPointCoordinates({
-                coordinates: [data.results[i].latlng.lat, data.results[i].latlng.lng],
-                newCRS: currentCRS.value
-              }),
-              currentCRS.value
-            );
-          }
-        }
-      }
-    });
+    // searchControl.on('results', function (data) {
+    //   debugger;
+    //   results.clearLayers();
+    //   if (TextUtils.areEquals(geometryType, 'POINT')) {
+    //     for (let i = data.results.length - 1; i >= 0; i--) {
+    //       if (
+    //         !MapUtils.inBounds({
+    //           coord: data.results[i].latlng.lat,
+    //           coordType: 'latitude',
+    //           checkProjected: true
+    //         }) ||
+    //         !MapUtils.inBounds({
+    //           coord: data.results[i].latlng.lng,
+    //           coordType: 'longitude',
+    //           checkProjected: true
+    //         })
+    //       ) {
+    //         setHasErrors({ ...hasErrors, newPointError: true });
+    //         return false;
+    //       } else {
+    //         setNewPositionMarker([data.results[i].latlng.lat, data.results[i].latlng.lng]);
+    //         onSelectPoint(
+    //           projectPointCoordinates({
+    //             coordinates: [data.results[i].latlng.lat, data.results[i].latlng.lng],
+    //             newCRS: currentCRS.value
+    //           }),
+    //           currentCRS.value
+    //         );
+    //       }
+    //     }
+    //   }
+    // });
   }, []);
 
   useEffect(() => {

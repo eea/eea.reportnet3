@@ -7,7 +7,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.eea.dataset.mapper.DataCollectionMapper;
+import org.eea.dataset.persistence.metabase.domain.ChangesEUDataset;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -22,6 +22,7 @@ import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.domain.TestDataset;
+import org.eea.dataset.persistence.metabase.repository.ChangesEUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
@@ -254,6 +255,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
+  @Autowired
+  private ChangesEUDatasetRepository changesEUDatasetRepository;
+
 
   /**
    * Gets the dataflow status.
@@ -390,7 +394,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   @Override
   @Async
-  public void createEmptyDataCollection(Long dataflowId, Date dueDate,
+  public void createEmptyDataCollection(Long dataflowId, LocalDateTime dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
       boolean referenceDataflow, boolean stopAndNotifyPKError) {
 
@@ -400,6 +404,27 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
 
   }
+
+  /**
+   * Gets the providers pending to copy into EU.
+   *
+   * @param euDatasetId the eu dataset id
+   * @return the providers pending to copy into EU
+   */
+  @Override
+  public List<String> getProvidersPendingToCopyIntoEU(Long euDatasetId) {
+
+    List<String> providers = new ArrayList<>();
+    String schemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(euDatasetId);
+    Optional<DataCollection> dc = dataCollectionRepository.findFirstByDatasetSchema(schemaId);
+    if (dc.isPresent()) {
+      List<ChangesEUDataset> changes =
+          changesEUDatasetRepository.findDistinctByDatacollection(dc.get().getId());
+      providers = changes.stream().map(ChangesEUDataset::getProvider).collect(Collectors.toList());
+    }
+    return providers;
+  }
+
 
   /**
    * Update reporting datasets visibility.
@@ -413,7 +438,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   }
 
-
   /**
    * Manage data collection.
    *
@@ -425,7 +449,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param referenceDataflow the reference dataflow
    * @param stopAndNotifyPKError the stop and notify PK error
    */
-  private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
+  private void manageDataCollection(Long dataflowId, LocalDateTime dueDate, boolean isCreation,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow,
       boolean stopAndNotifyPKError) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
@@ -647,8 +671,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param referenceDataflow the reference dataflow
    * @throws SQLException the SQL exception
    */
-  private void processDataCollectionAndRoles(Long dataflowId, Date dueDate, boolean isCreation,
-      boolean manualCheck, String time, List<DesignDatasetVO> designs,
+  private void processDataCollectionAndRoles(Long dataflowId, LocalDateTime dueDate,
+      boolean isCreation, boolean manualCheck, String time, List<DesignDatasetVO> designs,
       List<DesignDatasetVO> referenceDatasets, List<RepresentativeVO> representatives,
       Map<Long, String> map, List<Long> dataCollectionIds, Map<Long, List<String>> datasetIdsEmails,
       Map<Long, List<String>> referenceDatasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
@@ -764,11 +788,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           referenceDatasetIds.add(r.getId());
           for (RepresentativeVO representative : representatives) {
             List<String> emails = representative.getLeadReporters().stream()
+                .filter(leadReporter -> !Boolean.TRUE.equals(leadReporter.getInvalid()))
                 .map(LeadReporterVO::getEmail).collect(Collectors.toList());
-            if (emails.isEmpty()) {
-              referenceDatasetIdsEmails.put(r.getId(), null);
+            if (!emails.isEmpty()) {
+              if (referenceDatasetIdsEmails.containsKey(r.getId())) {
+                referenceDatasetIdsEmails.get(r.getId()).addAll(emails);
+              } else {
+                referenceDatasetIdsEmails.put(r.getId(), emails);
+              }
             } else {
-              referenceDatasetIdsEmails.put(r.getId(), emails);
+              if (!referenceDatasetIdsEmails.containsKey(r.getId())) {
+                referenceDatasetIdsEmails.put(r.getId(), new ArrayList<>());
+              }
             }
           }
         });
@@ -1097,7 +1128,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @throws SQLException the SQL exception
    */
   private Long persistDC(Statement metabaseStatement, DesignDatasetVO design, String time,
-      Long dataflowId, Date dueDate) throws SQLException {
+      Long dataflowId, LocalDateTime dueDate) throws SQLException {
     try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_DC_INTO_DATASET, time,
         dataflowId, String.format(NAME_DC, design.getDataSetName().replace("'", "''")),
         design.getDatasetSchema()))) {
