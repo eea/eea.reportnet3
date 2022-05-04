@@ -1,5 +1,8 @@
 package org.eea.dataset.mapper;
 
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -74,5 +77,27 @@ public abstract class ReleaseMapper implements IMapper<Snapshot, ReleaseVO> {
         }
       }));
     }
+  }
+
+  /**
+   * Map.
+   *
+   * @param value the value
+   * @return the string
+   */
+  public String map(Date value) {
+    ZonedDateTime zoneDateTime = ZonedDateTime.ofInstant(value.toInstant(), ZoneOffset.UTC);
+    return zoneDateTime.toString();
+  }
+
+  /**
+   * Map.
+   *
+   * @param value the value
+   * @return the date
+   */
+  public Date map(String value) {
+    ZonedDateTime zoneDateTime = ZonedDateTime.parse(value);
+    return Date.from(zoneDateTime.withZoneSameInstant(ZoneOffset.UTC).toInstant());
   }
 }
