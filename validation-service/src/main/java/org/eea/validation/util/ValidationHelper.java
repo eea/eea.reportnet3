@@ -37,6 +37,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.EEAEventVO;
@@ -208,7 +209,7 @@ public class ValidationHelper implements DisposableBean {
     KieBase kieBase = null;
     synchronized (processesMap) {
       if (!processesMap.containsKey(processId)) {
-        initializeProcess(processId, false, false);
+        initializeProcess(processId, null);
       }
       if (null == processesMap.get(processId).getKieBase()) {
         processesMap.get(processId)
@@ -234,12 +235,11 @@ public class ValidationHelper implements DisposableBean {
    * Initialize process.
    *
    * @param processId the process id
-   * @param isCoordinator the is coordinator
-   * @param released the released
+   * @param user the user
    */
-  public void initializeProcess(String processId, boolean isCoordinator, boolean released) {
+  public void initializeProcess(String processId, String user) {
     ValidationProcessVO process = new ValidationProcessVO(null,
-        SecurityContextHolder.getContext().getAuthentication().getName(), released);
+        user != null ? user : processControllerZuul.findById(processId).getUser());
 
     synchronized (processesMap) {
       processesMap.put(processId, process);
@@ -269,7 +269,8 @@ public class ValidationHelper implements DisposableBean {
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId, processId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), getPriority(dataset));
+        SecurityContextHolder.getContext().getAuthentication().getName(), getPriority(dataset),
+        null);
 
     // If there's no SQL rules enabled, no need to refresh the views, so directly start the
     // validation
@@ -443,7 +444,7 @@ public class ValidationHelper implements DisposableBean {
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     RulesSchema rules =
         rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getDatasetSchema()));
-    initializeProcess(processId, true, released);
+    initializeProcess(processId, SecurityContextHolder.getContext().getAuthentication().getName());
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
     LOG.info("Deleting all Validations");
     validationService.deleteAllValidation(datasetId);
@@ -459,7 +460,7 @@ public class ValidationHelper implements DisposableBean {
     releaseTableValidation(dataset, processId);
     processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId, processId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), 0);
+        SecurityContextHolder.getContext().getAuthentication().getName(), 0, released);
     datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
         DatasetRunningStatusEnum.VALIDATING);
   }
@@ -928,10 +929,9 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
-   * Cancel task in case failed.
+   * Cancel task.
    *
    * @param taskId the task id
-   * @param status the status
    * @param finishDate the finish date
    */
   @Transactional
@@ -941,6 +941,17 @@ public class ValidationHelper implements DisposableBean {
 
   /**
    * The Class ValidationTask.
+   */
+
+  /**
+   * Instantiates a new validation task.
+   *
+   * @param taskId the task id
+   * @param eeaEventVO the eea event VO
+   * @param validator the validator
+   * @param datasetId the dataset id
+   * @param kieBase the kie base
+   * @param processId the process id
    */
 
   /**
@@ -1057,6 +1068,7 @@ public class ValidationHelper implements DisposableBean {
         throws EEAException {
       boolean isFinished = false;
       if (taskRepository.isProcessFinished(processId)) {
+        ProcessVO process = processControllerZuul.findById(processId);
         LOG.info("Process {} finished for dataset {}", processId, datasetId);
         // Release the lock manually
         Map<String, Object> executeValidation = new HashMap<>();
@@ -1072,19 +1084,17 @@ public class ValidationHelper implements DisposableBean {
         lockService.removeLockByCriteria(forceExecuteValidation);
 
         // after last dataset validations have been saved, an event is sent to notify it
-        String notificationUser = processesMap.get(processId).getRequestingUser();
         Map<String, Object> value = new HashMap<>();
         value.put(LiteralConstants.DATASET_ID, datasetId);
         value.put("uuid", processId);
         // Setting as user the requesting one as it is being taken from ThreadPropertiesManager
         // and
         // validation threads inheritances from it. This is a side effect.
-        value.put("user", notificationUser);
-        boolean isRelease = processesMap.get(processId).isReleased();
+        value.put("user", process.getUser());
         finishProcess(processId);
 
         kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
-        if (isRelease) {
+        if (process.isReleased()) {
           Long nextDatasetId =
               datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(datasetId);
           if (null != nextDatasetId) {
@@ -1098,12 +1108,12 @@ public class ValidationHelper implements DisposableBean {
           deleteLockToReleaseProcess(datasetId);
 
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
-              NotificationVO.builder().user(notificationUser).datasetId(datasetId).build());
+              NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
         }
 
         processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
             ProcessTypeEnum.VALIDATION, processId, processId,
-            SecurityContextHolder.getContext().getAuthentication().getName(), 0);
+            SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
         datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
             DatasetRunningStatusEnum.VALIDATED);
         isFinished = true;

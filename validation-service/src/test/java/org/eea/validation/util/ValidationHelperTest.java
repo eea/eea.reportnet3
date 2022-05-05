@@ -23,6 +23,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.kafka.domain.ConsumerGroupVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -184,9 +185,7 @@ public class ValidationHelperTest {
   public void getKieBase() throws EEAException {
     Mockito.when(validationService.loadRulesKnowledgeBase(Mockito.eq(1l), Mockito.any()))
         .thenReturn(kieBase);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-
+    Mockito.when(processControllerZuul.findById(Mockito.any())).thenReturn(new ProcessVO());
     KieBase result = validationHelper.getKieBase("", 1l, "idRule");
     Assert.assertNotNull(result);
   }
@@ -199,8 +198,7 @@ public class ValidationHelperTest {
    */
   @Test(expected = EEAException.class)
   public void getKieBaseException() throws EEAException {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(processControllerZuul.findById(Mockito.any())).thenReturn(new ProcessVO());
 
     Mockito.doThrow(new EEAException("error")).when(validationService)
         .loadRulesKnowledgeBase(Mockito.eq(1l), Mockito.any());
@@ -389,7 +387,7 @@ public class ValidationHelperTest {
     pendingValidations.add(eeaEventVO);
     eeaEventVO.getData().put("user", "user");
     eeaEventVO.getData().put("token", "credentials");
-    processesMap.put("1", new ValidationProcessVO(null, "user1", false));
+    processesMap.put("1", new ValidationProcessVO(null, "user1"));
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
     ReflectionTestUtils.setField(validationHelper, "taskReleasedTax", 1);
 

@@ -99,11 +99,13 @@ public class ProcessServiceImpl implements ProcessService {
    * @param threadId the thread id
    * @param user the user
    * @param priority the priority
+   * @param released the released
    */
   @Override
   @Transactional
   public void updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
-      ProcessTypeEnum type, String processId, String threadId, String user, int priority) {
+      ProcessTypeEnum type, String processId, String threadId, String user, int priority,
+      Boolean released) {
 
     EEAProcess processToUpdate = processRepository.findOneByProcessId(processId);
 
@@ -114,6 +116,11 @@ public class ProcessServiceImpl implements ProcessService {
       processToUpdate.setDatasetId(datasetId);
     }
 
+    if (Boolean.TRUE.equals(processToUpdate.isReleased())) {
+      processToUpdate.setReleased(true);
+    } else {
+      processToUpdate.setReleased(false);
+    }
     processToUpdate.setProcessId(processId.equals(threadId) ? processId : threadId);
     processToUpdate.setProcessType(type);
     processToUpdate.setStatus(status);
@@ -158,6 +165,17 @@ public class ProcessServiceImpl implements ProcessService {
       processRepository.save(process);
       processRepository.flush();
     }
+  }
+
+  /**
+   * Gets the by process id.
+   *
+   * @param processId the process id
+   * @return the by process id
+   */
+  @Override
+  public ProcessVO getByProcessId(String processId) {
+    return processMapper.entityToClass(processRepository.findOneByProcessId(processId));
   }
 
 }
