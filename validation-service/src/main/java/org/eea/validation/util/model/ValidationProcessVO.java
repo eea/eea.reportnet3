@@ -18,7 +18,4 @@ public class ValidationProcessVO {
 
   /** The requesting user. */
   private String requestingUser;
-
-  /** The released. */
-  private boolean released;
 }
