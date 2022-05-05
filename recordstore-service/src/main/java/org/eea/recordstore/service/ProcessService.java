@@ -1,5 +1,6 @@
 package org.eea.recordstore.service;
 
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
@@ -39,7 +40,8 @@ public interface ProcessService {
    * @param user the user
    */
   void updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
-      ProcessTypeEnum type, String processId, String threadId, String user, int priority);
+      ProcessTypeEnum type, String processId, String threadId, String user, int priority,
+      Boolean released);
 
   /**
    * Update priority.
@@ -48,4 +50,12 @@ public interface ProcessService {
    * @param priority the priority
    */
   void updatePriority(Long processId, int priority);
+
+  /**
+   * Gets the by process id.
+   *
+   * @param processId the process id
+   * @return the by process id
+   */
+  ProcessVO getByProcessId(String processId);
 }

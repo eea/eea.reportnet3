@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.EUDatasetService;
@@ -55,6 +56,9 @@ public class RestoreDataCollectionSnapshotCommandTest {
   /** The dataset repository. */
   @Mock
   private DatasetRepository datasetRepository;
+
+  @Mock
+  private DataCollectionRepository dataCollectionRepository;
 
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
