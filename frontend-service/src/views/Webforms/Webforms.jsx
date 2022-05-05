@@ -31,7 +31,7 @@ export const Webforms = ({
 
   useEffect(() => {
     getWebformConfiguration();
-  }, []);
+  }, [webform.name]);
 
   const getWebformConfiguration = async () => {
     setLoadingStatus('pending');
@@ -68,6 +68,7 @@ export const Webforms = ({
           datasetId={datasetId}
           isReleasing={isReleasing}
           isReporting={isReporting}
+          overview={selectedConfiguration.overview}
           state={state}
           tables={selectedConfiguration.tables}
         />

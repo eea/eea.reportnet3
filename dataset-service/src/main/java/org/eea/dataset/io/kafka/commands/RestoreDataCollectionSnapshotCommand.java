@@ -2,17 +2,18 @@ package org.eea.dataset.io.kafka.commands;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.eea.dataset.persistence.data.repository.DatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.ChangesEUDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.EUDatasetService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +44,14 @@ public class RestoreDataCollectionSnapshotCommand extends AbstractEEAEventHandle
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /** The dataset repository. */
+  /** The data collection repository. */
   @Autowired
-  private DatasetRepository datasetRepository;
+  private DataCollectionRepository dataCollectionRepository;
+
+  /** The changes repository. */
+  @Autowired
+  private ChangesEUDatasetRepository changesRepository;
+
 
 
   /**
@@ -73,8 +79,9 @@ public class RestoreDataCollectionSnapshotCommand extends AbstractEEAEventHandle
     if (datasetSnapshotService.getSnapshotsByIdDataset(datasetId).isEmpty()) {
       Map<String, Object> value = new HashMap<>();
       value.put(LiteralConstants.DATASET_ID, datasetId);
-      Boolean removed = euDatasetService.removeLocksRelatedToPopulateEU(
-          datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId());
+      DataSetMetabaseVO datasetMetabase = datasetMetabaseService.findDatasetMetabase(datasetId);
+      Boolean removed =
+          euDatasetService.removeLocksRelatedToPopulateEU(datasetMetabase.getDataflowId());
 
       if (Boolean.TRUE.equals(removed)) {
         kafkaSenderUtils.releaseNotificableKafkaEvent(
@@ -83,10 +90,9 @@ public class RestoreDataCollectionSnapshotCommand extends AbstractEEAEventHandle
                 .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .datasetId(datasetId).build());
 
-        // remove the data from the temp_etlExport
-        TenantResolver
-            .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-        datasetRepository.removeTempEtlExport(datasetId);
+        // delete the datacollections in the table of changes now that the data is copied
+        dataCollectionRepository.findByDataflowId(datasetMetabase.getDataflowId()).stream()
+            .forEach(dc -> changesRepository.deleteByDatacollection(dc.getId()));
       }
     }
 

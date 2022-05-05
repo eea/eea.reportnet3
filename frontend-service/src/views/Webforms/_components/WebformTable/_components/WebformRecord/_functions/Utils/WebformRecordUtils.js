@@ -29,16 +29,6 @@ const getMultiselectValues = (multiselectItemsOptions, value) => {
   }
 };
 
-const getSingleRecordOption = singleRecord => {
-  if (singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'TITLE'))] === '') {
-    return `#${singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'ID'))]}`;
-  }
-
-  return `#${singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'ID'))]} - ${
-    singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'TITLE'))]
-  }`;
-};
-
 const parseMultiselect = record => {
   record.dataRow.forEach(field => {
     if (
@@ -92,25 +82,9 @@ const parseNewRecordData = (columnsSchema, data) => {
   }
 };
 
-const parseListOfSinglePams = (records = []) => {
-  const options = [];
-  records.forEach(record => {
-    if (
-      record.elements.find(el => TextUtils.areEquals(el.name, 'IsGroup')).value === 'Single' &&
-      record.elements.find(el => TextUtils.areEquals(el.name, 'Id')) &&
-      record.elements.find(el => TextUtils.areEquals(el.name, 'Title'))
-    ) {
-      options.push(getSingleRecordOption(record));
-    }
-  });
-
-  return options.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
-};
-
 export const WebformRecordUtils = {
   formatDate,
   getMultiselectValues,
-  parseListOfSinglePams,
   parseMultiselect,
   parseNewRecordData
 };

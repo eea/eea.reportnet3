@@ -295,7 +295,7 @@ export const EUDataset = () => {
   const renderTabsSchema = () => (
     <TabsSchema
       dataflowType={dataflowType}
-      datasetSchemaId={euDatasetState.metaData.dataset?.datasetSchemaId}
+      datasetSchemaId={euDatasetState.metaData?.dataset?.datasetSchemaId}
       hasCountryCode={true}
       hasWritePermissions={false}
       isExportable={false}
@@ -311,7 +311,9 @@ export const EUDataset = () => {
     />
   );
 
-  if (euDatasetState.isLoading) return renderLayout(<Spinner />);
+  if (euDatasetState.isLoading) {
+    return renderLayout(<Spinner />);
+  }
 
   return renderLayout(
     <Fragment>

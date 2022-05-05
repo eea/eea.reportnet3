@@ -344,4 +344,12 @@ public class DataCollectionControllerImplTest {
     Mockito.verify(dataCollectionService, times(1)).updateDataCollection(Mockito.any(),
         Mockito.anyBoolean());
   }
+
+
+  @Test
+  public void findProvidersPendingInEuDatasetTest() {
+    dataCollectionControllerImpl.findProvidersPendingInEuDataset(1L);
+    Mockito.verify(dataCollectionService, times(1))
+        .getProvidersPendingToCopyIntoEU(Mockito.anyLong());
+  }
 }

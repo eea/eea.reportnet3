@@ -83,6 +83,8 @@ public class DeleteHelper {
     datasetService.deleteTableBySchema(tableSchemaId, datasetId);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
     EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
         ? EventType.DELETE_TABLE_COMPLETED_EVENT
         : EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT;
@@ -128,6 +130,8 @@ public class DeleteHelper {
     datasetService.deleteImportData(datasetId, deletePrefilledTables);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
     EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
         ? EventType.DELETE_DATASET_DATA_COMPLETED_EVENT
         : EventType.DELETE_DATASET_SCHEMA_COMPLETED_EVENT;
@@ -178,6 +182,8 @@ public class DeleteHelper {
         datasetId);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
     // Send the kafka event after deleting to call FME
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
@@ -200,6 +206,8 @@ public class DeleteHelper {
     recordRepository.deleteByDataProviderCode(providerCode);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
   }
 
 }

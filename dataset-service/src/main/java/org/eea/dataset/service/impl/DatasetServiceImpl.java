@@ -1493,6 +1493,8 @@ public class DatasetServiceImpl implements DatasetService {
     fieldRepository.save(field);
     // now the view is not updated, update the check to false
     updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetRepository.removeTempEtlExport(datasetId);
   }
 
   /**
@@ -1539,6 +1541,8 @@ public class DatasetServiceImpl implements DatasetService {
     fieldRepository.save(field);
     // now the view is not updated, update the check to false
     updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetRepository.removeTempEtlExport(datasetId);
   }
 
   /**
@@ -1578,6 +1582,8 @@ public class DatasetServiceImpl implements DatasetService {
     fieldRepository.clearFieldValue(fieldSchemaId);
     // now the view is not updated, update the check to false
     updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetRepository.removeTempEtlExport(datasetId);
   }
 
 
@@ -1639,6 +1645,18 @@ public class DatasetServiceImpl implements DatasetService {
   public String findFieldSchemaIdById(Long datasetId, String idField) {
     FieldValue field = fieldRepository.findById(idField);
     return field.getIdFieldSchema();
+  }
+
+  /**
+   * Delete temp etl export.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @Transactional
+  public void deleteTempEtlExport(@DatasetId Long datasetId) {
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+    datasetRepository.removeTempEtlExport(datasetId);
   }
 
 

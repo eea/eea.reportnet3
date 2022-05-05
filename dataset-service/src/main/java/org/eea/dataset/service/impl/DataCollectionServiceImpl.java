@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.eea.dataset.mapper.DataCollectionMapper;
+import org.eea.dataset.persistence.metabase.domain.ChangesEUDataset;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -21,6 +22,7 @@ import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.domain.TestDataset;
+import org.eea.dataset.persistence.metabase.repository.ChangesEUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
@@ -253,6 +255,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
+  @Autowired
+  private ChangesEUDatasetRepository changesEUDatasetRepository;
+
 
   /**
    * Gets the dataflow status.
@@ -399,6 +404,27 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
 
   }
+
+  /**
+   * Gets the providers pending to copy into EU.
+   *
+   * @param euDatasetId the eu dataset id
+   * @return the providers pending to copy into EU
+   */
+  @Override
+  public List<String> getProvidersPendingToCopyIntoEU(Long euDatasetId) {
+
+    List<String> providers = new ArrayList<>();
+    String schemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(euDatasetId);
+    Optional<DataCollection> dc = dataCollectionRepository.findFirstByDatasetSchema(schemaId);
+    if (dc.isPresent()) {
+      List<ChangesEUDataset> changes =
+          changesEUDatasetRepository.findDistinctByDatacollection(dc.get().getId());
+      providers = changes.stream().map(ChangesEUDataset::getProvider).collect(Collectors.toList());
+    }
+    return providers;
+  }
+
 
   /**
    * Update reporting datasets visibility.
@@ -762,11 +788,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           referenceDatasetIds.add(r.getId());
           for (RepresentativeVO representative : representatives) {
             List<String> emails = representative.getLeadReporters().stream()
+                .filter(leadReporter -> !Boolean.TRUE.equals(leadReporter.getInvalid()))
                 .map(LeadReporterVO::getEmail).collect(Collectors.toList());
-            if (emails.isEmpty()) {
-              referenceDatasetIdsEmails.put(r.getId(), null);
+            if (!emails.isEmpty()) {
+              if (referenceDatasetIdsEmails.containsKey(r.getId())) {
+                referenceDatasetIdsEmails.get(r.getId()).addAll(emails);
+              } else {
+                referenceDatasetIdsEmails.put(r.getId(), emails);
+              }
             } else {
-              referenceDatasetIdsEmails.put(r.getId(), emails);
+              if (!referenceDatasetIdsEmails.containsKey(r.getId())) {
+                referenceDatasetIdsEmails.put(r.getId(), new ArrayList<>());
+              }
             }
           }
         });

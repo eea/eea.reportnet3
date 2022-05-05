@@ -111,7 +111,7 @@ const parseListOfSinglePams = (records = []) => {
   const options = [];
   records.forEach(record => {
     if (
-      record.elements.find(el => TextUtils.areEquals(el.name, 'IsGroup')).value === 'Single' &&
+      record.elements.find(el => TextUtils.areEquals(el.name, 'IsGroup'))?.value === 'Single' &&
       record.elements.find(el => TextUtils.areEquals(el.name, 'Id')) &&
       record.elements.find(el => TextUtils.areEquals(el.name, 'Title'))
     ) {
