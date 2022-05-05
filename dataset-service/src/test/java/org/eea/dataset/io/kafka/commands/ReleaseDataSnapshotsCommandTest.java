@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.repository.ChangesEUDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
@@ -13,8 +14,10 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -68,6 +71,14 @@ public class ReleaseDataSnapshotsCommandTest {
   @Mock
   private CollaborationControllerZuul collaborationControllerZuul;
 
+  @Mock
+  private DataCollectionRepository dataCollectionRepository;
+
+  @Mock
+  private RepresentativeControllerZuul representativeControllerZuul;
+
+  @Mock
+  private ChangesEUDatasetRepository changesEUDatasetRepository;
 
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
@@ -120,6 +131,13 @@ public class ReleaseDataSnapshotsCommandTest {
     dataflowVO.setName("dataflowName");
     dataflowVO.setShowPublicInfo(false);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+
+    DataProviderVO provider = new DataProviderVO();
+    provider.setId(1L);
+    provider.setCode("ES");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(provider);
+
     releaseDataSnapshotsCommand.execute(eeaEventVO);
     Mockito.verify(datasetMetabaseService, times(1)).getLastDatasetValidationForRelease(1L);
 
@@ -154,32 +172,17 @@ public class ReleaseDataSnapshotsCommandTest {
     dataflowVO.setId(1L);
     dataflowVO.setShowPublicInfo(false);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+
+    DataProviderVO provider = new DataProviderVO();
+    provider.setId(1L);
+    provider.setCode("ES");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong()))
+        .thenReturn(provider);
+
     releaseDataSnapshotsCommand.execute(eeaEventVO);
     Mockito.verify(datasetMetabaseService, times(1)).getLastDatasetValidationForRelease(1L);
 
   }
 
-  /**
-   * Test execute with blockers.
-   *
-   * @throws EEAException the EEA exception
-   */
-  @Test
-  public void testExecuteContinue() throws EEAException {
-    data = new HashMap<>();
-    data.put("dataset_id", 1L);
-    data.put("user", "user1");
-    eeaEventVO.setData(data);
-    DataSetMetabase datasetMetabase = new DataSetMetabase();
-    datasetMetabase.setId(1L);
-    datasetMetabase.setDataflowId(1L);
-    datasetMetabase.setDataProviderId(1L);
-    List<Long> datasetsId = new ArrayList<>();
-    datasetsId.add(1L);
-    datasetsId.add(2L);
-    releaseDataSnapshotsCommand.execute(eeaEventVO);
-    Mockito.verify(datasetMetabaseService, times(1)).getLastDatasetValidationForRelease(1L);
-
-  }
 
 }

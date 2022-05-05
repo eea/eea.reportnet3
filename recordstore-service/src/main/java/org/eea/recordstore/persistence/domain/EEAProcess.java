@@ -84,6 +84,10 @@ public class EEAProcess {
   @Column(name = "priority")
   private int priority;
 
+  /** The released. */
+  @Column(name = "released")
+  private boolean released;
+
   /**
    * Equals.
    *

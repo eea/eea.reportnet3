@@ -75,4 +75,6 @@ public abstract class ReleaseMapper implements IMapper<Snapshot, ReleaseVO> {
       }));
     }
   }
+
+
 }

@@ -937,8 +937,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       recordVOs = recordNoValidationMapper.entityListToClass(sanitizeOrderedRecords(a));
     }
     LOG.info(
-        "Filtering the table by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}, with PageSize {}",
-        fieldValue, idTableSchema, idRules, errorList, fieldSchema, pageable.getPageSize());
+        "Filtering the table by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}, with PageSize {} and PageNumber {}",
+        fieldValue, idTableSchema, idRules, errorList, fieldSchema, pageable.getPageSize(),
+        pageable.getPageNumber());
     result.setRecords(recordVOs);
   }
 

@@ -1,9 +1,11 @@
 package org.eea.interfaces.controller.recordstore;
 
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,13 +56,16 @@ public interface ProcessController {
    * @param processId the process id
    * @param threadId the thread id
    * @param user the user
+   * @param priority the priority
+   * @param released the released
    */
   @PostMapping(value = "/private/updateProcess")
   void updateProcess(@RequestParam("datasetId") Long datasetId,
       @RequestParam(required = false) Long dataflowId,
       @RequestParam("status") ProcessStatusEnum status, @RequestParam("type") ProcessTypeEnum type,
       @RequestParam("processId") String processId, @RequestParam("threadId") String threadId,
-      @RequestParam("user") String user, @RequestParam("priority") int priority);
+      @RequestParam("user") String user, @RequestParam("priority") int priority,
+      @RequestParam(required = false, value = "released") Boolean released);
 
   /**
    * Update priority.
@@ -71,5 +76,14 @@ public interface ProcessController {
   @PostMapping(value = "/{processId}/priority/{priority}")
   void updatePriority(@PathVariable("processId") Long processId,
       @PathVariable("priority") int priority);
+
+  /**
+   * Find by id.
+   *
+   * @param processId the process id
+   * @return the process VO
+   */
+  @GetMapping(value = "/private/{processId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  ProcessVO findById(@PathVariable("processId") String processId);
 
 }
