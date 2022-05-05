@@ -135,12 +135,10 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       if (isNil(datasetId)) {
         const data = await HistoricReleaseService.getAllRepresentative(dataflowId, dataProviderId);
         historicReleases = uniqBy(
-          data.map(historic => {
-            return {
-              releaseDate: historic.releaseDate,
-              dataProviderCode: historic.dataProviderCode
-            };
-          }),
+          data.map(historic => ({
+            releaseDate: historic.releaseDate,
+            dataProviderCode: historic.dataProviderCode
+          })),
           'releaseDate'
         );
       } else {
@@ -164,9 +162,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     }
   };
 
-  const renderReleaseDateTemplate = rowData => {
-    return <div className={styles.checkedValueColumn}>{getDateTimeFormatByUserPreferences(rowData.releaseDate)}</div>;
-  };
+  const renderReleaseDateTemplate = rowData => (
+    <div className={styles.checkedValueColumn}>{getDateTimeFormatByUserPreferences(rowData.releaseDate)}</div>
+  );
 
   const renderDataProviderLinkBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
@@ -190,9 +188,12 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         dataflowType,
         'historicReleaseDataProviderFilterLabel'
       ),
-      multiSelectOptions: historicReleasesState.data
-        .map(dataProvider => ({ type: dataProvider.dataProviderCode, value: dataProvider.dataProviderCode }))
-        .sort((a, b) => a.value.localeCompare(b.value))
+      multiSelectOptions: uniqBy(
+        historicReleasesState.data
+          .map(dataProvider => ({ type: dataProvider.dataProviderCode, value: dataProvider.dataProviderCode }))
+          .sort((a, b) => a.value.localeCompare(b.value)),
+        'type'
+      )
     },
     {
       type: 'CHECKBOX',
@@ -226,9 +227,12 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
             dataflowType,
             'historicReleaseDataProviderFilterLabel'
           ),
-          multiSelectOptions: historicReleasesState.data
-            .map(dataProvider => ({ type: dataProvider.dataProviderCode, value: dataProvider.dataProviderCode }))
-            .sort((a, b) => a.value.localeCompare(b.value))
+          multiSelectOptions: uniqBy(
+            historicReleasesState.data
+              .map(dataProvider => ({ type: dataProvider.dataProviderCode, value: dataProvider.dataProviderCode }))
+              .sort((a, b) => a.value.localeCompare(b.value)),
+            'type'
+          )
         },
         {
           key: 'isPublic',
@@ -250,22 +254,16 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       viewType="historicReleases"
     />
   );
-  const renderFilters = () => {
-    if (historicReleasesView === 'dataCollection') {
-      return getFilters(filterOptionsDataCollection);
-    } else if (historicReleasesView === 'EUDataset') {
-      return getFilters(filterOptionsEUDataset);
-    }
-  };
+  const renderFilters = () =>
+    historicReleasesView === 'dataCollection'
+      ? getFilters(filterOptionsDataCollection)
+      : getFilters(filterOptionsEUDataset);
 
   const renderHistoricReleasesTable = () => {
-    const getValueTable = () => {
-      if (historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset') {
-        return filteredData;
-      } else {
-        return historicReleasesState.data;
-      }
-    };
+    const getValueTable = () =>
+      historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset'
+        ? filteredData
+        : historicReleasesState.data;
 
     if (isEmpty(filteredData) && (historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset')) {
       return (
@@ -274,6 +272,7 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         </div>
       );
     }
+
     return (
       <DataTable
         autoLayout={true}
