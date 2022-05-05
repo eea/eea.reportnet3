@@ -225,10 +225,17 @@ public class ValidationHelper implements DisposableBean {
    *
    * @param processId the process id
    */
-  public void finishProcess(String processId) {
+  public boolean finishProcess(String processId) {
     LOG.info("Removing process {} from processesMap ", processId);
-    processesMap.remove(processId);
-    System.gc();
+    boolean result = false;
+    synchronized (processesMap) {
+      ValidationProcessVO removed = processesMap.remove(processId);
+      System.gc();
+      if (removed != null) {
+        result = true;
+      }
+    }
+    return result;
   }
 
   /**
@@ -1091,32 +1098,35 @@ public class ValidationHelper implements DisposableBean {
         // and
         // validation threads inheritances from it. This is a side effect.
         value.put("user", process.getUser());
-        finishProcess(processId);
+        if (finishProcess(processId)) {
 
-        kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
-        if (process.isReleased()) {
-          Long nextDatasetId =
-              datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(datasetId);
-          if (null != nextDatasetId) {
-            executeValidation(nextDatasetId, UUID.randomUUID().toString(), true, false);
+          kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
+          if (process.isReleased()) {
+            Long nextDatasetId =
+                datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(datasetId);
+            if (null != nextDatasetId) {
+              executeValidation(nextDatasetId, UUID.randomUUID().toString(), true, false);
+            } else {
+              kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
+                  value);
+            }
+
           } else {
-            kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
+            // Delete the lock to the Release process
+            deleteLockToReleaseProcess(datasetId);
+
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
+                value,
+                NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
           }
 
-        } else {
-          // Delete the lock to the Release process
-          deleteLockToReleaseProcess(datasetId);
-
-          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value,
-              NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
+          processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
+              ProcessTypeEnum.VALIDATION, processId, processId,
+              SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
+          datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+              DatasetRunningStatusEnum.VALIDATED);
+          isFinished = true;
         }
-
-        processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
-            ProcessTypeEnum.VALIDATION, processId, processId,
-            SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
-        datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
-            DatasetRunningStatusEnum.VALIDATED);
-        isFinished = true;
       }
       return isFinished;
     }
