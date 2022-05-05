@@ -116,11 +116,10 @@ public class ProcessServiceImpl implements ProcessService {
       processToUpdate.setDatasetId(datasetId);
     }
 
-    if (Boolean.TRUE.equals(processToUpdate.isReleased())) {
-      processToUpdate.setReleased(true);
-    } else {
-      processToUpdate.setReleased(false);
+    if (null != released) {
+      processToUpdate.setReleased(released);
     }
+
     processToUpdate.setProcessId(processId.equals(threadId) ? processId : threadId);
     processToUpdate.setProcessType(type);
     processToUpdate.setStatus(status);
