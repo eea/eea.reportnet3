@@ -270,7 +270,7 @@ public class ValidationHelper implements DisposableBean {
     processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId, processId,
         SecurityContextHolder.getContext().getAuthentication().getName(), getPriority(dataset),
-        null);
+        released);
 
     // If there's no SQL rules enabled, no need to refresh the views, so directly start the
     // validation
