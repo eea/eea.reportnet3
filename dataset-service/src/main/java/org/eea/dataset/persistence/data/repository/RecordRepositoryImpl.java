@@ -301,6 +301,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       List<ErrorTypeEnum> levelErrorList, Pageable pageable, List<String> idRules,
       String fieldSchema, String fieldValue, SortField... sortFields) {
 
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     StringBuilder sortQueryBuilder = new StringBuilder();
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
@@ -319,7 +320,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     // We don't want to do any query if the filter is empty and then return a new
     // result object
     if (levelErrorListFilled || idRulesListFilled) {
-      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       // Total records calculated.
       recordsCalc(idTableSchema, result, filter, errorList, idRules, fieldSchema, fieldValue);
 
