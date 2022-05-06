@@ -163,6 +163,25 @@ public class DataflowControllerImplTest {
   }
 
   /**
+   * Test find by id EEA excep 2.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void testFindByIdEEAExcep2() throws EEAException {
+    Authentication authentication = Mockito.mock(Authentication.class);
+    SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    SecurityContextHolder.setContext(securityContext);
+
+    Mockito.when(dataflowService.getByIdWithRepresentativesFilteredByUserEmail(Mockito.anyLong(),
+        Mockito.anyLong())).thenThrow(EEAException.class);
+
+    dataflowControllerImpl.findById(1L, 1L);
+    assertEquals("fail", null, dataflowControllerImpl.findById(1L, 1L));
+  }
+
+  /**
    * Test find by id.
    *
    * @throws EEAException the EEA exception
@@ -590,6 +609,31 @@ public class DataflowControllerImplTest {
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
     Mockito.when(dataflowService.isAdmin()).thenReturn(false);
     Mockito.when(dataflowService.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
+    doThrow(EEAException.class).when(dataflowService).updateDataFlow(dataflowVO);
+    ResponseEntity<?> value = dataflowControllerImpl.updateDataFlow(dataflowVO);
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, value.getStatusCode());
+  }
+
+  /**
+   * Update flow throw EEA exception.
+   *
+   * @throws EEAException the EEA exception
+   * @throws ParseException the parse exception
+   */
+  @Test
+  public void updateFlowThrowEEAException() throws EEAException, ParseException {
+    DataFlowVO dataflowVO = new DataFlowVO();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    Date date = sdf.parse("2914-09-15");
+    ObligationVO obligation = new ObligationVO();
+    obligation.setObligationId(1);
+    dataflowVO.setDeadlineDate(date);
+    dataflowVO.setDescription("description");
+    dataflowVO.setName("name");
+    dataflowVO.setObligation(obligation);
+    dataflowVO.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowService.isAdmin()).thenReturn(false);
+    Mockito.when(dataflowService.getMetabaseById(Mockito.any())).thenThrow(EEAException.class);
     doThrow(EEAException.class).when(dataflowService).updateDataFlow(dataflowVO);
     ResponseEntity<?> value = dataflowControllerImpl.updateDataFlow(dataflowVO);
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, value.getStatusCode());
@@ -1105,6 +1149,25 @@ public class DataflowControllerImplTest {
         dataflowControllerImpl.getPublicDataflowsByCountry("FR", 0, 10, "name", true, null));
   }
 
+  /**
+   * Gets the public dataflows by country EEA exception.
+   *
+   * @return the public dataflows by country EEA exception
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void getPublicDataflowsByCountryEEAException() throws EEAException {
+    Mockito.when(dataflowService.getPublicDataflowsByCountry("FR", "name", true, 0, 10, null))
+        .thenThrow(EEAException.class);
+    try {
+      dataflowControllerImpl.getPublicDataflowsByCountry("FR", 0, 10, "name", true, null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      assertEquals(EEAErrorMessage.DATAFLOW_GET_ERROR, e.getReason());
+      throw e;
+    }
+  }
+
   @Test
   public void accessReferenceEntityTest() {
     assertFalse("reference not allowed",
@@ -1469,5 +1532,59 @@ public class DataflowControllerImplTest {
     ResponseEntity<?> value = dataflowControllerImpl.updateDataFlow(dataflowVO);
     assertEquals(HttpStatus.BAD_REQUEST, value.getStatusCode());
     assertEquals(EEAErrorMessage.DATAFLOW_UPDATE_ERROR, value.getBody());
+  }
+
+  /**
+   * Update data flow automatic reporting deletion test.
+   */
+  @Test
+  public void updateDataFlowAutomaticReportingDeletionTest() {
+    dataflowControllerImpl.updateDataFlowAutomaticReportingDeletion(1L, true);
+  }
+
+  /**
+   * Update data flow automatic reporting deletion throw response status exception test.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void updateDataFlowAutomaticReportingDeletionThrowResponseStatusExceptionTest() {
+    Mockito.doThrow(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR))
+        .when(dataflowService).updateDataFlowAutomaticReportingDeletion(1L, true);
+    try {
+      dataflowControllerImpl.updateDataFlowAutomaticReportingDeletion(1L, true);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      assertEquals(
+          "Couldn't update the dataflow automatic delete data and snapshots. An unknown error happenned.",
+          e.getReason());
+      throw e;
+    }
+  }
+
+  /**
+   * Gets the dataflows metabase by id test.
+   *
+   * @return the dataflows metabase by id test
+   */
+  @Test
+  public void getDataflowsMetabaseByIdTest() {
+    dataflowControllerImpl.getDataflowsMetabaseById(Mockito.anyList());
+
+    Mockito.verify(dataflowService, times(1)).getDataflowsMetabaseById(Mockito.anyList());
+  }
+
+  /**
+   * Gets the dataflows metabase by id throw response status exception test.
+   *
+   * @return the dataflows metabase by id throw response status exception test
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void getDataflowsMetabaseByIdThrowResponseStatusExceptionTest() {
+    try {
+      dataflowControllerImpl.getDataflowsMetabaseById(null);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.DATAFLOW_INCORRECT_ID, e.getReason());
+      throw e;
+    }
   }
 }
