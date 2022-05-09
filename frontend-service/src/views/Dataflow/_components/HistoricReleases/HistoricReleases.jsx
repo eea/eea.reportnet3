@@ -3,10 +3,13 @@ import { useContext, useEffect, useReducer } from 'react';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 import uniqBy from 'lodash/uniqBy';
+
+import utc from 'dayjs/plugin/utc';
 
 import styles from './HistoricReleases.module.scss';
 
@@ -26,7 +29,6 @@ import { historicReleasesReducer } from './_functions/Reducers/historicReleasesR
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
-import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { ColumnTemplateUtils } from 'views/_functions/Utils/ColumnTemplateUtils';
@@ -44,8 +46,6 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   });
 
   const { filteredData, isFiltered } = useFilters('historicReleases');
-
-  const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
   useEffect(() => {
     onLoadHistoricReleases();
@@ -162,9 +162,12 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     }
   };
 
-  const renderReleaseDateTemplate = rowData => (
-    <div className={styles.checkedValueColumn}>{getDateTimeFormatByUserPreferences(rowData.releaseDate)}</div>
-  );
+  const renderReleaseDateTemplate = rowData => {
+    dayjs.extend(utc);
+    return (
+      <div className={styles.checkedValueColumn}>{dayjs(rowData.releaseDate).utc().format('YYYY-MM-DD HH:mm:ss')}</div>
+    );
+  };
 
   const renderDataProviderLinkBodyColumn = rowData => (
     <div onClick={e => e.stopPropagation()}>
