@@ -76,7 +76,6 @@ import org.eea.interfaces.vo.dataset.ETLFieldVO;
 import org.eea.interfaces.vo.dataset.ETLRecordVO;
 import org.eea.interfaces.vo.dataset.ETLTableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -288,10 +287,10 @@ public class FileTreatmentHelperTest {
 
     Mockito.when(datasetService.getMimetype(Mockito.anyString()))
         .thenReturn(FileTypeEnum.CSV.getValue());
-    Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.REPORTING);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    // Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+    // .thenReturn(DatasetTypeEnum.REPORTING);
+    // Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+    // Mockito.any(), Mockito.any());
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataProviderId(1L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
@@ -303,8 +302,8 @@ public class FileTreatmentHelperTest {
         .thenReturn(context);
     fileTreatmentHelper.importFileData(1L, null, multipartFile, true, 1L, null);
 
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    // Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+    // Mockito.any(), Mockito.any());
     final File downloadDirectory = new File("./");
     for (File f : downloadDirectory.listFiles()) {
       if (f.getName().equals("1")) {
@@ -386,10 +385,10 @@ public class FileTreatmentHelperTest {
         .thenReturn(FileTypeEnum.CSV.getValue());
     Mockito.doNothing().when(datasetService).deleteImportData(Mockito.anyLong(),
         Mockito.anyBoolean());
-    Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
-        .thenReturn(DatasetTypeEnum.REPORTING);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    // Mockito.when(datasetService.getDatasetType(Mockito.anyLong()))
+    // .thenReturn(DatasetTypeEnum.REPORTING);
+    // Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
+    // Mockito.any(), Mockito.any());
 
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
@@ -402,8 +401,8 @@ public class FileTreatmentHelperTest {
       }
     }
 
-    Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    // Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+    // Mockito.any(), Mockito.any());
   }
 
   /**

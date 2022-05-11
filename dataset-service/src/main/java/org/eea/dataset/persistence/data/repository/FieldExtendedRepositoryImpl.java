@@ -127,6 +127,31 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     NUMBER, DATE, STRING
   }
 
+  /**
+   * Query execution list.
+   *
+   * @param generatedQuery the generated query
+   * @return the list
+   */
+  @Override
+  public List<String> queryExecutionList(String generatedQuery) {
+    Query query = entityManager.createNativeQuery(generatedQuery);
+    return query.getResultList();
+  }
+
+  /**
+   * Query execution single.
+   *
+   * @param generatedQuery the generated query
+   * @return the list
+   */
+  @Override
+  public Object queryExecutionSingle(String generatedQuery) {
+    Query query = entityManager.createNativeQuery(generatedQuery);
+    return query.getSingleResult();
+  }
+
+
 
   /**
    * Find by id field schema with tag ordered.
