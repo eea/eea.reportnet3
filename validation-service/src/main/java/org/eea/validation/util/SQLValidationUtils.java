@@ -166,17 +166,19 @@ public class SQLValidationUtils {
     try {
       if (query != null) {
         String preparedquery = query.contains(";") ? query.replace(";", "") : query;
+        String providerCodeAux = "XX";
         if (dataProviderCode != null && !"null".equals(dataProviderCode)) {
           DataProviderVO providerCode =
               representativeControllerZuul.findDataProviderById(Long.valueOf(dataProviderCode));
           if (null != providerCode && StringUtils.isNotBlank(providerCode.getCode())) {
-            preparedquery = preparedquery.replace("{%R3_COUNTRY_CODE%}", providerCode.getCode());
-            preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", providerCode.getCode());
-            preparedquery =
-                preparedquery.replace("{%R3_ORGANIZATION_CODE%}", providerCode.getCode());
+            providerCodeAux = providerCode.getCode();
           }
         }
+        preparedquery = preparedquery.replace("{%R3_COUNTRY_CODE%}", providerCodeAux);
+        preparedquery = preparedquery.replace("{%R3_COMPANY_CODE%}", providerCodeAux);
+        preparedquery = preparedquery.replace("{%R3_ORGANIZATION_CODE%}", providerCodeAux);
         queryVO = sqlRulesService.retrieveTableData(preparedquery, queryVO, Boolean.FALSE);
+
       } else {
         throw new EEAInvalidSQLException("No sql found");
       }
