@@ -454,7 +454,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         String providersCode = getProvidersCode(idDataset);
         copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
             + ",data_provider_code FROM dataset_" + idDataset
-            + ".record_value WHERE data_provider_code in (" + providersCode + ")) to STDOUT";
+            + ".record_value WHERE data_provider_code in (" + providersCode
+            + ") order by data_position) to STDOUT";
         copyQueryField =
             "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
                 + idDataset + ".field_value fv, dataset_" + idDataset
@@ -463,7 +464,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       } else if (!DatasetTypeEnum.COLLECTION.equals(typeDataset)
           && Boolean.TRUE.equals(prefillingReference)) {
         copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
-            + ",data_provider_code FROM dataset_" + idDataset + ".record_value) to STDOUT";
+            + ",data_provider_code FROM dataset_" + idDataset
+            + ".record_value order by data_position) to STDOUT";
         copyQueryField =
             "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
                 + idDataset + ".field_value fv) to STDOUT";
@@ -471,7 +473,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         copyQueryRecord =
             "COPY (SELECT id, id_record_schema, id_table, dataset_partition_id, data_provider_code FROM dataset_"
                 + idDataset + ".record_value WHERE dataset_partition_id=" + idPartitionDataset
-                + ") to STDOUT";
+                + " order by data_position) to STDOUT";
         copyQueryField =
             "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
                 + idDataset + ".field_value fv inner join dataset_" + idDataset

@@ -45,6 +45,7 @@ public class ProcessControllerImpl implements ProcessController {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ProcessControllerImpl.class);
 
+  /** The valid headers. */
   List<String> validHeaders = Arrays.asList("name", "dataset_name", "username", "status",
       "queued_date", "date_start", "date_finish", "priority");
 
@@ -58,6 +59,7 @@ public class ProcessControllerImpl implements ProcessController {
    * @param status the status
    * @param dataflowId the dataflow id
    * @param user the user
+   * @param header the header
    * @return the processes
    */
   @Override
@@ -90,6 +92,8 @@ public class ProcessControllerImpl implements ProcessController {
    * @param processId the process id
    * @param threadId the thread id
    * @param user the user
+   * @param priority the priority
+   * @param released the released
    */
   @Override
   @PostMapping(value = "/private/updateProcess")
@@ -98,9 +102,10 @@ public class ProcessControllerImpl implements ProcessController {
       @RequestParam(required = false) Long dataflowId,
       @RequestParam("status") ProcessStatusEnum status, @RequestParam("type") ProcessTypeEnum type,
       @RequestParam("processId") String processId, @RequestParam("threadId") String threadId,
-      @RequestParam("user") String user, @RequestParam("priority") int priority) {
+      @RequestParam("user") String user, @RequestParam("priority") int priority,
+      @RequestParam(required = false, value = "released") Boolean released) {
     processService.updateProcess(datasetId, dataflowId, status, type, processId, threadId, user,
-        priority);
+        priority, released);
   }
 
   /**
@@ -119,6 +124,18 @@ public class ProcessControllerImpl implements ProcessController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong priority range.");
     }
     processService.updatePriority(processId, priority);
+  }
+
+  /**
+   * Find by id.
+   *
+   * @param processId the process id
+   * @return the process VO
+   */
+  @Override
+  @GetMapping(value = "/private/{processId}")
+  public ProcessVO findById(@PathVariable("processId") String processId) {
+    return processService.getByProcessId(processId);
   }
 
 }

@@ -46,4 +46,7 @@ public class ProcessVO {
   /** The priority. */
   private int priority;
 
+  /** The released. */
+  private boolean released;
+
 }

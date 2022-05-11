@@ -10,8 +10,10 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.eea.dataflow.mapper.DataflowMapper;
@@ -68,6 +70,7 @@ import org.eea.interfaces.vo.rod.ObligationListVO;
 import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.interfaces.vo.weblink.WeblinkVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Before;
@@ -246,6 +249,34 @@ public class DataFlowServiceImplTest {
       assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, ex.getMessage());
       throw ex;
     }
+  }
+
+  /**
+   * Gets the by id test.
+   *
+   * @return the by id test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getByIdTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+    dataflowServiceImpl.getById(1L, true);
+    Mockito.verify(dataflowRepository, times(1)).findById(Mockito.anyLong());
+  }
+
+  /**
+   * Gets the by id with representatives filtered by user email test.
+   *
+   * @return the by id with representatives filtered by user email test
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void getByIdWithRepresentativesFilteredByUserEmailTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
+    dataflowServiceImpl.getByIdWithRepresentativesFilteredByUserEmail(1L, 1L);
+    Mockito.verify(dataflowRepository, times(1)).findById(Mockito.anyLong());
   }
 
   /**
@@ -1209,6 +1240,35 @@ public class DataFlowServiceImplTest {
 
     assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.CITIZEN_SCIENCE, null, null,
         false, null, null));
+  }
+
+  @Test
+  public void getReferenceDataflows2Test() throws EEAException {
+    Map<String, String> filters = new HashMap<String, String>();
+    filters.put("role", SecurityRoleEnum.ADMIN.toString());
+
+    Map<String, List<String>> attributes = new HashMap<String, List<String>>();
+    List<String> pinnedDataflows = new ArrayList<>();
+    attributes.put("pinnedDataflows", pinnedDataflows);
+    Mockito.when(userManagementControllerZull.getUserAttributes()).thenReturn(attributes);
+
+    ObligationListVO obligationListVO = new ObligationListVO();
+    obligationListVO.setObligations(new ArrayList<>());
+
+    ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
+    resourceAccessVO.setId(0L);
+    List<ResourceAccessVO> idResources = new ArrayList<>();
+    idResources.add(resourceAccessVO);
+    Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
+    authorities.add(new SimpleGrantedAuthority("DATA_CUSTODIAN"));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.doReturn(authorities).when(authentication).getAuthorities();
+    Mockito.when(userManagementControllerZull.getResourcesByUser(Mockito.any(), Mockito.any()))
+        .thenReturn(idResources);
+    Mockito.when(obligationControllerZull.findOpenedObligations(null, null, null, null, null))
+        .thenReturn(obligationListVO);
+    assertNotNull(dataflowServiceImpl.getDataflows("", TypeDataflowEnum.REFERENCE, filters, null,
+        false, 1, 2));
   }
 
   /**
