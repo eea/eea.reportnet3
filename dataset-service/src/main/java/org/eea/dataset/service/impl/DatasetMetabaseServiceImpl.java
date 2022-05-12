@@ -1161,4 +1161,25 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         .entityListToClass(dataSetMetabaseRepository.findByDataProviderIdIn(providerIds));
   }
 
+  /**
+   * Gets the last dataset for release.
+   *
+   * @param datasetId the dataset id
+   * @return the last dataset for release
+   */
+  @Override
+  public Long getLastDatasetForRelease(Long datasetId) {
+    DataSetMetabase dataset =
+        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+    List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
+        dataset.getDataflowId(), dataset.getDataProviderId());
+    Collections.sort(datasets);
+    Long nextIdValidation = null;
+    if (!datasets.get(datasets.size() - 1).equals(datasetId)) {
+      int index = datasets.indexOf(datasetId);
+      nextIdValidation = datasets.get(++index);
+    }
+    return nextIdValidation;
+  }
+
 }
