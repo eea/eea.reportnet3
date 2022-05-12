@@ -310,7 +310,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       }
     } catch (EEAException | ResourceAccessException e) {
       LOG_ERROR.error("Error getting the file to send it to FME. File {}, datasetId {}",
-          file.getName(), dataset.getId());
+          file.getName(), dataset.getId(), e);
     }
     return result;
   }
