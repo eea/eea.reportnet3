@@ -1,5 +1,7 @@
 package org.eea.dataset.persistence.metabase.repository;
 
+import java.math.BigInteger;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
@@ -129,4 +131,18 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
    * @return the list
    */
   List<DataSetMetabase> findByDataProviderIdIn(List<Long> providerIdList);
+
+  /**
+   * Gets the free dataset ids by dataflow id and data provider id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param queuedDate the queued date
+   * @return the free dataset ids by dataflow id and data provider id
+   */
+  @Query(nativeQuery = true,
+      value = "select id from dataset where dataflowid=:dataflowId and data_provider_id= :providerId and id not in (select dataset_id from process where queued_date> :queuedDate)")
+  List<BigInteger> getFreeDatasetIdsByDataflowIdAndDataProviderId(
+      @Param("dataflowId") Long dataflowId, @Param("providerId") Long dataProviderId,
+      @Param("queuedDate") Date queuedDate);
 }
