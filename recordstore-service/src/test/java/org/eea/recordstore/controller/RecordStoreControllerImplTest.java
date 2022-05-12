@@ -192,6 +192,15 @@ public class RecordStoreControllerImplTest {
   }
 
   @Test
+  public void testCreateSnapshotIsBlankDate()
+      throws SQLException, IOException, RecordStoreAccessException, EEAException {
+    recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L, "", false);
+
+    Mockito.verify(recordStoreService, times(1)).createDataSnapshot(Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+  }
+
+  @Test
   public void testRestoreSnapshot()
       throws SQLException, IOException, RecordStoreAccessException, EEAException {
     Mockito.doNothing().when(dataSetMetabaseControllerZuul).updateDatasetRunningStatus(1L,
@@ -288,5 +297,13 @@ public class RecordStoreControllerImplTest {
     }
   }
 
+  /**
+   * Update snapshot disabled test.
+   */
+  @Test
+  public void updateSnapshotDisabledTest() {
+    recordStoreControllerImpl.updateSnapshotDisabled(1L);
+    Mockito.verify(recordStoreService, times(1)).updateSnapshotDisabled(Mockito.anyLong());
+  }
 
 }
