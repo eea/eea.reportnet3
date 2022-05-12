@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -1329,13 +1330,30 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             EventType.RESTORE_PREFILLING_REFERENCE_SNAPSHOT_COMPLETED_EVENT, createXls);
       }
       if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
-        dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
+        // We send the notification only when the last eu dataset being filled from the
+        // datacollection,
+        // ordered by id, is done
+        DataSetMetabaseVO ds =
+            dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetIdFromSnapshot);
+        List<DataCollectionVO> dcs = dataCollectionControllerZuul
+            .findDataCollectionIdByDataflowId(ds.getDataflowId()).stream()
+            .sorted(Comparator.comparing(DataCollectionVO::getId)).collect(Collectors.toList());
+        List<Long> idsDc = dcs.stream().sorted(Comparator.comparing(DataCollectionVO::getId))
+            .map(DataCollectionVO::getId).collect(Collectors.toList());
+
+        if (!CollectionUtils.isEmpty(idsDc)
+            && datasetIdFromSnapshot.equals(idsDc.get(idsDc.size() - 1))) {
+          // This last eu dataset ordered by being copied from the Dc in the process "copy data from
+          // dc to eu"
+          // so send the notification
+          Map<String, Object> valueEU = new HashMap<>();
+          valueEU.put(LiteralConstants.DATASET_ID, datasetId);
+          valueEU.put("snapshot_id", idSnapshot);
+          kafkaSenderUtils.releaseKafkaEvent(
+              EventType.RESTORE_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT, valueEU);
+        }
         dataSetSnapshotControllerZuul.updateSnapshotEURelease(datasetIdFromSnapshot);
-        Map<String, Object> valueEU = new HashMap<>();
-        valueEU.put(LiteralConstants.DATASET_ID, datasetId);
-        valueEU.put("snapshot_id", idSnapshot);
-        kafkaSenderUtils
-            .releaseKafkaEvent(EventType.RESTORE_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT, valueEU);
+        dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
       }
       LOG.info("Snapshot {} restored", idSnapshot);
     } catch (Exception e) {
