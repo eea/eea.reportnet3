@@ -293,7 +293,6 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     requestFactory.setBufferRequestBody(false);
     requestFactory.setConnectTimeout(7200000);
     requestFactory.setReadTimeout(7200000);
-    RestTemplate restTemplate = new RestTemplate();
     restTemplate.setRequestFactory(requestFactory);
     ResponseEntity<String> checkResult =
         restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
