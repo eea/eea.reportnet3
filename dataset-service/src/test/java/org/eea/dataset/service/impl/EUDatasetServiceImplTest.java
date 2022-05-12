@@ -166,7 +166,9 @@ public class EUDatasetServiceImplTest {
     when(reportingDatasetService.getDataSetIdByDataflowId(Mockito.any())).thenReturn(reportings);
     when(lockService.createLock(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new LockVO());
-    dataCollectionList.add(new DataCollection());
+    DataCollection dc = new DataCollection();
+    dc.setId(25L);
+    dataCollectionList.add(dc);
     when(dataCollectionRepository.findByDataflowId(Mockito.any())).thenReturn(dataCollectionList);
     when(euDatasetRepository.findByDataflowId(Mockito.any())).thenReturn(euDatasetList);
     try {
