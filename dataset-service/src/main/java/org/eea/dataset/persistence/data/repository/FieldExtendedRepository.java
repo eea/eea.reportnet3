@@ -66,13 +66,12 @@ public interface FieldExtendedRepository {
    */
   Object queryExecutionSingle(String generatedQuery);
 
-
-
   /**
    * Query execution list.
    *
    * @param generatedQuery the generated query
    * @return the list
    */
-  List<String> queryExecutionList(String generatedQuery);
+  List<Object[]> queryExecutionList(String generatedQuery);
+
 }
