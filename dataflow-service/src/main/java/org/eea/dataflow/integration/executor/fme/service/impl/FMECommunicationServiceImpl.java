@@ -260,55 +260,53 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
 
     DataFlowVO dataflowVO = null;
     String token = fmeToken;
-    if (null != dataset.getDataflowId()) {
-      try {
-        dataflowVO = dataflowService.getMetabaseById(dataset.getDataflowId());
-      } catch (EEAException e) {
-      }
-      if (null != dataflowVO && null != dataflowVO.getFmeUserId()) {
-        FMEUser fmeUser = fmeUserRepository.findById(dataflowVO.getFmeUserId()).orElse(null);
-        if (null != fmeUser) {
-          String userPass = fmeUser.getUsername() + ":" + fmeUser.getPassword();
-          token = "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes());
-        }
-      }
-    }
-
     FileSubmitResult result = new FileSubmitResult();
-    String result2 = "";
-    String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
-        .buildAndExpand(uriParams).toString();
-    MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
-    bodyMap.add(file.getName(), new FileSystemResource(file));
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-    headers.add(ACCEPT, APPLICATION_JSON);
-    String boundary = Long.toHexString(System.currentTimeMillis());
-    headers.add(CONTENT_TYPE, "multipart/form-data; boundary=" + boundary);
-    headers.add("Host", "fme.discomap.eea.europa.eu");
-    headers.add("Authorization", token);
-    headers.add("Connection", "keep-alive");
-    HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
-    SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
-    requestFactory.setBufferRequestBody(false);
-    requestFactory.setConnectTimeout(7200000);
-    requestFactory.setReadTimeout(7200000);
-    restTemplate.setRequestFactory(requestFactory);
-    ResponseEntity<String> checkResult =
-        restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
-
-    if (null != checkResult && null != checkResult.getBody()) {
-      if (checkResult.getBody() != null) {
-        result2 = checkResult.getBody().replace("[", "").replace("]", "");
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-          result = mapper.readValue(result2, FileSubmitResult.class);
-          LOG.info("File send to FME succesfully with result {}", result);
-        } catch (JsonProcessingException e) {
-          e.printStackTrace();
+    try {
+      if (null != dataset.getDataflowId()) {
+        dataflowVO = dataflowService.getMetabaseById(dataset.getDataflowId());
+        if (null != dataflowVO && null != dataflowVO.getFmeUserId()) {
+          FMEUser fmeUser = fmeUserRepository.findById(dataflowVO.getFmeUserId()).orElse(null);
+          if (null != fmeUser) {
+            String userPass = fmeUser.getUsername() + ":" + fmeUser.getPassword();
+            token = "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes());
+          }
         }
       }
-    } else {
+      String result2 = "";
+      String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
+          .buildAndExpand(uriParams).toString();
+      MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+      bodyMap.add(file.getName(), new FileSystemResource(file));
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+      headers.add(ACCEPT, APPLICATION_JSON);
+      String boundary = Long.toHexString(System.currentTimeMillis());
+      headers.add(CONTENT_TYPE, "multipart/form-data; boundary=" + boundary);
+      headers.add("Host", "fme.discomap.eea.europa.eu");
+      headers.add("Authorization", token);
+      headers.add("Connection", "keep-alive");
+      HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+      SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+      requestFactory.setBufferRequestBody(false);
+      requestFactory.setConnectTimeout(7200000);
+      requestFactory.setReadTimeout(7200000);
+      restTemplate.setRequestFactory(requestFactory);
+      ResponseEntity<String> checkResult =
+          restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+
+      if (null != checkResult && null != checkResult.getBody()) {
+        if (checkResult.getBody() != null) {
+          result2 = checkResult.getBody().replace("[", "").replace("]", "");
+          ObjectMapper mapper = new ObjectMapper();
+          try {
+            result = mapper.readValue(result2, FileSubmitResult.class);
+            LOG.info("File send to FME succesfully with result {}", result);
+          } catch (JsonProcessingException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    } catch (EEAException e) {
       LOG_ERROR.error("Error getting the file to send it to FME. File {}, datasetId {}",
           file.getName(), dataset.getId());
     }
