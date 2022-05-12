@@ -125,7 +125,7 @@ public class ReleaseDataSnapshotsCommandTest {
     datasetsId.add(1L);
     datasetsId.add(2L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(1L)).thenReturn(dataSetMetabaseVO);
-    Mockito.when(datasetMetabaseService.getLastDatasetValidationForRelease(1L)).thenReturn(null);
+    Mockito.when(datasetMetabaseService.getLastDatasetForRelease(1L)).thenReturn(null);
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setName("dataflowName");
@@ -139,7 +139,7 @@ public class ReleaseDataSnapshotsCommandTest {
         .thenReturn(provider);
 
     releaseDataSnapshotsCommand.execute(eeaEventVO);
-    Mockito.verify(datasetMetabaseService, times(1)).getLastDatasetValidationForRelease(1L);
+    Mockito.verify(datasetMetabaseService, times(1)).getLastDatasetForRelease(1L);
 
   }
 
@@ -159,9 +159,9 @@ public class ReleaseDataSnapshotsCommandTest {
     datasetsId.add(1L);
     datasetsId.add(2L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(1L)).thenReturn(dataSetMetabaseVO);
-    Mockito.when(datasetMetabaseService.getLastDatasetValidationForRelease(1L)).thenReturn(null);
+    Mockito.when(datasetMetabaseService.getLastDatasetForRelease(1L)).thenReturn(null);
 
-    List<Long> idsLong = new ArrayList();
+    List<Long> idsLong = new ArrayList<>();
     idsLong.add(1L);
     idsLong.add(2L);
     Mockito.when(datasetMetabaseService
@@ -180,7 +180,7 @@ public class ReleaseDataSnapshotsCommandTest {
         .thenReturn(provider);
 
     releaseDataSnapshotsCommand.execute(eeaEventVO);
-    Mockito.verify(datasetMetabaseService, times(1)).getLastDatasetValidationForRelease(1L);
+    Mockito.verify(datasetMetabaseService, times(1)).getLastDatasetForRelease(1L);
 
   }
 

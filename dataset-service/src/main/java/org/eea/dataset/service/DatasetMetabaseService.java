@@ -288,4 +288,12 @@ public interface DatasetMetabaseService {
    */
   List<DataSetMetabaseVO> getDatasetsByProviderIds(List<Long> providerIds);
 
+  /**
+   * Gets the last dataset for release.
+   *
+   * @param datasetId the dataset id
+   * @return the last dataset for release
+   */
+  Long getLastDatasetForRelease(Long datasetId);
+
 }
