@@ -86,4 +86,27 @@ public interface ProcessController {
   @GetMapping(value = "/private/{processId}", produces = MediaType.APPLICATION_JSON_VALUE)
   ProcessVO findById(@PathVariable("processId") String processId);
 
+
+  /**
+   * Gets the private processes.
+   *
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param asc the asc
+   * @param status the status
+   * @param dataflowId the dataflow id
+   * @param user the user
+   * @param header the header
+   * @return the private processes
+   */
+  @GetMapping(value = "/private/")
+  ProcessesVO getPrivateProcesses(
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+      @RequestParam(value = "status", required = false) String status,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "user", required = false) String user,
+      @RequestParam(value = "header", defaultValue = "date_start") String header);
+
 }

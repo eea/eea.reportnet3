@@ -66,7 +66,7 @@ public class ProcessControllerImpl implements ProcessController {
   @HystrixCommand
   @GetMapping
   @ApiOperation(value = "Gets all the system processes", response = ProcessVO.class,
-      responseContainer = "List", hidden = true)
+      responseContainer = "List", hidden = false)
   @PreAuthorize("hasAnyRole('ADMIN')")
   public ProcessesVO getProcesses(Integer pageNum, Integer pageSize, boolean asc, String status,
       Long dataflowId, String user, String header) {
@@ -136,6 +136,31 @@ public class ProcessControllerImpl implements ProcessController {
   @GetMapping(value = "/private/{processId}")
   public ProcessVO findById(@PathVariable("processId") String processId) {
     return processService.getByProcessId(processId);
+  }
+
+  /**
+   * Gets the private processes.
+   *
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param asc the asc
+   * @param status the status
+   * @param dataflowId the dataflow id
+   * @param user the user
+   * @param header the header
+   * @return the private processes
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/")
+  @ApiOperation(value = "Gets all the system processes", response = ProcessVO.class,
+      responseContainer = "List", hidden = true)
+  public ProcessesVO getPrivateProcesses(Integer pageNum, Integer pageSize, boolean asc,
+      String status, Long dataflowId, String user, String header) {
+    Pageable pageable = PageRequest.of(pageNum, pageSize);
+
+    ProcessTypeEnum type = ProcessTypeEnum.VALIDATION;
+    return processService.getProcesses(pageable, asc, status, dataflowId, user, type, header);
   }
 
 }
