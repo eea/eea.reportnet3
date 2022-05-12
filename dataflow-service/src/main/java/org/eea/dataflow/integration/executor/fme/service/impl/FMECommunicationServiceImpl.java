@@ -68,6 +68,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -290,6 +291,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       requestFactory.setBufferRequestBody(false);
       requestFactory.setConnectTimeout(7200000);
       requestFactory.setReadTimeout(7200000);
+      RestTemplate restTemplate = new RestTemplate();
       restTemplate.setRequestFactory(requestFactory);
       ResponseEntity<String> checkResult =
           restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
@@ -306,9 +308,9 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
           }
         }
       }
-    } catch (EEAException e) {
+    } catch (EEAException | ResourceAccessException e) {
       LOG_ERROR.error("Error getting the file to send it to FME. File {}, datasetId {}",
-          file.getName(), dataset.getId());
+          file.getName(), dataset.getId(), e);
     }
     return result;
   }
