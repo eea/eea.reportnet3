@@ -1,6 +1,7 @@
 package org.eea.dataset.service.impl;
 
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +41,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -57,6 +59,8 @@ import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -162,7 +166,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
   /** The user management controller zull. */
   @Autowired
-  private UserManagementControllerZull userManagementControllerZull;
+  private ProcessControllerZuul processControllerZuul;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
@@ -989,13 +993,23 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   public Long getLastDatasetValidationForRelease(Long datasetId) {
     DataSetMetabase dataset =
         dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
-    List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
-        dataset.getDataflowId(), dataset.getDataProviderId());
-    Collections.sort(datasets);
+    ProcessesVO processVO = processControllerZuul.getPrivateProcesses(null, null, false,
+        "IN_PROGRESS", dataset.getDataflowId(), null, "queued_date");
+    List<ProcessVO> processes = processVO.getProcessList();
+    ProcessVO onGoingProcess = processes.stream()
+        .filter(process -> datasetId.equals(process.getDatasetId())).findFirst().orElse(null);
     Long nextIdValidation = null;
-    if (!datasets.get(datasets.size() - 1).equals(datasetId)) {
-      int index = datasets.indexOf(datasetId);
-      nextIdValidation = datasets.get(++index);
+    if (onGoingProcess != null) {
+      List<BigInteger> datasets =
+          dataSetMetabaseRepository.getFreeDatasetIdsByDataflowIdAndDataProviderId(
+              dataset.getDataflowId(), dataset.getDataProviderId(), onGoingProcess.getQueuedDate());
+      Collections.sort(datasets);
+      if (datasets.get(datasets.size() - 1).longValue() != datasetId) {
+        int index = datasets.indexOf(BigInteger.valueOf(datasetId));
+        nextIdValidation = datasets.get(++index).longValue();
+      }
+    } else {
+      nextIdValidation = 0L;
     }
     return nextIdValidation;
 
@@ -1145,6 +1159,27 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   public List<DataSetMetabaseVO> getDatasetsByProviderIds(List<Long> providerIds) {
     return dataSetMetabaseMapper
         .entityListToClass(dataSetMetabaseRepository.findByDataProviderIdIn(providerIds));
+  }
+
+  /**
+   * Gets the last dataset for release.
+   *
+   * @param datasetId the dataset id
+   * @return the last dataset for release
+   */
+  @Override
+  public Long getLastDatasetForRelease(Long datasetId) {
+    DataSetMetabase dataset =
+        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+    List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
+        dataset.getDataflowId(), dataset.getDataProviderId());
+    Collections.sort(datasets);
+    Long nextIdValidation = null;
+    if (!datasets.get(datasets.size() - 1).equals(datasetId)) {
+      int index = datasets.indexOf(datasetId);
+      nextIdValidation = datasets.get(++index);
+    }
+    return nextIdValidation;
   }
 
 }
