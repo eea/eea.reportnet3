@@ -738,8 +738,7 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     }
     query += "] as public.geom_update[]));";
-    String result = fieldRepository.queryExecutionSingle(query).toString();
-    LOG.info("Update geometry result: {}", result);
+    fieldRepository.queryExecutionSingle(query);
   }
 
 
