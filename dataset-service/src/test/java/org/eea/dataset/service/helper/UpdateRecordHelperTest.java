@@ -5,6 +5,8 @@ import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.eea.dataset.mapper.DataSchemaMapper;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -37,6 +39,15 @@ public class UpdateRecordHelperTest {
 
   @Mock
   private KafkaSender kafkaSender;
+
+  @Mock
+  private DatasetSchemaService datasetSchemaService;
+
+  @Mock
+  private DataSchemaMapper dataSchemaMapper;
+
+  @Mock
+  private FileTreatmentHelper fileTreatmentHelper;
 
   /** The records. */
   private List<RecordVO> records;

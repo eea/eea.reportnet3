@@ -638,12 +638,18 @@ public class FileTreatmentHelper implements DisposableBean {
     }
   }
 
+  /**
+   * Update geomety.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchema the dataset schema
+   */
   public void updateGeomety(Long datasetId, DataSetSchema datasetSchema) {
     // check schema has geometry and check field Value has geometry
     if (checkSchemaGeometry(datasetSchema) && checkFieldValueGeometry(datasetId)) {
       // update geometryes (native)
       Map<String, String> mapFieldValue = getFieldValueGeometry(datasetId);
-      getFieldValueGeometry2(datasetId, mapFieldValue);
+      executeUpdateGeometry(datasetId, mapFieldValue);
     }
   }
 
@@ -694,6 +700,12 @@ public class FileTreatmentHelper implements DisposableBean {
     return result;
   }
 
+  /**
+   * Gets the field value geometry.
+   *
+   * @param datasetId the dataset id
+   * @return the field value geometry
+   */
   private Map<String, String> getFieldValueGeometry(Long datasetId) {
     String query = "select id, value from dataset_" + datasetId + ".field_value fv";
     List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
@@ -705,7 +717,13 @@ public class FileTreatmentHelper implements DisposableBean {
     return map;
   }
 
-  private void getFieldValueGeometry2(Long datasetId, Map<String, String> mapFieldValue) {
+  /**
+   * Execute update geometry.
+   *
+   * @param datasetId the dataset id
+   * @param mapFieldValue the map field value
+   */
+  private void executeUpdateGeometry(Long datasetId, Map<String, String> mapFieldValue) {
     String query =
         "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[";
 
@@ -720,7 +738,6 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     }
     query += "] as public.geom_update[]));";
-
     fieldRepository.queryExecutionSingle(query);
   }
 
