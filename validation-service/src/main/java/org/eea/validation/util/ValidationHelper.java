@@ -1098,31 +1098,32 @@ public class ValidationHelper implements DisposableBean {
         if (finishProcess(processId)) {
 
           kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
-          if (process.isReleased()) {
-            ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
-            if (null != nextProcess) {
-              executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
-                  false);
-            } else if (processControllerZuul.isProcessFinished(processId)) {
-              kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
-                  value);
+          if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
+              ProcessTypeEnum.VALIDATION, processId,
+              SecurityContextHolder.getContext().getAuthentication().getName(), 0, null)) {
+            if (process.isReleased()) {
+              ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
+              if (null != nextProcess) {
+                executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
+                    false);
+              } else if (processControllerZuul.isProcessFinished(processId)) {
+                kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
+                    value);
+              }
+
+            } else {
+              // Delete the lock to the Release process
+              deleteLockToReleaseProcess(datasetId);
+
+              kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
+                  value,
+                  NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
             }
 
-          } else {
-            // Delete the lock to the Release process
-            deleteLockToReleaseProcess(datasetId);
-
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
-                value,
-                NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
+            datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+                DatasetRunningStatusEnum.VALIDATED);
+            isFinished = true;
           }
-
-          processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
-              ProcessTypeEnum.VALIDATION, processId,
-              SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
-          datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
-              DatasetRunningStatusEnum.VALIDATED);
-          isFinished = true;
         }
       }
       return isFinished;
