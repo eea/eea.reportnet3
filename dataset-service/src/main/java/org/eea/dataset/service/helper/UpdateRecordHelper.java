@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.eea.dataset.mapper.DataSchemaMapper;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -42,6 +44,17 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
   @Value("${dataset.propagation.fieldBatchSize}")
   private int fieldBatchSize;
 
+  /** The file treatment helper. */
+  @Autowired
+  private FileTreatmentHelper fileTreatmentHelper;
+
+  /** The dataset schema service. */
+  @Autowired
+  private DatasetSchemaService datasetSchemaService;
+
+  /** The data schema mapper. */
+  @Autowired
+  private DataSchemaMapper dataSchemaMapper;
 
   /**
    * Instantiates a new file loader helper.
@@ -87,6 +100,10 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
     datasetService.deleteTempEtlExport(datasetId);
+
+    fileTreatmentHelper.updateGeomety(datasetId, dataSchemaMapper
+        .classToEntity(datasetSchemaService.getDataSchemaByDatasetId(false, datasetId)));
+
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
   }
@@ -149,6 +166,10 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
     datasetService.deleteTempEtlExport(datasetId);
+
+    fileTreatmentHelper.updateGeomety(datasetId, dataSchemaMapper
+        .classToEntity(datasetSchemaService.getDataSchemaByDatasetId(false, datasetId)));
+
     // after the field has been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.FIELD_UPDATED_COMPLETED_EVENT, datasetId);
   }

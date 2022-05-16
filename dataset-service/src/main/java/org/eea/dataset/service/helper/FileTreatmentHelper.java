@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -637,12 +638,18 @@ public class FileTreatmentHelper implements DisposableBean {
     }
   }
 
+  /**
+   * Update geomety.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchema the dataset schema
+   */
   public void updateGeomety(Long datasetId, DataSetSchema datasetSchema) {
     // check schema has geometry and check field Value has geometry
     if (checkSchemaGeometry(datasetSchema) && checkFieldValueGeometry(datasetId)) {
       // update geometryes (native)
-      fieldRepository.queryExecutionList(generatedQuery);
-
+      Map<String, String> mapFieldValue = getFieldValueGeometry(datasetId);
+      executeUpdateGeometry(datasetId, mapFieldValue);
     }
   }
 
@@ -691,6 +698,47 @@ public class FileTreatmentHelper implements DisposableBean {
       result = true;
     }
     return result;
+  }
+
+  /**
+   * Gets the field value geometry.
+   *
+   * @param datasetId the dataset id
+   * @return the field value geometry
+   */
+  private Map<String, String> getFieldValueGeometry(Long datasetId) {
+    String query = "select id, value from dataset_" + datasetId + ".field_value fv";
+    List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
+    Map<String, String> map = new HashMap<>();
+    for (Object[] object : resultQuery) {
+      map.put(object[0].toString(), object[1].toString());
+    }
+
+    return map;
+  }
+
+  /**
+   * Execute update geometry.
+   *
+   * @param datasetId the dataset id
+   * @param mapFieldValue the map field value
+   */
+  private void executeUpdateGeometry(Long datasetId, Map<String, String> mapFieldValue) {
+    String query =
+        "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[";
+
+    Iterator<Map.Entry<String, String>> iterator = mapFieldValue.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Map.Entry<String, String> entry = iterator.next();
+      query += "row('" + entry.getKey() + "', '" + entry.getValue();
+      if (iterator.hasNext()) {
+        query += "'), ";
+      } else {
+        query += "')";
+      }
+    }
+    query += "] as public.geom_update[]));";
+    fieldRepository.queryExecutionSingle(query);
   }
 
 

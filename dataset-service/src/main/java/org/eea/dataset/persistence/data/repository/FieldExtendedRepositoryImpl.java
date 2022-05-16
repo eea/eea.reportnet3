@@ -134,7 +134,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @return the list
    */
   @Override
-  public List<String> queryExecutionList(String generatedQuery) {
+  public List<Object[]> queryExecutionList(String generatedQuery) {
     Query query = entityManager.createNativeQuery(generatedQuery);
     return query.getResultList();
   }
@@ -150,8 +150,6 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     Query query = entityManager.createNativeQuery(generatedQuery);
     return query.getSingleResult();
   }
-
-
 
   /**
    * Find by id field schema with tag ordered.
