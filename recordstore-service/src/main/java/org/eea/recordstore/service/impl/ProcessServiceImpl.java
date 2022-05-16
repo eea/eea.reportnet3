@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
@@ -96,57 +98,64 @@ public class ProcessServiceImpl implements ProcessService {
    * @param status the status
    * @param type the type
    * @param processId the process id
-   * @param threadId the thread id
    * @param user the user
    * @param priority the priority
    * @param released the released
+   * @return true, if successful
    */
   @Override
   @Transactional
-  public void updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
-      ProcessTypeEnum type, String processId, String threadId, String user, int priority,
-      Boolean released) {
-
+  public boolean updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
+      ProcessTypeEnum type, String processId, String user, int priority, Boolean released) {
+    boolean updated = true;
     EEAProcess processToUpdate = processRepository.findOneByProcessId(processId);
 
     if (processToUpdate == null) {
       processToUpdate = new EEAProcess();
     }
-    if (processToUpdate.getDatasetId() == null) {
-      processToUpdate.setDatasetId(datasetId);
-    }
-
-    if (null != released) {
-      processToUpdate.setReleased(released);
-    }
-
-    processToUpdate.setProcessId(processId.equals(threadId) ? processId : threadId);
-    processToUpdate.setProcessType(type);
-    processToUpdate.setStatus(status);
-    processToUpdate.setDataflowId(dataflowId != -1L ? dataflowId
-        : datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId());
-    processToUpdate.setUser(user);
 
     switch (status) {
       case IN_QUEUE:
         processToUpdate.setQueuedDate(new Date());
         break;
       case IN_PROGRESS:
-        processToUpdate.setProcessStartingDate(new Date());
+        if (ProcessStatusEnum.IN_PROGRESS.equals(processToUpdate.getStatus())) {
+          updated = false;
+        } else {
+          processToUpdate.setProcessStartingDate(new Date());
+        }
         break;
       case FINISHED:
       case CANCELED:
         processToUpdate.setProcessFinishingDate(new Date());
         break;
     }
-    if (priority != 0) {
-      processToUpdate.setPriority(priority);
+    if (updated) {
+      if (processToUpdate.getDatasetId() == null) {
+        processToUpdate.setDatasetId(datasetId);
+      }
+      if (null != released) {
+        processToUpdate.setReleased(released);
+      }
+      processToUpdate.setProcessId(processId);
+      processToUpdate.setProcessType(type);
+      processToUpdate.setStatus(status);
+      processToUpdate.setDataflowId(dataflowId != -1L ? dataflowId
+          : datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId());
+      processToUpdate.setUser(user);
+
+      if (priority != 0) {
+        processToUpdate.setPriority(priority);
+      }
+      try {
+
+        processRepository.save(processToUpdate);
+        processRepository.flush();
+      } catch (ObjectOptimisticLockingFailureException e) {
+        updated = false;
+      }
     }
-    LOG.info(String.format(
-        "Adding or updating process for datasetId %s, dataflowId %s: %s %s with processId %s made by user %s",
-        datasetId, processToUpdate.getDataflowId(), type, status, processId, user));
-    processRepository.save(processToUpdate);
-    processRepository.flush();
+    return updated;
   }
 
   /**
@@ -175,6 +184,41 @@ public class ProcessServiceImpl implements ProcessService {
   @Override
   public ProcessVO getByProcessId(String processId) {
     return processMapper.entityToClass(processRepository.findOneByProcessId(processId));
+  }
+
+  /**
+   * Checks if is process finished.
+   *
+   * @param processId the process id
+   * @return true, if is process finished
+   */
+  @Override
+  public boolean isProcessFinished(String processId) {
+    EEAProcess processToUpdate = processRepository.findOneByProcessId(processId);
+    DataSetMetabaseVO dataset =
+        datasetMetabaseControllerZuul.findDatasetMetabaseById(processToUpdate.getDatasetId());
+
+    // check if for that dataflow and data provider id are not finished processes
+    return processRepository.isProcessFinished(processToUpdate.getDataflowId(),
+        dataset.getDataProviderId());
+  }
+
+  /**
+   * Find next process.
+   *
+   * @param processId the process id
+   * @return the process VO
+   */
+  @Override
+  public ProcessVO findNextProcess(String processId) {
+    // load process and dataset
+    EEAProcess processToUpdate = processRepository.findOneByProcessId(processId);
+    DataSetMetabaseVO dataset =
+        datasetMetabaseControllerZuul.findDatasetMetabaseById(processToUpdate.getDatasetId());
+
+    // return next in_queue process with the same dataflow and dataset+dataprovider as the previous
+    return processRepository.findNextProcess(processToUpdate.getDataflowId(),
+        dataset.getDataProviderId());
   }
 
 }
