@@ -49,4 +49,7 @@ public class ProcessVO {
   /** The released. */
   private boolean released;
 
+  /** The process id. */
+  private String processId;
+
 }

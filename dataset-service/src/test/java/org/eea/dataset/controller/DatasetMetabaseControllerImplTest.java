@@ -370,20 +370,6 @@ public class DatasetMetabaseControllerImplTest {
   }
 
   /**
-   * Gets the last dataset validation for release.
-   *
-   * @return the last dataset validation for release
-   */
-  @Test
-  public void getLastDatasetValidationForRelease() {
-    datasetMetabaseControllerImpl.getLastDatasetValidationForRelease(1L);
-    Mockito.when(datasetMetabaseService.getLastDatasetValidationForRelease(Mockito.any()))
-        .thenReturn(1L);
-    Assert.assertEquals((Long) 1L,
-        datasetMetabaseControllerImpl.getLastDatasetValidationForRelease(1L));
-  }
-
-  /**
    * Update dataset status test.
    *
    * @throws EEAException the EEA exception

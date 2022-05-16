@@ -21,7 +21,6 @@ public interface ProcessController {
    */
   @FeignClient(value = "recordstore", contextId = "process", path = "/process")
   interface ProcessControllerZuul extends ProcessController {
-
   }
 
   /**
@@ -54,17 +53,16 @@ public interface ProcessController {
    * @param status the status
    * @param type the type
    * @param processId the process id
-   * @param threadId the thread id
    * @param user the user
    * @param priority the priority
    * @param released the released
    */
   @PostMapping(value = "/private/updateProcess")
-  void updateProcess(@RequestParam("datasetId") Long datasetId,
+  boolean updateProcess(@RequestParam("datasetId") Long datasetId,
       @RequestParam(required = false) Long dataflowId,
       @RequestParam("status") ProcessStatusEnum status, @RequestParam("type") ProcessTypeEnum type,
-      @RequestParam("processId") String processId, @RequestParam("threadId") String threadId,
-      @RequestParam("user") String user, @RequestParam("priority") int priority,
+      @RequestParam("processId") String processId, @RequestParam("user") String user,
+      @RequestParam("priority") int priority,
       @RequestParam(required = false, value = "released") Boolean released);
 
   /**
@@ -108,5 +106,23 @@ public interface ProcessController {
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "user", required = false) String user,
       @RequestParam(value = "header", defaultValue = "date_start") String header);
+
+  /**
+   * Checks if is process finished.
+   *
+   * @param processId the process id
+   * @return true, if is process finished
+   */
+  @GetMapping(value = "/private/finished/{processId}")
+  boolean isProcessFinished(@PathVariable("processId") String processId);
+
+  /**
+   * Gets the next process.
+   *
+   * @param processId the process id
+   * @return the next process
+   */
+  @GetMapping(value = "/private/next/{processId}")
+  ProcessVO getNextProcess(@PathVariable("processId") String processId);
 
 }

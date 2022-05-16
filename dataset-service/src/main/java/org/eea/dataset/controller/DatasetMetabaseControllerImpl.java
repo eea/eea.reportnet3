@@ -489,21 +489,6 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   }
 
   /**
-   * Gets the last dataset validation for release.
-   *
-   * @param datasetId the dataset id
-   * @return the last dataset validation for release
-   */
-  @Override
-  @GetMapping(value = "/private/getLastDatasetValidationForRelease/{id}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "get last dataset validation for release", hidden = true)
-  public Long getLastDatasetValidationForRelease(@ApiParam(type = "Long", value = "Dataset Id",
-      example = "0") @PathVariable("id") Long datasetId) {
-    return datasetMetabaseService.getLastDatasetValidationForRelease(datasetId);
-  }
-
-  /**
    * Find reporting data set public by dataflow id.
    *
    * @param dataflowId the dataflow id

@@ -113,11 +113,8 @@ public class FMECommunicationServiceTest {
     FileSubmitResult fileSubmitResult = new FileSubmitResult();
     fileSubmitResult.setName("test");
 
-    ResponseEntity<FileSubmitResult> checkResult =
-        new ResponseEntity<>(fileSubmitResult, HttpStatus.OK);
-
-    // Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
-    // Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(checkResult);
+    ResponseEntity<String> checkResult =
+        new ResponseEntity<>(fileSubmitResult.toString(), HttpStatus.OK);
 
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());

@@ -36,12 +36,13 @@ public interface ProcessService {
    * @param status the status
    * @param type the type
    * @param processId the process id
-   * @param threadId the thread id
    * @param user the user
+   * @param priority the priority
+   * @param released the released
+   * @return true, if successful
    */
-  void updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
-      ProcessTypeEnum type, String processId, String threadId, String user, int priority,
-      Boolean released);
+  boolean updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
+      ProcessTypeEnum type, String processId, String user, int priority, Boolean released);
 
   /**
    * Update priority.
@@ -58,4 +59,20 @@ public interface ProcessService {
    * @return the by process id
    */
   ProcessVO getByProcessId(String processId);
+
+  /**
+   * Checks if is process finished.
+   *
+   * @param processId the process id
+   * @return true, if is process finished
+   */
+  boolean isProcessFinished(String processId);
+
+  /**
+   * Find next process.
+   *
+   * @param processId the process id
+   * @return the process VO
+   */
+  ProcessVO findNextProcess(String processId);
 }
