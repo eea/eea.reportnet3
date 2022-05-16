@@ -29,7 +29,7 @@ public class FileSubmitResult {
 
   /** The size. */
   @JsonProperty("size")
-  private Integer size;
+  private Long size;
 
   /** The type. */
   @JsonProperty("type")
