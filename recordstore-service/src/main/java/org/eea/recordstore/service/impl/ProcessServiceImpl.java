@@ -125,31 +125,38 @@ public class ProcessServiceImpl implements ProcessService {
         break;
       case FINISHED:
       case CANCELED:
-        processToUpdate.setProcessFinishingDate(new Date());
+        if (!ProcessStatusEnum.FINISHED.equals(processToUpdate.getStatus())
+            && !ProcessStatusEnum.CANCELED.equals(processToUpdate.getStatus())) {
+          processToUpdate.setProcessFinishingDate(new Date());
+        } else {
+          updated = false;
+        }
         break;
     }
-    if (processToUpdate.getDatasetId() == null) {
-      processToUpdate.setDatasetId(datasetId);
-    }
-    if (null != released) {
-      processToUpdate.setReleased(released);
-    }
-    processToUpdate.setProcessId(processId);
-    processToUpdate.setProcessType(type);
-    processToUpdate.setStatus(status);
-    processToUpdate.setDataflowId(dataflowId != -1L ? dataflowId
-        : datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId());
-    processToUpdate.setUser(user);
+    if (updated) {
+      if (processToUpdate.getDatasetId() == null) {
+        processToUpdate.setDatasetId(datasetId);
+      }
+      if (null != released) {
+        processToUpdate.setReleased(released);
+      }
+      processToUpdate.setProcessId(processId);
+      processToUpdate.setProcessType(type);
+      processToUpdate.setStatus(status);
+      processToUpdate.setDataflowId(dataflowId != -1L ? dataflowId
+          : datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId());
+      processToUpdate.setUser(user);
 
-    if (priority != 0) {
-      processToUpdate.setPriority(priority);
-    }
-    try {
+      if (priority != 0) {
+        processToUpdate.setPriority(priority);
+      }
+      try {
 
-      processRepository.save(processToUpdate);
-      processRepository.flush();
-    } catch (ObjectOptimisticLockingFailureException e) {
-      updated = false;
+        processRepository.save(processToUpdate);
+        processRepository.flush();
+      } catch (ObjectOptimisticLockingFailureException e) {
+        updated = false;
+      }
     }
     return updated;
   }
