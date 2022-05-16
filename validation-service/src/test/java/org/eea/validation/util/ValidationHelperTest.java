@@ -24,6 +24,8 @@ import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.ConsumerGroupVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -244,6 +246,7 @@ public class ValidationHelperTest {
     DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
     datasetMetabase.setId(1L);
     datasetMetabase.setDatasetSchema("5cf0e9b3b793310e9ceca190");
+    datasetMetabase.setDataflowId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabase);
     RulesSchema rules = new RulesSchema();
@@ -253,11 +256,15 @@ public class ValidationHelperTest {
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setDeadlineDate(new Date());
 
+    Mockito
+        .when(processControllerZuul.updateProcess(Mockito.anyLong(), Mockito.anyLong(),
+            Mockito.any(ProcessStatusEnum.class), Mockito.any(ProcessTypeEnum.class),
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyBoolean()))
+        .thenReturn(true);
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rules);
     Mockito.when(validationService.countRecordsDataset(Mockito.eq(1l))).thenReturn(1);
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any()))
         .thenReturn(new DataSetSchema());
-    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflow);
 
     validationHelper.executeValidation(1l, "1", false, false);
     Mockito.verify(validationService, Mockito.times(1)).deleteAllValidation(Mockito.eq(1l));
@@ -296,6 +303,7 @@ public class ValidationHelperTest {
     DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
     datasetMetabase.setId(1L);
     datasetMetabase.setDatasetSchema("5cf0e9b3b793310e9ceca190");
+    datasetMetabase.setDataflowId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(datasetMetabase);
     RulesSchema rules = new RulesSchema();
@@ -311,11 +319,14 @@ public class ValidationHelperTest {
 
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setDeadlineDate(new Date());
-
+    Mockito
+        .when(processControllerZuul.updateProcess(Mockito.anyLong(), Mockito.anyLong(),
+            Mockito.any(ProcessStatusEnum.class), Mockito.any(ProcessTypeEnum.class),
+            Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyBoolean()))
+        .thenReturn(true);
     Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(Arrays.asList(rule));
     Mockito.when(rulesRepository.findSqlRulesEnabled(Mockito.any()))
         .thenReturn(Arrays.asList(rule));
-    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     validationHelper.executeValidation(1l, "1", false, true);
     Mockito.verify(referenceDatasetControllerZuul, Mockito.times(1))
         .findReferenceDatasetByDataflowId(Mockito.any());
