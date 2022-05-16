@@ -119,9 +119,7 @@ public class ProcessServiceImpl implements ProcessService {
         processToUpdate.setQueuedDate(new Date());
         break;
       case IN_PROGRESS:
-        if (ProcessStatusEnum.IN_PROGRESS.equals(processToUpdate.getStatus())) {
-          updated = false;
-        } else {
+        if (!ProcessStatusEnum.IN_PROGRESS.equals(processToUpdate.getStatus())) {
           processToUpdate.setProcessStartingDate(new Date());
         }
         break;
@@ -130,30 +128,28 @@ public class ProcessServiceImpl implements ProcessService {
         processToUpdate.setProcessFinishingDate(new Date());
         break;
     }
-    if (updated) {
-      if (processToUpdate.getDatasetId() == null) {
-        processToUpdate.setDatasetId(datasetId);
-      }
-      if (null != released) {
-        processToUpdate.setReleased(released);
-      }
-      processToUpdate.setProcessId(processId);
-      processToUpdate.setProcessType(type);
-      processToUpdate.setStatus(status);
-      processToUpdate.setDataflowId(dataflowId != -1L ? dataflowId
-          : datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId());
-      processToUpdate.setUser(user);
+    if (processToUpdate.getDatasetId() == null) {
+      processToUpdate.setDatasetId(datasetId);
+    }
+    if (null != released) {
+      processToUpdate.setReleased(released);
+    }
+    processToUpdate.setProcessId(processId);
+    processToUpdate.setProcessType(type);
+    processToUpdate.setStatus(status);
+    processToUpdate.setDataflowId(dataflowId != -1L ? dataflowId
+        : datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId());
+    processToUpdate.setUser(user);
 
-      if (priority != 0) {
-        processToUpdate.setPriority(priority);
-      }
-      try {
+    if (priority != 0) {
+      processToUpdate.setPriority(priority);
+    }
+    try {
 
-        processRepository.save(processToUpdate);
-        processRepository.flush();
-      } catch (ObjectOptimisticLockingFailureException e) {
-        updated = false;
-      }
+      processRepository.save(processToUpdate);
+      processRepository.flush();
+    } catch (ObjectOptimisticLockingFailureException e) {
+      updated = false;
     }
     return updated;
   }
@@ -217,8 +213,8 @@ public class ProcessServiceImpl implements ProcessService {
         datasetMetabaseControllerZuul.findDatasetMetabaseById(processToUpdate.getDatasetId());
 
     // return next in_queue process with the same dataflow and dataset+dataprovider as the previous
-    return processRepository.findNextProcess(processToUpdate.getDataflowId(),
-        dataset.getDataProviderId());
+    return processMapper.entityToClass(processRepository
+        .findNextProcess(processToUpdate.getDataflowId(), dataset.getDataProviderId()));
   }
 
 }

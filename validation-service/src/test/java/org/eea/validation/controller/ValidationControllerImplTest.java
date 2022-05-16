@@ -10,6 +10,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.lock.service.impl.LockServiceImpl;
@@ -121,6 +122,9 @@ public class ValidationControllerImplTest {
   public void validateDataSetDataTest2() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
+        .thenReturn(new DataSetMetabaseVO());
+    Mockito.when(validationHelper.getPriority(Mockito.any())).thenReturn(60);
     validationController.validateDataSetData(1L, false);
     Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
@@ -135,6 +139,9 @@ public class ValidationControllerImplTest {
   public void validateDataSetDataTest3() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
+        .thenReturn(new DataSetMetabaseVO());
+    Mockito.when(validationHelper.getPriority(Mockito.any())).thenReturn(60);
     try {
       validationController.validateDataSetData(1L, false);
     } catch (ResponseStatusException e) {
@@ -147,6 +154,9 @@ public class ValidationControllerImplTest {
   public void validateDataSetDataTestEEAException() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(validationHelper.getPriority(Mockito.any())).thenReturn(60);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
+        .thenReturn(new DataSetMetabaseVO());
     doThrow(new EEAException("e")).when(validationHelper).executeValidation(Mockito.anyLong(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean());
     validationController.validateDataSetData(1L, false);

@@ -1,6 +1,5 @@
 package org.eea.recordstore.persistence.repository;
 
-import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.recordstore.persistence.domain.EEAProcess;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -49,7 +48,7 @@ public interface ProcessRepository
    * @return the process VO
    */
   @Query(nativeQuery = true,
-      value = "select p from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.status='IN_QUEUE' limit 1")
-  ProcessVO findNextProcess(@Param("dataflowId") Long dataflowId,
+      value = "select p.* from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.status='IN_QUEUE' limit 1")
+  EEAProcess findNextProcess(@Param("dataflowId") Long dataflowId,
       @Param("dataProviderId") Long dataProviderId);
 }
