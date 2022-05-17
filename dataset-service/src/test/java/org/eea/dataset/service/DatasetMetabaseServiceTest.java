@@ -11,7 +11,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,8 +59,6 @@ import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.interfaces.vo.recordstore.ProcessVO;
-import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -732,55 +729,6 @@ public class DatasetMetabaseServiceTest {
     Assert.assertEquals((Long) 1L, datasetMetabaseService.countDatasetNameByDataflowId(1L, "1"));
   }
 
-  /**
-   * Last dataset validation for releasing by id.
-   */
-  @Test
-  public void lastDatasetValidationForReleasingById() {
-    DataSetMetabase datasetMetabase = new DataSetMetabase();
-    datasetMetabase.setId(1L);
-    datasetMetabase.setDataflowId(1L);
-    datasetMetabase.setDataProviderId(1L);
-    List<BigInteger> datasetsId = new ArrayList<>();
-    datasetsId.add(BigInteger.valueOf(1L));
-    datasetsId.add(BigInteger.valueOf(2L));
-    ProcessesVO processesVO = new ProcessesVO();
-    List<ProcessVO> processList = new ArrayList<>();
-    ProcessVO processVO = new ProcessVO();
-    processVO.setDatasetId(1L);
-    processVO.setId(1L);
-    processList.add(processVO);
-    processesVO.setProcessList(processList);
-    Mockito
-        .when(processControllerZuul.getPrivateProcesses(Mockito.any(), Mockito.any(),
-            Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(processesVO);
-    Mockito.when(dataSetMetabaseRepository.getFreeDatasetIdsByDataflowIdAndDataProviderId(
-        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(datasetsId);
-    Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
-    Assert.assertEquals((Long) 2L, datasetMetabaseService.getLastDatasetValidationForRelease(1L));
-  }
-
-  /**
-   * Test last dataset validation for releasing by id return null.
-   */
-  @Test
-  public void testLastDatasetValidationForReleasingByIdReturnNull() {
-    DataSetMetabase datasetMetabase = new DataSetMetabase();
-    datasetMetabase.setId(1L);
-    datasetMetabase.setDataflowId(1L);
-    datasetMetabase.setDataProviderId(1L);
-    List<BigInteger> datasetsId = new ArrayList<>();
-    datasetsId.add(BigInteger.valueOf(1L));
-    ProcessesVO processesVO = new ProcessesVO();
-    processesVO.setProcessList(new ArrayList<>());
-    Mockito
-        .when(processControllerZuul.getPrivateProcesses(Mockito.any(), Mockito.any(),
-            Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
-        .thenReturn(processesVO);
-    Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
-    Assert.assertEquals((Long) 0L, datasetMetabaseService.getLastDatasetValidationForRelease(1L));
-  }
 
   /**
    * Update dataset status exception test.

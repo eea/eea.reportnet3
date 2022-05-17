@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.persistence.Version;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import lombok.Getter;
@@ -87,6 +88,10 @@ public class EEAProcess {
   /** The released. */
   @Column(name = "released")
   private boolean released;
+
+  /** The version. */
+  @Version
+  private int version;
 
   /**
    * Equals.

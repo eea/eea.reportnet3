@@ -18,6 +18,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -117,7 +118,6 @@ public class ValidationControllerImpl implements ValidationController {
         "The user invoking ValidationControllerImpl.validateDataSetData is {} and the datasetId {}",
         SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
 
-    String processId = UUID.randomUUID().toString();
 
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
@@ -126,14 +126,33 @@ public class ValidationControllerImpl implements ValidationController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
+    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    String uuid = UUID.randomUUID().toString();
+    String nextUuid = uuid;
+    if (released) {
+      // obtain datasets to be released
+      List<Long> datasets =
+          datasetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(
+              dataset.getDataflowId(), dataset.getDataProviderId());
+      // queue validations
+      for (Long datasetToReleaseId : datasets) {
+        processControllerZuul.updateProcess(datasetToReleaseId, dataset.getDataflowId(),
+            ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, nextUuid,
+            SecurityContextHolder.getContext().getAuthentication().getName(),
+            validationHelper.getPriority(dataset), released);
+        nextUuid = UUID.randomUUID().toString();
+      }
+    } else {
+      processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+          ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, uuid,
+          SecurityContextHolder.getContext().getAuthentication().getName(),
+          validationHelper.getPriority(dataset), released);
+    }
     try {
-      validationHelper.executeValidation(datasetId, processId, released, true);
+      validationHelper.executeValidation(datasetId, uuid, released, true);
       // Add lock to the release process if necessary
       validationHelper.addLockToReleaseProcess(datasetId);
     } catch (EEAException e) {
-      processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.CANCELED,
-          ProcessTypeEnum.VALIDATION, processId, processId,
-          SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
       LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);

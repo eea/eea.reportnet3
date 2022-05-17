@@ -267,39 +267,39 @@ public class ValidationHelper implements DisposableBean {
   public void executeValidation(@LockCriteria(name = "datasetId") final Long datasetId,
       String processId, boolean released, boolean updateViews) throws EEAException {
 
+    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     // In case there's no processId, set a new one (because the processId is set in
     // ValidationControlleriImpl)
     if (StringUtils.isBlank(processId) || "null".equals(processId)) {
       processId = UUID.randomUUID().toString();
     }
+    if (processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+        ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId,
+        SecurityContextHolder.getContext().getAuthentication().getName(), 0, released)) {
 
-    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-    processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
-        ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId, processId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), getPriority(dataset),
-        released);
 
-    // If there's no SQL rules enabled, no need to refresh the views, so directly start the
-    // validation
-    List<Rule> listSql =
-        rulesRepository.findSqlRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
-    Boolean hasSqlEnabled = true;
-    if (CollectionUtils.isEmpty(listSql)) {
-      hasSqlEnabled = false;
-    }
+      // If there's no SQL rules enabled, no need to refresh the views, so directly start the
+      // validation
+      List<Rule> listSql =
+          rulesRepository.findSqlRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
+      Boolean hasSqlEnabled = true;
+      if (CollectionUtils.isEmpty(listSql)) {
+        hasSqlEnabled = false;
+      }
 
-    if (Boolean.FALSE.equals(updateViews) || Boolean.FALSE.equals(hasSqlEnabled)) {
-      executeValidationProcess(datasetId, processId, released);
-    } else {
-      deleteLockToReleaseProcess(datasetId);
-      Map<String, Object> values = new HashMap<>();
-      values.put(LiteralConstants.DATASET_ID, datasetId);
-      values.put("released", released);
-      values.put("referencesToRefresh",
-          List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
-              dataset.getDataflowId(), dataset.getDatasetSchema())));
-      values.put("processId", processId);
-      kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
+      if (Boolean.FALSE.equals(updateViews) || Boolean.FALSE.equals(hasSqlEnabled)) {
+        executeValidationProcess(datasetId, processId, released);
+      } else {
+        deleteLockToReleaseProcess(datasetId);
+        Map<String, Object> values = new HashMap<>();
+        values.put(LiteralConstants.DATASET_ID, datasetId);
+        values.put("released", released);
+        values.put("referencesToRefresh",
+            List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
+                dataset.getDataflowId(), dataset.getDatasetSchema())));
+        values.put("processId", processId);
+        kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
+      }
     }
     dataset = null;
   }
@@ -310,7 +310,7 @@ public class ValidationHelper implements DisposableBean {
    * @param dataset the dataset
    * @return the priority
    */
-  private int getPriority(DataSetMetabaseVO dataset) {
+  public int getPriority(DataSetMetabaseVO dataset) {
     int priority = 0;
     DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
     dataflow.getDeadlineDate();
@@ -465,9 +465,6 @@ public class ValidationHelper implements DisposableBean {
     releaseFieldsValidation(dataset, processId, !filterEmptyFields(rules.getRules()));
     LOG.info("Collecting Table Validation tasks");
     releaseTableValidation(dataset, processId);
-    processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
-        ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId, processId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), 0, released);
     datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
         DatasetRunningStatusEnum.VALIDATING);
   }
@@ -1101,33 +1098,32 @@ public class ValidationHelper implements DisposableBean {
         if (finishProcess(processId)) {
 
           kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
-          if (process.isReleased()) {
-            Long nextDatasetId =
-                datasetMetabaseControllerZuul.getLastDatasetValidationForRelease(datasetId);
-            if (null != nextDatasetId) {
-              if (nextDatasetId != 0) {
-                executeValidation(nextDatasetId, UUID.randomUUID().toString(), true, false);
+          if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
+              ProcessTypeEnum.VALIDATION, processId,
+              SecurityContextHolder.getContext().getAuthentication().getName(), 0, null)) {
+            if (process.isReleased()) {
+              ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
+              if (null != nextProcess) {
+                executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
+                    false);
+              } else if (processControllerZuul.isProcessFinished(processId)) {
+                kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
+                    value);
               }
+
             } else {
-              kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
-                  value);
+              // Delete the lock to the Release process
+              deleteLockToReleaseProcess(datasetId);
+
+              kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
+                  value,
+                  NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
             }
 
-          } else {
-            // Delete the lock to the Release process
-            deleteLockToReleaseProcess(datasetId);
-
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
-                value,
-                NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
+            datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+                DatasetRunningStatusEnum.VALIDATED);
+            isFinished = true;
           }
-
-          processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
-              ProcessTypeEnum.VALIDATION, processId, processId,
-              SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
-          datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
-              DatasetRunningStatusEnum.VALIDATED);
-          isFinished = true;
         }
       }
       return isFinished;

@@ -1,7 +1,6 @@
 package org.eea.dataset.service.impl;
 
 import java.lang.reflect.Field;
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,8 +58,6 @@ import org.eea.interfaces.vo.dataset.TableStatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.interfaces.vo.recordstore.ProcessVO;
-import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -980,41 +977,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     return providerIds;
   }
-
-
-
-  /**
-   * Gets the last dataset validation for release.
-   *
-   * @param datasetId the dataset id
-   * @return the last dataset validation for release
-   */
-  @Override
-  public Long getLastDatasetValidationForRelease(Long datasetId) {
-    DataSetMetabase dataset =
-        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
-    ProcessesVO processVO = processControllerZuul.getPrivateProcesses(null, null, false,
-        "IN_PROGRESS", dataset.getDataflowId(), null, "queued_date");
-    List<ProcessVO> processes = processVO.getProcessList();
-    ProcessVO onGoingProcess = processes.stream()
-        .filter(process -> datasetId.equals(process.getDatasetId())).findFirst().orElse(null);
-    Long nextIdValidation = null;
-    if (onGoingProcess != null) {
-      List<BigInteger> datasets =
-          dataSetMetabaseRepository.getFreeDatasetIdsByDataflowIdAndDataProviderId(
-              dataset.getDataflowId(), dataset.getDataProviderId(), onGoingProcess.getQueuedDate());
-      Collections.sort(datasets);
-      if (datasets.get(datasets.size() - 1).longValue() != datasetId) {
-        int index = datasets.indexOf(BigInteger.valueOf(datasetId));
-        nextIdValidation = datasets.get(++index).longValue();
-      }
-    } else {
-      nextIdValidation = 0L;
-    }
-    return nextIdValidation;
-
-  }
-
 
   /**
    * Update dataset running status.
