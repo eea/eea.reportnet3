@@ -238,14 +238,6 @@ public interface DatasetMetabaseService {
   List<Long> getUserProviderIdsByDataflowId(Long dataflowId);
 
   /**
-   * Last dataset validation for releasing by id.
-   *
-   * @param datasetId the datasetId id
-   * @return true, if successful
-   */
-  Long getLastDatasetValidationForRelease(Long datasetId);
-
-  /**
    * Update dataset status.
    *
    * @param datasetStatusMessageVO the dataset status message VO
@@ -287,5 +279,13 @@ public interface DatasetMetabaseService {
    * @return the reportings by provider ids
    */
   List<DataSetMetabaseVO> getDatasetsByProviderIds(List<Long> providerIds);
+
+  /**
+   * Gets the last dataset for release.
+   *
+   * @param datasetId the dataset id
+   * @return the last dataset for release
+   */
+  Long getLastDatasetForRelease(Long datasetId);
 
 }

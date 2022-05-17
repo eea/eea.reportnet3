@@ -40,6 +40,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -162,7 +163,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
   /** The user management controller zull. */
   @Autowired
-  private UserManagementControllerZull userManagementControllerZull;
+  private ProcessControllerZuul processControllerZuul;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
@@ -977,31 +978,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return providerIds;
   }
 
-
-
-  /**
-   * Gets the last dataset validation for release.
-   *
-   * @param datasetId the dataset id
-   * @return the last dataset validation for release
-   */
-  @Override
-  public Long getLastDatasetValidationForRelease(Long datasetId) {
-    DataSetMetabase dataset =
-        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
-    List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
-        dataset.getDataflowId(), dataset.getDataProviderId());
-    Collections.sort(datasets);
-    Long nextIdValidation = null;
-    if (!datasets.get(datasets.size() - 1).equals(datasetId)) {
-      int index = datasets.indexOf(datasetId);
-      nextIdValidation = datasets.get(++index);
-    }
-    return nextIdValidation;
-
-  }
-
-
   /**
    * Update dataset running status.
    *
@@ -1145,6 +1121,27 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   public List<DataSetMetabaseVO> getDatasetsByProviderIds(List<Long> providerIds) {
     return dataSetMetabaseMapper
         .entityListToClass(dataSetMetabaseRepository.findByDataProviderIdIn(providerIds));
+  }
+
+  /**
+   * Gets the last dataset for release.
+   *
+   * @param datasetId the dataset id
+   * @return the last dataset for release
+   */
+  @Override
+  public Long getLastDatasetForRelease(Long datasetId) {
+    DataSetMetabase dataset =
+        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+    List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
+        dataset.getDataflowId(), dataset.getDataProviderId());
+    Collections.sort(datasets);
+    Long nextIdValidation = null;
+    if (!datasets.get(datasets.size() - 1).equals(datasetId)) {
+      int index = datasets.indexOf(datasetId);
+      nextIdValidation = datasets.get(++index);
+    }
+    return nextIdValidation;
   }
 
 }

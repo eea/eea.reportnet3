@@ -77,7 +77,7 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
         } catch (RecordStoreAccessException e) {
           LOG_ERROR.error("Error refreshing the materialized view of the dataset {}", dataset, e);
           processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.CANCELED,
-              ProcessTypeEnum.VALIDATION, processId, processId,
+              ProcessTypeEnum.VALIDATION, processId,
               SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
           datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
               DatasetRunningStatusEnum.ERROR_IN_VALIDATION);

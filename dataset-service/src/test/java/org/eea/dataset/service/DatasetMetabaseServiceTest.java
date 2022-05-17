@@ -1,5 +1,5 @@
 /*
- * 
+ *
  */
 package org.eea.dataset.service;
 
@@ -43,6 +43,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -159,6 +160,9 @@ public class DatasetMetabaseServiceTest {
   /** The reference dataset repository. */
   @Mock
   private ReferenceDatasetRepository referenceDatasetRepository;
+
+  @Mock
+  private ProcessControllerZuul processControllerZuul;
 
   /** The foreign relations. */
   private ForeignRelations foreignRelations;
@@ -725,44 +729,6 @@ public class DatasetMetabaseServiceTest {
     Assert.assertEquals((Long) 1L, datasetMetabaseService.countDatasetNameByDataflowId(1L, "1"));
   }
 
-  /**
-   * Last dataset validation for releasing by id.
-   */
-  @Test
-  public void lastDatasetValidationForReleasingById() {
-    DataSetMetabase datasetMetabase = new DataSetMetabase();
-    datasetMetabase.setId(1L);
-    datasetMetabase.setDataflowId(1L);
-    datasetMetabase.setDataProviderId(1L);
-    List<Long> datasetsId = new ArrayList();
-    datasetsId.add(1L);
-    datasetsId.add(2L);
-    Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
-    Mockito
-        .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
-            datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
-        .thenReturn(datasetsId);
-    Assert.assertEquals((Long) 2L, datasetMetabaseService.getLastDatasetValidationForRelease(1L));
-  }
-
-  /**
-   * Test last dataset validation for releasing by id return null.
-   */
-  @Test
-  public void testLastDatasetValidationForReleasingByIdReturnNull() {
-    DataSetMetabase datasetMetabase = new DataSetMetabase();
-    datasetMetabase.setId(1L);
-    datasetMetabase.setDataflowId(1L);
-    datasetMetabase.setDataProviderId(1L);
-    List<Long> datasetsId = new ArrayList();
-    datasetsId.add(1L);
-    Mockito.when(dataSetMetabaseRepository.findById(1L)).thenReturn(Optional.of(datasetMetabase));
-    Mockito
-        .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
-            datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
-        .thenReturn(datasetsId);
-    Assert.assertNull(datasetMetabaseService.getLastDatasetValidationForRelease(1L));
-  }
 
   /**
    * Update dataset status exception test.
@@ -1074,7 +1040,7 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(euDatasetRepository.existsById(Mockito.any())).thenReturn(false);
     Mockito.when(testDatasetRepository.existsById(Mockito.any())).thenReturn(false);
     Mockito.when(referenceDatasetRepository.existsById(Mockito.any())).thenReturn(true);
-    Assert.assertEquals(DatasetTypeEnum.REFERENCE, datasetMetabaseService.getDatasetType(1L));;
+    Assert.assertEquals(DatasetTypeEnum.REFERENCE, datasetMetabaseService.getDatasetType(1L));
   }
 
   /**

@@ -21,7 +21,6 @@ public interface ProcessController {
    */
   @FeignClient(value = "recordstore", contextId = "process", path = "/process")
   interface ProcessControllerZuul extends ProcessController {
-
   }
 
   /**
@@ -54,17 +53,16 @@ public interface ProcessController {
    * @param status the status
    * @param type the type
    * @param processId the process id
-   * @param threadId the thread id
    * @param user the user
    * @param priority the priority
    * @param released the released
    */
   @PostMapping(value = "/private/updateProcess")
-  void updateProcess(@RequestParam("datasetId") Long datasetId,
+  boolean updateProcess(@RequestParam("datasetId") Long datasetId,
       @RequestParam(required = false) Long dataflowId,
       @RequestParam("status") ProcessStatusEnum status, @RequestParam("type") ProcessTypeEnum type,
-      @RequestParam("processId") String processId, @RequestParam("threadId") String threadId,
-      @RequestParam("user") String user, @RequestParam("priority") int priority,
+      @RequestParam("processId") String processId, @RequestParam("user") String user,
+      @RequestParam("priority") int priority,
       @RequestParam(required = false, value = "released") Boolean released);
 
   /**
@@ -85,5 +83,46 @@ public interface ProcessController {
    */
   @GetMapping(value = "/private/{processId}", produces = MediaType.APPLICATION_JSON_VALUE)
   ProcessVO findById(@PathVariable("processId") String processId);
+
+
+  /**
+   * Gets the private processes.
+   *
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param asc the asc
+   * @param status the status
+   * @param dataflowId the dataflow id
+   * @param user the user
+   * @param header the header
+   * @return the private processes
+   */
+  @GetMapping(value = "/private/")
+  ProcessesVO getPrivateProcesses(
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+      @RequestParam(value = "status", required = false) String status,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "user", required = false) String user,
+      @RequestParam(value = "header", defaultValue = "date_start") String header);
+
+  /**
+   * Checks if is process finished.
+   *
+   * @param processId the process id
+   * @return true, if is process finished
+   */
+  @GetMapping(value = "/private/finished/{processId}")
+  boolean isProcessFinished(@PathVariable("processId") String processId);
+
+  /**
+   * Gets the next process.
+   *
+   * @param processId the process id
+   * @return the next process
+   */
+  @GetMapping(value = "/private/next/{processId}")
+  ProcessVO getNextProcess(@PathVariable("processId") String processId);
 
 }

@@ -120,7 +120,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
     String dateRelease = String.valueOf(eeaEventVO.getData().get("dateRelease"));
 
-    Long nextData = datasetMetabaseService.getLastDatasetValidationForRelease(datasetId);
+    Long nextData = datasetMetabaseService.getLastDatasetForRelease(datasetId);
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
 
     // Fill the table changes to eu_dataset and put there are changes in the DC data
