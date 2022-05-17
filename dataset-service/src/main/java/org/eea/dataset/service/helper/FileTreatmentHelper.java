@@ -691,8 +691,8 @@ public class FileTreatmentHelper implements DisposableBean {
    */
   private boolean checkFieldValueGeometry(Long datasetId) {
     boolean result = false;
-    String query = "select count(id) from dataset_" + datasetId
-        + ".field_value fv where type in ('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION')";
+    String query = "select count(fv.id) from dataset_" + datasetId
+        + ".field_value fv where fv.type in ('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION')";
     Integer count = Integer.parseInt(fieldRepository.queryExecutionSingle(query).toString());
     if (count != null && count > 0) {
       result = true;
