@@ -5,9 +5,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.eea.dataset.mapper.DataSchemaMapper;
-import org.eea.dataset.service.DatasetSchemaService;
+import org.bson.types.ObjectId;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -48,13 +51,13 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
 
-  /** The dataset schema service. */
+  /** The dataset metabase service. */
   @Autowired
-  private DatasetSchemaService datasetSchemaService;
+  DatasetMetabaseService datasetMetabaseService;
 
-  /** The data schema mapper. */
+  /** The schemas repository. */
   @Autowired
-  private DataSchemaMapper dataSchemaMapper;
+  private SchemasRepository schemasRepository;
 
   /**
    * Instantiates a new file loader helper.
@@ -101,8 +104,11 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     // delete the temporary table from etlExport
     datasetService.deleteTempEtlExport(datasetId);
 
-    fileTreatmentHelper.updateGeomety(datasetId, dataSchemaMapper
-        .classToEntity(datasetSchemaService.getDataSchemaByDatasetId(false, datasetId)));
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+    DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
+        .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
+
+    fileTreatmentHelper.updateGeomety(datasetId, datasetSchema);
 
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
@@ -167,8 +173,11 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     // delete the temporary table from etlExport
     datasetService.deleteTempEtlExport(datasetId);
 
-    fileTreatmentHelper.updateGeomety(datasetId, dataSchemaMapper
-        .classToEntity(datasetSchemaService.getDataSchemaByDatasetId(false, datasetId)));
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+    DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
+        .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
+
+    fileTreatmentHelper.updateGeomety(datasetId, datasetSchema);
 
     // after the field has been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.FIELD_UPDATED_COMPLETED_EVENT, datasetId);
