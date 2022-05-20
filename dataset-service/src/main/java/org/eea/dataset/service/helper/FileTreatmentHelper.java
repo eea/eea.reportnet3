@@ -645,9 +645,10 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetSchema the dataset schema
    */
   @Async
-  public void updateGeomety(Long datasetId, DataSetSchema datasetSchema) {
+  public void updateGeometry(Long datasetId, DataSetSchema datasetSchema) {
     // check schema has geometry and check field Value has geometry
-    if (checkSchemaGeometry(datasetSchema) && checkFieldValueGeometry(datasetId)) {
+    if (checkSchemaGeometry(datasetSchema)) {
+      LOG.info("Updating geometries for dataset {}", datasetId);
       // update geometryes (native)
       Map<Integer, Map<String, String>> mapFieldValue = getFieldValueGeometry(datasetId);
       int size = mapFieldValue.keySet().size();
@@ -711,7 +712,8 @@ public class FileTreatmentHelper implements DisposableBean {
    * @return the field value geometry
    */
   private Map<Integer, Map<String, String>> getFieldValueGeometry(Long datasetId) {
-    String query = "select id, value from dataset_" + datasetId + ".field_value fv";
+    String query = "select id, value from dataset_" + datasetId
+        + ".field_value fv where fv.type in ('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION')";
     List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
     Map<Integer, Map<String, String>> resultMap = new HashMap<>();
     for (int i = 0; i < resultQuery.size(); i++) {
@@ -1076,7 +1078,7 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     }
 
-    updateGeomety(datasetId, datasetSchema);
+    updateGeometry(datasetId, datasetSchema);
 
     if (files.size() == 1) {
       finishImportProcess(datasetId, tableSchemaId, originalFileName, error, errorWrongFilename);

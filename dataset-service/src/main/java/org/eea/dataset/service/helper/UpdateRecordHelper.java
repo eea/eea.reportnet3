@@ -108,7 +108,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
         .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
 
-    fileTreatmentHelper.updateGeomety(datasetId, datasetSchema);
+    fileTreatmentHelper.updateGeometry(datasetId, datasetSchema);
 
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
@@ -177,7 +177,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
         .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
 
-    fileTreatmentHelper.updateGeomety(datasetId, datasetSchema);
+    fileTreatmentHelper.updateGeometry(datasetId, datasetSchema);
 
     // after the field has been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.FIELD_UPDATED_COMPLETED_EVENT, datasetId);
