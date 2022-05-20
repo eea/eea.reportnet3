@@ -427,8 +427,8 @@ public class FileTreatmentHelper implements DisposableBean {
         .fileName(tableName).mimeType(mimeType).datasetSchemaId(tableSchemaId)
         .error("Error exporting table data").build();
     File fileFolder = new File(pathPublicFile, "dataset-" + datasetId);
-    String creatingFileError = String.format(
-        "Failed generating file from datasetId {} with schema {}.", datasetId, tableSchemaId);
+    String.format("Failed generating file from datasetId {} with schema {}.", datasetId,
+        tableSchemaId);
     fileFolder.mkdirs();
     try {
       byte[] file = createFile(datasetId, mimeType, tableSchemaId, filters);
@@ -644,12 +644,16 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @param datasetSchema the dataset schema
    */
+  @Async
   public void updateGeomety(Long datasetId, DataSetSchema datasetSchema) {
     // check schema has geometry and check field Value has geometry
     if (checkSchemaGeometry(datasetSchema) && checkFieldValueGeometry(datasetId)) {
       // update geometryes (native)
-      Map<String, String> mapFieldValue = getFieldValueGeometry(datasetId);
-      executeUpdateGeometry(datasetId, mapFieldValue);
+      Map<Integer, Map<String, String>> mapFieldValue = getFieldValueGeometry(datasetId);
+      int size = mapFieldValue.keySet().size();
+      for (int i = 0; i < size; i++) {
+        executeUpdateGeometry(datasetId, mapFieldValue.get(i));
+      }
     }
   }
 
@@ -706,15 +710,19 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param datasetId the dataset id
    * @return the field value geometry
    */
-  private Map<String, String> getFieldValueGeometry(Long datasetId) {
+  private Map<Integer, Map<String, String>> getFieldValueGeometry(Long datasetId) {
     String query = "select id, value from dataset_" + datasetId + ".field_value fv";
     List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
-    Map<String, String> map = new HashMap<>();
-    for (Object[] object : resultQuery) {
-      map.put(object[0].toString(), object[1].toString());
+    Map<Integer, Map<String, String>> resultMap = new HashMap<>();
+    for (int i = 0; i < resultQuery.size(); i++) {
+      Map<String, String> fieldMap = new HashMap<>();
+      for (int j = 0; j < 10000 && !resultQuery.isEmpty(); j++) {
+        fieldMap.put(resultQuery.get(0)[0].toString(), resultQuery.get(0)[1].toString());
+        resultQuery.remove(resultQuery.get(0));
+      }
+      resultMap.put(i, fieldMap);
     }
-
-    return map;
+    return resultMap;
   }
 
   /**
@@ -727,7 +735,7 @@ public class FileTreatmentHelper implements DisposableBean {
     String query =
         "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[";
 
-    Iterator<Map.Entry<String, String>> iterator = mapFieldValue.entrySet().iterator();
+    Iterator<Entry<String, String>> iterator = mapFieldValue.entrySet().iterator();
     while (iterator.hasNext()) {
       Map.Entry<String, String> entry = iterator.next();
       query += "row('" + entry.getKey() + "', '" + entry.getValue();
