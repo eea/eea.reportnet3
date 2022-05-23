@@ -680,8 +680,11 @@ public class FileTreatmentHelper implements DisposableBean {
           default:
             result = false;
         }
+        if (result) {
+          break;
+        }
       }
-      if (result == Boolean.TRUE) {
+      if (result) {
         break;
       }
     }
