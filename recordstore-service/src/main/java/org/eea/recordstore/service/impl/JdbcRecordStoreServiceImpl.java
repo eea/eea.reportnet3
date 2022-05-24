@@ -289,6 +289,31 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           datasetIdsAndSchemaIds.size());
       // waiting X seconds before releasing notifications, so database is able to write the
       // creation of all datasets
+      final List<String> citusCommands = new ArrayList<>();
+      // read file into stream, try-with-resources
+      try (BufferedReader brCitus =
+          new BufferedReader(new InputStreamReader(resourceCitusFile.getInputStream()))) {
+
+        brCitus.lines().forEach(citusCommands::add);
+
+      } catch (final IOException e) {
+        LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
+        try {
+          throw new RecordStoreAccessException(String
+              .format("Error reading commands file to create the dataset. %s", e.getMessage()), e);
+        } catch (RecordStoreAccessException e1) {
+          e1.printStackTrace();
+        }
+      }
+
+      for (String citusCommand : citusCommands) {
+        for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
+          citusCommand =
+              citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
+          jdbcTemplate.execute(command);
+        }
+      }
+
       Thread.sleep(timeToWaitBeforeReleasingNotification);
       LOG.info("Releasing notifications via Kafka");
       // Release events to initialize databases content
@@ -392,6 +417,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       command = command.replace("%dataset_name%", datasetName);
       jdbcTemplate.execute(command);
     }
+
   }
 
   /**
