@@ -1,5 +1,6 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useContext, useEffect, useState } from 'react';
+
+import { useRecoilValue } from 'recoil';
 
 import styles from './SnapshotSliderBar.module.scss';
 
@@ -13,12 +14,14 @@ import { SnapshotsList } from './_components/SnapshotsList';
 import { Spinner } from 'views/_components/Spinner';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 
-import { DialogContext } from 'views/_functions/Contexts/DialogContext';
+import { dialogsStore } from 'views/_components/Dialog/_functions/Stores/dialogsStore';
+
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
 
-const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, snapshotListData }) => {
-  const dialogContext = useContext(DialogContext);
+export const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, snapshotListData }) => {
+  const openedDialogs = useRecoilValue(dialogsStore);
+
   const resourcesContext = useContext(ResourcesContext);
   const snapshotContext = useContext(SnapshotContext);
 
@@ -59,7 +62,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
     if (isVisible) {
       bodySelector.style.overflow = 'hidden';
     } else {
-      if (dialogContext.open.length === 0) {
+      if (openedDialogs.length === 0) {
         bodySelector.style.overflow = 'hidden auto';
       }
     }
@@ -112,7 +115,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
       visible={isVisible}>
       <div className={styles.content}>
         <div className={styles.title}>
-          <h3>{resourcesContext.messages.createSnapshotTitle}</h3>
+          <h3>{resourcesContext.messages['createSnapshotTitle']}</h3>
         </div>
         <div className={`${styles.newContainer} ${styles.section}`}>
           <div className={styles.createForm}>
@@ -130,7 +133,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
                   name="createSnapshotDescription"
                   onChange={e => setInputValue(e.target.value)}
                   onKeyDown={e => onPressEnter(e)}
-                  placeholder={resourcesContext.messages.createSnapshotPlaceholder}
+                  placeholder={resourcesContext.messages['createSnapshotPlaceholder']}
                   rows={10}
                   type="text"
                   value={inputValue}
@@ -158,7 +161,7 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
                   ? resourcesContext.messages['snapshotsEmptyDescription']
                   : inputValue.length > config.INPUT_MAX_LENGTH
                   ? resourcesContext.messages['snapshotsWrongLengthDescription']
-                  : resourcesContext.messages.createSnapshotTooltip}
+                  : resourcesContext.messages['createSnapshotTooltip']}
               </ReactTooltip>
             </div>
           </div>
@@ -168,11 +171,9 @@ const SnapshotSlideBar = ({ isLoadingSnapshotListData, isSnapshotDialogVisible, 
         ) : snapshotListData.length > 0 ? (
           <SnapshotsList snapshotListData={snapshotListData} />
         ) : (
-          <h3>{resourcesContext.messages.snapshotsDoNotExist}</h3>
+          <h3>{resourcesContext.messages['snapshotsDoNotExist']}</h3>
         )}
       </div>
     </Sidebar>
   );
 };
-
-export { SnapshotSlideBar };

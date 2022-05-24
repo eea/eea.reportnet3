@@ -17,6 +17,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userImage: [],
     visualTheme: 'light'
   };
+
   if (isNil(userConfigurationDTO) || isEmpty(userConfigurationDTO)) {
     userConfiguration.basemapLayer = userDefaultConfiguration.basemapLayer;
     userConfiguration.dateFormat = userDefaultConfiguration.dateFormat;
@@ -84,6 +85,7 @@ const parseConfigurationDTO = userConfigurationDTO => {
       ? (userConfiguration.listView = false)
       : (userConfiguration.listView = true);
   }
+
   return userConfiguration;
 };
 

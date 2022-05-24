@@ -33,7 +33,7 @@ public class DefaultKafkaReceiver extends KafkaReceiver {
    */
   @Override
   @KafkaListener(topics = "DATA_REPORTING_TOPIC")
-  public void listenMessage(final Message<EEAEventVO> message) {
+  public void consumeMessage(final Message<EEAEventVO> message) {
     LOG.info("Received message {}", message.getPayload());
     if (null != handler) {
       try {

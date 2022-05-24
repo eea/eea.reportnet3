@@ -22,6 +22,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -149,9 +150,10 @@ public class ExcelReaderStrategyTest {
     when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any(DataSetSchema.class))).thenReturn(fschema);
     excelReaderStrategy.parseFile(fileIn, 1L, 1L, "5d0c822ae1ccd34cfcd97e20", 1L, null, false,
-        dataSet);
+        dataSet, new ConnectionDataVO());
     Mockito.verify(fileCommon, times(1)).persistImportedDataset(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
+        Mockito.any());
   }
 
   /**
@@ -174,9 +176,11 @@ public class ExcelReaderStrategyTest {
 
     when(fileCommon.findIdFieldSchema(Mockito.any(), Mockito.any(),
         Mockito.any(DataSetSchema.class))).thenReturn(fschema);
-    excelReaderStrategy.parseFile(fileIn, 1L, 1L, null, 1L, null, false, dataSet);
+    excelReaderStrategy.parseFile(fileIn, 1L, 1L, null, 1L, null, false, dataSet,
+        new ConnectionDataVO());
     Mockito.verify(fileCommon, times(1)).persistImportedDataset(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
+        Mockito.any());
   }
 
 
@@ -199,7 +203,7 @@ public class ExcelReaderStrategyTest {
     ByteArrayInputStream fileInAux = new ByteArrayInputStream(outStream.toByteArray());
 
     excelReaderStrategy.parseFile(fileInAux, 1L, 1L, "5ce524fad31fc52540abae73", null, null, false,
-        dataSet);
+        dataSet, new ConnectionDataVO());
     Mockito.verify(fileCommon, times(1)).getIdTableSchema(Mockito.any(),
         (DataSetSchema) Mockito.any());
   }
@@ -217,9 +221,10 @@ public class ExcelReaderStrategyTest {
         Mockito.any(DataSetSchema.class))).thenReturn(fschema);
     doThrow(new EEAException("error persisting excel file")).when(fileCommon)
         .persistImportedDataset(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
-            Mockito.any(), Mockito.any());
+            Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any());
     try {
-      excelReaderStrategy.parseFile(fileIn, 1L, 1L, null, 1L, null, false, dataSet);
+      excelReaderStrategy.parseFile(fileIn, 1L, 1L, null, 1L, null, false, dataSet,
+          new ConnectionDataVO());
     } catch (EEAException e) {
       Assert.assertEquals("not equals", "error persisting excel file", e.getMessage());
       throw e;

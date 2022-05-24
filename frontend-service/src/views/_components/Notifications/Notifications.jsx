@@ -15,7 +15,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const Notifications = () => {
+export const Notifications = () => {
   const [headerHeight, setHeaderHeight] = useState(0);
   const [position, setPosition] = useState({ marginTop: '-5px' });
 
@@ -64,7 +64,7 @@ const Notifications = () => {
               {notification.message}
               <Button
                 className={`p-button-animated-blink ${styles.downloadButton}`}
-                icon={'export'}
+                icon="export"
                 label={resourcesContext.messages['downloadFile']}
                 onClick={() => notification.onClick()}
               />
@@ -159,5 +159,3 @@ const Notifications = () => {
 
   return <Growl ref={growlRef} style={position} />;
 };
-
-export { Notifications };

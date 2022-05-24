@@ -41,12 +41,25 @@
             box-shadow: none !important;
           }
         }
-        .ccButton {
+
+        .ccButton,
+        .runButton,
+        .validateButton,
+        .sqlSentenceCostWrapper {
           margin-top: -0.9em;
           margin-left: 0.4rem !important;
-          border: 1px solid var(--c-custom-gray) !important;
-          padding: 0.37rem 0.45rem;
           float: right;
+        }
+        .ccButton,
+        .runButton,
+        .validateButton {
+          border: 1px solid var(--c-custom-gray) !important;
+        }
+        .ccButton {
+          padding: 0.37rem 0.45rem;
+        }
+        .validateSqlSentenceIcon {
+          padding-top: 1px;
         }
       }
       textarea {
@@ -67,14 +80,71 @@
   color: var(--main-font-color);
 }
 
-.sqlErrorMessage {
-  margin-top: 0.5rem;
-  text-align: right;
-  font-style: italic;
-  color: var(--errors);
+.trafficLightSize {
+  width: 5rem;
+  height: 2rem;
+  margin-top: 0.2rem !important;
+  > div {
+    height: 1rem;
+    width: 1rem;
+  }
+}
+
+.spinnerWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 5rem;
+  height: 2rem;
+  .spinner {
+    top: 3px;
+    height: 25px;
+    width: 25px;
+  }
+}
+
+.validationDialogMaxWidth {
+  width: 90% !important;
+}
+
+.noDataMessage {
+  text-align: center;
+}
+
+.errorSectionWrapper {
+  display: flex;
+  justify-content: space-between;
+}
+
+.hasError {
+  border-color: var(--errors) !important;
+  box-shadow: var(--inputtext-box-shadow-error) !important;
 }
 
 .emptySqlErrorMessage {
-  margin-top: 0.5rem;
   height: 1.2rem;
+}
+
+.errorSpacer {
+  min-width: 30%;
+}
+
+.sqlErrorMessage {
+  font-style: italic;
+  font-size: 0.9em;
+  color: var(--errors);
+}
+
+.emptySqlErrorMessage,
+.sqlErrorMessage {
+  margin-top: 0.5em;
+  width: 66%;
+}
+
+.IsViewUpdatedMessage {
+  font-style: italic;
+  padding: 10px 0;
+  p {
+    margin: 0;
+  }
 }

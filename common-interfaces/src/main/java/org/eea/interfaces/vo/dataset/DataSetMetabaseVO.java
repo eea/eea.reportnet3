@@ -2,6 +2,7 @@ package org.eea.interfaces.vo.dataset;
 
 import java.io.Serializable;
 import java.util.Date;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import lombok.Getter;
@@ -59,5 +60,8 @@ public class DataSetMetabaseVO implements Serializable {
 
   /** The status. */
   private DatasetStatusEnum status;
+
+  /** The dataset running status. */
+  private DatasetRunningStatusEnum datasetRunningStatus;
 
 }

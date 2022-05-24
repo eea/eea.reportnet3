@@ -50,14 +50,14 @@ public interface DatasetSnapshotController {
   SnapshotVO getSchemaById(@PathVariable("idSnapshot") Long idSnapshot);
 
   /**
-   * Gets the snapshots by id dataset.
+   * Gets the snapshots enabled by id dataset.
    *
    * @param datasetId the dataset id
-   * @return the snapshots by id dataset
+   * @return the snapshots enabled by id dataset
    */
   @GetMapping(value = "/dataset/{idDataset}/listSnapshots",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  List<SnapshotVO> getSnapshotsByIdDataset(@PathVariable("idDataset") Long datasetId);
+  List<SnapshotVO> getSnapshotsEnabledByIdDataset(@PathVariable("idDataset") Long datasetId);
 
 
 
@@ -229,13 +229,15 @@ public interface DatasetSnapshotController {
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
    * @param restrictFromPublic the restrict from public
+   * @param validate the validate
    */
   @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
   void createReleaseSnapshots(@PathVariable(value = "dataflowId", required = true) Long dataflowId,
       @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,
       @RequestParam(name = "restrictFromPublic", required = true,
-          defaultValue = "false") boolean restrictFromPublic);
+          defaultValue = "false") boolean restrictFromPublic,
+      @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate);
 
 
   /**
@@ -247,4 +249,20 @@ public interface DatasetSnapshotController {
   @PutMapping("/private/releaseLocksRelatedToReleaseDataset/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
   void releaseLocksFromReleaseDatasets(@PathVariable("dataflowId") Long dataflowId,
       @PathVariable("dataProviderId") Long dataProviderId);
+
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @PutMapping("/private/updateSnapshotDisabled/{datasetId}")
+  void updateSnapshotDisabled(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Delete snapshot by dataset id and date released is null.
+   *
+   * @param datasetId the dataset id
+   */
+  @DeleteMapping(value = "/private/deleteSnapshotByDatasetIdAndDateReleasedIsNull/{datasetId}")
+  void deleteSnapshotByDatasetIdAndDateReleasedIsNull(@PathVariable("datasetId") Long datasetId);
 }

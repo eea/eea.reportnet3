@@ -5,6 +5,7 @@ import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.data.domain.Pageable;
@@ -65,27 +66,31 @@ public interface RecordExtendedQueriesRepository {
 
   /**
    * Find and generate ETL json.
-   * 
-   * @param outputStream
-   * @param datasetId
    *
-   * @param stringQuery the string query
-   * @param columnName
-   * @param filterValue
-   * @param offset
-   * @param limit
+   * @param datasetId the dataset id
+   * @param outputStream the output stream
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    * @return the stream
-   * @throws EEAException
+   * @throws EEAException the EEA exception
    */
   String findAndGenerateETLJson(Long datasetId, OutputStream outputStream, String tableSchemaId,
-      Integer limit, Integer offset, String filterValue, String columnName) throws EEAException;
+      Integer limit, Integer offset, String filterValue, String columnName,
+      String dataProviderCodes) throws EEAException;
 
   /**
    * Find ordered native record.
    *
    * @param idTable the id table
    * @param datasetId the dataset id
+   * @param pageable the pageable
+   * @param filters the filters
    * @return the list
    */
-  List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable);
+  List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable,
+      ExportFilterVO filters);
 }

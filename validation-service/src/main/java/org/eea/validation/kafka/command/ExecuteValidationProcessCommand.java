@@ -1,6 +1,5 @@
 package org.eea.validation.kafka.command;
 
-import java.util.UUID;
 import org.eea.exception.EEAException;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
@@ -46,15 +45,14 @@ public class ExecuteValidationProcessCommand extends AbstractEEAEventHandlerComm
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
     ThreadPropertiesManager.setVariable("user", eeaEventVO.getData().get("user"));
     Object aux = eeaEventVO.getData().get("updateViews");
+    String processId = String.valueOf(eeaEventVO.getData().get("processId"));
     boolean updateViews = !(aux instanceof Boolean) || (boolean) aux;
     aux = eeaEventVO.getData().get("released");
     boolean released = aux instanceof Boolean && (boolean) aux;
 
     // Add lock to the release process if necessary
+    validationHelper.executeValidation(datasetId, processId, released, updateViews);
     validationHelper.addLockToReleaseProcess(datasetId);
-
-    validationHelper.executeValidation(datasetId, UUID.randomUUID().toString(), released,
-        updateViews);
   }
 
 

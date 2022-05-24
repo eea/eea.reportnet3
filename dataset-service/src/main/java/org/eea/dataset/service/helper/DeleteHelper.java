@@ -81,7 +81,10 @@ public class DeleteHelper {
   public void executeDeleteTableProcess(final Long datasetId, String tableSchemaId) {
     LOG.info("Deleting table {} from dataset {}", tableSchemaId, datasetId);
     datasetService.deleteTableBySchema(tableSchemaId, datasetId);
-
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
     EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
         ? EventType.DELETE_TABLE_COMPLETED_EVENT
         : EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT;
@@ -105,7 +108,7 @@ public class DeleteHelper {
         dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
 
     value.put(LiteralConstants.DATASET_ID, datasetId);
-    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
+
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
@@ -113,18 +116,22 @@ public class DeleteHelper {
     }
   }
 
-
   /**
    * Execute delete dataset process.
    *
    * @param datasetId the dataset id
    * @param deletePrefilledTables the delete prefilled tables
+   * @param technicallyAccepted the technically accepted
    */
   @Async
-  public void executeDeleteDatasetProcess(final Long datasetId, Boolean deletePrefilledTables) {
+  public void executeDeleteDatasetProcess(final Long datasetId, Boolean deletePrefilledTables,
+      boolean technicallyAccepted) {
     LOG.info("Deleting data from dataset {}", datasetId);
     datasetService.deleteImportData(datasetId, deletePrefilledTables);
-
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
     EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
         ? EventType.DELETE_DATASET_DATA_COMPLETED_EVENT
         : EventType.DELETE_DATASET_SCHEMA_COMPLETED_EVENT;
@@ -136,23 +143,26 @@ public class DeleteHelper {
     deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
     lockService.removeLockByCriteria(deleteDatasetValues);
 
-    // after the dataset values have been deleted, an event is sent to notify it
-    Map<String, Object> value = new HashMap<>();
-    NotificationVO notificationVO = NotificationVO.builder()
-        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .build();
-    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-    notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
-    notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
-    notificationVO.setDataflowName(
-        dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+    // If technically accepted is false, it will be notified and the dataset validated
+    if (!technicallyAccepted) {
+      // after the dataset values have been deleted, an event is sent to notify it
+      Map<String, Object> value = new HashMap<>();
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .datasetId(datasetId).build();
+      DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+      notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+      notificationVO.setDataflowName(
+          dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
 
-    value.put(LiteralConstants.DATASET_ID, datasetId);
-    kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, datasetId);
-    try {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing notification: {}", e.getMessage());
+      value.put(LiteralConstants.DATASET_ID, datasetId);
+
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error releasing notification: {}", e.getMessage());
+      }
     }
   }
 
@@ -170,6 +180,10 @@ public class DeleteHelper {
     datasetService.deleteImportData(datasetId, false);
     LOG.info("All data value deleted from datasetId {}. Next step call the FME by the kafka event",
         datasetId);
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
     // Send the kafka event after deleting to call FME
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
@@ -190,6 +204,10 @@ public class DeleteHelper {
     LOG.info("Deleting data with providerCode: {} ", providerCode);
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     recordRepository.deleteByDataProviderCode(providerCode);
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
   }
 
 }

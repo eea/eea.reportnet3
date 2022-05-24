@@ -44,6 +44,7 @@ export class Dropdown extends Component {
     label: null,
     maxLength: null,
     name: null,
+    onBlur: () => {},
     onChange: null,
     onContextMenu: null,
     onEmptyList: null,
@@ -110,7 +111,8 @@ export class Dropdown extends Component {
     tabIndex: PropTypes.number,
     tooltip: PropTypes.string,
     tooltipOptions: PropTypes.object,
-    value: PropTypes.any
+    value: PropTypes.any,
+    onBlur: PropTypes.func
   };
 
   constructor(props) {
@@ -183,6 +185,7 @@ export class Dropdown extends Component {
   }
 
   onInputBlur(event) {
+    this.props.onBlur();
     DomHandler.removeClass(this.container, 'p-focus');
   }
 
@@ -651,7 +654,7 @@ export class Dropdown extends Component {
 
       return (
         <label className={className} style={{ fontStyle: isNull(selectedOption) ? 'italic' : 'inherit' }}>
-          {label || `${this.props.placeholder}` || 'empty'}{' '}
+          <span>{label || this.props.placeholder || ''}</span>
           {this.props.required && isNull(selectedOption) ? (
             <FontAwesomeIcon
               aria-label="required"

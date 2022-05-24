@@ -116,7 +116,8 @@ public class ContributorControllerImpl implements ContributorController {
       }
       LOG_ERROR.error("Error deleting the requester {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_REQUESTER);
     }
   }
 
@@ -164,7 +165,8 @@ public class ContributorControllerImpl implements ContributorController {
       }
       LOG_ERROR.error("Error deleting the reporter {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_REPORTER);
     }
   }
 
@@ -193,8 +195,7 @@ public class ContributorControllerImpl implements ContributorController {
    * Find reporters by group.
    *
    * @param dataflowId the dataflow id
-   * @param dataproviderId the dataprovider id
-   *
+   * @param dataProviderId the data provider id
    * @return the list
    */
   @Override
@@ -337,11 +338,10 @@ public class ContributorControllerImpl implements ContributorController {
   }
 
   /**
-   * Updates the reporters permissions checking if they are now registered in the system.
+   * Validate reporters.
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
-   * @param contributorVO the contributor VO
    * @return the response entity
    */
   @Override
@@ -397,7 +397,8 @@ public class ContributorControllerImpl implements ContributorController {
       LOG_ERROR.error(
           "Error creating  the associated permissions for requester role in datasetschema {}.in the dataflow: {} ",
           datasetId, dataflowId);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.CREATING_ASSOCIATED_PERMISSIONS);
     }
   }
 

@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
 
@@ -32,10 +32,9 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
 
-export const EUDataset = withRouter(({ history, match }) => {
-  const {
-    params: { dataflowId, datasetId }
-  } = match;
+export const EUDataset = () => {
+  const navigate = useNavigate();
+  const { dataflowId, datasetId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
@@ -96,14 +95,7 @@ export const EUDataset = withRouter(({ history, match }) => {
     }
   }, [notificationContext.hidden]);
 
-  useBreadCrumbs({
-    currentPage: CurrentPage.EU_DATASET,
-    dataflowId,
-    dataflowType,
-    history,
-    isLoading,
-    metaData: metadata
-  });
+  useBreadCrumbs({ currentPage: CurrentPage.EU_DATASET, dataflowId, dataflowType, isLoading, metaData: metadata });
 
   const setMetadata = async () => {
     try {
@@ -117,7 +109,7 @@ export const EUDataset = withRouter(({ history, match }) => {
 
   const getDataflowDetails = async () => {
     try {
-      const data = await DataflowService.getDetails(match.params.dataflowId);
+      const data = await DataflowService.getDetails(dataflowId);
       euDatasetDispatch({
         type: 'GET_DATAFLOW_DETAILS',
         payload: {
@@ -220,14 +212,19 @@ export const EUDataset = withRouter(({ history, match }) => {
 
       const tableSchema = datasetSchema.tables.map(tableSchema => {
         tableSchemaNamesList.push(tableSchema.tableSchemaName);
-
         return {
+          description: tableSchema['tableSchemaDescription'],
+          fixedNumber: tableSchema['tableSchemaFixedNumber'],
           hasErrors: {
             ...datasetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
           }.hasErrors,
+          hasInfoTooltip: true,
           id: tableSchema['tableSchemaId'],
           name: tableSchema['tableSchemaName'],
-          readOnly: tableSchema['tableSchemaReadOnly']
+          notEmpty: tableSchema['tableSchemaNotEmpty'],
+          numberOfFields: tableSchema.records ? tableSchema.records[0].fields?.length : 0,
+          readOnly: tableSchema['tableSchemaReadOnly'],
+          toPrefill: tableSchema['tableSchemaToPrefill']
         };
       });
 
@@ -262,7 +259,7 @@ export const EUDataset = withRouter(({ history, match }) => {
       console.error('EUDataset - onLoadDatasetSchema.', error);
       notificationContext.add({ type: 'ERROR_LOADING_EU_DATASET_SCHEMA' }, true);
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
-        history.push(getUrl(routes.DATAFLOW, { dataflowId }));
+        navigate(getUrl(routes.DATAFLOW, { dataflowId }));
       }
     } finally {
       setIsLoading(false);
@@ -283,7 +280,14 @@ export const EUDataset = withRouter(({ history, match }) => {
   const setIsLoadingFile = value => euDatasetDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
 
   useCheckNotifications(
-    ['DOWNLOAD_EXPORT_DATASET_FILE_ERROR', 'EXPORT_DATA_BY_ID_ERROR', 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD'],
+    [
+      'CALL_FME_PROCESS_FAILED_EVENT',
+      'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
+      'EXPORT_DATA_BY_ID_ERROR',
+      'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD',
+      'EXPORT_TABLE_DATA_FILE_AUTOMATICALLY_DOWNLOAD',
+      'DOWNLOAD_EXPORT_TABLE_DATA_FILE_ERROR'
+    ],
     setIsLoadingFile,
     false
   );
@@ -291,7 +295,7 @@ export const EUDataset = withRouter(({ history, match }) => {
   const renderTabsSchema = () => (
     <TabsSchema
       dataflowType={dataflowType}
-      datasetSchemaId={euDatasetState.metaData.dataset?.datasetSchemaId}
+      datasetSchemaId={euDatasetState.metaData?.dataset?.datasetSchemaId}
       hasCountryCode={true}
       hasWritePermissions={false}
       isExportable={false}
@@ -301,13 +305,15 @@ export const EUDataset = withRouter(({ history, match }) => {
       onLoadTableData={onLoadTableData}
       onTabChange={table => onTabChange(table)}
       showWriteButtons={false}
+      tables={tableSchema}
       tableSchemaColumns={tableSchemaColumns}
       tableSchemaId={dataViewerOptions.tableSchemaId}
-      tables={tableSchema}
     />
   );
 
-  if (euDatasetState.isLoading) return renderLayout(<Spinner />);
+  if (euDatasetState.isLoading) {
+    return renderLayout(<Spinner />);
+  }
 
   return renderLayout(
     <Fragment>
@@ -335,4 +341,4 @@ export const EUDataset = withRouter(({ history, match }) => {
       {renderTabsSchema()}
     </Fragment>
   );
-});
+};

@@ -16,6 +16,7 @@
   --c-yellow-25: #fff4bb;
   --c-black-color: #000000;
   --c-gray-110: #404040;
+  --c-gray-75-opacity-08: rgba(112, 112, 112, 0.8);
   --c-gray-75: #707070;
   --c-gray-65: #898989;
   --c-gray-50: #9f9f9f;
@@ -24,6 +25,7 @@
   --c-gray-10: #ebebeb;
   --c-gray-5: #f5f5f5;
   --c-white-color: #ffffff;
+  --c-white-color-opacity-08: rgba(255, 255, 255, 0.8);
   --c-white-font: #ffffffe7;
   --informative-color: #006fb4;
   --warning-color: #f29527;
@@ -68,13 +70,15 @@
   --c-red-200: #e40046;
   --c-red-100: #ee2737;
   --c-red-100-rgb: 238, 39, 55;
+  --c-red-50: #ff0000;
   /* purple */
   --c-purple-400: #5c068c;
   --c-purple-300: #8246af;
   --c-purple-200: #ac4fc6;
   --c-purple-100: #dd7fd3;
   /* lilac */
-  --c-lilac-400: #6f5091;
+  --c-lilac-500: #6f5091;
+  --c-lilac-400: #5d5db1;
   --c-lilac-300: #6d6dc0;
   --c-lilac-200: #b4b5df;
   --c-lilac-100: #dbe2e9;
@@ -120,7 +124,7 @@
   --statusBox-error-color: #a6093d;
   --statusBox-info-bg: #b3e5fc;
   --statusBox-info-color: #23547b;
-  --statusBox-warning-bg: #ffd8b2;
+  --statusBox-warning-bg: #ffec81;
   --statusBox-warning-color: #805b36;
   /* boolean statusbox colors*/
   --statusBox-true-bg: #c8e6c9;
@@ -243,7 +247,7 @@
   /* Dataflow item */
   --dataflow-item-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.4);
   --dataflow-item-box-shadow-hover: 0 10px 20px rgba(0, 0, 0, 0.21), 0 6px 6px rgba(0, 0, 0, 0.25);
-  --dataflow-item-transition-box-shadow: box-shadow 0.1s ease-in;
+  --dataflow-item-transition: all 0.1s ease-in;
 
   /* Paginator */
   --paginator-bg: var(--c-corporate-blue);
@@ -251,6 +255,7 @@
   --paginator-color: var(--c-white-color);
   --paginator-bg-hover: var(--c-gray-10);
   --paginator-color-hover: var(--c-gray-110);
+  --paginator-dataflows-pages-not-highlight-hover-border: 1px solid var(--c-lilac-400);
   --paginator-dropdown-label-color: var(--c-gray-110);
   --paginator-dropdown-label-color-hover: var(--c-gray-110);
   --paginator-pages-not-highlight-hover-bg: var(--c-white-color);
@@ -309,7 +314,7 @@
   --growl-success-color: var(--c-black-color);
   --growl-success-icon-color: var(--c-growl-success-darker-green);
   --growl-success-border-color: var(--c-growl-success-darker-green);
-  --growl-warning-bg: var(--c-corporate-yellow);
+  --growl-warning-bg: var(--c-corporate-yellow-lighter);
   --growl-warning-color: var(--c-black-color);
   --growl-warning-icon-color: var(--c-growl-warning-darker-yellow);
   --growl-warning-border-color: var(--c-growl-warning-darker-yellow);
@@ -613,4 +618,29 @@
   --go-top-button-box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.3);
   --go-top-button-color-hover: var(--c-corporate-yellow);
   --go-top-button-color: var(--c-white-color);
+
+  /* Traffic light*/
+  --traffic-light-red-active: var(--c-red-50);
+  --traffic-light-yellow-active: var(--c-orange-200);
+  --traffic-light-green-active: var(--c-chart-correct);
+
+  /* Dataflows list */
+  --dataflows-list-paginator-bg-color: var(--c-lilac-300);
+
+  /* Step progress bar */
+  --step-progress-bar-activeCompleted-bg-color: var(--success-color);
+  --step-progress-bar-activeIncompleted-bg-color: var(--c-corporate-blue);
+  --step-progress-bar-icon-activeIncompleted-border: 2px solid var(--c-corporate-blue);
+  --step-progress-bar-activeCompleted-color: var(--c-white-color);
+  --step-progress-bar-icon-activeCompleted-border: 2px solid var(--success-color);
+  --step-progress-bar-inactive-color: var(--c-gray-65);
+  --step-progress-bar-inactive-bg-color: var(--bg);
+  --step-progress-bar-icon-border: 2px solid var(--c-gray-65);
+  --step-progress-bar-link-bg-color: var(--c-gray-65);
+  --step-progress-bar-link-box-shadow: 0 2px 3px rgb(70 122 57 / 50%), 0 1px 2px rgb(70 122 57 / 50%),
+    0 -3px 2px rgb(70 122 57 / 4%), 0 -2px 2px rgb(70 122 57 / 50%);
+  --step-progress-bar-link-done-bg-color: var(--success-color);
+  --step-progress-bar-label-color: var(--main-font-color);
+  --step-progress-bar-withError-bg-color: var(--errors);
+  --step-progress-bar-withError-color: var(--c-white-color);
 }

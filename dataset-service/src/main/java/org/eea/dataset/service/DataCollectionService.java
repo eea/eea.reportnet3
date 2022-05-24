@@ -1,6 +1,6 @@
 package org.eea.dataset.service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -41,14 +41,14 @@ public interface DataCollectionService {
    * @param dataflowId the dataflow id
    * @param dueDate the due date
    * @param stopAndNotifySQLErrors the stop and notify SQL errors
-   * @param manualCheck enable the manual check for the custodian approval
+   * @param manualCheck the manual check
    * @param showPublicInfo the show public info
    * @param referenceDataflow the reference dataflow
    * @param stopAndNotifyPKError the stop and notify PK error
    */
-  void createEmptyDataCollection(Long dataflowId, Date dueDate, boolean stopAndNotifySQLErrors,
-      boolean manualCheck, boolean showPublicInfo, boolean referenceDataflow,
-      boolean stopAndNotifyPKError);
+  void createEmptyDataCollection(Long dataflowId, LocalDateTime dueDate,
+      boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
+      boolean referenceDataflow, boolean stopAndNotifyPKError);
 
   /**
    * Adds the foreign relations from new reportings.
@@ -74,5 +74,12 @@ public interface DataCollectionService {
    */
   DataFlowVO getDataflowMetabase(Long dataflowId);
 
+  /**
+   * Gets the providers pending to copy into EU.
+   *
+   * @param dataCollectionId the data collection id
+   * @return the providers pending to copy into EU
+   */
+  List<String> getProvidersPendingToCopyIntoEU(Long dataCollectionId);
 
 }

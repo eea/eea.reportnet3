@@ -4,6 +4,8 @@ import dayjs from 'dayjs';
 import isNil from 'lodash/isNil';
 import remove from 'lodash/remove';
 
+import utc from 'dayjs/plugin/utc';
+
 import { config } from 'conf';
 import { DataflowConfig } from 'repositories/config/DataflowConfig';
 
@@ -40,6 +42,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { IntegrationsUtils } from 'views/DatasetDesigner/_components/Integrations/_functions/Utils/IntegrationsUtils';
@@ -69,6 +72,8 @@ export const BigButtonList = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+
+  dayjs.extend(utc);
 
   const [errorDialogData, setErrorDialogData] = useState({ isVisible: false, message: '' });
 
@@ -120,6 +125,10 @@ export const BigButtonList = ({
   const dataflowName = dataflowState.name;
   const dataflowData = dataflowState.data;
   const isBusinessDataflow = dataflowType === config.dataflowType.BUSINESS.value;
+
+  const { resetFiltersState: resetCloneSchemasFiltersState } = useFilters('cloneSchemas');
+  const { resetFiltersState: resetManualAcceptanceDatasetsFiltersState } = useFilters('manualAcceptanceDatasets');
+  const { resetFiltersState: resetHistoricReleasesFiltersState } = useFilters('historicReleases');
 
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
@@ -185,7 +194,7 @@ export const BigButtonList = ({
   );
 
   const cloneDatasetSchemas = async () => {
-    setCloneDialogVisible(false);
+    onHideCloneSchemasDialog();
 
     notificationContext.add(
       {
@@ -352,7 +361,6 @@ export const BigButtonList = ({
 
   const onUpdateDataCollection = async () => {
     setIsUpdateDataCollectionDialogVisible(false);
-
     setIsActiveButton(false);
 
     try {
@@ -364,8 +372,8 @@ export const BigButtonList = ({
 
   const onDeleteDatasetSchema = async index => {
     setDeleteDialogVisible(false);
-
     showLoading();
+
     try {
       await DatasetService.deleteSchema(dataflowState.designDatasetSchemas[index].datasetId);
       onUpdateData();
@@ -382,6 +390,16 @@ export const BigButtonList = ({
 
   const onHideErrorDialog = () => {
     setErrorDialogData({ isVisible: false, message: '' });
+  };
+
+  const onHideCloneSchemasDialog = () => {
+    setCloneDialogVisible(false);
+    resetCloneSchemasFiltersState();
+  };
+
+  const onHideManualAcceptanceDatasetsDialog = () => {
+    setIsManualTechnicalAcceptanceDialogVisible(false);
+    resetManualAcceptanceDatasetsFiltersState();
   };
 
   const onCopyDataCollectionToEUDataset = async () => {
@@ -426,7 +444,6 @@ export const BigButtonList = ({
     try {
       setIsReceiptLoading(true);
       const response = await ConfirmationReceiptService.download(dataflowId, dataProviderId);
-
       downloadPdf(response.data);
       onCleanUpReceipt();
     } catch (error) {
@@ -447,12 +464,11 @@ export const BigButtonList = ({
 
   const onShowUpdateDataCollectionModal = () => setIsUpdateDataCollectionDialogVisible(true);
 
-  const getDate = () => {
-    return new Date(dayjs(dataCollectionDueDate).endOf('day').format()).getTime();
-  };
+  const getDate = () => new Date(dayjs(dataCollectionDueDate).utc(true).endOf('day').valueOf()).getTime();
 
   const onCreateDataCollectionsWithNotValids = async () => {
     setIsActiveButton(false);
+
     try {
       notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
       await DataCollectionService.create(dataflowId, getDate(), isManualTechnicalAcceptance, false);
@@ -461,9 +477,7 @@ export const BigButtonList = ({
       const {
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
-
       notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } }, true);
-
       setIsActiveButton(true);
     } finally {
       setIsQCsNotValidWarningVisible(false);
@@ -474,11 +488,12 @@ export const BigButtonList = ({
     isHistoricReleasesDialogVisible || isManualTechnicalAcceptanceDialogVisible ? (
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => {
           setIsHistoricReleasesDialogVisible(false);
-          setIsManualTechnicalAcceptanceDialogVisible(false);
+          onHideManualAcceptanceDatasetsDialog();
+          resetHistoricReleasesFiltersState();
         }}
       />
     ) : (
@@ -486,25 +501,22 @@ export const BigButtonList = ({
         <Button
           className="p-button-primary p-button-animated-blink"
           disabled={isNil(cloneDataflow.id)}
-          icon={'plus'}
+          icon="plus"
           label={resourcesContext.messages['cloneSelectedDataflow']}
           onClick={() => cloneDatasetSchemas()}
         />
         <Button
           className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-          icon={'cancel'}
+          icon="cancel"
           label={resourcesContext.messages['close']}
-          onClick={() => setCloneDialogVisible(false)}
+          onClick={onHideCloneSchemasDialog}
         />
       </Fragment>
     );
 
   const onResetRadioButtonOptions = () => {
     setIsManualTechnicalAcceptance(null);
-    setManualTechnicalAcceptanceOptions({
-      Yes: false,
-      No: false
-    });
+    setManualTechnicalAcceptanceOptions({ Yes: false, No: false });
   };
 
   const onChangeRadioButton = value => {
@@ -520,8 +532,8 @@ export const BigButtonList = ({
 
   const refreshManualAcceptanceDatasets = value => setIsUpdatedManualAcceptanceDatasets(value);
 
-  const renderRadioButtonsCreateDC = () => {
-    return Object.keys(manualTechnicalAcceptanceOptions).map(value => (
+  const renderRadioButtonsCreateDC = () =>
+    Object.keys(manualTechnicalAcceptanceOptions).map(value => (
       <div className={styles.radioButton} key={`technicalAcceptance${value}`}>
         <RadioButton
           checked={manualTechnicalAcceptanceOptions[value]}
@@ -535,9 +547,8 @@ export const BigButtonList = ({
         </label>
       </div>
     ));
-  };
 
-  const bigButtonList = useBigButtonList({
+  const renderBigButtonList = useBigButtonList({
     dataflowId,
     dataflowState,
     dataProviderId,
@@ -584,7 +595,7 @@ export const BigButtonList = ({
     <Fragment>
       <div className={styles.buttonsWrapper}>
         <div className={`${styles.splitButtonWrapper} dataflow-big-buttons-help-step`}>
-          <div className={styles.datasetItem}>{bigButtonList}</div>
+          <div className={styles.datasetItem}>{renderBigButtonList}</div>
         </div>
       </div>
 
@@ -620,7 +631,7 @@ export const BigButtonList = ({
           className={styles.dialog}
           footer={renderDialogFooter}
           header={resourcesContext.messages['dataflowsList']}
-          onHide={() => setCloneDialogVisible(false)}
+          onHide={onHideCloneSchemasDialog}
           style={{ width: '95%' }}
           visible={cloneDialogVisible}>
           <CloneSchemas dataflowId={dataflowId} getCloneDataflow={getCloneDataflow} />
@@ -655,12 +666,15 @@ export const BigButtonList = ({
           className={styles.dialog}
           footer={renderDialogFooter}
           header={`${resourcesContext.messages['historicReleasesContextMenu']} ${historicReleasesDialogHeader}`}
-          onHide={() => setIsHistoricReleasesDialogVisible(false)}
+          onHide={() => {
+            setIsHistoricReleasesDialogVisible(false);
+            resetHistoricReleasesFiltersState();
+          }}
           visible={isHistoricReleasesDialogVisible}>
           <HistoricReleases
-            dataProviderId={providerId}
             dataflowId={dataflowId}
             dataflowType={dataflowType}
+            dataProviderId={providerId}
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
           />
@@ -672,7 +686,7 @@ export const BigButtonList = ({
           className={styles.dialog}
           footer={renderDialogFooter}
           header={`${resourcesContext.messages['manualTechnicalAcceptanceHeader']} ${dataflowName}`}
-          onHide={() => setIsManualTechnicalAcceptanceDialogVisible(false)}
+          onHide={onHideManualAcceptanceDatasetsDialog}
           style={{ width: '80%' }}
           visible={isManualTechnicalAcceptanceDialogVisible}>
           <ManualAcceptanceDatasets
@@ -690,6 +704,7 @@ export const BigButtonList = ({
         <ManageManualAcceptanceDataset
           dataflowId={dataflowId}
           dataset={datasetFeedbackStatusToEdit}
+          isAutomaticReportingDeletion={dataflowState.isAutomaticReportingDeletion}
           isManageManualAcceptanceDatasetDialogVisible={isManageManualAcceptanceDatasetDialogVisible}
           manageDialogs={manageManualAcceptanceDatasetDialog}
           refreshManualAcceptanceDatasets={refreshManualAcceptanceDatasets}
@@ -701,7 +716,7 @@ export const BigButtonList = ({
           header={resourcesContext.messages['updateDataCollectionHeader']}
           labelCancel={resourcesContext.messages['close']}
           labelConfirm={resourcesContext.messages['create']}
-          onConfirm={() => onUpdateDataCollection()}
+          onConfirm={onUpdateDataCollection}
           onHide={() => setIsUpdateDataCollectionDialogVisible(false)}
           visible={isUpdateDataCollectionDialogVisible}>
           <p>{resourcesContext.messages['updateDataCollectionMessage']}</p>
@@ -750,7 +765,7 @@ export const BigButtonList = ({
           header={resourcesContext.messages['copyDataCollectionToEUDatasetHeader']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onCopyDataCollectionToEUDataset()}
+          onConfirm={onCopyDataCollectionToEUDataset}
           onHide={() => setIsCopyDataCollectionToEUDatasetDialogVisible(false)}
           visible={isCopyDataCollectionToEUDatasetDialogVisible}>
           <p>{resourcesContext.messages['copyDataCollectionToEUDatasetMessage']}</p>
@@ -762,7 +777,7 @@ export const BigButtonList = ({
           header={resourcesContext.messages['exportEUDatasetHeader']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onExportEUDataset()}
+          onConfirm={onExportEUDataset}
           onHide={() => setIsExportEUDatasetDialogVisible(false)}
           visible={isExportEUDatasetDialogVisible}>
           <p>{resourcesContext.messages['exportEUDatasetMessage']}</p>
@@ -775,7 +790,7 @@ export const BigButtonList = ({
           header={resourcesContext.messages['createDataCollection']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onCreateDataCollections()}
+          onConfirm={onCreateDataCollections}
           onHide={() => {
             setIsConfirmCollectionDialog(false);
             onResetRadioButtonOptions();
@@ -795,7 +810,7 @@ export const BigButtonList = ({
           header={resourcesContext.messages['notValidQCWarningTitle']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => onCreateDataCollectionsWithNotValids()}
+          onConfirm={onCreateDataCollectionsWithNotValids}
           onHide={() => {
             notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
             setIsQCsNotValidWarningVisible(false);

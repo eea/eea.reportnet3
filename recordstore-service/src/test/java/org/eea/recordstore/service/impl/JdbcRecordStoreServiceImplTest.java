@@ -9,9 +9,12 @@ import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
@@ -190,7 +193,7 @@ public class JdbcRecordStoreServiceImplTest {
   @Test
   public void createEmptyDataSet() throws RecordStoreAccessException {
     jdbcRecordStoreService.createEmptyDataSet("", "");
-    Mockito.verify(jdbcTemplate, Mockito.times(90)).execute(Mockito.anyString());
+    Mockito.verify(jdbcTemplate, Mockito.times(96)).execute(Mockito.anyString());
   }
 
   @Test(expected = UnsupportedOperationException.class)
@@ -504,7 +507,7 @@ public class JdbcRecordStoreServiceImplTest {
     List<TableSchemaVO> tableSchemas = new ArrayList<>();
     tableSchemas.add(table);
     datasetSchemaVO.setTableSchemas(tableSchemas);
-    Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetId(Mockito.anyLong()))
+    Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(Mockito.anyLong()))
         .thenReturn(datasetSchemaVO);
 
     jdbcRecordStoreService.createUpdateQueryView(1L, true);
@@ -517,11 +520,11 @@ public class JdbcRecordStoreServiceImplTest {
     List<TableSchemaVO> tableSchemas = new ArrayList<>();
     tableSchemas.add(table);
     datasetSchemaVO.setTableSchemas(tableSchemas);
-    Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetId(Mockito.anyLong()))
+    Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(Mockito.anyLong()))
         .thenReturn(datasetSchemaVO);
 
     jdbcRecordStoreService.createUpdateQueryView(1L, false);
-    Mockito.verify(jdbcTemplate, Mockito.times(3)).execute(Mockito.anyString());
+    Mockito.verify(jdbcTemplate, Mockito.times(4)).execute(Mockito.anyString());
   }
 
   @Test
@@ -540,7 +543,7 @@ public class JdbcRecordStoreServiceImplTest {
         .when(datasetMetabaseControllerZuul
             .findReportingDataSetIdByDataflowIdAndProviderId(Mockito.any(), Mockito.any()))
         .thenReturn(reportings);
-    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true);
+    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true, "processId");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
@@ -558,7 +561,7 @@ public class JdbcRecordStoreServiceImplTest {
     reportings.add(reportingDatasetVO);
     Mockito.when(testDatasetControllerZuul.findTestDatasetByDataflowId(Mockito.any()))
         .thenReturn(reportings);
-    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true);
+    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true, "processId");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
@@ -576,7 +579,7 @@ public class JdbcRecordStoreServiceImplTest {
     reportings.add(reportingDatasetVO);
     Mockito.when(dataCollectionControllerZuul.findDataCollectionIdByDataflowId(Mockito.any()))
         .thenReturn(reportings);
-    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true);
+    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true, "processId");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
@@ -594,7 +597,7 @@ public class JdbcRecordStoreServiceImplTest {
     reportings.add(reportingDatasetVO);
     Mockito.when(euDatasetControllerZuul.findEUDatasetByDataflowId(Mockito.any()))
         .thenReturn(reportings);
-    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true);
+    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true, "processId");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
@@ -612,7 +615,7 @@ public class JdbcRecordStoreServiceImplTest {
     reportings.add(reportingDatasetVO);
     Mockito.when(referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(Mockito.any()))
         .thenReturn(reportings);
-    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true);
+    jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true, "processId");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
@@ -622,6 +625,48 @@ public class JdbcRecordStoreServiceImplTest {
     jdbcRecordStoreService.deleteDataSnapshot(1L, 1L);
     File file = new File("./snapshot_" + 1L + "-dataset_" + 1L + "_table_DatasetValue.snap");
     assertFalse(file.exists());
+  }
+
+
+
+  @Test
+  public void testDeleteDataset() throws SQLException, IOException {
+    jdbcRecordStoreService.deleteDataset("schema");
+    Mockito.verify(jdbcTemplate, times(1)).execute(Mockito.any(String.class));
+  }
+
+  @Test
+  public void createSnapshotToCloneTest() throws SQLException {
+    Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
+    List<String> datasets = new ArrayList<>();
+    datasets.add("dataset_1");
+    Mockito
+        .lenient().when(jdbcTemplate.query(Mockito.anyString(),
+            Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class)))
+        .thenReturn(datasets);
+    final Connection connection = Mockito.mock(BaseConnection.class);
+    Mockito.when(((BaseConnection) connection).getEncoding())
+        .thenReturn(Encoding.defaultEncoding());
+    driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
+        Mockito.anyString())).thenReturn(connection);
+    QueryExecutor queryExector = Mockito.mock(QueryExecutor.class);
+    CopyOperation copyOut = Mockito.mock(CopyOut.class);
+    Mockito.when(copyOut.isActive()).thenReturn(true);
+    Mockito.when(queryExector.startCopy(Mockito.anyString(), Mockito.anyBoolean()))
+        .thenReturn(copyOut);
+    Mockito.when(((BaseConnection) connection).getQueryExecutor()).thenReturn(queryExector);
+    Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
+        Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
+    Mockito.when(((BaseConnection) connection).getEncoding())
+        .thenReturn(Encoding.defaultEncoding());
+    Statement stmt = Mockito.mock(Statement.class);
+    Mockito.when(connection.createStatement()).thenReturn(stmt);
+    Mockito.when(stmt.executeUpdate(Mockito.anyString())).thenReturn(1);
+
+    jdbcRecordStoreService.createSnapshotToClone(1L, 1L, dictionaryOriginTargetObjectId, 1L,
+        datasets);
+    Mockito.verify(jdbcTemplate, times(2)).query(Mockito.anyString(),
+        Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
 
   @After
@@ -636,13 +681,9 @@ public class JdbcRecordStoreServiceImplTest {
     file.delete();
     file = new File("./nullsnapshot_1_table_AttachmentValue.snap");
     file.delete();
-  }
+    file = new File("./nullclone_1_to_1_table_TableValue.snap");
+    file.delete();
 
-  @Test
-  public void testDeleteDataset() throws SQLException, IOException {
-    jdbcRecordStoreService.deleteDataset("schema");
-    Mockito.verify(jdbcTemplate, times(1)).execute(Mockito.any(String.class));
   }
-
 
 }

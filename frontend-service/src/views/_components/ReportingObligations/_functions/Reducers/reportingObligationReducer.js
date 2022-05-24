@@ -1,22 +1,16 @@
 export const reportingObligationReducer = (state, { type, payload }) => {
   switch (type) {
-    case 'INITIAL_LOAD':
-      return { ...state, ...payload };
-
-    case 'IS_FILTERED_SEARCHED':
-      return { ...state, filteredSearched: payload.value };
-
-    case 'IS_FILTERED':
-      return { ...state, isFiltered: payload.value };
-
-    case 'IS_LOADING':
-      return { ...state, isLoading: payload.value };
-
-    case 'IS_SEARCHED':
-      return { ...state, isSearched: payload.value };
-
     case 'ON_LOAD_COUNTRIES':
       return { ...state, countries: payload.countries };
+
+    case 'ON_LOAD_DATA':
+      return {
+        ...state,
+        data: payload.data,
+        filteredRecords: payload.filteredRecords,
+        totalRecords: payload.totalRecords,
+        isFiltered: payload.filteredRecords !== payload.totalRecords
+      };
 
     case 'ON_LOAD_ISSUES':
       return { ...state, issues: payload.issues };
@@ -27,11 +21,11 @@ export const reportingObligationReducer = (state, { type, payload }) => {
     case 'ON_PAGINATE':
       return { ...state, pagination: payload.pagination };
 
-    case 'ON_SELECT_OBL':
+    case 'ON_SELECT_OBLIGATION':
       return { ...state, selectedObligation: payload.selectedObligation };
 
-    case 'SEARCHED_DATA':
-      return { ...state, searchedData: payload.data };
+    case 'SET_LOADING':
+      return { ...state, isLoading: payload.status };
 
     default:
       return state;

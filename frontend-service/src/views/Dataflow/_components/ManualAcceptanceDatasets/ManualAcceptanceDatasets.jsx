@@ -1,16 +1,17 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import isEmpty from 'lodash/isEmpty';
+import uniqBy from 'lodash/uniqBy';
 
 import styles from './ManualAcceptanceDatasets.module.scss';
 
 import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
-import { Filters } from 'views/_components/Filters';
+import { MyFilters } from 'views/_components/MyFilters';
 import { Spinner } from 'views/_components/Spinner';
 
 import { DataflowService } from 'services/DataflowService';
@@ -20,8 +21,11 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { manualAcceptanceDatasetsReducer } from './_functions/Reducers/manualAcceptanceDatasetsReducer';
 
+import { useFilters } from 'views/_functions/Hooks/useFilters';
+
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 
 export const ManualAcceptanceDatasets = ({
   dataflowId,
@@ -34,31 +38,22 @@ export const ManualAcceptanceDatasets = ({
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
+  const { filteredData, isFiltered } = useFilters('manualAcceptanceDatasets');
+
+  const manualAcceptanceInitialState = {
+    data: [],
+    filtered: false,
+    isLoading: true
+  };
+
   const [manualAcceptanceDatasetsState, manualAcceptanceDatasetsDispatch] = useReducer(
     manualAcceptanceDatasetsReducer,
-    { data: [], filtered: false, filteredData: [], isLoading: true }
+    manualAcceptanceInitialState
   );
 
   useEffect(() => {
     onLoadManualAcceptanceDatasets();
   }, [isUpdatedManualAcceptanceDatasets]);
-
-  const getFiltered = value => manualAcceptanceDatasetsDispatch({ type: 'IS_FILTERED', payload: { value } });
-
-  const getPaginatorRecordsCount = () => (
-    <Fragment>
-      {manualAcceptanceDatasetsState.filtered &&
-      manualAcceptanceDatasetsState.data.length !== manualAcceptanceDatasetsState.filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${manualAcceptanceDatasetsState.filteredData.length} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {manualAcceptanceDatasetsState.data.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-      {manualAcceptanceDatasetsState.filtered &&
-      manualAcceptanceDatasetsState.data.length === manualAcceptanceDatasetsState.filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
-    </Fragment>
-  );
 
   const isLoading = value => manualAcceptanceDatasetsDispatch({ type: 'IS_LOADING', payload: { value } });
 
@@ -78,8 +73,6 @@ export const ManualAcceptanceDatasets = ({
       isLoading(false);
     }
   };
-
-  const onLoadFilteredData = data => manualAcceptanceDatasetsDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
   const getOrderedValidations = datasets => {
     const datasetsWithPriority = [
@@ -123,31 +116,37 @@ export const ManualAcceptanceDatasets = ({
   );
 
   const filterOptions = [
-    { type: 'input', properties: [{ name: 'datasetName' }] },
+    { key: 'datasetName', label: resourcesContext.messages['datasetName'], type: 'INPUT' },
     {
-      type: 'multiselect',
-      properties: [
+      nestedOptions: [
         {
-          name: 'dataProviderName',
+          key: 'dataProviderName',
           label: TextByDataflowTypeUtils.getLabelByDataflowType(
             resourcesContext.messages,
             dataflowType,
             'manualAcceptanceDataProviderNameFilterLabel'
+          ),
+          multiSelectOptions: uniqBy(
+            manualAcceptanceDatasetsState.data
+              .map(dataProvider => ({ type: dataProvider.dataProviderName, value: dataProvider.dataProviderName }))
+              .sort((a, b) => a.value.localeCompare(b.value)),
+            'type'
           )
         },
-        { name: 'feedbackStatus' }
-      ]
+        { key: 'feedbackStatus', label: resourcesContext.messages['feedbackStatus'] }
+      ],
+      type: 'MULTI_SELECT'
     },
-    {
-      type: 'checkbox',
-      properties: [{ name: 'isReleased', label: resourcesContext.messages['onlyReleasedCheckboxLabel'] }]
-    }
+    { key: 'isReleased', label: resourcesContext.messages['onlyReleasedCheckboxLabel'], type: 'CHECKBOX' }
   ];
 
   const renderColumns = datasets => {
     const fieldColumns = getOrderedValidations(Object.keys(datasets[0])).map(field => {
       let template = null;
-      if (field === 'isReleased') template = isReleasedTemplate;
+      if (field === 'isReleased') {
+        template = isReleasedTemplate;
+      }
+
       return (
         <Column
           body={template}
@@ -167,6 +166,7 @@ export const ManualAcceptanceDatasets = ({
         />
       );
     });
+
     fieldColumns.push(renderActionButtonsColumn);
     return fieldColumns;
   };
@@ -186,23 +186,29 @@ export const ManualAcceptanceDatasets = ({
     </div>
   ) : (
     <div className={styles.manualAcceptanceDatasets}>
-      <Filters
+      <MyFilters
+        className="manualAcceptanceDatasets"
         data={manualAcceptanceDatasetsState.data}
-        getFilteredData={onLoadFilteredData}
-        getFilteredSearched={getFiltered}
         options={filterOptions}
+        viewType="manualAcceptanceDatasets"
       />
       {!isEmpty(manualAcceptanceDatasetsState.filteredData) ? (
         <DataTable
           autoLayout={true}
           onRowClick={event => getManageAcceptanceDataset(event.data)}
           paginator={true}
-          paginatorRight={getPaginatorRecordsCount()}
+          paginatorRight={
+            <PaginatorRecordsCount
+              dataLength={manualAcceptanceDatasetsState.data.length}
+              filteredDataLength={filteredData.length}
+              isFiltered={isFiltered}
+            />
+          }
           rows={10}
           rowsPerPageOptions={[5, 10, 15]}
-          summary="manualAcceptance"
-          totalRecords={manualAcceptanceDatasetsState.filteredData.length}
-          value={manualAcceptanceDatasetsState.filteredData}>
+          summary={resourcesContext.messages['manualAcceptance']}
+          totalRecords={filteredData.length}
+          value={filteredData}>
           {renderColumns(manualAcceptanceDatasetsState.filteredData)}
         </DataTable>
       ) : (

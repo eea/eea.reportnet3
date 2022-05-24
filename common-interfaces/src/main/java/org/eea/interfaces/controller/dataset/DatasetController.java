@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.ETLDatasetVO;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -127,6 +128,18 @@ public interface DatasetController {
           required = false) Boolean deletePrefilledTables);
 
   /**
+   * Private delete dataset data.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param technicallyAccepted the technically accepted
+   */
+  @DeleteMapping("/private/{datasetId}/deleteDatasetData")
+  void privateDeleteDatasetData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "technicallyAccepted", required = true) boolean technicallyAccepted);
+
+  /**
    * Delete import data legacy.
    *
    * @param datasetId the dataset id
@@ -176,11 +189,12 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param mimeType the mime type
+   * @param exportFilterVO the export filter VO
    */
   @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   void exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-      @RequestParam("mimeType") String mimeType);
+      @RequestParam("mimeType") String mimeType, @RequestBody ExportFilterVO exportFilterVO);
 
   /**
    * Export file through integration.
@@ -263,6 +277,7 @@ public interface DatasetController {
    * @param offset the offset
    * @param filterValue the filter value
    * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
    * @return the ETL dataset VO
    */
   @GetMapping("/v1/{datasetId}/etlExport")
@@ -273,8 +288,33 @@ public interface DatasetController {
       @RequestParam(value = "limit", required = false) Integer limit,
       @RequestParam(value = "offset", required = false) Integer offset,
       @RequestParam(value = "filterValue", required = false) String filterValue,
-      @RequestParam(value = "columnName", required = false) String columnName);
+      @RequestParam(value = "columnName", required = false) String columnName,
+      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
 
+  /**
+   * Etl export dataset V 2.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
+   * @return the response entity
+   */
+  @GetMapping("/v2/etlExport/{datasetId}")
+  ResponseEntity<StreamingResponseBody> etlExportDatasetV2(
+      @PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam(value = "limit", required = false) Integer limit,
+      @RequestParam(value = "offset", required = false) Integer offset,
+      @RequestParam(value = "filterValue", required = false) String filterValue,
+      @RequestParam(value = "columnName", required = false) String columnName,
+      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
 
   /**
    * Etl export dataset legacy.
@@ -435,6 +475,30 @@ public interface DatasetController {
   void insertRecordsMultiTable(@PathVariable("datasetId") Long datasetId,
       @RequestBody List<TableVO> tableRecords);
 
+
+  /**
+   * Import big file data.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   * @param integrationId the integration id
+   * @param delimiter the delimiter
+   */
+  @PostMapping("/v2/importFileData/{datasetId}")
+  void importBigFileData(@PathVariable("datasetId") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "replace", required = false) boolean replace,
+      @RequestParam(value = "integrationId", required = false) Long integrationId,
+      @RequestParam(value = "delimiter", required = false) String delimiter);
+
+
   /**
    * Import file data.
    *
@@ -538,5 +602,31 @@ public interface DatasetController {
   @GetMapping("/exportPublicFile/dataflow/{dataflowId}")
   ResponseEntity<InputStreamResource> exportReferenceDatasetFile(@PathVariable Long dataflowId,
       @RequestParam String fileName);
+
+  /**
+   * Update check view.
+   *
+   * @param datasetId the dataset id
+   * @param updated the updated
+   */
+  @PutMapping("/private/viewUpdated/{datasetId}")
+  void updateCheckView(@PathVariable("datasetId") Long datasetId, @RequestParam Boolean updated);
+
+  /**
+   * Gets the check view.
+   *
+   * @param datasetId the dataset id
+   * @return the check view
+   */
+  @GetMapping("/{datasetId}/viewUpdated")
+  Boolean getCheckView(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Delete temp etl export.
+   *
+   * @param datasetId the dataset id
+   */
+  @DeleteMapping("/private/deleteTempEtlExport/{datasetId}")
+  void deleteTempEtlExport(@PathVariable("datasetId") Long datasetId);
 
 }

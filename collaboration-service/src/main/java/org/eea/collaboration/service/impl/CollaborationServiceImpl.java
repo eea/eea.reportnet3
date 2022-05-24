@@ -27,6 +27,7 @@ import org.eea.interfaces.vo.dataflow.MessageAttachmentVO;
 import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.slf4j.Logger;
@@ -117,10 +118,6 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setAutomatic(messageVO.isAutomatic());
     message.setFileSize("0");
     message = messageRepository.save(message);
-
-    String eventType = EventType.RECEIVED_MESSAGE.toString();
-    collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null,
-        eventType);
 
     LOG.info("Message created: message={}", message);
     return messageMapper.entityToClass(message);
@@ -218,7 +215,9 @@ public class CollaborationServiceImpl implements CollaborationService {
     if (authorities.contains(
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)))
         || authorities.contains(new SimpleGrantedAuthority(
-            ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)))) {
+            ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)))
+        || authorities.contains(new SimpleGrantedAuthority(
+            ObjectAccessRoleEnum.DATAFLOW_STEWARD_SUPPORT.getAccessRole(dataflowId)))) {
       stream = stream.filter(Message::isDirection);
     }
 
@@ -352,7 +351,10 @@ public class CollaborationServiceImpl implements CollaborationService {
           .contains(new SimpleGrantedAuthority(
               ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(dataflowId)))
           || authorities.contains(new SimpleGrantedAuthority(
-              ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)));
+              ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(dataflowId)))
+          || authorities.contains(new SimpleGrantedAuthority(
+              ObjectAccessRoleEnum.DATAFLOW_STEWARD_SUPPORT.getAccessRole(dataflowId)))
+          || authorities.contains(new SimpleGrantedAuthority("ROLE_" + SecurityRoleEnum.ADMIN));
       if (custodianSteward) {
         direction = false;
       }

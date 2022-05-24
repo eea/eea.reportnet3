@@ -231,7 +231,7 @@ export const ManageUniqueConstraint = ({
       </span>
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => {
           manageDialogs('isManageUniqueConstraintDialogVisible', false);
@@ -254,8 +254,8 @@ export const ManageUniqueConstraint = ({
         setSelectedFields([]);
       }}
       optionLabel="name"
-      optionValue="value"
       options={getTableOptions()}
+      optionValue="value"
       title={resourcesContext.messages['selectUniqueTableTitle']}
       value={selectedTable}
     />
@@ -269,8 +269,8 @@ export const ManageUniqueConstraint = ({
       multiple={true}
       onChange={event => !isNil(event.value) && setSelectedFields(event.value)}
       optionLabel="name"
-      optionValue="value"
       options={getFieldOptions()}
+      optionValue="value"
       title={resourcesContext.messages['selectUniqueFieldsTitle']}
       value={selectedFields}
     />

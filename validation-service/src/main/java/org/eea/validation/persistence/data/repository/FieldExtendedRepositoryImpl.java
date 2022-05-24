@@ -1,10 +1,14 @@
 package org.eea.validation.persistence.data.repository;
 
+import java.math.BigInteger;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
+import org.hibernate.annotations.QueryHints;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The Class FieldExtendedRepositoryImpl.
@@ -43,8 +47,22 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   }
 
 
+
   /**
-   * Query pk execution.
+   * Query PK native field value.
+   *
+   * @param generatedQuery the generated query
+   * @return the list
+   */
+  @Override
+  public List<FieldValue> queryPKNativeFieldValue(String generatedQuery) {
+    Query query = entityManager.createNativeQuery(generatedQuery, FieldValue.class);
+    return query.setHint(QueryHints.READ_ONLY, true).getResultList();
+
+  }
+
+  /**
+   * Query PK execution.
    *
    * @param generatedQuery the generated query
    * @return the list
@@ -56,6 +74,26 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
 
   }
 
+  /**
+   * Single F kscount.
+   *
+   * @param generatedQuery the generated query
+   * @return the integer
+   */
+  @Override
+  public Long getCount(String generatedQuery) {
+    Query query = entityManager.createNativeQuery(generatedQuery);
+    BigInteger result = (BigInteger) query.setHint(QueryHints.READ_ONLY, true).getSingleResult();
+    return result.longValue();
+  }
 
+
+  /**
+   * Flush.
+   */
+  @Transactional
+  public void flush() {
+    entityManager.flush();
+  }
 
 }

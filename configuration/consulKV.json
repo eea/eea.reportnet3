@@ -844,8 +844,12 @@
     "value": "JHtWQUxJREFUSU9OX1RBU0tTX0lOSVRJQUxfVEFYOjF9"
   },
   {
-    "key": "config/validation/validation.tasks.parallelism",
+    "key": "config/application/validation.tasks.parallelism",
     "value": "JHtWQUxJREFUSU9OX1RBU0tTX1BBUkFMTEVMSVNNOjR9"
+  },
+  {
+    "key": "config/application/validation.scheduled.consumer",
+    "value": "JHtWQUxJREFUSU9OX1NDSEVEVUxFUl9DT05TVU1FUjoxMDAwMH0="
   },
   {
     "key": "config/ums/management.endpoints.web.exposure.include",
@@ -1014,6 +1018,10 @@
   {
     "key": "config/recordstore/pathSnapshot",
     "value": "JHtTTkFQU0hPVF9QQVRIOkM6XHNuYXBzaG90c1x9"
+  },
+  {
+    "key": "config/recordstore/pathSnapshotDisabled",
+    "value": "JHtTTkFQU0hPVF9ESVNBQkxFRF9QQVRIOkM6XHNuYXBzaG90c1xkaXNhYmxlZFx9"
   },
   {
     "key": "config/indexsearch/spring.jpa.hibernate.ddl-auto",
@@ -1738,5 +1746,29 @@
   {
     "key": "config/validation/validation.sqlFetchSize",
     "value": "JHtWQUxJREFUSU9OX1NRTF9GRVRDSF9TSVpFOjI1MH0="
+  },
+  {
+    "key": "config/dataset/dataset.import.batchRecordSave",
+    "value": "JHtEQVRBU0VUX0lNUE9SVF9CQVRDSFJFQ09SRFNBVkU6MjUwMH0="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.process.path",
+    "value": "L3Byb2Nlc3MvKio="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.process.serviceId",
+    "value": "cmVjb3Jkc3RvcmU="
+  },
+  {
+    "key": "config/apiGateway/zuul.routes.process.stripPrefix",
+    "value": "ZmFsc2U="
+  },
+  {
+    "key": "config/validation/validation.instance.priority",
+    "value": "JHtWQUxJREFUSU9OX0lOU1RBTkNFX1BSSU9SSVRZOkhJR0h9"
+  },
+  {
+    "key": "config/validation/validation.priority.days",
+    "value": "JHtWQUxJREFUSU9OX1BSSU9SSVRZX0RBWVM6MjkgOCA3IDR9"
   }
 ]

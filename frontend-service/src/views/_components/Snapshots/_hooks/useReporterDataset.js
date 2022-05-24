@@ -26,6 +26,7 @@ const useReporterDataset = (datasetId, dataflowId) => {
     dialogConfirmQuestion: '',
     dialogMessage: '',
     isConfirmDisabled: false,
+    isRestoring: false,
     snapShotId: ''
   };
 

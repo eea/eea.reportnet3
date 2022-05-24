@@ -3,6 +3,8 @@ import { UserRightRepository } from 'repositories/UserRightRepository';
 import { UserRightUtils } from 'services/_utils/UserRightUtils';
 
 export const UserRightService = {
+  getNationalCoordinators: async () => await UserRightRepository.getNationalCoordinators(),
+
   getReporters: async (dataflowId, dataProviderId) => {
     const userRightListDTO = await UserRightRepository.getReporters(dataflowId, dataProviderId);
     return UserRightUtils.parseUserRightListDTO(userRightListDTO.data);
@@ -13,23 +15,21 @@ export const UserRightService = {
     return UserRightUtils.parseUserRightListDTO(userRightListDTO.data);
   },
 
-  deleteReporter: async (userRight, dataflowId, dataProviderId) => {
-    return await UserRightRepository.deleteReporter(userRight, dataflowId, dataProviderId);
-  },
+  deleteNationalCoordinator: async userRight => await UserRightRepository.deleteNationalCoordinator(userRight),
 
-  deleteRequester: async (userRight, dataflowId, dataProviderId) => {
-    return await UserRightRepository.deleteRequester(userRight, dataflowId, dataProviderId);
-  },
+  deleteReporter: async (userRight, dataflowId, dataProviderId) =>
+    await UserRightRepository.deleteReporter(userRight, dataflowId, dataProviderId),
 
-  updateReporter: async (userRight, dataflowId, dataProviderId) => {
-    return await UserRightRepository.updateReporter(userRight, dataflowId, dataProviderId);
-  },
+  deleteRequester: async (userRight, dataflowId, dataProviderId) =>
+    await UserRightRepository.deleteRequester(userRight, dataflowId, dataProviderId),
 
-  updateRequester: async (userRight, dataflowId) => {
-    return await UserRightRepository.updateRequester(userRight, dataflowId);
-  },
+  createNationalCoordinator: async userRight => await UserRightRepository.createNationalCoordinator(userRight),
 
-  validateReporters: async (dataflowId, dataProviderId) => {
-    return await UserRightRepository.validateReporters(dataflowId, dataProviderId);
-  }
+  updateReporter: async (userRight, dataflowId, dataProviderId) =>
+    await UserRightRepository.updateReporter(userRight, dataflowId, dataProviderId),
+
+  updateRequester: async (userRight, dataflowId) => await UserRightRepository.updateRequester(userRight, dataflowId),
+
+  validateReporters: async (dataflowId, dataProviderId) =>
+    await UserRightRepository.validateReporters(dataflowId, dataProviderId)
 };

@@ -10,7 +10,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import ReactTooltip from 'react-tooltip';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, label, onClick, style, title }) => {
+export const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, label, onClick, style, title }) => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -95,18 +95,28 @@ const LeftSideBarButton = ({ buttonType = 'default', className, href, icon, labe
 
   const buttonsLayouts = { defaultLayout, notificationsLayout, systemNotificationsLayout };
 
-  return (
-    <Fragment>
+  const renderButton = () => {
+    return (
       <a className={className} data-for={title} data-tip href={href} onClick={onClick} style={style}>
         <div className={styles.leftSideBarElementWrapper}>{buttonsLayouts[`${buttonType}Layout`]}</div>
       </a>
-      {!leftSideBarContext.isLeftSideBarOpened ? (
+    );
+  };
+
+  const renderTooltip = () => {
+    if (!leftSideBarContext.isLeftSideBarOpened) {
+      return (
         <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id={title} place="right">
           <span>{!leftSideBarContext.isLeftSideBarOpened ? resourcesContext.messages[title] : undefined}</span>
         </ReactTooltip>
-      ) : null}
-    </Fragment>
+      );
+    }
+  };
+
+  return (
+    <div>
+      {renderButton()}
+      {renderTooltip()}
+    </div>
   );
 };
-
-export { LeftSideBarButton };

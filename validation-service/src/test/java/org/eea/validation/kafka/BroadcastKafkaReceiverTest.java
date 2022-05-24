@@ -4,7 +4,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EEAEventVO;
-import org.eea.kafka.handler.EEAEventHandler;
+import org.eea.message.EEAEventHandler;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,7 +37,7 @@ public class BroadcastKafkaReceiverTest {
   @Before
   public void initMocks() {
     MockitoAnnotations.openMocks(this);
-    message = new Message<EEAEventVO>() {
+    message = new Message<>() {
 
       @Override
       public EEAEventVO getPayload() {
@@ -59,7 +59,7 @@ public class BroadcastKafkaReceiverTest {
    */
   @Test
   public void listenMessageTest() throws EEAException {
-    broadcastKafkaReceiver.listenMessage(message);
+    broadcastKafkaReceiver.consumeMessage(message);
     Mockito.verify(handler, times(1)).processMessage(Mockito.any());
   }
 
@@ -72,7 +72,7 @@ public class BroadcastKafkaReceiverTest {
   @Test
   public void listenMessageTestEEAException() throws EEAException {
     doThrow(new EEAException()).when(handler).processMessage(Mockito.any());
-    broadcastKafkaReceiver.listenMessage(message);
+    broadcastKafkaReceiver.consumeMessage(message);
     Mockito.verify(handler, times(1)).processMessage(Mockito.any());
   }
 
@@ -84,7 +84,7 @@ public class BroadcastKafkaReceiverTest {
   @Test
   public void listenMessageTestException() throws EEAException {
     doThrow(new NullPointerException()).when(handler).processMessage(Mockito.any());
-    broadcastKafkaReceiver.listenMessage(message);
+    broadcastKafkaReceiver.consumeMessage(message);
     Mockito.verify(handler, times(1)).processMessage(Mockito.any());
   }
 }

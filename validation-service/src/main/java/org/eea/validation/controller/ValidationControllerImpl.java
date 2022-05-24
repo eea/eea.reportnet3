@@ -8,16 +8,23 @@ import java.util.List;
 import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
@@ -50,23 +57,19 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 
 /**
- * The Class ValidationServiceController.
+ * The Class ValidationControllerImpl.
  */
 @RestController
 @RequestMapping(value = "/validation")
 public class ValidationControllerImpl implements ValidationController {
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ValidationControllerImpl.class);
 
-  /**
-   * The validation service.
-   */
+  /** The validation service. */
   @Autowired
   @Qualifier("proxyValidationService")
   private ValidationService validationService;
@@ -83,17 +86,24 @@ public class ValidationControllerImpl implements ValidationController {
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
 
+  /** The dataset metabase controller zuul. */
+  @Autowired
+  private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+
+  /** The process controller zuul. */
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
 
   /**
-   * Validate data set data. The lock should be released on
-   * ValidationHelper.checkFinishedValidations(..)
+   * Validate data set data.
    *
    * @param datasetId the dataset id
    * @param released the released
    */
   @Override
   @PutMapping(value = "/dataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')  OR hasAnyRole('ADMIN')")
   @LockMethod(removeWhenFinish = false)
   @ApiOperation(value = "Validates dataset data for a given dataset id", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
@@ -108,6 +118,7 @@ public class ValidationControllerImpl implements ValidationController {
         "The user invoking ValidationControllerImpl.validateDataSetData is {} and the datasetId {}",
         SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
 
+
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -115,14 +126,37 @@ public class ValidationControllerImpl implements ValidationController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
+    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    String uuid = UUID.randomUUID().toString();
+    String nextUuid = uuid;
+    if (released) {
+      // obtain datasets to be released
+      List<Long> datasets =
+          datasetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(
+              dataset.getDataflowId(), dataset.getDataProviderId());
+      // queue validations
+      for (Long datasetToReleaseId : datasets) {
+        processControllerZuul.updateProcess(datasetToReleaseId, dataset.getDataflowId(),
+            ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, nextUuid,
+            SecurityContextHolder.getContext().getAuthentication().getName(),
+            validationHelper.getPriority(dataset), released);
+        nextUuid = UUID.randomUUID().toString();
+      }
+    } else {
+      processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+          ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, uuid,
+          SecurityContextHolder.getContext().getAuthentication().getName(),
+          validationHelper.getPriority(dataset), released);
+    }
     try {
-
+      validationHelper.executeValidation(datasetId, uuid, released, true);
       // Add lock to the release process if necessary
       validationHelper.addLockToReleaseProcess(datasetId);
-
-      validationHelper.executeValidation(datasetId, UUID.randomUUID().toString(), released, true);
     } catch (EEAException e) {
+      datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+          DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
       LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);
+      validationHelper.deleteLockToReleaseProcess(datasetId);
     }
   }
 
@@ -141,7 +175,7 @@ public class ValidationControllerImpl implements ValidationController {
    * @return the failed validations by id dataset
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASET_OBSERVER','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR checkAccessReferenceEntity('DATASET',#datasetId)")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT') OR checkAccessReferenceEntity('DATASET',#datasetId)")
   @GetMapping(value = "listValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Gets all the failed validations for a given dataset", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
@@ -213,7 +247,7 @@ public class ValidationControllerImpl implements ValidationController {
    */
   @Override
   @GetMapping(value = "listGroupValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER')")
+  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId)")
   @ApiOperation(value = "Gets all the failed validations for a given dataset grouped by code",
       hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
@@ -270,14 +304,13 @@ public class ValidationControllerImpl implements ValidationController {
   }
 
   /**
-   * Export CSV file of grouped validations.
+   * Export validation data CSV.
    *
    * @param datasetId the dataset id
-   * @return the response entity
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @PostMapping(value = "/export/{datasetId}")
   @ApiOperation(value = "Export all the validations for a given dataset grouped by code",
       hidden = true)
@@ -306,7 +339,7 @@ public class ValidationControllerImpl implements ValidationController {
    */
   @Override
   @GetMapping(value = "/downloadFile/{datasetId}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @ApiOperation(
       value = "Download the file created in the export validations for a given dataset grouped by code",
       hidden = true)
@@ -321,8 +354,10 @@ public class ValidationControllerImpl implements ValidationController {
     try {
       LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
           datasetId, fileName);
-      File file = validationService.downloadExportedFile(datasetId, fileName);
-      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      File file =
+          validationService.downloadExportedFile(datasetId, FilenameUtils.getName(fileName));
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+          "attachment; filename=" + FilenameUtils.getName(fileName));
 
       OutputStream out = response.getOutputStream();
       FileInputStream in = new FileInputStream(file);
@@ -338,8 +373,8 @@ public class ValidationControllerImpl implements ValidationController {
           datasetId, fileName, e.getMessage());
 
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
-          "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s + message: %s ",
-          datasetId, fileName, e.getMessage()), e);
+          "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s",
+          datasetId, fileName));
 
     }
 

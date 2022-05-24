@@ -1,6 +1,7 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
 import uniqueId from 'lodash/uniqueId';
 
@@ -12,7 +13,6 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { DropdownButton } from 'views/_components/DropdownButton';
 import { DropDownMenu } from 'views/_components/DropdownButton/_components/DropDownMenu';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Icon } from 'views/_components/Icon';
 import { InputText } from 'views/_components/InputText';
 import ReactTooltip from 'react-tooltip';
 
@@ -47,6 +47,7 @@ export const BigButton = ({
   restrictFromPublicStatus,
   setSelectedRepresentative = () => {},
   setErrorDialogData,
+  technicalAcceptanceStatus,
   tooltip
 }) => {
   const resourcesContext = useContext(ResourcesContext);
@@ -86,8 +87,7 @@ export const BigButton = ({
         setErrorDialogData({ isVisible: true, message: resourcesContext.messages['emptyDatasetSchema'] });
         document.getElementsByClassName('p-inputtext p-component')[0].focus();
       }
-    }
-    if (event.key === 'Escape') {
+    } else if (event.key === 'Escape') {
       if (!isEmpty(initialValue)) {
         setButtonsTitle(initialValue);
         setIsEditEnabled(false);
@@ -101,18 +101,19 @@ export const BigButton = ({
     }
   };
 
-  const onEnableSchemaNameEdit = () => {
-    setIsEditEnabled(true);
-  };
+  const onEnableSchemaNameEdit = () => setIsEditEnabled(true);
 
-  const designModel =
-    !isUndefined(model) &&
-    model.map(button => {
-      if (button.label === resourcesContext.messages['rename']) {
-        button.command = onEnableSchemaNameEdit;
-      }
-      return button;
-    });
+  const getDesignModel = () => {
+    if (!isUndefined(model)) {
+      return model.map(button => {
+        if (button.label === resourcesContext.messages['rename']) {
+          button.command = onEnableSchemaNameEdit;
+        }
+
+        return button;
+      });
+    }
+  };
 
   const onInputSave = (value, index) => {
     const changeTitle = onUpdateName(value, index);
@@ -177,59 +178,93 @@ export const BigButton = ({
     }
   };
 
-  const defaultBigButton = (
-    <Fragment>
-      <div
-        className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName} ${
-          !enabled && styles.bigButtonDisabled
-        }`}>
-        <span data-for={caption} data-tip onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)}>
-          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} role="presentation" />
-        </span>
-        {model && !isEmpty(model) && (
-          <DropdownButton
-            buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
-            icon="caretDown"
-            iconStyle={{ fontSize: '1.8rem' }}
-            model={designModel}
-          />
-        )}
-        {infoStatus &&
-          (infoStatusIcon ? (
-            <Icon
+  const renderDropDownModel = () => {
+    if (model && !isEmpty(model)) {
+      return (
+        <DropdownButton
+          buttonStyle={{ position: 'absolute', bottom: '-5px', right: '0px' }}
+          icon="caretDown"
+          iconStyle={{ fontSize: '1.8rem' }}
+          model={getDesignModel()}
+        />
+      );
+    }
+  };
+
+  const renderRestrictFromPublicIcon = () => {
+    if (restrictFromPublicInfo) {
+      return (
+        <FontAwesomeIcon
+          className={`${!restrictFromPublicAccess && styles.notClickableIcon} ${
+            restrictFromPublicIsUpdating && 'fa-spin'
+          }`}
+          icon={getRestrictFromPublicIcon()}
+          onClick={() => {
+            restrictFromPublicAccess && manageDialogs('isRestrictFromPublicDialogVisible', true);
+            setSelectedRepresentative(dataProviderId);
+          }}
+          role="presentation"
+          style={{ position: 'absolute', top: '4px', left: '2px', fontSize: '1.2rem' }}
+        />
+      );
+    }
+  };
+
+  const renderTechnicalAcceptanceTooltip = uniqName => {
+    const getMessage = () => {
+      if (!isNil(technicalAcceptanceStatus) && !isEmpty(technicalAcceptanceStatus)) {
+        return technicalAcceptanceStatus;
+      } else {
+        return resourcesContext.messages['released'];
+      }
+    };
+
+    return (
+      <ReactTooltip border={true} effect="solid" id={uniqName} place="top">
+        {getMessage()}
+      </ReactTooltip>
+    );
+  };
+
+  const renderInfoStatusIcon = () => {
+    if (infoStatus) {
+      if (infoStatusIcon) {
+        const uniqName = uniqueId('infoStatusTooltip');
+        return (
+          <Fragment>
+            <FontAwesomeIcon
               className={styles.notClickableIcon}
-              icon="checkCircle"
-              style={{ position: 'absolute', top: '0', right: '0', fontSize: '1.8rem' }}
+              data-for={uniqName}
+              data-tip
+              icon={AwesomeIcons('circleCheck')}
+              role="presentation"
+              style={{ position: 'absolute', top: '4px', right: '0', fontSize: '1.2rem' }}
             />
-          ) : (
-            <p
-              className={styles.notClickableIcon}
-              style={{
-                position: 'absolute',
-                top: '0',
-                right: '0',
-                fontSize: '1.1rem',
-                margin: '0 0.5rem',
-                fontWeight: '600'
-              }}>
-              {resourcesContext.messages['new'].toUpperCase()}
-            </p>
-          ))}
-        {restrictFromPublicInfo && (
-          <FontAwesomeIcon
-            className={`${!restrictFromPublicAccess && styles.notClickableIcon} ${
-              restrictFromPublicIsUpdating && 'fa-spin'
-            }`}
-            icon={getRestrictFromPublicIcon()}
-            onClick={() => {
-              restrictFromPublicAccess && manageDialogs('isRestrictFromPublicDialogVisible', true);
-              setSelectedRepresentative(dataProviderId);
-            }}
-            style={{ position: 'absolute', top: '4px', left: '2px', fontSize: '1.2rem' }}
-          />
-        )}
-      </div>
-      {!isUndefined(isEditEnabled) && isEditEnabled ? (
+            {renderTechnicalAcceptanceTooltip(uniqName)}
+          </Fragment>
+        );
+      } else {
+        return (
+          <p
+            className={styles.notClickableIcon}
+            style={{
+              position: 'absolute',
+              top: '0',
+              right: '0',
+              fontSize: '1.1rem',
+              margin: '0 0.5rem',
+              fontWeight: '600'
+            }}>
+            {resourcesContext.messages['new'].toUpperCase()}
+          </p>
+        );
+      }
+    }
+  };
+
+  const renderEditableInput = () => {
+    if (!isUndefined(isEditEnabled) && isEditEnabled) {
+      return (
         <InputText
           autoFocus={true}
           className={`${styles.inputText}`}
@@ -256,24 +291,55 @@ export const BigButton = ({
           placeholder={placeholder}
           value={!isUndefined(buttonsTitle) ? buttonsTitle : caption}
         />
-      ) : (
+      );
+    } else {
+      const renderTitleCaption = () => {
+        if (!isUndefined(buttonsTitle)) {
+          return buttonsTitle;
+        } else {
+          return caption;
+        }
+      };
+
+      const titleCaption = renderTitleCaption();
+
+      return (
         <Fragment>
           <p
             className={styles.caption}
             data-for={tooltipId}
             data-tip
-            onDoubleClick={
-              dataflowStatus === config.dataflowStatus.DESIGN && canEditName ? onEnableSchemaNameEdit : null
-            }>
-            {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+            onDoubleClick={() => {
+              if (dataflowStatus === config.dataflowStatus.DESIGN && canEditName) {
+                onEnableSchemaNameEdit();
+              }
+            }}>
+            {titleCaption}
           </p>
           {!isUndefined(buttonsTitle) && buttonsTitle.length > 60 && (
             <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={tooltipId} place="top">
-              {!isUndefined(buttonsTitle) ? buttonsTitle : caption}
+              {titleCaption}
             </ReactTooltip>
           )}
         </Fragment>
-      )}
+      );
+    }
+  };
+
+  const defaultBigButton = (
+    <Fragment>
+      <div
+        className={`${styles.bigButton} ${styles.defaultBigButton} ${styles[buttonClass]} ${helpClassName} ${
+          !enabled && styles.bigButtonDisabled
+        }`}>
+        <span data-for={caption} data-tip onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)}>
+          <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} role="presentation" />
+        </span>
+        {renderDropDownModel()}
+        {renderInfoStatusIcon()}
+        {renderRestrictFromPublicIcon()}
+      </div>
+      {renderEditableInput()}
     </Fragment>
   );
 
@@ -294,14 +360,20 @@ export const BigButton = ({
     menuBigButton
   };
 
-  return (
-    <Fragment>
-      <div className={`${styles.datasetItem} ${!enabled && styles.datasetItemDisabled}`}>{buttons[layout]}</div>
-      {tooltip && (
+  const renderTooltip = () => {
+    if (tooltip) {
+      return (
         <ReactTooltip border={true} effect="solid" id={caption} place="top">
           {tooltip}
         </ReactTooltip>
-      )}
+      );
+    }
+  };
+
+  return (
+    <Fragment>
+      <div className={`${styles.datasetItem} ${!enabled && styles.datasetItemDisabled}`}>{buttons[layout]}</div>
+      {renderTooltip()}
     </Fragment>
   );
 };

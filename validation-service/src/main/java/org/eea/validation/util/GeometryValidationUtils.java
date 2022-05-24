@@ -175,7 +175,7 @@ public class GeometryValidationUtils {
     Validation validation = new Validation();
     validation.setIdRule(rule.getRuleId().toString());
     validation.setLevelError(ErrorTypeEnum.valueOf(rule.getThenCondition().get(1)));
-    validation.setMessage(rule.getThenCondition().get(0) + ": " + message);
+    validation.setMessage(rule.getThenCondition().get(0).replace("{%reason%}", ": " + message));
     validation.setTypeEntity((rule.getType()));
     validation.setValidationDate(new Date().toString());
     validation.setTableName(tableName);

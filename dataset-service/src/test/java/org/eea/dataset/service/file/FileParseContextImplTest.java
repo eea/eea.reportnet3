@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.service.file.interfaces.ReaderStrategy;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,11 +51,11 @@ public class FileParseContextImplTest {
   @Test
   public void testParse() throws EEAException, IOException {
     MultipartFile file = Mockito.mock(MultipartFile.class);
-    fileParseContext.parse(file.getInputStream(), 1L, 1L, "", 1L, "file", true,
-        new DataSetSchema());
+    fileParseContext.parse(file.getInputStream(), 1L, 1L, "", 1L, "file", true, new DataSetSchema(),
+        new ConnectionDataVO());
     Mockito.verify(readerStrategy, times(1)).parseFile(Mockito.any(), Mockito.anyLong(),
         Mockito.anyLong(), Mockito.any(), Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
   }
 
 }

@@ -1,11 +1,13 @@
 package org.eea.dataset.controller;
 
 import static org.mockito.Mockito.doThrow;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.eea.dataset.service.ReferenceDatasetService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetPublicVO;
@@ -70,25 +72,26 @@ public class ReferenceDatasetControllerImplTest {
   }
 
   @Test
-  public void updateReferenceDatasetSuccessTest() throws EEAException {
+  public void updateReferenceDatasetSuccessTest() throws EEAException, IOException {
     referenceDatasetControllerImpl.updateReferenceDataset(1L, true);
-    Mockito.verify(referenceDatasetService, Mockito.times(1)).updateUpdatable(Mockito.anyLong(),
-        Mockito.anyBoolean());
+    Mockito.verify(referenceDatasetService, Mockito.times(1))
+        .updateUpdatableReferenceDataset(Mockito.anyLong(), Mockito.anyBoolean());
   }
 
   /**
    * Update reference dataset exception test.
    *
    * @throws EEAException the EEA exception
+   * @throws IOException
    */
   @Test(expected = ResponseStatusException.class)
-  public void updateReferenceDatasetExceptionTest() throws EEAException {
+  public void updateReferenceDatasetExceptionTest() throws EEAException, IOException {
     doThrow(new EEAException("Fail")).when(referenceDatasetService)
-        .updateUpdatable(Mockito.anyLong(), Mockito.anyBoolean());
+        .updateUpdatableReferenceDataset(Mockito.anyLong(), Mockito.anyBoolean());
     try {
       referenceDatasetControllerImpl.updateReferenceDataset(1L, true);
     } catch (ResponseStatusException e) {
-      Assert.assertEquals("Fail", e.getReason());
+      Assert.assertEquals(EEAErrorMessage.UPDATING_REFERENCE_DATASET, e.getReason());
       Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       throw e;
     }

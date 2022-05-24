@@ -6,6 +6,8 @@ import isNull from 'lodash/isNull';
 import orderBy from 'lodash/orderBy';
 import sortBy from 'lodash/sortBy';
 
+import utc from 'dayjs/plugin/utc';
+
 import { DataflowRepository } from 'repositories/DataflowRepository';
 
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
@@ -18,6 +20,7 @@ import { DatasetTableRecord } from 'entities/DatasetTableRecord';
 
 import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
+import { ServiceUtils } from 'services/_utils/ServiceUtils';
 
 export const DataflowService = {
   countByType: async () => {
@@ -25,21 +28,33 @@ export const DataflowService = {
     return DataflowUtils.parseDataflowCount(dataflowsCountDTO.data);
   },
 
-  getAll: async (accessRoles, contextRoles) => {
-    const dataflowsDTO = await DataflowRepository.getAll();
+  getAll: async ({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy }) => {
+    const { isAsc, sortByHeader } = DataflowUtils.parseRequestSortBy(sortBy);
+    const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
 
-    const dataflows = dataflowsDTO.data.map(dataflowDTO => {
+    const dataflowsDTO = await DataflowRepository.getAll({
+      filterBy: filteredFilterBy,
+      isAsc,
+      numberRows,
+      pageNum,
+      sortBy: sortByHeader
+    });
+
+    const dataflows = dataflowsDTO.data.dataflows.map(dataflowDTO => {
       dataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(dataflowDTO.id, accessRoles, contextRoles);
       return dataflowDTO;
     });
 
-    return DataflowUtils.parseSortedDataflowListDTO(dataflows);
+    return { ...dataflowsDTO.data, dataflows: DataflowUtils.parseDataflowListDTO(dataflows) };
   },
 
   getCloneableDataflows: async () => {
+    dayjs.extend(utc);
+
     const dataflowsDTO = await DataflowRepository.getCloneableDataflows();
     return dataflowsDTO.data.map(dataflow => {
-      dataflow.expirationDate = dataflow.deadlineDate > 0 ? dayjs(dataflow.deadlineDate).format('YYYY-MM-DD') : '-';
+      dataflow.expirationDate =
+        dataflow.deadlineDate > 0 ? dayjs(dataflow.deadlineDate).utc().format('YYYY-MM-DD') : '-';
       dataflow.obligationTitle = dataflow.obligation?.oblTitle;
       dataflow.legalInstrument = dataflow.obligation?.legalInstrument?.sourceAlias;
       return dataflow;
@@ -72,8 +87,8 @@ export const DataflowService = {
     );
 
     datasetsDashboardsDataDTO.data.sort((a, b) => {
-      let datasetName_A = a.nameDataSetSchema;
-      let datasetName_B = b.nameDataSetSchema;
+      const datasetName_A = a.nameDataSetSchema;
+      const datasetName_B = b.nameDataSetSchema;
       return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
     });
 
@@ -188,22 +203,20 @@ export const DataflowService = {
 
   getDatasetsFinalFeedback: async dataflowId => {
     const datasetsFinalFeedbackDTO = await DataflowRepository.getDatasetsFinalFeedbackAndReleasedStatus(dataflowId);
-    return datasetsFinalFeedbackDTO.data.map(dataset => {
-      return {
-        dataProviderName: dataset.dataSetName,
-        datasetName: dataset.nameDatasetSchema,
-        datasetId: dataset.id,
-        isReleased: dataset.isReleased ?? false,
-        feedbackStatus: !isNil(dataset.status) && capitalize(dataset.status.split('_').join(' '))
-      };
-    });
+    return datasetsFinalFeedbackDTO.data.map(dataset => ({
+      dataProviderName: dataset.dataSetName,
+      datasetName: dataset.nameDatasetSchema,
+      datasetId: dataset.id,
+      isReleased: dataset.isReleased ?? false,
+      feedbackStatus: !isNil(dataset.status) && capitalize(dataset.status.split('_').join(' '))
+    }));
   },
 
   getDatasetsReleasedStatus: async dataflowId => {
     const datasetsReleasedStatusDTO = await DataflowRepository.getDatasetsFinalFeedbackAndReleasedStatus(dataflowId);
     datasetsReleasedStatusDTO.data.sort((a, b) => {
-      let datasetName_A = a.dataSetName;
-      let datasetName_B = b.dataSetName;
+      const datasetName_A = a.dataSetName;
+      const datasetName_B = b.dataSetName;
       return datasetName_A < datasetName_B ? -1 : datasetName_A > datasetName_B ? 1 : 0;
     });
 
@@ -250,25 +263,26 @@ export const DataflowService = {
         const records = !isNull(datasetTableDTO.recordSchema)
           ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
               const fields = !isNull(dataTableRecordDTO.fieldSchema)
-                ? dataTableRecordDTO.fieldSchema.map(DataTableFieldDTO => {
-                    return new DatasetTableField({
-                      codelistItems: DataTableFieldDTO.codelistItems,
-                      description: DataTableFieldDTO.description,
-                      fieldId: DataTableFieldDTO.id,
-                      pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
-                      pkHasMultipleValues: !isNull(DataTableFieldDTO.pkHasMultipleValues)
-                        ? DataTableFieldDTO.pkHasMultipleValues
-                        : false,
-                      pkMustBeUsed: !isNull(DataTableFieldDTO.pkMustBeUsed) ? DataTableFieldDTO.pkMustBeUsed : false,
-                      pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
-                      name: DataTableFieldDTO.name,
-                      readOnly: DataTableFieldDTO.readOnly,
-                      recordId: DataTableFieldDTO.idRecord,
-                      referencedField: DataTableFieldDTO.referencedField,
-                      required: DataTableFieldDTO.required,
-                      type: DataTableFieldDTO.type
-                    });
-                  })
+                ? dataTableRecordDTO.fieldSchema.map(
+                    DataTableFieldDTO =>
+                      new DatasetTableField({
+                        codelistItems: DataTableFieldDTO.codelistItems,
+                        description: DataTableFieldDTO.description,
+                        fieldId: DataTableFieldDTO.id,
+                        pk: !isNull(DataTableFieldDTO.pk) ? DataTableFieldDTO.pk : false,
+                        pkHasMultipleValues: !isNull(DataTableFieldDTO.pkHasMultipleValues)
+                          ? DataTableFieldDTO.pkHasMultipleValues
+                          : false,
+                        pkMustBeUsed: !isNull(DataTableFieldDTO.pkMustBeUsed) ? DataTableFieldDTO.pkMustBeUsed : false,
+                        pkReferenced: !isNull(DataTableFieldDTO.pkReferenced) ? DataTableFieldDTO.pkReferenced : false,
+                        name: DataTableFieldDTO.name,
+                        readOnly: DataTableFieldDTO.readOnly,
+                        recordId: DataTableFieldDTO.idRecord,
+                        referencedField: DataTableFieldDTO.referencedField,
+                        required: DataTableFieldDTO.required,
+                        type: DataTableFieldDTO.type
+                      })
+                  )
                 : null;
               return new DatasetTableRecord({
                 datasetPartitionId: dataTableRecordDTO.id,
@@ -310,17 +324,21 @@ export const DataflowService = {
   getApiKey: async (dataflowId, dataProviderId, isCustodian) =>
     await DataflowRepository.getApiKey(dataflowId, dataProviderId, isCustodian),
 
-  getPublicDataflowsByCountryCode: async (countryCode, sortOrder, pageNum, numberRows, sortField) => {
-    const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode(
+  getPublicDataflowsByCountryCode: async ({ countryCode, sortOrder, pageNum, numberRows, sortField, filterBy }) => {
+    const parsedFilterBy = DataflowUtils.parseRequestPublicCountryFilterBy(filterBy);
+    const parsedSortField = DataflowUtils.parseRequestPublicCountrySortField(sortField);
+
+    const publicDataflowsByCountryCodeResponse = await DataflowRepository.getPublicDataflowsByCountryCode({
       countryCode,
-      sortOrder,
+      sortOrder: ServiceUtils.getSortOrder(sortOrder),
       pageNum,
       numberRows,
-      sortField
-    );
+      sortField: parsedSortField,
+      filterBy: parsedFilterBy
+    });
 
-    publicDataflowsByCountryCodeResponse.data.publicDataflows = DataflowUtils.parsePublicDataflowListDTO(
-      publicDataflowsByCountryCodeResponse.data.publicDataflows
+    publicDataflowsByCountryCodeResponse.data.dataflows = DataflowUtils.parsePublicDataflowListDTO(
+      publicDataflowsByCountryCodeResponse.data.dataflows
     );
 
     return publicDataflowsByCountryCodeResponse.data;
@@ -357,10 +375,20 @@ export const DataflowService = {
   createEmptyDatasetSchema: async (dataflowId, datasetSchemaName) =>
     await DataflowRepository.createEmptyDatasetSchema(dataflowId, datasetSchemaName),
 
-  getPublicData: async () => {
-    const publicDataflows = await DataflowRepository.getPublicData();
-    const parsedPublicDataflows = DataflowUtils.parsePublicDataflowListDTO(publicDataflows.data);
-    return sortBy(parsedPublicDataflows, ['name']);
+  getPublicData: async ({ filterBy, numberRows, pageNum, sortByOptions }) => {
+    const { isAsc, sortByHeader } = DataflowUtils.parseRequestSortBy(sortByOptions);
+    const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
+
+    const publicDataflows = await DataflowRepository.getPublicData({
+      filterBy: filteredFilterBy,
+      isAsc,
+      numberRows,
+      pageNum,
+      sortByHeader
+    });
+    const parsedPublicDataflows = DataflowUtils.parsePublicDataflowListDTO(publicDataflows.data.dataflows);
+
+    return { ...publicDataflows.data, dataflows: parsedPublicDataflows };
   },
 
   get: async dataflowId => {
@@ -377,6 +405,9 @@ export const DataflowService = {
 
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
     await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo),
+
+  updateAutomaticDelete: async (dataflowId, isAutomaticReportingDeletion) =>
+    await DataflowRepository.updateAutomaticDelete(dataflowId, isAutomaticReportingDeletion),
 
   getDatasetsInfo: async dataflowId => {
     const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);

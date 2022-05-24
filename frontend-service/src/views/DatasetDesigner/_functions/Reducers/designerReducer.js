@@ -94,6 +94,9 @@ export const designerReducer = (state, { type, payload }) => {
     case 'SET_IS_TABLE_CREATED':
       return { ...state, isTableCreated: payload.isTableCreated };
 
+    case 'SET_IS_HISTORY_DIALOG_VISIBLE':
+      return { ...state, isHistoryDialogVisible: payload };
+
     case 'SET_VIEW_MODE':
       const inmViewType = { ...state.viewType };
       Object.keys(inmViewType).forEach(view => {
@@ -183,14 +186,22 @@ export const designerReducer = (state, { type, payload }) => {
     case 'SET_IS_VALIDATIONS_TABULAR_VIEW':
       return { ...state, isValidationsTabularView: payload.isValidationsTabularView };
 
-    case 'TOGGLE_DASHBOARD_VISIBILITY':
-      return { ...state, dashDialogVisible: payload };
-
     case 'TOGGLE_VALIDATION_VIEWER_VISIBILITY':
       return { ...state, isValidationViewerVisible: payload };
 
     case 'ON_CHANGE_VIEW':
       return { ...state, viewType: payload.viewType };
+
+    case 'SET_PROGRESS_STEP_BAR':
+      const inmDatasetProgressBarSteps = [...state.datasetProgressBarSteps];
+      inmDatasetProgressBarSteps[payload.step].isRunning = payload.isRunning;
+      inmDatasetProgressBarSteps[payload.step].completed = payload.completed || false;
+      inmDatasetProgressBarSteps[payload.step].withError = payload.withError || false;
+      return {
+        ...state,
+        datasetProgressBarCurrentStep: payload.currentStep,
+        datasetProgressBarSteps: inmDatasetProgressBarSteps
+      };
 
     case 'SET_SELECTED_WEBFORM':
       return { ...state, selectedWebform: payload.selectedWebform };
@@ -212,6 +223,9 @@ export const designerReducer = (state, { type, payload }) => {
 
     case 'SET_WEBFORM_OPTIONS_LOADING_STATUS':
       return { ...state, webformOptionsLoadingStatus: payload.loadingStatus };
+
+    case 'SET_HAS_QCS_HISTORY':
+      return { ...state, hasQCsHistory: payload.hasQCsHistory };
 
     default:
       return state;

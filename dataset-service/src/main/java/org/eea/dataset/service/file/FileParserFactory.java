@@ -3,7 +3,7 @@ package org.eea.dataset.service.file;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
-import org.eea.interfaces.controller.dataflow.RepresentativeController;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
@@ -39,6 +39,10 @@ public class FileParserFactory implements IFileParserFactory {
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
 
+  /** The batch record save. */
+  @Value("${dataset.import.batchRecordSave}")
+  private int batchRecordSave;
+
   /**
    * the field dataset Metabase Service
    */
@@ -48,7 +52,9 @@ public class FileParserFactory implements IFileParserFactory {
    * the field representative Controller Zuul
    */
   @Autowired
-  private RepresentativeController representativeControllerZuul;
+  private RepresentativeControllerZuul representativeControllerZuul;
+
+
 
   /**
    * Creates a new FileParser object.
@@ -69,13 +75,14 @@ public class FileParserFactory implements IFileParserFactory {
       providerId = metabase.getDataProviderId();
     }
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+
     try {
       switch (FileTypeEnum.getEnum(mimeType.toLowerCase())) {
         case CSV:
 
           context = new FileParseContextImpl(
               new CSVReaderStrategy(delimiterValue != null ? delimiterValue.charAt(0) : delimiter,
-                  fileCommon, datasetId, fieldMaxLength, provider.getCode()));
+                  fileCommon, datasetId, fieldMaxLength, provider.getCode(), batchRecordSave));
           break;
         case XML:
           // Fill it with the xml strategy

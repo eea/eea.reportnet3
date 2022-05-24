@@ -16,7 +16,7 @@ export const MenuItem = ({ item }) => {
 
   return (
     <Fragment>
-      <li className={'p-menuitem'} data-for={item.label} data-tip>
+      <li className="p-menuitem" data-for={item.label} data-tip>
         <span
           className={`p-menuitem-link ${item.disabled ? 'p-disabled' : null} ${styles.menuItem} `}
           disabled={item.disabled}

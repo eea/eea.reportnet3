@@ -380,9 +380,11 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param datasetId the dataset id
    * @param user the user
    * @param released the released
+   * @param processId the process id
    */
   @Override
-  public void updateMaterializedQueryView(Long datasetId, String user, Boolean released) {
+  public void updateMaterializedQueryView(Long datasetId, String user, Boolean released,
+      String processId) {
     LOG.info("Update Materialized View");
   }
 
@@ -417,10 +419,39 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    *
    * @param datasetIds the dataset ids
    * @param continueValidation the continue validation
+   * @param released the released
+   * @param datasetId the dataset id
+   * @param processId the process id
    */
   @Override
   public void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation,
-      boolean released, Long datasetId) {
+      boolean released, Long datasetId, String processId) {
     LOG.info("Refresh async materialized view");
+  }
+
+  /**
+   * Creates the snapshot to clone.
+   *
+   * @param originDataset the origin dataset
+   * @param targetDataset the target dataset
+   * @param dictionaryOriginTargetObjectId the dictionary origin target object id
+   * @param partitionDatasetTarget the partition dataset target
+   * @param tableSchemasIdPrefill the table schemas id prefill
+   */
+  @Override
+  public void createSnapshotToClone(Long originDataset, Long targetDataset,
+      Map<String, String> dictionaryOriginTargetObjectId, Long partitionDatasetTarget,
+      List<String> tableSchemasIdPrefill) {
+    LOG.info("createSnapshotToClone");
+  }
+
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void updateSnapshotDisabled(Long datasetId) {
+    LOG.info("updateSnapshotDisabled");
   }
 }

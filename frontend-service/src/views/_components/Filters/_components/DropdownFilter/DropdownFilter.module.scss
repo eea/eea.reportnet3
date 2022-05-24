@@ -1,0 +1,76 @@
+.block {
+  display: flex;
+  margin-bottom: 1.5rem;
+  align-items: flex-end;
+  width: 100%;
+
+  .dropdownFilter {
+    display: flex;
+    align-items: flex-end;
+    position: relative;
+    border-radius: 0px !important;
+    border: 0px !important;
+    font-size: 0.8333rem !important;
+    height: 3em;
+    padding-left: 0em;
+    width: 100%;
+    box-shadow: none !important;
+
+    .label {
+      clip: auto;
+      height: auto;
+      overflow: visible;
+      width: 90%;
+      top: 0.7em;
+
+      label {
+        margin-top: -0.7em;
+      }
+    }
+
+    > div > div > ul > li {
+      margin: 0.5em 0 !important;
+    }
+  }
+
+  .elementFilter {
+    border-bottom: var(--inputtext-border) !important;
+  }
+
+  .elementFilter:focus-within {
+    label {
+      top: -0.75em;
+      font-size: 12px;
+    }
+  }
+
+  .elementFilterSelected {
+    border-bottom: var(--active-filter-border) !important;
+    box-shadow: var(--active-filter-shadow) !important;
+    label {
+      padding-left: 0 !important;
+      span {
+        color: var(--inputtext-color);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        display: block;
+        padding-bottom: 0.01em;
+      }
+    }
+  }
+}
+
+@media (max-width: 1695px) {
+  .block {
+    height: 3rem;
+  }
+}
+
+.dropdownFilterWrapper {
+  padding-left: 0px !important;
+}
+
+.noSortFilterWrapper {
+  padding-left: 2.5em;
+}

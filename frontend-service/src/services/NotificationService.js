@@ -33,12 +33,14 @@ export const NotificationService = {
 
   create: async (type, content) => await NotificationRepository.create(type, content),
 
+  deleteAll: async () => await NotificationRepository.deleteAll(),
+
   parse: ({ config, content = {}, date, message, onClick, routes, type }) => {
     content = merge(content, content.customContent);
     delete content.customContent;
 
     if (type === 'UPDATED_DATASET_STATUS') {
-      content.datasetStatus = capitalize(content.datasetStatus.split('_').join(' '));
+      content.datasetStatus = capitalize(content?.datasetStatus?.split('_').join(' '));
     }
 
     const notificationDTO = {};

@@ -17,19 +17,17 @@ import org.eea.validation.persistence.schemas.rule.Rule;
  */
 public class AutomaticRules {
 
-
-
   // we use that class to create a specifies rule for any of diferent automatic validation
 
   /**
-   * Creates the required rule.
+   * Creates the required rule point.
    *
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
-   *
    * @return the rule
    */
   public static Rule createRequiredRulePoint(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -47,8 +45,8 @@ public class AutomaticRules {
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
-   *
    * @return the rule
    */
   public static Rule createRequiredRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -59,7 +57,6 @@ public class AutomaticRules {
         automaticType, description, null);
   }
 
-
   /**
    * Creates the number integer automatic rule.
    *
@@ -67,8 +64,8 @@ public class AutomaticRules {
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
-   *
    * @return the rule
    */
   public static Rule createNumberIntegerAutomaticRule(String referenceId,
@@ -87,8 +84,8 @@ public class AutomaticRules {
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
-   *
    * @return the rule
    */
   public static Rule createNumberDecimalAutomaticRule(String referenceId,
@@ -101,14 +98,14 @@ public class AutomaticRules {
   }
 
   /**
-   * Creates the automatic date rule.
+   * Creates the date automatic rule.
    *
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
-   *
    * @return the rule
    */
   public static Rule createDateAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -126,6 +123,7 @@ public class AutomaticRules {
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
    * @return the rule
    */
@@ -137,16 +135,15 @@ public class AutomaticRules {
         shortCode, automaticType, description, null);
   }
 
-
   /**
-   * Creates the automatic boolean rule.
+   * Creates the boolean automatic rule.
    *
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
-   *
    * @return the rule
    */
   public static Rule createBooleanAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -158,14 +155,14 @@ public class AutomaticRules {
   }
 
   /**
-   * Creates the automatic lat rule.
+   * Creates the lat automatic rule.
    *
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
-   *
    * @return the rule
    */
   public static Rule createLatAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -177,14 +174,14 @@ public class AutomaticRules {
   }
 
   /**
-   * Creates the automatic long rule.
+   * Creates the long automatic rule.
    *
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
-   *
    * @return the rule
    */
   public static Rule createLongAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -195,7 +192,6 @@ public class AutomaticRules {
         ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description, null);
   }
 
-
   /**
    * Creates the codelist automatic rule.
    *
@@ -204,6 +200,7 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param singleCodeListItems the single code list items
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
    * @return the list
    */
@@ -238,8 +235,8 @@ public class AutomaticRules {
    * @param nameRule the name rule
    * @param codelistItems the codelist items
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
-   *
    * @return the list
    */
   public static List<Rule> createMultiSelectCodelistAutomaticRule(String referenceId,
@@ -265,16 +262,16 @@ public class AutomaticRules {
   }
 
   /**
-   * Creates the PK automatic rule.
+   * Creates the FK automatic rule.
    *
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
    * @param tableSchemaId the table schema id
    * @param pkMustBeUsed the pk must be used
-   *
    * @return the rule
    */
   public static Rule createFKAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -306,8 +303,8 @@ public class AutomaticRules {
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
-   *
    * @return the rule
    */
   public static Rule createUrlAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -325,8 +322,8 @@ public class AutomaticRules {
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
-   *
    * @return the rule
    */
   public static Rule createPhoneAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -344,8 +341,8 @@ public class AutomaticRules {
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
-   *
    * @return the rule
    */
   public static Rule createEmailAutomaticRule(String referenceId, EntityTypeEnum typeEntityEnum,
@@ -356,7 +353,6 @@ public class AutomaticRules {
         ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description, null);
   }
 
-
   /**
    * Creates the geometry automatic rule.
    *
@@ -365,6 +361,7 @@ public class AutomaticRules {
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
    * @return the rule
    */
@@ -375,11 +372,11 @@ public class AutomaticRules {
     if (DataType.POLYGON.equals(typeData)) {
       error = LiteralConstants.POLYGONERROR;
     } else {
-      error = LiteralConstants.GEOMETRYERROR + typeData.toString().toLowerCase();
+      error = LiteralConstants.GEOMETRYERROR + typeData.toString().toLowerCase() + " {%reason%} ";
     }
     ObjectId ruleId = new ObjectId();
     return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "isGeometry(this)", error,
-        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description, null);
+        ErrorTypeEnum.BLOCKER.getValue(), shortCode, automaticType, description, null);
   }
 
   /**
@@ -390,6 +387,7 @@ public class AutomaticRules {
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
    * @return the rule
    */
@@ -398,15 +396,15 @@ public class AutomaticRules {
       AutomaticRuleTypeEnum automaticType, String description) {
     ObjectId ruleId = new ObjectId();
     return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, "checkEPSGSRID(this)",
-        "Unsupported SRID", ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description,
+        "Unsupported SRID", ErrorTypeEnum.BLOCKER.getValue(), shortCode, automaticType, description,
         null);
   }
-
-
 
   /**
    * Creates the geometry automatic rule check geometries.
    *
+   * @param datasetId the dataset id
+   * @param document the document
    * @param typeData the type data
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
@@ -428,7 +426,7 @@ public class AutomaticRules {
 
     String fieldName = document.getString("headerName");
 
-    String sql = "select * from ( select rv.id as record_id ,fv.id as %s_id,"
+    String sql = "select * from ( select rv.id as record_id ,fv.id as \"%s_id\","
         + " public.ST_isValidReason(public.ST_SetSRID(public.ST_GeomFromGeoJSON(fv.value::json->'geometry'),"
         + " ((fv.value::json->'properties')::json->>'srid')::integer)) as reason,"
         + " public.ST_SetSRID(public.ST_GeomFromGeoJSON(fv.value::json->'geometry'), "
@@ -440,9 +438,42 @@ public class AutomaticRules {
     String sqlResult = String.format(sql, fieldName, datasetId, datasetId);
 
     return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, whenCondition, message,
-        ErrorTypeEnum.ERROR.getValue(), shortCode, automaticType, description, sqlResult);
+        ErrorTypeEnum.BLOCKER.getValue(), shortCode, automaticType, description, sqlResult);
   }
 
+  /**
+   * Creates the geometry automatic rule check S ttransform.
+   *
+   * @param datasetId the dataset id
+   * @param document the document
+   * @param typeData the type data
+   * @param referenceId the reference id
+   * @param typeEntityEnum the type entity enum
+   * @param nameRule the name rule
+   * @param shortCode the short code
+   * @param automaticType the automatic type
+   * @param description the description
+   * @return the rule
+   */
+  public static Rule createGeometryAutomaticRuleCheckSTtransform(Long datasetId, Document document,
+      DataType typeData, String referenceId, EntityTypeEnum typeEntityEnum, String nameRule,
+      String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
+    ObjectId ruleId = new ObjectId();
+
+    String message = "The transformation of the geometry has not worked because of: {%reason%}";
+
+    String whenCondition = "isSQLSentenceWithCode(this.datasetId.id, '" + ruleId.toString()
+        + "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX')";
+
+    String fieldName = document.getString("headerName");
+
+    String sql =
+        "select rv.id as record_id , fv.id as \"%s_id\" , fv.geometry_error as reason from dataset_%s.field_value fv inner join dataset_%s.record_value rv on rv.id = fv.id_record where fv.geometry_error is not null and fv.id_field_schema = '%s'";
+    String sqlResult = String.format(sql, fieldName, datasetId, datasetId, referenceId);
+
+    return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, whenCondition, message,
+        ErrorTypeEnum.BLOCKER.getValue(), shortCode, automaticType, description, sqlResult);
+  }
 
   /**
    * Creates the unique constraint automatic rule.
@@ -451,6 +482,7 @@ public class AutomaticRules {
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
    * @param message the message
    * @param uniqueId the unique id
@@ -478,9 +510,8 @@ public class AutomaticRules {
 
   /**
    * Compose rule.
-   * 
-   * @param ruleId
    *
+   * @param ruleId the rule id
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
@@ -488,7 +519,9 @@ public class AutomaticRules {
    * @param thenCondition0 the then condition 0
    * @param thenCondition1 the then condition 1
    * @param shortCode the short code
+   * @param automaticType the automatic type
    * @param description the description
+   * @param sql the sql
    * @return the rule
    */
   private static Rule composeRule(ObjectId ruleId, String referenceId,

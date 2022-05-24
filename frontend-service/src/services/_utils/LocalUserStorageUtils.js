@@ -7,8 +7,12 @@ const { storage: storageConfig } = config;
 
 const getSessionStorage = () => {
   const cLocalStorage = JSON.parse(sessionStorage.getItem(storageConfig.LOCAL_KEY));
-  if (!isNil(cLocalStorage)) return cLocalStorage;
-  return;
+
+  if (isNil(cLocalStorage)) {
+    return null;
+  }
+
+  return cLocalStorage;
 };
 
 const removeSessionStorage = () => {
@@ -34,8 +38,12 @@ const removeSessionStorageProperty = key => {
 
 const getPropertyFromSessionStorage = key => {
   const cLocalStorage = getSessionStorage();
-  if (cLocalStorage) return cLocalStorage[key];
-  return;
+
+  if (isNil(cLocalStorage)) {
+    return null;
+  }
+
+  return cLocalStorage[key];
 };
 
 const setSessionStorage = value => {
@@ -44,14 +52,18 @@ const setSessionStorage = value => {
 
 const getTokens = () => {
   const cSessionStorage = getSessionStorage();
-  if (!isNil(cSessionStorage)) {
-    const { accessToken, refreshToken } = cSessionStorage;
-    if (accessToken && refreshToken) {
-      return { accessToken, refreshToken };
-    }
-    return;
+
+  if (isNil(cSessionStorage)) {
+    return null;
   }
-  return;
+
+  const { accessToken, refreshToken } = cSessionStorage;
+
+  if (!accessToken || !refreshToken) {
+    return null;
+  }
+
+  return { accessToken, refreshToken };
 };
 
 const set = tokens => {

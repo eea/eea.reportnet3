@@ -19,9 +19,9 @@ export const useSnapshotReducer = (
           action: onCreateSnapshot,
           creationDate: Date.now(),
           description: payload.description,
-          dialogConfirmMessage: resourcesContext.messages.createSnapshotConfirmationMessage,
-          dialogConfirmQuestion: resourcesContext.messages.createSnapshotConfirmationQuestion,
-          dialogMessage: resourcesContext.messages.createSnapshotMessage,
+          dialogConfirmMessage: resourcesContext.messages['createSnapshotConfirmationMessage'],
+          dialogConfirmQuestion: resourcesContext.messages['createSnapshotConfirmationQuestion'],
+          dialogMessage: resourcesContext.messages['createSnapshotMessage'],
           snapShotId: '',
           isConfirmDisabled: false
         };
@@ -33,9 +33,9 @@ export const useSnapshotReducer = (
           action: onDeleteSnapshot,
           creationDate: payload.creationDate,
           description: payload.description,
-          dialogConfirmMessage: resourcesContext.messages.deleteSnapshotConfirmationMessage,
-          dialogConfirmQuestion: resourcesContext.messages.deleteSnapshotConfirmationQuestion,
-          dialogMessage: resourcesContext.messages.deleteSnapshotMessage,
+          dialogConfirmMessage: resourcesContext.messages['deleteSnapshotConfirmationMessage'],
+          dialogConfirmQuestion: resourcesContext.messages['deleteSnapshotConfirmationQuestion'],
+          dialogMessage: resourcesContext.messages['deleteSnapshotMessage'],
           snapShotId: payload.id,
           isConfirmDisabled: false
         };
@@ -47,15 +47,15 @@ export const useSnapshotReducer = (
           action: onRestoreSnapshot,
           creationDate: payload.creationDate,
           description: payload.description,
-          dialogConfirmMessage: resourcesContext.messages.restoreSnapshotConfirmationMessage,
-          dialogConfirmQuestion: resourcesContext.messages.restoreSnapshotConfirmationQuestion,
-          dialogMessage: resourcesContext.messages.restoreSnapshotMessage,
+          dialogConfirmMessage: resourcesContext.messages['restoreSnapshotConfirmationMessage'],
+          dialogConfirmQuestion: resourcesContext.messages['restoreSnapshotConfirmationQuestion'],
+          dialogMessage: resourcesContext.messages['restoreSnapshotMessage'],
           snapShotId: payload.id,
           isConfirmDisabled: false
         };
 
       case 'ON_SNAPSHOT_ACTION':
-        return { ...state, isConfirmDisabled: true };
+        return { ...state, isConfirmDisabled: true, isRestoring: true };
 
       case 'ON_SNAPSHOT_RESET':
         return {
@@ -68,8 +68,12 @@ export const useSnapshotReducer = (
           dialogConfirmQuestion: '',
           dialogMessage: '',
           isConfirmDisabled: false,
+          isRestoring: false,
           snapShotId: ''
         };
+
+      case 'SET_IS_RESTORING':
+        return { ...state, isRestoring: payload };
 
       default:
         return state;

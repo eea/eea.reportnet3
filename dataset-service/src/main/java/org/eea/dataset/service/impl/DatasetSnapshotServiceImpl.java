@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -49,7 +50,6 @@ import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
@@ -59,7 +59,6 @@ import org.eea.interfaces.controller.validation.RulesController.RulesControllerZ
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -76,12 +75,12 @@ import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -227,10 +226,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private ValidationControllerZuul validationControllerZuul;
 
-  /** The collaboration controller zuul. */
-  @Autowired
-  private CollaborationControllerZuul collaborationControllerZuul;
-
   /**
    * Gets the by id.
    *
@@ -275,6 +270,21 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     return snapshotMapper.entityListToClass(snapshots);
   }
 
+  /**
+   * Gets the snapshots enabled by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots enabled by id dataset
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<SnapshotVO> getSnapshotsEnabledByIdDataset(Long datasetId) throws EEAException {
+
+    List<Snapshot> snapshots =
+        snapshotRepository.findByReportingDatasetIdAndEnabledTrueOrderByCreationDateDesc(datasetId);
+
+    return snapshotMapper.entityListToClass(snapshots);
+  }
 
   /**
    * Adds the snapshot.
@@ -313,6 +323,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setDataSetName("snapshot from dataset_" + idDataset);
       snap.setDcReleased(createSnapshotVO.getReleased());
       snap.setEuReleased(false);
+      snap.setEnabled(true);
 
       Long dataflowId = metabaseRepository.findDataflowIdById(idDataset);
       if (snap.getReportingDataset() != null
@@ -892,9 +903,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId).stream()
             .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
 
-    UserRepresentationVO user = userManagementControllerZull.getUserByUserId(
-        ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
-            .get(AuthenticationDetails.USER_ID));
+    UserRepresentationVO user = userManagementControllerZull.getUserByUserId();
     receipt.setEmail(user.getEmail());
 
     if (!representatives.isEmpty()) {
@@ -1049,7 +1058,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   @Async
   public void createReleaseSnapshots(Long dataflowId, Long dataProviderId,
-      boolean restrictFromPublic) throws EEAException {
+      boolean restrictFromPublic, boolean validate) throws EEAException {
     LOG.info("Releasing datasets process begins. DataflowId: {} DataProviderId: {}", dataflowId,
         dataProviderId);
     // First dataset involved in the process
@@ -1058,7 +1067,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // List of the datasets involved
     List<Long> datasetsFilters = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
         .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
-        .collect(Collectors.toList());
+        .distinct().collect(Collectors.toList());
 
     // Lock all the operations related to the datasets involved
     addLocksRelatedToRelease(datasetsFilters, dataflowId);
@@ -1067,19 +1076,19 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     representativeControllerZuul.updateRepresentativeVisibilityRestrictions(dataflowId,
         dataProviderId, restrictFromPublic);
 
-    validationControllerZuul.validateDataSetData(dataset.getId(), true);
+    // if the user is admin can release without validations
+    if (!isAdmin() || validate) {
+      validationControllerZuul.validateDataSetData(dataset.getId(), true);
+    } else {
+      String processId = UUID.randomUUID().toString();
+      String notificationUser = SecurityContextHolder.getContext().getAuthentication().getName();
+      Map<String, Object> value = new HashMap<>();
+      value.put(LiteralConstants.DATASET_ID, dataset.getId());
+      value.put("uuid", processId);
+      value.put("user", notificationUser);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
+    }
 
-    String country = dataset.getDataSetName();
-    DataFlowVO dataflowVO = dataflowControllerZuul.findById(dataflowId, dataProviderId);
-    String dataflowName = dataflowVO.getName();
-
-    MessageVO messageVO = new MessageVO();
-    messageVO.setProviderId(dataProviderId);
-    messageVO.setContent(country + " released " + dataflowName + " successfully");
-    messageVO.setAutomatic(true);
-    collaborationControllerZuul.createMessage(dataflowId, messageVO);
-    LOG.info("Automatic feedback message created of dataflow {}. Message: {}", dataflowId,
-        messageVO.getContent());
   }
 
 
@@ -1125,10 +1134,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Map<String, Object> importFileData = new HashMap<>();
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
+      Map<String, Object> importBigFileData = new HashMap<>();
+      importBigFileData.put(LiteralConstants.SIGNATURE,
+          LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+      importBigFileData.put(LiteralConstants.DATASETID, datasetId);
 
       Map<String, Object> restoreSnapshots = new HashMap<>();
       restoreSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RESTORE_SNAPSHOT.getValue());
       restoreSnapshots.put(LiteralConstants.DATASETID, datasetId);
+
 
       Map<String, Object> insertRecordsMultitable = new HashMap<>();
       insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
@@ -1141,6 +1155,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       lockService.removeLockByCriteria(updateRecords);
       lockService.removeLockByCriteria(deleteDatasetValues);
       lockService.removeLockByCriteria(importFileData);
+      lockService.removeLockByCriteria(importBigFileData);
       lockService.removeLockByCriteria(insertRecordsMultitable);
       lockService.removeLockByCriteria(restoreSnapshots);
 
@@ -1174,6 +1189,39 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     lockService.removeLockByCriteria(populateEuDataset);
     lockService.removeLockByCriteria(releaseSnapshots);
+  }
+
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void updateSnapshotDisabled(Long datasetId) {
+    snapshotRepository.updateSnapshotEnabledFalse(datasetId);
+    LOG.info("Snapshots disabled from dataset: {}", datasetId);
+  }
+
+  /**
+   * Delete snapshot by dataset id and date released is null.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void deleteSnapshotByDatasetIdAndDateReleasedIsNull(Long datasetId) {
+    snapshotRepository.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
+    LOG.info("Snapshots deleted from dataset: {}", datasetId);
+  }
+
+  /**
+   * Checks if is admin.
+   *
+   * @return true, if is admin
+   */
+  private boolean isAdmin() {
+    String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
+    return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+        .anyMatch(role -> roleAdmin.equals(role.getAuthority()));
   }
 
   /**
@@ -1227,6 +1275,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
       lockService.createLock(timestamp, userName, LockType.METHOD, importFileData);
+
+      Map<String, Object> importBigFileData = new HashMap<>();
+      importBigFileData.put(LiteralConstants.SIGNATURE,
+          LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+      importBigFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.createLock(timestamp, userName, LockType.METHOD, importBigFileData);
 
       DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
       for (TableSchemaVO table : schema.getTableSchemas()) {

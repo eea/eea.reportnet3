@@ -1,31 +1,46 @@
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
-import isUndefined from 'lodash/isUndefined';
+import ReactDOMServer from 'react-dom/server';
 
-import styles from './Tab.module.css';
+import isNil from 'lodash/isNil';
+import isUndefined from 'lodash/isUndefined';
+import uniqueId from 'lodash/uniqueId';
+
+import styles from './Tab.module.scss';
 
 import { config } from 'conf';
 
 import classNames from 'classnames';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
+import { Button } from 'views/_components/Button';
+import { Column } from 'primereact/column';
 import { ContextMenu } from 'views/_components/ContextMenu';
+import { DataTable } from 'views/_components/DataTable';
+import { Dialog } from 'views/_components/Dialog';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Icon } from 'views/_components/Icon';
 import { InputText } from 'views/_components/InputText';
+import ReactTooltip from 'react-tooltip';
+import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const Tab = ({
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
+export const Tab = ({
   addTab,
   ariaControls,
   checkEditingTabs,
   className,
   closeIcon,
+  description = '',
   designMode = false,
   divScrollTabsRef,
   disabled = false,
   editable = false,
+  fixedNumber = false,
+  hasInfoTooltip = false,
   hasPKReferenced = false,
   header,
   headerStyle,
@@ -37,6 +52,8 @@ const Tab = ({
   isNavigationHidden,
   leftIcon,
   newTab,
+  notEmpty = true,
+  numberOfFields,
   onTabBlur,
   onTabAddCancel,
   onTabDeleteClick,
@@ -46,11 +63,14 @@ const Tab = ({
   onTabHeaderClick,
   onTabMouseWheel,
   onTabNameError,
+  readOnly = false,
   rightIcon,
   rightIconClass = '',
+  rightIconTooltip,
   scrollTo,
   selected,
   tableSchemaId,
+  toPrefill = false,
   totalTabs
 }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -58,6 +78,7 @@ const Tab = ({
   const [hasErrors, setHasErrors] = useState(false);
   const [initialTitleHeader, setInitialTitleHeader] = useState(!isUndefined(addTab) ? '' : header);
   const [iconToShow, setIconToShow] = useState(!isUndefined(closeIcon) ? closeIcon : 'cancel');
+  const [isTableInfoVisible, setIsTableInfoVisible] = useState(false);
   const [menu, setMenu] = useState();
   const [titleHeader, setTitleHeader] = useState(!isUndefined(addTab) ? '' : header);
 
@@ -108,12 +129,108 @@ const Tab = ({
     }
   }, [newTab]);
 
+  const tableTemplate = rowData => {
+    if (rowData.key === 'description') {
+      return (
+        <div className={styles.templateWrapper}>
+          <label className={styles.tableDescriptionTemplate}>{rowData.value || '-'}</label>
+        </div>
+      );
+    } else if (
+      (rowData.key === 'fixedNumber' ||
+        rowData.key === 'readOnly' ||
+        rowData.key === 'notEmpty' ||
+        rowData.key === 'prefilled') &&
+      rowData.value
+    ) {
+      return (
+        <div className={styles.templateWrapper}>
+          <FontAwesomeIcon className={styles.checkTemplate} icon={AwesomeIcons('check')} />
+        </div>
+      );
+    } else {
+      return <div className={styles.templateWrapper}>{rowData.value}</div>;
+    }
+  };
+
+  const getTooltipMessage = () => {
+    const renderDescription = () => {
+      if (description && description !== '') {
+        return (
+          <Fragment>
+            <span>{resourcesContext.messages['description']}: </span>
+            <br />
+            <p className={styles.propertyLabel}>{TextUtils.ellipsis(description, 103)}</p>
+          </Fragment>
+        );
+      }
+    };
+
+    const renderReadOnly = () => {
+      if (readOnly) {
+        return <p className={styles.propertyLabel}>{resourcesContext.messages['readOnly']}</p>;
+      }
+    };
+
+    const renderPrefilled = () => {
+      if (toPrefill) {
+        return <p className={styles.propertyLabel}>{resourcesContext.messages['prefilled']}</p>;
+      }
+    };
+
+    const renderFixedNumber = () => {
+      if (fixedNumber) {
+        return <p className={styles.propertyLabel}>{resourcesContext.messages['fixedNumber']}</p>;
+      }
+    };
+
+    const renderNotEmpty = () => {
+      if (notEmpty) {
+        return <p className={styles.propertyLabel}>{resourcesContext.messages['notEmpty']}</p>;
+      }
+    };
+
+    const renderNumberOfFiedls = () => (
+      <p className={styles.propertyLabel}>{`${resourcesContext.messages['numberOfFields']}: ${numberOfFields}`}</p>
+    );
+
+    return (
+      <div className={`${styles.fieldText} ${styles.tooltipWrapper}`}>
+        {renderDescription()}
+        {renderReadOnly()}
+        {renderPrefilled()}
+        {renderFixedNumber()}
+        {renderNotEmpty()}
+        {renderNumberOfFiedls()}
+      </div>
+    );
+  };
+
+  const getTooltipContent = () =>
+    ReactDOMServer.renderToStaticMarkup(
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          maxWidth: '250px'
+        }}>
+        {getTooltipMessage()}
+      </div>
+    );
+
+  const tableInfoDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button icon="check" label={resourcesContext.messages['ok']} onClick={() => setIsTableInfoVisible(false)} />
+    </div>
+  );
+
   const onTabDragStart = event => {
     if (editingHeader) {
       event.preventDefault();
     } else {
-      //For firefox
-      event.dataTransfer.setData('text/plain', null);
+      const draggedTabHeader = event.target.getElementsByClassName('p-tabview-title')[0].textContent;
+      event.dataTransfer.setData('text/plain', draggedTabHeader);
       if (!isUndefined(onTabDragAndDropStart)) {
         onTabDragAndDropStart(index, tableSchemaId);
       }
@@ -168,15 +285,13 @@ const Tab = ({
       //Get the dragged tab header
       event.currentTarget.style.border = '';
       event.currentTarget.style.opacity = '';
-      const dataString = event.dataTransfer.getData('text/html');
-      const range = document.createRange();
-      const draggedTabHeader = range.createContextualFragment(dataString).childNodes[0].innerText;
+      const dataString = event.dataTransfer.getData('text/plain');
       //currentTarget gets the child's target parent
       const childs = event.currentTarget.childNodes;
       for (let i = 0; i < childs.length; i++) {
         if (childs[i].nodeName === 'SPAN' && childs[i].className === 'p-tabview-title') {
           if (!isUndefined(onTabDragAndDrop)) {
-            onTabDragAndDrop(draggedTabHeader, childs[i].textContent);
+            onTabDragAndDrop(dataString, childs[i].textContent);
             setIsDragging(false);
           }
         }
@@ -256,6 +371,87 @@ const Tab = ({
       return `${styles.p_tabview_design_add} ${extraStyle} datasetSchema-created-table-help-step`;
     } else {
       return `${styles.p_tabview_noDesign} ${extraStyle}`;
+    }
+  };
+
+  const renderRightIcon = () => {
+    if (!addTab && !newTab) {
+      return (
+        <Icon
+          icon={iconToShow}
+          style={{
+            position: 'absolute',
+            top: '33%',
+            right: '6px',
+            fontSize: '1rem',
+            cursor: 'pointer ',
+            opacity: '0.7'
+          }}
+        />
+      );
+    }
+  };
+
+  const renderRightSpan = () => {
+    if (rightIcon && !editingHeader) {
+      return (
+        <span
+          className={classNames('p-tabview-right-icon ', rightIcon, rightIconClass)}
+          data-for={`${tableSchemaId}-table-info-tooltip`}
+          data-tip></span>
+      );
+    }
+  };
+
+  const renderRightSpanTooltip = () => {
+    if (!isNil(rightIconTooltip)) {
+      return (
+        <ReactTooltip border={true} effect="solid" id={`${tableSchemaId}-table-info-tooltip`} place="top">
+          {rightIconTooltip}
+        </ReactTooltip>
+      );
+    }
+  };
+
+  const renderTableInfo = () => {
+    if (isTableInfoVisible) {
+      const values = [
+        { field: resourcesContext.messages['tableSchemaName'], key: 'tableSchemaName', value: header },
+        { field: resourcesContext.messages['description'], key: 'description', value: description }
+      ];
+
+      if (fixedNumber) {
+        values.push({ field: resourcesContext.messages['fixedNumber'], key: 'fixedNumber', value: fixedNumber });
+      }
+      if (readOnly) {
+        values.push({ field: resourcesContext.messages['readOnly'], key: 'readOnly', value: readOnly });
+      }
+      if (toPrefill) {
+        values.push({ field: resourcesContext.messages['prefilled'], key: 'prefilled', value: toPrefill });
+      }
+      if (notEmpty) {
+        values.push({ field: resourcesContext.messages['notEmpty'], key: 'notEmpty', value: notEmpty });
+      }
+
+      return (
+        <Dialog
+          className={styles.fieldInfoDialogWrapper}
+          footer={tableInfoDialogFooter}
+          header={resourcesContext.messages['tableInfo']}
+          onHide={() => setIsTableInfoVisible(false)}
+          visible={isTableInfoVisible}>
+          <DataTable value={values}>
+            {['field', 'value'].map(column => (
+              <Column
+                body={column === 'value' ? tableTemplate : null}
+                field={column}
+                headerStyle={{ display: 'none' }}
+                key={column}
+              />
+            ))}
+          </DataTable>
+        </Dialog>
+      );
     }
   };
 
@@ -346,7 +542,16 @@ const Tab = ({
           }}
           role="tab"
           tabIndex={index}>
-          {leftIcon && <span className={classNames('p-tabview-left-icon ', leftIcon)}></span>}
+          {hasInfoTooltip && !editingHeader && (
+            <TooltipButton
+              buttonClassName={styles.tooltipButton}
+              getContent={getTooltipContent}
+              onClick={() => setIsTableInfoVisible(true)}
+              tooltipClassName={styles.tooltipContent}
+              uniqueIdentifier={uniqueId('table_more_info_')}
+            />
+          )}
+          {leftIcon && <span className={classNames('p-tabview-left-icon', leftIcon)}></span>}
           {!isUndefined(editingHeader) && editingHeader ? (
             <InputText
               autoFocus={true}
@@ -386,9 +591,8 @@ const Tab = ({
           ) : (
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
-          {rightIcon && !editingHeader && (
-            <span className={classNames('p-tabview-right-icon ', rightIcon, rightIconClass)}></span>
-          )}
+          {renderRightSpan()}
+          {renderRightSpanTooltip()}
           {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDatasetEditorRead ? (
             <div
               onClick={e => {
@@ -404,19 +608,7 @@ const Tab = ({
               }}
               onMouseOut={() => setIconToShow('cancel')}
               onMouseOver={() => setIconToShow('errorCircle')}>
-              {!addTab && !newTab ? (
-                <Icon
-                  icon={iconToShow}
-                  style={{
-                    position: 'absolute',
-                    top: '33%',
-                    right: '6px',
-                    fontSize: '1rem',
-                    cursor: 'pointer ',
-                    opacity: '0.7'
-                  }}
-                />
-              ) : null}
+              {renderRightIcon()}
             </div>
           ) : null}
         </a>
@@ -424,8 +616,7 @@ const Tab = ({
       {designMode && !isDataflowOpen && !isDesignDatasetEditorRead ? (
         <ContextMenu model={menu} ref={contextMenuRef} />
       ) : null}
+      {renderTableInfo()}
     </Fragment>
   );
 };
-
-export { Tab };

@@ -6,6 +6,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -126,6 +127,15 @@ public class KafkaSenderUtils {
     String fileName =
         (notificationMap.get("fileName") != null) ? notificationMap.get("fileName").toString()
             : null;
+    String shortCode =
+        (notificationMap.get("shortCode") != null) ? notificationMap.get("shortCode").toString()
+            : null;
+    Long invalidRules = (notificationMap.get("invalidRules") != null)
+        ? Long.parseLong(notificationMap.get("invalidRules").toString())
+        : null;
+    Long disabledRules = (notificationMap.get("disabledRules") != null)
+        ? Long.parseLong(notificationMap.get("disabledRules").toString())
+        : null;
 
     UserNotificationContentVO content = new UserNotificationContentVO();
     content.setDataflowId(dataflowId);
@@ -141,6 +151,12 @@ public class KafkaSenderUtils {
         : null);
     content.setTableSchemaName(tableSchemaName);
     content.setFileName(fileName);
+    content.setShortCode(shortCode);
+    content.setInvalidRules(invalidRules);
+    content.setDisabledRules(disabledRules);
+    content.setDatasetStatus((notificationMap.get("datasetStatus") != null)
+        ? DatasetStatusEnum.valueOf(notificationMap.get("datasetStatus").toString())
+        : null);
     notificationControllerZuul.createUserNotificationPrivate(eventType, content);
     LOG.info("Save user notification, eventType: {}, notification content: {}", eventType, content);
 

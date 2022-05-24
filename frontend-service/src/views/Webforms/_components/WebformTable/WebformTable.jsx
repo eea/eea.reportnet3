@@ -64,12 +64,10 @@ export const WebformTable = ({
     if (!isNil(webform) && isNil(webform.tableSchemaId)) isLoading(false);
 
     if (!isNil(webform) && webform.tableSchemaId) {
-      if (webformType === 'ARTICLE_13' && !isNil(selectedTable.pamsId)) {
+      if (webformType === 'PAMS' && !isNil(selectedTable.pamsId)) {
         isLoading(true);
         onLoadTableData();
-      }
-
-      if (webformType === 'ARTICLE_15') {
+      } else if (webformType === 'TABLES') {
         isLoading(true);
         onLoadTableData();
       }
@@ -224,8 +222,8 @@ export const WebformTable = ({
       addingOnTableSchemaId={webformTableState.addingOnTableSchemaId}
       calculateSingle={calculateSingle}
       columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
-      dataProviderId={dataProviderId}
       dataflowId={dataflowId}
+      dataProviderId={dataProviderId}
       datasetId={datasetId}
       datasetSchemaId={datasetSchemaId}
       hasFields={isNil(webformData.records) || isEmpty(webformData.records[0].fields)}
@@ -248,7 +246,7 @@ export const WebformTable = ({
     />
   );
 
-  const renderArticle15WebformRecords = isMultiple => {
+  const renderTableWebformRecords = isMultiple => {
     const { elementsRecords } = webformData;
 
     return isMultiple
@@ -256,16 +254,16 @@ export const WebformTable = ({
       : renderWebformRecord(elementsRecords[0], null);
   };
 
-  const renderArticle13WebformRecords = () => {
+  const renderPaMsWebformRecords = () => {
     return renderWebformRecord(webformData.elementsRecords[0], null);
   };
 
   const renderWebform = isMultiple => {
     switch (webformType) {
-      case 'ARTICLE_15':
-        return renderArticle15WebformRecords(isMultiple);
-      case 'ARTICLE_13':
-        return renderArticle13WebformRecords();
+      case 'TABLES':
+        return renderTableWebformRecords(isMultiple);
+      case 'PAMS':
+        return renderPaMsWebformRecords();
       default:
         return <div />;
     }
@@ -295,7 +293,7 @@ export const WebformTable = ({
         </div>
         {webformData.multipleRecords && (
           <Button
-            icon={'plus'}
+            icon="plus"
             label={resourcesContext.messages['addRecord']}
             onClick={() => onAddMultipleWebform(webformData.tableSchemaId)}
           />

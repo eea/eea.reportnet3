@@ -10,15 +10,13 @@ import 'leaflet-draw/dist/leaflet.draw.css';
 import 'proj4leaflet';
 import L from 'leaflet';
 import proj4 from 'proj4';
-import * as ELG from 'esri-leaflet-geocoder';
+// import * as ELG from 'esri-leaflet-geocoder';
 import * as esri from 'esri-leaflet';
 
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { Map as MapComponent, GeoJSON, Marker, Popup } from 'react-leaflet';
-// import { EditControl } from 'react-leaflet-draw';
-// import ReactTooltip from 'react-tooltip';
 
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
@@ -56,6 +54,7 @@ let NewMarkerIcon = L.icon({
   iconAnchor: [12, 36]
 });
 export const Map = ({
+  disabledEdition = false,
   enabledDrawElements = {
     circle: false,
     circlemarker: false,
@@ -78,7 +77,6 @@ export const Map = ({
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
-  // const { BaseLayer, Overlay } = LayersControl;
 
   const crs = [
     { label: 'WGS84 - 4326', value: 'EPSG:4326' },
@@ -125,105 +123,42 @@ export const Map = ({
     const map = mapRef.current.leafletElement;
     esri.basemapLayer(currentTheme.value).addTo(map);
 
-    // const geojsonLayer = L.geoJson(geojson, {
-    //   style: function (feature) {
-    //     return { color: feature.properties.GPSUserColor };
-    //   },
-    //   pointToLayer: function (feature, latlng) {
-    //     return new L.CircleMarker(latlng, { radius: 10, fillOpacity: 0.85 });
-    //   },
-    //   onEachFeature: function (feature, layer) {
-    //     layer.bindPopup(feature.properties.GPSUserName);
-    //   }
-    // });
+    // Disabled. It now requires an API Key.
+    // const searchControl = new ELG.Geosearch().addTo(map);
+    // const results = new L.LayerGroup().addTo(map);
 
-    // map.addLayer(geojsonLayer);
-
-    // esri
-    //   .tiledMapLayer({
-    //     url: 'https://services.arcgisonline.com/ArcGIS/rest/services/USA_Topo_Maps/MapServer',
-    //     tileSize: 256,
-    //     maxZoom: 20,
-    //     minZoom: 0
-    //   })
-    //   .addTo(map);
-
-    // var defaultLayer = L.tileLayer(
-    //   '//services.arcgisonline.com/arcgis/rest/services/ESRI_Imagery_World_2D/MapServer/tile/{z}/{y}/{x}',
-    //   {
-    //     attribution: false,
-    //     continuousWorld: true,
-    //     crs: '4326',
-    //     tileSize: 512
-    //   }
-    // );
-    // defaultLayer.addTo(map);
-
-    // var map = new L.Map(mapRef.current.leafletElement).setView([45.543, -122.621], 5);
-
-    const searchControl = new ELG.Geosearch().addTo(map);
-    const results = new L.LayerGroup().addTo(map);
-
-    searchControl.on('results', function (data) {
-      results.clearLayers();
-      if (TextUtils.areEquals(geometryType, 'POINT')) {
-        for (let i = data.results.length - 1; i >= 0; i--) {
-          if (
-            !MapUtils.inBounds({
-              coord: data.results[i].latlng.lat,
-              coordType: 'latitude',
-              checkProjected: true
-            }) ||
-            !MapUtils.inBounds({
-              coord: data.results[i].latlng.lng,
-              coordType: 'longitude',
-              checkProjected: true
-            })
-          ) {
-            setHasErrors({ ...hasErrors, newPointError: true });
-            return false;
-          } else {
-            setNewPositionMarker([data.results[i].latlng.lat, data.results[i].latlng.lng]);
-            onSelectPoint(
-              projectPointCoordinates({
-                coordinates: [data.results[i].latlng.lat, data.results[i].latlng.lng],
-                newCRS: currentCRS.value
-              }),
-              currentCRS.value
-            );
-          }
-        }
-      }
-    });
-
-    // var service = esri.mapService({
-    //   url: 'https://land.discomap.eea.europa.eu/arcgis/rest/services/Background/Background_Cashed_WGS84/MapServer'
-    // });
-
-    // service
-    //   .identify()
-    //   .on(map)
-    //   .at([45.543, -12.621])
-    //   .layers('Countries')
-    //   .run(function (error, featureCollection, response) {
-    //     if (error) {
-    //       console.log(error);
-    //       return;
+    // searchControl.on('results', function (data) {
+    //   debugger;
+    //   results.clearLayers();
+    //   if (TextUtils.areEquals(geometryType, 'POINT')) {
+    //     for (let i = data.results.length - 1; i >= 0; i--) {
+    //       if (
+    //         !MapUtils.inBounds({
+    //           coord: data.results[i].latlng.lat,
+    //           coordType: 'latitude',
+    //           checkProjected: true
+    //         }) ||
+    //         !MapUtils.inBounds({
+    //           coord: data.results[i].latlng.lng,
+    //           coordType: 'longitude',
+    //           checkProjected: true
+    //         })
+    //       ) {
+    //         setHasErrors({ ...hasErrors, newPointError: true });
+    //         return false;
+    //       } else {
+    //         setNewPositionMarker([data.results[i].latlng.lat, data.results[i].latlng.lng]);
+    //         onSelectPoint(
+    //           projectPointCoordinates({
+    //             coordinates: [data.results[i].latlng.lat, data.results[i].latlng.lng],
+    //             newCRS: currentCRS.value
+    //           }),
+    //           currentCRS.value
+    //         );
+    //       }
     //     }
-    //     console.log('UTC Offset: ' + featureCollection.features[0].properties.ZONE);
-    //   });
-
-    // setDraggablePointsCoordinates([
-    //   [12.5874761, 55.6811578],
-    //   [12.5944761, 55.6811578]
-    // ]);
-    // let map = L.map(element).setView([-41.2858, 174.78682], 14);
-
-    // esri
-    //   .featureLayer({
-    //     url: 'https://sampleserver6.arcgisonline.com/arcgis/rest/services/Earthquakes_Since1970/MapServer/0'
-    //   })
-    //   .addTo(map);
+    //   }
+    // });
   }, []);
 
   useEffect(() => {
@@ -242,7 +177,6 @@ export const Map = ({
 
   useEffect(() => {
     const map = mapRef.current.leafletElement;
-    // esri.removeLayer();
     esri.basemapLayer(currentTheme.value).addTo(map);
   }, [currentTheme]);
 
@@ -335,7 +269,7 @@ export const Map = ({
   };
 
   const onDoubleClick = e => {
-    if (TextUtils.areEquals(geometryType, 'POINT')) {
+    if (TextUtils.areEquals(geometryType, 'POINT') && !disabledEdition) {
       if (
         currentCRS.value === 'EPSG:3035' &&
         (!MapUtils.inBounds({
@@ -530,7 +464,7 @@ export const Map = ({
         <Dropdown
           ariaLabel="crs"
           className={`${styles.crsSwitcherSplitButton} ${hasErrors.projection ? styles.error : ''}`}
-          disabled={!MapUtils.checkValidJSONCoordinates(geoJson) && !isNewPositionMarkerVisible}
+          disabled={(!MapUtils.checkValidJSONCoordinates(geoJson) && !isNewPositionMarkerVisible) || disabledEdition}
           onChange={e => {
             if (e.target.value.value === 'EPSG:3035') {
               if (

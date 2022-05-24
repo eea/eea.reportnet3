@@ -128,7 +128,6 @@ export class BodyRow extends Component {
           this.onClick(event);
           break;
         case 9:
-          //this.findNextSelectableCell(row);
           break;
         default:
           //no op
@@ -136,10 +135,6 @@ export class BodyRow extends Component {
       }
     }
   }
-
-  // findNextSelectableCell(cell) {
-  //   let nextCell = cell.nextElementSibling;
-  // }
 
   findNextSelectableRow(row) {
     let nextRow = row.nextElementSibling;
@@ -246,8 +241,8 @@ export class BodyRow extends Component {
         <BodyCell
           key={i}
           {...column.props}
-          editMode={this.props.editMode}
           editing={this.state.editing}
+          editMode={this.props.editMode}
           expanded={this.props.expanded}
           onCheckboxClick={this.props.onCheckboxClick}
           onRadioClick={this.props.onRadioClick}

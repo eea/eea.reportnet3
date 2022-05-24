@@ -276,7 +276,7 @@ public class DocumentControllerImplTest {
       documentController.getDocument(1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
-      assertEquals(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e.getReason());
+      assertEquals(EEAErrorMessage.RETRIEVING_DOCUMENT, e.getReason());
     }
   }
 
@@ -829,6 +829,22 @@ public class DocumentControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException()).when(documentService).uploadCollaborationDocument(Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    documentController.uploadCollaborationDocument(fileMock.getBytes(), 1L, "desc", "json", 1L);
+  }
+
+  /**
+   * Test upload collaboration IO exception.
+   *
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testUploadCollaborationIOException() throws EEAException, IOException {
+    IOException ioException = new IOException(EEAErrorMessage.DOCUMENT_NOT_FOUND);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    doThrow(ioException).when(documentService).uploadCollaborationDocument(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     documentController.uploadCollaborationDocument(fileMock.getBytes(), 1L, "desc", "json", 1L);
   }

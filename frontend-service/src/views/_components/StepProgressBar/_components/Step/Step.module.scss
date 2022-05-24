@@ -1,0 +1,110 @@
+@import '_styles/mixins';
+
+.step {
+  list-style-type: none;
+  float: left;
+  font-size: 12px;
+  position: relative;
+  text-align: center;
+  width: 20%;
+  text-transform: uppercase;
+  @include for-tablet-portrait-up {
+    width: 50%;
+  }
+  @include for-tablet-landscape-up {
+    width: 50%;
+  }
+  @include for-desktop-up {
+    width: 20%;
+  }
+  @include for-big-desktop-up {
+    width: 10%;
+  }
+
+  .stepLabel {
+    color: var(--step-progress-bar-label-color);
+  }
+  .activeCompleted {
+    background-color: var(--step-progress-bar-activeCompleted-bg-color);
+    border: var(--step-progress-bar-icon-activeCompleted-border) !important;
+    animation: check 1s forwards;
+    svg {
+      color: var(--step-progress-bar-activeCompleted-color);
+      font-weight: bold;
+    }
+  }
+  .withError {
+    background-color: var(--step-progress-bar-withError-bg-color);
+    animation: check 1s forwards;
+    svg {
+      color: var(--step-progress-bar-withError-color);
+      font-weight: bold;
+    }
+  }
+  .activeIncompleted {
+    background-color: var(--step-progress-bar-activeIncompleted-bg-color);
+    border: var(--step-progress-bar-icon-activeIncompleted-border) !important;
+    svg {
+      color: var(--step-progress-bar-activeCompleted-color);
+      font-weight: bold;
+    }
+  }
+  .inactive {
+    background-color: var(--step-progress-bar-inactive-bg-color);
+    svg {
+      color: var(--step-progress-bar-inactive-color);
+    }
+  }
+  .iconWrapper {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    border: var(--step-progress-bar-icon-border);
+    display: block;
+    text-align: center;
+    margin: 0 auto 3px auto;
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+    svg {
+      font-size: 12pt;
+      margin-left: -6px;
+    }
+  }
+  &:after {
+    width: 100%;
+    height: 2px;
+    content: '';
+    position: absolute;
+    background-color: var(--step-progress-bar-link-bg-color);
+    top: 12px;
+    left: -50%;
+    z-index: 0;
+  }
+  &:first-child:after {
+    content: none;
+  }
+  &.stepActive {
+    &:after {
+      animation: appear 1s forwards !important;
+    }
+  }
+}
+
+@keyframes appear {
+  0% {
+    background-color: var(--step-progress-bar-link-bg-color);
+  }
+  100% {
+    background-color: var(--step-progress-bar-link-done-bg-color);
+  }
+}
+
+@keyframes check {
+  0% {
+    border-radius: 50%;
+  }
+  100% {
+    border-radius: 3px;
+  }
+}

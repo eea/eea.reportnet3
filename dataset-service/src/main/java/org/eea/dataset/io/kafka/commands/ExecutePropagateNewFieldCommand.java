@@ -104,7 +104,9 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
         kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_NEW_DESIGN_FIELD_PROPAGATION,
             value);
       }
-
+      // now the view is not updated, update the check to false
+      datasetService.updateCheckView(datasetId, false);
+      datasetService.deleteTempEtlExport(datasetId);
     }
   }
 

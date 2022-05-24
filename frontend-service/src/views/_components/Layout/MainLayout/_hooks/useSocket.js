@@ -22,9 +22,6 @@ const useSocket = () => {
 
       const stompClient = new Client({
         brokerURL: socket_url,
-        // debug: function (str) {
-        //   console.log(str);
-        // },
         reconnectDelay: 30000,
         connectionTimeout: 30000,
         beforeConnect: () => {
@@ -33,7 +30,7 @@ const useSocket = () => {
           stompClient.connectHeaders = { token };
 
           if (currentTry > maxConnectionAttempts) {
-            notificationContext.add({ type: 'MAX_WEBSOCKET_RECONNECT_ATTEMPS_ERROR' });
+            notificationContext.add({ type: 'MAX_WEBSOCKET_RECONNECT_ATTEMPTS_ERROR' });
             console.error(`Exceeds max attempts (${maxConnectionAttempts}), will not try to connect now`);
             stompClient.deactivate();
           }

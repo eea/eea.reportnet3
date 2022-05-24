@@ -10,6 +10,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 
 /**
@@ -32,6 +33,14 @@ public interface DatasetMetabaseService {
    * @return the data set metabase VO
    */
   DataSetMetabaseVO findDatasetMetabase(Long idDataset);
+
+  /**
+   * Find data set by dataflow ids.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the list
+   */
+  List<DataSetMetabaseVO> findDataSetByDataflowIds(List<Long> dataflowIds);
 
   /**
    * Delete design dataset.
@@ -229,14 +238,6 @@ public interface DatasetMetabaseService {
   List<Long> getUserProviderIdsByDataflowId(Long dataflowId);
 
   /**
-   * Last dataset validation for releasing by id.
-   *
-   * @param datasetId the datasetId id
-   * @return true, if successful
-   */
-  Long getLastDatasetValidationForRelease(Long datasetId);
-
-  /**
    * Update dataset status.
    *
    * @param datasetStatusMessageVO the dataset status message VO
@@ -251,5 +252,40 @@ public interface DatasetMetabaseService {
    * @return the datasets summary list
    */
   List<DatasetsSummaryVO> getDatasetsSummaryList(Long dataflowId);
+
+  /**
+   * Find dataset metabase external.
+   *
+   * @param datasetId the dataset id
+   * @return the data set metabase VO
+   * @throws EEAException the EEA exception
+   */
+  DataSetMetabaseVO findDatasetMetabaseExternal(Long datasetId) throws EEAException;
+
+  /**
+   * Update dataset running status.
+   *
+   * @param datasetId the dataset id
+   * @param datasetRunningStatus the dataset running status
+   * @throws EEAException the EEA exception
+   */
+  void updateDatasetRunningStatus(Long datasetId, DatasetRunningStatusEnum datasetRunningStatus)
+      throws EEAException;
+
+  /**
+   * Gets the reportings by provider ids.
+   *
+   * @param providerIds the provider ids
+   * @return the reportings by provider ids
+   */
+  List<DataSetMetabaseVO> getDatasetsByProviderIds(List<Long> providerIds);
+
+  /**
+   * Gets the last dataset for release.
+   *
+   * @param datasetId the dataset id
+   * @return the last dataset for release
+   */
+  Long getLastDatasetForRelease(Long datasetId);
 
 }

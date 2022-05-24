@@ -19,7 +19,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const UserImage = () => {
+export const UserImage = () => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -145,15 +145,15 @@ const UserImage = () => {
         id="addAvatar"
         place="top">
         <Button
-          className={`p-button-secondary p-button-animated-blink`}
-          icon={'add'}
+          className="p-button-secondary p-button-animated-blink"
+          icon="add"
           label={resourcesContext.messages['uploadImage']}
           onClick={() => imageUploader.current.click()}
           style={{ marginRight: '1rem' }}
         />
         <Button
-          className={`p-button-secondary p-button-animated-blink`}
-          icon={'userPlus'}
+          className="p-button-secondary p-button-animated-blink"
+          icon="userPlus"
           label={resourcesContext.messages['selectImage']}
           onClick={() => setIsAvatarDialogVisible(true)}
         />
@@ -161,5 +161,3 @@ const UserImage = () => {
     </div>
   );
 };
-
-export { UserImage };

@@ -20,6 +20,7 @@ import {
   faCaretRight,
   faChartBar,
   faCheck,
+  faCheckCircle,
   faCircleNotch,
   faClipboard,
   faClipboardList,
@@ -103,6 +104,7 @@ import {
   faUsers,
   faUsersCog,
   faUserShield,
+  faUserTie,
   faUserTimes,
   faVectorSquare,
   faVolumeUp
@@ -429,6 +431,8 @@ export const AwesomeIcons = icon => {
       return faUsers;
     case 'userShield':
       return faUserShield;
+    case 'userTie':
+      return faUserTie;
     case 'userTimes':
       return faUserTimes;
     case 'wav':
@@ -447,6 +451,8 @@ export const AwesomeIcons = icon => {
       return faFileArchive;
     case 'bullhorn':
       return faBullhorn;
+    case 'circleCheck':
+      return faCheckCircle;
     default:
       return faFileAlt;
   }

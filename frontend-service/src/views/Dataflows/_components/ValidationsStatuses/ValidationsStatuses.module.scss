@@ -1,0 +1,102 @@
+@import '_styles/mixins';
+
+.dialogContent {
+  min-height: 50vh;
+}
+
+.noDataContent {
+  height: 35vh;
+}
+
+.noDataContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  flex-direction: column;
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
+}
+
+.actionsColumn {
+  width: 44px;
+}
+
+.largeColumn {
+  width: 26%;
+}
+
+.middleColumn {
+  width: 9em;
+  text-align: center;
+}
+
+.smallColumn {
+  width: 8em;
+}
+
+.footer {
+  display: flex;
+}
+
+.buttonPushRight {
+  margin-left: auto !important;
+}
+
+.deleteRowButton {
+  border: 1px solid var(--general-border-color) !important;
+  color: var(--errors) !important;
+  @include shadow-0em;
+  margin-left: 3px !important;
+  &:enabled:hover {
+    border-color: var(--button-secondary-border-color-hover) !important;
+  }
+}
+
+.dialogContent {
+  > div:first-child {
+    margin-top: 0 !important;
+  }
+  > div:first-child > div {
+    width: 25% !important;
+  }
+  > div:first-child > div:nth-child(3) {
+    margin-bottom: 0;
+  }
+  > div:first-child > div:last-child {
+    display: flex;
+    flex-direction: row;
+    > div:first-child {
+      margin-top: auto;
+      margin-bottom: 0 !important;
+    }
+  }
+}
+
+.error {
+  border-color: var(--errors) !important;
+  box-shadow: inset 0px 0px 0px 1px var(--errors) !important;
+  outline: none;
+  overflow: hidden;
+}
+
+.priority {
+  margin-top: 0.25rem;
+}
+
+.validationStatusesTable {
+  p {
+    margin: 0 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .dialogContent {
+    > div:first-child > div {
+      width: 100% !important;
+    }
+  }
+}

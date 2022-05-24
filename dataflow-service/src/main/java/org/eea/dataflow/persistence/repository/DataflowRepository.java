@@ -79,6 +79,16 @@ public interface DataflowRepository
   List<Dataflow> findByIdInOrderByStatusDescCreationDateDesc(@Param("ids") List<Long> ids);
 
   /**
+   * Find metabase by dataflow ids.
+   *
+   * @param ids the ids
+   * @return the list
+   */
+  @Modifying
+  @Query("select df from Dataflow df where df.id IN :ids")
+  List<Dataflow> findMetabaseByDataflowIds(@Param("ids") List<Long> ids);
+
+  /**
    * Find in order by status desc creation date desc.
    *
    * @return the list
@@ -177,14 +187,12 @@ public interface DataflowRepository
    * @return the datasets status
    */
   @Query(nativeQuery = true,
-      value = "select  df.id as id ,ds.status as status from dataflow df join dataset ds on df.id = ds.dataflowid where ds.id IN :datasetIds")
+      value = "select  df.id as id ,ds.status as status, ds.data_provider_id as dataProviderId from dataflow df join dataset ds on df.id = ds.dataflowid where ds.id IN :datasetIds")
   List<IDatasetStatus> getDatasetsStatus(@Param("datasetIds") List<Long> datasetIds);
 
-
   /**
-   * Count dataflow by type used by Admin users.
+   * Count dataflow by type.
    *
-   * @param datasetIds the dataset ids
    * @return the list
    */
   @Query(nativeQuery = true,
@@ -192,29 +200,28 @@ public interface DataflowRepository
   List<IDataflowCount> countDataflowByType();
 
   /**
-   * Count reference dataflows available to the user in DESIGN status.
+   * Count reference dataflows design by user.
    *
-   * @param datasetIds the dataset ids
-   * @return the dataflow count
+   * @param ids the ids
+   * @return the i dataflow count
    */
   @Query(nativeQuery = true,
       value = "select df.type as type , count(*) as amount from dataflow df where df.type='REFERENCE' and df.status='DESIGN' and df.id IN :ids group by type")
   IDataflowCount countReferenceDataflowsDesignByUser(@Param("ids") List<Long> ids);
 
-
   /**
-   * Count reference dataflows in DRAFT status.
+   * Count reference dataflows draft.
    *
-   * @return the dataflow count
+   * @return the i dataflow count
    */
   @Query(nativeQuery = true,
       value = "select df.type as type , count(*) as amount from dataflow df where df.type='REFERENCE' and df.status='DRAFT' group by type")
   IDataflowCount countReferenceDataflowsDraft();
 
   /**
-   * Count dataflow by type based on the user access rights.
+   * Count dataflow by type and user.
    *
-   * @param datasetIds the dataset ids
+   * @param ids the ids
    * @return the list
    */
   @Query(nativeQuery = true,
@@ -222,11 +229,19 @@ public interface DataflowRepository
   List<IDataflowCount> countDataflowByTypeAndUser(@Param("ids") List<Long> ids);
 
   /**
-   * Find by available true.
+   * Find by show public info true.
    *
    * @return the list
    */
   List<Dataflow> findByShowPublicInfoTrue();
+
+  /**
+   * Count by show public info.
+   *
+   * @param showPublicInfo the show public info
+   * @return the long
+   */
+  Long countByShowPublicInfo(@Param("showPublicInfo") boolean showPublicInfo);
 
   /**
    * Find public dataflows by country code.
@@ -236,6 +251,15 @@ public interface DataflowRepository
    */
   @Query("select r.dataflow from Representative r where r.dataflow.showPublicInfo= true and r.dataProvider.code= :countryCode and r.dataflow.status='DRAFT' and r.hasDatasets=true")
   List<Dataflow> findPublicDataflowsByCountryCode(@Param("countryCode") String countryCode);
+
+  /**
+   * Find public dataflows by country code.
+   *
+   * @param countryCode the country code
+   * @return the list
+   */
+  @Query("select count(*) from Representative r where r.dataflow.showPublicInfo= true and r.dataProvider.code= :countryCode and r.dataflow.status='DRAFT' and r.hasDatasets=true")
+  Long countPublicDataflowsByCountryCode(@Param("countryCode") String countryCode);
 
   /**
    * Find dataflows by dataprovider ids and dataflow ids.
@@ -272,6 +296,20 @@ public interface DataflowRepository
       @Param("showPublicInfo") boolean showPublicInfo);
 
   /**
+   * Update automatic reporting deletion.
+   *
+   * @param dataflowId the dataflow id
+   * @param automaticReportingDeletion the automatic reporting deletion
+   */
+  @Modifying
+  @Transactional
+  @CacheEvict(value = "dataflowVO", key = "#dataflowId")
+  @Query(nativeQuery = true,
+      value = "UPDATE dataflow SET automatic_reporting_deletion=:automaticReportingDeletion WHERE id=:dataflowId")
+  void updateAutomaticReportingDeletion(@Param("dataflowId") Long dataflowId,
+      @Param("automaticReportingDeletion") Boolean automaticReportingDeletion);
+
+  /**
    * The Interface IDatasetStatus.
    */
   public interface IDatasetStatus {
@@ -289,6 +327,13 @@ public interface DataflowRepository
      * @return the status
      */
     String getStatus();
+
+    /**
+     * Gets the data provider id.
+     *
+     * @return the data provider id
+     */
+    Long getDataProviderId();
   }
 
 

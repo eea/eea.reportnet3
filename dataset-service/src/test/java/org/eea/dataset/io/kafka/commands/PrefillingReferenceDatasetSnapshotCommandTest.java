@@ -10,7 +10,7 @@ import java.util.Optional;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
-import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.kafka.domain.EEAEventVO;
@@ -43,9 +43,9 @@ public class PrefillingReferenceDatasetSnapshotCommandTest {
   @Mock
   private ReferenceDatasetRepository referenceDatasetRepository;
 
-
+  /** The file treatment helper. */
   @Mock
-  private DatasetService datasetService;
+  private FileTreatmentHelper fileTreatmentHelper;
 
   @Mock
   private RecordStoreControllerZuul recordStoreControllerZuul;
@@ -78,7 +78,7 @@ public class PrefillingReferenceDatasetSnapshotCommandTest {
         .thenReturn(Optional.of(datasetMetabase));
 
     prefillingReferenceDatasetSnapshotCommand.execute(eeaEventVO);
-    Mockito.verify(datasetService, times(1)).createReferenceDatasetFiles(Mockito.any());
+    Mockito.verify(fileTreatmentHelper, times(1)).createReferenceDatasetFiles(Mockito.any());
 
   }
 

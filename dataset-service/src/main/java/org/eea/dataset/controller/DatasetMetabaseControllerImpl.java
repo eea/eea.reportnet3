@@ -22,6 +22,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,19 +74,15 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
-   * Find data set id by dataflow id.
+   * Find reporting data set id by dataflow id.
    *
-   * @param idDataflow the id dataflow
-   *
+   * @param dataflowId the dataflow id
    * @return the list
    */
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  // @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_NATIONAL_COORDINATOR')
-  // OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND
-  // checkAccessReferenceEntity('DATAFLOW',#dataflowId)) hasAnyRole('ADMIN')")
-  @PreAuthorize("isAuthenticated()")
+  @PreAuthorize("checkAccessSuperUser('DATAFLOW',#dataflowId) OR checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Find reporting dataset id by dataflow id", hidden = true)
   public List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(@ApiParam(type = "Long",
       value = "dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
@@ -118,12 +115,31 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/private/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "find dataset metabase", hidden = true)
   public DataSetMetabaseVO findDatasetMetabaseById(@ApiParam(type = "Long", value = "dataset Id",
       example = "0") @PathVariable("datasetId") Long datasetId) {
     return datasetMetabaseService.findDatasetMetabase(datasetId);
+  }
+
+  /**
+   * Find external dataset metabase by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data set metabase VO
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId)")
+  @ApiOperation(value = "find dataset metabase", hidden = true)
+  public DataSetMetabaseVO findExternalDatasetMetabaseById(@ApiParam(type = "Long",
+      value = "dataset Id", example = "0") @PathVariable("datasetId") Long datasetId) {
+    try {
+      return datasetMetabaseService.findDatasetMetabaseExternal(datasetId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+    }
   }
 
 
@@ -203,13 +219,14 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @ApiOperation(value = "Update dataset Status", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated status"),
       @ApiResponse(code = 500, message = "Error updating status")})
-  @PreAuthorize("secondLevelAuthorize(#datasetStatusMessageVO.datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetStatusMessageVO.datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_STEWARD_SUPPORT')")
   public void updateDatasetStatus(@ApiParam(
       value = "dataset Status message object") @RequestBody DatasetStatusMessageVO datasetStatusMessageVO) {
     try {
       datasetMetabaseService.updateDatasetStatus(datasetStatusMessageVO);
     } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_DATASET_STATUS);
     }
   }
 
@@ -243,7 +260,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @HystrixCommand
   @GetMapping(value = "/{datasetId}/loadStatistics", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get statistics by dataset", hidden = true)
-  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_NATIONAL_COORDINATOR','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','DATASCHEMA_EDITOR_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','DATASCHEMA_EDITOR_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @PreAuthorize("isAuthenticated()")
   public StatisticsVO getStatisticsById(@ApiParam(type = "Long", value = "dataset Id",
       example = "0") @PathVariable("datasetId") Long datasetId) {
@@ -271,7 +288,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @GetMapping(value = "/globalStatistics/dataflow/{dataflowId}/dataSchema/{dataschemaId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get global statistics", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_OBSERVER','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   public List<StatisticsVO> getGlobalStatisticsByDataschemaId(
       @ApiParam(type = "String", value = "Dataset schema Id",
           example = "5cf0e9b3b793310e9ceca190") @PathVariable("dataschemaId") String dataschemaId,
@@ -472,21 +489,6 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   }
 
   /**
-   * Gets the last dataset validation for release.
-   *
-   * @param datasetId the dataset id
-   * @return the last dataset validation for release
-   */
-  @Override
-  @GetMapping(value = "/private/getLastDatasetValidationForRelease/{id}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  @ApiOperation(value = "get last dataset validation for release", hidden = true)
-  public Long getLastDatasetValidationForRelease(@ApiParam(type = "Long", value = "Dataset Id",
-      example = "0") @PathVariable("id") Long datasetId) {
-    return datasetMetabaseService.getLastDatasetValidationForRelease(datasetId);
-  }
-
-  /**
    * Find reporting data set public by dataflow id.
    *
    * @param dataflowId the dataflow id
@@ -564,6 +566,36 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
 
 
   /**
+   * Find data set by dataflow ids.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/datasets/dataflowIds", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find datasets by dataflow Ids list", hidden = true)
+  public List<DataSetMetabaseVO> findDataSetByDataflowIds(
+      @ApiParam(value = "Dataflow Ids list") @RequestParam("dataflowIds") List<Long> dataflowIds) {
+    return datasetMetabaseService.findDataSetByDataflowIds(dataflowIds);
+  }
+
+  /**
+   * Find reporting data set by provider ids.
+   *
+   * @param providerIds the provider ids
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/providerIds", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find datasets by Provider Ids list", hidden = true)
+  public List<DataSetMetabaseVO> findReportingDataSetByProviderIds(
+      @ApiParam(value = "Provider Ids list") @RequestParam("providerIds") List<Long> providerIds) {
+    return datasetMetabaseService.getDatasetsByProviderIds(providerIds);
+  }
+
+  /**
    * Filter name.
    *
    * @param nameTrimmed the name trimmed
@@ -591,5 +623,23 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   }
 
 
-
+  /**
+   * Update dataset running status.
+   *
+   * @param datasetId the dataset id
+   * @param datasetRunningStatus the dataset running status
+   */
+  @Override
+  @PutMapping(value = "/private/updateDatasetRunningStatus/{id}")
+  @ApiOperation(value = "Update dataset running status", hidden = true)
+  public void updateDatasetRunningStatus(
+      @ApiParam(value = "Dataset Id", example = "0") @PathVariable("id") Long datasetId,
+      @RequestParam("datasetRunningStatus") DatasetRunningStatusEnum datasetRunningStatus) {
+    try {
+      datasetMetabaseService.updateDatasetRunningStatus(datasetId, datasetRunningStatus);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.UPDATING_DATASET_STATUS);
+    }
+  }
 }

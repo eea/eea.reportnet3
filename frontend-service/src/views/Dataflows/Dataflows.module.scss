@@ -17,3 +17,48 @@
   padding-bottom: 1rem;
   padding-top: 1rem;
 }
+
+.bottomPaginator {
+  margin-bottom: 3rem;
+  margin-top: -2.5rem;
+}
+
+.currentPageWrapper {
+  color: var(--c-white-color);
+  margin-left: 1.5rem;
+  user-select: none;
+  .currentPageInput {
+    display: inline;
+    height: 1.75rem;
+    width: 2.5rem;
+  }
+  .currentPageLabel {
+    margin: 0 0.5rem;
+  }
+  .currentPageOf {
+    margin: 0 0 0 0.5rem;
+  }
+}
+
+.paginator {
+  background-color: var(--dataflows-list-paginator-bg-color) !important;
+  border-radius: 5px;
+  border: none !important;
+  color: var(--tabview-highlight-color);
+
+  label,
+  button,
+  div:last-child {
+    color: var(--tabview-highlight-color) !important;
+    font-weight: bold;
+  }
+
+  button {
+    border-radius: 3px !important;
+  }
+
+  button:hover {
+    border: none !important;
+    background-color: var(--paginator-dataflows-bg-hover) !important;
+  }
+}

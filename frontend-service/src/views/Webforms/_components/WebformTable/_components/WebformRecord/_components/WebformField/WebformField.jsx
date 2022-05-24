@@ -253,7 +253,9 @@ export const WebformField = ({
 
   const onToggleDialogVisible = value => webformFieldDispatch({ type: 'ON_TOGGLE_DIALOG', payload: { value } });
 
-  const getAttachExtensions = [{ fileExtension: element.validExtensions || [] }]
+  const getAttachExtensions = [
+    { fileExtension: isNil(element) || isNil(element.validExtensions) ? [] : element.validExtensions }
+  ]
     .map(file => file.fileExtension.map(extension => (extension.indexOf('.') > -1 ? extension : `.${extension}`)))
     .flat()
     .join(', ');
@@ -262,7 +264,7 @@ export const WebformField = ({
     getAttachExtensions || '*'
   }
   ${resourcesContext.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
-    !isNil(element.maxSize) && element.maxSize.toString() !== '0'
+    !isNil(element) && !isNil(element.maxSize) && element.maxSize.toString() !== '0'
       ? `${element.maxSize} ${resourcesContext.messages['MB']}`
       : resourcesContext.messages['maxSizeNotDefined']
   }`;
@@ -315,9 +317,9 @@ export const WebformField = ({
               onFillField(field, option, formatDate(event.value, isNil(event.value)));
               onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
             }}
+            selectableYears={100}
             value={new Date(field.value)}
             yearNavigator={true}
-            yearRange="1900:2100"
           />
         );
       case 'DATETIME':
@@ -340,11 +342,11 @@ export const WebformField = ({
               onFillField(field, option, formatDate(event.value, isNil(event.value)));
               onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
             }}
+            selectableYears={100}
             showSeconds={true}
             showTime={true}
             value={field.value}
             yearNavigator={true}
-            yearRange="1900:2100"
           />
         );
       case 'EXTERNAL_LINK':
@@ -522,7 +524,7 @@ export const WebformField = ({
             )}
             {
               <Button
-                className={`p-button-animated-blink p-button-primary-transparent`}
+                className="p-button-animated-blink p-button-primary-transparent"
                 icon="import"
                 label={
                   !isNil(field.value) && field.value !== ''
@@ -542,7 +544,7 @@ export const WebformField = ({
             }
 
             <Button
-              className={`p-button-animated-blink p-button-primary-transparent`}
+              className="p-button-animated-blink p-button-primary-transparent"
               icon="trash"
               onClick={() => onFileDeleteVisible(field.fieldId, field.fieldSchemaId)}
             />
@@ -561,7 +563,6 @@ export const WebformField = ({
           accept={getAttachExtensions || '*'}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.fileUpload}
-          dialogClassName={styles.dialog}
           dialogHeader={resourcesContext.messages['uploadAttachment']}
           dialogOnHide={() => onToggleDialogVisible(false)}
           dialogVisible={isFileDialogVisible}

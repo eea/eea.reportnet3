@@ -6,13 +6,16 @@ import java.util.List;
 import java.util.Map;
 import org.eea.dataflow.integration.executor.IntegrationExecutorFactory;
 import org.eea.dataflow.service.IntegrationService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -37,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -49,6 +53,9 @@ import io.swagger.annotations.ApiResponse;
 @RequestMapping("/integration")
 @Api(tags = "Integrations : Integrations Manager")
 public class IntegrationControllerImpl implements IntegrationController {
+
+  /** The Constant ERROR_FINDING_INTEGRATIONS: {@value}. */
+  private static final String ERROR_FINDING_INTEGRATIONS = "Error finding integrations: {}";
 
   /**
    * The integration service.
@@ -69,6 +76,10 @@ public class IntegrationControllerImpl implements IntegrationController {
   /** The notification controller zuul. */
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
+
+  /** The data set metabase controller zuul. */
+  @Autowired
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /**
    * The Constant LOG_ERROR.
@@ -95,8 +106,9 @@ public class IntegrationControllerImpl implements IntegrationController {
     try {
       return integrationService.getAllIntegrationsByCriteria(integrationVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error finding integrations: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(ERROR_FINDING_INTEGRATIONS, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_INTEGRATIONS);
     }
   }
 
@@ -135,7 +147,8 @@ public class IntegrationControllerImpl implements IntegrationController {
       integrationService.createIntegration(integration);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating integration. Message: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.CREATING_INTEGRATION);
     }
   }
 
@@ -159,7 +172,8 @@ public class IntegrationControllerImpl implements IntegrationController {
       integrationService.deleteIntegration(integrationId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting an integration. Message: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_INTEGRATION);
     }
   }
 
@@ -181,7 +195,8 @@ public class IntegrationControllerImpl implements IntegrationController {
       integrationService.updateIntegration(integration);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating an integration. Message: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.DELETING_INTEGRATION);
     }
   }
 
@@ -194,7 +209,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_STEWARD','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#integrationVO.internalParameters['dataflowId']))")
+  @PreAuthorize("secondLevelAuthorize(#integrationVO.internalParameters['dataflowId'],'DATAFLOW_STEWARD','DATAFLOW_EDITOR_WRITE','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#integrationVO.internalParameters['dataflowId']))")
   @PutMapping(value = "/listExtensionsOperations", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find Integrations and Operations by Integration Criteria",
       produces = MediaType.APPLICATION_JSON_VALUE, response = IntegrationVO.class,
@@ -206,8 +221,9 @@ public class IntegrationControllerImpl implements IntegrationController {
       return integrationService.getOnlyExtensionsAndOperations(
           integrationService.getAllIntegrationsByCriteria(integrationVO));
     } catch (EEAException e) {
-      LOG_ERROR.error("Error finding integrations: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(ERROR_FINDING_INTEGRATIONS, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_INTEGRATIONS);
     }
   }
 
@@ -232,8 +248,9 @@ public class IntegrationControllerImpl implements IntegrationController {
       return integrationService.getOnlyExtensionsAndOperations(
           integrationService.getAllIntegrationsByCriteria(integrationVO));
     } catch (EEAException e) {
-      LOG_ERROR.error("Error finding integrations: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      LOG_ERROR.error(ERROR_FINDING_INTEGRATIONS, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.RETRIEVING_INTEGRATIONS);
     }
   }
 
@@ -249,7 +266,8 @@ public class IntegrationControllerImpl implements IntegrationController {
    * @return the execution result VO
    */
   @Override
-  @HystrixCommand
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+      name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
   @PostMapping(value = "/private/executeIntegration")
   @ApiOperation(value = "Find Integrations and Operations by Integration Criteria",
       response = ExecutionResultVO.class, hidden = true)
@@ -297,7 +315,8 @@ public class IntegrationControllerImpl implements IntegrationController {
       results = integrationService.executeEUDatasetExport(dataflowId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error executing the export from EUDataset with message: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXPORTING_EU_DATASET);
     } finally {
       integrationService.releasePopulateEUDatasetLock(dataflowId);
     }
@@ -316,7 +335,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @LockMethod
   @PostMapping(value = "/executeEUDatasetExport")
   @ApiOperation(value = "Execute EUDataset Export", response = ExecutionResultVO.class,
-      hidden = true, responseContainer = "List", notes = "Allowed roles: CUSTODIAN, STEWARD")
+      hidden = true, responseContainer = "List")
   @ApiResponse(code = 500, message = "Internal Server Error")
   public List<ExecutionResultVO> executeEUDatasetExportLegacy(
       @ApiParam(value = "Dataflow Id", example = "0") @LockCriteria(
@@ -341,7 +360,8 @@ public class IntegrationControllerImpl implements IntegrationController {
           copyVO.getOriginDatasetSchemaIds(), copyVO.getDictionaryOriginTargetObjectId());
     } catch (EEAException e) {
       LOG_ERROR.error("Error copying integrations: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.COPYING_INTEGRATIONS);
     }
   }
 
@@ -362,7 +382,8 @@ public class IntegrationControllerImpl implements IntegrationController {
       integrationService.createDefaultIntegration(dataflowId, datasetSchemaId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating default integration. Message: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.CREATING_INTEGRATION);
     }
   }
 
@@ -430,7 +451,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
   @PostMapping("/{integrationId}/runIntegration/dataset/{datasetId}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASET_LEAD_REPORTER','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASET_LEAD_REPORTER','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @ApiOperation(
       value = "Run an external integration process providing the integration id and the dataset where applies",
       response = ExecutionResultVO.class, hidden = true)
@@ -445,6 +466,9 @@ public class IntegrationControllerImpl implements IntegrationController {
 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDatasetId(datasetId);
+    DataSetMetabaseVO datasetMetabaseVO =
+        dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    userNotificationContentVO.setDatasetName(datasetMetabaseVO.getDataSetName());
     notificationControllerZuul.createUserNotificationPrivate("DATASET_IMPORT_INIT",
         userNotificationContentVO);
 
@@ -462,7 +486,8 @@ public class IntegrationControllerImpl implements IntegrationController {
       lockCriteria.put(LiteralConstants.DATASETID, datasetId);
       lockService.removeLockByCriteria(lockCriteria);
       integrationService.releaseLocks(datasetId);
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXECUTING_INTEGRATIONS);
     }
 
   }
@@ -485,7 +510,8 @@ public class IntegrationControllerImpl implements IntegrationController {
       integrationService.createIntegrations(integrations);
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating integrations. Message: {}", e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.CREATING_INTEGRATION);
     }
   }
 

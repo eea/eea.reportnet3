@@ -1,5 +1,5 @@
 /*
- * 
+ *
  */
 package org.eea.interfaces.controller.dataset;
 
@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -36,9 +37,9 @@ public interface DatasetMetabaseController {
   }
 
   /**
-   * Find data set id by dataflow id.
+   * Find reporting data set id by dataflow id.
    *
-   * @param idDataflow the id dataflow
+   * @param dataflowId the dataflow id
    * @return the list
    */
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -66,8 +67,18 @@ public interface DatasetMetabaseController {
    * @param datasetId the id dataset
    * @return the string
    */
-  @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @GetMapping(value = "/private/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("datasetId") Long datasetId);
+
+
+  /**
+   * Find external dataset metabase by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data set metabase VO
+   */
+  @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataSetMetabaseVO findExternalDatasetMetabaseById(@PathVariable("datasetId") Long datasetId);
 
   /**
    * Find design data set id by dataflow id.
@@ -231,18 +242,6 @@ public interface DatasetMetabaseController {
   @GetMapping("/private/getUserProviderIdsByDataflowId")
   List<Long> getUserProviderIdsByDataflowId(@RequestParam("dataflowId") Long dataflowId);
 
-
-  /**
-   * Gets the last dataset validation for release.
-   *
-   * @param datasetId the dataset id
-   * @return the last dataset validation for release
-   */
-  @GetMapping(value = "/private/getLastDatasetValidationForRelease/{id}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
-  Long getLastDatasetValidationForRelease(@PathVariable("id") Long datasetId);
-
-
   /**
    * Find reporting data set public by dataflow id.
    *
@@ -290,6 +289,16 @@ public interface DatasetMetabaseController {
       @RequestParam("dataflowIds") List<Long> dataflowIds);
 
   /**
+   * Find data set by dataflow ids.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the list
+   */
+  @GetMapping(value = "/private/datasets/dataflowIds", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataSetMetabaseVO> findDataSetByDataflowIds(
+      @RequestParam("dataflowIds") List<Long> dataflowIds);
+
+  /**
    * Gets the datasets summary list.
    *
    * @param dataflowId the dataflow id
@@ -297,5 +306,26 @@ public interface DatasetMetabaseController {
    */
   @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
   List<DatasetsSummaryVO> getDatasetsSummaryList(@PathVariable("id") Long dataflowId);
+
+  /**
+   * Update dataset running status.
+   *
+   * @param datasetId the dataset id
+   * @param datasetRunningStatus the dataset running status
+   */
+  @PutMapping(value = "/private/updateDatasetRunningStatus/{id}")
+  void updateDatasetRunningStatus(@PathVariable("id") Long datasetId,
+      @RequestParam("datasetRunningStatus") DatasetRunningStatusEnum datasetRunningStatus);
+
+  /**
+   * Find reporting data set by provider ids.
+   *
+   * @param providerIds the provider ids
+   * @return the list
+   */
+  @GetMapping(value = "/private/providerIds", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataSetMetabaseVO> findReportingDataSetByProviderIds(
+      @RequestParam("providerIds") List<Long> providerIds);
+
 
 }

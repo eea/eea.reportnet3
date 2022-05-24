@@ -40,6 +40,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -54,6 +55,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.TableStatisticsVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
@@ -143,9 +145,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Lazy
   private KafkaSenderUtils kafkaSenderUtils;
 
-  /**
-   * The foreign relations repository.
-   */
+  /** The foreign relations repository. */
   @Autowired
   private ForeignRelationsRepository foreignRelationsRepository;
 
@@ -161,14 +161,14 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Autowired
   private ReferenceDatasetRepository referenceDatasetRepository;
 
-  /**
-   * The Constant LOG.
-   */
+  /** The user management controller zull. */
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
+  /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
+  /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant STATUS_TECHNICALLY_ACCEPTED: {@value}. */
@@ -186,7 +186,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Gets the data set id by dataflow id.
    *
    * @param idFlow the id flow
-   *
    * @return the data set id by dataflow id
    */
   @Override
@@ -221,11 +220,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   /**
-   * Gets the dataset name.
+   * Find dataset metabase.
    *
    * @param idDataset the id dataset
-   *
-   * @return the dataset name
+   * @return the data set metabase VO
    */
   @Override
   public DataSetMetabaseVO findDatasetMetabase(Long idDataset) {
@@ -237,6 +235,19 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
     }
     return metabaseVO;
+  }
+
+
+  /**
+   * Find data set by dataflow ids.
+   *
+   * @param dataflowIds the dataflow ids
+   * @return the list
+   */
+  @Override
+  public List<DataSetMetabaseVO> findDataSetByDataflowIds(List<Long> dataflowIds) {
+    return dataSetMetabaseMapper
+        .entityListToClass(dataSetMetabaseRepository.findDataSetByDataflowIds(dataflowIds));
   }
 
   /**
@@ -257,7 +268,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    *
    * @param datasetId the dataset id
    * @param datasetName the dataset name
-   *
    * @return true, if successful
    */
   @Override
@@ -293,6 +303,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     String messageStatus = "";
     if (DatasetStatusEnum.TECHNICALLY_ACCEPTED.equals(datasetStatusMessageVO.getStatus())) {
       messageStatus = STATUS_TECHNICALLY_ACCEPTED;
+
+      DataFlowVO dfVO =
+          dataflowControllerZuul.getMetabaseById(datasetStatusMessageVO.getDataflowId());
+      if (dfVO.isAutomaticReportingDeletion()) {
+        recordStoreControllerZuul.updateSnapshotDisabled(datasetStatusMessageVO.getDatasetId());
+      }
     } else if (DatasetStatusEnum.CORRECTION_REQUESTED.equals(datasetStatusMessageVO.getStatus())) {
       messageStatus = STATUS_CORRECTION_REQUESTED;
     } else {
@@ -319,9 +335,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Gets the statistics.
    *
    * @param datasetId the dataset id
-   *
    * @return the statistics
-   *
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
    */
@@ -340,7 +354,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param object the object
    * @param fieldName the field name
    * @param fieldValue the field value
-   *
    * @return the boolean
    */
   public static Boolean setEntityProperty(Object object, String fieldName, String fieldValue) {
@@ -373,9 +386,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Process statistics.
    *
    * @param statistics the statistics
-   *
    * @return the statistics VO
-   *
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
    */
@@ -419,9 +430,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Gets the global statistics.
    *
    * @param dataschemaId the dataschema id
-   *
    * @return the global statistics
-   *
    * @throws EEAException the EEA exception
    * @throws InstantiationException the instantiation exception
    * @throws IllegalAccessException the illegal access exception
@@ -511,7 +520,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param datasetId the dataset id
    * @param type the type
    * @param role the role
-   *
    * @return the resource info VO
    */
   private ResourceInfoVO createGroup(Long datasetId, ResourceTypeEnum type, SecurityRoleEnum role) {
@@ -526,7 +534,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   /**
-   * Creates the schema group and add user.
+   * Creates the schema group.
    *
    * @param datasetId the dataset id
    */
@@ -570,9 +578,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param dueDate the due date
    * @param representatives the representatives
    * @param iterationDC the iteration DC
-   *
    * @return the future
-   *
    * @throws EEAException the EEA exception
    */
   @Override
@@ -673,7 +679,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param id the id
    * @param email the email
    * @param group the group
-   *
    * @return the resource assignation VO
    */
   private ResourceAssignationVO fillResourceAssignation(Long id, String email,
@@ -694,7 +699,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * @param representative the representative
    * @param dataflowId the dataflow id
    * @param datasetSchemaId the dataset schema id
-   *
    * @return the map
    */
   private Map<Long, String> fillAndSaveReportingDataset(RepresentativeVO representative,
@@ -724,7 +728,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Find dataset schema id by id.
    *
    * @param datasetId the dataset id
-   *
    * @return the string
    */
   @Override
@@ -736,7 +739,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   /**
-   * Adds the foreign relation into the metabase.
+   * Adds the foreign relation.
    *
    * @param datasetIdOrigin the dataset id origin
    * @param datasetIdDestination the dataset id destination
@@ -761,7 +764,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   /**
-   * Delete foreign relation from the metabase.
+   * Delete foreign relation.
    *
    * @param datasetIdOrigin the dataset id origin
    * @param datasetIdDestination the dataset id destination
@@ -777,7 +780,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
 
 
   /**
-   * Gets the dataset destination foreign relation. It's used to know the datasetId destination of a
+   * Gets the dataset destination foreign relation. It"s used to know the datasetId destination of a
    * FK
    *
    * @param datasetIdOrigin the dataset id origin
@@ -800,7 +803,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    * Gets the dataset type.
    *
    * @param datasetId the dataset id
-   *
    * @return the dataset type
    */
 
@@ -976,28 +978,25 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return providerIds;
   }
 
-
-
   /**
-   * Gets the last dataset validation for release.
+   * Update dataset running status.
    *
    * @param datasetId the dataset id
-   * @return the last dataset validation for release
+   * @param datasetRunningStatus the dataset running status
+   * @throws EEAException the EEA exception
    */
   @Override
-  public Long getLastDatasetValidationForRelease(Long datasetId) {
-    DataSetMetabase dataset =
-        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
-    List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
-        dataset.getDataflowId(), dataset.getDataProviderId());
-    Collections.sort(datasets);
-    Long nextIdValidation = null;
-    if (!datasets.get(datasets.size() - 1).equals(datasetId)) {
-      int index = datasets.indexOf(datasetId);
-      nextIdValidation = datasets.get(++index);
+  public void updateDatasetRunningStatus(Long datasetId,
+      DatasetRunningStatusEnum datasetRunningStatus) throws EEAException {
+    DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(datasetId).orElse(null);
+    LOG.info("Updating dataset running status to {} for datasetId {}.", datasetRunningStatus,
+        datasetId);
+    if (datasetMetabase != null) {
+      datasetMetabase.setDatasetRunningStatus(datasetRunningStatus);
+      dataSetMetabaseRepository.save(datasetMetabase);
+    } else {
+      throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    return nextIdValidation;
-
   }
 
   /**
@@ -1092,6 +1091,57 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         .addAll(getDatasetsSummaryListFromDatasetType(dataflowId, DatasetTypeEnum.TEST));
     datasetsSummaryList.addAll(getReportingDatasetsSummaryList(dataflowId));
     return datasetsSummaryList;
+  }
+
+  /**
+   * Find dataset metabase external.
+   *
+   * @param datasetId the dataset id
+   * @return the data set metabase VO
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public DataSetMetabaseVO findDatasetMetabaseExternal(Long datasetId) throws EEAException {
+    Optional<DataSetMetabase> datasetMetabase = dataSetMetabaseRepository.findById(datasetId);
+    DataSetMetabaseVO metabaseVO = new DataSetMetabaseVO();
+    if (datasetMetabase.isPresent()) {
+      metabaseVO = dataSetMetabaseMapper.entityToClass(datasetMetabase.get());
+      metabaseVO.setDatasetTypeEnum(getDatasetType(datasetId));
+    }
+    return metabaseVO;
+  }
+
+  /**
+   * Gets the reportings by provider ids.
+   *
+   * @param providerIds the provider ids
+   * @return the reportings by provider ids
+   */
+  @Override
+  public List<DataSetMetabaseVO> getDatasetsByProviderIds(List<Long> providerIds) {
+    return dataSetMetabaseMapper
+        .entityListToClass(dataSetMetabaseRepository.findByDataProviderIdIn(providerIds));
+  }
+
+  /**
+   * Gets the last dataset for release.
+   *
+   * @param datasetId the dataset id
+   * @return the last dataset for release
+   */
+  @Override
+  public Long getLastDatasetForRelease(Long datasetId) {
+    DataSetMetabase dataset =
+        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+    List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
+        dataset.getDataflowId(), dataset.getDataProviderId());
+    Collections.sort(datasets);
+    Long nextIdValidation = null;
+    if (!datasets.get(datasets.size() - 1).equals(datasetId)) {
+      int index = datasets.indexOf(datasetId);
+      nextIdValidation = datasets.get(++index);
+    }
+    return nextIdValidation;
   }
 
 }

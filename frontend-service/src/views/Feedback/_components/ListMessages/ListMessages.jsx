@@ -22,7 +22,7 @@ export const ListMessages = ({
   className = '',
   dataflowId,
   emptyMessage = '',
-  isCustodian,
+  hasCustodianPermissions,
   isLoading,
   lazyLoading = true,
   messages = [],
@@ -60,7 +60,7 @@ export const ListMessages = ({
       type: 'SET_LIST_CONTENT',
       payload: renderMessageList()
     });
-  }, [isCustodian, isLoading, moreMessagesLoading, messages, separatorIndex]);
+  }, [hasCustodianPermissions, isLoading, moreMessagesLoading, messages, separatorIndex]);
 
   const getIndexByHeader = messagesArray => {
     return messagesArray
@@ -74,7 +74,7 @@ export const ListMessages = ({
     const domMessages = document.querySelectorAll('.rep-feedback-message');
     const lastMessage = last(domMessages);
 
-    if (!isCustodian) {
+    if (!hasCustodianPermissions) {
       if (!moreMessagesLoaded) {
         const unreadSeparator = document.querySelectorAll('.rep-feedback-unreadSeparator');
         if (!isEmpty(unreadSeparator)) {
@@ -168,10 +168,11 @@ export const ListMessages = ({
         {messages.map((message, i) => (
           <Message
             dataflowId={dataflowId}
+            hasCustodianPermissions={hasCustodianPermissions}
             hasSeparator={
-              i === separatorIndex && ((isCustodian && message.direction) || (!isCustodian && !message.direction))
+              i === separatorIndex &&
+              ((hasCustodianPermissions && message.direction) || (!hasCustodianPermissions && !message.direction))
             }
-            isCustodian={isCustodian}
             key={uniqueId('message_')}
             message={message}
             onToggleVisibleDeleteMessage={(isVisible, messageId) =>

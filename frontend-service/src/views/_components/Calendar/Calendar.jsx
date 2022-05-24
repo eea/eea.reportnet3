@@ -1,7 +1,7 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 
+import isNil from 'lodash/isNil';
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
-import { isNil } from 'lodash';
 
 export const Calendar = forwardRef((props, _) => {
   const {
@@ -16,7 +16,6 @@ export const Calendar = forwardRef((props, _) => {
     inputId,
     inputRef,
     keepInvalid,
-    key,
     maxDate,
     minDate,
     monthNavigator,
@@ -25,9 +24,11 @@ export const Calendar = forwardRef((props, _) => {
     onFocus,
     onSelect,
     onTodayButtonClick,
+    panelClassName,
     placeholder,
     readOnlyInput,
     selectionMode,
+    selectableYears = 10,
     showButtonBar,
     showSeconds = false,
     showTime = false,
@@ -35,6 +36,7 @@ export const Calendar = forwardRef((props, _) => {
     style,
     todayButtonClassName,
     value,
+    viewDate = undefined,
     yearNavigator,
     yearRange
   } = props;
@@ -64,8 +66,20 @@ export const Calendar = forwardRef((props, _) => {
     weekHeader: 'Wk'
   };
 
+  useEffect(() => {
+    const isValidDate = date => date instanceof Date && !isNaN(date);
+
+    if (isValidDate(viewDate)) {
+      setViewDateState(viewDate);
+    }
+  }, [viewDate]);
+
+  const [viewDateState, setViewDateState] = useState(viewDate);
+
   const yearRangeValue =
-    yearNavigator && isNil(yearRange) ? `${new Date().getFullYear() - 10}:${new Date().getFullYear() + 10}` : yearRange;
+    yearNavigator && isNil(yearRange)
+      ? `${new Date().getFullYear() - selectableYears}:${new Date().getFullYear() + selectableYears}`
+      : yearRange;
 
   return (
     <PrimeCalendar
@@ -79,7 +93,6 @@ export const Calendar = forwardRef((props, _) => {
       inputClassName={inputClassName}
       inputId={inputId}
       keepInvalid={keepInvalid}
-      key={key}
       locale={locale}
       maxDate={maxDate}
       minDate={minDate}
@@ -89,6 +102,8 @@ export const Calendar = forwardRef((props, _) => {
       onFocus={onFocus}
       onSelect={onSelect}
       onTodayButtonClick={onTodayButtonClick}
+      onViewDateChange={event => setViewDateState(event.value)}
+      panelClassName={panelClassName}
       placeholder={placeholder}
       readOnlyInput={readOnlyInput}
       ref={inputRef}
@@ -100,6 +115,7 @@ export const Calendar = forwardRef((props, _) => {
       style={style}
       todayButtonClassName={todayButtonClassName}
       value={value}
+      viewDate={viewDateState || new Date()}
       yearNavigator={yearNavigator}
       yearRange={yearRangeValue}
     />

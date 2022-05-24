@@ -14,6 +14,27 @@
           }
         },
         {
+          "key": "IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "IMPORT_REPORTING_FAILED_NAMEFILE_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "UPDATE_AUTOMATIC_REPORTING_DELETION_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
           "key": "UPDATE_RELEASABLE_FAILED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
@@ -57,6 +78,20 @@
         },
         {
           "key": "IMPORT_DESIGN_FAILED_EVENT"
+        },
+        {
+          "key": "IMPORT_DESIGN_FAILED_NO_HEADERS_MATCHING_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "IMPORT_DESIGN_FAILED_NAMEFILE_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         },
         {
           "key": "DOWNLOAD_ALL_TABS_INFO_FAILED"
@@ -517,7 +552,10 @@
           "key": "EMAIL_NOT_FOUND_ERROR"
         },
         {
-          "key": "IMPOSSIBLE_ROLE_ERROR"
+          "key": "IMPOSSIBLE_REPORTER_ROLE_ERROR"
+        },
+        {
+          "key": "IMPOSSIBLE_REQUESTER_ROLE_ERROR"
         },
         {
           "key": "ERROR_LOADING_EU_DATASET_SCHEMA"
@@ -724,6 +762,9 @@
           "key": "DOWNLOAD_EXPORT_DATASET_FILE_ERROR"
         },
         {
+          "key": "DOWNLOAD_EXPORT_TABLE_DATA_FILE_ERROR"
+        },
+        {
           "key": "DOWNLOAD_QC_RULES_FILE_ERROR"
         },
         {
@@ -808,9 +849,29 @@
         { "key": "CREATE_SYSTEM_NOTIFICATION_ERROR" },
         { "key": "UPDATE_SYSTEM_NOTIFICATION_ERROR" },
         { "key": "DELETE_SYSTEM_NOTIFICATION_ERROR" },
+        { "key": "DELETE_ALL_LEAD_REPORTERS_ERROR" },
         { "key": "GET_SYSTEM_NOTIFICATIONS_ERROR" },
         { "key": "CHECK_ENABLED_SYSTEM_NOTIFICATIONS_ERROR" },
-        { "key": "MAX_WEBSOCKET_RECONNECT_ATTEMPS_ERROR", "fixed": true }
+        { "key": "VALIDATE_SQL_ERROR" },
+        { "key": "EVALUATE_SQL_SENTENCE_ERROR" },
+        { "key": "MAX_WEBSOCKET_RECONNECT_ATTEMPTS_ERROR", "fixed": true },
+        { "key": "FILTER_DATA_ERROR" },
+        { "key": "CALL_FME_PROCESS_FAILED_EVENT" },
+        { "key": "LOAD_DATASET_SCHEMA_INFO_ERROR" },
+        { "key": "LOAD_HISTORY_DATA_ERROR" },
+        { "key": "DELETE_WEBFORM_CONFIGURATION_ERROR" },
+        { "key": "DOWNLOAD_WEBFORM_CONFIGURATION_ERROR" },
+        { "key": "CREATE_WEBFORM_CONFIGURATION_ERROR" },
+        { "key": "EDIT_WEBFORM_CONFIGURATION_ERROR" },
+        { "key": "DELETE_WEBFORM_IN_USE_ERROR" },
+        { "key": "GET_METADATA_ERROR" },
+        { "key": "DELETE_USER_NOTIFICATIONS_ERROR" },
+        { "key": "LOAD_NATIONAL_COORDINATORS_ERROR" },
+        { "key": "DELETE_NATIONAL_COORDINATORS_ERROR" },
+        { "key": "CREATE_NATIONAL_COORDINATORS_ERROR" },
+        { "key": "GET_VALIDATIONS_STATUSES_ERROR" },
+        { "key": "DELETE_VALIDATION_FROM_QUEUE_ERROR" },
+        { "key": "SET_VALIDATIONS_STATUS_PRIORITY_ERROR" }
       ]
     },
     {
@@ -1037,7 +1098,7 @@
         { "key": "AUTOMATICALLY_DOWNLOAD_SCHEMAS_INFO_FILE" },
         { "key": "AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE" },
         { "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE" },
-        { "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD" },
+        { "key": "EXPORT_TABLE_DATA_FILE_AUTOMATICALLY_DOWNLOAD" },
         { "key": "AUTOMATICALLY_DOWNLOAD_USERS_LIST_FILE" },
         { "key": "EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT" },
         { "key": "VALIDATE_ALL_REPORTERS_COMPLETED_EVENT" },
@@ -1103,11 +1164,19 @@
         { "key": "RECEIVED_MESSAGE" },
         { "key": "DOWNLOAD_USERS_BY_COUNTRY_START" },
         { "key": "EXPORT_TABLE_DATA_START" },
-        { "key": "DOWNLOAD_SCHEMAS_INFO_START" }
+        { "key": "DOWNLOAD_SCHEMAS_INFO_START" },
+        { "key": "EXTERNAL_EXPORT_DESIGN_INIT" }
       ]
+    },
+    {
+      "key": "warn",
+      "lifeTime": 20000,
+      "fixed": false,
+      "types": [{ "key": "IMPORT_NAMEFILE_WARNING_EVENT" }]
     }
   ],
   "hiddenNotifications": [
+    "EXPORT_TABLE_DATA_COMPLETED_EVENT",
     "EXPORT_DATASET_COMPLETED_EVENT",
     "EXPORT_DATASET_FAILED_EVENT",
     "EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT",

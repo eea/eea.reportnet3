@@ -66,6 +66,11 @@ const useBigButtonList = ({
     const isObserver = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
       config.permissions.roles.OBSERVER.key
     ]);
+
+    const isStewardSupport = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.STEWARD_SUPPORT.key
+    ]);
+
     const isDesignStatus = dataflowState.status === config.dataflowStatus.DESIGN;
     const isDraftStatus = dataflowState.status === config.dataflowStatus.OPEN;
     const isEditorRead = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
@@ -80,7 +85,7 @@ const useBigButtonList = ({
       cloneSchemasFromDataflow: isLeadDesigner && isDesignStatus,
       copyDataCollectionToEUDataset: isLeadDesigner && isDraftStatus,
       exportEUDataset: isLeadDesigner && isDraftStatus,
-      dashboard: (isLeadDesigner || isObserver) && isDraftStatus,
+      dashboard: (isLeadDesigner || isObserver || isStewardSupport) && isDraftStatus,
       designDatasets:
         (isLeadDesigner ||
           userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
@@ -92,16 +97,16 @@ const useBigButtonList = ({
       designDatasetsOpen: (isLeadDesigner && isDraftStatus) || (isEditorRead && isDesignStatus),
       designDatasetEditorReadActions: isEditorRead && isDesignStatus,
       feedback:
-        (isLeadDesigner && isDraftStatus && isManualAcceptance) ||
+        ((isStewardSupport || isLeadDesigner) && isDraftStatus && isManualAcceptance) ||
         (isLeadReporterOfCountry && isReleased && isManualAcceptance),
-      groupByRepresentative: (isLeadDesigner || isObserver) && isDraftStatus,
-      manageReporters: isLeadDesigner,
-      manualTechnicalAcceptance: isLeadDesigner && isManualAcceptance,
+      groupByRepresentative: (isLeadDesigner || isObserver || isStewardSupport) && isDraftStatus,
+      manageReporters: isLeadDesigner || isStewardSupport,
+      manualTechnicalAcceptance: (isLeadDesigner || isStewardSupport) && isManualAcceptance,
       newSchema: isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
       release: isLeadReporterOfCountry,
-      testDatasetVisibility: isLeadDesigner && isDraftStatus
+      testDatasetVisibility: (isLeadDesigner || isStewardSupport) && isDraftStatus
     };
   }, [
     dataflowId,
@@ -259,20 +264,29 @@ const useBigButtonList = ({
       }));
 
   const buildGroupByRepresentativeModels = (datasets = []) => {
-    const allDatasets = datasets.map(dataset => {
-      return {
-        datasetId: dataset.datasetId,
-        datasetName: dataset.name,
-        dataProviderId: dataset.dataProviderId,
-        isReleased: isNil(dataset.isReleased) ? false : dataset.isReleased,
-        name: dataset.datasetSchemaName
-      };
-    });
+    const allDatasets = datasets.map(dataset => ({
+      datasetId: dataset.datasetId,
+      datasetName: dataset.name,
+      dataProviderId: dataset.dataProviderId,
+      isReleased: isNil(dataset.isReleased) ? false : dataset.isReleased,
+      name: dataset.datasetSchemaName,
+      status: dataset.status
+    }));
 
     const isUniqRepresentative = uniq(allDatasets.map(dataset => dataset.dataProviderId)).length === 1;
 
     if (!buttonsVisibility.groupByRepresentative && isUniqRepresentative) {
       return allDatasets.map(dataset => {
+        const getTechnicalAcceptanceStatus = () => {
+          if (!dataflowState.data.manualAcceptance) {
+            return null;
+          }
+
+          return resourcesContext.messages[config.datasetStatus[dataset.status].label];
+        };
+
+        const technicalAcceptanceStatus = getTechnicalAcceptanceStatus();
+
         return {
           buttonClass: 'dataset',
           buttonIcon: 'dataset',
@@ -281,6 +295,8 @@ const useBigButtonList = ({
           handleRedirect: () => {
             handleRedirect(getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true));
           },
+          infoStatus: dataset.isReleased,
+          infoStatusIcon: true,
           layout: 'defaultBigButton',
           model: [
             {
@@ -292,6 +308,7 @@ const useBigButtonList = ({
             }
           ],
           onWheel: getUrl(routes.DATASET, { dataflowId, datasetId: dataset.datasetId }, true),
+          technicalAcceptanceStatus: technicalAcceptanceStatus,
           visibility: true
         };
       });
@@ -301,9 +318,26 @@ const useBigButtonList = ({
       const datasetRepresentative = dataflowState.data.representatives.find(
         representative => representative.dataProviderId === dataset.dataProviderId
       );
+
+      const getTechnicalAcceptanceStatus = () => {
+        if (!dataflowState.data.manualAcceptance) {
+          return null;
+        }
+
+        const datasets = allDatasets.filter(ds => ds.dataProviderId === dataset.dataProviderId);
+        if (datasets.some(ds => ds.status === config.datasetStatus.CORRECTION_REQUESTED.key)) {
+          return resourcesContext.messages[config.datasetStatus.CORRECTION_REQUESTED.label];
+        } else if (datasets.some(ds => ds.status === config.datasetStatus.FINAL_FEEDBACK.key)) {
+          return resourcesContext.messages[config.datasetStatus.FINAL_FEEDBACK.label];
+        } else if (datasets.every(ds => ds.status === config.datasetStatus.TECHNICALLY_ACCEPTED.key)) {
+          return resourcesContext.messages[config.datasetStatus.TECHNICALLY_ACCEPTED.label];
+        }
+      };
+
+      const technicalAcceptanceStatus = getTechnicalAcceptanceStatus();
       const releasedShowPublicInfoUpdating = dataset.isReleased && dataflowState.isShowPublicInfoUpdating;
       const representativeRestrictFromPublicUpdating =
-        datasetRepresentative.dataProviderId === dataflowState.restrictFromPublicIsUpdating.dataProviderId &&
+        datasetRepresentative?.dataProviderId === dataflowState.restrictFromPublicIsUpdating.dataProviderId &&
         dataflowState.restrictFromPublicIsUpdating.value;
 
       return {
@@ -335,6 +369,7 @@ const useBigButtonList = ({
           dataset.isReleased && (dataflowState.data.showPublicInfo || dataflowState.isShowPublicInfoUpdating),
         restrictFromPublicIsUpdating: releasedShowPublicInfoUpdating || representativeRestrictFromPublicUpdating,
         restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
+        technicalAcceptanceStatus: technicalAcceptanceStatus,
         visibility: true
       };
     });

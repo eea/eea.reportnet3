@@ -28,7 +28,8 @@ import { MapUtils } from 'views/_functions/Utils/MapUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const FieldEditor = ({
+export const FieldEditor = ({
+  areCoordinatesDisabled = false,
   cells,
   colsSchema,
   datasetId,
@@ -50,7 +51,6 @@ const FieldEditor = ({
     { label: 'ETRS89 - 4258', value: 'EPSG:4258' },
     { label: 'LAEA-ETRS89 - 3035', value: 'EPSG:3035' }
   ];
-
   const fieldEmptyPointValue = `{"type": "Feature", "geometry": {"type":"Point","coordinates":[55.6811608,12.5844761]}, "properties": {"srid": "EPSG:4326"}}`;
 
   const notificationContext = useContext(NotificationContext);
@@ -119,13 +119,19 @@ const FieldEditor = ({
 
   let fieldType = {};
 
-  let isReadOnlyField = RecordUtils.getCellInfo(colsSchema, cells.field).readOnly;
+  const isReadOnlyField =
+    RecordUtils.getCellInfo(colsSchema, cells.field).readOnly &&
+    !['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+      RecordUtils.getCellInfo(colsSchema, cells.field).type
+    );
+
   if (!isEmpty(record)) {
     fieldType = RecordUtils.getCellInfo(colsSchema, cells.field).type;
   }
 
   const onFilter = async filter => {
     const colSchema = colsSchema.filter(colSchema => colSchema.field === cells.field)[0];
+
     if (isNil(colSchema) || isNil(colSchema.referencedField)) {
       return;
     }
@@ -520,9 +526,10 @@ const FieldEditor = ({
         return (
           <div className={styles.pointEpsgWrapper}>
             <Coordinates
-              crsDisabled={isMapDisabled}
+              crsDisabled={isMapDisabled || areCoordinatesDisabled}
               crsOptions={crs}
               crsValue={!isNil(currentCRS) ? currentCRS : { label: 'WGS84 - 4326', value: 'EPSG:4326' }}
+              disabled={areCoordinatesDisabled}
               id={cells.field}
               initialGeoJson={RecordUtils.getCellValue(cells, cells.field)}
               isCellEditor={true}
@@ -531,7 +538,14 @@ const FieldEditor = ({
               onCrsChange={crs => onCrsChange(crs)}
               onFocus={() => onEditorValueFocus(cells, RecordUtils.getCellValue(cells, cells.field))}
               onKeyDown={(e, value) => onCoordinatesKeyDown(e, value)}
-              onMapOpen={() => onMapOpen(RecordUtils.getCellValue(cells, cells.field), cells, type)}
+              onMapOpen={() =>
+                onMapOpen(
+                  RecordUtils.getCellValue(cells, cells.field),
+                  cells,
+                  type,
+                  RecordUtils.getCellInfo(colsSchema, cells.field).readOnly
+                )
+              }
               xyLabels={currentCRS.value === 'EPSG:3035'}
             />
           </div>
@@ -584,9 +598,9 @@ const FieldEditor = ({
             onBlur={onCalendarBlur}
             onFocus={onCalendarFocus}
             onSelect={onSelectCalendar}
+            selectableYears={100}
             value={new Date(RecordUtils.getCellValue(cells, cells.field))}
             yearNavigator={true}
-            yearRange="1900:2100"
           />
         );
       case 'DATETIME':
@@ -847,5 +861,3 @@ const FieldEditor = ({
     </span>
   );
 };
-
-export { FieldEditor };

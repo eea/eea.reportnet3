@@ -1,6 +1,9 @@
 package org.eea.dataflow.integration.executor.fme.service.impl;
 
+
+
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -10,9 +13,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.dataflow.integration.executor.fme.domain.FMEAsyncJob;
 import org.eea.dataflow.integration.executor.fme.domain.FMECollection;
 import org.eea.dataflow.integration.executor.fme.domain.FileSubmitResult;
+import org.eea.dataflow.integration.executor.fme.domain.PublishedParameter;
 import org.eea.dataflow.integration.executor.fme.domain.SubmitResult;
 import org.eea.dataflow.integration.executor.fme.mapper.FMECollectionMapper;
 import org.eea.dataflow.integration.executor.fme.service.FMECommunicationService;
@@ -44,22 +51,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The Class FMECommunicationServiceImpl.
@@ -182,24 +195,42 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     } catch (HttpStatusCodeException exception) {
       LOG_ERROR.error("Status code: {} message: {}", exception.getStatusCode().value(),
           exception.getMessage(), exception);
-    }
+      Map<String, PublishedParameter> mapParameters = fmeAsyncJob.getPublishedParameters().stream()
+          .collect(Collectors.toMap(PublishedParameter::getName, Function.identity()));
 
+      Long datasetId = null;
+      String fileName = "";
+      if (mapParameters.containsKey("datasetId")) {
+        datasetId = Long.valueOf(mapParameters.get("datasetId").getValue().toString());
+      }
+      if (mapParameters.containsKey("inputfile")) {
+        fileName = mapParameters.get("inputfile").getValue().toString();
+      }
+      String user = SecurityContextHolder.getContext().getAuthentication().getName();
+      NotificationVO notificationVO =
+          NotificationVO.builder().user(user).error("Error calling to FME").datasetId(datasetId)
+              .dataflowId(dataflowId).fileName(fileName).build();
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.CALL_FME_PROCESS_FAILED_EVENT, null,
+            notificationVO);
+      } catch (EEAException e1) {
+        LOG_ERROR.error("Failed sending kafka notification due to an error calling FME: {}",
+            e1.getMessage(), e1);
+      }
+    }
     return result;
   }
 
   /**
    * Send file.
    *
-   * @param file the file
    * @param idDataset the id dataset
    * @param idProvider the id provider
    * @param fileName the file name
-   *
    * @return the file submit result
    */
   @Override
-  public FileSubmitResult sendFile(byte[] file, Long idDataset, String idProvider,
-      String fileName) {
+  public FileSubmitResult sendFile(Long idDataset, String idProvider, String fileName) {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put(DATASETID, String.valueOf(idDataset));
@@ -213,29 +244,75 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     }
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     Map<String, String> headerInfo = new HashMap<>();
+    File file = new File(fileName);
 
     try {
-      headerInfo.put("Content-Disposition",
-          "attachment; filename*=UTF-8''\"" + URLEncoder.encode(fileName, "UTF-8") + "\"");
+      if (StringUtils.isNotBlank(file.getName())) {
+        headerInfo.put("Content-Disposition",
+            "attachment; filename*=UTF-8''\"" + URLEncoder.encode(file.getName(), "UTF-8") + "\"");
+      }
     } catch (UnsupportedEncodingException e) {
-      LOG_ERROR.error("Error encoding file: {}", fileName);
+      LOG_ERROR.error("Error encoding file: {}", file.getName());
     }
+
     headerInfo.put(CONTENT_TYPE, "application/octet-stream");
     headerInfo.put(ACCEPT, APPLICATION_JSON);
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(idDataset);
-    HttpEntity<byte[]> request =
-        createHttpRequest(file, uriParams, headerInfo, dataset.getDataflowId());
-    String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
-        .buildAndExpand(uriParams).toString();
-    ResponseEntity<FileSubmitResult> checkResult =
-        this.restTemplate.exchange(url, HttpMethod.POST, request, FileSubmitResult.class);
 
+    DataFlowVO dataflowVO = null;
+    String token = fmeToken;
     FileSubmitResult result = new FileSubmitResult();
-    if (null != checkResult && null != checkResult.getBody()) {
-      result = checkResult.getBody();
+    try {
+      if (null != dataset.getDataflowId()) {
+        dataflowVO = dataflowService.getMetabaseById(dataset.getDataflowId());
+        if (null != dataflowVO && null != dataflowVO.getFmeUserId()) {
+          FMEUser fmeUser = fmeUserRepository.findById(dataflowVO.getFmeUserId()).orElse(null);
+          if (null != fmeUser) {
+            String userPass = fmeUser.getUsername() + ":" + fmeUser.getPassword();
+            token = "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes());
+          }
+        }
+      }
+      String result2 = "";
+      String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
+          .buildAndExpand(uriParams).toString();
+      MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
+      bodyMap.add(file.getName(), new FileSystemResource(file));
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+      headers.add(ACCEPT, APPLICATION_JSON);
+      String boundary = Long.toHexString(System.currentTimeMillis());
+      headers.add(CONTENT_TYPE, "multipart/form-data; boundary=" + boundary);
+      headers.add("Host", "fme.discomap.eea.europa.eu");
+      headers.add("Authorization", token);
+      headers.add("Connection", "keep-alive");
+      HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(bodyMap, headers);
+      SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+      requestFactory.setBufferRequestBody(false);
+      requestFactory.setConnectTimeout(7200000);
+      requestFactory.setReadTimeout(7200000);
+      RestTemplate restTemplate = new RestTemplate();
+      restTemplate.setRequestFactory(requestFactory);
+      ResponseEntity<String> checkResult =
+          restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+
+      if (null != checkResult && null != checkResult.getBody()) {
+        if (checkResult.getBody() != null) {
+          result2 = checkResult.getBody().replace("[", "").replace("]", "");
+          ObjectMapper mapper = new ObjectMapper();
+          try {
+            result = mapper.readValue(result2, FileSubmitResult.class);
+            LOG.info("File send to FME succesfully with result {}", result);
+          } catch (JsonProcessingException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    } catch (EEAException | ResourceAccessException e) {
+      LOG_ERROR.error("Error getting the file to send it to FME. File {}, datasetId {}",
+          file.getName(), dataset.getId(), e);
     }
     return result;
-
   }
 
   /**
@@ -591,7 +668,6 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         } else {
           eventType = EventType.EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT;
         }
-        launchValidationProcess(datasetId, userName);
       }
     } else {
       if (isReporting) {
@@ -605,6 +681,10 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
     importFileData.put(LiteralConstants.DATASETID, datasetId);
     lockService.removeLockByCriteria(importFileData);
+    Map<String, Object> importBigFileData = new HashMap<>();
+    importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+    importFileData.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(importBigFileData);
 
     return eventType;
   }
@@ -674,7 +754,6 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       } else {
         eventType = EventType.EXTERNAL_IMPORT_DESIGN_FROM_OTHER_SYSTEM_COMPLETED_EVENT;
       }
-      launchValidationProcess(datasetId, userName);
     } else {
       if (isReporting) {
         eventType = EventType.EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT;
@@ -685,18 +764,6 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     return eventType;
   }
 
-  /**
-   * Launch validation process.
-   *
-   * @param datasetId the dataset id
-   * @param userName the user name
-   */
-  private void launchValidationProcess(Long datasetId, String userName) {
-    Map<String, Object> values = new HashMap<>();
-    values.put(LiteralConstants.DATASET_ID, datasetId);
-    values.put(LiteralConstants.USER, userName);
-    kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
-  }
 
   /**
    * Release lock releasing process.

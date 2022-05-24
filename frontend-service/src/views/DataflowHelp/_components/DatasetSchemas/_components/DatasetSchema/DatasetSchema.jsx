@@ -27,7 +27,7 @@ import { ValidationService } from 'services/ValidationService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const DatasetSchema = ({
+export const DatasetSchema = ({
   designDataset,
   extensionsOperationsList = [],
   onGetReferencedFieldName,
@@ -302,7 +302,7 @@ const DatasetSchema = ({
             onClick={() => onDownloadTableDefinitions(parsedDesignDataset.datasetId)}
           />
           <Button
-            className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink`}
+            className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
             icon={expandAll ? 'angleRight' : 'angleDown'}
             label={expandAll ? resourcesContext.messages['collapseAll'] : resourcesContext.messages['expandAll']}
             onClick={() => setExpandAll(!expandAll)}
@@ -379,7 +379,7 @@ const DatasetSchema = ({
         return (
           <a
             href="https://geojsonlint.com/"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             target="_blank"
             title={resourcesContext.messages['geomTypeHelpTooltip']}>
             <FontAwesomeIcon
@@ -547,5 +547,3 @@ const DatasetSchema = ({
     </div>
   );
 };
-
-export { DatasetSchema };

@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -61,7 +60,6 @@ import org.eea.interfaces.controller.validation.ValidationController.ValidationC
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.LeadReporterVO;
-import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -290,6 +288,14 @@ public class DatasetSnapshotServiceTest {
     assertEquals("failed assertion", new ArrayList<>(),
         datasetSnapshotService.getSnapshotsByIdDataset(Mockito.anyLong()));
 
+  }
+
+  @Test
+  public void testGetSnapshotsEnabledByIdDataset() throws Exception {
+    when(snapshotMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
+    datasetSnapshotService.getSnapshotsEnabledByIdDataset(Mockito.anyLong());
+    assertEquals("failed assertion", new ArrayList<>(),
+        datasetSnapshotService.getSnapshotsEnabledByIdDataset(Mockito.anyLong()));
   }
 
   /**
@@ -795,7 +801,7 @@ public class DatasetSnapshotServiceTest {
    */
   @Test
   public void createRecepitPDFTest() {
-    Authentication authentication = Mockito.mock(Authentication.class);
+    Mockito.mock(Authentication.class);
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
     SecurityContextHolder.setContext(securityContext);
     ReportingDatasetVO dataset = new ReportingDatasetVO();
@@ -826,10 +832,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(dataflowVO);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(representatives);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getDetails()).thenReturn(new HashMap<>());
-    Mockito.when(userManagementControllerZull.getUserByUserId(Mockito.any()))
-        .thenReturn(userRepresentationVO);
+    Mockito.when(userManagementControllerZull.getUserByUserId()).thenReturn(userRepresentationVO);
     datasetSnapshotService.createReceiptPDF(null, 1L, 1L);
     Mockito.verify(representativeControllerZuul, times(1))
         .updateInternalRepresentative(Mockito.any());
@@ -1072,11 +1075,7 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(schemaService.getDataSchemaByDatasetId(Mockito.anyBoolean(), Mockito.any()))
         .thenReturn(schema);
     Mockito.doNothing().when(reportingDatasetService).updateReportingDatasetMetabase(Mockito.any());
-    Mockito.when(collaborationControllerZuul.createMessage(Mockito.anyLong(), Mockito.any()))
-        .thenReturn(new MessageVO());
-    Mockito.when(dataflowControllerZuul.findById(Mockito.anyLong(), Mockito.anyLong()))
-        .thenReturn(new DataFlowVO());
-    datasetSnapshotService.createReleaseSnapshots(1L, 1L, true);
+    datasetSnapshotService.createReleaseSnapshots(1L, 1L, true, true);
     Mockito.verify(validationControllerZuul, times(1)).validateDataSetData(Mockito.any(),
         Mockito.anyBoolean());
   }
@@ -1100,7 +1099,7 @@ public class DatasetSnapshotServiceTest {
         .thenReturn(schema);
 
     datasetSnapshotService.releaseLocksRelatedToRelease(1L, 1L);
-    Mockito.verify(lockService, times(11)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(12)).removeLockByCriteria(Mockito.any());
   }
 
   @Test

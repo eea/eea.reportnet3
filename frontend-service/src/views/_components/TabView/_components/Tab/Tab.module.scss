@@ -1,0 +1,107 @@
+a.p_tabview_design {
+  padding: 0.571rem 2rem 0.571rem 0.5rem !important;
+}
+
+a.p_tabview_noDesign {
+  padding: 0.571rem 0.5rem 0.571rem 0.5rem !important;
+}
+
+a.p_tabview_design_add {
+  padding: 0.571rem 1.3rem;
+  height: 2.6rem;
+  width: 3.6rem;
+}
+
+a.p_tabview_design_add:hover {
+  background-color: var(--tabview-highlight-bg-hover) !important;
+  border: var(--tabview-highlight-border-hover) !important;
+  color: var(--tabview-highlight-color-hover) !important;
+  cursor: pointer !important;
+}
+
+a.p_tabview_design_add:hover span:first-child:not(:hover) {
+  transform: scale(1.25);
+  transition: 0.08s auto;
+}
+
+a.p_tabview_design_add span:first-child:hover {
+  transform: scale(1.25);
+  transition: 0.08s auto;
+}
+
+a.p_tabview_design_add span {
+  font-size: 24px;
+  position: absolute;
+}
+
+a.tabGeneral {
+  pointer-events: fill;
+  min-width: 3.6rem;
+}
+
+input.p_tabview_input_design {
+  min-width: 140px;
+  height: 21px;
+}
+
+.dragArrow {
+  color: var(--drag-and-drop-arrow-color);
+  opacity: var(--drag-and-drop-arrow-opacity);
+}
+
+.highlight {
+  color: var(--tabview-highlight-color) !important;
+}
+
+.tabViewTableEmpty {
+  height: 2.34rem !important;
+}
+
+.tabViewNavigationHidden {
+  height: 2.6rem !important;
+}
+
+.tabViewTabNavigationShown {
+  height: 2.7rem !important;
+}
+
+.tooltipButton {
+  margin-top: 0.5rem !important;
+  margin-right: 0.5rem !important;
+}
+.tooltipContent {
+  max-height: 300px !important;
+  z-index: 3003 !important;
+}
+
+.fieldText {
+  text-align: left;
+  font-weight: bold;
+  .propertyLabel {
+    color: var(--success-color-lighter);
+    max-height: 100px;
+    font-weight: 600;
+    overflow: hidden;
+  }
+}
+
+.templateWrapper {
+  display: flex;
+  justify-content: center;
+  .checkTemplate {
+    font-size: 14pt;
+  }
+}
+
+.tableDescriptionTemplate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 30vh;
+  overflow: auto;
+  white-space: pre-line;
+}
+
+.tooltipWrapper {
+  white-space: pre-line;
+}

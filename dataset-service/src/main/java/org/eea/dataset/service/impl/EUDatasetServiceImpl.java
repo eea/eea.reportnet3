@@ -1,6 +1,7 @@
 package org.eea.dataset.service.impl;
 
 import java.sql.Timestamp;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,7 +103,8 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     addLocksRelatedToPopulateEU(reportings, dataflowId);
 
     // Load the dataCollections to be copied
-    List<DataCollection> dataCollectionList = dataCollectionRepository.findByDataflowId(dataflowId);
+    List<DataCollection> dataCollectionList = dataCollectionRepository.findByDataflowId(dataflowId)
+        .stream().sorted(Comparator.comparing(DataCollection::getId)).collect(Collectors.toList());
     List<EUDataset> euDatasetList = euDatasetRepository.findByDataflowId(dataflowId);
 
     Map<Long, Long> relatedDatasetsByIds =
@@ -204,7 +206,6 @@ public class EUDatasetServiceImpl implements EUDatasetService {
 
     List<Long> providersId = reportings.stream().map(ReportingDatasetVO::getDataProviderId)
         .distinct().collect(Collectors.toList());
-    providersId.stream().distinct().collect(Collectors.toList());
 
     for (Long providerId : providersId) {
       // Release locks to avoid a provider can release a snapshot

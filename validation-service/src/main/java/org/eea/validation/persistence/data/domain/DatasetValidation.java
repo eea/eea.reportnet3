@@ -16,7 +16,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * The Class Record.
+ * The Class DatasetValidation.
  */
 @Entity
 @Getter
@@ -25,9 +25,7 @@ import lombok.ToString;
 @Table(name = "DATASET_VALIDATION")
 public class DatasetValidation {
 
-  /**
-   * The id.
-   */
+  /** The id. */
   @Id
   @SequenceGenerator(name = "dataset_validation_sequence_generator",
       sequenceName = "dataset_validation_sequence", allocationSize = 1)
@@ -36,7 +34,7 @@ public class DatasetValidation {
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
-  /** The id field. */
+  /** The dataset value. */
   @ManyToOne
   @JoinColumn(name = "ID_DATASET")
   private DatasetValue datasetValue;

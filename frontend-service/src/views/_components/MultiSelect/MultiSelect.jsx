@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 
 import classNames from 'classnames';
 
+import styles from './MultiSelect.module.scss';
+
 import { MultiSelectHeader } from './_components/MultiSelectHeader';
 import { MultiSelectItem } from './_components/MultiSelectItem';
 import { MultiSelectPanel } from './_components/MultiSelectPanel';
@@ -47,6 +49,7 @@ export class MultiSelect extends Component {
     optionLabel: null,
     optionValue: null,
     options: null,
+    panelClassName: null,
     placeholder: null,
     scrollHeight: '200px',
     selectedItemTemplate: null,
@@ -91,6 +94,7 @@ export class MultiSelect extends Component {
     optionLabel: PropTypes.string,
     options: PropTypes.array,
     optionValue: PropTypes.string,
+    panelClassName: PropTypes.string,
     placeholder: PropTypes.string,
     scrollHeight: PropTypes.string,
     selectedItemsLabel: PropTypes.string,
@@ -457,27 +461,26 @@ export class MultiSelect extends Component {
   }
 
   getLabel() {
-    let label;
-
-    if (!this.isEmpty() && !this.props.fixedPlaceholder) {
-      label = '';
-      for (let i = 0; i < this.props.value.length; i++) {
-        if (i !== 0) {
-          label += this.props.addSpaceAfterSeparator ? `${this.props.valuesSeparator} ` : this.props.valuesSeparator;
-        }
-        label += this.findLabelByValue(this.props.value[i]);
-      }
-
-      if (this.props.hasSelectedItemsLabel) {
-        if (this.props.value.length <= this.props.maxSelectedLabels) {
-          return label;
-        } else {
-          return this.getSelectedItemsLabel();
-        }
-      }
+    if (this.isEmpty() || this.props.fixedPlaceholder) {
+      return '';
     }
 
-    return label;
+    if (this.props.hasSelectedItemsLabel) {
+      const label = this.props.value
+        .map(value => this.findLabelByValue(value))
+        .filter(item => item !== null)
+        .join(this.props.addSpaceAfterSeparator ? `${this.props.valuesSeparator} ` : this.props.valuesSeparator);
+
+      if (label === '') {
+        return [];
+      }
+
+      if (this.props.value.length <= this.props.maxSelectedLabels) {
+        return label;
+      } else {
+        return this.getSelectedItemsLabel();
+      }
+    }
   }
 
   getLabelContent() {
@@ -545,7 +548,7 @@ export class MultiSelect extends Component {
 
     return this.props.hasSelectedItemsLabel ? (
       this.props.isLoadingData ? (
-        <Spinner style={{ top: 0, width: '25px', height: '25px' }} />
+        <Spinner className={styles.spinner} />
       ) : (
         <div
           className="p-multiselect-label-container"
@@ -624,6 +627,7 @@ export class MultiSelect extends Component {
           header={header}
           label={this.props.label}
           onClick={this.onPanelClick}
+          panelClassName={this.props.panelClassName}
           ref={el => (this.panel = el)}
           scrollHeight={this.props.scrollHeight}>
           {items}

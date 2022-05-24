@@ -1,5 +1,5 @@
 import { useContext, useEffect, useLayoutEffect, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -25,14 +25,13 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 
 import { ErrorUtils } from 'views/_functions/Utils';
 
-export const PublicFrontpage = withRouter(({ history, match }) => {
+export const PublicFrontpage = () => {
+  const navigate = useNavigate();
+  const { errorType: urlErrorType } = useParams();
+
   const notificationContext = useContext(NotificationContext);
   const themeContext = useContext(ThemeContext);
   const [contentStyles, setContentStyles] = useState({});
-
-  const {
-    params: { errorType: urlErrorType }
-  } = match;
 
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_INDEX });
 
@@ -52,7 +51,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
 
   const handleRedirect = (e, target) => {
     if (e.button === 0) {
-      return history.push(target);
+      return navigate(target);
     } else if (e.button === 1) {
       window.open(target, '_blank');
     }
@@ -62,7 +61,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
     <PublicLayout>
       <div className={styles.content} style={contentStyles}>
         <div className={styles.mainTextWrapper}>
-          <div className={`rep-container`}>
+          <div className="rep-container">
             <div className={`${styles.pageContent} rep-row`}>
               <div className={styles.frontText}>
                 <div className={styles.text}>
@@ -72,8 +71,8 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                       <p>
                         Reportnet 3 is the new e-Reporting platform for reporting environmental and climate data to the
                         European Environment Agency (EEA). The platform embraces the strategic goals of the European
-                        Commission’s Green Deal and Digital Strategy and will host reporting tasks on behalf of EEA and
-                        the Commission.
+                        Commission's Green Deal and Digital Strategy and hosts reporting tasks on behalf of EEA and the
+                        Commission.
                       </p>
                     </div>
                     <div className={styles.column}>
@@ -120,11 +119,11 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                         role="presentation"
                       />
                     </div>
-                    <h4>Support documents:</h4>
+                    <h4>Supporting documents:</h4>
                     <ul>
                       <li>
                         <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/howto_login_reportnet3.0`}
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/howto_login_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">
                           Login
@@ -132,7 +131,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                       </li>
                       <li>
                         <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/reporter_howto_reportnet3.0`}
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/reporter_howto_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">
                           Reporter
@@ -140,7 +139,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                       </li>
                       <li>
                         <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/requester_howto_reportnet3.0`}
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/requester_howto_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">
                           Requester
@@ -148,10 +147,18 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
                       </li>
                       <li>
                         <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/webforms_howto_reportnet3.0`}
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/webforms_howto_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">
                           Webforms
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/api_howto_reportnet3`}
+                          rel="noopener noreferrer"
+                          target="_blank">
+                          API
                         </a>
                       </li>
                     </ul>
@@ -161,7 +168,7 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
             </div>
           </div>
         </div>
-        <div className={`rep-container`}>
+        <div className="rep-container">
           <div className={`${styles.pageContent} rep-row`}>
             <div className={styles.showPublicBox}>
               <div className={styles.title}>
@@ -214,4 +221,4 @@ export const PublicFrontpage = withRouter(({ history, match }) => {
       </div>
     </PublicLayout>
   );
-});
+};

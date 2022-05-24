@@ -1,10 +1,9 @@
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import { config } from 'conf';
 import { routes } from 'conf/routes';
 
 import camelCase from 'lodash/camelCase';
-import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -13,8 +12,11 @@ import styles from './NotificationsList.module.scss';
 
 import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Dialog } from 'views/_components/Dialog';
+import { DatasetService } from 'services/DatasetService';
 import { DataTable } from 'views/_components/DataTable';
+import { DownloadFile } from 'views/_components/DownloadFile';
 import { LevelError } from 'views/_components/LevelError';
 import { Spinner } from 'views/_components/Spinner';
 
@@ -22,21 +24,22 @@ import { NotificationService } from 'services/NotificationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'views/_functions/Contexts/UserContext';
 
-const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
+import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
+
+export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
 
   const [columns, setColumns] = useState([]);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
-  const [paginationInfo, setPaginationInfo] = useState({
-    recordsPerPage: userContext.userProps.rowsPerPage,
-    firstPageRecord: 0
-  });
+  const [paginationInfo, setPaginationInfo] = useState({ recordsPerPage: 10, firstPageRecord: 0 });
   const [totalRecords, setTotalRecords] = useState(0);
+
+  const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
   useEffect(() => {
     const headers = [
@@ -62,12 +65,12 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       }
     ];
 
-    let columnsArray = headers.map(col => (
+    const columnsArray = headers.map(col => (
       <Column body={col.template} field={col.id} header={col.header} key={col.id} style={col.style} />
     ));
 
     setColumns(columnsArray);
-  }, [userContext]);
+  }, []);
 
   useEffect(() => {
     if (!isEmpty(columns)) {
@@ -76,14 +79,15 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   }, [columns]);
 
   const getValidUrl = (url = '') => {
-    let newUrl = window.decodeURIComponent(url);
-    newUrl = newUrl.trim().replace(/\s/g, '');
+    const newUrl = window.decodeURIComponent(url).trim().replace(/\s/g, '');
 
-    if (/^(:\/\/)/.test(newUrl)) return `http${newUrl}`;
-
-    if (!/^(f|ht)tps?:\/\//i.test(newUrl)) return `//${newUrl}`;
-
-    return newUrl;
+    if (/^(:\/\/)/.test(newUrl)) {
+      return `http${newUrl}`;
+    } else if (!/^(f|ht)tps?:\/\//i.test(newUrl)) {
+      return `//${newUrl}`;
+    } else {
+      return newUrl;
+    }
   };
 
   const linkTemplate = rowData => {
@@ -108,15 +112,12 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       }}></label>
   );
 
-  const notificationLevelTemplate = rowData => {
-    return (
-      !isNil(rowData.levelError) && (
-        <div className={styles.notificationLevelTemplateWrapper}>
-          <LevelError type={rowData.levelError.toLowerCase()} />
-        </div>
-      )
+  const notificationLevelTemplate = rowData =>
+    !isNil(rowData.levelError) && (
+      <div className={styles.notificationLevelTemplateWrapper}>
+        <LevelError type={rowData.levelError.toLowerCase()} />
+      </div>
     );
-  };
 
   const onChangePage = event => {
     setPaginationInfo({ ...paginationInfo, recordsPerPage: event.rows, firstPageRecord: event.first });
@@ -131,6 +132,13 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
   const notificationsFooter = (
     <div>
       <Button
+        className="p-button-rounded p-button-secondary"
+        icon="trash"
+        label={resourcesContext.messages['deleteUsersNotificationsData']}
+        onClick={() => setIsDeleteDialogVisible(true)}
+        visible={false}
+      />
+      <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         icon="cancel"
         id="cancelNotification"
@@ -139,6 +147,40 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
       />
     </div>
   );
+
+  const downloadExportFMEFile = async notification => {
+    try {
+      const getFileName = () => {
+        const extension = notification.content.fileName.split('.').pop();
+        return `${notification.content.datasetName}.${extension}`;
+      };
+
+      let datasetData;
+
+      if (notification) {
+        if (notification.content.providerId) {
+          const { data } = await DatasetService.downloadExportFile(
+            notification.content.datasetId,
+            notification.content.fileName,
+            notification.content.providerId
+          );
+          datasetData = data;
+        } else {
+          const { data } = await DatasetService.downloadExportFile(
+            notification.content.datasetId,
+            notification.content.fileName
+          );
+          datasetData = data;
+        }
+        DownloadFile(datasetData, getFileName());
+      }
+    } catch (error) {
+      console.error('NotificationsList - downloadExportFMEFile.', error);
+      notificationContext.add({ type: 'DOWNLOAD_FME_FILE_ERROR' }, true);
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
+  };
 
   const onLoadNotifications = async (fRow, nRows) => {
     try {
@@ -154,6 +196,11 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           content: notification.content,
           date: notification.date,
           message: resourcesContext.messages[camelCase(notification.type)],
+          onClick:
+            notification.type === 'EXTERNAL_EXPORT_DESIGN_COMPLETED_EVENT' ||
+            notification.type === 'EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT'
+              ? () => downloadExportFMEFile(notification)
+              : null,
           routes,
           type: notification.type
         });
@@ -169,17 +216,13 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           key: notification.key,
           message: notification.message,
           levelError: capitalizedLevelError,
-          date: dayjs(notification.date).format(
-            `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-              userContext.userProps.amPm24h ? '' : ' A'
-            }`
-          ),
+          date: getDateTimeFormatByUserPreferences(notification.date),
 
           downloadButton: notification.onClick ? (
             <span className={styles.center}>
               <Button
                 className={`${styles.columnActionButton}`}
-                icon={'export'}
+                icon="export"
                 label={resourcesContext.messages['downloadFile']}
                 onClick={() => notification.onClick()}
               />
@@ -227,46 +270,74 @@ const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) 
           {columns}
         </DataTable>
       );
+    } else if (isLoading) {
+      return (
+        <div className={styles.loadingSpinner}>
+          <Spinner className={styles.spinnerPosition} />
+        </div>
+      );
     } else {
-      if (isLoading) {
-        return (
-          <div className={styles.loadingSpinner}>
-            <Spinner className={styles.spinnerPosition} />
-          </div>
-        );
-      } else {
-        return (
-          <div className={styles.notificationsWithoutTable}>
-            <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
-          </div>
-        );
-      }
+      return (
+        <div className={styles.notificationsWithoutTable}>
+          <div className={styles.noNotifications}>{resourcesContext.messages['noNotifications']}</div>
+        </div>
+      );
     }
   };
 
-  const newNotificationsClassName = rowData => {
-    return {
-      'p-highlight-bg': rowData.index < notificationContext.all.filter(notification => !notification.isSystem).length
-    };
+  const newNotificationsClassName = rowData => ({
+    'p-highlight-bg': rowData.index < notificationContext.all.filter(notification => !notification.isSystem).length
+  });
+
+  const onDelete = async () => {
+    try {
+      setIsDeleting(true);
+      await notificationContext.deleteAll();
+      await NotificationService.deleteAll();
+    } catch (error) {
+      console.error('NotificationsList - onDelete.', error);
+      notificationContext.add({ type: 'DELETE_USER_NOTIFICATIONS_ERROR' }, true);
+    } finally {
+      onLoadNotifications();
+      setIsDeleteDialogVisible(false);
+      setIsDeleting(false);
+    }
   };
 
-  return (
-    isNotificationVisible && (
-      <Dialog
-        blockScroll={false}
-        className="edit-table"
-        contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
-        footer={notificationsFooter}
-        header={resourcesContext.messages['notifications']}
-        modal={true}
-        onHide={onHideNotificationsList}
-        style={{ width: '80%' }}
-        visible={isNotificationVisible}
-        zIndex={3100}>
-        {renderNotifications()}
-      </Dialog>
-    )
-  );
-};
+  const renderNotificationsListContent = () => {
+    if (isNotificationVisible) {
+      return (
+        <Fragment>
+          <Dialog
+            blockScroll={false}
+            className="edit-table"
+            contentStyle={{ height: '50%', maxHeight: '80%', overflow: 'auto' }}
+            footer={notificationsFooter}
+            header={resourcesContext.messages['notifications']}
+            modal={true}
+            onHide={onHideNotificationsList}
+            style={{ width: '80%' }}
+            visible={isNotificationVisible}>
+            {renderNotifications()}
+          </Dialog>
+          {isDeleteDialogVisible && (
+            <ConfirmDialog
+              classNameConfirm="p-button-danger"
+              disabledConfirm={isDeleting}
+              header={resourcesContext.messages['deleteUsersNotificationsHeader']}
+              iconConfirm={isDeleting ? 'spinnerAnimate' : 'check'}
+              labelCancel={resourcesContext.messages['no']}
+              labelConfirm={resourcesContext.messages['yes']}
+              onConfirm={onDelete}
+              onHide={() => setIsDeleteDialogVisible(false)}
+              visible={isDeleteDialogVisible}>
+              {resourcesContext.messages['deleteUsersNotificationsConfirm']}
+            </ConfirmDialog>
+          )}
+        </Fragment>
+      );
+    }
+  };
 
-export { NotificationsList };
+  return renderNotificationsListContent();
+};

@@ -20,6 +20,7 @@ import org.eea.interfaces.controller.communication.NotificationController.Notifi
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.lock.service.LockService;
 import org.junit.Before;
@@ -116,10 +117,25 @@ public class DatasetSnapshotControllerImplTest {
    */
   @Test
   public void testGetSnapshots() throws Exception {
-    when(datasetSnapshotService.getSnapshotsByIdDataset(Mockito.anyLong()))
+    when(datasetSnapshotService.getSnapshotsEnabledByIdDataset(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
-    datasetSnapshotControllerImpl.getSnapshotsByIdDataset(Mockito.anyLong());
-    Mockito.verify(datasetSnapshotService, times(1)).getSnapshotsByIdDataset(Mockito.any());
+    datasetSnapshotControllerImpl.getSnapshotsEnabledByIdDataset(Mockito.anyLong());
+    Mockito.verify(datasetSnapshotService, times(1))
+        .getSnapshotsEnabledByIdDataset(Mockito.anyLong());
+  }
+
+  /**
+   * Test get snapshots throw EEA exception.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testGetSnapshotsThrowEEAException() throws Exception {
+    Mockito.doThrow(EEAException.class).when(datasetSnapshotService)
+        .getSnapshotsEnabledByIdDataset(Mockito.anyLong());
+    datasetSnapshotControllerImpl.getSnapshotsEnabledByIdDataset(Mockito.anyLong());
+    Mockito.verify(datasetSnapshotService, times(1))
+        .getSnapshotsEnabledByIdDataset(Mockito.anyLong());
   }
 
   /**
@@ -168,7 +184,7 @@ public class DatasetSnapshotControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testGetSnapshotsException() throws Exception {
 
-    datasetSnapshotControllerImpl.getSnapshotsByIdDataset(null);
+    datasetSnapshotControllerImpl.getSnapshotsEnabledByIdDataset(null);
   }
 
   /**
@@ -422,6 +438,26 @@ public class DatasetSnapshotControllerImplTest {
   }
 
   /**
+   * Test delete schema snapshots exception lock VO not null.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testDeleteSchemaSnapshotsExceptionLockVONotNull() throws Exception {
+    LockVO importLockVO = new LockVO();
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(lockService.findByCriteria(Mockito.any())).thenReturn(importLockVO);
+    try {
+      datasetSnapshotControllerImpl.deleteSchemaSnapshot(1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.LOCKED, e.getStatus());
+      throw e;
+    }
+  }
+
+  /**
    * Restore snapshot test.
    */
   @Test(expected = ResponseStatusException.class)
@@ -432,6 +468,29 @@ public class DatasetSnapshotControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     datasetSnapshotControllerImpl.restoreSnapshot(null, 1L);
+  }
+
+  /**
+   * Test restore snapshot lock VO not null.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testRestoreSnapshotLockVONotNull() throws Exception {
+    LockVO importLockVO = new LockVO();
+
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    Mockito.when(lockService.findByCriteria(Mockito.any())).thenReturn(importLockVO);
+    try {
+      datasetSnapshotControllerImpl.restoreSnapshot(1L, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.LOCKED, e.getStatus());
+      throw e;
+    }
   }
 
   /**
@@ -449,6 +508,27 @@ public class DatasetSnapshotControllerImplTest {
     doThrow(new EEAException()).when(datasetSnapshotService).restoreSchemaSnapshot(Mockito.any(),
         Mockito.any());
     datasetSnapshotControllerImpl.restoreSchemaSnapshot(1L, 1L);
+  }
+
+  /**
+   * Test restore schema snapshots exception dataset id null.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void testRestoreSchemaSnapshotsExceptionDatasetIdNull() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    try {
+      datasetSnapshotControllerImpl.restoreSchemaSnapshot(null, 1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
   }
 
   /**
@@ -590,8 +670,8 @@ public class DatasetSnapshotControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     Mockito.when(authentication.getName()).thenReturn("user");
-    datasetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L, false);
-    Mockito.verify(datasetSnapshotService, times(1)).createReleaseSnapshots(1L, 1L, false);
+    datasetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L, false, true);
+    Mockito.verify(datasetSnapshotService, times(1)).createReleaseSnapshots(1L, 1L, false, true);
   }
 
   /**
@@ -609,12 +689,85 @@ public class DatasetSnapshotControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
     Mockito.when(authentication.getName()).thenReturn("user");
-    doThrow(new EEAException()).when(datasetSnapshotService).createReleaseSnapshots(1L, 1L, true);
+    doThrow(new EEAException()).when(datasetSnapshotService).createReleaseSnapshots(1L, 1L, true,
+        true);
     try {
-      datasetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L, true);
+      datasetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L, true, true);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.EXECUTION_ERROR, e.getReason());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the release snapshots throw release locks.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createReleaseSnapshotsThrowReleaseLocks() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setReleasable(true);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    doThrow(new EEAException()).when(datasetSnapshotService).createReleaseSnapshots(1L, 1L, true,
+        true);
+    doThrow(new EEAException()).when(datasetSnapshotService).releaseLocksRelatedToRelease(1L, 1L);
+    try {
+      datasetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L, true, true);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      assertEquals(EEAErrorMessage.EXECUTION_ERROR, e.getReason());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the release snapshots is reaseable throw.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createReleaseSnapshotsIsReaseableThrow() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setReleasable(false);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(dataflow);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    try {
+      datasetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L, true, true);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.PRECONDITION_FAILED, e.getStatus());
+      throw e;
+    }
+  }
+
+  /**
+   * Creates the release snapshots dataflow null throw.
+   *
+   * @throws Exception the exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void createReleaseSnapshotsDataflowNullThrow() throws Exception {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(dataflowControllerZull.getMetabaseById(Mockito.any())).thenReturn(null);
+    Mockito.when(authentication.getName()).thenReturn("user");
+    doThrow(new EEAException()).when(datasetSnapshotService).releaseLocksRelatedToRelease(1L, 1L);
+    try {
+      datasetSnapshotControllerImpl.createReleaseSnapshots(1L, 1L, true, true);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.PRECONDITION_FAILED, e.getStatus());
       throw e;
     }
   }
@@ -645,5 +798,28 @@ public class DatasetSnapshotControllerImplTest {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
     }
+  }
+
+  /**
+   * Test update snapshot disabled.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testUpdateSnapshotDisabled() throws Exception {
+    datasetSnapshotControllerImpl.updateSnapshotDisabled(1L);
+    Mockito.verify(datasetSnapshotService, times(1)).updateSnapshotDisabled(1L);
+  }
+
+  /**
+   * Test delete snapshot by dataset id and date released is null.
+   *
+   * @throws Exception the exception
+   */
+  @Test
+  public void testDeleteSnapshotByDatasetIdAndDateReleasedIsNull() throws Exception {
+    datasetSnapshotControllerImpl.deleteSnapshotByDatasetIdAndDateReleasedIsNull(1L);
+    Mockito.verify(datasetSnapshotService, times(1))
+        .deleteSnapshotByDatasetIdAndDateReleasedIsNull(1L);
   }
 }

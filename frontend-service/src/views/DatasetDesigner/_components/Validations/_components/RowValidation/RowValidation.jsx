@@ -74,7 +74,7 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
     if (!creationFormState.candidateRule.automatic) {
       setTabContents([
         <TabPanel
-          header={resourcesContext.messages.tabMenuConstraintData}
+          header={resourcesContext.messages['tabMenuConstraintData']}
           headerClassName={showErrorOnInfoTab ? styles.error : ''}
           key="rowInfoTab"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
@@ -88,7 +88,7 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
           />
         </TabPanel>,
         <TabPanel
-          header={resourcesContext.messages.tabMenuExpression}
+          header={resourcesContext.messages['tabMenuExpression']}
           headerClassName={showErrorOnExpressionTab ? styles.error : ''}
           key="rowExpressionTab"
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}>
@@ -96,6 +96,7 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
             componentName={componentName}
             creationFormState={creationFormState}
             dataflowType={dataflowType}
+            datasetId={datasetId}
             onAddNewExpression={onAddNewExpression}
             onAddNewExpressionIf={onAddNewExpressionIf}
             onAddNewExpressionThen={onAddNewExpressionThen}
@@ -107,12 +108,12 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
             onExpressionIfGroup={onExpressionIfGroup}
             onExpressionIfMarkToGroup={onExpressionIfMarkToGroup}
             onExpressionMarkToGroup={onExpressionMarkToGroup}
+            onExpressionsErrors={onExpressionsErrors}
             onExpressionThenDelete={onExpressionThenDelete}
             onExpressionThenFieldUpdate={onExpressionThenFieldUpdate}
             onExpressionThenGroup={onExpressionThenGroup}
             onExpressionThenMarkToGroup={onExpressionThenMarkToGroup}
             onExpressionTypeToggle={onExpressionTypeToggle}
-            onExpressionsErrors={onExpressionsErrors}
             onGetFieldType={onGetFieldType}
             onSetSqlSentence={onSetSqlSentence}
             tabsChanges={tabsChanges}
@@ -122,7 +123,7 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
     } else {
       setTabContents([
         <TabPanel
-          header={resourcesContext.messages.tabMenuConstraintData}
+          header={resourcesContext.messages['tabMenuConstraintData']}
           key="rowInfoTab"
           leftIcon={showErrorOnInfoTab ? 'pi pi-exclamation-circle' : ''}>
           <InfoTab
@@ -660,11 +661,11 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
 
     if (validationContext.ruleEdit && !isNil(creationFormState.candidateRule?.id)) {
       options.onClick = () => onUpdateValidationRule();
-      options.label = resourcesContext.messages.update;
+      options.label = resourcesContext.messages['update'];
       options.id = `${componentName}__update`;
     } else {
       options.onClick = () => onCreateValidationRule();
-      options.label = resourcesContext.messages.create;
+      options.label = resourcesContext.messages['create'];
       options.id = `${componentName}__create`;
     }
 
@@ -692,7 +693,7 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
           {getRuleCreationBtn()}
           {(creationFormState.isValidationCreationDisabled || isSubmitDisabled) && (
             <ReactTooltip border={true} className={styles.tooltipClass} effect="solid" id="createTooltip" place="top">
-              <span>{resourcesContext.messages.fcSubmitButtonDisabled}</span>
+              <span>{resourcesContext.messages['fcSubmitButtonDisabled']}</span>
             </ReactTooltip>
           )}
 
@@ -700,7 +701,7 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
             className="p-button-secondary p-button-text-icon-left p-button-animated-blink button-right-aligned"
             icon="cancel"
             id={`${componentName}__cancel`}
-            label={resourcesContext.messages.cancel}
+            label={resourcesContext.messages['cancel']}
             onClick={() => onHide()}
             type="button"
           />
@@ -716,8 +717,8 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
         footer={renderRowQCsFooter}
         header={
           validationContext.ruleEdit
-            ? resourcesContext.messages.editRowConstraint
-            : resourcesContext.messages.createRowConstraint
+            ? resourcesContext.messages['editRowConstraint']
+            : resourcesContext.messages['createRowConstraint']
         }
         onHide={() => onHide()}
         style={{ width: '975px' }}

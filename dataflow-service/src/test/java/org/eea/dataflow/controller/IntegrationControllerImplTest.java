@@ -1,6 +1,7 @@
 package org.eea.dataflow.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.times;
 import java.util.ArrayList;
@@ -13,7 +14,9 @@ import org.eea.dataflow.integration.executor.service.IntegrationExecutorService;
 import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.lock.service.LockService;
@@ -59,6 +62,9 @@ public class IntegrationControllerImplTest {
   @Mock
   private NotificationControllerZuul notificationControllerZuul;
 
+  /** The data set metabase controller zuul. */
+  @Mock
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /**
    * Inits the mocks.
@@ -388,6 +394,10 @@ public class IntegrationControllerImplTest {
    */
   @Test
   public void executeExternalIntegrationTest() throws EEAException {
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataSetName("datasetName");
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
 
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
@@ -404,6 +414,10 @@ public class IntegrationControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void executeExternalIntegrationExceptionTest() throws EEAException {
+    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
+    datasetMetabaseVO.setDataSetName("datasetName");
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(datasetMetabaseVO);
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
@@ -481,6 +495,36 @@ public class IntegrationControllerImplTest {
       integrationControllerImpl.deleteExportEuDatasetIntegration("5ce524fad31fc52540abae73");
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test
+  public void findExtensionsAndOperationsPrivateTest() throws EEAException {
+    List<IntegrationVO> integrations = new ArrayList<>();
+    IntegrationVO integration = new IntegrationVO();
+    integration.setId(1L);
+    integrations.add(integration);
+    Mockito.when(integrationService.getAllIntegrationsByCriteria(Mockito.any()))
+        .thenReturn(integrations);
+    Mockito.when(integrationService.getOnlyExtensionsAndOperations(Mockito.anyList()))
+        .thenReturn(integrations);
+    assertEquals(integrations,
+        integrationControllerImpl.findExtensionsAndOperationsPrivate(integration));
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void findExtensionsAndOperationsPrivateExceptionTest() throws EEAException {
+    try {
+      List<IntegrationVO> integrations = new ArrayList<>();
+      IntegrationVO integration = new IntegrationVO();
+      integration.setId(1L);
+      integrations.add(integration);
+      Mockito.doThrow(EEAException.class).when(integrationService)
+          .getAllIntegrationsByCriteria(Mockito.any());
+      integrationControllerImpl.findExtensionsAndOperationsPrivate(integration);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
       throw e;
     }
   }

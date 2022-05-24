@@ -1,0 +1,35 @@
+.block {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+
+  .inputFilter {
+    position: relative;
+    border-radius: 0px !important;
+    border: 0px !important;
+    font-size: 0.8333rem !important;
+    padding-left: 0em;
+
+    &:focus,
+    &:enabled:focus {
+      box-shadow: 0 0 0 0 var(--c-blue-120) !important;
+    }
+  }
+
+  .label {
+    font-size: 0.8333rem;
+    color: var(--font-filters) !important;
+  }
+}
+
+@media (min-width: 600px) {
+  .block {
+    width: 50% !important;
+  }
+}
+
+@media (max-width: 1695px) {
+  .block {
+    height: 3rem;
+  }
+}

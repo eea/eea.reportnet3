@@ -1,0 +1,11 @@
+.buttonPageLinks {
+  background-color: var(--paginator-dataflows-bg-hover) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.notHighlightButtonPageLinks {
+  &:hover {
+    border: var(--paginator-dataflows-pages-not-highlight-hover-border) !important;
+  }
+}

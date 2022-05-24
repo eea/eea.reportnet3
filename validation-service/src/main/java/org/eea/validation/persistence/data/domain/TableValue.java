@@ -29,8 +29,6 @@ import lombok.ToString;
 @Table(name = "TABLE_VALUE")
 public class TableValue {
 
-
-
   /**
    * The id.
    */

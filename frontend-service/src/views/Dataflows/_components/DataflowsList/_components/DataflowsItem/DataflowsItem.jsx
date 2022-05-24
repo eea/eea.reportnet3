@@ -20,7 +20,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { routes } from 'conf/routes';
 
-const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = () => {} }) => {
+export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = () => {} }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -56,31 +56,85 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
     }
   };
 
-  const layout = children => {
-    return (
-      <div
-        className={`${styles.container} ${styles.accepted} ${
-          styles[itemContent.status]
-        } dataflowList-first-dataflow-help-step`}
-        onMouseEnter={() => setIsPinShowed(true)}
-        onMouseLeave={() => setIsPinShowed(false)}>
-        <Link className={`${styles.containerLink}`} to={getUrl(routes.DATAFLOW, { dataflowId: itemContent.id }, true)}>
-          {children}
-        </Link>
-        <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>
-          <FontAwesomeIcon
-            aria-label={resourcesContext.messages['pinDataflow']}
-            className={`${isPinned ? styles.pinned : styles.notPinned} ${isPinning ? 'fa-spin' : null}`}
-            icon={!isPinning ? AwesomeIcons('pin') : AwesomeIcons('spinner')}
-            onClick={async () => {
-              setIsPinning(true);
-              await reorderDataflows(itemContent, !isPinned);
-              setIsPinning(false);
-            }}
-          />
-        </div>
+  const layout = children => (
+    <div
+      className={`${styles.container} ${styles.accepted} ${
+        styles[itemContent.status]
+      } dataflowList-first-dataflow-help-step`}
+      onMouseEnter={() => setIsPinShowed(true)}
+      onMouseLeave={() => setIsPinShowed(false)}>
+      <Link className={`${styles.containerLink}`} to={getUrl(routes.DATAFLOW, { dataflowId: itemContent.id }, true)}>
+        {children}
+      </Link>
+      <div className={`${styles.pinContainer} ${isPinShowed || isPinned ? styles.pinShowed : styles.pinHidden}`}>
+        <FontAwesomeIcon
+          alt={resourcesContext.messages['pinDataflow']}
+          aria-label={itemContent.pinned}
+          className={`${isPinned ? styles.pinned : styles.notPinned} ${isPinning ? 'fa-spin' : null}`}
+          icon={!isPinning ? AwesomeIcons('pin') : AwesomeIcons('spinner')}
+          onClick={async () => {
+            setIsPinning(true);
+            await reorderDataflows(itemContent, !isPinned);
+            setIsPinning(false);
+          }}
+          role="presentation"
+        />
       </div>
-    );
+    </div>
+  );
+
+  const renderReportingDatasetsStatus = () => {
+    const renderDeliveryStatus = () => {
+      if (itemContent.reportingDatasetsStatus === 'PENDING') {
+        return resourcesContext.messages['draft'].toUpperCase();
+      } else {
+        return resourcesContext.messages[config.datasetStatus[itemContent.reportingDatasetsStatus].label].toUpperCase();
+      }
+    };
+
+    if (
+      !isCustodian &&
+      !isNil(itemContent.reportingDatasetsStatus) &&
+      itemContent.statusKey === config.dataflowStatus.OPEN
+    ) {
+      return (
+        <p>
+          <span>{`${resourcesContext.messages['deliveryStatus']}: `}</span>
+          {renderDeliveryStatus()}
+        </p>
+      );
+    }
+  };
+
+  const renderCreationDate = () => {
+    if (isCustodian || isAdmin) {
+      return (
+        <div>
+          <span>{`${resourcesContext.messages['creationDate']}: `}</span>
+          <span className={`${styles.dateBlock}`}>
+            {dayjs(itemContent.creationDate).format(userContext.userProps.dateFormat)}
+          </span>
+        </div>
+      );
+    }
+  };
+
+  const renderTooltipDescription = () => {
+    if (itemContent.name.length > 70) {
+      return (
+        <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={idTooltip} place="top">
+          {itemContent.name}
+        </ReactTooltip>
+      );
+    }
+  };
+
+  const renderDeliveryDate = () => {
+    if (TextUtils.areEquals(itemContent.expirationDate, '-')) {
+      return resourcesContext.messages['pending'];
+    } else {
+      return dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat);
+    }
   };
 
   const idTooltip = uniqueId();
@@ -94,21 +148,10 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
 
       <div className={`${styles.dataflowDates}`}>
         <div>
-          {(isCustodian || isAdmin) && (
-            <div>
-              <span>{`${resourcesContext.messages['creationDate']}: `}</span>
-              <span className={`${styles.dateBlock}`}>
-                {dayjs(itemContent.creationDate).format(userContext.userProps.dateFormat)}
-              </span>
-            </div>
-          )}
+          {renderCreationDate()}
           <div>
             <span>{`${resourcesContext.messages['deliveryDate']}: `}</span>
-            <span className={`${styles.dateBlock}`}>
-              {TextUtils.areEquals(itemContent.expirationDate, '-')
-                ? resourcesContext.messages['pending']
-                : dayjs(itemContent.expirationDate).format(userContext.userProps.dateFormat)}
-            </span>
+            <span className={`${styles.dateBlock}`}>{renderDeliveryDate()}</span>
           </div>
         </div>
       </div>
@@ -118,24 +161,11 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
           {itemContent.name}
         </h3>
         <p>{itemContent.description}</p>
-        {itemContent.name.length > 70 && (
-          <ReactTooltip border={true} className={styles.tooltip} effect="solid" id={idTooltip} place="top">
-            {itemContent.name}
-          </ReactTooltip>
-        )}
+        {renderTooltipDescription()}
       </div>
 
       <div className={`${styles.status} dataflowList-status-help-step`}>
-        {!isCustodian &&
-          !isNil(itemContent.reportingDatasetsStatus) &&
-          itemContent.statusKey === config.dataflowStatus.OPEN && (
-            <p>
-              <span>{`${resourcesContext.messages['deliveryStatus']}: `}</span>
-              {itemContent.reportingDatasetsStatus === 'PENDING'
-                ? resourcesContext.messages['draft'].toUpperCase()
-                : itemContent.reportingDatasetsStatus.split('_').join(' ').toUpperCase()}
-            </p>
-          )}
+        {renderReportingDatasetsStatus()}
         <p>
           <span>{`${resourcesContext.messages['dataflowStatus']}: `}</span>
           {itemContent.status}
@@ -161,5 +191,3 @@ const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = (
     </Fragment>
   );
 };
-
-export { DataflowsItem };

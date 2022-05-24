@@ -3,12 +3,18 @@ import { useContext } from 'react';
 import { Button } from 'views/_components/Button';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const Footer = ({ hasWritePermissions, isDataflowOpen, isDesignDatasetEditorRead, onAddClick, onPasteClick }) => {
+export const Footer = ({
+  hasWritePermissions,
+  isDataflowOpen,
+  isDesignDatasetEditorRead,
+  onAddClick,
+  onPasteClick
+}) => {
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className="p-clearfix datasetSchema-addRecordsBar-help-step" style={{ width: '100%' }}>
       <Button
-        className={`p-button-secondary ${isDataflowOpen ? null : 'p-button-animated-blink'}`}
+        className={`${isDataflowOpen ? '' : 'p-button-animated-blink'}`}
         disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
         icon="add"
         label={resourcesContext.messages['addRecord']}
@@ -30,5 +36,3 @@ const Footer = ({ hasWritePermissions, isDataflowOpen, isDesignDatasetEditorRead
     </div>
   );
 };
-
-export { Footer };

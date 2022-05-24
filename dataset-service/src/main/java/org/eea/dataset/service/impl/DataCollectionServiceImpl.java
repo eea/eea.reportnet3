@@ -7,7 +7,6 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.eea.dataset.mapper.DataCollectionMapper;
+import org.eea.dataset.persistence.metabase.domain.ChangesEUDataset;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -22,6 +22,7 @@ import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
 import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
 import org.eea.dataset.persistence.metabase.domain.TestDataset;
+import org.eea.dataset.persistence.metabase.repository.ChangesEUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
@@ -254,6 +255,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private IntegrationControllerZuul integrationControllerZuul;
 
+  @Autowired
+  private ChangesEUDatasetRepository changesEUDatasetRepository;
+
 
   /**
    * Gets the dataflow status.
@@ -390,7 +394,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   @Override
   @Async
-  public void createEmptyDataCollection(Long dataflowId, Date dueDate,
+  public void createEmptyDataCollection(Long dataflowId, LocalDateTime dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
       boolean referenceDataflow, boolean stopAndNotifyPKError) {
 
@@ -400,6 +404,27 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
 
   }
+
+  /**
+   * Gets the providers pending to copy into EU.
+   *
+   * @param euDatasetId the eu dataset id
+   * @return the providers pending to copy into EU
+   */
+  @Override
+  public List<String> getProvidersPendingToCopyIntoEU(Long euDatasetId) {
+
+    List<String> providers = new ArrayList<>();
+    String schemaId = dataSetMetabaseRepository.findDatasetSchemaIdById(euDatasetId);
+    Optional<DataCollection> dc = dataCollectionRepository.findFirstByDatasetSchema(schemaId);
+    if (dc.isPresent()) {
+      List<ChangesEUDataset> changes =
+          changesEUDatasetRepository.findDistinctByDatacollection(dc.get().getId());
+      providers = changes.stream().map(ChangesEUDataset::getProvider).collect(Collectors.toList());
+    }
+    return providers;
+  }
+
 
   /**
    * Update reporting datasets visibility.
@@ -413,7 +438,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   }
 
-
   /**
    * Manage data collection.
    *
@@ -425,7 +449,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param referenceDataflow the reference dataflow
    * @param stopAndNotifyPKError the stop and notify PK error
    */
-  private void manageDataCollection(Long dataflowId, Date dueDate, boolean isCreation,
+  private void manageDataCollection(Long dataflowId, LocalDateTime dueDate, boolean isCreation,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean referenceDataflow,
       boolean stopAndNotifyPKError) {
     String time = Timestamp.valueOf(LocalDateTime.now()).toString();
@@ -647,8 +671,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param referenceDataflow the reference dataflow
    * @throws SQLException the SQL exception
    */
-  private void processDataCollectionAndRoles(Long dataflowId, Date dueDate, boolean isCreation,
-      boolean manualCheck, String time, List<DesignDatasetVO> designs,
+  private void processDataCollectionAndRoles(Long dataflowId, LocalDateTime dueDate,
+      boolean isCreation, boolean manualCheck, String time, List<DesignDatasetVO> designs,
       List<DesignDatasetVO> referenceDatasets, List<RepresentativeVO> representatives,
       Map<Long, String> map, List<Long> dataCollectionIds, Map<Long, List<String>> datasetIdsEmails,
       Map<Long, List<String>> referenceDatasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
@@ -764,11 +788,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           referenceDatasetIds.add(r.getId());
           for (RepresentativeVO representative : representatives) {
             List<String> emails = representative.getLeadReporters().stream()
+                .filter(leadReporter -> !Boolean.TRUE.equals(leadReporter.getInvalid()))
                 .map(LeadReporterVO::getEmail).collect(Collectors.toList());
-            if (emails.isEmpty()) {
-              referenceDatasetIdsEmails.put(r.getId(), null);
+            if (!emails.isEmpty()) {
+              if (referenceDatasetIdsEmails.containsKey(r.getId())) {
+                referenceDatasetIdsEmails.get(r.getId()).addAll(emails);
+              } else {
+                referenceDatasetIdsEmails.put(r.getId(), emails);
+              }
             } else {
-              referenceDatasetIdsEmails.put(r.getId(), emails);
+              if (!referenceDatasetIdsEmails.containsKey(r.getId())) {
+                referenceDatasetIdsEmails.put(r.getId(), new ArrayList<>());
+              }
             }
           }
         });
@@ -1097,7 +1128,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @throws SQLException the SQL exception
    */
   private Long persistDC(Statement metabaseStatement, DesignDatasetVO design, String time,
-      Long dataflowId, Date dueDate) throws SQLException {
+      Long dataflowId, LocalDateTime dueDate) throws SQLException {
     try (ResultSet rs = metabaseStatement.executeQuery(String.format(INSERT_DC_INTO_DATASET, time,
         dataflowId, String.format(NAME_DC, design.getDataSetName().replace("'", "''")),
         design.getDatasetSchema()))) {
@@ -1222,7 +1253,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       for (int i = 0; i < size; i += 10) {
         resourceManagementControllerZuul
             .deleteResourceByDatasetId(groups.subList(i, i + 10 > size ? size : i + 10).stream()
-                .map(ResourceInfoVO::getResourceId).collect(Collectors.toList()));
+                .map(ResourceInfoVO::getResourceId).distinct().collect(Collectors.toList()));
       }
       throw new EEAException(e);
     }
@@ -1290,6 +1321,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         findUsersByGroup(ResourceGroupEnum.DATAFLOW_CUSTODIAN.getGroupName(dataflowId));
     List<UserRepresentationVO> observers =
         findUsersByGroup(ResourceGroupEnum.DATAFLOW_OBSERVER.getGroupName(dataflowId));
+    List<UserRepresentationVO> custodiansSupport =
+        findUsersByGroup(ResourceGroupEnum.DATAFLOW_STEWARD_SUPPORT.getGroupName(dataflowId));
 
     for (Long dataCollectionId : dataCollectionIds) {
 
@@ -1304,6 +1337,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       // Create DataCollection-%s-DATA_OBSERVER
       groups.add(createGroup(dataCollectionId, ResourceTypeEnum.DATA_COLLECTION,
           SecurityRoleEnum.DATA_OBSERVER));
+
+      // Create DataCollection-%s-STEWARD_SUPPORT
+      groups.add(createGroup(dataCollectionId, ResourceTypeEnum.DATA_COLLECTION,
+          SecurityRoleEnum.STEWARD_SUPPORT));
 
       // Assign DataCollection-%s-DATA_STEWARD
       for (UserRepresentationVO steward : stewards) {
@@ -1322,6 +1359,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         assignments.add(createAssignments(dataCollectionId, observer.getEmail(),
             ResourceGroupEnum.DATACOLLECTION_OBSERVER));
       }
+
+      // Assign DataCollection-%s-STEWARD_SUPPORT
+      for (UserRepresentationVO custodianSupport : custodiansSupport) {
+        assignments.add(createAssignments(dataCollectionId, custodianSupport.getEmail(),
+            ResourceGroupEnum.DATACOLLECTION_STEWARD_SUPPORT));
+      }
     }
 
     for (Long euDatasetId : euDatasetIds) {
@@ -1337,6 +1380,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       // Create EUDataset-%s-DATA_OBSERVER
       groups.add(
           createGroup(euDatasetId, ResourceTypeEnum.EU_DATASET, SecurityRoleEnum.DATA_OBSERVER));
+
+
+      // Create EUDataset-%s-STEWARD_SUPPORT
+      groups.add(
+          createGroup(euDatasetId, ResourceTypeEnum.EU_DATASET, SecurityRoleEnum.STEWARD_SUPPORT));
 
 
       // Assign DataCollection-%s-DATA_STEWARD
@@ -1356,6 +1404,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         assignments.add(createAssignments(euDatasetId, observer.getEmail(),
             ResourceGroupEnum.EUDATASET_OBSERVER));
       }
+
+      // Assign EUDataset-%s-STEWARD_SUPPORT
+      for (UserRepresentationVO custodianSupport : custodiansSupport) {
+        assignments.add(createAssignments(euDatasetId, custodianSupport.getEmail(),
+            ResourceGroupEnum.EUDATASET_STEWARD_SUPPORT));
+      }
     }
 
     for (Long testDatasetId : testDatasetIds) {
@@ -1368,6 +1422,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       groups.add(createGroup(testDatasetId, ResourceTypeEnum.TEST_DATASET,
           SecurityRoleEnum.DATA_CUSTODIAN));
 
+      // Create TestDataset-%s-STEWARD_SUPPORT
+      groups.add(createGroup(testDatasetId, ResourceTypeEnum.TEST_DATASET,
+          SecurityRoleEnum.STEWARD_SUPPORT));
+
       // Assign TestDataset-%s-DATA_STEWARD
       for (UserRepresentationVO steward : stewards) {
         assignments.add(createAssignments(testDatasetId, steward.getEmail(),
@@ -1378,6 +1436,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       for (UserRepresentationVO custodian : custodians) {
         assignments.add(createAssignments(testDatasetId, custodian.getEmail(),
             ResourceGroupEnum.TESTDATASET_CUSTODIAN));
+      }
+
+      // Assign TestDataset-%s-STEWARD_SUPPORT
+      for (UserRepresentationVO custodianSupport : custodiansSupport) {
+        assignments.add(createAssignments(testDatasetId, custodianSupport.getEmail(),
+            ResourceGroupEnum.TESTDATASET_STEWARD_SUPPORT));
       }
     }
 
@@ -1395,6 +1459,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         // Create ReferenceDataset-%s-DATA_OBSERVER
         groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
             SecurityRoleEnum.DATA_OBSERVER));
+
+        // Create ReferenceDataset-%s-STEWARD_SUPPORT
+        groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
+            SecurityRoleEnum.STEWARD_SUPPORT));
+
+        // Create ReferenceDataset-%s-LEAD_REPORTER
+        groups.add(createGroup(referenceDatasetId, ResourceTypeEnum.REFERENCE_DATASET,
+            SecurityRoleEnum.LEAD_REPORTER));
 
         // Assign ReferenceDataset-%s-DATA_STEWARD
         for (UserRepresentationVO steward : stewards) {
@@ -1414,6 +1486,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           assignments.add(createAssignments(referenceDatasetId, observer.getEmail(),
               ResourceGroupEnum.REFERENCEDATASET_OBSERVER));
         }
+
+        // Assign ReferenceDataset-%s-STEWARD_SUPPORT
+        for (UserRepresentationVO custodianSupport : custodiansSupport) {
+          assignments.add(createAssignments(referenceDatasetId, custodianSupport.getEmail(),
+              ResourceGroupEnum.REFERENCEDATASET_STEWARD_SUPPORT));
+        }
+
+
       }
 
       // Assign reporters
@@ -1422,7 +1502,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           for (String email : entry.getValue()) {
             LOG.info("Assign to the user {} reference dataset {}", email, referenceDatasetId);
             assignments.add(createAssignments(referenceDatasetId, email,
-                ResourceGroupEnum.REFERENCEDATASET_OBSERVER));
+                ResourceGroupEnum.REFERENCEDATASET_LEAD_REPORTER));
 
             // Assign Dataflow-%s-LEAD_REPORTER
             assignments.add(
@@ -1447,6 +1527,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       groups.add(
           createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.DATA_OBSERVER));
 
+      // Create Dataset-%s-STEWARD_SUPPORT
+      groups.add(
+          createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.STEWARD_SUPPORT));
+
       // Create Dataset-%s-LEAD_REPORTER
       groups.add(
           createGroup(entry.getKey(), ResourceTypeEnum.DATASET, SecurityRoleEnum.LEAD_REPORTER));
@@ -1467,6 +1551,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       for (UserRepresentationVO observer : observers) {
         assignments.add(createAssignments(entry.getKey(), observer.getEmail(),
             ResourceGroupEnum.DATASET_OBSERVER));
+      }
+
+      // Assign Dataset-%s-STEWARD_SUPPORT
+      for (UserRepresentationVO custodianSupport : custodiansSupport) {
+        assignments.add(createAssignments(entry.getKey(), custodianSupport.getEmail(),
+            ResourceGroupEnum.DATASET_STEWARD_SUPPORT));
       }
 
       if (null != entry.getValue()) {

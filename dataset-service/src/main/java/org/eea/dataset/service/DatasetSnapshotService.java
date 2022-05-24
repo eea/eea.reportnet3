@@ -43,6 +43,14 @@ public interface DatasetSnapshotService {
    */
   List<SnapshotVO> getSnapshotsByIdDataset(Long datasetId) throws EEAException;
 
+  /**
+   * Gets the snapshots enabled by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots enabled by id dataset
+   * @throws EEAException the EEA exception
+   */
+  List<SnapshotVO> getSnapshotsEnabledByIdDataset(Long datasetId) throws EEAException;
 
   /**
    * Adds the snapshot.
@@ -210,10 +218,11 @@ public interface DatasetSnapshotService {
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
    * @param restrictFromPublic the restrict from public
+   * @param validate the validate
    * @throws EEAException the EEA exception
    */
-  void createReleaseSnapshots(Long dataflowId, Long dataProviderId, boolean restrictFromPublic)
-      throws EEAException;
+  void createReleaseSnapshots(Long dataflowId, Long dataProviderId, boolean restrictFromPublic,
+      boolean validate) throws EEAException;
 
 
   /**
@@ -235,4 +244,19 @@ public interface DatasetSnapshotService {
    */
   PartitionDataSetMetabase obtainPartition(final Long datasetId, final String user)
       throws EEAException;
+
+  /**
+   * Update snapshot disabled.
+   *
+   * @param datasetId the dataset id
+   */
+  public void updateSnapshotDisabled(Long datasetId);
+
+  /**
+   * Delete snapshot by dataset id and date released is null.
+   *
+   * @param datasetId the dataset id
+   */
+  public void deleteSnapshotByDatasetIdAndDateReleasedIsNull(Long datasetId);
+
 }

@@ -68,11 +68,13 @@ export class InputMask extends Component {
   }
 
   caret(first, last) {
-    let range, begin, end;
-
     if (!this.input.offsetParent || this.input !== document.activeElement) {
       return;
     }
+
+    let range;
+    let begin;
+    let end;
 
     if (typeof first === 'number') {
       begin = first;

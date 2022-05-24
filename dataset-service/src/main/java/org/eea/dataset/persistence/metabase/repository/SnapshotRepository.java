@@ -22,6 +22,15 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
   List<Snapshot> findByReportingDatasetIdOrderByCreationDateDesc(
       @Param("idReportingDataset") Long idDataset);
 
+  /**
+   * Find by reporting dataset id and enabled true order by creation date desc.
+   *
+   * @param idDataset the id dataset
+   * @return the list
+   */
+  List<Snapshot> findByReportingDatasetIdAndEnabledTrueOrderByCreationDateDesc(
+      @Param("idReportingDataset") Long idDataset);
+
 
   /**
    * Release snaphot.
@@ -89,4 +98,25 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
    */
   List<Snapshot> findByDataCollectionIdOrderByCreationDateDesc(@Param("idDataset") Long idDataset);
 
+  /**
+   * Update snapshot enabled false.
+   *
+   * @param idDataset the id dataset
+   */
+  @Transactional
+  @Modifying
+  @Query(nativeQuery = true,
+      value = "UPDATE snapshot SET enabled=false WHERE reporting_dataset_id=:idDataset")
+  void updateSnapshotEnabledFalse(@Param("idDataset") Long idDataset);
+
+  /**
+   * Delete snapshot by dataset id and date released is null.
+   *
+   * @param idDataset the id dataset
+   */
+  @Transactional
+  @Modifying
+  @Query(nativeQuery = true,
+      value = "DELETE FROM snapshot WHERE reporting_dataset_id=:idDataset AND date_released is null ")
+  void deleteSnapshotByDatasetIdAndDateReleasedIsNull(@Param("idDataset") Long idDataset);
 }

@@ -7,10 +7,19 @@ import { ReferenceDataflowUtils } from 'services/_utils/ReferenceDataflowUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 
 export const ReferenceDataflowService = {
-  getAll: async (accessRoles, contextRoles) => {
-    const referenceDataflowsDTO = await ReferenceDataflowRepository.getAll();
+  getAll: async ({ accessRoles, contextRoles, filterBy, numberRows, pageNum, sortBy }) => {
+    const { isAsc, sortByHeader } = DataflowUtils.parseRequestSortBy(sortBy);
+    const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
 
-    const referenceDataflows = referenceDataflowsDTO.data.map(referenceDataflowDTO => {
+    const referenceDataflowsDTO = await ReferenceDataflowRepository.getAll({
+      filterBy: filteredFilterBy,
+      isAsc,
+      numberRows,
+      pageNum,
+      sortBy: sortByHeader
+    });
+
+    const referenceDataflows = referenceDataflowsDTO.data.dataflows.map(referenceDataflowDTO => {
       referenceDataflowDTO.userRole = UserRoleUtils.getUserRoleByDataflow(
         referenceDataflowDTO.id,
         accessRoles,
@@ -19,7 +28,7 @@ export const ReferenceDataflowService = {
       return referenceDataflowDTO;
     });
 
-    return DataflowUtils.parseSortedDataflowListDTO(referenceDataflows);
+    return { ...referenceDataflowsDTO.data, dataflows: DataflowUtils.parseDataflowListDTO(referenceDataflows) };
   },
 
   create: async (name, description, type) => ReferenceDataflowRepository.create(name, description, type),

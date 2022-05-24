@@ -1,4 +1,5 @@
 import { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isUndefined from 'lodash/isUndefined';
@@ -17,7 +18,9 @@ import { UserService } from 'services/UserService';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 
-const ReportnetLogin = ({ history }) => {
+export const ReportnetLogin = () => {
+  const navigate = useNavigate();
+
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -58,7 +61,7 @@ const ReportnetLogin = ({ history }) => {
       try {
         const userObject = await UserService.oldLogin(userName, password);
         userContext.onLogin(userObject);
-        history.push(getUrl(routes.DATAFLOWS));
+        navigate(getUrl(routes.DATAFLOWS));
       } catch (error) {
         console.error('ReportnetLogin - onLogin.', error);
         notificationContext.add(
@@ -77,6 +80,8 @@ const ReportnetLogin = ({ history }) => {
       }
     }
   };
+
+  const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
   return (
     <div className="rp-container login">
@@ -143,8 +148,8 @@ const ReportnetLogin = ({ history }) => {
                 id="kc-login"
                 label={resourcesContext.messages['login']}
                 layout="simple"
-                onClick={() => onLogin()}
-                type="button"
+                onClick={onLogin}
+                type={isFirefox ? 'button' : 'submit'}
               />
             </fieldset>
           </form>
@@ -153,5 +158,3 @@ const ReportnetLogin = ({ history }) => {
     </div>
   );
 };
-
-export { ReportnetLogin };

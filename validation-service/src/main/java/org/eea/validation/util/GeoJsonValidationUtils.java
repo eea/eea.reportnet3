@@ -86,9 +86,8 @@ public class GeoJsonValidationUtils {
       if (result.length() == 0) {
         verifyJson(aux);
       }
-    } catch (JsonProcessingException | JSONException | JsonSyntaxException e) {
-      LOG.info("This field: {} is not a valid geometry. Reason: {}", fieldValue.getId(),
-          e.getMessage());
+    } catch (JsonProcessingException | JSONException | JsonSyntaxException
+        | IllegalArgumentException e) {
       if (e.getMessage().contains("VALUE_NULL")) {
         result = String.format("This Field constains null tokens on column: %s value: %s",
             fieldValue.getValue().indexOf("null"), fieldValue.getValue());

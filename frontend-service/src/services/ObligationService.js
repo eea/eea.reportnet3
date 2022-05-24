@@ -1,5 +1,8 @@
+import dayjs from 'dayjs';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+
+import utc from 'dayjs/plugin/utc';
 
 import { ObligationUtils } from 'services/_utils/ObligationUtils';
 
@@ -27,25 +30,32 @@ export const ObligationService = {
   },
 
   getOpen: async filterData => {
-    if (!isEmpty(filterData)) {
-      const countryId = !isNil(filterData.countries) ? filterData.countries.value : '';
-      const dateFrom =
-        !isNil(filterData.expirationDate) && filterData.expirationDate[0] ? filterData.expirationDate[0].getTime() : '';
-      const dateTo =
-        !isNil(filterData.expirationDate) && filterData.expirationDate[1] ? filterData.expirationDate[1].getTime() : '';
-      const issueId = !isNil(filterData.issues) ? filterData.issues.value : '';
-      const organizationId = !isNil(filterData.organizations) ? filterData.organizations.value : '';
-      const openedObligationsDTO = await ObligationRepository.getOpen(
-        countryId,
-        dateFrom,
-        dateTo,
-        issueId,
-        organizationId
-      );
-      return ObligationUtils.parseObligationList(openedObligationsDTO.data);
-    } else {
-      const openedObligationsDTO = await ObligationRepository.getOpen();
-      return ObligationUtils.parseObligationList(openedObligationsDTO.data);
-    }
+    dayjs.extend(utc);
+
+    const getOpenedObligationsDTO = async () => {
+      if (!isEmpty(filterData)) {
+        const countryId = !isNil(filterData.countries) ? filterData.countries.value : '';
+        const dateFrom =
+          !isNil(filterData.expirationDate) && filterData.expirationDate[0]
+            ? new Date(dayjs(filterData.expirationDate[0]).utc(true).valueOf()).getTime()
+            : '';
+        const dateTo =
+          !isNil(filterData.expirationDate) && filterData.expirationDate[1]
+            ? new Date(dayjs(filterData.expirationDate[1]).utc(true).endOf('day').valueOf()).getTime()
+            : '';
+        const issueId = !isNil(filterData.issues) ? filterData.issues.value : '';
+        const organizationId = !isNil(filterData.organizations) ? filterData.organizations.value : '';
+
+        return await ObligationRepository.getOpen(countryId, dateFrom, dateTo, issueId, organizationId);
+      } else {
+        return await ObligationRepository.getOpen();
+      }
+    };
+
+    const openedObligationsDTO = await getOpenedObligationsDTO();
+    const { totalRecords, filteredRecords, obligations } = openedObligationsDTO?.data;
+    const parseobligationList = ObligationUtils.parseObligationList(obligations);
+
+    return { filteredRecords, obligations: parseobligationList, totalRecords };
   }
 };

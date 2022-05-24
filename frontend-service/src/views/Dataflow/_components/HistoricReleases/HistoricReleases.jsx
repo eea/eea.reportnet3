@@ -1,14 +1,15 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer } from 'react';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import dayjs from 'dayjs';
-
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
 import uniqBy from 'lodash/uniqBy';
+
+import utc from 'dayjs/plugin/utc';
 
 import styles from './HistoricReleases.module.scss';
 
@@ -16,34 +17,35 @@ import { routes } from 'conf/routes';
 
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
-import { Filters } from 'views/_components/Filters';
+import { MyFilters } from 'views/_components/MyFilters';
 import { Spinner } from 'views/_components/Spinner';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { HistoricReleaseService } from 'services/HistoricReleaseService';
 
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
 
-import { TextUtils } from 'repositories/_utils/TextUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
+import { useFilters } from 'views/_functions/Hooks/useFilters';
+
+import { ColumnTemplateUtils } from 'views/_functions/Utils/ColumnTemplateUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
 export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
 
   const [historicReleasesState, historicReleasesDispatch] = useReducer(historicReleasesReducer, {
     data: [],
     dataProviderCodes: [],
-    filtered: false,
-    filteredData: [],
     isLoading: true
   });
+
+  const { filteredData, isFiltered } = useFilters('historicReleases');
 
   useEffect(() => {
     onLoadHistoricReleases();
@@ -54,24 +56,77 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     historicReleasesDispatch({ type: 'GET_DATA_PROVIDER_CODES', payload: { dataProviderCodes } });
   };
 
-  const getFiltered = value => historicReleasesDispatch({ type: 'IS_FILTERED', payload: { value } });
+  const getHistoricReleasesColumns = () => {
+    const getColumns = () => {
+      if (historicReleasesView === 'releaseDate' || historicReleasesView === 'reportingDataset') {
+        return [
+          {
+            key: 'releaseDate',
+            header: resourcesContext.messages['releaseDate'],
+            template: renderReleaseDateTemplate
+          }
+        ];
+      } else {
+        const columns = [
+          {
+            key: 'dataProviderCode',
+            header: TextByDataflowTypeUtils.getLabelByDataflowType(
+              resourcesContext.messages,
+              dataflowType,
+              'historicReleaseDataProviderColumnHeader'
+            ),
+            template: renderDataProviderLinkBodyColumn
+          }
+        ];
 
-  const getPaginatorRecordsCount = () => (
-    <Fragment>
-      {historicReleasesState.filtered && historicReleasesState.data.length !== historicReleasesState.filteredData.length
-        ? `${resourcesContext.messages['filtered']} : ${historicReleasesState.filteredData.length} | `
-        : ''}
-      {resourcesContext.messages['totalRecords']} {historicReleasesState.data.length}{' '}
-      {resourcesContext.messages['records'].toLowerCase()}
-      {historicReleasesState.filtered && historicReleasesState.data.length === historicReleasesState.filteredData.length
-        ? ` (${resourcesContext.messages['filtered'].toLowerCase()})`
-        : ''}
-    </Fragment>
-  );
+        if (historicReleasesView === 'dataCollection') {
+          columns.push(
+            {
+              key: 'isDataCollectionReleased',
+              header: resourcesContext.messages['isDataCollectionReleased'],
+              template: (rowData, column) =>
+                ColumnTemplateUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
+            },
+            {
+              key: 'isEUReleased',
+              header: resourcesContext.messages['isEUReleased'],
+              template: (rowData, column) =>
+                ColumnTemplateUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
+            }
+          );
+        }
+
+        columns.push(
+          {
+            key: 'releaseDate',
+            header: resourcesContext.messages['releaseDate'],
+            template: renderReleaseDateTemplate
+          },
+          {
+            key: 'isPublic',
+            header: resourcesContext.messages['isPublic'],
+            template: (rowData, column) =>
+              ColumnTemplateUtils.getCheckTemplate(rowData, column, styles.checkedValueColumn, styles.icon)
+          }
+        );
+
+        return columns;
+      }
+    };
+
+    return getColumns().map(column => (
+      <Column
+        body={column.template}
+        columnResizeMode="expand"
+        field={column.key}
+        header={column.header}
+        key={column.key}
+        sortable={true}
+      />
+    ));
+  };
 
   const isLoading = value => historicReleasesDispatch({ type: 'IS_LOADING', payload: { value } });
-
-  const onLoadFilteredData = data => historicReleasesDispatch({ type: 'FILTERED_DATA', payload: { data } });
 
   const onLoadHistoricReleases = async () => {
     try {
@@ -80,12 +135,10 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       if (isNil(datasetId)) {
         const data = await HistoricReleaseService.getAllRepresentative(dataflowId, dataProviderId);
         historicReleases = uniqBy(
-          data.map(historic => {
-            return {
-              releaseDate: historic.releaseDate,
-              dataProviderCode: historic.dataProviderCode
-            };
-          }),
+          data.map(historic => ({
+            releaseDate: historic.releaseDate,
+            dataProviderCode: historic.dataProviderCode
+          })),
           'releaseDate'
         );
       } else {
@@ -93,10 +146,12 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
         historicReleases = data;
       }
 
+      historicReleases = historicReleases.map(historic => ({ ...historic, isPublic: !historic.restrictFromPublic }));
       historicReleases.sort((a, b) => b.releaseDate - a.releaseDate);
+
       historicReleasesDispatch({
         type: 'INITIAL_LOAD',
-        payload: { data: historicReleases, filteredData: historicReleases, filtered: false }
+        payload: { data: historicReleases }
       });
       getDataProviderCode(historicReleases);
     } catch (error) {
@@ -108,14 +163,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   };
 
   const renderReleaseDateTemplate = rowData => {
+    dayjs.extend(utc);
     return (
-      <div className={styles.checkedValueColumn}>
-        {dayjs(rowData.releaseDate).format(
-          `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
-            userContext.userProps.amPm24h ? '' : ' A'
-          }`
-        )}
-      </div>
+      <div className={styles.checkedValueColumn}>{dayjs(rowData.releaseDate).utc().format('YYYY-MM-DD HH:mm:ss')}</div>
     );
   };
 
@@ -132,218 +182,122 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
     </div>
   );
 
-  const renderIsDataCollectionReleasedTemplate = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {rowData.isDataCollectionReleased ? (
-        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
-      ) : null}
-    </div>
-  );
-
-  const renderIsEUReleasedTemplate = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {rowData.isEUReleased ? (
-        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
-      ) : null}
-    </div>
-  );
-
-  const renderRestrictFromPublicTemplate = rowData => (
-    <div className={styles.checkedValueColumn}>
-      {!rowData.restrictFromPublic ? (
-        <FontAwesomeIcon className={styles.icon} icon={AwesomeIcons('check')} role="presentation" />
-      ) : null}
-    </div>
-  );
-
-  const renderDataCollectionColumns = historicReleases => {
-    const fieldColumns = Object.keys(historicReleases[0])
-      .filter(
-        key =>
-          key.includes('dataProviderCode') ||
-          key.includes('releaseDate') ||
-          key.includes('isDataCollectionReleased') ||
-          key.includes('isEUReleased') ||
-          key.includes('restrictFromPublic')
-      )
-      .map(field => {
-        let template = null;
-        if (field === 'dataProviderCode') template = renderDataProviderLinkBodyColumn;
-        if (field === 'releaseDate') template = renderReleaseDateTemplate;
-        if (field === 'isEUReleased') template = renderIsEUReleasedTemplate;
-        if (field === 'isDataCollectionReleased') template = renderIsDataCollectionReleasedTemplate;
-        if (field === 'restrictFromPublic') template = renderRestrictFromPublicTemplate;
-
-        return (
-          <Column
-            body={template}
-            columnResizeMode="expand"
-            field={field}
-            header={
-              TextUtils.areEquals(field, 'dataProviderCode')
-                ? TextByDataflowTypeUtils.getLabelByDataflowType(
-                    resourcesContext.messages,
-                    dataflowType,
-                    'historicReleaseDataProviderColumnHeader'
-                  )
-                : resourcesContext.messages[field]
-            }
-            key={field}
-            sortable={true}
-          />
-        );
-      });
-    return fieldColumns;
-  };
-
-  const renderEUDatasetColumns = historicReleases => {
-    const fieldColumns = Object.keys(historicReleases[0])
-      .filter(
-        key => key.includes('dataProviderCode') || key.includes('releaseDate') || key.includes('restrictFromPublic')
-      )
-      .map(field => {
-        let template = null;
-        if (field === 'dataProviderCode') template = renderDataProviderLinkBodyColumn;
-        if (field === 'releaseDate') template = renderReleaseDateTemplate;
-        if (field === 'restrictFromPublic') template = renderRestrictFromPublicTemplate;
-        return (
-          <Column
-            body={template}
-            columnResizeMode="expand"
-            field={field}
-            header={
-              TextUtils.areEquals(field, 'dataProviderCode')
-                ? TextByDataflowTypeUtils.getLabelByDataflowType(
-                    resourcesContext.messages,
-                    dataflowType,
-                    'historicReleaseDataProviderColumnHeader'
-                  )
-                : resourcesContext.messages[field]
-            }
-            key={field}
-            sortable={true}
-          />
-        );
-      });
-    return fieldColumns;
-  };
-
   const filterOptionsDataCollection = [
     {
-      type: 'multiselect',
-      properties: [
-        {
-          name: 'dataProviderCode',
-          label: TextByDataflowTypeUtils.getLabelByDataflowType(
-            resourcesContext.messages,
-            dataflowType,
-            'historicReleaseDataProviderFilterLabel'
-          )
-        }
-      ]
+      type: 'MULTI_SELECT',
+      key: 'dataProviderCode',
+      label: TextByDataflowTypeUtils.getLabelByDataflowType(
+        resourcesContext.messages,
+        dataflowType,
+        'historicReleaseDataProviderFilterLabel'
+      ),
+      multiSelectOptions: uniqBy(
+        historicReleasesState.data
+          .map(dataProvider => ({ type: dataProvider.dataProviderCode, value: dataProvider.dataProviderCode }))
+          .sort((a, b) => a.value.localeCompare(b.value)),
+        'type'
+      )
     },
     {
-      type: 'checkbox',
-      properties: [
+      type: 'CHECKBOX',
+      nestedOptions: [
         {
-          name: 'isDataCollectionReleased',
+          key: 'isDataCollectionReleased',
           label: resourcesContext.messages['onlyReleasedDataCollectionCheckboxLabel']
         },
-        { name: 'isEUReleased', label: resourcesContext.messages['onlyReleasedEUDatasetCheckboxLabel'] }
+        { key: 'isEUReleased', label: resourcesContext.messages['onlyReleasedEUDatasetCheckboxLabel'] }
       ]
     },
     {
-      type: 'multiselect',
-      properties: [{ name: 'restrictFromPublic', label: resourcesContext.messages['restrictFromPublic'] }]
+      type: 'MULTI_SELECT',
+      key: 'isPublic',
+      label: resourcesContext.messages['public'],
+      multiSelectOptions: [
+        { type: resourcesContext.messages['true'].toUpperCase(), value: true },
+        { type: resourcesContext.messages['false'].toUpperCase(), value: false }
+      ]
     }
   ];
 
   const filterOptionsEUDataset = [
     {
-      type: 'multiselect',
-      properties: [
+      type: 'MULTI_SELECT',
+      nestedOptions: [
         {
-          name: 'dataProviderCode',
+          key: 'dataProviderCode',
           label: TextByDataflowTypeUtils.getLabelByDataflowType(
             resourcesContext.messages,
             dataflowType,
             'historicReleaseDataProviderFilterLabel'
+          ),
+          multiSelectOptions: uniqBy(
+            historicReleasesState.data
+              .map(dataProvider => ({ type: dataProvider.dataProviderCode, value: dataProvider.dataProviderCode }))
+              .sort((a, b) => a.value.localeCompare(b.value)),
+            'type'
           )
         },
-        { name: 'restrictFromPublic', label: resourcesContext.messages['restrictFromPublic'] }
+        {
+          key: 'isPublic',
+          label: resourcesContext.messages['public'],
+          multiSelectOptions: [
+            { type: resourcesContext.messages['true'].toUpperCase(), value: true },
+            { type: resourcesContext.messages['false'].toUpperCase(), value: false }
+          ]
+        }
       ]
     }
   ];
 
-  const renderReportingDatasetColumns = historicReleases => {
-    const fieldColumns = Object.keys(historicReleases[0])
-      .filter(key => key.includes('releaseDate'))
-      .map(field => {
-        let template = null;
-        if (field === 'releaseDate') template = renderReleaseDateTemplate;
-        return (
-          <Column
-            body={template}
-            columnResizeMode="expand"
-            field={field}
-            header={resourcesContext.messages[field]}
-            key={field}
-            sortable={true}
-          />
-        );
-      });
-    return fieldColumns;
-  };
-
-  const getFilters = filterOptions => {
-    return (
-      <Filters
-        data={historicReleasesState.data}
-        getFilteredData={onLoadFilteredData}
-        getFilteredSearched={getFiltered}
-        options={filterOptions}
-      />
-    );
-  };
-
-  const renderFilters = () => {
-    if (historicReleasesView === 'dataCollection') {
-      return getFilters(filterOptionsDataCollection);
-    }
-
-    if (historicReleasesView === 'EUDataset') {
-      return getFilters(filterOptionsEUDataset);
-    }
-  };
+  const getFilters = filterOptions => (
+    <MyFilters
+      className="historicReleases"
+      data={historicReleasesState.data}
+      options={filterOptions}
+      viewType="historicReleases"
+    />
+  );
+  const renderFilters = () =>
+    historicReleasesView === 'dataCollection'
+      ? getFilters(filterOptionsDataCollection)
+      : getFilters(filterOptionsEUDataset);
 
   const renderHistoricReleasesTable = () => {
-    if (isEmpty(historicReleasesState.filteredData)) {
+    const getValueTable = () =>
+      historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset'
+        ? filteredData
+        : historicReleasesState.data;
+
+    if (isEmpty(filteredData) && (historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset')) {
       return (
         <div className={styles.emptyFilteredData}>
           {resourcesContext.messages['noHistoricReleasesWithSelectedParameters']}
         </div>
       );
-    } else {
-      return (
-        <DataTable
-          autoLayout={true}
-          className={
-            historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset' ? '' : styles.noFilters
-          }
-          paginator={true}
-          paginatorRight={getPaginatorRecordsCount()}
-          rows={10}
-          rowsPerPageOptions={[5, 10, 15]}
-          summary={resourcesContext.messages['historicReleases']}
-          totalRecords={historicReleasesState.filteredData.length}
-          value={historicReleasesState.filteredData}>
-          {historicReleasesView === 'dataCollection' && renderDataCollectionColumns(historicReleasesState.filteredData)}
-          {historicReleasesView === 'EUDataset' && renderEUDatasetColumns(historicReleasesState.filteredData)}
-          {historicReleasesView === 'reportingDataset' &&
-            renderReportingDatasetColumns(historicReleasesState.filteredData)}
-        </DataTable>
-      );
     }
+
+    return (
+      <DataTable
+        autoLayout={true}
+        className={
+          historicReleasesView === 'dataCollection' || historicReleasesView === 'EUDataset' ? '' : styles.noFilters
+        }
+        paginator={true}
+        paginatorRight={
+          <PaginatorRecordsCount
+            dataLength={historicReleasesState.data.length}
+            filteredDataLength={filteredData.length}
+            isFiltered={isFiltered}
+          />
+        }
+        rows={10}
+        rowsPerPageOptions={[5, 10, 15]}
+        summary={resourcesContext.messages['historicReleases']}
+        totalRecords={filteredData.length}
+        value={getValueTable()}>
+        {getHistoricReleasesColumns()}
+      </DataTable>
+    );
   };
 
   const renderHistoricReleasesContent = () => {

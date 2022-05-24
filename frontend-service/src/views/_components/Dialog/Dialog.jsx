@@ -1,12 +1,13 @@
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { useRecoilState } from 'recoil';
 import uniqueId from 'lodash/uniqueId';
 
 import styles from './Dialog.module.scss';
 
 import { Dialog as PrimeDialog } from 'primereact/dialog';
 
-import { DialogContext } from 'views/_functions/Contexts/DialogContext';
+import { dialogsStore } from 'views/_components/Dialog/_functions/Stores/dialogsStore';
 
 export const Dialog = ({
   blockScroll = true,
@@ -24,7 +25,9 @@ export const Dialog = ({
   zIndex = 5000
 }) => {
   const id = uniqueId();
-  const dialogContext = useContext(DialogContext);
+
+  const [openedDialogs, setOpenedDialogs] = useRecoilState(dialogsStore);
+
   const [dialogId, setDialogId] = useState('');
   const [maskStyle, setMaskStyle] = useState({
     display: visible ? 'flex' : 'none',
@@ -50,35 +53,37 @@ export const Dialog = ({
   useEffect(() => {
     const newDialogId = uniqueId();
     setDialogId(newDialogId);
-    dialogContext.add(newDialogId);
+    setOpenedDialogs(prev => [...prev, newDialogId]);
     return () => {
-      dialogContext.remove(dialogId);
-      restoreBodyScroll();
+      onDialogUnmount(dialogId);
     };
   }, []);
-
-  const restoreBodyScroll = () => {
-    if (dialogContext.open.length === 0) {
-      document.body.style.overflow = 'hidden auto';
-    }
-  };
 
   useEffect(() => {
     const body = document.querySelector('body');
     visible && (body.style.overflow = 'hidden');
-    return () => {
-      body.style.overflow = 'auto';
-    };
   }, [visible]);
 
   useEffect(() => {
-    if (dialogContext.open.indexOf(dialogId) >= 0) {
+    if (openedDialogs.indexOf(dialogId) >= 0) {
       setMaskStyle({
         ...maskStyle,
-        zIndex: zIndex + dialogContext.open.indexOf(dialogId)
+        zIndex: zIndex + openedDialogs.indexOf(dialogId)
       });
     }
-  }, [dialogContext.open]);
+  }, [openedDialogs]);
+
+  const onDialogUnmount = () => {
+    const filteredDialogs = openedDialogs.filter(dialog => dialog !== dialogId);
+    setOpenedDialogs(filteredDialogs);
+    restoreBodyScroll();
+  };
+
+  const restoreBodyScroll = () => {
+    if (openedDialogs.length === 0) {
+      document.body.style.overflow = 'hidden auto';
+    }
+  };
 
   return (
     <div className={dialogClass} style={maskStyle}>

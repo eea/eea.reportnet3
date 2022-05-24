@@ -58,7 +58,7 @@ export const IfThenClause = ({
             disabled={creationFormState.isRuleAddingDisabledIf}
             icon="plus"
             id={`${componentName}__addExpresionIf`}
-            label={resourcesContext.messages.addNewRule}
+            label={resourcesContext.messages['addNewRule']}
             onClick={() => onAddNewExpressionIf()}
             type="button"
           />
@@ -104,7 +104,7 @@ export const IfThenClause = ({
             disabled={creationFormState.isRuleAddingDisabledThen}
             icon="plus"
             id={`${componentName}__addExpresionThen`}
-            label={resourcesContext.messages.addNewRule}
+            label={resourcesContext.messages['addNewRule']}
             onClick={() => onAddNewExpressionThen()}
             type="button"
           />

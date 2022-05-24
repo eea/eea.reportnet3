@@ -1,5 +1,4 @@
 import { useContext } from 'react';
-import { withRouter } from 'react-router-dom';
 
 import styles from './PrivacyStatement.module.scss';
 
@@ -8,7 +7,7 @@ import { Title } from 'views/_components/Title';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-const PrivacyStatement = withRouter(() => {
+export const PrivacyStatement = () => {
   const resourcesContext = useContext(ResourcesContext);
 
   const onClickAnchorLink = e => {
@@ -31,19 +30,17 @@ const PrivacyStatement = withRouter(() => {
     });
   };
 
-  const layout = children => {
-    return (
-      <PublicLayout>
-        <div className>
-          <div className="rep-container">{children}</div>
-        </div>
-      </PublicLayout>
-    );
-  };
+  const layout = children => (
+    <PublicLayout>
+      <div className>
+        <div className="rep-container">{children}</div>
+      </div>
+    </PublicLayout>
+  );
 
   return layout(
     <div className="rep-row">
-      <div className={` rep-col-12 rep-col-sm-12`}>
+      <div className="rep-col-12 rep-col-sm-12">
         <Title
           icon="info"
           iconSize="4rem"
@@ -267,6 +264,4 @@ const PrivacyStatement = withRouter(() => {
       </div>
     </div>
   );
-});
-
-export { PrivacyStatement };
+};

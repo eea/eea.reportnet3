@@ -2,6 +2,7 @@ package org.eea.communication.controller;
 
 import java.util.List;
 import org.eea.communication.service.NotificationService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController;
 import org.eea.interfaces.vo.communication.SystemNotificationVO;
@@ -9,6 +10,8 @@ import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.communication.UserNotificationListVO;
 import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.eea.lock.annotation.LockCriteria;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -40,6 +43,9 @@ public class NotificationControllerImpl implements NotificationController {
   @Autowired
   private NotificationService notificationService;
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(NotificationControllerImpl.class);
+
   /**
    * Creates the user notification.
    *
@@ -54,7 +60,9 @@ public class NotificationControllerImpl implements NotificationController {
     try {
       notificationService.createUserNotification(userNotificationVO);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      LOG.error("Creating user notification produced an error: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.CREATING_NOTIFICATION);
     }
   }
 
@@ -75,7 +83,9 @@ public class NotificationControllerImpl implements NotificationController {
       userNotificationVO.setContent(content);
       notificationService.createUserNotification(userNotificationVO);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      LOG.error("Creating user notification produced an error: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.CREATING_NOTIFICATION);
     }
   }
 
@@ -93,7 +103,9 @@ public class NotificationControllerImpl implements NotificationController {
     try {
       notificationService.createSystemNotification(systemNotificationVO);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      LOG.error("Creating system notification produced an error: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.CREATING_SYSTEM_NOTIFICATION);
     }
   }
 
@@ -112,7 +124,9 @@ public class NotificationControllerImpl implements NotificationController {
     try {
       notificationService.deleteSystemNotification(systemNotificationId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      LOG.error("Deleting system notification produced an error: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DELETING_SYSTEM_NOTIFICATION);
     }
   }
 
@@ -130,7 +144,9 @@ public class NotificationControllerImpl implements NotificationController {
     try {
       notificationService.updateSystemNotification(systemNotificationVO);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+      LOG.error("Updating system notification produced an error: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.UPDATING_SYSTEM_NOTIFICATION);
     }
   }
 

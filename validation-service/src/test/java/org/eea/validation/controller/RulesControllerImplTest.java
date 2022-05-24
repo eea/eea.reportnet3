@@ -1,21 +1,38 @@
 package org.eea.validation.controller;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.DatasetHistoricRuleVO;
+import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.SqlRuleVO;
+import org.eea.validation.exception.EEAForbiddenSQLCommandException;
+import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
+import org.json.simple.parser.ParseException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -48,11 +65,23 @@ public class RulesControllerImplTest {
 
   @Mock
   private SqlRulesService sqlRulesService;
+
+  @Mock
+  private NotificationControllerZuul notificationControllerZuul;
+
+  /** The http servlet response. */
+  @Mock
+  private HttpServletResponse httpServletResponse;
+
   /** The security context. */
   SecurityContext securityContext;
 
   /** The authentication. */
   Authentication authentication;
+
+  /** The folder. */
+  @org.junit.Rule
+  public TemporaryFolder folder = new TemporaryFolder();
 
   /**
    * Inits the mocks.
@@ -604,4 +633,280 @@ public class RulesControllerImplTest {
 
   }
 
+  @Test
+  public void runSqlTest() throws EEAException {
+    SqlRuleVO sqlRule = new SqlRuleVO();
+    sqlRule.setSqlRule("SELECT * from dataset_1.table_value");
+    rulesControllerImpl.runSqlRule(1L, sqlRule, true);
+    Mockito.verify(sqlRulesService, times(1)).runSqlRule(1L, "SELECT * from dataset_1.table_value",
+        true);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void runSqlEEAForbiddenSQLCommandExceptionTest() throws EEAException {
+    SqlRuleVO sqlRule = new SqlRuleVO();
+    sqlRule.setSqlRule("DELETE * FROM DATASET_396.TABLE1");
+    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule.getSqlRule(), true))
+        .thenThrow(new EEAForbiddenSQLCommandException());
+    try {
+      rulesControllerImpl.runSqlRule(1L, sqlRule, true);
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.SQL_COMMAND_NOT_ALLOWED, e.getReason());
+      throw e;
+    }
+
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void runSqlEEAExceptionTest() throws EEAException {
+    SqlRuleVO sqlRule = new SqlRuleVO();
+    sqlRule.setSqlRule("DELETE * FROM DATASET_396.TABLE1");
+    Mockito.when(sqlRulesService.runSqlRule(1L, sqlRule.getSqlRule(), true))
+        .thenThrow(new EEAException());
+    try {
+      rulesControllerImpl.runSqlRule(1L, sqlRule, true);
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.RUNNING_RULE, e.getReason());
+      throw e;
+    }
+
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void getRuleHistoricExceptionTest() throws EEAException {
+    Mockito.doThrow(EEAException.class).when(rulesService).getRuleHistoricInfo(Mockito.anyLong(),
+        Mockito.any());
+    try {
+      rulesControllerImpl.getRuleHistoric(1L, "RULE_ID");
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test
+  public void getRuleHistoricTest() throws EEAException {
+    List<RuleHistoricInfoVO> historicExpected = new ArrayList<>();
+    RuleHistoricInfoVO ruleInfo = new RuleHistoricInfoVO();
+    ruleInfo.setExpression(true);
+    ruleInfo.setMetadata(false);
+    ruleInfo.setRuleBefore("");
+    ruleInfo.setRuleId("ruleid");
+    ruleInfo.setRuleInfoId("ruleinfoid");
+    ruleInfo.setStatus(false);
+    ruleInfo.setTimestamp(new Date());
+    ruleInfo.setUser("user");
+    historicExpected.add(ruleInfo);
+
+    Mockito.when(rulesService.getRuleHistoricInfo(Mockito.anyLong(), Mockito.any()))
+        .thenReturn(historicExpected);
+
+    assertEquals(rulesControllerImpl.getRuleHistoric(1L, "ruleId"), historicExpected);
+  }
+
+
+  @Test
+  public void getRuleHistoricByDatasetIdTest() {
+    DatasetHistoricRuleVO datasetHistoricVO = new DatasetHistoricRuleVO();
+    datasetHistoricVO.setRuleId("ruleId");
+    List<DatasetHistoricRuleVO> historic = new ArrayList<>();
+    historic.add(datasetHistoricVO);
+    Mockito.when(rulesService.getRuleHistoricInfoByDatasetId(Mockito.anyLong()))
+        .thenReturn(historic);
+    assertNotNull(rulesControllerImpl.getRuleHistoricByDatasetId(1L));
+  }
+
+  @Test
+  public void exportQCCSVTest() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+    rulesControllerImpl.exportQCCSV(1L);
+    Mockito.verify(rulesService, times(1)).exportQCCSV(Mockito.anyLong());
+  }
+
+  @Test
+  public void exportQCCSVExceptionTest() throws EEAException, IOException {
+    Mockito.doNothing().when(notificationControllerZuul)
+        .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
+    Mockito.doThrow(EEAException.class).when(rulesService).exportQCCSV(Mockito.anyLong());
+    rulesControllerImpl.exportQCCSV(1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void evaluateSqlRuleParseExceptionTest() throws EEAException, ParseException {
+    Mockito.doThrow(ParseException.class).when(sqlRulesService).evaluateSqlRule(Mockito.anyLong(),
+        Mockito.any());
+    try {
+      rulesControllerImpl.evaluateSqlRule(1L, new SqlRuleVO());
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void evaluateSqlRuleEEAInvalidSQLExceptionTest() throws EEAException, ParseException {
+    Mockito.doThrow(EEAInvalidSQLException.class).when(sqlRulesService)
+        .evaluateSqlRule(Mockito.anyLong(), Mockito.any());
+    try {
+      rulesControllerImpl.evaluateSqlRule(1L, new SqlRuleVO());
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void evaluateSqlRuleEEAForbiddenSQLCommandExceptionTest()
+      throws EEAException, ParseException {
+    Mockito.doThrow(EEAForbiddenSQLCommandException.class).when(sqlRulesService)
+        .evaluateSqlRule(Mockito.anyLong(), Mockito.any());
+    try {
+      rulesControllerImpl.evaluateSqlRule(1L, new SqlRuleVO());
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void evaluateSqlRuleEEAExceptionTest() throws EEAException, ParseException {
+    Mockito.doThrow(EEAException.class).when(sqlRulesService).evaluateSqlRule(Mockito.anyLong(),
+        Mockito.any());
+    try {
+      rulesControllerImpl.evaluateSqlRule(1L, new SqlRuleVO());
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void evaluateSqlRuleStringIndexOutOfBodundsExceptionTest()
+      throws EEAException, ParseException {
+    Mockito.doThrow(StringIndexOutOfBoundsException.class).when(sqlRulesService)
+        .evaluateSqlRule(Mockito.anyLong(), Mockito.any());
+    try {
+      rulesControllerImpl.evaluateSqlRule(1L, new SqlRuleVO());
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+
+  @Test
+  public void evaluateSqlRuleTest() throws EEAException, ParseException {
+    Mockito.when(sqlRulesService.evaluateSqlRule(Mockito.anyLong(), Mockito.any())).thenReturn(0.5);
+    assertNotNull(rulesControllerImpl.evaluateSqlRule(1L, new SqlRuleVO()));
+  }
+
+  @Test
+  public void findRuleSchemaByDatasetIdPrivateTest() {
+    rulesControllerImpl.findRuleSchemaByDatasetIdPrivate("schema", 1L);
+    Mockito.verify(rulesService, times(1)).getRulesSchemaByDatasetId(Mockito.anyString());
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void runSqlRuleNumberFormatExceptionTest() throws EEAException {
+    Mockito.doThrow(NumberFormatException.class).when(sqlRulesService).runSqlRule(Mockito.anyLong(),
+        Mockito.any(), Mockito.anyBoolean());
+    try {
+      SqlRuleVO sql = new SqlRuleVO();
+      sql.setSqlRule("sql");
+      rulesControllerImpl.runSqlRule(1L, sql, false);
+    } catch (NumberFormatException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void runSqlRuleStringIndexOutOfBoundsExceptionTest() throws EEAException {
+    Mockito.doThrow(StringIndexOutOfBoundsException.class).when(sqlRulesService)
+        .runSqlRule(Mockito.anyLong(), Mockito.any(), Mockito.anyBoolean());
+    try {
+      SqlRuleVO sql = new SqlRuleVO();
+      sql.setSqlRule("sql");
+      rulesControllerImpl.runSqlRule(1L, sql, false);
+    } catch (StringIndexOutOfBoundsException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  /**
+   * Run sql rule string EEA invalid SQL exception message test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void runSqlRuleStringEEAInvalidSQLExceptionMessageTest() throws EEAException {
+    EEAInvalidSQLException exception = new EEAInvalidSQLException("",
+        new EEAException("message", new EEAException("message", new EEAException("message"))));
+    Mockito.doThrow(exception).when(sqlRulesService).runSqlRule(Mockito.anyLong(), Mockito.any(),
+        Mockito.anyBoolean());
+    try {
+      SqlRuleVO sql = new SqlRuleVO();
+      sql.setSqlRule("sql");
+      rulesControllerImpl.runSqlRule(1L, sql, false);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  /**
+   * Run sql rule string EEA invalid SQL exception message null test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = ResponseStatusException.class)
+  public void runSqlRuleStringEEAInvalidSQLExceptionMessageNullTest() throws EEAException {
+    EEAInvalidSQLException exception = new EEAInvalidSQLException("",
+        new EEAException("message", new EEAException("message", new EEAException())));
+    Mockito.doThrow(exception).when(sqlRulesService).runSqlRule(Mockito.anyLong(), Mockito.any(),
+        Mockito.anyBoolean());
+    try {
+      SqlRuleVO sql = new SqlRuleVO();
+      sql.setSqlRule("sql");
+      rulesControllerImpl.runSqlRule(1L, sql, false);
+    } catch (ResponseStatusException e) {
+      assertNotNull(e);
+      assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+      throw e;
+    }
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void downloadQCCSVExceptionTest() throws IOException {
+    try {
+      Mockito.doThrow(IOException.class).when(rulesService).downloadQCCSV(Mockito.anyLong(),
+          Mockito.any());
+      rulesControllerImpl.downloadQCCSV(1L, "FILENAME", null);
+    } catch (IOException e) {
+      assertNotNull(e);
+      throw e;
+    }
+  }
+
+  /**
+   * Download QCCSV.
+   *
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Test
+  public void downloadQCCSV() throws IOException {
+    File file = folder.newFile("filename.txt");
+
+    ServletOutputStream outputStream = Mockito.mock(ServletOutputStream.class);
+
+    Mockito.when(rulesService.downloadQCCSV(Mockito.any(), Mockito.any())).thenReturn(file);
+    Mockito.when(httpServletResponse.getOutputStream()).thenReturn(outputStream);
+    Mockito.doNothing().when(outputStream).close();
+
+    rulesControllerImpl.downloadQCCSV(1L, "FILENAME", httpServletResponse);
+    Mockito.verify(outputStream, times(1)).close();
+  }
 }

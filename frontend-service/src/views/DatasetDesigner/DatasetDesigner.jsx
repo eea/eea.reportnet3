@@ -1,7 +1,7 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
-import { withRouter } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import ReactTooltip from 'react-tooltip';
 
-import camelCase from 'lodash/camelCase';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
@@ -16,9 +16,10 @@ import { DatasetSchemaRequesterWithTabsHelpConfig } from 'conf/help/datasetSchem
 import { Button } from 'views/_components/Button';
 import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { Checkbox } from 'views/_components/Checkbox';
-import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
-import { Dashboard } from 'views/_components/Dashboard';
+import { DatasetDashboardDialog } from 'views/_components/DatasetDashboardDialog';
+import { DatasetDeleteDataDialog } from 'views/_components/DatasetDeleteDataDialog';
+import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputTextarea } from 'views/_components/InputTextarea';
@@ -27,15 +28,17 @@ import { MainLayout } from 'views/_components/Layout';
 import { ManageUniqueConstraint } from './_components/ManageUniqueConstraint';
 import { Menu } from 'views/_components/Menu';
 import { QCList } from 'views/_components/QCList';
+import { QCGenericHistory } from './_components/QCGenericHistory';
+import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
+// import { StepProgressBar } from 'views/_components/StepProgressBar';
 import { TabsDesigner } from './_components/TabsDesigner';
 import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { UniqueConstraints } from './_components/UniqueConstraints';
 import { Validations } from 'views/DatasetDesigner/_components/Validations';
-import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -53,6 +56,7 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 import { designerReducer } from './_functions/Reducers/designerReducer';
 
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useDatasetDesigner } from 'views/_components/Snapshots/_hooks/useDatasetDesigner';
@@ -63,22 +67,26 @@ import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false, match }) => {
-  const {
-    params: { dataflowId, datasetId }
-  } = match;
+export const DatasetDesigner = ({ isReferenceDataset = false }) => {
+  const { dataflowId, datasetId } = useParams();
 
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const validationContext = useContext(ValidationContext);
+
+  const { resetFilterState } = useApplyFilters('uniqueConstraints');
+
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
     id: null,
     name: ''
   });
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
+  const [selectedView, setSelectedView] = useState(
+    QuerystringUtils.getUrlParamValue('view') !== '' ? QuerystringUtils.getUrlParamValue('view') : 'design'
+  );
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -91,6 +99,24 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     dataflowType: '',
     datasetDescription: '',
     datasetHasData: false,
+    datasetProgressBarSteps: [
+      {
+        stepNumber: 1,
+        labelCompleted: resourcesContext.messages['importedData'],
+        labelUndone: resourcesContext.messages['importData'],
+        labelRunning: resourcesContext.messages['importingData'],
+        labelError: resourcesContext.messages['importDataError']
+      },
+      {
+        stepNumber: 2,
+        labelCompleted: resourcesContext.messages['validatedData'],
+        labelUndone: resourcesContext.messages['validateData'],
+        labelRunning: resourcesContext.messages['validatingData'],
+        labelError: resourcesContext.messages['validatingDataError'],
+        isRunning: true
+      }
+    ],
+    datasetProgressBarCurrentStep: 0,
     datasetSchema: {},
     datasetSchemaAllTables: [],
     datasetSchemaId: '',
@@ -109,6 +135,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     exportButtonsList: [],
     exportDatasetFileType: '',
     externalOperationsList: { export: [], import: [], importOtherSystems: [] },
+    hasQCsHistory: false,
     hasWritePermissions: false,
     importButtonsList: [],
     initialDatasetDescription: '',
@@ -116,11 +143,11 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     isConfigureWebformDialogVisible: false,
     isDataflowOpen: false,
     isDataUpdated: false,
-    isDeleteDialogVisible: false,
     isDownloadingQCRules: false,
     isDownloadingValidations: false,
     isDuplicatedToManageUnique: false,
     isExportTableSchemaDialogVisible: false,
+    isHistoryDialogVisible: false,
     isImportDatasetDialogVisible: false,
     isImportOtherSystemsDialogVisible: false,
     isImportTableSchemaDialogVisible: false,
@@ -134,7 +161,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     isUniqueConstraintCreating: false,
     isUniqueConstraintsListDialogVisible: false,
     isUniqueConstraintUpdating: false,
-    isValidateDialogVisible: false,
     isValidationsTabularView: false,
     isValidationViewerVisible: false,
     levelErrorTypes: [],
@@ -169,13 +195,13 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const {
     arePrefilledTablesDeleted,
     datasetDescription,
+    // datasetProgressBarCurrentStep,
+    // datasetProgressBarSteps,
     datasetSchemaAllTables,
     dataViewerOptions,
     isDataflowOpen,
-    isDeleteDialogVisible,
     isDesignDatasetEditorRead,
     isImportOtherSystemsDialogVisible,
-    isValidateDialogVisible,
     webformOptions,
     webformOptionsLoadingStatus
   } = designerState;
@@ -197,7 +223,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   useBreadCrumbs({
     currentPage: isReferenceDataset ? CurrentPage.REFERENCE_DATASET_DESIGNER : CurrentPage.DATASET_DESIGNER,
     dataflowId,
-    history,
     dataflowType: designerState.dataflowType,
     isLoading: designerState.isLoading,
     referenceDataflowId: dataflowId
@@ -207,7 +232,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     leftSideBarContext.removeModels();
     onLoadSchema();
     callSetMetaData();
-    if (isEmpty(webformOptions)) getWebformList();
+    if (isEmpty(webformOptions)) {
+      getWebformList();
+    }
   }, []);
 
   useEffect(() => {
@@ -303,11 +330,20 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         schemaName: metaData.dataset.name
       }
     });
+
+    const stepStatus = DatasetUtils.getDatasetStepRunningStatus(metaData.dataset.datasetRunningStatus);
+    designerDispatch({
+      type: 'SET_PROGRESS_STEP_BAR',
+      payload: stepStatus
+    });
   };
 
   const changeMode = viewMode => designerDispatch({ type: 'SET_VIEW_MODE', payload: { value: viewMode } });
 
   const changeUrl = (changeOnlyView = false) => {
+    const activedViews = Object.keys(designerState.viewType).filter(view => designerState.viewType[view]);
+    const view = activedViews.length > 0 ? activedViews[0] : 'design';
+    setSelectedView(view);
     window.history.replaceState(
       null,
       null,
@@ -316,10 +352,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             QuerystringUtils.getUrlParamValue('tab') !== ''
               ? QuerystringUtils.getUrlParamValue('tab')
               : dataViewerOptions.tableSchemaId
-          }${`&view=${Object.keys(designerState.viewType).filter(view => designerState.viewType[view] === true)}`}`
-        : `?tab=${QuerystringUtils.getUrlParamValue('tab')}${`&view=${Object.keys(designerState.viewType).filter(
-            view => designerState.viewType[view] === true
-          )}`}`
+          }${`&view=${view}`}`
+        : `?tab=${QuerystringUtils.getUrlParamValue('tab')}${`&view=${view}`}`
     );
   };
 
@@ -343,7 +377,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               return {
                 command: () => onExportDataExternalIntegration(type.id),
                 icon: type.fileExtension,
-                label: `${type.name.toUpperCase()} (.${type.fileExtension.toLowerCase()})`
+                label: `${type.name} (.${type.fileExtension})`
               };
             })
           }
@@ -468,7 +502,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
     try {
       const data = await WebformService.getAll();
-      data.unshift({ id: null, label: 'No webform', value: null });
+      data.unshift({ id: null, label: resourcesContext.messages['notSelectedWebformOption'], value: null, name: null });
 
       designerDispatch({ type: 'GET_WEBFORMS', payload: { data } });
       setWebformOptionsLoadingStatus('success');
@@ -561,12 +595,12 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const onCloseUniqueListModal = () => {
     manageDialogs('isUniqueConstraintsListDialogVisible', false);
     refreshUniqueList(true);
+    resetFilterState();
   };
 
   const onCloseConfigureWebformModal = () => manageDialogs('isConfigureWebformDialogVisible', false);
 
   const onConfirmValidate = async () => {
-    manageDialogs('isValidateDialogVisible', false);
     try {
       await DatasetService.validate(datasetId);
       notificationContext.add(
@@ -583,6 +617,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         },
         true
       );
+      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 1, currentStep: 2, isRunning: true } });
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -608,7 +643,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const onConfirmDelete = async () => {
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
-      manageDialogs('isDeleteDialogVisible', false);
       await DatasetService.deleteData(datasetId, arePrefilledTablesDeleted);
       onResetDelete();
     } catch (error) {
@@ -633,7 +667,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   };
 
   const onHideDelete = () => {
-    manageDialogs('isDeleteDialogVisible', false);
     onResetDelete();
   };
 
@@ -654,7 +687,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
   const onExportDataExternalIntegration = async integrationId => {
     setIsLoadingFile(true);
-    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
+    notificationContext.add({ type: 'EXTERNAL_EXPORT_DESIGN_INIT' });
 
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
@@ -672,7 +705,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
-    notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
+    notificationContext.add({ type: 'EXTERNAL_EXPORT_DESIGN_INIT' });
 
     try {
       await DatasetService.exportDatasetData(datasetId, fileType);
@@ -683,15 +716,64 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   };
 
   useEffect(() => {
+    if (snapshotState.isRestoring) {
+      designerDispatch({
+        type: 'SET_PROGRESS_STEP_BAR',
+        payload: { step: 0, currentStep: 1, isRunning: true, completed: false, withError: false }
+      });
+    }
+  }, [snapshotState.isRestoring]);
+
+  useEffect(() => {
     const validationFinished = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
     );
     if (validationFinished && validationFinished.content.datasetId?.toString() === datasetId.toString()) {
       onHighlightRefresh(true);
+      designerDispatch({
+        type: 'SET_PROGRESS_STEP_BAR',
+        payload: { step: 1, currentStep: 2, isRunning: false, completed: false, withError: false }
+      });
+    }
+
+    const validationFinishedWithError = notificationContext.toShow.find(
+      notification => notification.key === 'IMPORT_DESIGN_FAILED_EVENT'
+    );
+
+    if (
+      validationFinishedWithError &&
+      validationFinishedWithError.content.datasetId?.toString() === datasetId.toString()
+    ) {
+      onHighlightRefresh(true);
+      designerDispatch({
+        type: 'SET_PROGRESS_STEP_BAR',
+        payload: { step: 1, currentStep: 2, isRunning: false, completed: false, withError: false }
+      });
     }
     const isImportFieldSchemaCompleted = notificationContext.toShow.some(
       notification => notification.key === 'IMPORT_FIELD_SCHEMA_COMPLETED_EVENT'
     );
+
+    const isImportDataCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'IMPORT_DESIGN_COMPLETED_EVENT'
+    );
+
+    const isRestoreSnapshotDataCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT'
+    );
+
+    const isDeletedDataCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'DELETE_DATASET_SCHEMA_COMPLETED_EVENT'
+    );
+
+    if (isImportDataCompleted || isRestoreSnapshotDataCompleted || isDeletedDataCompleted) {
+      onHighlightRefresh(true);
+      designerDispatch({
+        type: 'SET_PROGRESS_STEP_BAR',
+        payload: { step: 1, currentStep: 2, isRunning: true, completed: false, withError: false }
+      });
+      snapshotDispatch({ type: 'SET_IS_RESTORING', payload: false });
+    }
 
     if (isImportFieldSchemaCompleted) {
       window.location.reload();
@@ -702,12 +784,15 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
 
   useCheckNotifications(
     [
+      'CALL_FME_PROCESS_FAILED_EVENT',
       'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
       'DOWNLOAD_FME_FILE_ERROR',
       'EXPORT_DATA_BY_ID_ERROR',
       'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD',
+      'EXPORT_TABLE_DATA_FILE_AUTOMATICALLY_DOWNLOAD',
       'EXPORT_DATASET_FILE_DOWNLOAD',
-      'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT'
+      'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT',
+      'DOWNLOAD_EXPORT_TABLE_DATA_FILE_ERROR'
     ],
     setIsLoadingFile,
     false
@@ -739,10 +824,12 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   };
 
   const onResetDelete = () => {
-    designerDispatch({
-      type: 'SET_ARE_PREFILLED_TABLES_DELETED',
-      payload: { arePrefilledTablesDeleted: false }
-    });
+    if (arePrefilledTablesDeleted) {
+      designerDispatch({
+        type: 'SET_ARE_PREFILLED_TABLES_DELETED',
+        payload: { arePrefilledTablesDeleted: false }
+      });
+    }
   };
 
   const onKeyChange = event => {
@@ -793,6 +880,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           }
         });
       };
+
       const getDatasetSchemas = async () => {
         const data = await DataflowService.getSchemas(dataflowId);
         designerDispatch({ type: 'LOAD_DATASET_SCHEMAS', payload: { schemas: data } });
@@ -903,6 +991,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
         },
         true
       );
+      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 0, currentStep: 1, isRunning: true } });
     } catch (error) {
       console.error('DatasetDesigner - onUpload.', error);
       notificationContext.add(
@@ -986,70 +1075,95 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     }
   };
 
+  const setIsHistoryDialogVisible = isHistoryDialogVisible => {
+    designerDispatch({
+      type: 'SET_IS_HISTORY_DIALOG_VISIBLE',
+      payload: isHistoryDialogVisible
+    });
+  };
+
+  const onCloseHistoryDialog = () => {
+    setIsHistoryDialogVisible(false);
+  };
+
+  const renderQCsHistoryButton = () => {
+    if (isDataflowOpen) {
+      return (
+        <span data-for="qcHistoryTooltip" data-tip>
+          <Button
+            className={`p-button-secondary ${designerState.hasQCsHistory ? 'p-button-animated-blink' : ''}`}
+            disabled={!designerState.hasQCsHistory}
+            icon="info"
+            label={resourcesContext.messages['allQCsHistoryBtn']}
+            onClick={() => setIsHistoryDialogVisible(true)}
+          />
+        </span>
+      );
+    }
+  };
+
+  const renderQCsHistoryButtonTooltip = () => {
+    if (!designerState.hasQCsHistory) {
+      return (
+        <ReactTooltip border effect="solid" id="qcHistoryTooltip" place="top">
+          {resourcesContext.messages['genericQCsHistoryButtonTooltip']}
+        </ReactTooltip>
+      );
+    }
+  };
+
   const renderActionButtonsValidationDialog = (
-    <Fragment>
+    <div className={styles.qcDialogFooterWrapper}>
+      {renderQCsHistoryButton()}
+      {renderQCsHistoryButtonTooltip()}
+
       <Button
         className="p-button-secondary p-button-animated-blink"
         disabled={designerState.isDownloadingQCRules}
         icon={designerState.isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadQCsButtonLabel']}
         onClick={() => onDownloadQCRules()}
-        style={{ float: 'left' }}
       />
-
       <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon={'plus'}
+        className="p-button-animated-blink"
+        icon="plus"
         label={resourcesContext.messages['createFieldValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('field', 'validationsListDialog')}
-        style={{ float: 'left' }}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon={'plus'}
+        className="p-button-animated-blink"
+        icon="plus"
         label={resourcesContext.messages['createRowValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('row', 'validationsListDialog')}
-        style={{ float: 'left' }}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink"
-        icon={'plus'}
+        className="p-button-animated-blink"
+        icon="plus"
         label={resourcesContext.messages['createTableValidationBtn']}
         onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
-        style={{ float: 'left' }}
       />
-
       <Button
-        className="p-button-secondary p-button-animated-blink"
+        className={`p-button-secondary p-button-animated-blink ${styles.buttonAlignRight}`}
         icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['validateSqlRulesBtn']}
-        onClick={() => validateQcRules()}
+        onClick={validateQcRules}
         tooltip={resourcesContext.messages['validateRulesBtnTootip']}
         tooltipOptions={{ position: 'top' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
-        onClick={() => onHideValidationsDialog()}
+        onClick={onHideValidationsDialog}
       />
-    </Fragment>
-  );
-
-  const renderDashboardFooter = (
-    <Button
-      className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-      icon={'cancel'}
-      label={resourcesContext.messages['close']}
-      onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
-    />
+    </div>
   );
 
   const renderImportOtherSystemsFooter = (
     <Fragment>
       <Button
         className="p-button-animated-blink"
-        icon={'check'}
+        icon="check"
         label={resourcesContext.messages['import']}
         onClick={() => onImportOtherSystems()}
       />
@@ -1117,7 +1231,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={() => manageDialogs('isValidationViewerVisible', false)}
       />
@@ -1132,56 +1246,40 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     setIsValidationsTabularView(true);
   };
 
-  const renderRadioButtons = () => {
-    return (
-      <TabularSwitch
-        elements={Object.keys(designerState.viewType).map(view => resourcesContext.messages[`${view}View`])}
-        getIsTableCreated={setIsTableCreated}
-        isTableCreated={designerState.isTableCreated}
-        isValidationsTabularView={designerState.isValidationsTabularView}
-        onChange={switchView => {
-          const views = { design: 'design', tabularData: 'tabularData', webform: 'webform' };
-          onChangeView(views[camelCase(switchView)]);
-          changeMode(views[camelCase(switchView)]);
-        }}
-        setIsValidationsTabularView={setIsValidationsTabularView}
-        value={
-          QuerystringUtils.getUrlParamValue('view') !== ''
-            ? resourcesContext.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
-            : resourcesContext.messages['designView']
-        }
-      />
-    );
-  };
-
   const renderSwitchView = () => {
-    const switchView = (
-      <TabularSwitch
-        elements={[resourcesContext.messages['designView'], resourcesContext.messages['tabularDataView']]}
-        getIsTableCreated={setIsTableCreated}
-        isTableCreated={designerState.isTableCreated}
-        isValidationsTabularView={designerState.isValidationsTabularView}
-        onChange={switchView =>
-          designerDispatch({
-            type: 'SET_VIEW_MODE',
-            payload: { value: switchView === 'Design' ? 'design' : 'tabularData' }
-          })
-        }
-        setIsValidationsTabularView={setIsValidationsTabularView}
-        value={
-          QuerystringUtils.getUrlParamValue('view') !== ''
-            ? resourcesContext.messages[`${QuerystringUtils.getUrlParamValue('view')}View`]
-            : resourcesContext.messages['designView']
-        }
-      />
-    );
+    const renderStepProgressBar = () => {
+      // if (!isDesignDatasetEditorRead) {
+      //   return (
+      //     <StepProgressBar
+      //       className={styles.stepProgressBar}
+      //       currentStep={datasetProgressBarCurrentStep}
+      //       steps={datasetProgressBarSteps}
+      //     />
+      //   );
+      // }
+    };
+
+    const viewModes = [
+      { key: 'design', label: resourcesContext.messages['designView'] },
+      { key: 'tabularData', label: resourcesContext.messages['tabularDataView'] }
+    ];
+
+    if (!isNil(designerState?.webform?.name) && !isDataflowOpen && !isDesignDatasetEditorRead) {
+      viewModes.push({ key: 'webform', label: resourcesContext.messages['webform'] });
+    }
 
     return (
       <div className={styles.switchDivInput}>
+        {renderStepProgressBar()}
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-          {!isNil(designerState.webform) && !isDataflowOpen && !isDesignDatasetEditorRead
-            ? renderRadioButtons()
-            : switchView}
+          <TabularSwitch
+            elements={viewModes}
+            onChange={switchView => {
+              onChangeView(switchView);
+              changeMode(switchView);
+            }}
+            value={selectedView}
+          />
         </div>
       </div>
     );
@@ -1192,7 +1290,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       <Dialog
         footer={renderUniqueConstraintsFooter}
         header={resourcesContext.messages['uniqueConstraints']}
-        onHide={() => onCloseUniqueListModal()}
+        onHide={onCloseUniqueListModal}
         style={{ width: '70%' }}
         visible={designerState.isUniqueConstraintsListDialogVisible}>
         <UniqueConstraints
@@ -1223,7 +1321,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           isUndefined(designerState.selectedWebform) ||
           designerState?.selectedWebform?.value === designerState?.webform?.value
         }
-        icon={'check'}
+        icon="check"
         label={resourcesContext.messages['save']}
         onClick={() => {
           onUpdateWebform();
@@ -1234,7 +1332,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       />
       <Button
         className="p-button-secondary p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['cancel']}
         onClick={() => {
           designerDispatch({ type: 'RESET_SELECTED_WEBFORM' });
@@ -1248,17 +1346,17 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
     <Fragment>
       <div className="p-toolbar-group-left">
         <Button
-          className="p-button-secondary p-button-animated-blink"
-          icon={'plus'}
+          className="p-button-animated-blink"
+          icon="plus"
           label={resourcesContext.messages['addUniqueConstraint']}
           onClick={() => manageDialogs('isManageUniqueConstraintDialogVisible', true)}
         />
       </div>
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon={'cancel'}
+        icon="cancel"
         label={resourcesContext.messages['close']}
-        onClick={() => onCloseUniqueListModal()}
+        onClick={onCloseUniqueListModal}
       />
     </Fragment>
   );
@@ -1275,6 +1373,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const setIsUniqueConstraintUpdating = isUniqueConstraintUpdatingValue =>
     designerDispatch({ type: 'SET_IS_CONSTRAINT_UPDATING', payload: { isUniqueConstraintUpdatingValue } });
 
+  const setHasQCsHistory = hasQCsHistory =>
+    designerDispatch({ type: 'SET_HAS_QCS_HISTORY', payload: { hasQCsHistory } });
+
   const validationsListDialog = () => {
     if (designerState.validationListDialogVisible) {
       return (
@@ -1289,6 +1390,9 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
+            isDataflowOpen={isDataflowOpen}
+            isDatasetDesigner
+            setHasQCsHistory={setHasQCsHistory}
           />
         </Dialog>
       );
@@ -1298,6 +1402,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   const deletePrefilledDataCheckbox = (
     <div className={styles.checkboxWrapper}>
       <Checkbox
+        ariaLabelledBy="arePrefilledTablesDeleted"
         checked={arePrefilledTablesDeleted}
         id="arePrefilledTablesDeleted"
         inputId="arePrefilledTablesDeleted"
@@ -1324,7 +1429,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
   );
 
   const renderWebformOptionsContent = () => {
-    const webform = webformOptions.find(option => option.value === designerState.webform);
+    const webform = webformOptions.find(option => option.name === designerState.webform?.name);
 
     if (webformOptionsLoadingStatus === 'pending') return <Spinner style={{ top: 0 }} />;
 
@@ -1365,6 +1470,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       }}>
       <div className={styles.noScrollDatasetDesigner}>
         <Title
+          ariaLabelledBy={designerState.datasetSchemaName}
           icon="pencilRuler"
           iconSize="3.4rem"
           subtitle={designerState.dataflowName}
@@ -1471,7 +1577,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                     : null
                 } datasetSchema-uniques-help-step`}
                 disabled={isDataflowOpen || isDesignDatasetEditorRead || designerState.referenceDataset}
-                icon={'table'}
+                icon="table"
                 label={resourcesContext.messages['configureWebform']}
                 onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}
               />
@@ -1484,7 +1590,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={isDataflowOpen || isDesignDatasetEditorRead}
-                icon={'import'}
+                icon="import"
                 label={resourcesContext.messages['importDataset']}
                 onClick={event => importMenuRef.current.show(event)}
               />
@@ -1512,24 +1618,12 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 popup={true}
                 ref={exportMenuRef}
               />
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent p-button-animated-blink dataset-deleteDataset-help-step`}
-                icon="trash"
-                label={resourcesContext.messages['deleteDatasetData']}
-                onClick={() => manageDialogs('isDeleteDialogVisible', true)}
-              />
+              <DatasetDeleteDataDialog onConfirmDelete={onConfirmDelete} onHideDelete={onHideDelete}>
+                {deletePrefilledDataCheckbox}
+              </DatasetDeleteDataDialog>
             </div>
             <div className="p-toolbar-group-right">
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent ${
-                  !isDataflowOpen && !isDesignDatasetEditorRead ? ' p-button-animated-blink' : null
-                }`}
-                disabled={isDataflowOpen || isDesignDatasetEditorRead}
-                icon="validate"
-                label={resourcesContext.messages['validate']}
-                onClick={() => manageDialogs('isValidateDialogVisible', true)}
-              />
-
+              <DatasetValidateDialog disabled={isDesignDatasetEditorRead} onConfirmValidate={onConfirmValidate} />
               <Button
                 className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
                 icon="warning"
@@ -1572,18 +1666,10 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
                 label={resourcesContext.messages['externalIntegrations']}
                 onClick={() => manageDialogs('isIntegrationListDialogVisible', true)}
               />
-
-              <Button
-                className={`p-button-rounded p-button-secondary-transparent ${
-                  designerState.datasetHasData &&
-                  !isDataflowOpen &&
-                  !isDesignDatasetEditorRead &&
-                  'p-button-animated-blink'
-                }`}
+              <DatasetDashboardDialog
                 disabled={!designerState.datasetHasData || isDataflowOpen || isDesignDatasetEditorRead}
-                icon="dashboard"
-                label={resourcesContext.messages['dashboards']}
-                onClick={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: true })}
+                levelErrorTypes={designerState.levelErrorTypes}
+                tableSchemas={designerState.schemaTables.map(table => table.name)}
               />
               <Button
                 className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
@@ -1600,8 +1686,8 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
               <Button
                 className={`p-button-rounded p-button-${
                   designerState.isRefreshHighlighted ? 'primary' : 'secondary-transparent'
-                }  ${!isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null}`}
-                disabled={isDataflowOpen || isDesignDatasetEditorRead}
+                }  ${!isDesignDatasetEditorRead ? 'p-button-animated-blink' : null}`}
+                disabled={isDesignDatasetEditorRead}
                 icon="refresh"
                 label={resourcesContext.messages['refresh']}
                 onClick={onLoadSchema}
@@ -1616,7 +1702,7 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             datasetId={datasetId}
             options={webformOptions}
             state={designerState}
-            webformType={designerState.webform}
+            webform={designerState.webform}
           />
         ) : (
           <TabsDesigner
@@ -1628,7 +1714,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
             editable={!isDataflowOpen && !isDesignDatasetEditorRead}
             getIsTableCreated={setIsTableCreated}
             getUpdatedTabs={onUpdateTabs}
-            history={history}
             isDataflowOpen={isDataflowOpen}
             isDesignDatasetEditorRead={isDesignDatasetEditorRead}
             isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
@@ -1697,47 +1782,6 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           setIsUniqueConstraintCreating={setIsUniqueConstraintCreating}
           setIsUniqueConstraintUpdating={setIsUniqueConstraintUpdating}
         />
-
-        {isValidateDialogVisible && (
-          <ConfirmDialog
-            header={resourcesContext.messages['validateDataset']}
-            labelCancel={resourcesContext.messages['no']}
-            labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={onConfirmValidate}
-            onHide={() => manageDialogs('isValidateDialogVisible', false)}
-            visible={isValidateDialogVisible}>
-            {resourcesContext.messages['validateDatasetConfirm']}
-          </ConfirmDialog>
-        )}
-
-        {isDeleteDialogVisible && (
-          <ConfirmDialog
-            classNameConfirm={'p-button-danger'}
-            header={resourcesContext.messages['deleteDatasetHeader']}
-            labelCancel={resourcesContext.messages['no']}
-            labelConfirm={resourcesContext.messages['yes']}
-            onConfirm={onConfirmDelete}
-            onHide={onHideDelete}
-            visible={isDeleteDialogVisible}>
-            <div>{resourcesContext.messages['deleteDatasetConfirm']}</div>
-            {deletePrefilledDataCheckbox}
-          </ConfirmDialog>
-        )}
-
-        {designerState.dashDialogVisible && (
-          <Dialog
-            footer={renderDashboardFooter}
-            header={resourcesContext.messages['titleDashboard']}
-            onHide={() => designerDispatch({ type: 'TOGGLE_DASHBOARD_VISIBILITY', payload: false })}
-            style={{ width: '70vw' }}
-            visible={designerState.dashDialogVisible}>
-            <Dashboard
-              levelErrorTypes={designerState.levelErrorTypes}
-              refresh={designerState.dashDialogVisible}
-              tableSchemaNames={designerState.schemaTables.map(table => table.name)}
-            />
-          </Dialog>
-        )}
         {designerState.isConfigureWebformDialogVisible && (
           <Dialog
             footer={renderConfigureWebformFooter}
@@ -1777,12 +1821,19 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
           </Dialog>
         )}
 
+        {designerState.isHistoryDialogVisible && (
+          <QCGenericHistory
+            datasetId={datasetId}
+            isDialogVisible={designerState.isHistoryDialogVisible}
+            onCloseDialog={onCloseHistoryDialog}
+          />
+        )}
+
         {designerState.isImportDatasetDialogVisible && (
           <CustomFileUpload
             accept={DatasetUtils.getValidExtensions({ validExtensions: designerState.selectedImportExtension })}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
-            dialogClassName={styles.Dialog}
             dialogHeader={selectedCustomImportIntegration.name}
             dialogOnHide={() => {
               manageDialogs('isImportDatasetDialogVisible', false);
@@ -1857,4 +1908,4 @@ export const DatasetDesigner = withRouter(({ history, isReferenceDataset = false
       </div>
     </SnapshotContext.Provider>
   );
-});
+};
