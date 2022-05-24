@@ -310,7 +310,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
           citusCommand =
               citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
-          jdbcTemplate.execute(command);
+          jdbcTemplate.execute(citusCommand);
         }
       }
 
