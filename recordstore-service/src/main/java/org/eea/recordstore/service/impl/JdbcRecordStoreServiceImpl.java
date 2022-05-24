@@ -164,6 +164,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("classpath:datasetInitCommands.txt")
   private Resource resourceFile;
 
+  /** The resource file. */
+  @Value("classpath:datasetInitCommandsCitus.txt")
+  private Resource resourceCitusFile;
+
   /** The path snapshot. */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
@@ -354,12 +358,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     jdbcTemplate.execute(
         String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA, datasetName, datasetUsers));
 
+    LOG.info("Empty design dataset created");
     try {
-      Thread.sleep(5000);
+      Thread.sleep(1000);
     } catch (InterruptedException e) {
       LOG.info("Propagate Error");
     }
-    LOG.info("Empty design dataset created");
     // Now we insert the values into the dataset_value table of the brand new schema
     StringBuilder insertSql = new StringBuilder("INSERT INTO ");
     insertSql.append(datasetName).append(".dataset_value(id, id_dataset_schema) values (?, ?)");
@@ -368,6 +372,25 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       Long idDataset = Long.valueOf(aux[aux.length - 1]);
       jdbcTemplate.update(insertSql.toString(), idDataset, idDatasetSchema);
       LOG.info("DS created with the id {} and idDatasetSchema {}", idDataset, idDatasetSchema);
+    }
+
+    final List<String> citusCommands = new ArrayList<>();
+    // read file into stream, try-with-resources
+    try (BufferedReader brCitus =
+        new BufferedReader(new InputStreamReader(resourceFile.getInputStream()))) {
+
+      brCitus.lines().forEach(citusCommands::add);
+
+    } catch (final IOException e) {
+      LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
+      throw new RecordStoreAccessException(
+          String.format("Error reading commands file to create the dataset. %s", e.getMessage()),
+          e);
+    }
+
+    for (String command : citusCommands) {
+      command = command.replace("%dataset_name%", datasetName);
+      jdbcTemplate.execute(command);
     }
   }
 

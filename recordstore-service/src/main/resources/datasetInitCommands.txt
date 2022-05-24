@@ -60,6 +60,7 @@ CREATE INDEX idx_record_validation_validation ON %dataset_name%.record_validatio
 CREATE INDEX idx_validation_level_error ON %dataset_name%.validation(level_error);
 CREATE INDEX geometry_field_value ON %dataset_name%.field_value USING gist (geometry);
 CREATE INDEX idx_filter ON %dataset_name%.temp_etlexport(filter_value);
+CREATE INDEX idx_data_provider_code ON %dataset_name%.record_value(data_provider_code);
 
 ALTER SEQUENCE %dataset_name%.field_sequence OWNER TO %user%;
 GRANT ALL ON SEQUENCE %dataset_name%.field_validation_sequence TO %user%;
@@ -80,25 +81,11 @@ CREATE OR REPLACE FUNCTION %dataset_name%.is_numeric(text) RETURNS boolean LANGU
 CREATE OR REPLACE FUNCTION %dataset_name%.is_double(text) RETURNS boolean LANGUAGE plpgsql IMMUTABLE STRICT AS $function$ DECLARE x double precision;BEGIN    x = $1::double precision;    RETURN TRUE;EXCEPTION WHEN others THEN    RETURN FALSE;END;$function$;
 CREATE OR REPLACE FUNCTION %dataset_name%.is_date(s character varying) RETURNS boolean LANGUAGE plpgsql AS $function$ begin   perform s::date;  return true; exception when others then  return false; end; $function$;
 
-ALTER FUNCTION %dataset_name%.is_numeric OWNER TO %user%;
+ALTER FUNCTION %dataset_name%.is_numeric(text) OWNER TO %user%;
 GRANT EXECUTE ON FUNCTION %dataset_name%.is_numeric(text) TO %user%;
-ALTER FUNCTION %dataset_name%.is_double OWNER TO %user%;
+ALTER FUNCTION %dataset_name%.is_double(text) OWNER TO %user%;
 GRANT EXECUTE ON FUNCTION %dataset_name%.is_double(text) TO %user%;
-ALTER FUNCTION %dataset_name%.is_date OWNER TO %user%;
+ALTER FUNCTION %dataset_name%.is_date(varchar) OWNER TO %user%;
 GRANT EXECUTE ON FUNCTION %dataset_name%.is_date(varchar) TO %user%;
-
-commit;
-
-SELECT create_reference_table('%dataset_name%.DATASET_VALUE');
-SELECT create_reference_table('%dataset_name%.TABLE_VALUE');
-SELECT create_reference_table('%dataset_name%.RECORD_VALUE');
-SELECT create_reference_table('%dataset_name%.FIELD_VALUE');
-SELECT create_reference_table('%dataset_name%.VALIDATION');
-SELECT create_reference_table('%dataset_name%.DATASET_VALIDATION');
-SELECT create_reference_table('%dataset_name%.TABLE_VALIDATION');
-SELECT create_reference_table('%dataset_name%.RECORD_VALIDATION');
-SELECT create_reference_table('%dataset_name%.FIELD_VALIDATION');
-SELECT create_reference_table('%dataset_name%.ATTACHMENT_VALUE');
-SELECT create_reference_table('%dataset_name%.TEMP_ETLEXPORT');
 
 commit;
