@@ -178,6 +178,8 @@ public class JdbcRecordStoreServiceImplTest {
     ReflectionTestUtils.setField(jdbcRecordStoreService, "bufferFile", 1024);
     ReflectionTestUtils.setField(jdbcRecordStoreService, "resourceFile",
         new ClassPathResource("datasetInitCommands.txt"));
+    ReflectionTestUtils.setField(jdbcRecordStoreService, "resourceCitusFile",
+        new ClassPathResource("datasetInitCommandsCitus.txt"));
     ReflectionTestUtils.setField(jdbcRecordStoreService, "userPostgreDb", "root");
 
     ReflectionTestUtils.setField(jdbcRecordStoreService, "passPostgreDb", "root");
@@ -193,7 +195,7 @@ public class JdbcRecordStoreServiceImplTest {
   @Test
   public void createEmptyDataSet() throws RecordStoreAccessException {
     jdbcRecordStoreService.createEmptyDataSet("", "");
-    Mockito.verify(jdbcTemplate, Mockito.times(185)).execute(Mockito.anyString());
+    Mockito.verify(jdbcTemplate, Mockito.times(107)).execute(Mockito.anyString());
   }
 
   @Test(expected = UnsupportedOperationException.class)

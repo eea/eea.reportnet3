@@ -377,7 +377,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     final List<String> citusCommands = new ArrayList<>();
     // read file into stream, try-with-resources
     try (BufferedReader brCitus =
-        new BufferedReader(new InputStreamReader(resourceFile.getInputStream()))) {
+        new BufferedReader(new InputStreamReader(resourceCitusFile.getInputStream()))) {
 
       brCitus.lines().forEach(citusCommands::add);
 
