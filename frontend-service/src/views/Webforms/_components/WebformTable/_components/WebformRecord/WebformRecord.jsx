@@ -488,12 +488,12 @@ export const WebformRecord = ({
     if (content.totalRecords === 0) {
       errorMessages.push(resourcesContext.messages['webformTableWithLessRecords']);
     }
-    if (content.totalRecords > 1) {
+    if (!multipleRecords && content.totalRecords > 1) {
       errorMessages.push(resourcesContext.messages['webformTableWithMoreRecords']);
     }
-    if (!isFixedNumber) {
-      errorMessages.push(resourcesContext.messages['webformTableWithoutFixedNumber']);
-    }
+    // if (!isFixedNumber) {
+    //   errorMessages.push(resourcesContext.messages['webformTableWithoutFixedNumber']);
+    // }
 
     return errorMessages;
   };

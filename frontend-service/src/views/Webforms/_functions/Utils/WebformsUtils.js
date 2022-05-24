@@ -140,6 +140,25 @@ const parseNewTableRecord = (table, pamNumber, SectorObjectivesTable) => {
   }
 };
 
+const parseNewTableRecordTable = table => {
+  if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
+    const fields = table.records[0].fields.map(field => {
+      return {
+        fieldData: {
+          [field.fieldSchema || field.fieldId]: null,
+          type: field.type,
+          fieldSchemaId: field.fieldSchema || field.fieldId
+        }
+      };
+    });
+
+    const obj = { dataRow: fields, recordSchemaId: table.recordSchemaId };
+
+    obj.datasetPartitionId = null;
+    return obj;
+  }
+};
+
 const parseOtherObjectivesRecord = (table, parentTable, pamsId, filteredRecordId) => {
   if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
     let fields;
@@ -349,6 +368,7 @@ export const WebformsUtils = {
   onParseWebformData,
   onParseWebformRecords,
   parseNewTableRecord,
+  parseNewTableRecordTable,
   parseOtherObjectivesRecord,
   parsePamsRecords,
   parseRecordsValidations,
