@@ -354,8 +354,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     jdbcTemplate.execute(
         String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA, datasetName, datasetUsers));
 
+    try {
+      Thread.sleep(5000);
+    } catch (InterruptedException e) {
+      LOG.info("Propagate Error");
+    }
     LOG.info("Empty design dataset created");
-
     // Now we insert the values into the dataset_value table of the brand new schema
     StringBuilder insertSql = new StringBuilder("INSERT INTO ");
     insertSql.append(datasetName).append(".dataset_value(id, id_dataset_schema) values (?, ?)");

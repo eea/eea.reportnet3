@@ -3210,7 +3210,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       try {
         Thread.sleep(5000);
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        LOG.info("Propagate Error");
       }
       TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       datasetService.saveTablePropagation(datasetId, tableSchemaMapper.entityToClass(table));

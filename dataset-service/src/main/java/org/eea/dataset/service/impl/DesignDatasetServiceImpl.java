@@ -390,7 +390,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       try {
         Thread.sleep(5000);
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        LOG.info("Propagate Error");
       }
       datasetService.saveTablePropagation(datasetId, tableSchemaMapper.entityToClass(table));
     }
