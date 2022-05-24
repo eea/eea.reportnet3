@@ -306,8 +306,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         }
       }
 
-      for (String citusCommand : citusCommands) {
-        for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
+
+      for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
+        for (String citusCommand : citusCommands) {
           citusCommand =
               citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
           jdbcTemplate.execute(citusCommand);
