@@ -216,11 +216,12 @@ export const WebformRecord = ({
           const elementWidth = (100 - elementGap) / elementCount;
           fieldStyle.width = elementWidth;
         }
+
         return (
           checkLabelVisibility(element) &&
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div className={styles.field} key={element.fieldId} style={fieldStyle}>
+            <div className={styles.field} key={uniqueId(`${element.fieldId}_`)} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
