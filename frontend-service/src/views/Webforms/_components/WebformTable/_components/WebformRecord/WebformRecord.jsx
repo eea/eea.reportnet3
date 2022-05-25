@@ -221,7 +221,7 @@ export const WebformRecord = ({
           checkLabelVisibility(element) &&
           !isFieldVisible &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div className={styles.field} key={uniqueId(`${element.fieldId}_`)} style={fieldStyle}>
+            <div className={styles.field} key={element.fieldId} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
@@ -471,13 +471,16 @@ export const WebformRecord = ({
   const renderWebformPaMsErrorMessages = content => {
     const errorMessages = [];
 
-    if (isEmpty(record)) errorMessages.push('PLEASE CHOOSE ONE');
+    if (isEmpty(record)) {
+      errorMessages.push('PLEASE CHOOSE ONE');
+    }
     if (hasFields) {
       errorMessages.push(resourcesContext.messages['emptyWebformTable']);
     }
     if (content.totalRecords === 0) {
       errorMessages.push(resourcesContext.messages['webformTableWithLessRecords']);
     }
+
     return errorMessages;
   };
 
