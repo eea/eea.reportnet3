@@ -312,8 +312,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
     // Find if the dataset type is EU to include the countryCode
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
-    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
-        || DatasetTypeEnum.COLLECTION.equals(datasetType);
+    String includeCountryCode = getCode(idDataflow, datasetType);
 
     final IFileExportContext contextExport = fileExportFactory.createContext(mimeType);
     LOG.info("End of createFile");
@@ -558,13 +557,12 @@ public class FileTreatmentHelper implements DisposableBean {
   public void exportDatasetFile(Long datasetId, String mimeType) {
 
     Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-
     ExportFilterVO filters = new ExportFilterVO();
 
     // Look for the dataset type is EU or DC to include the countryCode
     DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
-    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
-        || DatasetTypeEnum.COLLECTION.equals(datasetType);
+
+    String includeCountryCode = getCode(dataflowId, datasetType);
 
     // Extension arrive with zip+xlsx, zip+csv or xlsx, but to the backend arrives with empty space.
     // Split the extensions to know
@@ -1804,5 +1802,35 @@ public class FileTreatmentHelper implements DisposableBean {
       out.closeEntry();
       LOG.info("We create file {} in the route ", fileWriteZip);
     }
+  }
+
+  /**
+   * Gets the code.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetType the dataset type
+   * @return the code
+   */
+  private String getCode(Long dataflowId, DatasetTypeEnum datasetType) {
+    String includeCountryCode = null;
+    if (DatasetTypeEnum.EUDATASET.equals(datasetType)
+        || DatasetTypeEnum.COLLECTION.equals(datasetType)) {
+      TypeDataflowEnum dataflowType = dataflowControllerZuul.getMetabaseById(dataflowId).getType();
+      switch (dataflowType) {
+        case REPORTING:
+          includeCountryCode = "Country Code";
+          break;
+        case BUSINESS:
+          includeCountryCode = "Company Code";
+          break;
+        case CITIZEN_SCIENCE:
+          includeCountryCode = "Citizen Science Code";
+          break;
+        default:
+          includeCountryCode = "Country Code";
+          break;
+      }
+    }
+    return includeCountryCode;
   }
 }

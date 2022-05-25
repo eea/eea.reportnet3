@@ -22,7 +22,7 @@ public interface WriterStrategy {
    * @throws EEAException the EEA exception
    */
   byte[] writeFile(Long dataflowId, Long partitionId, String idTableSchema,
-      boolean includeCountryCode, boolean includeValidations, ExportFilterVO filters)
+      String includeCountryCode, boolean includeValidations, ExportFilterVO filters)
       throws EEAException;
 
   /**
@@ -35,6 +35,6 @@ public interface WriterStrategy {
    * @return the list
    * @throws EEAException the EEA exception
    */
-  List<byte[]> writeFileList(Long dataflowId, Long partitionId, boolean includeCountryCode,
+  List<byte[]> writeFileList(Long dataflowId, Long partitionId, String includeCountryCode,
       boolean includeValidations) throws EEAException;
 }
