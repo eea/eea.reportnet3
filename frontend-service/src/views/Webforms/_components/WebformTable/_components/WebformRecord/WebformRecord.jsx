@@ -491,9 +491,9 @@ export const WebformRecord = ({
     if (!multipleRecords && content.totalRecords > 1) {
       errorMessages.push(resourcesContext.messages['webformTableWithMoreRecords']);
     }
-    // if (!isFixedNumber) {
-    //   errorMessages.push(resourcesContext.messages['webformTableWithoutFixedNumber']);
-    // }
+    if (!multipleRecords && !isFixedNumber) {
+      errorMessages.push(resourcesContext.messages['webformTableWithoutFixedNumber']);
+    }
 
     return errorMessages;
   };
