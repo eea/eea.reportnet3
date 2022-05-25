@@ -505,6 +505,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // Special case to make the snapshot to copy from DataCollection to EUDataset. The sql copy
       // all the values from the DC, no matter what partitionId has the origin, but we need to put
       // in the file the partitionId of the EUDataset destination
+      String copyQueryAttachment =
+          "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
+              + idDataset + ".attachment_value at) to STDOUT";
       if (DatasetTypeEnum.COLLECTION.equals(typeDataset)) {
         String providersCode = getProvidersCode(idDataset);
         copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
@@ -516,6 +519,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 + idDataset + ".field_value fv, dataset_" + idDataset
                 + ".record_value rv WHERE fv.id_record = rv.id " + "AND rv.data_provider_code in ("
                 + providersCode + ")) to STDOUT";
+        copyQueryAttachment =
+            "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
+                + idDataset + ".attachment_value at, dataset_" + idDataset
+                + ".field_value fv, dataset_" + idDataset
+                + ".record_value rv WHERE at.field_value_id = fv.id AND fv.id_record = rv.id "
+                + "AND rv.data_provider_code in (" + providersCode + ")) to STDOUT";
       } else if (!DatasetTypeEnum.COLLECTION.equals(typeDataset)
           && Boolean.TRUE.equals(prefillingReference)) {
         copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
@@ -551,9 +560,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // Copy attachment_value
       String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
-      String copyQueryAttachment =
-          "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
-              + idDataset + ".attachment_value at) to STDOUT";
+
       printToFile(nameFileAttachmentValue, copyQueryAttachment, cm);
 
       LOG.info("Snapshot {} data files created", idSnapshot);
