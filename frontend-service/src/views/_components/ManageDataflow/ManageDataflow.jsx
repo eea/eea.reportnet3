@@ -146,7 +146,9 @@ export const ManageDataflow = ({
         ? resourcesContext.messages['updateCitizenScienceDataflow']
         : resourcesContext.messages['createNewCitizenScienceDataflow'];
     } else {
-      return isEditing ? resourcesContext.messages['updateDataflow'] : resourcesContext.messages['createNewDataflow'];
+      return isEditing
+        ? resourcesContext.messages['updateDataflow']
+        : resourcesContext.messages['createNewReportingDataflow'];
     }
   };
 
