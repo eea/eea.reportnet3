@@ -39,7 +39,7 @@ public class FileExportContextImpl implements IFileExportContext {
    */
   @Override
   public byte[] fileWriter(Long dataflowId, Long partitionId, String tableSchemaId,
-      boolean includeCountryCode, boolean includeValidations, ExportFilterVO filters)
+      String includeCountryCode, boolean includeValidations, ExportFilterVO filters)
       throws IOException, EEAException {
     return writerStrategy.writeFile(dataflowId, partitionId, tableSchemaId, includeCountryCode,
         includeValidations, filters);
@@ -57,7 +57,7 @@ public class FileExportContextImpl implements IFileExportContext {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<byte[]> fileListWriter(Long dataflowId, Long partitionId, boolean includeCountryCode,
+  public List<byte[]> fileListWriter(Long dataflowId, Long partitionId, String includeCountryCode,
       boolean includeValidations) throws IOException, EEAException {
     return writerStrategy.writeFileList(dataflowId, partitionId, includeCountryCode,
         includeValidations);

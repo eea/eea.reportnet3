@@ -65,7 +65,7 @@ public class RecordValue {
   /**
    * The table value.
    */
-  @ManyToOne
+  @ManyToOne(cascade = CascadeType.MERGE)
   @JoinColumn(name = "ID_TABLE")
   private TableValue tableValue;
 

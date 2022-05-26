@@ -56,4 +56,22 @@ public interface FieldExtendedRepository {
   List<FieldVO> findByIdFieldSchemaWithTagOrdered(String idPk, String labelSchemaId,
       String searchValue, String conditionalSchemaId, String conditionalValue, DataType dataTypePk,
       Integer resultsNumber) throws DataIntegrityViolationException;
+
+
+  /**
+   * Query execution single.
+   *
+   * @param generatedQuery the generated query
+   * @return the object
+   */
+  Object queryExecutionSingle(String generatedQuery);
+
+  /**
+   * Query execution list.
+   *
+   * @param generatedQuery the generated query
+   * @return the list
+   */
+  List<Object[]> queryExecutionList(String generatedQuery);
+
 }
