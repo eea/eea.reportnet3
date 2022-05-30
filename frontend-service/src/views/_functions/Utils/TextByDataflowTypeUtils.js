@@ -6,8 +6,10 @@ const getKeyByDataflowType = (dataflowType, field) => {
       return config.dataflowType.BUSINESS.labels[field];
     case config.dataflowType.CITIZEN_SCIENCE.value:
       return config.dataflowType.CITIZEN_SCIENCE.labels[field];
-    default:
+    case config.dataflowType.REPORTING.value:
       return config.dataflowType.REPORTING.labels[field];
+    default:
+      return '';
   }
 };
 

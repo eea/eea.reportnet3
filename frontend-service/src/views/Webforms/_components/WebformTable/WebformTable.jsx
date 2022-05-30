@@ -40,8 +40,13 @@ export const WebformTable = ({
   webform,
   webformType
 }) => {
-  const { onParseWebformRecords, parseNewTableRecord, parseOtherObjectivesRecord, parseRecordsValidations } =
-    WebformsUtils;
+  const {
+    onParseWebformRecords,
+    parseNewTableRecord,
+    parseNewTableRecordTable,
+    parseOtherObjectivesRecord,
+    parseRecordsValidations
+  } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -102,25 +107,42 @@ export const WebformTable = ({
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const onAddMultipleWebform = async (tableSchemaId, filteredRecordId = null) => {
+  const onAddMultipleWebform = async (tableSchemaId, filteredRecordId = null, mainTable = false) => {
     webformTableDispatch({
       type: 'SET_IS_ADDING_MULTIPLE',
       payload: { isAddingMultiple: true, addingOnTableSchemaId: tableSchemaId }
     });
 
+    let newEmptyRecord;
+
     if (!isEmpty(webformData.elementsRecords)) {
-      let sectorObjectivesTable;
-      const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(element => {
-        if (TextUtils.areEquals(element.name, 'SectorObjectives')) {
-          sectorObjectivesTable = element;
+      if (webformType === 'PAMS') {
+        let sectorObjectivesTable;
+        const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(element => {
+          if (TextUtils.areEquals(element.name, 'SectorObjectives')) {
+            sectorObjectivesTable = element;
+          }
+          return element.tableSchemaId === tableSchemaId;
+        })[0];
+
+        newEmptyRecord = TextUtils.areEquals(filteredTable.name, 'OtherObjectives')
+          ? parseOtherObjectivesRecord(filteredTable, sectorObjectivesTable, selectedTable.pamsId, filteredRecordId)
+          : parseNewTableRecord(filteredTable, selectedTable.pamsId, sectorObjectivesTable);
+      } else {
+        if (!mainTable) {
+          const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(
+            element => element.tableSchemaId === tableSchemaId
+          )[0];
+          newEmptyRecord = parseNewTableRecordTable(filteredTable);
         }
-        return element.tableSchemaId === tableSchemaId;
-      })[0];
+      }
+    }
 
-      const newEmptyRecord = TextUtils.areEquals(filteredTable.name, 'OtherObjectives')
-        ? parseOtherObjectivesRecord(filteredTable, sectorObjectivesTable, selectedTable.pamsId, filteredRecordId)
-        : parseNewTableRecord(filteredTable, selectedTable.pamsId, sectorObjectivesTable);
+    if (mainTable) {
+      newEmptyRecord = parseNewTableRecordTable(webformData);
+    }
 
+    if (!isEmpty(newEmptyRecord)) {
       try {
         await DatasetService.createRecord(datasetId, tableSchemaId, [newEmptyRecord]);
         onUpdateData();
@@ -249,9 +271,15 @@ export const WebformTable = ({
   const renderTableWebformRecords = isMultiple => {
     const { elementsRecords } = webformData;
 
-    return isMultiple
-      ? elementsRecords.map((record, index) => renderWebformRecord(record, index))
-      : renderWebformRecord(elementsRecords[0], null);
+    if (!isMultiple) {
+      return renderWebformRecord(elementsRecords[0], null);
+    } else {
+      if (elementsRecords.length > 0) {
+        return elementsRecords.map((record, index) => renderWebformRecord(record, index));
+      } else {
+        return renderWebformRecord(elementsRecords[0], null);
+      }
+    }
   };
 
   const renderPaMsWebformRecords = () => {
@@ -295,7 +323,7 @@ export const WebformTable = ({
           <Button
             icon="plus"
             label={resourcesContext.messages['addRecord']}
-            onClick={() => onAddMultipleWebform(webformData.tableSchemaId)}
+            onClick={() => onAddMultipleWebform(webformData.tableSchemaId, null, true)}
           />
         )}
       </h3>

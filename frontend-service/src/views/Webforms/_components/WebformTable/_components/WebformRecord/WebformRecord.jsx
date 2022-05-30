@@ -216,6 +216,7 @@ export const WebformRecord = ({
           const elementWidth = (100 - elementGap) / elementCount;
           fieldStyle.width = elementWidth;
         }
+
         return (
           checkLabelVisibility(element) &&
           !isFieldVisible &&
@@ -470,13 +471,16 @@ export const WebformRecord = ({
   const renderWebformPaMsErrorMessages = content => {
     const errorMessages = [];
 
-    if (isEmpty(record)) errorMessages.push('PLEASE CHOOSE ONE');
+    if (isEmpty(record)) {
+      errorMessages.push('PLEASE CHOOSE ONE');
+    }
     if (hasFields) {
       errorMessages.push(resourcesContext.messages['emptyWebformTable']);
     }
     if (content.totalRecords === 0) {
       errorMessages.push(resourcesContext.messages['webformTableWithLessRecords']);
     }
+
     return errorMessages;
   };
 
@@ -488,10 +492,10 @@ export const WebformRecord = ({
     if (content.totalRecords === 0) {
       errorMessages.push(resourcesContext.messages['webformTableWithLessRecords']);
     }
-    if (content.totalRecords > 1) {
+    if (!multipleRecords && content.totalRecords > 1) {
       errorMessages.push(resourcesContext.messages['webformTableWithMoreRecords']);
     }
-    if (!isFixedNumber) {
+    if (!multipleRecords && !isFixedNumber) {
       errorMessages.push(resourcesContext.messages['webformTableWithoutFixedNumber']);
     }
 
