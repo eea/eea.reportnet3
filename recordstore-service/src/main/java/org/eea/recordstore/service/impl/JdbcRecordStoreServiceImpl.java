@@ -1017,7 +1017,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           "select matviewname from pg_matviews  where schemaname = 'dataset_" + datasetId + "'";
       List<String> viewList = jdbcTemplate.queryForList(viewToUpdate, String.class);
 
-      String updateQuery = "refresh materialized view concurrently dataset_";
+      String updateQuery = "refresh materialized view dataset_";
 
       for (String view : viewList) {
         executeQueryViewCommands(updateQuery + datasetId + "." + "\"" + view + "\"");
@@ -1880,7 +1880,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     stringQuery.append(" from dataset_" + datasetId + ".record_value rv");
     stringQuery.append(" inner join dataset_" + datasetId
         + ".table_value tv on rv.id_table = tv.id where tv.id_table_schema = '" + idTableSchema
-        + "')");
+        + "') with no data");
 
     executeQueryViewCommands(stringQuery.toString().toLowerCase());
   }
