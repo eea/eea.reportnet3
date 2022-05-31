@@ -136,6 +136,9 @@ public class KafkaSenderUtils {
     Long disabledRules = (notificationMap.get("disabledRules") != null)
         ? Long.parseLong(notificationMap.get("disabledRules").toString())
         : null;
+    Long providerId = (notificationMap.get("providerId") != null)
+        ? Long.parseLong(notificationMap.get("providerId").toString())
+        : null;
 
     UserNotificationContentVO content = new UserNotificationContentVO();
     content.setDataflowId(dataflowId);
@@ -157,6 +160,7 @@ public class KafkaSenderUtils {
     content.setDatasetStatus((notificationMap.get("datasetStatus") != null)
         ? DatasetStatusEnum.valueOf(notificationMap.get("datasetStatus").toString())
         : null);
+    content.setProviderId(providerId);
     notificationControllerZuul.createUserNotificationPrivate(eventType, content);
     LOG.info("Save user notification, eventType: {}, notification content: {}", eventType, content);
 
