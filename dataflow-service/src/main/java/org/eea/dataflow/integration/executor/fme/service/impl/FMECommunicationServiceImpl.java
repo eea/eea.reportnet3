@@ -506,6 +506,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     NotificationVO notificationVO = NotificationVO.builder().user(fmeJob.getUserName())
         .datasetId(fmeJob.getDatasetId()).dataflowId(fmeJob.getDataflowId())
         .fileName(fmeJob.getFileName()).providerId(fmeJob.getProviderId()).build();
+    notificationVO.setProviderId(fmeJob.getProviderId());
+    LOG.info("eventType: {}, notification VO: {}", eventType, notificationVO);
     // Set the notification EventType
     switch (fmeJob.getOperation()) {
       case IMPORT:
