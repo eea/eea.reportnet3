@@ -13,20 +13,20 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>CITUS-SNAPSHOT</api-gateway.version>
-    <communication.version>CITUS-SNAPSHOT</communication.version>
-    <collaboration.version>CITUS-SNAPSHOT</collaboration.version>
-    <dataflow.version>CITUS-SNAPSHOT</dataflow.version>
-    <dataset.version>CITUS-SNAPSHOT</dataset.version>
-    <document.version>CITUS-SNAPSHOT</document.version>
-    <frontend.version>CITUS-SNAPSHOT</frontend.version>
-    <indexsearch.version>CITUS-SNAPSHOT</indexsearch.version>
-    <inspire.version>CITUS-SNAPSHOT</inspire.version>
-    <recordstore.version>CITUS-SNAPSHOT</recordstore.version>
-    <ums.version>CITUS-SNAPSHOT</ums.version>
-    <validation.version>CITUS-SNAPSHOT</validation.version>
-    <common-interfaces.version>CITUS-SNAPSHOT</common-interfaces.version>
-    <common-utitlities.version>CITUS-SNAPSHOT</common-utitlities.version>
-    <rod.version>CITUS-SNAPSHOT</rod.version>
+    <api-gateway.version>3.0-SNAPSHOT</api-gateway.version>
+    <communication.version>3.0-SNAPSHOT</communication.version>
+    <collaboration.version>3.0-SNAPSHOT</collaboration.version>
+    <dataflow.version>3.0-SNAPSHOT</dataflow.version>
+    <dataset.version>3.0-SNAPSHOT</dataset.version>
+    <document.version>3.0-SNAPSHOT</document.version>
+    <frontend.version>3.0-SNAPSHOT</frontend.version>
+    <indexsearch.version>3.0-SNAPSHOT</indexsearch.version>
+    <inspire.version>3.0-SNAPSHOT</inspire.version>
+    <recordstore.version>3.0-SNAPSHOT</recordstore.version>
+    <ums.version>3.0-SNAPSHOT</ums.version>
+    <validation.version>3.0-SNAPSHOT</validation.version>
+    <common-interfaces.version>3.0-SNAPSHOT</common-interfaces.version>
+    <common-utitlities.version>3.0-SNAPSHOT</common-utitlities.version>
+    <rod.version>3.0-SNAPSHOT</rod.version>
   </properties>
 </project>
