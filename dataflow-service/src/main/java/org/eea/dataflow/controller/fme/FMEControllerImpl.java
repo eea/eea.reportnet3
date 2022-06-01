@@ -129,7 +129,6 @@ public class FMEControllerImpl implements FMEController {
     try {
       FMEJob fmeJob = fmeCommunicationService.authenticateAndAuthorize(
           fmeOperationInfoVO.getApiKey(), fmeOperationInfoVO.getRn3JobId());
-      LOG_ERROR.error("PROVIDER ID :" + fmeJob.getProviderId());
       fmeCommunicationService.releaseNotifications(fmeJob, fmeOperationInfoVO.getStatusNumber(),
           fmeOperationInfoVO.isNotificationRequired());
       fmeCommunicationService.updateJobStatus(fmeJob, fmeOperationInfoVO.getStatusNumber());
