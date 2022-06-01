@@ -139,7 +139,6 @@ public class KafkaSenderUtils {
     Long providerId = (notificationMap.get("providerId") != null)
         ? Long.parseLong(notificationMap.get("providerId").toString())
         : null;
-    LOG.info("map:" + providerId);
 
     UserNotificationContentVO content = new UserNotificationContentVO();
     content.setDataflowId(dataflowId);
