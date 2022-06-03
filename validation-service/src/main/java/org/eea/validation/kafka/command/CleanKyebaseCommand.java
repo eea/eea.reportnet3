@@ -47,7 +47,7 @@ public class CleanKyebaseCommand extends AbstractEEAEventHandlerCommand {
   public void execute(final EEAEventVO eeaEventVO) {
     final String processId = (String) eeaEventVO.getData().get("uuid");
     LOG.info("Removing kieBase for process {}", processId);
-    validationHelper.finishProcess(processId);
+    validationHelper.finishProcessInMap(processId);
   }
 
 
