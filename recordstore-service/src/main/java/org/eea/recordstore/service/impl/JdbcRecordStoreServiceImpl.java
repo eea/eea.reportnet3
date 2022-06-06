@@ -302,7 +302,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           throw new RecordStoreAccessException(String
               .format("Error reading commands file to create the dataset. %s", e.getMessage()), e);
         } catch (RecordStoreAccessException e1) {
-          e1.printStackTrace();
+          LOG.info(e1.getMessage(), e);
         }
       }
 
@@ -313,6 +313,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
           jdbcTemplate.execute(citusCommand);
         }
+        Thread.sleep(5000);
       }
 
       Thread.sleep(timeToWaitBeforeReleasingNotification);
