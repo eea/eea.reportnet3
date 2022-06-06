@@ -129,6 +129,7 @@ public class ValidationControllerImpl implements ValidationController {
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     String uuid = UUID.randomUUID().toString();
     String nextUuid = uuid;
+    int priority = validationHelper.getPriority(dataset);
     if (released) {
       // obtain datasets to be released
       List<Long> datasets =
@@ -138,15 +139,13 @@ public class ValidationControllerImpl implements ValidationController {
       for (Long datasetToReleaseId : datasets) {
         processControllerZuul.updateProcess(datasetToReleaseId, dataset.getDataflowId(),
             ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, nextUuid,
-            SecurityContextHolder.getContext().getAuthentication().getName(),
-            validationHelper.getPriority(dataset), released);
+            SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
         nextUuid = UUID.randomUUID().toString();
       }
     } else {
       processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
           ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, uuid,
-          SecurityContextHolder.getContext().getAuthentication().getName(),
-          validationHelper.getPriority(dataset), released);
+          SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
     }
     try {
       validationHelper.executeValidation(datasetId, uuid, released, true);

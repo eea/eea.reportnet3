@@ -75,9 +75,9 @@ public class CleanKyebaseCommandTest {
    */
   @Test
   public void testData() throws EEAException {
-    Mockito.when(validationHelper.finishProcess(Mockito.anyString())).thenReturn(true);
+    Mockito.when(validationHelper.finishProcessInMap(Mockito.anyString())).thenReturn(true);
     cleanKyebaseCommand.execute(eeaEventVO);
-    Mockito.verify(validationHelper, times(1)).finishProcess(Mockito.any());
+    Mockito.verify(validationHelper, times(1)).finishProcessInMap(Mockito.any());
   }
 
 }
