@@ -104,7 +104,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
    */
   @Override
   public byte[] writeFile(Long dataflowId, Long datasetId, String tableSchemaId,
-      boolean includeCountryCode, boolean includeValidations, ExportFilterVO filters)
+      String includeCountryCode, boolean includeValidations, ExportFilterVO filters)
       throws EEAException {
 
     DataSetSchemaVO dataset = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
@@ -153,7 +153,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @throws EEAException the EEA exception
    */
   @Override
-  public List<byte[]> writeFileList(Long dataflowId, Long datasetId, boolean includeCountryCode,
+  public List<byte[]> writeFileList(Long dataflowId, Long datasetId, String includeCountryCode,
       boolean includeValidations) throws EEAException {
 
     ExportFilterVO filters = new ExportFilterVO();
@@ -224,7 +224,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @param filters the filters
    */
   private void writeSheet(Workbook workbook, TableSchemaVO table, Long datasetId,
-      boolean includeCountryCode, boolean includeValidations, DataSetSchemaVO dataset,
+      String includeCountryCode, boolean includeValidations, DataSetSchemaVO dataset,
       ExportFilterVO filters) {
 
     String nameSheet = table.getNameTableSchema();
@@ -240,8 +240,8 @@ public class ExcelWriterStrategy implements WriterStrategy {
     int nHeaders = 0;
     Row rowhead = sheet.createRow(0);
 
-    if (includeCountryCode) {
-      rowhead.createCell(nHeaders).setCellValue("Country code");
+    if (null != includeCountryCode) {
+      rowhead.createCell(nHeaders).setCellValue(includeCountryCode);
       nHeaders++;
     }
 
@@ -289,7 +289,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
             record.getFields() != null ? new ArrayList<>(record.getFields()) : new ArrayList<>();
         int nextUnknownCellNumber = nHeaders;
 
-        if (includeCountryCode) {
+        if (null != includeCountryCode) {
           row.createCell(0).setCellValue(record.getDataProviderCode());
         }
 
@@ -353,15 +353,15 @@ public class ExcelWriterStrategy implements WriterStrategy {
    * @return the sheet
    */
   private Sheet createSheetAndHeaders(Workbook workbook, TableSchemaVO table,
-      boolean includeCountryCode, boolean includeValidations, String nameSheet) {
+      String includeCountryCode, boolean includeValidations, String nameSheet) {
     Sheet sheet = workbook.createSheet(nameSheet);
     List<FieldSchemaVO> fieldSchemas = table.getRecordSchema().getFieldSchema();
     // Set headers
     int nHeaders = 0;
     Row rowhead = sheet.createRow(0);
 
-    if (includeCountryCode) {
-      rowhead.createCell(nHeaders).setCellValue("Country code");
+    if (null != includeCountryCode) {
+      rowhead.createCell(nHeaders).setCellValue(includeCountryCode);
       nHeaders++;
     }
     Map<String, Integer> indexMap = new HashMap<>();

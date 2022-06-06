@@ -5,7 +5,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.bson.types.ObjectId;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -42,6 +47,17 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
   @Value("${dataset.propagation.fieldBatchSize}")
   private int fieldBatchSize;
 
+  /** The file treatment helper. */
+  @Autowired
+  private FileTreatmentHelper fileTreatmentHelper;
+
+  /** The dataset metabase service. */
+  @Autowired
+  DatasetMetabaseService datasetMetabaseService;
+
+  /** The schemas repository. */
+  @Autowired
+  private SchemasRepository schemasRepository;
 
   /**
    * Instantiates a new file loader helper.
@@ -87,6 +103,13 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
     datasetService.deleteTempEtlExport(datasetId);
+
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+    DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
+        .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
+
+    fileTreatmentHelper.updateGeometry(datasetId, datasetSchema);
+
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
   }
@@ -149,6 +172,13 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
     datasetService.deleteTempEtlExport(datasetId);
+
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+    DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
+        .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
+
+    fileTreatmentHelper.updateGeometry(datasetId, datasetSchema);
+
     // after the field has been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.FIELD_UPDATED_COMPLETED_EVENT, datasetId);
   }

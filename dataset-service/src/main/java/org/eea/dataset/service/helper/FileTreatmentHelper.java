@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -37,6 +38,7 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.data.repository.AttachmentRepository;
 import org.eea.dataset.persistence.data.repository.DatasetRepository;
+import org.eea.dataset.persistence.data.repository.FieldRepository;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -210,6 +212,10 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
+  /** The field repository. */
+  @Autowired
+  private FieldRepository fieldRepository;
+
   /**
    * Initialize the executor service.
    */
@@ -289,6 +295,465 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
   /**
+   * Creates the file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   * @param tableSchemaId the table schema id
+   * @param filters the filters
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  public byte[] createFile(Long datasetId, String mimeType, final String tableSchemaId,
+      ExportFilterVO filters) throws EEAException, IOException {
+    // Get the dataFlowId from the metabase
+    Long idDataflow = datasetService.getDataFlowIdById(datasetId);
+
+    // Find if the dataset type is EU to include the countryCode
+    DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
+    String includeCountryCode = getCode(idDataflow, datasetType);
+
+    final IFileExportContext contextExport = fileExportFactory.createContext(mimeType);
+    LOG.info("End of createFile");
+    return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode, false,
+        filters);
+  }
+
+  /**
+   * Save public files.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataSetDataProvider the data set data provider
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  public void savePublicFiles(Long dataflowId, Long dataSetDataProvider) throws IOException {
+
+    LOG.info("Start creating files. DataflowId: {} DataProviderId: {}", dataflowId,
+        dataSetDataProvider);
+
+    List<RepresentativeVO> representativeList =
+        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
+
+    // we find representative
+    RepresentativeVO representative = representativeList.stream().filter(
+        representativeData -> representativeData.getDataProviderId().equals(dataSetDataProvider))
+        .findAny().orElse(null);
+
+    if (null != representative) {
+      // we create the dataflow folder to save it
+
+      File directoryDataflow = new File(pathPublicFile, "dataflow-" + dataflowId);
+      File directoryDataProvider =
+          new File(directoryDataflow, "dataProvider-" + representative.getDataProviderId());
+      // we create the dataprovider folder to save it andwe always delete it and put new files
+      FileUtils.deleteDirectory(directoryDataProvider);
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+      if (!TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
+        createAllDatasetFiles(dataflowId, representative.getDataProviderId());
+      } else {
+        // we delete all file names in the table dataset
+        List<DataSetMetabase> datasetMetabaseList = dataSetMetabaseRepository
+            .findByDataflowIdAndDataProviderId(dataflowId, representative.getDataProviderId());
+        datasetMetabaseList.stream().forEach(datasetFileName -> {
+          datasetFileName.setPublicFileName(null);
+        });
+        dataSetMetabaseRepository.saveAll(datasetMetabaseList);
+      }
+    }
+  }
+
+  /**
+   * Creates the reference dataset files.
+   *
+   * @param dataset the dataset
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Async
+  public void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
+
+    ExportFilterVO filters = new ExportFilterVO();
+    List<DesignDataset> desingDataset =
+        designDatasetRepository.findByDataflowId(dataset.getDataflowId());
+    // look for the name of the design dataset to put the right name to the file
+    String datasetDesingName = "";
+    for (DesignDataset designDatasetVO : desingDataset) {
+      if (designDatasetVO.getDatasetSchema().equalsIgnoreCase(dataset.getDatasetSchema())) {
+        datasetDesingName = designDatasetVO.getDataSetName();
+      }
+    }
+
+    try {
+      // create the excel file
+      byte[] file = createFile(dataset.getId(), FileTypeEnum.XLSX.getValue(), null, filters);
+      // we save the file in its files
+      if (null != file) {
+        String nameFileUnique = String.format("%s", datasetDesingName);
+        String nameFileScape = nameFileUnique + ".xlsx";
+
+        // we create the files and zip with the attachment if it is necessary
+        createFilesAndZip(dataset.getDataflowId(), null, dataset, file, nameFileUnique,
+            nameFileScape);
+
+        // we save the file in metabase with the name without the route
+        dataset.setPublicFileName(nameFileUnique + ".zip");
+        dataSetMetabaseRepository.save(dataset);
+      }
+    } catch (EEAException e) {
+      LOG_ERROR.error("File not created in dataflow {}. Message: {}", dataset.getDataflowId(),
+          e.getMessage(), e);
+    }
+    LOG.info("File created in dataflowId {}", dataset.getDataflowId());
+
+  }
+
+  /**
+   * Export file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   * @param tableSchemaId the table schema id
+   * @param tableName the table name
+   * @param filters the filters
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Async
+  public void exportFile(Long datasetId, String mimeType, String tableSchemaId, String tableName,
+      ExportFilterVO filters) throws EEAException, IOException {
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+        .fileName(tableName).mimeType(mimeType).datasetSchemaId(tableSchemaId)
+        .error("Error exporting table data").build();
+    File fileFolder = new File(pathPublicFile, "dataset-" + datasetId);
+    String.format("Failed generating file from datasetId {} with schema {}.", datasetId,
+        tableSchemaId);
+    fileFolder.mkdirs();
+    try {
+      byte[] file = createFile(datasetId, mimeType, tableSchemaId, filters);
+      File fileWrite =
+          new File(new File(pathPublicFile, "dataset-" + datasetId), tableName + "." + mimeType);
+      try (OutputStream out = new FileOutputStream(fileWrite.toString());) {
+        out.write(file);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT,
+            null, notificationVO);
+      }
+    } catch (IOException | EEAException e) {
+      LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId,
+          tableSchemaId);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_FAILED_EVENT, null,
+          notificationVO);
+    }
+  }
+
+  /**
+   * Gets the tables.
+   *
+   * @param datasetId the dataset id
+   * @return the tables
+   */
+  public List<TableSchema> getTables(Long datasetId) {
+
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+    DataSetSchema datasetSchema = null;
+    try {
+      datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
+          .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error finding datasetSchema by Id. DatasetSchemaId {}. Message {}",
+          datasetSchemaId, e.getMessage(), e);
+    }
+    List<TableSchema> tableSchemaList = new ArrayList<>();
+    if (datasetSchema != null) {
+      tableSchemaList = datasetSchema.getTableSchemas();
+    }
+
+    return tableSchemaList;
+  }
+
+  /**
+   * Etl import dataset.
+   *
+   * @param datasetId the dataset id
+   * @param etlDatasetVO the etl dataset VO
+   * @param providerId the provider id
+   * @throws EEAException the EEA exception
+   */
+  public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO,
+      Long providerId) throws EEAException {
+    // Get the datasetSchemaId by the datasetId
+    LOG.info("Import data into dataset {}", datasetId);
+    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    if (null == datasetSchemaId) {
+      throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
+    }
+
+    // Get the datasetSchema by the datasetSchemaId
+    DataSetSchema datasetSchema =
+        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+    if (null == datasetSchema) {
+      throw new EEAException(
+          String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, datasetSchemaId));
+    }
+
+    // Obtain the data provider code to insert into the record
+    DataProviderVO provider =
+        providerId != null ? representativeControllerZuul.findDataProviderById(providerId) : null;
+
+    // Get the partition for the partiton id
+    final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
+
+    // Construct Maps to relate ids
+    Map<String, TableSchema> tableMap = new HashMap<>();
+    Map<String, FieldSchema> fieldMap = new HashMap<>();
+    Set<String> tableWithAttachmentFieldSet = new HashSet<>();
+    for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
+      tableMap.put(tableSchema.getNameTableSchema().toLowerCase(), tableSchema);
+      // Match each fieldSchemaId with its headerName
+      for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
+        fieldMap.put(field.getHeaderName().toLowerCase() + tableSchema.getIdTableSchema(), field);
+        if (DataType.ATTACHMENT.equals(field.getType())) {
+          LOG.warn("Table with id schema {} contains attachment field, processing",
+              tableSchema.getIdTableSchema());
+          tableWithAttachmentFieldSet.add(tableSchema.getIdTableSchema().toString());
+        }
+      }
+    }
+
+    // Construct object to be save
+    DatasetValue dataset = new DatasetValue();
+    List<TableValue> tables = new ArrayList<>();
+    List<String> readOnlyTables = new ArrayList<>();
+    List<String> fixedNumberTables = new ArrayList<>();
+
+    // Loops to build the entity
+    dataset.setId(datasetId);
+    DatasetTypeEnum datasetType = datasetService.getDatasetType(dataset.getId());
+
+    etlTableFor(etlDatasetVO, provider, partition, tableMap, fieldMap, dataset, tables,
+        readOnlyTables, fixedNumberTables, datasetType);
+    dataset.setTableValues(tables);
+    dataset.setIdDatasetSchema(datasetSchemaId);
+
+    List<RecordValue> allRecords = new ArrayList<>();
+
+    tableValueFor(datasetId, dataset, readOnlyTables, fixedNumberTables, allRecords,
+        tableWithAttachmentFieldSet, datasetSchema.getTableSchemas());
+    recordRepository.saveAll(allRecords);
+    LOG.info("Data saved into dataset {}", datasetId);
+    // now the view is not updated, update the check to false
+    datasetService.updateCheckView(datasetId, false);
+    // delete the temporary table from etlExport
+    datasetService.deleteTempEtlExport(datasetId);
+  }
+
+  /**
+   * Export dataset file.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   */
+  @Async
+  public void exportDatasetFile(Long datasetId, String mimeType) {
+
+    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+    ExportFilterVO filters = new ExportFilterVO();
+
+    // Look for the dataset type is EU or DC to include the countryCode
+    DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
+
+    String includeCountryCode = getCode(dataflowId, datasetType);
+
+    // Extension arrive with zip+xlsx, zip+csv or xlsx, but to the backend arrives with empty space.
+    // Split the extensions to know
+    // if its a zip or only xlsx
+    String[] type = mimeType.split(" ");
+    String extension = "";
+    if (type.length > 1) {
+      extension = type[1];
+    } else {
+      extension = type[0];
+    }
+    final IFileExportContext context = fileExportFactory.createContext(extension);
+
+    try {
+      Map<String, byte[]> contents = new HashMap<>();
+      if (extension.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
+        List<TableSchema> tablesSchema = getTables(datasetId);
+        List<byte[]> dataFile =
+            context.fileListWriter(dataflowId, datasetId, includeCountryCode, false);
+        for (int i = 0; i < tablesSchema.size(); i++) {
+          contents.put(tablesSchema.get(i).getIdTableSchema() + "_"
+              + tablesSchema.get(i).getNameTableSchema(), dataFile.get(i));
+        }
+      } else {
+        byte[] dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode,
+            extension.equalsIgnoreCase(FileTypeEnum.VALIDATIONS.getValue()), filters);
+        contents.put(null, dataFile);
+      }
+
+      Boolean includeZip = false;
+      // If the length after splitting the file type arrives it's more than 1, then there's a
+      // zip+xlsx type
+      if (type.length > 1 && !extension.equalsIgnoreCase(FileTypeEnum.VALIDATIONS.getValue())) {
+        includeZip = true;
+      }
+      generateFile(datasetId, extension, contents, includeZip, datasetType);
+      LOG.info("End of exportDatasetFile datasetId {}", datasetId);
+    } catch (EEAException | IOException | NullPointerException e) {
+      LOG_ERROR.error("Error exporting dataset data. DatasetId {}, file type {}. Message {}",
+          datasetId, mimeType, e.getMessage(), e);
+      // Send notification
+      NotificationVO notificationVO = NotificationVO.builder()
+          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+          .dataflowId(dataflowId).datasetId(datasetId).datasetType(datasetType)
+          .error("Error exporting dataset data").build();
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null,
+            notificationVO);
+      } catch (EEAException ex) {
+        LOG_ERROR.error("Error sending export dataset fail notification. Message {}",
+            e.getMessage(), ex);
+      }
+    }
+
+  }
+
+  /**
+   * Release lock releasing process.
+   *
+   * @param datasetId the dataset id
+   */
+  public void releaseLockReleasingProcess(Long datasetId) {
+    // Release lock to the releasing process
+    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    if (datasetMetabaseVO.getDataProviderId() != null) {
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
+      importFileData.put(LiteralConstants.DATAFLOWID, datasetMetabaseVO.getDataflowId());
+      importFileData.put(LiteralConstants.DATAPROVIDERID, datasetMetabaseVO.getDataProviderId());
+      lockService.removeLockByCriteria(importFileData);
+    }
+  }
+
+  /**
+   * Update geomety.
+   *
+   * @param datasetId the dataset id
+   * @param datasetSchema the dataset schema
+   */
+  @Async
+  public void updateGeometry(Long datasetId, DataSetSchema datasetSchema) {
+    // check schema has geometry and check field Value has geometry
+    if (checkSchemaGeometry(datasetSchema)) {
+      LOG.info("Updating geometries for dataset {}", datasetId);
+      // update geometryes (native)
+      Map<Integer, Map<String, String>> mapFieldValue = getFieldValueGeometry(datasetId);
+      int size = mapFieldValue.keySet().size();
+      for (int i = 0; i < size; i++) {
+        executeUpdateGeometry(datasetId, mapFieldValue.get(i));
+      }
+    }
+  }
+
+  /**
+   * Check schema geometry.
+   *
+   * @param datasetSchema the dataset schema
+   * @return true, if successful
+   */
+  private boolean checkSchemaGeometry(DataSetSchema datasetSchema) {
+    boolean result = false;
+    for (TableSchema table : datasetSchema.getTableSchemas()) {
+      for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
+        switch (field.getType()) {
+          case GEOMETRYCOLLECTION:
+          case MULTILINESTRING:
+          case MULTIPOINT:
+          case MULTIPOLYGON:
+          case POINT:
+          case POLYGON:
+            result = true;
+            break;
+          default:
+            result = false;
+        }
+        if (result) {
+          break;
+        }
+      }
+      if (result) {
+        break;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Check field value geometry.
+   *
+   * @param datasetId the dataset id
+   * @return true, if successful
+   */
+  private boolean checkFieldValueGeometry(Long datasetId) {
+    boolean result = false;
+    String query = "select count(fv.id) from dataset_" + datasetId
+        + ".field_value fv where fv.type in ('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION')";
+    Integer count = Integer.parseInt(fieldRepository.queryExecutionSingle(query).toString());
+    if (count != null && count > 0) {
+      result = true;
+    }
+    return result;
+  }
+
+  /**
+   * Gets the field value geometry.
+   *
+   * @param datasetId the dataset id
+   * @return the field value geometry
+   */
+  private Map<Integer, Map<String, String>> getFieldValueGeometry(Long datasetId) {
+    String query = "select id, value from dataset_" + datasetId
+        + ".field_value fv where fv.type in ('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION')";
+    List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
+    Map<Integer, Map<String, String>> resultMap = new HashMap<>();
+    for (int i = 0; i < resultQuery.size(); i++) {
+      Map<String, String> fieldMap = new HashMap<>();
+      for (int j = 0; j < 10000 && !resultQuery.isEmpty(); j++) {
+        fieldMap.put(resultQuery.get(0)[0].toString(), resultQuery.get(0)[1].toString());
+        resultQuery.remove(resultQuery.get(0));
+      }
+      resultMap.put(i, fieldMap);
+    }
+    return resultMap;
+  }
+
+  /**
+   * Execute update geometry.
+   *
+   * @param datasetId the dataset id
+   * @param mapFieldValue the map field value
+   */
+  private void executeUpdateGeometry(Long datasetId, Map<String, String> mapFieldValue) {
+    String query =
+        "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[";
+
+    Iterator<Entry<String, String>> iterator = mapFieldValue.entrySet().iterator();
+    while (iterator.hasNext()) {
+      Map.Entry<String, String> entry = iterator.next();
+      query += "row('" + entry.getKey() + "', '" + entry.getValue();
+      if (iterator.hasNext()) {
+        query += "'), ";
+      } else {
+        query += "')";
+      }
+    }
+    query += "] as public.geom_update[]));";
+    fieldRepository.queryExecutionSingle(query);
+  }
+
+
+  /**
    * Release lock.
    *
    * @param datasetId the dataset id
@@ -309,23 +774,6 @@ public class FileTreatmentHelper implements DisposableBean {
       releaseLockReleasingProcess(datasetId);
     } catch (IOException e) {
       LOG_ERROR.error("Error deleting files: datasetId={}", datasetId, e);
-    }
-  }
-
-  /**
-   * Release lock releasing process.
-   *
-   * @param datasetId the dataset id
-   */
-  public void releaseLockReleasingProcess(Long datasetId) {
-    // Release lock to the releasing process
-    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-    if (datasetMetabaseVO.getDataProviderId() != null) {
-      Map<String, Object> importFileData = new HashMap<>();
-      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
-      importFileData.put(LiteralConstants.DATAFLOWID, datasetMetabaseVO.getDataflowId());
-      importFileData.put(LiteralConstants.DATAPROVIDERID, datasetMetabaseVO.getDataProviderId());
-      lockService.removeLockByCriteria(importFileData);
     }
   }
 
@@ -631,6 +1079,8 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     }
 
+    updateGeometry(datasetId, datasetSchema);
+
     if (files.size() == 1) {
       finishImportProcess(datasetId, tableSchemaId, originalFileName, error, errorWrongFilename);
     } else {
@@ -638,7 +1088,6 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
   }
-
 
   /**
    * Gets the table schema id from file name.
@@ -868,78 +1317,6 @@ public class FileTreatmentHelper implements DisposableBean {
     }
   }
 
-  /**
-   * Export dataset file.
-   *
-   * @param datasetId the dataset id
-   * @param mimeType the mime type
-   */
-  @Async
-  public void exportDatasetFile(Long datasetId, String mimeType) {
-
-    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-
-    ExportFilterVO filters = new ExportFilterVO();
-
-    // Look for the dataset type is EU or DC to include the countryCode
-    DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
-    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
-        || DatasetTypeEnum.COLLECTION.equals(datasetType);
-
-    // Extension arrive with zip+xlsx, zip+csv or xlsx, but to the backend arrives with empty space.
-    // Split the extensions to know
-    // if its a zip or only xlsx
-    String[] type = mimeType.split(" ");
-    String extension = "";
-    if (type.length > 1) {
-      extension = type[1];
-    } else {
-      extension = type[0];
-    }
-    final IFileExportContext context = fileExportFactory.createContext(extension);
-
-    try {
-      Map<String, byte[]> contents = new HashMap<>();
-      if (extension.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
-        List<TableSchema> tablesSchema = getTables(datasetId);
-        List<byte[]> dataFile =
-            context.fileListWriter(dataflowId, datasetId, includeCountryCode, false);
-        for (int i = 0; i < tablesSchema.size(); i++) {
-          contents.put(tablesSchema.get(i).getIdTableSchema() + "_"
-              + tablesSchema.get(i).getNameTableSchema(), dataFile.get(i));
-        }
-      } else {
-        byte[] dataFile = context.fileWriter(dataflowId, datasetId, null, includeCountryCode,
-            extension.equalsIgnoreCase(FileTypeEnum.VALIDATIONS.getValue()), filters);
-        contents.put(null, dataFile);
-      }
-
-      Boolean includeZip = false;
-      // If the length after splitting the file type arrives it's more than 1, then there's a
-      // zip+xlsx type
-      if (type.length > 1 && !extension.equalsIgnoreCase(FileTypeEnum.VALIDATIONS.getValue())) {
-        includeZip = true;
-      }
-      generateFile(datasetId, extension, contents, includeZip, datasetType);
-      LOG.info("End of exportDatasetFile datasetId {}", datasetId);
-    } catch (EEAException | IOException | NullPointerException e) {
-      LOG_ERROR.error("Error exporting dataset data. DatasetId {}, file type {}. Message {}",
-          datasetId, mimeType, e.getMessage(), e);
-      // Send notification
-      NotificationVO notificationVO = NotificationVO.builder()
-          .user(SecurityContextHolder.getContext().getAuthentication().getName())
-          .dataflowId(dataflowId).datasetId(datasetId).datasetType(datasetType)
-          .error("Error exporting dataset data").build();
-      try {
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null,
-            notificationVO);
-      } catch (EEAException ex) {
-        LOG_ERROR.error("Error sending export dataset fail notification. Message {}",
-            e.getMessage(), ex);
-      }
-    }
-
-  }
 
 
   /**
@@ -1057,106 +1434,6 @@ public class FileTreatmentHelper implements DisposableBean {
   }
 
 
-  /**
-   * Etl import dataset.
-   *
-   * @param datasetId the dataset id
-   * @param etlDatasetVO the etl dataset VO
-   * @param providerId the provider id
-   * @throws EEAException the EEA exception
-   */
-  public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO,
-      Long providerId) throws EEAException {
-    // Get the datasetSchemaId by the datasetId
-    LOG.info("Import data into dataset {}", datasetId);
-    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-    if (null == datasetSchemaId) {
-      throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
-    }
-
-    // Get the datasetSchema by the datasetSchemaId
-    DataSetSchema datasetSchema =
-        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
-    if (null == datasetSchema) {
-      throw new EEAException(
-          String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, datasetSchemaId));
-    }
-
-    // Obtain the data provider code to insert into the record
-    DataProviderVO provider =
-        providerId != null ? representativeControllerZuul.findDataProviderById(providerId) : null;
-
-    // Get the partition for the partiton id
-    final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
-
-    // Construct Maps to relate ids
-    Map<String, TableSchema> tableMap = new HashMap<>();
-    Map<String, FieldSchema> fieldMap = new HashMap<>();
-    Set<String> tableWithAttachmentFieldSet = new HashSet<>();
-    for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
-      tableMap.put(tableSchema.getNameTableSchema().toLowerCase(), tableSchema);
-      // Match each fieldSchemaId with its headerName
-      for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
-        fieldMap.put(field.getHeaderName().toLowerCase() + tableSchema.getIdTableSchema(), field);
-        if (DataType.ATTACHMENT.equals(field.getType())) {
-          LOG.warn("Table with id schema {} contains attachment field, processing",
-              tableSchema.getIdTableSchema());
-          tableWithAttachmentFieldSet.add(tableSchema.getIdTableSchema().toString());
-        }
-      }
-    }
-
-    // Construct object to be save
-    DatasetValue dataset = new DatasetValue();
-    List<TableValue> tables = new ArrayList<>();
-    List<String> readOnlyTables = new ArrayList<>();
-    List<String> fixedNumberTables = new ArrayList<>();
-
-    // Loops to build the entity
-    dataset.setId(datasetId);
-    DatasetTypeEnum datasetType = datasetService.getDatasetType(dataset.getId());
-
-    etlTableFor(etlDatasetVO, provider, partition, tableMap, fieldMap, dataset, tables,
-        readOnlyTables, fixedNumberTables, datasetType);
-    dataset.setTableValues(tables);
-    dataset.setIdDatasetSchema(datasetSchemaId);
-
-    List<RecordValue> allRecords = new ArrayList<>();
-
-    tableValueFor(datasetId, dataset, readOnlyTables, fixedNumberTables, allRecords,
-        tableWithAttachmentFieldSet, datasetSchema.getTableSchemas());
-    recordRepository.saveAll(allRecords);
-    LOG.info("Data saved into dataset {}", datasetId);
-    // now the view is not updated, update the check to false
-    datasetService.updateCheckView(datasetId, false);
-    // delete the temporary table from etlExport
-    datasetService.deleteTempEtlExport(datasetId);
-  }
-
-  /**
-   * Gets the tables.
-   *
-   * @param datasetId the dataset id
-   * @return the tables
-   */
-  public List<TableSchema> getTables(Long datasetId) {
-
-    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
-    DataSetSchema datasetSchema = null;
-    try {
-      datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
-          .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error finding datasetSchema by Id. DatasetSchemaId {}. Message {}",
-          datasetSchemaId, e.getMessage(), e);
-    }
-    List<TableSchema> tableSchemaList = new ArrayList<>();
-    if (datasetSchema != null) {
-      tableSchemaList = datasetSchema.getTableSchemas();
-    }
-
-    return tableSchemaList;
-  }
 
   /**
    * Table value for.
@@ -1384,132 +1661,7 @@ public class FileTreatmentHelper implements DisposableBean {
     return partition;
   }
 
-  /**
-   * Export file.
-   *
-   * @param datasetId the dataset id
-   * @param mimeType the mime type
-   * @param tableSchemaId the table schema id
-   * @param tableName the table name
-   * @param filters the filters
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Async
-  public void exportFile(Long datasetId, String mimeType, String tableSchemaId, String tableName,
-      ExportFilterVO filters) throws EEAException, IOException {
-    NotificationVO notificationVO = NotificationVO.builder()
-        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .fileName(tableName).mimeType(mimeType).datasetSchemaId(tableSchemaId)
-        .error("Error exporting table data").build();
 
-    File fileFolder = new File(pathPublicFile, "dataset-" + datasetId);
-    String creatingFileError = String.format(
-        "Failed generating file from datasetId {} with schema {}.", datasetId, tableSchemaId);
-    fileFolder.mkdirs();
-    try {
-      byte[] file = createFile(datasetId, mimeType, tableSchemaId, filters);
-      File fileWrite =
-          new File(new File(pathPublicFile, "dataset-" + datasetId), tableName + "." + mimeType);
-      try (OutputStream out = new FileOutputStream(fileWrite.toString());) {
-        out.write(file);
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT,
-            null, notificationVO);
-      }
-    } catch (IOException | EEAException e) {
-      LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId,
-          tableSchemaId);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_FAILED_EVENT, null,
-          notificationVO);
-    }
-  }
-
-  /**
-   * Creates the reference dataset files.
-   *
-   * @param dataset the dataset
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  @Async
-  public void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
-
-    ExportFilterVO filters = new ExportFilterVO();
-    List<DesignDataset> desingDataset =
-        designDatasetRepository.findByDataflowId(dataset.getDataflowId());
-    // look for the name of the design dataset to put the right name to the file
-    String datasetDesingName = "";
-    for (DesignDataset designDatasetVO : desingDataset) {
-      if (designDatasetVO.getDatasetSchema().equalsIgnoreCase(dataset.getDatasetSchema())) {
-        datasetDesingName = designDatasetVO.getDataSetName();
-      }
-    }
-
-    try {
-      // create the excel file
-      byte[] file = createFile(dataset.getId(), FileTypeEnum.XLSX.getValue(), null, filters);
-      // we save the file in its files
-      if (null != file) {
-        String nameFileUnique = String.format("%s", datasetDesingName);
-        String nameFileScape = nameFileUnique + ".xlsx";
-
-        // we create the files and zip with the attachment if it is necessary
-        createFilesAndZip(dataset.getDataflowId(), null, dataset, file, nameFileUnique,
-            nameFileScape);
-
-        // we save the file in metabase with the name without the route
-        dataset.setPublicFileName(nameFileUnique + ".zip");
-        dataSetMetabaseRepository.save(dataset);
-      }
-    } catch (EEAException e) {
-      LOG_ERROR.error("File not created in dataflow {}. Message: {}", dataset.getDataflowId(),
-          e.getMessage(), e);
-    }
-    LOG.info("File created in dataflowId {}", dataset.getDataflowId());
-
-  }
-
-  /**
-   * Save public files.
-   *
-   * @param dataflowId the dataflow id
-   * @param dataSetDataProvider the data set data provider
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  public void savePublicFiles(Long dataflowId, Long dataSetDataProvider) throws IOException {
-
-    LOG.info("Start creating files. DataflowId: {} DataProviderId: {}", dataflowId,
-        dataSetDataProvider);
-
-    List<RepresentativeVO> representativeList =
-        representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
-
-    // we find representative
-    RepresentativeVO representative = representativeList.stream().filter(
-        representativeData -> representativeData.getDataProviderId().equals(dataSetDataProvider))
-        .findAny().orElse(null);
-
-    if (null != representative) {
-      // we create the dataflow folder to save it
-
-      File directoryDataflow = new File(pathPublicFile, "dataflow-" + dataflowId);
-      File directoryDataProvider =
-          new File(directoryDataflow, "dataProvider-" + representative.getDataProviderId());
-      // we create the dataprovider folder to save it andwe always delete it and put new files
-      FileUtils.deleteDirectory(directoryDataProvider);
-      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
-      if (!TypeDataflowEnum.BUSINESS.equals(dataflow.getType())) {
-        createAllDatasetFiles(dataflowId, representative.getDataProviderId());
-      } else {
-        // we delete all file names in the table dataset
-        List<DataSetMetabase> datasetMetabaseList = dataSetMetabaseRepository
-            .findByDataflowIdAndDataProviderId(dataflowId, representative.getDataProviderId());
-        datasetMetabaseList.stream().forEach(datasetFileName -> {
-          datasetFileName.setPublicFileName(null);
-        });
-        dataSetMetabaseRepository.saveAll(datasetMetabaseList);
-      }
-    }
-  }
 
   /**
    * Creates the all dataset files.
@@ -1576,32 +1728,6 @@ public class FileTreatmentHelper implements DisposableBean {
     }
   }
 
-  /**
-   * Creates the file.
-   *
-   * @param datasetId the dataset id
-   * @param mimeType the mime type
-   * @param tableSchemaId the table schema id
-   * @param filters the filters
-   * @return the byte[]
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-  public byte[] createFile(Long datasetId, String mimeType, final String tableSchemaId,
-      ExportFilterVO filters) throws EEAException, IOException {
-    // Get the dataFlowId from the metabase
-    Long idDataflow = datasetService.getDataFlowIdById(datasetId);
-
-    // Find if the dataset type is EU to include the countryCode
-    DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
-    boolean includeCountryCode = DatasetTypeEnum.EUDATASET.equals(datasetType)
-        || DatasetTypeEnum.COLLECTION.equals(datasetType);
-
-    final IFileExportContext contextExport = fileExportFactory.createContext(mimeType);
-    LOG.info("End of createFile");
-    return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode, false,
-        filters);
-  }
 
   private void createFilesAndZip(Long dataflowId, Long dataProviderId,
       DataSetMetabase datasetToFile, byte[] file, String nameFileUnique, String nameFileScape)
@@ -1676,5 +1802,35 @@ public class FileTreatmentHelper implements DisposableBean {
       out.closeEntry();
       LOG.info("We create file {} in the route ", fileWriteZip);
     }
+  }
+
+  /**
+   * Gets the code.
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetType the dataset type
+   * @return the code
+   */
+  private String getCode(Long dataflowId, DatasetTypeEnum datasetType) {
+    String includeCountryCode = null;
+    if (DatasetTypeEnum.EUDATASET.equals(datasetType)
+        || DatasetTypeEnum.COLLECTION.equals(datasetType)) {
+      TypeDataflowEnum dataflowType = dataflowControllerZuul.getMetabaseById(dataflowId).getType();
+      switch (dataflowType) {
+        case REPORTING:
+          includeCountryCode = "Country Code";
+          break;
+        case BUSINESS:
+          includeCountryCode = "Company Code";
+          break;
+        case CITIZEN_SCIENCE:
+          includeCountryCode = "Citizen Science Code";
+          break;
+        default:
+          includeCountryCode = "Country Code";
+          break;
+      }
+    }
+    return includeCountryCode;
   }
 }

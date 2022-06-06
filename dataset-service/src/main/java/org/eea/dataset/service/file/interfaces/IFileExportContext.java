@@ -26,7 +26,7 @@ public interface IFileExportContext {
    * @throws EEAException the EEA exception
    */
   byte[] fileWriter(Long dataflowId, Long datasetId, String idTableSchema,
-      boolean includeCountryCode, boolean includeValidations, ExportFilterVO filters)
+      String includeCountryCode, boolean includeValidations, ExportFilterVO filters)
       throws InvalidFileException, IOException, EEAException;
 
   /**
@@ -41,6 +41,6 @@ public interface IFileExportContext {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
-  List<byte[]> fileListWriter(Long dataflowId, Long datasetId, boolean includeCountryCode,
+  List<byte[]> fileListWriter(Long dataflowId, Long datasetId, String includeCountryCode,
       boolean includeValidations) throws InvalidFileException, IOException, EEAException;
 }

@@ -57,9 +57,9 @@ public class FileExportContextImplTest {
   public void testFileWriter() throws IOException, EEAException {
     byte[] expectedResult = "".getBytes();
     Mockito.when(writerStrategy.writeFile(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any())).thenReturn(expectedResult);
+        Mockito.any(), Mockito.anyBoolean(), Mockito.any())).thenReturn(expectedResult);
     assertEquals("Not equals", expectedResult,
-        fileExportContextImpl.fileWriter(1L, 1L, "", true, false, null));
+        fileExportContextImpl.fileWriter(1L, 1L, "", "Country Code", false, null));
   }
 
   /**
@@ -72,10 +72,10 @@ public class FileExportContextImplTest {
   public void testFileListWriter() throws IOException, EEAException {
     List<byte[]> expectedResult = new ArrayList<>();
     expectedResult.add("".getBytes());
-    Mockito.when(writerStrategy.writeFileList(Mockito.any(), Mockito.any(), Mockito.anyBoolean(),
+    Mockito.when(writerStrategy.writeFileList(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.anyBoolean())).thenReturn(expectedResult);
     assertEquals("Not equals", expectedResult,
-        fileExportContextImpl.fileListWriter(1L, 1L, true, true));
+        fileExportContextImpl.fileListWriter(1L, 1L, "Country Code", true));
   }
 
 }
