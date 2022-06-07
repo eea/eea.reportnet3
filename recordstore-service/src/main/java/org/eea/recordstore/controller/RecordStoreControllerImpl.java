@@ -324,6 +324,25 @@ public class RecordStoreControllerImpl implements RecordStoreController {
         isMaterialized);
   }
 
+  /**
+   * Distribute tables.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/dataset/create/dataCollection/finish/{datasetId}")
+  @ApiOperation(value = "Distribute into reference tables", hidden = true)
+  public void distributeTables(
+      @ApiParam(value = "Dataset Id", example = "0") @PathVariable("datasetId") Long datasetId) {
+
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
+    recordStoreService.distributeTables(datasetId);
+  }
+
 
   /**
    * Creates the update query view.

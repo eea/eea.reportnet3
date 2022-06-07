@@ -165,8 +165,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private Resource resourceFile;
 
   /** The resource file. */
-  @Value("classpath:datasetInitCommandsCitus.txt")
+  @Value("classpath:datasetInitCommandsCitusComplete.txt")
   private Resource resourceCitusFile;
+
+  /** The resource file. */
+  @Value("classpath:datasetDistributeCitus.txt")
+  private Resource resourceDistributeFile;
+
+  /** The resource file. */
+  @Value("classpath:datasetInitCommandsCitus.txt")
+  private Resource resourceDistributeFirstFile;
 
   /** The path snapshot. */
   @Value("${pathSnapshot}")
@@ -292,7 +300,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       final List<String> citusCommands = new ArrayList<>();
       // read file into stream, try-with-resources
       try (BufferedReader brCitus =
-          new BufferedReader(new InputStreamReader(resourceCitusFile.getInputStream()))) {
+          new BufferedReader(new InputStreamReader(resourceDistributeFirstFile.getInputStream()))) {
 
         brCitus.lines().forEach(citusCommands::add);
 
@@ -313,7 +321,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
           jdbcTemplate.execute(citusCommand);
         }
-        Thread.sleep(5000);
+        Thread.sleep(2000);
       }
 
       Thread.sleep(timeToWaitBeforeReleasingNotification);
@@ -346,6 +354,43 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       Thread.currentThread().interrupt();
     }
   }
+
+
+  /**
+   * Distribute tables.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @Async
+  public void distributeTables(Long datasetId) {
+
+    // Initialize resources
+    try (Connection connection = dataSource.getConnection();
+        Statement statement = connection.createStatement();
+        BufferedReader br =
+            new BufferedReader(new InputStreamReader(resourceDistributeFile.getInputStream()))) {
+
+      final List<String> citusCommands = new ArrayList<>();
+      br.lines().forEach(citusCommands::add);
+
+      for (String citusCommand : citusCommands) {
+        citusCommand =
+            citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
+        jdbcTemplate.execute(citusCommand);
+      }
+    } catch (final IOException | SQLException e) {
+      LOG_ERROR.error("Error reading commands file to distribute the dataset. {}", e.getMessage());
+      try {
+        throw new RecordStoreAccessException(String.format(
+            "Error reading commands file to distribute the dataset. %s", e.getMessage()), e);
+      } catch (RecordStoreAccessException e1) {
+        LOG.info(e1.getMessage(), e);
+      }
+    }
+
+  }
+
 
   /**
    * Creates the empty data set. This method is used to create the schema of the design datasets
