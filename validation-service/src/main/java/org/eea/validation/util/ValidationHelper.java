@@ -1086,6 +1086,8 @@ public class ValidationHelper implements DisposableBean {
             LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
         forceExecuteValidation.put(LiteralConstants.DATASETID, datasetId);
         lockService.removeLockByCriteria(forceExecuteValidation);
+        datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+            DatasetRunningStatusEnum.VALIDATED);
 
         // after last dataset validations have been saved, an event is sent to notify it
         Map<String, Object> value = new HashMap<>();
@@ -1119,8 +1121,6 @@ public class ValidationHelper implements DisposableBean {
                 NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
           }
 
-          datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
-              DatasetRunningStatusEnum.VALIDATED);
           isFinished = true;
         }
       }
