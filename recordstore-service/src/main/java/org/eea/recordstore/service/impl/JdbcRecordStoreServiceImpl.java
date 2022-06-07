@@ -293,6 +293,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // Execute queries and commit results
       statement.executeBatch();
+      statement.clearBatch();
       LOG.info("{} Schemas created as part of DataCollection creation.",
           datasetIdsAndSchemaIds.size());
       // waiting X seconds before releasing notifications, so database is able to write the
@@ -319,8 +320,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         for (String citusCommand : citusCommands) {
           citusCommand =
               citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
-          jdbcTemplate.execute(citusCommand);
+          statement.addBatch(citusCommand);
+          // jdbcTemplate.execute(citusCommand);
         }
+        statement.executeBatch();
+        statement.clearBatch();
         Thread.sleep(2000);
       }
 
