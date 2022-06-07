@@ -15,11 +15,6 @@
   color: var(--c-white-color);
 }
 
-.correct {
-  background-color: var(--statusBox-true-bg);
-  color: var(--statusBox-true-color);
-}
-
 .design {
   background-color: var(--statusBox-designer-bg);
   color: var(--c-black-color);
@@ -30,34 +25,18 @@
   color: var(--statusBox-false-color);
 }
 
-.open {
-  background-color: var(--statusBox-draft-bg);
-  color: var(--statusBox-draft-color);
-}
-
+.open,
 .draft {
   background-color: var(--statusBox-draft-bg);
   color: var(--statusBox-draft-color);
 }
 
-.enabled {
-  background-color: var(--statusBox-true-bg);
-  color: var(--statusBox-true-color);
-}
-
-.error {
+.error, 
+.incorrect, 
+.invalid, 
+.cancelled {
   background-color: var(--statusBox-error-bg);
   color: var(--statusBox-error-color);
-}
-
-.incorrect {
-  background-color: var(--statusBox-false-bg);
-  color: var(--statusBox-false-color);
-}
-
-.invalid {
-  background-color: var(--statusBox-false-bg);
-  color: var(--statusBox-false-color);
 }
 
 .info,
@@ -72,7 +51,9 @@
   color: var(--c-growl-success-darker-green);
 }
 
-.valid {
+.valid,
+.enabled,
+.correct {
   background-color: var(--statusBox-true-bg);
   color: var(--statusBox-true-color);
 }
