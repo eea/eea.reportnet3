@@ -178,6 +178,10 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   private static final String KO_ALREADY_EXISTS =
       "KO - imported user already exists in Reportnet representing for the same Representative.";
 
+  /** The Constant KO_REPRESENTATIVE_ALREADY_EXISTS: {@value}. */
+  private static final String KO_REPRESENTATIVE_ALREADY_EXISTS =
+      "KO - imported Representative already exists";
+
   /**
    * Creates the representative.
    *
@@ -1036,18 +1040,24 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       Pattern p = Pattern.compile(EMAIL_REGEX);
       Matcher m = p.matcher(email);
 
-      if (m.matches()) {
-        // If the representative exists we don't create it again
-        if (null == representative) {
-          importResult = createRepresentativeAndLeadReporter(email, representativeList, user,
-              dataflow, dataProvider);
-        } else {
-          importResult = createLeadReporterWhenRepresentativeExists(email, representativeList, user,
-              representative);
-        }
+
+      // If the representative exists we don't create it again
+      if (null == representative) {
+        importResult = createRepresentativeAndLeadReporter(email, representativeList, user,
+            dataflow, dataProvider);
       } else {
-        importResult = KO_INVALID_EMAIL;
+        if (!email.isBlank()) {
+          if (m.matches()) {
+            importResult = createLeadReporterWhenRepresentativeExists(email, representativeList,
+                user, representative);
+          } else {
+            importResult = KO_INVALID_EMAIL;
+          }
+        } else {
+          importResult = KO_REPRESENTATIVE_ALREADY_EXISTS;
+        }
       }
+
     }
     return importResult;
   }
@@ -1074,6 +1084,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         leadReporter.setEmail(innerEmail);
         if (null == user) {
           leadReporter.setInvalid(true);
+        } else {
+          leadReporter.setInvalid(false);
+          modifyLeadReporterPermissions(email, representative, false);
         }
         leadReporters.add(leadReporter);
         representative.setLeadReporters(leadReporters);
@@ -1113,19 +1126,30 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     representative.setReceiptOutdated(false);
     representative.setHasDatasets(false);
     representative.setId(0L);
+    Pattern p = Pattern.compile(EMAIL_REGEX);
+    Matcher m = p.matcher(email);
     if (StringUtils.isNotBlank(email)) {
       LeadReporter leadReporter = new LeadReporter();
       leadReporter.setRepresentative(representative);
       leadReporter.setEmail(email.toLowerCase());
-      if (null == user) {
-        leadReporter.setInvalid(true);
+      if (m.matches()) {
+        representative.setLeadReporters(new ArrayList<>(Arrays.asList(leadReporter)));
+        if (null == user) {
+          leadReporter.setInvalid(true);
+        } else {
+          leadReporter.setInvalid(false);
+          modifyLeadReporterPermissions(email, representative, false);
+        }
+        importResult = OK_IMPORT;
+      } else {
+        representative.setLeadReporters(new ArrayList<>());
+        importResult = KO_INVALID_EMAIL;
       }
-      representative.setLeadReporters(new ArrayList<>(Arrays.asList(leadReporter)));
     } else {
       representative.setLeadReporters(new ArrayList<>());
+      importResult = OK_IMPORT;
     }
     representativeList.add(representative);
-    importResult = OK_IMPORT;
     return importResult;
   }
 

@@ -153,6 +153,10 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         {
           type: resourcesContext.messages[config.datasetRunningStatus.FINISHED.label].toUpperCase(),
           value: config.datasetRunningStatus.FINISHED.key
+        },
+        {
+          type: resourcesContext.messages[config.datasetRunningStatus.CANCELED.label].toUpperCase(),
+          value: config.datasetRunningStatus.CANCELED.key
         }
       ],
       template: 'ValidationsStatus',
