@@ -1669,7 +1669,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     // Validate property maxSize of the file. If the size is 0, it's ok, continue
     if (fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() != 0
-        && fieldSchema.getMaxSize() * 1000000 < size) {
+        && fieldSchema.getMaxSize() * 1048576 < size) {
       result = false;
     }
     // Validate property extensions of the file. If no extensions provided, it's ok, continue
