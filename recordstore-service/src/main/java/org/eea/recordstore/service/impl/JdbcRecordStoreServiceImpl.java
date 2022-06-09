@@ -24,7 +24,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
@@ -319,17 +318,29 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         }
       }
 
-      StringJoiner joiner = new StringJoiner(",");
-      datasetIdsAndSchemaIds.keySet()
-          .forEach(item -> joiner.add("'dataset_" + item.toString() + "'"));
-      String datasets = joiner.toString();
-      for (String citusCommand : citusCommands) {
-        citusCommand = citusCommand.replace("%dataset_name%", datasets);
-        statement.addBatch(citusCommand);
-        statement.executeBatch();
-        statement.clearBatch();
-        Thread.sleep(2000);
-      }
+      /*
+       * StringJoiner joiner = new StringJoiner(","); datasetIdsAndSchemaIds.keySet().forEach(item
+       * -> { joiner.add("'dataset_" + item.toString() + "'"); }); String datasets =
+       * joiner.toString(); for (String citusCommand : citusCommands) { citusCommand =
+       * citusCommand.replace("%dataset_name%", datasets); statement.addBatch(citusCommand);
+       * statement.executeBatch(); statement.clearBatch(); Thread.sleep(2000); }
+       */
+
+
+      datasetIdsAndSchemaIds.keySet().forEach(item -> {
+        for (String citusCommand : citusCommands) {
+          citusCommand =
+              citusCommand.replace("%dataset_name%", "'dataset_" + item.toString() + "'");
+          try {
+            statement.addBatch(citusCommand);
+            statement.executeBatch();
+            statement.clearBatch();
+            citusCommand.replace("'dataset_" + item.toString() + "'", "%dataset_name%");
+          } catch (SQLException e) {
+            LOG_ERROR.error("Error executing distribution table in dataset {}", item.toString());
+          }
+        }
+      });
 
       /*
        * for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
