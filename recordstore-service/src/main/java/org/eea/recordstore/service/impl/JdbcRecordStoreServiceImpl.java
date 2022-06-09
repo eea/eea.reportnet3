@@ -331,14 +331,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         for (String citusCommand : citusCommands) {
           citusCommand =
               citusCommand.replace("%dataset_name%", "'dataset_" + item.toString() + "'");
-          try {
-            statement.addBatch(citusCommand);
-            statement.executeBatch();
-            statement.clearBatch();
-            citusCommand.replace("'dataset_" + item.toString() + "'", "%dataset_name%");
-          } catch (SQLException e) {
-            LOG_ERROR.error("Error executing distribution table in dataset {}", item.toString());
-          }
+          jdbcTemplate.execute(citusCommand);
+          // statement.addBatch(citusCommand);
+          // statement.executeBatch();
+          // statement.clearBatch();
+          LOG.info("Distributing dataset {}", item.toString());
+          citusCommand.replace("'dataset_" + item.toString() + "'", "%dataset_name%");
         }
       });
 
