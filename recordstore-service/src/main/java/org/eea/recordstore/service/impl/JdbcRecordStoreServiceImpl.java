@@ -318,36 +318,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         }
       }
 
-      /*
-       * StringJoiner joiner = new StringJoiner(","); datasetIdsAndSchemaIds.keySet().forEach(item
-       * -> { joiner.add("'dataset_" + item.toString() + "'"); }); String datasets =
-       * joiner.toString(); for (String citusCommand : citusCommands) { citusCommand =
-       * citusCommand.replace("%dataset_name%", datasets); statement.addBatch(citusCommand);
-       * statement.executeBatch(); statement.clearBatch(); Thread.sleep(2000); }
-       */
-
-
-      datasetIdsAndSchemaIds.keySet().forEach(item -> {
+      for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
         for (String citusCommand : citusCommands) {
           citusCommand =
-              citusCommand.replace("%dataset_name%", "'dataset_" + item.toString() + "'");
+              citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
           jdbcTemplate.execute(citusCommand);
-          // statement.addBatch(citusCommand);
-          // statement.executeBatch();
-          // statement.clearBatch();
-          LOG.info("Distributing dataset {}", item.toString());
-          citusCommand.replace("'dataset_" + item.toString() + "'", "%dataset_name%");
+          LOG.info("Distributed dataset {}", datasetId);
         }
-      });
+      }
 
-      /*
-       * for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
-       * 
-       * for (String citusCommand : citusCommands) { citusCommand =
-       * citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
-       * statement.addBatch(citusCommand); // jdbcTemplate.execute(citusCommand); }
-       * statement.executeBatch(); statement.clearBatch(); Thread.sleep(2000); }
-       */
 
       Thread.sleep(timeToWaitBeforeReleasingNotification);
       LOG.info("Releasing notifications via Kafka");

@@ -2988,7 +2988,7 @@ public class DatasetServiceImpl implements DatasetService {
               datasetSnapshotService.obtainPartition(datasetId, "root").getId(), null, true);
         }
       }
-      // recordStoreControllerZuul.distributeTables(datasetId);
+      recordStoreControllerZuul.distributeTables(datasetId);
     } catch (Exception e) {
       LOG_ERROR.error(
           "Error executing the processes after creating a new empty dataset. Error message: {}",
