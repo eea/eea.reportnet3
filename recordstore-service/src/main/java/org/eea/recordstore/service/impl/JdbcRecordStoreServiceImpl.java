@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
@@ -176,6 +177,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("classpath:datasetInitCommandsCitus.txt")
   private Resource resourceDistributeFirstFile;
 
+  @Value("classpath:datasetCitusLoop.txt")
+  private Resource resourceLoop;
+
   /** The path snapshot. */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
@@ -301,7 +305,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       final List<String> citusCommands = new ArrayList<>();
       // read file into stream, try-with-resources
       try (BufferedReader brCitus =
-          new BufferedReader(new InputStreamReader(resourceDistributeFirstFile.getInputStream()))) {
+          new BufferedReader(new InputStreamReader(resourceLoop.getInputStream()))) {
 
         brCitus.lines().forEach(citusCommands::add);
 
@@ -315,18 +319,26 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         }
       }
 
-
-      for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
-        for (String citusCommand : citusCommands) {
-          citusCommand =
-              citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
-          statement.addBatch(citusCommand);
-          // jdbcTemplate.execute(citusCommand);
-        }
+      StringJoiner joiner = new StringJoiner(",");
+      datasetIdsAndSchemaIds.keySet()
+          .forEach(item -> joiner.add("'dataset_" + item.toString() + "'"));
+      String datasets = joiner.toString();
+      for (String citusCommand : citusCommands) {
+        citusCommand = citusCommand.replace("%dataset_name%", datasets);
+        statement.addBatch(citusCommand);
         statement.executeBatch();
         statement.clearBatch();
         Thread.sleep(2000);
       }
+
+      /*
+       * for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
+       * 
+       * for (String citusCommand : citusCommands) { citusCommand =
+       * citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
+       * statement.addBatch(citusCommand); // jdbcTemplate.execute(citusCommand); }
+       * statement.executeBatch(); statement.clearBatch(); Thread.sleep(2000); }
+       */
 
       Thread.sleep(timeToWaitBeforeReleasingNotification);
       LOG.info("Releasing notifications via Kafka");
