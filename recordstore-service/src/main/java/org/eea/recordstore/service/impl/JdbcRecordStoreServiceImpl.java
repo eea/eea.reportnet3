@@ -323,8 +323,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           citusCommand =
               citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
           jdbcTemplate.execute(citusCommand);
-          LOG.info("Distributed dataset {}", datasetId);
         }
+        Thread.sleep(4000);
+        LOG.info("Distributed dataset {}", datasetId);
       }
 
 
@@ -467,6 +468,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     for (String command : citusCommands) {
       command = command.replace("%dataset_name%", datasetName);
       jdbcTemplate.execute(command);
+      LOG.info("Table inside dataset {} distributed", datasetName);
     }
 
   }
