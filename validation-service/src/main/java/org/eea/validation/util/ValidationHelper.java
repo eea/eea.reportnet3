@@ -16,6 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -1071,6 +1072,11 @@ public class ValidationHelper implements DisposableBean {
     private boolean checkFinishedValidations(final Long datasetId, final String processId)
         throws EEAException {
       boolean isFinished = false;
+      try {
+        Thread.sleep(ThreadLocalRandom.current().nextInt(500, 3000));
+      } catch (InterruptedException eeaEx) {
+        LOG_ERROR.error("interrupting the sleep because of {}", eeaEx);
+      }
       if (taskRepository.isProcessFinished(processId)) {
         ProcessVO process = processControllerZuul.findById(processId);
         LOG.info("Process {} finished for dataset {}", processId, datasetId);
