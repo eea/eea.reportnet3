@@ -85,6 +85,16 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
       value = "update task set status= (case when (select \"version\" from task where id=:taskId) >20 then 'CANCELED' else 'IN_QUEUE' END) ,date_finish= :dateFinish where id=:taskId ")
   void cancelStatusAndFinishDate(@Param("taskId") Long taskId,
       @Param("dateFinish") Date dateFinish);
+
+  /**
+   * Checks if is process ending.
+   *
+   * @param processId the process id
+   * @return true, if is process ending
+   */
+  @Query(nativeQuery = true,
+      value = "select case when (exists (select id from task where process_id=:processId and status ='IN_QUEUE' limit 1)) then FALSE else TRUE end")
+  boolean isProcessEnding(@Param("processId") String processId);
 }
 
 
