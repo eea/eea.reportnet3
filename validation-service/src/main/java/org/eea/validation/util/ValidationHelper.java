@@ -269,10 +269,14 @@ public class ValidationHelper implements DisposableBean {
       boolean released, boolean updateViews) throws EEAException {
 
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    LOG.info(
+        "Obtaining dataset metabase from datasetId {} to perform validation. The schema from the metabase is {}",
+        datasetId, dataset.getDatasetSchema());
     // In case there's no processId, set a new one (because the processId is set in
     // ValidationControlleriImpl)
     if (StringUtils.isBlank(processId) || "null".equals(processId)) {
       processId = UUID.randomUUID().toString();
+      LOG.info("processId is empty. Generating one: {}", processId);
     }
     if (processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId,
