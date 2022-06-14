@@ -16,7 +16,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -1124,7 +1123,6 @@ public class ValidationHelper implements DisposableBean {
 
           isFinished = true;
         }
-      }
       } else {
         if (taskRepository.isProcessEnding(processId)) {
           try {
@@ -1134,6 +1132,7 @@ public class ValidationHelper implements DisposableBean {
           }
           checkFinishedValidations(datasetId, processId);
         }
+      }
       return isFinished;
     }
   }
