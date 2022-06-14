@@ -222,11 +222,12 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
-   * Finish process.
+   * Finish process in map.
    *
    * @param processId the process id
+   * @return true, if successful
    */
-  public boolean finishProcess(String processId) {
+  public boolean finishProcessInMap(String processId) {
     LOG.info("Removing process {} from processesMap ", processId);
     boolean result = false;
     synchronized (processesMap) {
@@ -265,8 +266,8 @@ public class ValidationHelper implements DisposableBean {
    */
   @Async
   @LockMethod(removeWhenFinish = true, isController = false)
-  public void executeValidation(@LockCriteria(name = "datasetId") final Long datasetId,
-      String processId, boolean released, boolean updateViews) throws EEAException {
+  public void executeValidation(@LockCriteria(name = "datasetId") Long datasetId, String processId,
+      boolean released, boolean updateViews) throws EEAException {
 
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     // In case there's no processId, set a new one (because the processId is set in
@@ -281,6 +282,7 @@ public class ValidationHelper implements DisposableBean {
 
       // If there's no SQL rules enabled, no need to refresh the views, so directly start the
       // validation
+      TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + dataset.getId());
       List<Rule> listSql =
           rulesRepository.findSqlRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
       Boolean hasSqlEnabled = true;
@@ -289,7 +291,7 @@ public class ValidationHelper implements DisposableBean {
       }
 
       if (Boolean.FALSE.equals(updateViews) || Boolean.FALSE.equals(hasSqlEnabled)) {
-        executeValidationProcess(datasetId, processId, released);
+        executeValidationProcess(dataset, processId);
       } else {
         deleteLockToReleaseProcess(datasetId);
         Map<String, Object> values = new HashMap<>();
@@ -447,15 +449,14 @@ public class ValidationHelper implements DisposableBean {
    * @param processId the process id
    * @param released the released
    */
-  public void executeValidationProcess(final Long datasetId, String processId, boolean released) {
+  public void executeValidationProcess(final DataSetMetabaseVO dataset, String processId) {
     // Initialize process as coordinator
-    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     RulesSchema rules =
         rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getDatasetSchema()));
     initializeProcess(processId, SecurityContextHolder.getContext().getAuthentication().getName());
-    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
+    TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + dataset.getId());
     LOG.info("Deleting all Validations");
-    validationService.deleteAllValidation(datasetId);
+    validationService.deleteAllValidation(dataset.getId());
     LOG.info("Collecting Dataset Validation tasks");
     releaseDatasetValidation(dataset, processId);
     LOG.info("Collecting Record Validation tasks");
@@ -466,7 +467,7 @@ public class ValidationHelper implements DisposableBean {
     releaseFieldsValidation(dataset, processId, !filterEmptyFields(rules.getRules()));
     LOG.info("Collecting Table Validation tasks");
     releaseTableValidation(dataset, processId);
-    datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+    datasetMetabaseControllerZuul.updateDatasetRunningStatus(dataset.getId(),
         DatasetRunningStatusEnum.VALIDATING);
   }
 
@@ -1069,15 +1070,14 @@ public class ValidationHelper implements DisposableBean {
      * @return true, if successful
      * @throws EEAException the EEA exception
      */
-    private boolean checkFinishedValidations(final Long datasetId, final String processId)
-        throws EEAException {
+    private boolean checkFinishedValidations(Long datasetId, String processId) throws EEAException {
       boolean isFinished = false;
       try {
         Thread.sleep(ThreadLocalRandom.current().nextInt(500, 3000));
       } catch (InterruptedException eeaEx) {
         LOG_ERROR.error("interrupting the sleep because of {}", eeaEx);
       }
-      if (taskRepository.isProcessFinished(processId)) {
+      if (taskRepository.isProcessFinished(processId) && finishProcessInMap(processId)) {
         ProcessVO process = processControllerZuul.findById(processId);
         LOG.info("Process {} finished for dataset {}", processId, datasetId);
         // Release the lock manually
@@ -1092,6 +1092,8 @@ public class ValidationHelper implements DisposableBean {
             LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
         forceExecuteValidation.put(LiteralConstants.DATASETID, datasetId);
         lockService.removeLockByCriteria(forceExecuteValidation);
+        datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+            DatasetRunningStatusEnum.VALIDATED);
 
         // after last dataset validations have been saved, an event is sent to notify it
         Map<String, Object> value = new HashMap<>();
@@ -1101,35 +1103,31 @@ public class ValidationHelper implements DisposableBean {
         // and
         // validation threads inheritances from it. This is a side effect.
         value.put("user", process.getUser());
-        if (finishProcess(processId)) {
 
-          kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
-          if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
-              ProcessTypeEnum.VALIDATION, processId,
-              SecurityContextHolder.getContext().getAuthentication().getName(), 0, null)) {
-            if (process.isReleased()) {
-              ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
-              if (null != nextProcess) {
-                executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
-                    false);
-              } else if (processControllerZuul.isProcessFinished(processId)) {
-                kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
-                    value);
-              }
-
-            } else {
-              // Delete the lock to the Release process
-              deleteLockToReleaseProcess(datasetId);
-
-              kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
-                  value,
-                  NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
+        kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
+        if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
+            ProcessTypeEnum.VALIDATION, processId,
+            SecurityContextHolder.getContext().getAuthentication().getName(), 0, null)) {
+          if (datasetId.equals(process.getDatasetId()) && process.isReleased()) {
+            ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
+            if (null != nextProcess) {
+              executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
+                  false);
+            } else if (processControllerZuul.isProcessFinished(processId)) {
+              kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
+                  value);
             }
 
-            datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
-                DatasetRunningStatusEnum.VALIDATED);
-            isFinished = true;
+          } else {
+            // Delete the lock to the Release process
+            deleteLockToReleaseProcess(datasetId);
+
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
+                value,
+                NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
           }
+
+          isFinished = true;
         }
       }
       return isFinished;
