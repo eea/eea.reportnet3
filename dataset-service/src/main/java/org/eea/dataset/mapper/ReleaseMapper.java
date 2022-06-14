@@ -1,6 +1,8 @@
 package org.eea.dataset.mapper;
 
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
@@ -74,6 +76,13 @@ public abstract class ReleaseMapper implements IMapper<Snapshot, ReleaseVO> {
         }
       }));
     }
+    // force date to UTC
+    TimeZone tz = TimeZone.getTimeZone("UTC");
+    releaseVO.stream().forEach(release -> {
+      Calendar calValue = Calendar.getInstance(tz);
+      calValue.setTime(release.getDateReleased());
+      release.setDateReleased(calValue.getTime());
+    });
   }
 
 

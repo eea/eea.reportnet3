@@ -1,0 +1,6 @@
+SELECT create_reference_table('%dataset_name%.VALIDATION');
+SELECT create_reference_table('%dataset_name%.DATASET_VALIDATION');
+SELECT create_reference_table('%dataset_name%.TABLE_VALIDATION');
+SELECT create_reference_table('%dataset_name%.RECORD_VALIDATION');
+SELECT create_reference_table('%dataset_name%.FIELD_VALIDATION');
+SELECT create_reference_table('%dataset_name%.TEMP_ETLEXPORT');

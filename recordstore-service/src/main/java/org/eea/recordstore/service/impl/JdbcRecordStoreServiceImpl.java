@@ -165,8 +165,19 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private Resource resourceFile;
 
   /** The resource file. */
-  @Value("classpath:datasetInitCommandsCitus.txt")
+  @Value("classpath:datasetInitCommandsCitusComplete.txt")
   private Resource resourceCitusFile;
+
+  /** The resource file. */
+  @Value("classpath:datasetDistributeCitus.txt")
+  private Resource resourceDistributeFile;
+
+  /** The resource file. */
+  @Value("classpath:datasetInitCommandsCitus.txt")
+  private Resource resourceDistributeFirstFile;
+
+  @Value("classpath:datasetCitusLoop.txt")
+  private Resource resourceLoop;
 
   /** The path snapshot. */
   @Value("${pathSnapshot}")
@@ -285,6 +296,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // Execute queries and commit results
       statement.executeBatch();
+      statement.clearBatch();
       LOG.info("{} Schemas created as part of DataCollection creation.",
           datasetIdsAndSchemaIds.size());
       // waiting X seconds before releasing notifications, so database is able to write the
@@ -292,7 +304,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       final List<String> citusCommands = new ArrayList<>();
       // read file into stream, try-with-resources
       try (BufferedReader brCitus =
-          new BufferedReader(new InputStreamReader(resourceCitusFile.getInputStream()))) {
+          new BufferedReader(new InputStreamReader(resourceDistributeFirstFile.getInputStream()))) {
 
         brCitus.lines().forEach(citusCommands::add);
 
@@ -306,15 +318,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         }
       }
 
-
       for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
         for (String citusCommand : citusCommands) {
           citusCommand =
               citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
           jdbcTemplate.execute(citusCommand);
         }
-        Thread.sleep(5000);
+        Thread.sleep(4000);
+        LOG.info("Distributed dataset {}", datasetId);
       }
+
 
       Thread.sleep(timeToWaitBeforeReleasingNotification);
       LOG.info("Releasing notifications via Kafka");
@@ -346,6 +359,43 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       Thread.currentThread().interrupt();
     }
   }
+
+
+  /**
+   * Distribute tables.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @Async
+  public void distributeTables(Long datasetId) {
+
+    // Initialize resources
+    try (Connection connection = dataSource.getConnection();
+        Statement statement = connection.createStatement();
+        BufferedReader br =
+            new BufferedReader(new InputStreamReader(resourceDistributeFile.getInputStream()))) {
+
+      final List<String> citusCommands = new ArrayList<>();
+      br.lines().forEach(citusCommands::add);
+
+      for (String citusCommand : citusCommands) {
+        citusCommand =
+            citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
+        jdbcTemplate.execute(citusCommand);
+      }
+    } catch (final IOException | SQLException e) {
+      LOG_ERROR.error("Error reading commands file to distribute the dataset. {}", e.getMessage());
+      try {
+        throw new RecordStoreAccessException(String.format(
+            "Error reading commands file to distribute the dataset. %s", e.getMessage()), e);
+      } catch (RecordStoreAccessException e1) {
+        LOG.info(e1.getMessage(), e);
+      }
+    }
+
+  }
+
 
   /**
    * Creates the empty data set. This method is used to create the schema of the design datasets
@@ -418,6 +468,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     for (String command : citusCommands) {
       command = command.replace("%dataset_name%", datasetName);
       jdbcTemplate.execute(command);
+      LOG.info("Table inside dataset {} distributed", datasetName);
     }
 
   }

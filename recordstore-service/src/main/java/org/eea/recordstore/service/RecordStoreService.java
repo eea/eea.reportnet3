@@ -188,4 +188,11 @@ public interface RecordStoreService {
   void createSnapshotToClone(Long originDataset, Long targetDataset,
       Map<String, String> dictionaryOriginTargetObjectId, Long partitionDatasetTarget,
       List<String> tableSchemasIdPrefill);
+
+  /**
+   * Distribute tables.
+   *
+   * @param datasetId the dataset id
+   */
+  void distributeTables(Long datasetId);
 }
