@@ -1162,7 +1162,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     List<String> referenceDatasetsId = new ArrayList<>();
     List<DataFlowVO> referencesDataflow = (List<DataFlowVO>) dataFlowController
-        .findReferenceDataflows(null, null, false, null, null).getDataflows();
+        .findReferenceDataflows(new HashMap<>(), null, false, null, null).getDataflows();
 
     for (DataFlowVO referenceDataflow : referencesDataflow) {
       List<ReferenceDatasetVO> referenceDatasets =
