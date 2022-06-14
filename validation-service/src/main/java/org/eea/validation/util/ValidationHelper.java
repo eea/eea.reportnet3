@@ -1072,11 +1072,6 @@ public class ValidationHelper implements DisposableBean {
     private boolean checkFinishedValidations(final Long datasetId, final String processId)
         throws EEAException {
       boolean isFinished = false;
-      try {
-        Thread.sleep(ThreadLocalRandom.current().nextInt(500, 3000));
-      } catch (InterruptedException eeaEx) {
-        LOG_ERROR.error("interrupting the sleep because of {}", eeaEx);
-      }
       if (taskRepository.isProcessFinished(processId)) {
         ProcessVO process = processControllerZuul.findById(processId);
         LOG.info("Process {} finished for dataset {}", processId, datasetId);
@@ -1131,7 +1126,15 @@ public class ValidationHelper implements DisposableBean {
             isFinished = true;
           }
         }
-      }
+      } else {
+        if (taskRepository.isProcessEnding(processId)) {
+          try {
+            Thread.sleep(5000);
+          } catch (InterruptedException eeaEx) {
+            LOG_ERROR.error("interrupting the sleep because of {}", eeaEx);
+          }
+          checkFinishedValidations(datasetId, processId);
+        }
       return isFinished;
     }
   }
