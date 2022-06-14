@@ -944,20 +944,6 @@ public class ValidationHelper implements DisposableBean {
     taskRepository.cancelStatusAndFinishDate(taskId, finishDate);
   }
 
-  /**
-   * The Class ValidationTask.
-   */
-
-  /**
-   * Instantiates a new validation task.
-   *
-   * @param taskId the task id
-   * @param eeaEventVO the eea event VO
-   * @param validator the validator
-   * @param datasetId the dataset id
-   * @param kieBase the kie base
-   * @param processId the process id
-   */
 
   /**
    * Instantiates a new validation task.
