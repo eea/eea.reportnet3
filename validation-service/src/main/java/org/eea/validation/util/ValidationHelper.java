@@ -227,12 +227,12 @@ public class ValidationHelper implements DisposableBean {
    * @return true, if successful
    */
   public boolean finishProcessInMap(String processId) {
-    LOG.info("Removing process {} from processesMap ", processId);
     boolean result = false;
     synchronized (processesMap) {
       ValidationProcessVO removed = processesMap.remove(processId);
       System.gc();
       if (removed != null) {
+        LOG.info("Removing process {} from processesMap ", processId);
         result = true;
       }
     }
@@ -1071,56 +1071,57 @@ public class ValidationHelper implements DisposableBean {
      */
     private boolean checkFinishedValidations(Long datasetId, String processId) throws EEAException {
       boolean isFinished = false;
-      if (taskRepository.isProcessFinished(processId) && finishProcessInMap(processId)) {
-        ProcessVO process = processControllerZuul.findById(processId);
-        LOG.info("Process {} finished for dataset {}", processId, datasetId);
-        // Release the lock manually
-        Map<String, Object> executeValidation = new HashMap<>();
-        executeValidation.put(LiteralConstants.SIGNATURE,
-            LockSignature.EXECUTE_VALIDATION.getValue());
-        executeValidation.put(LiteralConstants.DATASETID, datasetId);
-        lockService.removeLockByCriteria(executeValidation);
+      if (taskRepository.isProcessFinished(processId)) {
+        if (finishProcessInMap(processId)) {
+          ProcessVO process = processControllerZuul.findById(processId);
+          LOG.info("Process {} finished for dataset {}", processId, datasetId);
+          // Release the lock manually
+          Map<String, Object> executeValidation = new HashMap<>();
+          executeValidation.put(LiteralConstants.SIGNATURE,
+              LockSignature.EXECUTE_VALIDATION.getValue());
+          executeValidation.put(LiteralConstants.DATASETID, datasetId);
+          lockService.removeLockByCriteria(executeValidation);
 
-        Map<String, Object> forceExecuteValidation = new HashMap<>();
-        forceExecuteValidation.put(LiteralConstants.SIGNATURE,
-            LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
-        forceExecuteValidation.put(LiteralConstants.DATASETID, datasetId);
-        lockService.removeLockByCriteria(forceExecuteValidation);
-        datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
-            DatasetRunningStatusEnum.VALIDATED);
+          Map<String, Object> forceExecuteValidation = new HashMap<>();
+          forceExecuteValidation.put(LiteralConstants.SIGNATURE,
+              LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
+          forceExecuteValidation.put(LiteralConstants.DATASETID, datasetId);
+          lockService.removeLockByCriteria(forceExecuteValidation);
+          datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+              DatasetRunningStatusEnum.VALIDATED);
 
-        // after last dataset validations have been saved, an event is sent to notify it
-        Map<String, Object> value = new HashMap<>();
-        value.put(LiteralConstants.DATASET_ID, datasetId);
-        value.put("uuid", processId);
-        // Setting as user the requesting one as it is being taken from ThreadPropertiesManager
-        // and
-        // validation threads inheritances from it. This is a side effect.
-        value.put("user", process.getUser());
+          // after last dataset validations have been saved, an event is sent to notify it
+          Map<String, Object> value = new HashMap<>();
+          value.put(LiteralConstants.DATASET_ID, datasetId);
+          value.put("uuid", processId);
+          // Setting as user the requesting one as it is being taken from ThreadPropertiesManager
+          // and
+          // validation threads inheritances from it. This is a side effect.
+          value.put("user", process.getUser());
 
-        kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
-        if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
-            ProcessTypeEnum.VALIDATION, processId,
-            SecurityContextHolder.getContext().getAuthentication().getName(), 0, null)) {
-          if (datasetId.equals(process.getDatasetId()) && process.isReleased()) {
-            ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
-            if (null != nextProcess) {
-              executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
-                  false);
-            } else if (processControllerZuul.isProcessFinished(processId)) {
-              kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
-                  value);
+          kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
+          if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
+              ProcessTypeEnum.VALIDATION, processId,
+              SecurityContextHolder.getContext().getAuthentication().getName(), 0, null)) {
+            if (datasetId.equals(process.getDatasetId()) && process.isReleased()) {
+              ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
+              if (null != nextProcess) {
+                executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
+                    false);
+              } else if (processControllerZuul.isProcessFinished(processId)) {
+                kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
+                    value);
+              }
+
+            } else {
+              // Delete the lock to the Release process
+              deleteLockToReleaseProcess(datasetId);
+
+              kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
+                  value,
+                  NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
             }
-
-          } else {
-            // Delete the lock to the Release process
-            deleteLockToReleaseProcess(datasetId);
-
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
-                value,
-                NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
           }
-
           isFinished = true;
         }
       } else {
