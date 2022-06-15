@@ -1163,10 +1163,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
     List<String> referenceDatasetsId = new ArrayList<>();
     List<DataFlowVO> referencesDataflow = new ArrayList<>();
-    PaginatedDataflowVO paginatedDf = dataFlowController
-        .findReferenceDataflows(new HashMap<String, String>(), null, false, null, null);
+    PaginatedDataflowVO paginatedDf =
+        dataFlowController.findReferenceDataflows(new HashMap<>(), null, false, null, null);
     if (paginatedDf != null && paginatedDf.getDataflows() != null) {
-      referencesDataflow = (List<DataFlowVO>) paginatedDf.getDataflows();
+      referencesDataflow = (List<DataFlowVO>) (List<?>) paginatedDf.getDataflows();
     }
 
     for (DataFlowVO referenceDataflow : referencesDataflow) {
