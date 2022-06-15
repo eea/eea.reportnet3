@@ -22,6 +22,7 @@ import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetContro
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -1161,8 +1162,12 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   private List<String> checkDatasetFromReferenceDataflow(List<String> ids) {
 
     List<String> referenceDatasetsId = new ArrayList<>();
-    List<DataFlowVO> referencesDataflow = (List<DataFlowVO>) dataFlowController
-        .findReferenceDataflows(new HashMap<>(), null, false, null, null).getDataflows();
+    List<DataFlowVO> referencesDataflow = new ArrayList<>();
+    PaginatedDataflowVO paginatedDf = dataFlowController
+        .findReferenceDataflows(new HashMap<String, String>(), null, false, null, null);
+    if (paginatedDf != null && paginatedDf.getDataflows() != null) {
+      referencesDataflow = (List<DataFlowVO>) paginatedDf.getDataflows();
+    }
 
     for (DataFlowVO referenceDataflow : referencesDataflow) {
       List<ReferenceDatasetVO> referenceDatasets =
