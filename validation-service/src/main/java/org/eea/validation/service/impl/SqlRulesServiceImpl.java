@@ -68,6 +68,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The Class SqlRulesServiceImpl.
@@ -1166,7 +1167,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     PaginatedDataflowVO paginatedDf =
         dataFlowController.findReferenceDataflows(new HashMap<>(), null, false, null, null);
     if (paginatedDf != null && paginatedDf.getDataflows() != null) {
-      referencesDataflow = (List<DataFlowVO>) (List<?>) paginatedDf.getDataflows();
+      ObjectMapper mapper = new ObjectMapper();
+      for (Object df : paginatedDf.getDataflows()) {
+        DataFlowVO dfVO = mapper.convertValue(df, DataFlowVO.class);
+        referencesDataflow.add(dfVO);
+      }
     }
 
     for (DataFlowVO referenceDataflow : referencesDataflow) {
