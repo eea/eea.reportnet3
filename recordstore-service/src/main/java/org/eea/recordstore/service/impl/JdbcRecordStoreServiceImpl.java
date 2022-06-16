@@ -176,8 +176,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("classpath:datasetInitCommandsCitus.txt")
   private Resource resourceDistributeFirstFile;
 
-  @Value("classpath:datasetCitusLoop.txt")
-  private Resource resourceLoop;
 
   /** The path snapshot. */
   @Value("${pathSnapshot}")
