@@ -108,8 +108,8 @@ export const Message = ({
               iconPos="right"
               onClick={() => onFileDownload(dataflowId, message.id, message.providerId)}
               style={{ color: message.direction ? 'var(--c-white-color)' : 'var(--c-black-400)' }}
-              tooltip={`${resourcesContext.messages['downloadFile']}: ${message.messageAttachment.name}`}
-              tooltipOptions={{ position: 'top' }}
+              //tooltip={`${resourcesContext.messages['downloadFile']}: ${message.messageAttachment.name}`}
+              //tooltipOptions={{ position: 'top' }}
             />
           )}
         </div>
