@@ -1,0 +1,5 @@
+SELECT create_reference_table('%dataset_name%.DATASET_VALUE');
+SELECT create_reference_table('%dataset_name%.TABLE_VALUE');
+SELECT create_reference_table('%dataset_name%.RECORD_VALUE');
+SELECT create_reference_table('%dataset_name%.FIELD_VALUE');
+SELECT create_reference_table('%dataset_name%.ATTACHMENT_VALUE');

@@ -5,6 +5,13 @@ import static org.mockito.Mockito.times;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import org.bson.types.ObjectId;
+import org.eea.dataset.mapper.DataSchemaMapper;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -38,6 +45,21 @@ public class UpdateRecordHelperTest {
   @Mock
   private KafkaSender kafkaSender;
 
+  @Mock
+  private DatasetSchemaService datasetSchemaService;
+
+  @Mock
+  private DataSchemaMapper dataSchemaMapper;
+
+  @Mock
+  DatasetMetabaseService datasetMetabaseService;
+
+  @Mock
+  private SchemasRepository schemasRepository;
+
+  @Mock
+  private FileTreatmentHelper fileTreatmentHelper;
+
   /** The records. */
   private List<RecordVO> records;
 
@@ -63,6 +85,11 @@ public class UpdateRecordHelperTest {
   @Test
   public void executeCreateProcessTest() throws EEAException, IOException, InterruptedException {
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(1L))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    Optional<DataSetSchema> datasetSchema = Optional.ofNullable(new DataSetSchema());
+    Mockito.when(schemasRepository.findById(new ObjectId("5cf0e9b3b793310e9ceca190")))
+        .thenReturn(datasetSchema);
     updateRecordHelper.executeCreateProcess(1L, records, "");
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }
@@ -92,6 +119,11 @@ public class UpdateRecordHelperTest {
     doNothing().when(datasetService).updateField(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
     doNothing().when(kafkaSender).sendMessage(Mockito.any());
+    Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(1L))
+        .thenReturn("5cf0e9b3b793310e9ceca190");
+    Optional<DataSetSchema> datasetSchema = Optional.ofNullable(new DataSetSchema());
+    Mockito.when(schemasRepository.findById(new ObjectId("5cf0e9b3b793310e9ceca190")))
+        .thenReturn(datasetSchema);
     updateRecordHelper.executeFieldUpdateProcess(1L, new FieldVO(), false);
     Mockito.verify(kafkaSender, times(1)).sendMessage(Mockito.any());
   }

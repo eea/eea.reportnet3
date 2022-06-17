@@ -220,8 +220,8 @@ public class ProcessServiceImpl implements ProcessService {
         datasetMetabaseControllerZuul.findDatasetMetabaseById(processToUpdate.getDatasetId());
 
     // return next in_queue process with the same dataflow and dataset+dataprovider as the previous
-    return processMapper.entityToClass(processRepository
-        .findNextProcess(processToUpdate.getDataflowId(), dataset.getDataProviderId()));
+    return processMapper.entityToClass(processRepository.findNextProcess(
+        processToUpdate.getDataflowId(), dataset.getDataProviderId(), dataset.getId()));
   }
 
 }

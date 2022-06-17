@@ -3207,6 +3207,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       schema.getTableSchemas().add(table);
 
       // propagate new table into the datasets schema
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        LOG.info("Propagate Error");
+      }
       TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       datasetService.saveTablePropagation(datasetId, tableSchemaMapper.entityToClass(table));
     }

@@ -45,10 +45,11 @@ public interface ProcessRepository
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
-   * @return the process VO
+   * @param datasetId the dataset id
+   * @return the EEA process
    */
   @Query(nativeQuery = true,
-      value = "select p.* from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.status='IN_QUEUE' limit 1")
+      value = "select p.* from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.status='IN_QUEUE' and d.id <> :datasetId limit 1")
   EEAProcess findNextProcess(@Param("dataflowId") Long dataflowId,
-      @Param("dataProviderId") Long dataProviderId);
+      @Param("dataProviderId") Long dataProviderId, @Param("datasetId") Long datasetId);
 }

@@ -15,6 +15,8 @@ import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.service.LockService;
 import org.eea.utils.LiteralConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -62,6 +64,9 @@ public class FMEControllerImpl implements FMEController {
    */
   @Autowired
   private IntegrationService integrationService;
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
   /**

@@ -387,6 +387,11 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       schema.getTableSchemas().add(table);
 
       // propagate new table into the datasets schema
+      try {
+        Thread.sleep(2000);
+      } catch (InterruptedException e) {
+        LOG.info("Propagate Error");
+      }
       datasetService.saveTablePropagation(datasetId, tableSchemaMapper.entityToClass(table));
     }
     // save the schema with the new values

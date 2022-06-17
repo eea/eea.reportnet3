@@ -645,6 +645,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
             throw new EEAException("Unsupported datasetType: " + datasetType);
         }
 
+        try {
+          Thread.sleep(5000);
+        } catch (InterruptedException e) {
+          LOG.info("Propagate Error");
+        }
+
         return new AsyncResult<>(idDesignDataset);
 
       } catch (EEAException e) {
@@ -671,7 +677,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     throw new EEAException("createEmptyDataset: Bad arguments");
 
   }
-
 
   /**
    * Fill resource assignation.

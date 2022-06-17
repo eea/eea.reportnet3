@@ -164,6 +164,19 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("classpath:datasetInitCommands.txt")
   private Resource resourceFile;
 
+  /** The resource file. */
+  @Value("classpath:datasetInitCommandsCitusComplete.txt")
+  private Resource resourceCitusFile;
+
+  /** The resource file. */
+  @Value("classpath:datasetDistributeCitus.txt")
+  private Resource resourceDistributeFile;
+
+  /** The resource file. */
+  @Value("classpath:datasetInitCommandsCitus.txt")
+  private Resource resourceDistributeFirstFile;
+
+
   /** The path snapshot. */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
@@ -281,10 +294,39 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // Execute queries and commit results
       statement.executeBatch();
+      statement.clearBatch();
       LOG.info("{} Schemas created as part of DataCollection creation.",
           datasetIdsAndSchemaIds.size());
       // waiting X seconds before releasing notifications, so database is able to write the
       // creation of all datasets
+      final List<String> citusCommands = new ArrayList<>();
+      // read file into stream, try-with-resources
+      try (BufferedReader brCitus =
+          new BufferedReader(new InputStreamReader(resourceDistributeFirstFile.getInputStream()))) {
+
+        brCitus.lines().forEach(citusCommands::add);
+
+      } catch (final IOException e) {
+        LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
+        try {
+          throw new RecordStoreAccessException(String
+              .format("Error reading commands file to create the dataset. %s", e.getMessage()), e);
+        } catch (RecordStoreAccessException e1) {
+          LOG.info(e1.getMessage(), e);
+        }
+      }
+
+      for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
+        for (String citusCommand : citusCommands) {
+          citusCommand =
+              citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
+          jdbcTemplate.execute(citusCommand);
+        }
+        Thread.sleep(4000);
+        LOG.info("Distributed dataset {}", datasetId);
+      }
+
+
       Thread.sleep(timeToWaitBeforeReleasingNotification);
       LOG.info("Releasing notifications via Kafka");
       // Release events to initialize databases content
@@ -315,6 +357,43 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       Thread.currentThread().interrupt();
     }
   }
+
+
+  /**
+   * Distribute tables.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @Async
+  public void distributeTables(Long datasetId) {
+
+    // Initialize resources
+    try (Connection connection = dataSource.getConnection();
+        Statement statement = connection.createStatement();
+        BufferedReader br =
+            new BufferedReader(new InputStreamReader(resourceDistributeFile.getInputStream()))) {
+
+      final List<String> citusCommands = new ArrayList<>();
+      br.lines().forEach(citusCommands::add);
+
+      for (String citusCommand : citusCommands) {
+        citusCommand =
+            citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
+        jdbcTemplate.execute(citusCommand);
+      }
+    } catch (final IOException | SQLException e) {
+      LOG_ERROR.error("Error reading commands file to distribute the dataset. {}", e.getMessage());
+      try {
+        throw new RecordStoreAccessException(String.format(
+            "Error reading commands file to distribute the dataset. %s", e.getMessage()), e);
+      } catch (RecordStoreAccessException e1) {
+        LOG.info(e1.getMessage(), e);
+      }
+    }
+
+  }
+
 
   /**
    * Creates the empty data set. This method is used to create the schema of the design datasets
@@ -355,7 +434,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         String.format(GRANT_ALL_PRIVILEGES_ON_ALL_SEQUENCES_ON_SCHEMA, datasetName, datasetUsers));
 
     LOG.info("Empty design dataset created");
-
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      LOG.info("Propagate Error");
+    }
     // Now we insert the values into the dataset_value table of the brand new schema
     StringBuilder insertSql = new StringBuilder("INSERT INTO ");
     insertSql.append(datasetName).append(".dataset_value(id, id_dataset_schema) values (?, ?)");
@@ -365,6 +448,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       jdbcTemplate.update(insertSql.toString(), idDataset, idDatasetSchema);
       LOG.info("DS created with the id {} and idDatasetSchema {}", idDataset, idDatasetSchema);
     }
+
+    final List<String> citusCommands = new ArrayList<>();
+    // read file into stream, try-with-resources
+    try (BufferedReader brCitus =
+        new BufferedReader(new InputStreamReader(resourceCitusFile.getInputStream()))) {
+
+      brCitus.lines().forEach(citusCommands::add);
+
+    } catch (final IOException e) {
+      LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
+      throw new RecordStoreAccessException(
+          String.format("Error reading commands file to create the dataset. %s", e.getMessage()),
+          e);
+    }
+
+    for (String command : citusCommands) {
+      command = command.replace("%dataset_name%", datasetName);
+      jdbcTemplate.execute(command);
+      LOG.info("Table inside dataset {} distributed", datasetName);
+    }
+
   }
 
   /**
@@ -451,6 +555,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // Special case to make the snapshot to copy from DataCollection to EUDataset. The sql copy
       // all the values from the DC, no matter what partitionId has the origin, but we need to put
       // in the file the partitionId of the EUDataset destination
+      String copyQueryAttachment =
+          "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
+              + idDataset + ".attachment_value at) to STDOUT";
       if (DatasetTypeEnum.COLLECTION.equals(typeDataset)) {
         String providersCode = getProvidersCode(idDataset);
         copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
@@ -462,6 +569,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 + idDataset + ".field_value fv, dataset_" + idDataset
                 + ".record_value rv WHERE fv.id_record = rv.id " + "AND rv.data_provider_code in ("
                 + providersCode + ")) to STDOUT";
+        copyQueryAttachment =
+            "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
+                + idDataset + ".attachment_value at, dataset_" + idDataset
+                + ".field_value fv, dataset_" + idDataset
+                + ".record_value rv WHERE at.field_value_id = fv.id AND fv.id_record = rv.id "
+                + "AND rv.data_provider_code in (" + providersCode + ")) to STDOUT";
       } else if (!DatasetTypeEnum.COLLECTION.equals(typeDataset)
           && Boolean.TRUE.equals(prefillingReference)) {
         copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
@@ -497,9 +610,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // Copy attachment_value
       String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
           LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
-      String copyQueryAttachment =
-          "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
-              + idDataset + ".attachment_value at) to STDOUT";
+
       printToFile(nameFileAttachmentValue, copyQueryAttachment, cm);
 
       LOG.info("Snapshot {} data files created", idSnapshot);

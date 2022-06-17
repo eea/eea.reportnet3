@@ -454,4 +454,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   public void updateSnapshotDisabled(Long datasetId) {
     LOG.info("updateSnapshotDisabled");
   }
+
+  @Override
+  public void distributeTables(Long datasetId) {
+    LOG.info("distributeTables");
+  }
 }

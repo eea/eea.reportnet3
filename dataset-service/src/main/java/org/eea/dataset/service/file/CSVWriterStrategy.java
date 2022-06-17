@@ -67,7 +67,7 @@ public class CSVWriterStrategy implements WriterStrategy {
    */
   @Override
   public byte[] writeFile(final Long dataflowId, final Long datasetId, final String tableSchemaId,
-      boolean includeCountryCode, boolean includeValidations, ExportFilterVO filters)
+      String includeCountryCode, boolean includeValidations, ExportFilterVO filters)
       throws EEAException {
     LOG.info("starting csv file writter");
 
@@ -99,7 +99,7 @@ public class CSVWriterStrategy implements WriterStrategy {
    */
   @Override
   public List<byte[]> writeFileList(final Long dataflowId, final Long datasetId,
-      boolean includeCountryCode, boolean includeValidations) throws EEAException {
+      String includeCountryCode, boolean includeValidations) throws EEAException {
     LOG.info("starting csv file writter");
 
     ExportFilterVO filters = new ExportFilterVO();
@@ -140,7 +140,7 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @param filters the filters
    */
   private void setLines(final String idTableSchema, DataSetSchemaVO dataSetSchema,
-      CSVWriter csvWriter, Long datasetId, boolean includeCountryCode, ExportFilterVO filters) {
+      CSVWriter csvWriter, Long datasetId, String includeCountryCode, ExportFilterVO filters) {
 
     List<FieldSchemaVO> fieldSchemas = fileCommon.getFieldSchemas(idTableSchema, dataSetSchema);
     Map<String, Integer> indexMap = new HashMap<>();
@@ -151,8 +151,8 @@ public class CSVWriterStrategy implements WriterStrategy {
       int nHeaders = setHeaders(fieldSchemas, indexMap, csvWriter, includeCountryCode);
 
       // If we don't have records, return a file only with headers.
-      setRecords(indexMap, nHeaders, csvWriter, includeCountryCode, datasetId, idTableSchema,
-          filters);
+      setRecords(indexMap, nHeaders, csvWriter, null != includeCountryCode, datasetId,
+          idTableSchema, filters);
     }
   }
 
@@ -166,13 +166,13 @@ public class CSVWriterStrategy implements WriterStrategy {
    * @return the int
    */
   private int setHeaders(List<FieldSchemaVO> fieldSchemas, Map<String, Integer> indexMap,
-      CSVWriter csvWriter, boolean includeCountryCode) {
+      CSVWriter csvWriter, String includeCountryCode) {
 
     List<String> headers = new ArrayList<>();
     int nHeaders = 0;
 
-    if (includeCountryCode) {
-      headers.add("Country code");
+    if (null != includeCountryCode) {
+      headers.add(includeCountryCode);
       nHeaders++;
     }
 
