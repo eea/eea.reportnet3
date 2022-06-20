@@ -176,6 +176,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("classpath:datasetInitCommandsCitus.txt")
   private Resource resourceDistributeFirstFile;
 
+
   /** The path snapshot. */
   @Value("${pathSnapshot}")
   private String pathSnapshot;
@@ -315,18 +316,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         }
       }
 
-
       for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
         for (String citusCommand : citusCommands) {
           citusCommand =
               citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
-          statement.addBatch(citusCommand);
-          // jdbcTemplate.execute(citusCommand);
+          jdbcTemplate.execute(citusCommand);
         }
-        statement.executeBatch();
-        statement.clearBatch();
-        Thread.sleep(2000);
+        Thread.sleep(4000);
+        LOG.info("Distributed dataset {}", datasetId);
       }
+
 
       Thread.sleep(timeToWaitBeforeReleasingNotification);
       LOG.info("Releasing notifications via Kafka");
@@ -467,6 +466,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     for (String command : citusCommands) {
       command = command.replace("%dataset_name%", datasetName);
       jdbcTemplate.execute(command);
+      LOG.info("Table inside dataset {} distributed", datasetName);
     }
 
   }

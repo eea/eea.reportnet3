@@ -227,12 +227,12 @@ public class ValidationHelper implements DisposableBean {
    * @return true, if successful
    */
   public boolean finishProcessInMap(String processId) {
-    LOG.info("Removing process {} from processesMap ", processId);
     boolean result = false;
     synchronized (processesMap) {
       ValidationProcessVO removed = processesMap.remove(processId);
       System.gc();
       if (removed != null) {
+        LOG.info("Removing process {} from processesMap ", processId);
         result = true;
       }
     }
@@ -269,10 +269,14 @@ public class ValidationHelper implements DisposableBean {
       boolean released, boolean updateViews) throws EEAException {
 
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    LOG.info(
+        "Obtaining dataset metabase from datasetId {} to perform validation. The schema from the metabase is {}",
+        datasetId, dataset.getDatasetSchema());
     // In case there's no processId, set a new one (because the processId is set in
     // ValidationControlleriImpl)
     if (StringUtils.isBlank(processId) || "null".equals(processId)) {
       processId = UUID.randomUUID().toString();
+      LOG.info("processId is empty. Generating one: {}", processId);
     }
     if (processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId,
@@ -944,20 +948,6 @@ public class ValidationHelper implements DisposableBean {
     taskRepository.cancelStatusAndFinishDate(taskId, finishDate);
   }
 
-  /**
-   * The Class ValidationTask.
-   */
-
-  /**
-   * Instantiates a new validation task.
-   *
-   * @param taskId the task id
-   * @param eeaEventVO the eea event VO
-   * @param validator the validator
-   * @param datasetId the dataset id
-   * @param kieBase the kie base
-   * @param processId the process id
-   */
 
   /**
    * Instantiates a new validation task.
@@ -1071,57 +1061,67 @@ public class ValidationHelper implements DisposableBean {
      */
     private boolean checkFinishedValidations(Long datasetId, String processId) throws EEAException {
       boolean isFinished = false;
-      if (taskRepository.isProcessFinished(processId) && finishProcessInMap(processId)) {
-        ProcessVO process = processControllerZuul.findById(processId);
-        LOG.info("Process {} finished for dataset {}", processId, datasetId);
-        // Release the lock manually
-        Map<String, Object> executeValidation = new HashMap<>();
-        executeValidation.put(LiteralConstants.SIGNATURE,
-            LockSignature.EXECUTE_VALIDATION.getValue());
-        executeValidation.put(LiteralConstants.DATASETID, datasetId);
-        lockService.removeLockByCriteria(executeValidation);
+      if (taskRepository.isProcessFinished(processId)) {
+        if (finishProcessInMap(processId)) {
+          ProcessVO process = processControllerZuul.findById(processId);
+          LOG.info("Process {} finished for dataset {}", processId, datasetId);
+          // Release the lock manually
+          Map<String, Object> executeValidation = new HashMap<>();
+          executeValidation.put(LiteralConstants.SIGNATURE,
+              LockSignature.EXECUTE_VALIDATION.getValue());
+          executeValidation.put(LiteralConstants.DATASETID, datasetId);
+          lockService.removeLockByCriteria(executeValidation);
 
-        Map<String, Object> forceExecuteValidation = new HashMap<>();
-        forceExecuteValidation.put(LiteralConstants.SIGNATURE,
-            LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
-        forceExecuteValidation.put(LiteralConstants.DATASETID, datasetId);
-        lockService.removeLockByCriteria(forceExecuteValidation);
-
-        // after last dataset validations have been saved, an event is sent to notify it
-        Map<String, Object> value = new HashMap<>();
-        value.put(LiteralConstants.DATASET_ID, datasetId);
-        value.put("uuid", processId);
-        // Setting as user the requesting one as it is being taken from ThreadPropertiesManager
-        // and
-        // validation threads inheritances from it. This is a side effect.
-        value.put("user", process.getUser());
-
-        kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
-        if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
-            ProcessTypeEnum.VALIDATION, processId,
-            SecurityContextHolder.getContext().getAuthentication().getName(), 0, null)) {
-          if (datasetId.equals(process.getDatasetId()) && process.isReleased()) {
-            ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
-            if (null != nextProcess) {
-              executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
-                  false);
-            } else if (processControllerZuul.isProcessFinished(processId)) {
-              kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
-                  value);
-            }
-
-          } else {
-            // Delete the lock to the Release process
-            deleteLockToReleaseProcess(datasetId);
-
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
-                value,
-                NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
-          }
-
+          Map<String, Object> forceExecuteValidation = new HashMap<>();
+          forceExecuteValidation.put(LiteralConstants.SIGNATURE,
+              LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
+          forceExecuteValidation.put(LiteralConstants.DATASETID, datasetId);
+          lockService.removeLockByCriteria(forceExecuteValidation);
           datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
               DatasetRunningStatusEnum.VALIDATED);
+
+          // after last dataset validations have been saved, an event is sent to notify it
+          Map<String, Object> value = new HashMap<>();
+          value.put(LiteralConstants.DATASET_ID, datasetId);
+          value.put("uuid", processId);
+          // Setting as user the requesting one as it is being taken from ThreadPropertiesManager
+          // and
+          // validation threads inheritances from it. This is a side effect.
+          value.put("user", process.getUser());
+
+          kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
+          if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
+              ProcessTypeEnum.VALIDATION, processId,
+              SecurityContextHolder.getContext().getAuthentication().getName(), 0, null)) {
+            if (datasetId.equals(process.getDatasetId()) && process.isReleased()) {
+              ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
+              if (null != nextProcess) {
+                executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
+                    false);
+              } else if (processControllerZuul.isProcessFinished(processId)) {
+                kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
+                    value);
+              }
+
+            } else {
+              // Delete the lock to the Release process
+              deleteLockToReleaseProcess(datasetId);
+
+              kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
+                  value,
+                  NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
+            }
+          }
           isFinished = true;
+        }
+      } else {
+        if (taskRepository.isProcessEnding(processId)) {
+          try {
+            Thread.sleep(5000);
+          } catch (InterruptedException eeaEx) {
+            LOG_ERROR.error("interrupting the sleep because of {}", eeaEx);
+          }
+          checkFinishedValidations(datasetId, processId);
         }
       }
       return isFinished;

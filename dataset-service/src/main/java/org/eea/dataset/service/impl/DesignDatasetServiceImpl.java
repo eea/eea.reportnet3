@@ -388,7 +388,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
 
       // propagate new table into the datasets schema
       try {
-        Thread.sleep(5000);
+        Thread.sleep(2000);
       } catch (InterruptedException e) {
         LOG.info("Propagate Error");
       }

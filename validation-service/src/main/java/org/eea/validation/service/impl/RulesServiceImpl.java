@@ -254,16 +254,22 @@ public class RulesServiceImpl implements RulesService {
     RulesSchema rulesSchema =
         rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), false);
     RulesSchemaVO rulesVO = null;
+    Long designDatasetRelated =
+        dataSetMetabaseControllerZuul.getDesignDatasetIdByDatasetSchemaId(datasetSchemaId);
     if (null == rulesSchema) {
       rulesSchema = null;
     } else {
+      List<Audit> audits = auditRepository.getAuditsByDatasetId(designDatasetRelated);
       for (Rule rule : rulesSchema.getRules()) {
         if (null != rule.getAutomaticType()
             && AutomaticRuleTypeEnum.FIELD_SQL_TYPE.equals(rule.getAutomaticType())) {
           rule.setSqlSentence(null);
         }
-        var audit = auditRepository.getAuditByRuleId(rule.getRuleId());
-        if (null != audit) {
+
+        Optional<Audit> aud = audits.stream()
+            .filter(audit -> audit.getHistoric().get(0).getRuleId().equals(rule.getRuleId()))
+            .findFirst();
+        if (aud.isPresent()) {
           rule.setHasHistoric(true);
         }
       }

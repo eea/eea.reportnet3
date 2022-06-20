@@ -128,24 +128,27 @@ public class ValidationControllerImpl implements ValidationController {
     }
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     String uuid = UUID.randomUUID().toString();
-    String nextUuid = uuid;
     int priority = validationHelper.getPriority(dataset);
-    if (released) {
+    if (!released) {
+      processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+          ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, uuid,
+          SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
+
+    } else {
       // obtain datasets to be released
       List<Long> datasets =
           datasetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(
               dataset.getDataflowId(), dataset.getDataProviderId());
       // queue validations
-      for (Long datasetToReleaseId : datasets) {
-        processControllerZuul.updateProcess(datasetToReleaseId, dataset.getDataflowId(),
-            ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, nextUuid,
-            SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
-        nextUuid = UUID.randomUUID().toString();
-      }
-    } else {
       processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
           ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, uuid,
           SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
+      datasets.remove(datasetId);
+      for (Long datasetToReleaseId : datasets) {
+        processControllerZuul.updateProcess(datasetToReleaseId, dataset.getDataflowId(),
+            ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, UUID.randomUUID().toString(),
+            SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
+      }
     }
     try {
       validationHelper.executeValidation(datasetId, uuid, released, true);
@@ -157,6 +160,7 @@ public class ValidationControllerImpl implements ValidationController {
       LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);
       validationHelper.deleteLockToReleaseProcess(datasetId);
     }
+
   }
 
   /**
