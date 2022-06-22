@@ -64,7 +64,7 @@ public class InspireHarvesterApplication {
 
       ok = true;
     } catch (final Exception ex) {
-      LOG_ERROR.error("ERROR: {}", ex.getMessage(), ex);
+      LOG_ERROR.error("ERROR MESSAGE : {}", ex.getMessage(), ex);
     }
     if (!ok) {
 
