@@ -19,7 +19,7 @@
     <dataflow.version>v3.1.5.2</dataflow.version>
     <dataset.version>v3.1.5.2</dataset.version>
     <document.version>v3.1.5.2</document.version>
-    <frontend.version>v3.1.5.3</frontend.version>
+    <frontend.version>v3.1.5.2</frontend.version>
     <indexsearch.version>v3.1.5.2</indexsearch.version>
     <inspire.version>v3.1.5.2</inspire.version>
     <recordstore.version>v3.1.5.2</recordstore.version>
