@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.recordstore.service;
 
 import java.io.IOException;
@@ -195,4 +198,18 @@ public interface RecordStoreService {
    * @param datasetId the dataset id
    */
   void distributeTables(Long datasetId);
+
+  /**
+   * Distribute tables job.
+   *
+   * @param datasetId the dataset id
+   */
+  void distributeTablesJob(Long datasetId);
+
+  /**
+   * Gets the notdistributed datasets.
+   *
+   * @return the notdistributed datasets
+   */
+  List<String> getNotdistributedDatasets();
 }

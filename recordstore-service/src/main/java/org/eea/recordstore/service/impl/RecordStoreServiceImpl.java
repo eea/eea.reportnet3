@@ -459,4 +459,16 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   public void distributeTables(Long datasetId) {
     LOG.info("distributeTables");
   }
+
+  @Override
+  public void distributeTablesJob(Long datasetId) {
+    LOG.info("distributeTablesJob");
+
+  }
+
+  @Override
+  public List<String> getNotdistributedDatasets() {
+    LOG.info("getNotdistributedDatasets");
+    return new ArrayList<String>();
+  }
 }

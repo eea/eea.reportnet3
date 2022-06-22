@@ -398,6 +398,55 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
 
   /**
+   * Distribute tables job.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void distributeTablesJob(Long datasetId) {
+
+    // Initialize resources
+    try (Connection connection = dataSource.getConnection();
+        Statement statement = connection.createStatement();
+        BufferedReader br =
+            new BufferedReader(new InputStreamReader(resourceCitusFile.getInputStream()))) {
+
+      final List<String> citusCommands = new ArrayList<>();
+      br.lines().forEach(citusCommands::add);
+
+      for (String citusCommand : citusCommands) {
+        citusCommand =
+            citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
+        jdbcTemplate.execute(citusCommand);
+      }
+    } catch (final IOException | SQLException e) {
+      LOG_ERROR.error("Error reading commands file to distribute the dataset. {}", e.getMessage());
+      try {
+        throw new RecordStoreAccessException(String.format(
+            "Error reading commands file to distribute the dataset. %s", e.getMessage()), e);
+      } catch (RecordStoreAccessException e1) {
+        LOG.info(e1.getMessage(), e);
+      }
+    }
+
+  }
+
+  /**
+   * Gets the notdistributed datasets.
+   *
+   * @return the notdistributed datasets
+   */
+  @Override
+  public List<String> getNotdistributedDatasets() {
+    String datasetsTodistributre =
+        "select schema_name from information_schema.schemata where schema_name like 'dataset_%' and schema_name not in (SELECT replace (logicalrelid::text, '.dataset_value','') from pg_dist_partition where logicalrelid::text like '%dataset_value') limit 5";
+    List<String> datasetsTodistributreList =
+        jdbcTemplate.queryForList(datasetsTodistributre, String.class);
+    return datasetsTodistributreList;
+  }
+
+
+  /**
    * Creates the empty data set. This method is used to create the schema of the design datasets
    *
    * @param datasetName the dataset name
@@ -450,27 +499,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       jdbcTemplate.update(insertSql.toString(), idDataset, idDatasetSchema);
       LOG.info("DS created with the id {} and idDatasetSchema {}", idDataset, idDatasetSchema);
     }
-
-    final List<String> citusCommands = new ArrayList<>();
-    // read file into stream, try-with-resources
-    try (BufferedReader brCitus =
-        new BufferedReader(new InputStreamReader(resourceCitusFile.getInputStream()))) {
-
-      brCitus.lines().forEach(citusCommands::add);
-
-    } catch (final IOException e) {
-      LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
-      throw new RecordStoreAccessException(
-          String.format("Error reading commands file to create the dataset. %s", e.getMessage()),
-          e);
-    }
-
-    for (String command : citusCommands) {
-      command = command.replace("%dataset_name%", datasetName);
-      jdbcTemplate.execute(command);
-      LOG.info("Table inside dataset {} distributed", datasetName);
-    }
-
   }
 
   /**
