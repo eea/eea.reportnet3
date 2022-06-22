@@ -75,7 +75,7 @@
     "basemapLayer": "Basemap layer",
     "blocker": "Blocker",
     "bulkDeleteCheckTooltip": "Delete multiple fields",
-    "bulkDeleteCheckTooltipShift": "Hold Shift+Click to select more than one field",
+    "bulkDeleteCheckTooltipShift": "Hold shift to select more than one field",
     "bulkDeleteConfirmTooltip": "Confirm",
     "businessDataflowCreationError": "Failed creating <strong title='dataflowName'>{:shortDataflowName}</strong> business dataflow",
     "businessDataflowCrumbLabel": "Business dataflow",
