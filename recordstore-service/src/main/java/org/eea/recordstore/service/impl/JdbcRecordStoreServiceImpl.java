@@ -195,6 +195,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${snapshot.bufferSize}")
   private Integer bufferFile;
 
+  /** The batch distribute dataset. */
+  @Value("${recordstore.batchDistributeDataset}")
+  private Integer batchDistributeDataset;
+
   /** The jdbc template. */
   @Autowired
   private JdbcTemplate jdbcTemplate;
@@ -438,11 +442,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public List<String> getNotdistributedDatasets() {
-    String datasetsTodistributre =
-        "select schema_name from information_schema.schemata where schema_name like 'dataset_%' and schema_name not in (SELECT replace (logicalrelid::text, '.dataset_value','') from pg_dist_partition where logicalrelid::text like '%dataset_value') limit 5";
-    List<String> datasetsTodistributreList =
-        jdbcTemplate.queryForList(datasetsTodistributre, String.class);
-    return datasetsTodistributreList;
+    String datasetsToDistribute =
+        "select schema_name from information_schema.schemata where schema_name like 'dataset_%' and schema_name not in (SELECT replace (logicalrelid::text, '.dataset_value','') from pg_dist_partition where logicalrelid::text like '%dataset_value') limit "
+            + batchDistributeDataset;
+    return jdbcTemplate.queryForList(datasetsToDistribute, String.class);
   }
 
 
