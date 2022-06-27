@@ -1618,6 +1618,8 @@ public class DatasetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping("/private/deleteTempEtlExport/{datasetId}")
+  @ApiOperation(value = "Empty the temporary etlExport table from the dataset schema DB",
+      hidden = true)
   public void deleteTempEtlExport(@PathVariable("datasetId") Long datasetId) {
     datasetService.deleteTempEtlExport(datasetId);
   }
