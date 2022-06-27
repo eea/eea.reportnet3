@@ -305,34 +305,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           datasetIdsAndSchemaIds.size());
       // waiting X seconds before releasing notifications, so database is able to write the
       // creation of all datasets
-      final List<String> citusCommands = new ArrayList<>();
-      // read file into stream, try-with-resources
-      try (BufferedReader brCitus =
-          new BufferedReader(new InputStreamReader(resourceDistributeFirstFile.getInputStream()))) {
-
-        brCitus.lines().forEach(citusCommands::add);
-
-      } catch (final IOException e) {
-        LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
-        try {
-          throw new RecordStoreAccessException(String
-              .format("Error reading commands file to create the dataset. %s", e.getMessage()), e);
-        } catch (RecordStoreAccessException e1) {
-          LOG.info(e1.getMessage(), e);
-        }
-      }
-
-      for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
-        for (String citusCommand : citusCommands) {
-          citusCommand =
-              citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
-          jdbcTemplate.execute(citusCommand);
-        }
-        Thread.sleep(4000);
-        LOG.info("Distributed dataset {}", datasetId);
-      }
-
-
       Thread.sleep(timeToWaitBeforeReleasingNotification);
       LOG.info("Releasing notifications via Kafka");
       // Release events to initialize databases content
@@ -423,6 +395,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
         jdbcTemplate.execute(citusCommand);
       }
+      // After distributing tables the view gets deleted so we need to recreate them again
+      createUpdateQueryViewAsync(datasetId, true);
     } catch (final IOException | SQLException e) {
       LOG_ERROR.error("Error reading commands file to distribute the dataset. {}", e.getMessage());
       try {
@@ -999,6 +973,46 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           }
         });
   }
+
+
+  /**
+   * Creates the update query view async.
+   *
+   * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
+   */
+  @Async
+  @Override
+  public void createUpdateQueryViewAsync(Long datasetId, boolean isMaterialized) {
+    LOG.info("Executing createUpdateQueryView on the datasetId {}. Materialized: {}", datasetId,
+        isMaterialized);
+    DataSetSchemaVO datasetSchema =
+        datasetSchemaController.findDataSchemaByDatasetIdPrivate(datasetId);
+    // delete all views because some names can be changed
+    try {
+      deleteAllViewsFromSchema(datasetId);
+      deleteAllMatViewsFromSchema(datasetId);
+    } catch (RecordStoreAccessException e1) {
+      LOG_ERROR.error("Error deleting Query view: {}", e1.getMessage(), e1);
+    }
+
+    datasetSchema.getTableSchemas().stream()
+        .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
+        .forEach(table -> {
+          List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
+          try {
+            // create materialiced view or query view of all tableSchemas
+            executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
+                datasetId, true);
+            createIndexMaterializedView(datasetId, table.getNameTableSchema());
+            // execute view permission
+            executeViewPermissions(table.getNameTableSchema(), datasetId);
+          } catch (RecordStoreAccessException e) {
+            LOG_ERROR.error("Error creating Query view: {}", e.getMessage(), e);
+          }
+        });
+  }
+
 
   /**
    * Update materialized query view.

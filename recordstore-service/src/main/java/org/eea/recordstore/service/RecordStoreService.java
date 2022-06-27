@@ -212,4 +212,12 @@ public interface RecordStoreService {
    * @return the notdistributed datasets
    */
   List<String> getNotdistributedDatasets();
+
+  /**
+   * Creates the update query view async.
+   *
+   * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
+   */
+  void createUpdateQueryViewAsync(Long datasetId, boolean isMaterialized);
 }
