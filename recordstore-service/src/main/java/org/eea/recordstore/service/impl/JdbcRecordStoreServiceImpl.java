@@ -982,8 +982,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Async
   @Override
   public void createUpdateQueryViewAsync(Long datasetId, boolean isMaterialized) {
-    LOG.info("Executing createUpdateQueryView on the datasetId {}. Materialized: {}", datasetId,
-        isMaterialized);
+    LOG.info("Executing createUpdateQueryViewAsync on the datasetId {}. Materialized: {}",
+        datasetId, isMaterialized);
     DataSetSchemaVO datasetSchema =
         datasetSchemaController.findDataSchemaByDatasetIdPrivate(datasetId);
     // delete all views because some names can be changed
