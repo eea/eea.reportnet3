@@ -30,24 +30,23 @@ public class CitusJob {
    */
   @PostConstruct
   private void init() {
-    // cron = "0 0-6 * * *"
-    String cronExpression = "0 0 * * * * ";
-    ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-    scheduler.initialize();
-    scheduler.schedule(() -> executeTableDistribution(), new CronTrigger(cronExpression));
+    if (!enableTableDistributionJob.isBlank()) {
+      ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+      scheduler.initialize();
+      scheduler.schedule(() -> executeTableDistribution(),
+          new CronTrigger(enableTableDistributionJob));
+    }
   }
 
   /**
    * Execute table distribution.
    */
   public void executeTableDistribution() {
-    if ("true".equals(enableTableDistributionJob)) {
-      List<String> distributeDatasets = recordStoreService.getNotdistributedDatasets();
-      for (String dataset : distributeDatasets) {
-        String datasetAux = dataset.replace("dataset_", "");
-        Long datasetLong = Long.parseLong(datasetAux);
-        recordStoreService.distributeTablesJob(datasetLong);
-      }
+    List<String> distributeDatasets = recordStoreService.getNotdistributedDatasets();
+    for (String dataset : distributeDatasets) {
+      String datasetAux = dataset.replace("dataset_", "");
+      Long datasetLong = Long.parseLong(datasetAux);
+      recordStoreService.distributeTablesJob(datasetLong);
     }
   }
 }
