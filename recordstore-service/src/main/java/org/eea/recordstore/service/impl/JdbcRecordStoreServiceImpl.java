@@ -196,7 +196,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private Integer bufferFile;
 
   /** The batch distribute dataset. */
-  @Value("${recordstore.batchDistributeDataset}")
+  @Value("${batchDistributeDataset}")
   private Integer batchDistributeDataset;
 
   /** The jdbc template. */

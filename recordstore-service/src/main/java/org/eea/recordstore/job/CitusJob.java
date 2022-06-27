@@ -22,7 +22,7 @@ public class CitusJob {
   private RecordStoreService recordStoreService;
 
   /** The enable table distribution job. */
-  @Value("${recordstore.enableTableDistributionJob}")
+  @Value("${enableTableDistributionJob}")
   private String enableTableDistributionJob;
 
   /**
