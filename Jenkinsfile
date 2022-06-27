@@ -73,14 +73,14 @@ pipeline {
 
         stage('Push to EEA GitHub') {
             when {
-                branch 'release/v3.1.5.2-RC1'
+                branch 'sandbox'
             }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'jenkins-eea-altia', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                     sh('git config --global user.email "ext.jose.luis.anton@altia.es"')
                     sh('git config --global user.name "Jose Luis Anton (ALTIA)"')
-                    sh('git pull https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git develop --allow-unrelated-histories')
-                    sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git HEAD:develop')
+                    sh('git pull https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git sandbox --allow-unrelated-histories')
+                    sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/eea/eea.reportnet3.git HEAD:sandbox')
                 }
             }
         }

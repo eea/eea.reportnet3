@@ -301,7 +301,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       List<ErrorTypeEnum> levelErrorList, Pageable pageable, List<String> idRules,
       String fieldSchema, String fieldValue, SortField... sortFields) {
 
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     StringBuilder sortQueryBuilder = new StringBuilder();
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
@@ -321,10 +320,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     // result object
     if (levelErrorListFilled || idRulesListFilled) {
       // Total records calculated.
-      recordsCalc(idTableSchema, result, filter, errorList, idRules, fieldSchema, fieldValue);
+      recordsCalc(idTableSchema, result, filter, errorList, idRules, fieldSchema, fieldValue,
+          datasetId);
 
       queryOrder(idTableSchema, pageable, sortQueryBuilder, directionQueryBuilder, result, filter,
-          errorList, idRules, fieldSchema, fieldValue, sortFields);
+          errorList, idRules, fieldSchema, fieldValue, datasetId, sortFields);
     }
     return result;
   }
@@ -846,9 +846,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param idRules the id rules
    * @param fieldSchema the field schema
    * @param fieldValue the field value
+   * @param datasetId the dataset id
    */
   private void recordsCalc(String idTableSchema, TableVO result, String filter,
-      List<ErrorTypeEnum> errorList, List<String> idRules, String fieldSchema, String fieldValue) {
+      List<ErrorTypeEnum> errorList, List<String> idRules, String fieldSchema, String fieldValue,
+      Long datasetId) {
     if (!filter.isEmpty()) {
       Query query2;
       query2 = entityManager.createQuery(MASTER_QUERY_COUNT + filter);
@@ -869,11 +871,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         query2.setParameter(ERROR_LIST, errorList);
         query2.setParameter(ERROR_LIST, errorList);
       }
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       Long recordsCount = Long.valueOf(query2.getResultList().get(0).toString());
 
       LOG.info(
-          "Filtering the table by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}",
-          fieldValue, idTableSchema, idRules, errorList, fieldSchema);
+          "Filtering the table in dataset {} by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}",
+          datasetId, fieldValue, idTableSchema, idRules, errorList, fieldSchema);
       result.setTotalFilteredRecords(recordsCount);
     }
   }
@@ -891,12 +894,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param idRules the id rules
    * @param fieldSchema the field schema
    * @param fieldValue the field value
+   * @param datasetId the dataset id
    * @param sortFields the sort fields
    */
   private void queryOrder(String idTableSchema, Pageable pageable, StringBuilder sortQueryBuilder,
       StringBuilder directionQueryBuilder, TableVO result, String filter,
       List<ErrorTypeEnum> errorList, List<String> idRules, String fieldSchema, String fieldValue,
-      SortField... sortFields) {
+      Long datasetId, SortField... sortFields) {
 
     // Query without order or with it
     Query query = entityManager.createQuery(
@@ -926,6 +930,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     query.setMaxResults(pageable.getPageSize());
 
     List<RecordVO> recordVOs = null;
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     if (null == sortFields) {
       // Query without order.
       List<RecordValue> a = query.getResultList();
@@ -937,9 +942,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       recordVOs = recordNoValidationMapper.entityListToClass(sanitizeOrderedRecords(a));
     }
     LOG.info(
-        "Filtering the table by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}, with PageSize {} and PageNumber {}",
-        fieldValue, idTableSchema, idRules, errorList, fieldSchema, pageable.getPageSize(),
-        pageable.getPageNumber());
+        "Filtering the table in dataset {} by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}, with PageSize {} and PageNumber {}",
+        datasetId, fieldValue, idTableSchema, idRules, errorList, fieldSchema,
+        pageable.getPageSize(), pageable.getPageNumber());
     result.setRecords(recordVOs);
   }
 
