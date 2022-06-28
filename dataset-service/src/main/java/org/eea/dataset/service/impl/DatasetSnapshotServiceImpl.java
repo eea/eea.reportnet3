@@ -321,7 +321,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
       snap.setReportingDataset(dataset);
       snap.setDataSetName("snapshot from dataset_" + idDataset);
-      snap.setDcReleased(createSnapshotVO.getReleased());
+      if (Boolean.TRUE.equals(createSnapshotVO.getReleased())) {
+        snap.setDcReleased(true);
+      } else {
+        snap.setDcReleased(false);
+      }
       snap.setEuReleased(false);
       snap.setEnabled(true);
 
