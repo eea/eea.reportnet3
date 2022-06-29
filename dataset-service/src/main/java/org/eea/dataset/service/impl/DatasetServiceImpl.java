@@ -3241,6 +3241,7 @@ public class DatasetServiceImpl implements DatasetService {
     validation.setErrors(new ArrayList<>());
     validation.setIdDatasetSchema(dataset.getDatasetSchema());
     validation.setIdDataset(datasetId);
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     Long countValidations = validationRepository.count();
     validation.setErrors(getFieldAndRecordErrors(datasetId, idTableSchema));
     validation.setTotalFilteredRecords(countValidations);

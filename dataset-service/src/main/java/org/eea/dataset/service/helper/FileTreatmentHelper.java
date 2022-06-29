@@ -87,6 +87,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.DatasetId;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -1361,6 +1362,8 @@ public class FileTreatmentHelper implements DisposableBean {
           if (!CollectionUtils.isEmpty(fieldSchemaAttachment)) {
             // We took every field for every table
             for (FieldSchema fieldAttach : fieldSchemaAttachment) {
+              TenantResolver
+                  .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
               List<AttachmentValue> attachmentValue =
                   attachmentRepository.findAllByIdFieldSchemaAndValueIsNotNull(
                       fieldAttach.getIdFieldSchema().toString());

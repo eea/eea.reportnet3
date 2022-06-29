@@ -56,6 +56,7 @@ public class CitusJob {
       Long datasetId = Long.parseLong(dataset.replace("dataset_", ""));
       Map<String, Object> values = new HashMap<>();
       values.put(LiteralConstants.DATASET_ID, datasetId);
+      LOG.info("Distributing dataset {}", datasetId);
       kafkaSenderUtils.releaseKafkaEvent(EventType.DISTRIBUTE_DATASET_EVENT, values);
     }
   }
