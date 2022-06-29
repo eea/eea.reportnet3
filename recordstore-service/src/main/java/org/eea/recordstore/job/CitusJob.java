@@ -8,6 +8,8 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.utils.LiteralConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -21,6 +23,9 @@ import org.springframework.stereotype.Component;
 @RefreshScope
 @Component
 public class CitusJob {
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(CitusJob.class);
 
   /** The record store service. */
   @Autowired
