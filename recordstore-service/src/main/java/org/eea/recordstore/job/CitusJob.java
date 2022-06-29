@@ -1,8 +1,13 @@
 package org.eea.recordstore.job;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.utils.LiteralConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
@@ -25,6 +30,10 @@ public class CitusJob {
   @Value("${enableTableDistributionJob}")
   private String enableTableDistributionJob;
 
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
   /**
    * Inits the job.
    */
@@ -44,9 +53,10 @@ public class CitusJob {
   public void executeTableDistribution() {
     List<String> distributeDatasets = recordStoreService.getNotdistributedDatasets();
     for (String dataset : distributeDatasets) {
-      String datasetAux = dataset.replace("dataset_", "");
-      Long datasetLong = Long.parseLong(datasetAux);
-      recordStoreService.distributeTablesJob(datasetLong);
+      Long datasetId = Long.parseLong(dataset.replace("dataset_", ""));
+      Map<String, Object> values = new HashMap<>();
+      values.put(LiteralConstants.DATASET_ID, datasetId);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.DISTRIBUTE_DATASET_EVENT, values);
     }
   }
 }
