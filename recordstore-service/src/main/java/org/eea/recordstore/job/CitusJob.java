@@ -1,8 +1,13 @@
 package org.eea.recordstore.job;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +35,10 @@ public class CitusJob {
   @Value("${enableTableDistributionJob}")
   private String enableTableDistributionJob;
 
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
   /**
    * Inits the job.
    */
@@ -49,14 +58,11 @@ public class CitusJob {
   public void executeTableDistribution() {
     List<String> distributeDatasets = recordStoreService.getNotdistributedDatasets();
     for (String dataset : distributeDatasets) {
-      String datasetAux = dataset.replace("dataset_", "");
-      Long datasetLong = Long.parseLong(datasetAux);
-      try {
-        LOG.info("Distributing dataset {}", datasetLong);
-        recordStoreService.distributeTablesJob(datasetLong);
-      } catch (Exception e) {
-        LOG.info("For any reason the distribution of the dataset {} failed", datasetLong, e);
-      }
+      Long datasetId = Long.parseLong(dataset.replace("dataset_", ""));
+      Map<String, Object> values = new HashMap<>();
+      values.put(LiteralConstants.DATASET_ID, datasetId);
+      LOG.info("Distributing dataset {}", datasetId);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.DISTRIBUTE_DATASET_EVENT, values);
     }
   }
 }

@@ -1,3 +1,6 @@
+/*
+ *
+ */
 package org.eea.kafka.domain;
 
 import org.eea.utils.LiteralConstants;
@@ -523,7 +526,10 @@ public enum EventType {
 
   /** The call fme process failed event. */
   CALL_FME_PROCESS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "call_fme_process_failed_event", true);
+      "call_fme_process_failed_event", true),
+
+  /** The distribute dataset event. */
+  DISTRIBUTE_DATASET_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "distribute_dataset_event", true);
 
   /** The topic. */
   private String topic;
