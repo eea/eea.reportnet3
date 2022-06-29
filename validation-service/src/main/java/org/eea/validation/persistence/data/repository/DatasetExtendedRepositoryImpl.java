@@ -401,7 +401,22 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
               List<ValueVO> values = new ArrayList<>();
               for (int i = 1; i <= rsmt.getColumnCount(); i++) {
                 ValueVO valueToAdd = new ValueVO();
-                valueToAdd.setValue(rs.getString(i));
+                if (rsmt.getColumnType(i) == 1111) {
+                  try {
+                    // we try to convert Extended Well-Known Binary (EWKB) into String
+                    // Example : 0101000020E610000095B9F94674CF37C09CBF0985083B5040 -> Point (1,2)
+                    // RSID : 4236
+                    final GeometryFactory gm = new GeometryFactory(new PrecisionModel(), 4326);
+                    final WKBReader wkbr = new WKBReader(gm);
+                    byte[] wkbBytes = wkbr.hexToBytes(rs.getString(i));
+                    Geometry geom = wkbr.read(wkbBytes);
+                    valueToAdd.setValue(geom.toText());
+                  } catch (ParseException | NullPointerException e) {
+                    valueToAdd.setValue(geometryErrorMessage);
+                  }
+                } else {
+                  valueToAdd.setValue(rs.getString(i));
+                }
                 valueToAdd.setLabel(rsmt.getColumnLabel(i));
                 valueToAdd.setTable(rsmt.getTableName(i));
                 valueToAdd.setRow(index);
