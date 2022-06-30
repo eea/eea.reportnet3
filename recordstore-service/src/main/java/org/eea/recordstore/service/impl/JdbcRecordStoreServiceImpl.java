@@ -415,7 +415,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Override
   public List<String> getNotdistributedDatasets() {
     String datasetsToDistribute =
-        "select schema_name from information_schema.schemata where schema_name like 'dataset_%' and schema_name not in (SELECT replace (logicalrelid::text, '.dataset_value','') from pg_dist_partition where logicalrelid::text like '%dataset_value') limit "
+        "select schema_name from information_schema.schemata where schema_name like 'dataset_%' and schema_name not in (SELECT replace (logicalrelid::text, '.dataset_value','') from pg_dist_partition where logicalrelid::text like '%dataset_value') order by random() limit "
             + batchDistributeDataset;
     return jdbcTemplate.queryForList(datasetsToDistribute, String.class);
   }
