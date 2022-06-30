@@ -525,6 +525,7 @@ public enum EventType {
   CALL_FME_PROCESS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "call_fme_process_failed_event", true);
 
+
   /** The topic. */
   private String topic;
 

@@ -30,6 +30,7 @@ public class CitusJob {
   @Value("${enableTableDistributionJob}")
   private String enableTableDistributionJob;
 
+
   /**
    * Inits the job.
    */
