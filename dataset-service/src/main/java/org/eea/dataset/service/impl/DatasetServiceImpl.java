@@ -76,6 +76,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.PaMService;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.PostgresBulkImporter;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -306,6 +307,11 @@ public class DatasetServiceImpl implements DatasetService {
   @Lazy
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
+
+  /** The file treatment helper. */
+  @Lazy
+  @Autowired
+  private FileTreatmentHelper fileTreatmentHelper;
 
   /** The import path. */
   @Value("${importPath}")
@@ -1706,6 +1712,7 @@ public class DatasetServiceImpl implements DatasetService {
         if (!attachments.isEmpty()) {
           attachmentRepository.saveAll(attachments);
         }
+        fileTreatmentHelper.updateGeometry(targetDataset.getId(), datasetSchema);
       }
     }
   }

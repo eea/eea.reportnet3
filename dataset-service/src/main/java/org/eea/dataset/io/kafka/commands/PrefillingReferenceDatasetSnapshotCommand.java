@@ -1,8 +1,11 @@
 package org.eea.dataset.io.kafka.commands;
 
 import java.io.IOException;
+import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
@@ -38,6 +41,10 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
+  /** The dataset schema repository. */
+  @Autowired
+  private SchemasRepository datasetSchemaRepository;
+
 
   /**
    * Gets the event type.
@@ -61,9 +68,15 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
     DataSetMetabase dataset = datasetMetabaseRepository.findById(datasetId).orElse(null);
     if (null != dataset) {
       try {
-        recordStoreControllerZuul.refreshMaterializedView(datasetId, null);
+        DataSetSchema schema =
+            datasetSchemaRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+        fileTreatmentHelper.updateGeometry(datasetId, schema);
+
+        Thread.sleep(10000);
+
         fileTreatmentHelper.createReferenceDatasetFiles(dataset);
-      } catch (IOException e) {
+        recordStoreControllerZuul.refreshMaterializedView(datasetId, null);
+      } catch (IOException | InterruptedException e) {
         LOG_ERROR.error(
             "Error creating the reference dataset {} files during the creation. Error: {}",
             datasetId, e.getMessage(), e);
