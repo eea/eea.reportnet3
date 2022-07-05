@@ -16,6 +16,8 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.multitenancy.TenantResolver;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -205,7 +207,7 @@ public class CSVWriterStrategy implements WriterStrategy {
     if (StringUtils.isNotBlank(filters.getIdRules())) {
       idRulesList = Arrays.asList(filters.getIdRules());
     }
-
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     Long totalRecords = fileCommon.countRecordsByTableSchema(idTableSchema);
     int batchSize = 50000 / nHeaders;
     int totalPages = (int) Math.ceil((double) totalRecords / batchSize);

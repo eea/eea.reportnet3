@@ -260,13 +260,14 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
     // Set records
     int nRow = 1;
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+
     Map<String, String> errorsMap = null;
     if (includeValidations) {
       errorsMap = mapErrors(fileCommon.getErrors(datasetId, table.getIdTableSchema(), dataset));
     }
     CellStyle cs = workbook.createCellStyle();
     cs.setWrapText(true);
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     Long totalRecords = fileCommon.countRecordsByTableSchema(table.getIdTableSchema());
     int batchSize = 50000 / fieldSchemas.size();
     int numSheets = 0;
