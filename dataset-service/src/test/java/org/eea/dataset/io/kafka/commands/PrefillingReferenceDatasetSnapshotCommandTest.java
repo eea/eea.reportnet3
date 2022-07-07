@@ -7,9 +7,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
@@ -50,6 +53,9 @@ public class PrefillingReferenceDatasetSnapshotCommandTest {
   @Mock
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
+  @Mock
+  private SchemasRepository datasetSchemaRepository;
+
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
 
@@ -72,10 +78,14 @@ public class PrefillingReferenceDatasetSnapshotCommandTest {
     data.put("user", "user1");
     eeaEventVO.setData(data);
     DataSetMetabase datasetMetabase = new DataSetMetabase();
-
+    datasetMetabase.setId(1L);
+    datasetMetabase.setDatasetSchema(new ObjectId().toString());
 
     when(datasetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(datasetMetabase));
+
+    when(datasetSchemaRepository.findByIdDataSetSchema(Mockito.any()))
+        .thenReturn(new DataSetSchema());
 
     prefillingReferenceDatasetSnapshotCommand.execute(eeaEventVO);
     Mockito.verify(fileTreatmentHelper, times(1)).createReferenceDatasetFiles(Mockito.any());

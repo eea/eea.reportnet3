@@ -272,6 +272,11 @@
       "flag": "MC"
     },
     {
+      "name": "Northern Ireland (UK)",
+      "code": "XI",
+      "flag": "GB"
+    },
+    {
       "name": "Russia",
       "code": "RU",
       "flag": "RU"

@@ -76,6 +76,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.PaMService;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.PostgresBulkImporter;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -306,6 +307,11 @@ public class DatasetServiceImpl implements DatasetService {
   @Lazy
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
+
+  /** The file treatment helper. */
+  @Lazy
+  @Autowired
+  private FileTreatmentHelper fileTreatmentHelper;
 
   /** The import path. */
   @Value("${importPath}")
@@ -1706,6 +1712,7 @@ public class DatasetServiceImpl implements DatasetService {
         if (!attachments.isEmpty()) {
           attachmentRepository.saveAll(attachments);
         }
+        fileTreatmentHelper.updateGeometry(targetDataset.getId(), datasetSchema);
       }
     }
   }
@@ -2988,7 +2995,6 @@ public class DatasetServiceImpl implements DatasetService {
               datasetSnapshotService.obtainPartition(datasetId, "root").getId(), null, true);
         }
       }
-      recordStoreControllerZuul.distributeTables(datasetId);
     } catch (Exception e) {
       LOG_ERROR.error(
           "Error executing the processes after creating a new empty dataset. Error message: {}",
@@ -3242,6 +3248,7 @@ public class DatasetServiceImpl implements DatasetService {
     validation.setErrors(new ArrayList<>());
     validation.setIdDatasetSchema(dataset.getDatasetSchema());
     validation.setIdDataset(datasetId);
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     Long countValidations = validationRepository.count();
     validation.setErrors(getFieldAndRecordErrors(datasetId, idTableSchema));
     validation.setTotalFilteredRecords(countValidations);
