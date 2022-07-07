@@ -1074,6 +1074,7 @@
     "pinned": "Pinned",
     "pk": "PK",
     "pkHasMultipleValues": "Multiple values",
+    "ignoreCaseInLinksMessage": "Ignore case in links",
     "PKTooltip": "The primary key (PK) is a unique identifier for the records",
     "pkValuesMustBeUsed": "All PK values must be used on link",
     "plusFileSize": "Increase maximum file size",
