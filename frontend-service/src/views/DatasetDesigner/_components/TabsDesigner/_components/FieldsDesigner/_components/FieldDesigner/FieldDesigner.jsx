@@ -45,6 +45,7 @@ export const FieldDesigner = ({
                                   fieldDescription,
                                   fieldFileProperties,
                                   fieldHasMultipleValues,
+                                  fieldIgnoreCaseInLinks,
                                   fieldId,
                                   fieldLink,
                                   fieldLinkedTableConditional = '',
@@ -90,6 +91,7 @@ export const FieldDesigner = ({
         fieldDescriptionValue: fieldDescription,
         fieldLinkValue: fieldLink || null,
         fieldPkHasMultipleValues: fieldHasMultipleValues || false,
+        fieldIgnoreCaseInLinks: fieldIgnoreCaseInLinks || false,
         fieldPkMustBeUsed: fieldMustBeUsed || false,
         fieldPKReferencedValue: fieldPKReferenced || false,
         fieldPKValue: fieldPK,
@@ -384,6 +386,7 @@ export const FieldDesigner = ({
                                   linkedTableLabel,
                                   masterTableConditional,
                                   pkHasMultipleValues,
+                                  ignoreCaseInLinks,
                                   pkMustBeUsed
                               }) => {
         const inmReferencedField = {...link.referencedField};
@@ -407,7 +410,8 @@ export const FieldDesigner = ({
                             referencedField: inmReferencedField
                         },
                         pkMustBeUsed,
-                        pkHasMultipleValues
+                        pkHasMultipleValues,
+                        ignoreCaseInLinks
                     });
                 }
             }
@@ -698,8 +702,10 @@ export const FieldDesigner = ({
                             linkedTableLabel,
                             masterTableConditional,
                             pkHasMultipleValues,
+                            ignoreCaseInLinks,
                             pkMustBeUsed
                         }) => {
+        console.log("onSaveLink", pkHasMultipleValues, ignoreCaseInLinks)
         const inmReferencedField = {...link.referencedField};
         if (linkedTableConditional !== '') {
             inmReferencedField.linkedTableConditional = linkedTableConditional;
@@ -718,7 +724,8 @@ export const FieldDesigner = ({
                     referencedField: inmReferencedField
                 },
                 pkMustBeUsed,
-                pkHasMultipleValues
+                pkHasMultipleValues,
+                ignoreCaseInLinks
             }
         });
         if (fieldDesignerState.fieldValue === '') {
@@ -739,7 +746,8 @@ export const FieldDesigner = ({
                             referencedField: inmReferencedField
                         },
                         pkMustBeUsed,
-                        pkHasMultipleValues
+                        pkHasMultipleValues,
+                        ignoreCaseInLinks
                     });
                 } else {
                     fieldUpdate({
@@ -751,7 +759,8 @@ export const FieldDesigner = ({
                             referencedField: inmReferencedField
                         },
                         pkMustBeUsed,
-                        pkHasMultipleValues
+                        pkHasMultipleValues,
+                        ignoreCaseInLinks
                     });
                 }
                 dispatchFieldDesigner({type: 'TOGGLE_LINK_SELECTOR_VISIBLE', payload: false});
@@ -792,6 +801,7 @@ export const FieldDesigner = ({
                                    type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
                                    validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
                                }) => {
+        console.log("DatasetService.updateFieldDesign", pkHasMultipleValues, ignoreCaseInLinks)
         try {
             await DatasetService.updateFieldDesign(datasetId, {
                 codelistItems,
@@ -1410,10 +1420,10 @@ export const FieldDesigner = ({
                     <div className={styles.draggableFieldCell}>
                         <LinkSelector
                             datasetSchemaId={datasetSchemaId}
+                            doesIgnoreCaseInLinks={fieldDesignerState.fieldIgnoreCaseInLinks}
                             fieldId={fieldId}
                             fields={fields}
                             hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
-                            ignoreCaseInLinks={fieldDesignerState.fieldIgnoreCaseInLinks}
                             isExternalLink={areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link') ? true : false}
                             isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
                             isReferenceDataset={isReferenceDataset}

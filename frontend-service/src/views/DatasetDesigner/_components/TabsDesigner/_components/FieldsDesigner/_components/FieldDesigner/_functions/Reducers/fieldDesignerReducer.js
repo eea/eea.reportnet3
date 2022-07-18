@@ -18,6 +18,7 @@ export const fieldDesignerReducer = (state, {type, payload}) => {
                 fieldLinkValue: null,
                 fieldPkMustBeUsed: false,
                 fieldPkHasMultipleValues: false,
+                fieldIgnoreCaseInLinks: false,
                 fieldFileProperties: {validExtensions: [], maxSize: 0},
                 referencedField: null
             };
@@ -28,7 +29,8 @@ export const fieldDesignerReducer = (state, {type, payload}) => {
                 referencedField: null,
                 fieldLinkValue: null,
                 fieldPkMustBeUsed: false,
-                fieldPkHasMultipleValues: false
+                fieldPkHasMultipleValues: false,
+                fieldIgnoreCaseInLinks: false
             };
 
         case 'RESET_NEW_FIELD':
@@ -77,11 +79,13 @@ export const fieldDesignerReducer = (state, {type, payload}) => {
             return {...state, fieldLinkValue: payload.link};
 
         case 'SET_LINK':
+            console.log("SET_LINK", state, type, payload)
             return {
                 ...state,
                 fieldLinkValue: payload.link,
                 fieldPkMustBeUsed: payload.pkMustBeUsed,
                 fieldPkHasMultipleValues: payload.pkHasMultipleValues,
+                fieldIgnoreCaseInLinks: payload.ignoreCaseInLinks,
                 completeLink: payload.link
             };
 

@@ -183,6 +183,7 @@ export const LinkSelector = ({
                 linkedTableLabel: !isNil(pkLinkedTableLabel) ? pkLinkedTableLabel.fieldSchemaId : '',
                 masterTableConditional: !isNil(pkMasterTableConditional) ? pkMasterTableConditional.fieldSchemaId : '',
                 pkHasMultipleValues,
+                ignoreCaseInLinks,
                 pkMustBeUsed
             });
         }
@@ -511,7 +512,7 @@ export const LinkSelector = ({
                             onChange={e => setPkHasMultipleValues(e.checked)}
                             style={{width: '70px', marginLeft: '0.5rem'}}
                         />
-                        <span className={styles.switchTextInput} htmlFor={'pkHasMultipleValues_check'}>
+                        <span className={styles.switchTextInput} htmlFor={'ignoreCaseInLinks_check'}>
               {resourcesContext.messages['ignoreCaseInLinksMessage']}
             </span>
                         <Checkbox
