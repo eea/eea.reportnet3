@@ -1,11 +1,19 @@
 {
   "overrides": [
     {
-      "files": ["*.jsx", "*.js"]
+      "files": [
+        "*.jsx",
+        "*.js"
+      ]
     }
   ],
-  "extends": ["react-app", "prettier"],
-  "plugins": ["react-hooks"],
+  "extends": [
+    "react-app",
+    "prettier"
+  ],
+  "plugins": [
+    "react-hooks"
+  ],
   "rules": {
     "no-unused-expressions": "off",
     "no-unused-vars": "warn",
@@ -17,7 +25,12 @@
     "react/jsx-no-undef": "warn",
     "react/jsx-no-useless-fragment": "warn",
     "react/jsx-sort-default-props": "warn",
-    "react/jsx-sort-props": ["warn", { "ignoreCase": true }],
+    "react/jsx-sort-props": [
+      "warn",
+      {
+        "ignoreCase": true
+      }
+    ],
     "react/jsx-uses-react": "warn",
     "react/jsx-uses-vars": "warn",
     "react/no-array-index-key": "warn",
@@ -25,6 +38,7 @@
     "react/no-direct-mutation-state": "warn",
     "react/no-multi-comp": "off",
     "react/no-unused-prop-types": "warn",
-    "react/no-unused-state": "warn"
+    "react/no-unused-state": "warn",
+    "object-curly-spacing": "warn"
   }
 }
