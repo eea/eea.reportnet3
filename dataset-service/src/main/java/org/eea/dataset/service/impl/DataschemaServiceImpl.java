@@ -771,6 +771,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         fieldSchemaVO.setMaxSize(20f);
       }
 
+      if (fieldSchemaVO.getIgnoreCaseInLinks() == null) {
+        fieldSchemaVO.setIgnoreCaseInLinks(false);
+      }
+
       return schemasRepository
           .createFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
           .getModifiedCount() == 1 ? fieldSchemaVO.getId() : "";
