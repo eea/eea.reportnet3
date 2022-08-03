@@ -875,6 +875,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       fieldSchema.put("readOnly", fieldSchemaVO.getReadOnly());
     }
 
+    if (fieldSchemaVO.getIgnoreCaseInLinks() != null) {
+      fieldSchema.put("ignoreCaseInLinks", fieldSchemaVO.getIgnoreCaseInLinks());
+    }
+
     modifyValidExtensions(fieldSchemaVO, fieldSchema);
     if (fieldSchemaVO.getReferencedField() != null && (DataType.LINK.equals(fieldSchemaVO.getType())
         || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType()))) {
