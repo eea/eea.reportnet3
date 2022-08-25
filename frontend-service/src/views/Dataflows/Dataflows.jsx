@@ -254,7 +254,6 @@ export const Dataflows = () => {
             onClick: () => manageDialogs('isValidationStatusDialogVisible', true),
             title: 'validationsStatus'
         };
-        
 
         const adminManageNationalCoordinatorsBtn = {
             className: 'dataflowList-left-side-bar-create-dataflow-help-step',
