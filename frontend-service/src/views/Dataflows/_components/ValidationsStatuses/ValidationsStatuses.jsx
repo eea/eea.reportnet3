@@ -50,7 +50,7 @@ export const ValidationsStatuses = ({onCloseDialog, isDialogVisible}) => {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [loadingStatus, setLoadingStatus] = useState('idle');
     const [pagination, setPagination] = useState({firstRow: 0, numberRows: 10, pageNum: 0});
-    const [sort, setSort] = useState({field: '', order: 0});
+    const [sort, setSort] = useState({field: 'queuedDate', order: -1});
     const [totalRecords, setTotalRecords] = useState(0);
     const [validationsStatuses, setValidationsStatusesList] = useState([]);
     const [validationStatus, setValidationStatus] = useState(null);
@@ -426,7 +426,7 @@ export const ValidationsStatuses = ({onCloseDialog, isDialogVisible}) => {
                     resizableColumns={true}
                     rows={numberRows}
                     rowsPerPageOptions={[5, 10, 15]}
-                    sortField={sort.field.length ? sort.field : "queuedDate"}
+                    sortField={sort.field}
                     sortOrder={sort.order}
                     totalRecords={isFiltered ? filteredRecords : totalRecords}
                     value={validationsStatuses}>
