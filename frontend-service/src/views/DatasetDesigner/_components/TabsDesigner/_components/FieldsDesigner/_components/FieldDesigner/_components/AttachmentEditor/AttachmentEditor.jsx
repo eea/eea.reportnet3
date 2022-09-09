@@ -39,15 +39,15 @@ export const AttachmentEditor = ({
   const onMaxSizeChange = size => {
     size = size.toString();
     if ((size.match(/\./g) || []).length === 0) {
-      size = size.substring(0, 2);
+      size = size.substring(0, 3);
     } else if ((size.match(/\./g) || []).length === 1) {
       const splittedNumber = size.split('.');
-      size = `${splittedNumber[0] === '' ? '0' : splittedNumber[0]}.${splittedNumber[1].substring(0, 2)}`;
+      size = `${splittedNumber[0] === '' ? '0' : splittedNumber[0]}.${splittedNumber[1].substring(0, 3)}`;
     } else {
       size = size.substring(0, size.length - 1);
     }
 
-    setMaxSize(size > 20 ? 20 : size < 0 ? 0 : size);
+    setMaxSize(size > 100 ? 100 : size < 0 ? 0 : size);
   };
 
   const onPasteChips = event => {
