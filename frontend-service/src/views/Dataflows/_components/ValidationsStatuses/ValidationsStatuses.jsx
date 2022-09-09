@@ -1,4 +1,4 @@
-import {Fragment, useContext, useEffect, useReducer, useState} from 'react';
+import {Fragment, useContext, useEffect, useState} from 'react';
 import {useRecoilValue} from 'recoil';
 import {useNavigate} from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
@@ -26,10 +26,11 @@ import {filterByCustomFilterStore} from 'views/_components/Filters/_functions/St
 import {useApplyFilters} from 'views/_functions/Hooks/useApplyFilters';
 import {useDateTimeFormatByUserPreferences} from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 import {FiltersUtils} from 'views/_components/Filters/_functions/Utils/FiltersUtils';
-import {dataflowsReducer} from "views/Dataflows/_functions/Reducers/dataflowsReducer";
 import {getUrl} from "repositories/_utils/UrlUtils";
 import {routes} from "conf/routes";
 import {UserContext} from "../../../_functions/Contexts/UserContext";
+
+const {permissions} = config;
 
 export const ValidationsStatuses = ({onCloseDialog, isDialogVisible}) => {
     const filterBy = useRecoilValue(filterByCustomFilterStore('validationsStatuses'));
@@ -37,9 +38,9 @@ export const ValidationsStatuses = ({onCloseDialog, isDialogVisible}) => {
 
     const resourcesContext = useContext(ResourcesContext);
     const notificationContext = useContext(NotificationContext);
-    const [dataflowsState] = useReducer(dataflowsReducer, {})
-    const {isAdmin} = dataflowsState;
     const userContext = useContext(UserContext);
+    const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
+
     const [editedValidationStatusPriority, setEditedValidationStatusPriority] = useState();
     const [filteredRecords, setFilteredRecords] = useState(0);
     const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
