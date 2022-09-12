@@ -1770,5 +1770,13 @@
   {
     "key": "config/validation/validation.priority.days",
     "value": "JHtWQUxJREFUSU9OX1BSSU9SSVRZX0RBWVM6MjkgOCA3IDR9"
+  },
+  {
+    "key": "config/recordstore/batchDistributeDataset",
+    "value": "JHtSRUNPUkRTVE9SRS5CQVRDSF9ESVNUUklCVVRFX0RBVEFTRVQ6NX0="
+  },
+  {
+    "key": "config/recordstore/enableTableDistributionJob",
+    "value": "JHtSRUNPUkRTVE9SRS5FTkFCTEVfVEFCTEVfRElTVFJJQlVUSU9OX0pPQjowIDAsMzAgKiAqICogKn0="
   }
 ]

@@ -34,6 +34,8 @@ import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.DatasetId;
+import org.eea.multitenancy.TenantResolver;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -472,6 +474,7 @@ public class FileCommonUtils {
    */
   public List<RecordValue> getRecordValuesPaginated(@DatasetId Long datasetId, String idTableSchema,
       Pageable pageable, ExportFilterVO filters) {
+    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     return recordRepository.findOrderedNativeRecord(
         tableRepository.findIdByIdTableSchema(idTableSchema), datasetId, pageable, filters);
   }

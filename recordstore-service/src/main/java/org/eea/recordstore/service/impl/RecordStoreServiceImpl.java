@@ -454,4 +454,47 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   public void updateSnapshotDisabled(Long datasetId) {
     LOG.info("updateSnapshotDisabled");
   }
+
+  /**
+   * Distribute tables.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void distributeTables(Long datasetId) {
+    LOG.info("distributeTables");
+  }
+
+  /**
+   * Distribute tables job.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void distributeTablesJob(Long datasetId) {
+    LOG.info("distributeTablesJob");
+
+  }
+
+  /**
+   * Gets the notdistributed datasets.
+   *
+   * @return the notdistributed datasets
+   */
+  @Override
+  public List<String> getNotdistributedDatasets() {
+    LOG.info("getNotdistributedDatasets");
+    return new ArrayList<String>();
+  }
+
+  /**
+   * Creates the update query view async.
+   *
+   * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
+   */
+  @Override
+  public void createUpdateQueryViewAsync(Long datasetId, boolean isMaterialized) {
+    LOG.info("Create or Update Query-Materialized View");
+  }
 }

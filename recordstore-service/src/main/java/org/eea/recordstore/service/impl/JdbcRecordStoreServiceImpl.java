@@ -165,8 +165,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private Resource resourceFile;
 
   /** The resource file. */
-  @Value("classpath:datasetInitCommandsCitus.txt")
+  @Value("classpath:datasetInitCommandsCitusComplete.txt")
   private Resource resourceCitusFile;
+
+  /** The resource file. */
+  @Value("classpath:datasetDistributeCitus.txt")
+  private Resource resourceDistributeFile;
+
+  /** The resource file. */
+  @Value("classpath:datasetInitCommandsCitus.txt")
+  private Resource resourceDistributeFirstFile;
+
 
   /** The path snapshot. */
   @Value("${pathSnapshot}")
@@ -183,6 +192,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The buffer file. */
   @Value("${snapshot.bufferSize}")
   private Integer bufferFile;
+
+  /** The batch distribute dataset. */
+  @Value("${batchDistributeDataset}")
+  private Integer batchDistributeDataset;
 
   /** The jdbc template. */
   @Autowired
@@ -285,36 +298,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       // Execute queries and commit results
       statement.executeBatch();
+      statement.clearBatch();
       LOG.info("{} Schemas created as part of DataCollection creation.",
           datasetIdsAndSchemaIds.size());
       // waiting X seconds before releasing notifications, so database is able to write the
       // creation of all datasets
-      final List<String> citusCommands = new ArrayList<>();
-      // read file into stream, try-with-resources
-      try (BufferedReader brCitus =
-          new BufferedReader(new InputStreamReader(resourceCitusFile.getInputStream()))) {
-
-        brCitus.lines().forEach(citusCommands::add);
-
-      } catch (final IOException e) {
-        LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
-        try {
-          throw new RecordStoreAccessException(String
-              .format("Error reading commands file to create the dataset. %s", e.getMessage()), e);
-        } catch (RecordStoreAccessException e1) {
-          e1.printStackTrace();
-        }
-      }
-
-
-      for (Long datasetId : datasetIdsAndSchemaIds.keySet()) {
-        for (String citusCommand : citusCommands) {
-          citusCommand =
-              citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
-          jdbcTemplate.execute(citusCommand);
-        }
-      }
-
       Thread.sleep(timeToWaitBeforeReleasingNotification);
       LOG.info("Releasing notifications via Kafka");
       // Release events to initialize databases content
@@ -345,6 +333,93 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       Thread.currentThread().interrupt();
     }
   }
+
+
+  /**
+   * Distribute tables.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  @Async
+  public void distributeTables(Long datasetId) {
+
+    // Initialize resources
+    try (Connection connection = dataSource.getConnection();
+        Statement statement = connection.createStatement();
+        BufferedReader br =
+            new BufferedReader(new InputStreamReader(resourceDistributeFile.getInputStream()))) {
+
+      final List<String> citusCommands = new ArrayList<>();
+      br.lines().forEach(citusCommands::add);
+
+      for (String citusCommand : citusCommands) {
+        citusCommand =
+            citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
+        jdbcTemplate.execute(citusCommand);
+      }
+    } catch (final IOException | SQLException e) {
+      LOG_ERROR.error("Error reading commands file to distribute the dataset. {}", e.getMessage());
+      try {
+        throw new RecordStoreAccessException(String.format(
+            "Error reading commands file to distribute the dataset. %s", e.getMessage()), e);
+      } catch (RecordStoreAccessException e1) {
+        LOG.info(e1.getMessage(), e);
+      }
+    }
+
+  }
+
+
+  /**
+   * Distribute tables job.
+   *
+   * @param datasetId the dataset id
+   */
+  @Override
+  public void distributeTablesJob(Long datasetId) {
+
+    // Initialize resources
+    try (Connection connection = dataSource.getConnection();
+        Statement statement = connection.createStatement();
+        BufferedReader br =
+            new BufferedReader(new InputStreamReader(resourceCitusFile.getInputStream()))) {
+
+      final List<String> citusCommands = new ArrayList<>();
+      br.lines().forEach(citusCommands::add);
+
+      for (String citusCommand : citusCommands) {
+        citusCommand =
+            citusCommand.replace("%dataset_name%", LiteralConstants.DATASET_PREFIX + datasetId);
+        jdbcTemplate.execute(citusCommand);
+      }
+      // After distributing tables the view gets deleted so we need to recreate them again
+      createUpdateQueryViewAsync(datasetId, true);
+    } catch (final IOException | SQLException e) {
+      LOG_ERROR.error("Error reading commands file to distribute the dataset. {}", e.getMessage());
+      try {
+        throw new RecordStoreAccessException(String.format(
+            "Error reading commands file to distribute the dataset. %s", e.getMessage()), e);
+      } catch (RecordStoreAccessException e1) {
+        LOG.info(e1.getMessage(), e);
+      }
+    }
+
+  }
+
+  /**
+   * Gets the notdistributed datasets.
+   *
+   * @return the notdistributed datasets
+   */
+  @Override
+  public List<String> getNotdistributedDatasets() {
+    String datasetsToDistribute =
+        "select schema_name from information_schema.schemata where schema_name like 'dataset_%' and schema_name not in (SELECT replace (logicalrelid::text, '.dataset_value','') from pg_dist_partition where logicalrelid::text like '%dataset_value') order by random() limit "
+            + batchDistributeDataset;
+    return jdbcTemplate.queryForList(datasetsToDistribute, String.class);
+  }
+
 
   /**
    * Creates the empty data set. This method is used to create the schema of the design datasets
@@ -399,26 +474,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       jdbcTemplate.update(insertSql.toString(), idDataset, idDatasetSchema);
       LOG.info("DS created with the id {} and idDatasetSchema {}", idDataset, idDatasetSchema);
     }
-
-    final List<String> citusCommands = new ArrayList<>();
-    // read file into stream, try-with-resources
-    try (BufferedReader brCitus =
-        new BufferedReader(new InputStreamReader(resourceCitusFile.getInputStream()))) {
-
-      brCitus.lines().forEach(citusCommands::add);
-
-    } catch (final IOException e) {
-      LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
-      throw new RecordStoreAccessException(
-          String.format("Error reading commands file to create the dataset. %s", e.getMessage()),
-          e);
-    }
-
-    for (String command : citusCommands) {
-      command = command.replace("%dataset_name%", datasetName);
-      jdbcTemplate.execute(command);
-    }
-
   }
 
   /**
@@ -916,6 +971,46 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           }
         });
   }
+
+
+  /**
+   * Creates the update query view async.
+   *
+   * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
+   */
+  @Async
+  @Override
+  public void createUpdateQueryViewAsync(Long datasetId, boolean isMaterialized) {
+    LOG.info("Executing createUpdateQueryViewAsync on the datasetId {}. Materialized: {}",
+        datasetId, isMaterialized);
+    DataSetSchemaVO datasetSchema =
+        datasetSchemaController.findDataSchemaByDatasetIdPrivate(datasetId);
+    // delete all views because some names can be changed
+    try {
+      deleteAllViewsFromSchema(datasetId);
+      deleteAllMatViewsFromSchema(datasetId);
+    } catch (RecordStoreAccessException e1) {
+      LOG_ERROR.error("Error deleting Query view: {}", e1.getMessage(), e1);
+    }
+
+    datasetSchema.getTableSchemas().stream()
+        .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
+        .forEach(table -> {
+          List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
+          try {
+            // create materialiced view or query view of all tableSchemas
+            executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
+                datasetId, true);
+            createIndexMaterializedView(datasetId, table.getNameTableSchema());
+            // execute view permission
+            executeViewPermissions(table.getNameTableSchema(), datasetId);
+          } catch (RecordStoreAccessException e) {
+            LOG_ERROR.error("Error creating Query view: {}", e.getMessage(), e);
+          }
+        });
+  }
+
 
   /**
    * Update materialized query view.

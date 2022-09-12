@@ -13,20 +13,20 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>CITUS-SNAPSHOT</api-gateway.version>
-    <communication.version>CITUS-SNAPSHOT</communication.version>
-    <collaboration.version>CITUS-SNAPSHOT</collaboration.version>
-    <dataflow.version>CITUS-SNAPSHOT</dataflow.version>
-    <dataset.version>CITUS-SNAPSHOT</dataset.version>
-    <document.version>CITUS-SNAPSHOT</document.version>
-    <frontend.version>CITUS-SNAPSHOT</frontend.version>
-    <indexsearch.version>CITUS-SNAPSHOT</indexsearch.version>
-    <inspire.version>CITUS-SNAPSHOT</inspire.version>
-    <recordstore.version>CITUS-SNAPSHOT</recordstore.version>
-    <ums.version>CITUS-SNAPSHOT</ums.version>
-    <validation.version>CITUS-SNAPSHOT</validation.version>
-    <common-interfaces.version>CITUS-SNAPSHOT</common-interfaces.version>
-    <common-utitlities.version>CITUS-SNAPSHOT</common-utitlities.version>
-    <rod.version>CITUS-SNAPSHOT</rod.version>
+    <api-gateway.version>v3.1.5.6</api-gateway.version>
+    <communication.version>v3.1.5.6</communication.version>
+    <collaboration.version>v3.1.5.6</collaboration.version>
+    <dataflow.version>v3.1.5.6</dataflow.version>
+    <dataset.version>v3.1.5.6</dataset.version>
+    <document.version>v3.1.5.6</document.version>
+    <frontend.version>v3.1.5.6</frontend.version>
+    <indexsearch.version>v3.1.5.6</indexsearch.version>
+    <inspire.version>v3.1.5.6</inspire.version>
+    <recordstore.version>v3.1.5.6</recordstore.version>
+    <ums.version>v3.1.5.6</ums.version>
+    <validation.version>v3.1.5.6</validation.version>
+    <common-interfaces.version>v3.1.5.6</common-interfaces.version>
+    <common-utitlities.version>v3.1.5.6</common-utitlities.version>
+    <rod.version>v3.1.5.6</rod.version>
   </properties>
 </project>

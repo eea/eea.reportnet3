@@ -215,7 +215,7 @@ public class ValidationHelperTest {
   @Test
   public void finishProcess() {
     ReflectionTestUtils.setField(validationHelper, "processesMap", processesMap);
-    validationHelper.finishProcess("1");
+    validationHelper.finishProcessInMap("1");
     Assert.assertNull(processesMap.get("1"));
   }
 

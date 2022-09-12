@@ -32,15 +32,20 @@ export const useBreadCrumbs = ({
   const resourcesContext = useContext(ResourcesContext);
 
   useEffect(() => {
-    !isLoading && setBreadCrumbs();
+    if (!isLoading) {
+      setBreadCrumbs();
+    }
   }, [
+    currentPage,
     dataflowStateData,
+    dataflowId,
     dataflowType,
     dataProviderId,
     dataProviderName,
     isLoading,
     params,
     metaData,
+    referenceDataflowId,
     representativeId
   ]);
 

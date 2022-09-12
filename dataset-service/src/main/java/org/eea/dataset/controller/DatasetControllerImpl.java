@@ -1618,6 +1618,8 @@ public class DatasetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping("/private/deleteTempEtlExport/{datasetId}")
+  @ApiOperation(value = "Empty the temporary etlExport table from the dataset schema DB",
+      hidden = true)
   public void deleteTempEtlExport(@PathVariable("datasetId") Long datasetId) {
     datasetService.deleteTempEtlExport(datasetId);
   }
@@ -1669,7 +1671,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     // Validate property maxSize of the file. If the size is 0, it's ok, continue
     if (fieldSchema.getMaxSize() != null && fieldSchema.getMaxSize() != 0
-        && fieldSchema.getMaxSize() * 1000000 < size) {
+        && fieldSchema.getMaxSize() * 1048576 < size) {
       result = false;
     }
     // Validate property extensions of the file. If no extensions provided, it's ok, continue

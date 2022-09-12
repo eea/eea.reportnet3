@@ -179,6 +179,19 @@ public class FKValidationUtils {
           + " select fktable.* from fktable inner join fkcrosspk on fkcrosspk.id = fktable.id where is_contained = false\r\n"
           + " limit %s offset %s ";
 
+  /** The Constant FK_SINGLE_WRONG_IGNORE_CASE_LINK: {@value}. */
+  private static final String FK_SINGLE_WRONG_IGNORE_CASE_LINK =
+      "with fktable as (select * from dataset_%s.field_value fv where ID_FIELD_SCHEMA = '%s'),\r\n"
+          + " pktable as (select string_agg(pk_value, '; ') pk_value  from (select distinct field_value.VALUE pk_value\r\n"
+          + " from dataset_%s.field_value field_value\r\n"
+          + " where field_value.id_field_schema = '%s') table_aux),\r\n"
+          + " fkcrosspk as (select *, (pkas @> fkas) is_contained  from (\r\n"
+          + " select fktable.id,string_to_array(case when fktable.value like %s then fktable.value  when fktable.value like %s then REPLACE(fktable.value, ';', '; ' ) else LOWER(fktable.value) end ,'; ') as fkas,\r\n"
+          + " (select string_to_array(pk_value,'; ') from pktable ) as pkas\r\n"
+          + " from fktable) table_aux2 limit %s offset %s )\r\n"
+          + " select fktable.* from fktable inner join fkcrosspk on fkcrosspk.id = fktable.id where is_contained = false\r\n"
+          + " limit %s offset %s ";
+
   /**
    * Isfield FK.
    *
@@ -300,10 +313,18 @@ public class FKValidationUtils {
       int pkBatchSize = batchSize / 2;
       for (int fkindex = 0; fkindex < totalRecords; fkindex += batchSize) {
         for (int pkindex = 0; pkindex < totalRecords; pkindex += pkBatchSize) {
-          List<FieldValue> fkFields =
-              fieldRepository.queryPKNativeFieldValue(String.format(FK_SINGLE_WRONG,
-                  datasetIdReference, idFieldSchema, datasetIdRefered, idFieldSchemaPKString,
-                  "'%; %'", "'%;%'", pkBatchSize, pkindex, batchSize, fkindex));
+          List<FieldValue> fkFields;
+          if (fkFieldSchema.getIgnoreCaseInLinks() != null && fkFieldSchema.getIgnoreCaseInLinks()) {
+            fkFields = fieldRepository.queryPKNativeFieldValue(
+                String.format(FK_SINGLE_WRONG_IGNORE_CASE_LINK, datasetIdReference, idFieldSchema, datasetIdRefered,
+                    idFieldSchemaPKString, "'%; %'", "'%;%'", pkBatchSize, pkindex, batchSize,
+                    fkindex));
+          } else {
+            fkFields = fieldRepository.queryPKNativeFieldValue(
+                String.format(FK_SINGLE_WRONG, datasetIdReference, idFieldSchema, datasetIdRefered,
+                    idFieldSchemaPKString, "'%; %'", "'%;%'", pkBatchSize, pkindex, batchSize,
+                    fkindex));
+          }
           if (null != fkFields && !fkFields.isEmpty()) {
             createFieldValueValidationV2(fkFields, pkValidation, errorFields);
             saveFieldValidations(errorFields);

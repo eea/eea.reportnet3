@@ -439,7 +439,7 @@ export const ManageLeadReporters = ({
           }`}
           key={uniqueInputId}>
           <InputText
-            autoComplete={reporters[leadReporter.id]?.account || reporters[leadReporter.id]}
+            autoComplete="off"
             autoFocus={isNewLeadReporter && isEmpty(Object.keys(filterBy))}
             className={errors?.[leadReporter.id] ? styles.hasErrors : undefined}
             disabled={representative.hasDatasets && reporters[leadReporter.id]?.isValid}

@@ -178,4 +178,12 @@ public interface RecordStoreController {
    */
   @PutMapping("/private/updateSnapshotDisabled/{datasetId}")
   void updateSnapshotDisabled(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Distribute tables.
+   *
+   * @param datasetId the dataset id
+   */
+  @PutMapping("/private/dataset/create/dataCollection/finish/{datasetId}")
+  void distributeTables(@PathVariable("datasetId") Long datasetId);
 }

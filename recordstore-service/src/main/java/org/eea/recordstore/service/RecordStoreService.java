@@ -1,3 +1,6 @@
+/*
+ * 
+ */
 package org.eea.recordstore.service;
 
 import java.io.IOException;
@@ -188,4 +191,33 @@ public interface RecordStoreService {
   void createSnapshotToClone(Long originDataset, Long targetDataset,
       Map<String, String> dictionaryOriginTargetObjectId, Long partitionDatasetTarget,
       List<String> tableSchemasIdPrefill);
+
+  /**
+   * Distribute tables.
+   *
+   * @param datasetId the dataset id
+   */
+  void distributeTables(Long datasetId);
+
+  /**
+   * Distribute tables job.
+   *
+   * @param datasetId the dataset id
+   */
+  void distributeTablesJob(Long datasetId);
+
+  /**
+   * Gets the notdistributed datasets.
+   *
+   * @return the notdistributed datasets
+   */
+  List<String> getNotdistributedDatasets();
+
+  /**
+   * Creates the update query view async.
+   *
+   * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
+   */
+  void createUpdateQueryViewAsync(Long datasetId, boolean isMaterialized);
 }
