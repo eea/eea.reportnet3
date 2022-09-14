@@ -1,10 +1,5 @@
 package org.eea.validation.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
@@ -12,6 +7,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.lock.service.impl.LockServiceImpl;
 import org.eea.validation.service.ValidationService;
@@ -31,6 +27,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -284,5 +284,11 @@ public class ValidationControllerImplTest {
         1, 10, null, false, null, null, "", ""));
   }
 
+  @Test
+  public void restartTaskTest() {
+    doNothing().when(validationHelper).updateTaskStatus(anyLong(), any(ProcessStatusEnum.class));
+    validationController.restartTask(Long.valueOf(1));
+    verify(validationHelper).updateTaskStatus(anyLong(), any(ProcessStatusEnum.class));
+  }
 
 }

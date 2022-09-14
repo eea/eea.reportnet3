@@ -380,7 +380,22 @@ public class ValidationControllerImpl implements ValidationController {
           datasetId, fileName));
 
     }
+  }
 
-
+  @Override
+  @PutMapping(value = "/restartTask/{taskId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Sets the status to IN_QUEUE for a given task id", hidden = true)
+  @ApiResponse(code = 400, message = EEAErrorMessage.TASK_INCORRECT_ID)
+  public void restartTask(@ApiParam(
+          value = "Task id of task to restart",
+          example = "15") @PathVariable("taskId") Long taskId) {
+      LOG.info("Restarting task with id " + taskId);
+      try {
+        validationHelper.updateTaskStatus(taskId, ProcessStatusEnum.IN_QUEUE);
+        LOG.info("Task with id " + taskId + " restarted.");
+      } catch (Exception e) {
+        LOG.error("Error restarting task with id " + taskId);
+      }
   }
 }

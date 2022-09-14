@@ -926,6 +926,16 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
+   * update task status
+   * @param taskId
+   * @param status
+   */
+  @Transactional
+  public void updateTaskStatus(Long taskId, ProcessStatusEnum status) {
+    taskRepository.updateStatus(taskId, status.toString());
+  }
+
+  /**
    * Update task.
    *
    * @param taskId the task id
