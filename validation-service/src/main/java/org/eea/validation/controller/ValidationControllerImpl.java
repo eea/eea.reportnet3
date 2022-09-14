@@ -383,7 +383,7 @@ public class ValidationControllerImpl implements ValidationController {
   }
 
   @Override
-  @PutMapping(value = "/task/{taskId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/restartTask/{taskId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("hasAnyRole('ADMIN')")
   @ApiOperation(value = "Sets the status to IN_QUEUE for a given task id", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.TASK_INCORRECT_ID)
