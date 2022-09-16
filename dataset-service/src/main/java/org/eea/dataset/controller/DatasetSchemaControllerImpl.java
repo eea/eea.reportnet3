@@ -164,11 +164,11 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
     if (!TypeStatusEnum.DESIGN
         .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status for dataflowId " + dataflowId);
     }
 
     if (0 != datasetMetabaseService.countDatasetNameByDataflowId(dataflowId, datasetSchemaName)) {
-      LOG.error("Error creating duplicated dataset : {}", datasetSchemaName);
+      LOG.error("Error creating duplicated dataset : {} for dataflowId {}", datasetSchemaName, dataflowId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_NAME_DUPLICATED);
     }
@@ -181,13 +181,14 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       contributorControllerZuul.createAssociatedPermissions(dataflowId, futureDatasetId.get());
 
       integrationControllerZuul.createDefaultIntegration(dataflowId, datasetSchemaId);
+      LOG.info("Created dataset schema {} with datasetSchemaId {} for dataflowId {} ", nameTrimmed, datasetSchemaId, dataflowId);
     } catch (InterruptedException | ExecutionException | EEAException e) {
-      LOG.error("Aborted DataSetSchema creation: {}", e.getMessage(), e);
+      LOG.error("Aborted DataSetSchema creation for schema {} and dataflowId {}. Error is: {}", nameTrimmed, dataflowId, e.getMessage(), e);
       if (e instanceof InterruptedException) {
         Thread.currentThread().interrupt();
       }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          "Error creating design dataset");
+          "Error creating design dataset for dataflowId " + dataflowId);
     }
   }
 

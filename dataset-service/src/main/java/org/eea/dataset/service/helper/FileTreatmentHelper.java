@@ -253,7 +253,7 @@ public class FileTreatmentHelper implements DisposableBean {
       boolean replace, Long integrationId, String delimiter) throws EEAException {
 
     if (delimiter != null && delimiter.length() > 1) {
-      LOG_ERROR.error("the size of the delimiter cannot be greater than 1");
+      LOG_ERROR.error("Error when importing file data for datasetId {} and tableSchemaId {}. ReplaceData is {}. The size of the delimiter cannot be greater than 1", datasetId, tableSchemaId, replace);
       datasetMetabaseService.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_IMPORT);
       throw new EEAException("The size of the delimiter cannot be greater than 1");
@@ -802,7 +802,7 @@ public class FileTreatmentHelper implements DisposableBean {
     } else {
       integrationVO = getIntegrationVO(integrationId);
       if (null == integrationVO) {
-        LOG_ERROR.error("Error. Integration {} not found", integrationId);
+        LOG_ERROR.error("Error in fileManagement. Integration {} not found. datasetId: {} and tableSchemaId: {}", integrationId, datasetId, tableSchemaId);
       }
     }
 
@@ -838,8 +838,8 @@ public class FileTreatmentHelper implements DisposableBean {
           releaseLock(datasetId);
           datasetMetabaseService.updateDatasetRunningStatus(datasetId,
               DatasetRunningStatusEnum.ERROR_IN_IMPORT);
-          LOG_ERROR.error("Error trying to import a zip file into dataset {}. Empty zip file",
-              datasetId);
+          LOG_ERROR.error("Error trying to import a zip file into datasetId {} and tableSchemaId: {}. Empty zip file",
+              datasetId, tableSchemaId);
           throw new EEAException("Empty zip file");
         }
       } else {
@@ -850,7 +850,7 @@ public class FileTreatmentHelper implements DisposableBean {
         try (FileOutputStream output = new FileOutputStream(file)) {
           IOUtils.copyLarge(input, output);
           files.add(file);
-          LOG.info("Stored file {}", file.getPath());
+          LOG.info("Stored file {} in fileManagement. For datasetId {} and tableSchemaId {}", file.getPath(), datasetId, tableSchemaId);
         }
 
         // if the import goes it's a zip file, check if the zip is not empty to show
@@ -861,12 +861,12 @@ public class FileTreatmentHelper implements DisposableBean {
             if (zipFile.size() == 0) {
               zipFile.close();
               releaseLock(datasetId);
-              throw new EEAException("Empty zip file");
+              throw new EEAException("Empty zip file for datasetId " + datasetId + " and tableSchemaId " + tableSchemaId);
             }
             zipFile.close();
           } catch (IOException e) {
             releaseLock(datasetId);
-            throw new EEAException("Empty zip file");
+            throw new EEAException("Empty zip file for datasetId " + datasetId + " and tableSchemaId " + tableSchemaId);
           }
         }
 
@@ -951,6 +951,7 @@ public class FileTreatmentHelper implements DisposableBean {
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
       List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
       String delimiter, String mimeType) throws IOException, EEAException {
+      LOG.info("Queueing import process for datasetId {} tableSchemaId {} and file {}", datasetId, tableSchemaId, originalFileName);
     if (null != integrationVO) {
       prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
           replace);
@@ -960,7 +961,7 @@ public class FileTreatmentHelper implements DisposableBean {
           rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, replace,
               delimiter);
         } catch (Exception e) {
-          LOG_ERROR.error("RN3-Import: Unexpected error. {}", e.getMessage(), e);
+          LOG_ERROR.error("RN3-Import: Unexpected error in queueImportProcess for datasetId {} and tableSchemaId {}. {}", datasetId, tableSchemaId, e.getMessage(), e);
           if (e instanceof InterruptedException) {
             Thread.currentThread().interrupt();
           }
