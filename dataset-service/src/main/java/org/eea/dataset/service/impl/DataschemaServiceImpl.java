@@ -767,8 +767,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         fieldSchemaVO.setValidExtensions(validExtensions);
       }
       if (fieldSchemaVO.getMaxSize() == null || fieldSchemaVO.getMaxSize() == 0
-          || fieldSchemaVO.getMaxSize() > 20) {
-        fieldSchemaVO.setMaxSize(20f);
+          || fieldSchemaVO.getMaxSize() > 100) {
+        fieldSchemaVO.setMaxSize(100f);
       }
 
       return schemasRepository
@@ -861,9 +861,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       fieldSchema.put("required", fieldSchemaVO.getRequired());
     }
     pkFieldSchemaValues(fieldSchemaVO, fieldSchema);
-    Float size = 20f;
+    Float size = 100f;
     if (fieldSchemaVO.getMaxSize() != null && fieldSchemaVO.getMaxSize() != 0
-        && fieldSchemaVO.getMaxSize() < 20) {
+        && fieldSchemaVO.getMaxSize() < 100) {
       size = fieldSchemaVO.getMaxSize();
     }
     fieldSchema.put("maxSize", size);
