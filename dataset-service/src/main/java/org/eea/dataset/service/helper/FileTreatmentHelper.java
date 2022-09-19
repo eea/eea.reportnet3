@@ -541,7 +541,7 @@ public class FileTreatmentHelper implements DisposableBean {
     tableValueFor(datasetId, dataset, readOnlyTables, fixedNumberTables, allRecords,
         tableWithAttachmentFieldSet, datasetSchema.getTableSchemas());
     recordRepository.saveAll(allRecords);
-    LOG.info("Data saved into dataset {}", datasetId);
+    LOG.info("Data saved for datasetId {}", datasetId);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
@@ -600,9 +600,9 @@ public class FileTreatmentHelper implements DisposableBean {
         includeZip = true;
       }
       generateFile(datasetId, extension, contents, includeZip, datasetType);
-      LOG.info("End of exportDatasetFile datasetId {}", datasetId);
+      LOG.info("Exported dataset data for datasetId {}", datasetId);
     } catch (EEAException | IOException | NullPointerException e) {
-      LOG_ERROR.error("Error exporting dataset data. DatasetId {}, file type {}. Message {}",
+      LOG_ERROR.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
           datasetId, mimeType, e.getMessage(), e);
       // Send notification
       NotificationVO notificationVO = NotificationVO.builder()
@@ -613,8 +613,8 @@ public class FileTreatmentHelper implements DisposableBean {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null,
             notificationVO);
       } catch (EEAException ex) {
-        LOG_ERROR.error("Error sending export dataset fail notification. Message {}",
-            e.getMessage(), ex);
+        LOG_ERROR.error("Error sending export dataset fail notification for datasetId {}. Message {}",
+            datasetId, e.getMessage(), ex);
       }
     }
 
@@ -648,7 +648,7 @@ public class FileTreatmentHelper implements DisposableBean {
     // check schema has geometry and check field Value has geometry
     if (checkSchemaGeometry(datasetSchema)) {
       LOG.info("Updating geometries for dataset {}", datasetId);
-      // update geometryes (native)
+      // update geometries (native)
       Map<Integer, Map<String, String>> mapFieldValue = getFieldValueGeometry(datasetId);
       int size = mapFieldValue.keySet().size();
       for (int i = 0; i < size; i++) {
@@ -873,6 +873,8 @@ public class FileTreatmentHelper implements DisposableBean {
         // Queue import task for the stored file
         queueImportProcess(datasetId, tableSchemaId, schema, files, originalFileName, integrationVO,
             replace, delimiter, multipartFileMimeType);
+
+        LOG.info("Queued import process for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       }
 
     } catch (EEAException | FeignException | IOException e) {
