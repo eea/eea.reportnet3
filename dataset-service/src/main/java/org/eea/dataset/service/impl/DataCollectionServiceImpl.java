@@ -400,6 +400,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck,
         referenceDataflow, stopAndNotifyPKError);
+    LOG.info("Managed creating data collection for dataflowId {}", dataflowId);
 
     updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
 
@@ -474,7 +475,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               EEAErrorMessage.NO_PK_REFERENCE_DATAFLOW);
         }
       }
-      LOG.info("Validate SQL Rules in Dataflow {}, Data Collection creation proccess.", dataflowId);
+      LOG.info("Validate SQL Rules for dataflowId {}, Data Collection creation proccess.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
       designs.stream().forEach(dataset -> {
         recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
@@ -486,7 +487,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
       });
       LOG.info(
-          "Data Collection creation proccess stopped: there are SQL rules containing: {} errors",
+          "Data Collection creation process for dataflowId {} stopped: there are SQL rules containing: {} errors", dataflowId,
           rulesWithError.size());
       if (stopAndNotifySQLErrors) {
         rulesOk = checkSQLRulesErrors(dataflowId, rulesOk, designs, rulesWithError);
@@ -504,7 +505,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         if (isCreation) {
           datasetSchemaService.updateReferenceDataset(dataset.getId(), dataset.getDatasetSchema(),
               true);
-          LOG.info("There are reference datasets. Deleting its export eu dataset integrations");
+          LOG.info("There are reference datasets for dataflowId {}. Deleting its export eu dataset integrations", dataflowId);
           integrationControllerZuul.deleteExportEuDatasetIntegration(dataset.getDatasetSchema());
         }
       }
@@ -524,13 +525,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         .dataflowId(dataflowId).build();
     if (Boolean.TRUE.equals(referenceDataflow) && referenceDatasets.isEmpty()) {
       LOG_ERROR.error(
-          "No reference schemas in the dataflow {}. So error in the process to create the reference dataset",
+          "No reference schemas for dataflowId {}. So error in the process to create the reference dataset",
           dataflowId);
       releaseNotification(EventType.REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT, notificationErrorVO);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.NOT_REFERENCE_TO_PROCESS);
     } else if (Boolean.FALSE.equals(referenceDataflow) && designs.isEmpty()) {
-      LOG_ERROR.error("No design datasets in the dataflow {}. So error creating the DC",
+      LOG_ERROR.error("No design datasets for dataflowId {}. So error creating the DC",
           dataflowId);
       releaseNotification(EventType.ADD_DATACOLLECTION_FAILED_EVENT, notificationErrorVO);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -572,8 +573,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             referenceDatasets, representatives, map, dataCollectionIds, datasetIdsEmails,
             referenceDatasetIdsEmails, datasetIdsAndSchemaIds, euDatasetIds, connection, statement,
             referenceDataflow);
+
       } catch (SQLException e) {
-        LOG_ERROR.error("Error rolling back: ", e);
+        LOG_ERROR.error("Error rolling back manageDataCollection for dataflowId {}. Message: ", dataflowId, e);
       }
     }
   }

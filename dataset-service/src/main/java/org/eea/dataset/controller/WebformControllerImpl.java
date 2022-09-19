@@ -43,6 +43,9 @@ public class WebformControllerImpl implements WebformController {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(WebformControllerImpl.class);
+
 
   /**
    * Gets the webforms list
@@ -71,9 +74,12 @@ public class WebformControllerImpl implements WebformController {
   @ApiOperation(value = "Insert webform config json into the system", hidden = true)
   public void insertWebformConfig(@RequestBody WebformConfigVO webformConfig) {
     try {
+      LOG.info("Inserting webform config {} with type {}", webformConfig.getName(), webformConfig.getType());
       webformService.insertWebformConfig(webformConfig.getName(), webformConfig.getContent(),
           webformConfig.getType());
+      LOG.info("Successfully inserted webform config {} with type {}", webformConfig.getName(), webformConfig.getType());
     } catch (EEAException e) {
+      LOG_ERROR.error("Error when inserting webform config {} with type {}. Message: {}", webformConfig.getName(), webformConfig.getType(), e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
     }
   }
@@ -91,9 +97,12 @@ public class WebformControllerImpl implements WebformController {
   @ApiOperation(value = "Update webform config json into the system", hidden = true)
   public void updateWebformConfig(@RequestBody WebformConfigVO webformConfig) {
     try {
+      LOG.info("Updating webform config {} with type {}", webformConfig.getName(), webformConfig.getType());
       webformService.updateWebformConfig(webformConfig.getIdReferenced(), webformConfig.getName(),
           webformConfig.getContent(), webformConfig.getType());
+      LOG.info("Successfully updated webform config {} with type {}", webformConfig.getName(), webformConfig.getType());
     } catch (EEAException e) {
+      LOG_ERROR.error("Error when updating webform config {} with type {}. Message: {}", webformConfig.getName(), webformConfig.getType(), e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
     }
   }
@@ -135,8 +144,10 @@ public class WebformControllerImpl implements WebformController {
   @ApiOperation(value = "Delete webform config", hidden = true)
   public void deleteWebformConfig(@PathVariable("id") Long id) {
     try {
+      LOG.info("Deleting webform config with id",id);
       webformService.deleteWebformConfig(id);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error when deleting webform config with id",id);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.ERROR_WEBFORM_IN_USE);
     }

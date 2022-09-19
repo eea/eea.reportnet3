@@ -326,7 +326,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         datasetMetabase.getDataProviderId(), datasetMetabase.getId(), datasetMetabase.getStatus(),
         designDataset.isPresent() ? designDataset.get().getDataSetName() : null,
         EventType.UPDATED_DATASET_STATUS.toString());
-    LOG.info("Automatic feedback message created of dataflow {}. Message: {}",
+    LOG.info("Automatic feedback message created of dataflowId {}. Message: {}",
         datasetStatusMessageVO.getDataflowId(), message.getContent());
   }
 
@@ -648,7 +648,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         try {
           Thread.sleep(5000);
         } catch (InterruptedException e) {
-          LOG.info("Propagate Error");
+          LOG.info("Propagate Error in thread sleep in method createEmptyDataset for dataSchemaId {} and dataflowId {}", datasetSchemaId, dataflowId);
         }
 
         return new AsyncResult<>(idDesignDataset);
@@ -661,8 +661,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
           LOG_ERROR.error("Error processing the reference dataflow {}. Error message: {}",
               dataflowId, e.getMessage(), e);
         } else {
-          LOG_ERROR.error("Error creating a new empty data collection. Error message: {}",
-              e.getMessage(), e);
+          LOG_ERROR.error("Error creating a new empty data collection for dataflowId {}. Error message: {}",
+              dataflowId, e.getMessage(), e);
         }
 
         // Error notification

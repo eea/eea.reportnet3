@@ -58,7 +58,7 @@ public class PamControllerImpl implements PamController {
     try {
       return paMService.getListSinglePaM(datasetId, groupPaMId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error retrieving single PAM list. Error Message: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error retrieving single PAM list for datasetId {} and groupPaMId {}. Error Message: {}", datasetId, groupPaMId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_SINGLE_PAM_LIST);
     }
