@@ -714,7 +714,7 @@ public final class EEAErrorMessage {
 
   /** The Constant RESTARTING_TASK: {@value}. */
   public static final String RESTARTING_TASK =
-          "An unknown error happenned while restartin task.";
+          "An unknown error happenned while restarting task.";
 
   /**
    * Instantiates a new EEA error message.

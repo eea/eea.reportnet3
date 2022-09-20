@@ -69,7 +69,13 @@ public class JobForRestartingInProgressTasks {
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            tasksInProgress.stream().forEach(taskId -> validationControllerZuul.restartTask(taskId.longValue()));
+            tasksInProgress.stream().forEach(taskId -> {
+                try {
+                    validationControllerZuul.restartTask(taskId.longValue());
+                } catch (Exception e) {
+                   LOG.error("Error while running scheduled task restartInProgressTasksExceedingTime for task " + taskId);
+                }
+            });
         } catch (Exception e) {
             LOG.error("Error while running scheduled task restartInProgressTasksExceedingTime " + e.getMessage());
         }
