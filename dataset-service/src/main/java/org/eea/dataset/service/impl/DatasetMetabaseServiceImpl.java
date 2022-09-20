@@ -261,6 +261,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       @CacheEvict(value = "datasetSchemaByDatasetId", key = "#datasetId")})
   public void deleteDesignDataset(Long datasetId) {
     dataSetMetabaseRepository.deleteNativeDataset(datasetId);
+    LOG.info("Deleted native dataset with datasetId {}", datasetId);
   }
 
   /**

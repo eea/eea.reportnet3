@@ -475,7 +475,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               EEAErrorMessage.NO_PK_REFERENCE_DATAFLOW);
         }
       }
-      LOG.info("Validate SQL Rules for dataflowId {}, Data Collection creation proccess.", dataflowId);
+      LOG.info("Validate SQL Rules for dataflowId {}, Data Collection creation process.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
       designs.stream().forEach(dataset -> {
         recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
@@ -559,6 +559,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
       // 4. Map representatives to providers
       Map<Long, String> map = mapRepresentativesToProviders(representatives, dataProviders);
+
+      LOG.info("Representatives have been mapped to providers during managing data collection process for dataflowId {}", dataflowId);
 
       List<Long> dataCollectionIds = new ArrayList<>();
       Map<Long, List<String>> datasetIdsEmails = new HashMap<>();

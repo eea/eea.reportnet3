@@ -1050,6 +1050,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void deleteTableValue(Long datasetId, String idTableSchema) {
     tableRepository.deleteByIdTableSchema(idTableSchema);
+    LOG.info("Deleted table value with tableSchemaId {} and datasetId {}", idTableSchema, datasetId);
   }
 
   /**
@@ -2490,6 +2491,7 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValues.add(fieldValue);
       }
     }
+    LOG.info("Created {} records for datasetId {}", recordValues.size(), datasetId);
     return recordValues;
   }
 

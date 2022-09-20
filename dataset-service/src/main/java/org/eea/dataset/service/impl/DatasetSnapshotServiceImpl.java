@@ -848,13 +848,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Async
   public void deleteAllSchemaSnapshots(Long idDesignDataset) throws EEAException {
 
-    LOG.info("Deleting all schema snapshots: datasetId={}", idDesignDataset);
+    LOG.info("Deleting all schema snapshots for datasetId {}", idDesignDataset);
     List<SnapshotVO> snapshots = getSchemaSnapshotsByIdDataset(idDesignDataset);
     snapshots.stream().forEach(s -> {
       try {
         removeSchemaSnapshot(idDesignDataset, s.getId());
       } catch (Exception e) {
-        LOG_ERROR.error("Error deleting the schema snapshot {}", s.getId(), e);
+        LOG_ERROR.error("Error deleting the schema snapshot {} for datasetId {}", s.getId(), idDesignDataset, e);
       }
     });
   }

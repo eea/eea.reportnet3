@@ -191,7 +191,7 @@ public class RulesControllerImpl implements RulesController {
     try {
       rulesService.deleteRuleById(datasetId, ruleId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting rule: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error deleting rule {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.ERROR_DELETING_RULE);
     }
@@ -372,7 +372,7 @@ public class RulesControllerImpl implements RulesController {
     try {
       rulesService.updateAutomaticRule(datasetId, ruleVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error updating automatic rule: {}", e.getMessage());
+      LOG_ERROR.error("Error updating automatic rule for datsetId {} Message: {}", datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.ERROR_UPDATING_RULE);
     }
@@ -753,7 +753,6 @@ public class RulesControllerImpl implements RulesController {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
-
       return rulesService.importRulesSchema(importRules.getQcRulesBytes(),
           importRules.getDictionaryOriginTargetObjectId(), importRules.getIntegritiesVO());
     } catch (EEAException e) {
@@ -858,24 +857,25 @@ public class RulesControllerImpl implements RulesController {
               defaultValue = "false") boolean showInternalFields) {
     List<List<ValueVO>> obtainedTableValues = new ArrayList<>();
     try {
+      LOG.info("Running sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
       obtainedTableValues =
           sqlRulesService.runSqlRule(datasetId, sqlRule.getSqlRule(), showInternalFields);
-
+      LOG.info("Successfully ran sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
     } catch (EEAInvalidSQLException e) {
       LOG_ERROR.error(
-          "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.",
-          sqlRule.getSqlRule(), e);
+          "There was an error trying to execute the SQL Rule: {} for datasetId {}. Check your SQL Syntax.",
+          sqlRule.getSqlRule(), datasetId, e);
       String sqlError = e.getCause().getCause().getCause().getMessage() != null
           ? e.getCause().getCause().getCause().getMessage()
           : "";
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, sqlError);
     } catch (EEAForbiddenSQLCommandException e) {
-      LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}",
-          sqlRule.getSqlRule(), e.getMessage());
+      LOG_ERROR.error("SQL Command not allowed in SQL Rule: {} for datasetId {}. Exception: {}",
+          sqlRule.getSqlRule(), datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
           EEAErrorMessage.SQL_COMMAND_NOT_ALLOWED);
     } catch (EEAException e) {
-      LOG_ERROR.error("User doesn't have access to one of the datasets: {}", sqlRule.getSqlRule(),
+      LOG_ERROR.error("User doesn't have access to datasetId {}. Sql rule is: {}", datasetId, sqlRule.getSqlRule(),
           e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.RUNNING_RULE);
     } catch (NumberFormatException e) {
@@ -914,12 +914,13 @@ public class RulesControllerImpl implements RulesController {
       @ApiParam(value = "SQL rule that is going to be evaluated") @RequestBody SqlRuleVO sqlRule) {
     double sqlCost = 0;
     try {
+      LOG.info("Evaluating sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
       sqlCost = sqlRulesService.evaluateSqlRule(datasetId, sqlRule.getSqlRule());
-
+      LOG.info("Successfully evaluated sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
 
     } catch (ParseException e) {
-      LOG_ERROR.error("There was an error trying to parse the explain plan: {}",
-          sqlRule.getSqlRule(), e);
+      LOG_ERROR.error("There was an error trying to parse the explain plan: {} for datasetId {}",
+          sqlRule.getSqlRule(), datasetId, e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 
     } catch (EEAInvalidSQLException e) {

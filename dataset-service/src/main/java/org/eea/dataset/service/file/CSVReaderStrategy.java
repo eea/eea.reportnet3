@@ -138,7 +138,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       final Long partitionId, final String idTableSchema, Long datasetId, String fileName,
       boolean replace, DataSetSchema schema, ConnectionDataVO connectionDataVO)
       throws EEAException {
-    LOG.info("starting csv file reading");
+    LOG.info("Starting csv file reading for dataflowId {}, datasetId {} amd fileName {}", dataflowId, datasetId, fileName);
     readLines(inputStream, partitionId, idTableSchema, datasetId, fileName, replace, schema,
         connectionDataVO);
   }
@@ -159,7 +159,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
   private DatasetValue readLines(final InputStream inputStream, final Long partitionId,
       final String idTableSchema, Long datasetId, String fileName, boolean replace,
       DataSetSchema dataSetSchema, ConnectionDataVO connectionDataVO) throws EEAException {
-    LOG.info("Processing entries at method readLines in dataset {}", datasetId);
+    LOG.info("Processing entries at method readLines in  datasetId {} for file {}", datasetId, fileName);
     // Init variables
     String[] line;
     TableValue table = new TableValue();
@@ -202,10 +202,12 @@ public class CSVReaderStrategy implements ReaderStrategy {
 
       // through the file
       int numLines = 0;
+      int fullCSVNumLines = 0;
       while ((line = reader.readNext()) != null && numLines < 5000) {
         final List<String> values = Arrays.asList(line);
         sanitizeAndCreateDataSet(partitionId, table, tables, values, headers, idTableSchema,
             idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords);
+        LOG.info("RN3 Import: Sanitized and created dataset from file {} with datasetId {} and tableSchemaId {}", fullCSVNumLines, fileName, datasetId, idTableSchema);
         numLines++;
         if (numLines == batchRecordSave) {
           dataset.setTableValues(tables);
@@ -218,6 +220,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
           table.setRecords(new ArrayList<>());
           tables.add(table);
         }
+        fullCSVNumLines++;
+        LOG.info("RN3 Import: Added line {} from file {} in datasetId {} and tableSchemaId {}", fullCSVNumLines, fileName, datasetId, idTableSchema);
       }
       dataset.setTableValues(tables);
       // Set the dataSetSchemaId of MongoDB
@@ -226,10 +230,10 @@ public class CSVReaderStrategy implements ReaderStrategy {
           dataset, manageFixedRecords, connectionDataVO);
 
     } catch (final IOException | SQLException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error when reading lines from CSV file {} for datasetId {}. Message: ", fileName, datasetId, e.getMessage());
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
     }
-    LOG.info("Reading Csv File Completed in dataset {}", datasetId);
+    LOG.info("Reading Csv File {} Completed in dataset {}", fileName, datasetId);
     return dataset;
   }
 

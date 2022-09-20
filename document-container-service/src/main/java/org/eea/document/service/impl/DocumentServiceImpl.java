@@ -113,7 +113,7 @@ public class DocumentServiceImpl implements DocumentService {
       documentVO.setName(fileName);
       Long idDocument = dataflowController.insertDocument(documentVO);
       if (idDocument != null) {
-        LOG.info("Adding the file...");
+        LOG.info("Inserting document {} with id {}", fileName, idDocument);
         // Initialize the session
         ns = oakRepositoryUtils.initializeNodeStore();
         Repository repository = oakRepositoryUtils.initializeRepository(ns);
@@ -122,7 +122,7 @@ public class DocumentServiceImpl implements DocumentService {
         // Add a file node with the document
         oakRepositoryUtils.addFileNode(session, PATH_DELIMITER + documentVO.getDataflowId(),
             inputStream, Long.toString(idDocument), contentType);
-        LOG.info("File added...");
+        LOG.info("Finished inserting document {} with id {}", fileName, idDocument);
 
         // Release finish event
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.UPLOAD_DOCUMENT_COMPLETED_EVENT,
@@ -139,7 +139,7 @@ public class DocumentServiceImpl implements DocumentService {
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
               .dataflowId((documentVO != null) ? documentVO.getDataflowId() : null)
               .fileName(fileName).error(e.getMessage()).build());
-      LOG_ERROR.error("Error in uploadDocument due to", e);
+      LOG_ERROR.error("Error in uploadDocument {} due to", fileName, e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     } finally {
       inputStream.close();
@@ -168,7 +168,7 @@ public class DocumentServiceImpl implements DocumentService {
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
               .dataflowId(documentVO.getDataflowId()).fileName(documentVO.getName()).build());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error in uploadDocument due to", e);
+      LOG_ERROR.error("Error in uploadDocument for file with id {} and dataflowId {} due to", documentVO.getId(), documentVO.getDataflowId(), e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     }
   }
@@ -282,7 +282,7 @@ public class DocumentServiceImpl implements DocumentService {
         throw new EEAException(EEAErrorMessage.FILE_FORMAT);
       }
 
-      LOG.info("Adding the file... {}", filename);
+      LOG.info("Inserting schema snapshot document {} for designDataset {}", filename, designDataset);
       // Initialize the session
       ns = oakRepositoryUtils.initializeNodeStore();
       Repository repository = oakRepositoryUtils.initializeRepository(ns);
@@ -294,10 +294,10 @@ public class DocumentServiceImpl implements DocumentService {
       if (StringUtils.isBlank(modifiedFilename)) {
         throw new EEAException(EEAErrorMessage.FILE_NAME);
       }
-      LOG.info("File snapshot added... {}", filename);
+      LOG.info("Inserted schema snapshot document {} for designDataset {}", filename, designDataset);
 
     } catch (RepositoryException | EEAException e) {
-      LOG_ERROR.error("Error in uploadSnapshotSchema, document {} due to {}", filename,
+      LOG_ERROR.error("Error in uploadSnapshotSchema, document {}, designDatasetId {} due to {}", filename, designDataset,
           e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     } finally {
@@ -370,10 +370,10 @@ public class DocumentServiceImpl implements DocumentService {
       // Delete a file node with the document
       oakRepositoryUtils.deleteFileNode(session,
           PATH_DELIMITER_SNAPSHOT_DELETE + designDatasetId.toString(), documentName);
-      LOG.info("File deleted...");
+      LOG.info("File {} deleted for designDatasetId {}", documentName, designDatasetId);
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
     } catch (Exception e) {
-      LOG_ERROR.error("Error in deleteSnapshotDocument due to", e);
+      LOG_ERROR.error("Error in deleteSnapshotDocument for file {} and designDatasetId {} due to", documentName, designDatasetId, e);
       if (e.getClass().equals(PathNotFoundException.class)) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
       }
@@ -408,7 +408,7 @@ public class DocumentServiceImpl implements DocumentService {
         throw new EEAException(EEAErrorMessage.FILE_FORMAT);
       }
 
-      LOG.info("Adding the file... {}", filename);
+      LOG.info("Inserting collaboration document {} for dataflowId {}", filename, dataflowId);
       // Initialize the session
       ns = oakRepositoryUtils.initializeNodeStore();
       Repository repository = oakRepositoryUtils.initializeRepository(ns);
@@ -421,10 +421,10 @@ public class DocumentServiceImpl implements DocumentService {
       if (StringUtils.isBlank(modifiedFilename)) {
         throw new EEAException(EEAErrorMessage.FILE_NAME);
       }
-      LOG.info("File collaboration attachment added... {}", filename);
+      LOG.info("Inserted collaboration document {} for dataflowId {}", filename, dataflowId);
 
     } catch (RepositoryException | EEAException e) {
-      LOG_ERROR.error("Error in uploadCollaborationDocument, document {} due to {}", filename,
+      LOG_ERROR.error("Error in uploadCollaborationDocument, document {} dataflowId {} due to {}", filename, dataflowId,
           e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     } finally {
@@ -459,10 +459,9 @@ public class DocumentServiceImpl implements DocumentService {
       oakRepositoryUtils.deleteFileNode(session,
           PATH_DELIMITER_COLLABORATION_DATAFLOW_DELETE + dataflowId,
           messageId + "_" + documentName);
-      LOG.info("File {} deleted...", documentName);
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
     } catch (Exception e) {
-      LOG_ERROR.error("Error deleting file {} in deleteCollaborationDocument due to", documentName,
+      LOG_ERROR.error("Error deleting file {} for dataflowId {} in deleteCollaborationDocument due to", documentName, dataflowId,
           e);
       if (e.getClass().equals(PathNotFoundException.class)) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);

@@ -404,8 +404,7 @@ public class FileTreatmentHelper implements DisposableBean {
       LOG_ERROR.error("File not created in dataflow {}. Message: {}", dataset.getDataflowId(),
           e.getMessage(), e);
     }
-    LOG.info("File created in dataflowId {}", dataset.getDataflowId());
-
+    LOG.info("Reference file created in dataflowId {} for datasetId {}", dataset.getDataflowId(), dataset.getId());
   }
 
   /**
@@ -970,6 +969,7 @@ public class FileTreatmentHelper implements DisposableBean {
         }
       });
     }
+    LOG.info("Finished queueing import process for datasetId {} tableSchemaId {} and file {}", datasetId, tableSchemaId, originalFileName);
   }
 
 
@@ -1010,8 +1010,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
     // delete precious data if necessary
     if (replace) {
-      LOG.info("Replacing data checked");
       wipeDataAsync(datasetId, tableSchemaId, file, integrationVO);
+      LOG.info("Data has been wiped for datasetId {}", datasetId);
     } else {
       Map<String, Object> valuesFME = new HashMap<>();
       valuesFME.put("datasetId", datasetId);
@@ -1040,6 +1040,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
     // delete precious data if necessary
     wipeData(datasetId, tableSchemaId, replace);
+    LOG.info("Data has been wiped during rn3FileProcess datasetId {}, files {}", datasetId, files);
 
     // Wait a second before continue to avoid duplicated insertions
     Thread.sleep(1000);
@@ -1090,6 +1091,7 @@ public class FileTreatmentHelper implements DisposableBean {
     } else {
       finishImportProcess(datasetId, null, originalFileName, error, errorWrongFilename);
     }
+    LOG.info("Finished import process for datasetId {} and file {}", datasetId, originalFileName);
 
   }
 
@@ -1176,7 +1178,7 @@ public class FileTreatmentHelper implements DisposableBean {
             value, notificationWarning);
       }
     } catch (EEAException e) {
-      LOG_ERROR.error("RN3-Import file error", e);
+      LOG_ERROR.error("RN3-Import file error for datasetId {}", datasetId, e);
     }
   }
 
@@ -1268,15 +1270,18 @@ public class FileTreatmentHelper implements DisposableBean {
       throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
+      LOG_ERROR.error("RN3 Import process: Filename is null. DatasetId {}", datasetId);
       throw new EEAException(EEAErrorMessage.FILE_NAME);
     }
     final String mimeType = datasetService.getMimetype(fileName).toLowerCase();
     // validates file types for the data load
     validateFileType(mimeType);
+    LOG.info("RN3 Import process: file type has been validated for file {} and datasetId {}",fileName, datasetId);
 
     try {
       // Get the partition for the partiton id
       final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
+      LOG.info("RN3 Import process: partition has been obtained for datasetId {}",fileName, datasetId);
 
       // Get the dataFlowId from the metabase
       final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -1284,15 +1289,17 @@ public class FileTreatmentHelper implements DisposableBean {
       // create the right file parser for the file type
       final IFileParseContext context =
           fileParserFactory.createContext(mimeType, datasetId, delimiter);
+      LOG.info("RN3 Import process: context has been created for datasetId {}",fileName, datasetId);
 
       ConnectionDataVO connectionDataVO = recordStoreControllerZuul
           .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
 
       context.parse(is, dataflowId, partition.getId(), idTableSchema, datasetId, fileName, replace,
           schema, connectionDataVO);
+      LOG.info("RN3 Import process: context has been parsed for datasetId {}",fileName, datasetId);
 
     } catch (Exception e) {
-      LOG.error("error processing file", e);
+      LOG.error("Error in RN3 Import process: processing file for datasetId {}", datasetId, e);
       throw e;
     } finally {
       is.close();
