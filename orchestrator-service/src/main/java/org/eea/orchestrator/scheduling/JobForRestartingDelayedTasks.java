@@ -18,7 +18,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 @Component
-public class JobForRestartingInProgressTasks {
+public class JobForRestartingDelayedTasks {
 
     @Value(value = "${scheduling.inProgress.task.max.time}")
     private long maxTimeInMinutesForInProgressTasks;
@@ -41,7 +41,7 @@ public class JobForRestartingInProgressTasks {
     /**
      * The Constant LOG.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(JobForRestartingInProgressTasks.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JobForRestartingDelayedTasks.class);
 
     @Autowired
     private ValidationControllerZuul validationControllerZuul;
@@ -53,7 +53,7 @@ public class JobForRestartingInProgressTasks {
     private void init() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
-        scheduler.schedule(() -> restartInProgressTasksExceedingTime(),
+        scheduler.schedule(() -> restartDelayedTasks(),
                 new CronTrigger("0 */5 * * * *"));
     }
 
@@ -61,7 +61,7 @@ public class JobForRestartingInProgressTasks {
      * The job runs every 5 minutes. It finds task ids for tasks that have status=IN_PROGRESS for more than maxTimeInMinutesForInProgressTasks
      * and sets their status to status=IN_QUEUE.
      */
-    public void restartInProgressTasksExceedingTime() {
+    public void restartDelayedTasks() {
         LOG.info("Running scheduled task restartInProgressTasksExceedingTime");
         try {
             List<BigInteger> tasksInProgress = validationControllerZuul.listTasksInProgress(maxTimeInMinutesForInProgressTasks);
