@@ -91,7 +91,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     }
 
     Optional<Weblink> idLinkData = webLinkRepository.findById(idLink);
-    LOG.info("get the links with id : {}", idLink);
+    LOG.info("Retrieved the links with id : {}", idLink);
     WeblinkVO weblinkVO = null;
     if (idLinkData.isPresent()) {
       weblinkVO = dataflowWebLinkMapper.entityToClass(idLinkData.get());
@@ -135,7 +135,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     }
 
     webLinkRepository.save(weblink);
-    LOG.info("Save the link: {}, with description: {} , in {}", weblink.getUrl(),
+    LOG.info("Saved the link: {}, with description: {} , in {}", weblink.getUrl(),
         weblink.getDescription(), dataflow.get().getName());
   }
 
@@ -157,10 +157,10 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     try {
       webLinkRepository.deleteById(webLinkId);
     } catch (EmptyResultDataAccessException e) {
-      LOG_ERROR.error("link with id: {}", webLinkId);
+      LOG_ERROR.error("Error when removing link with id {}", webLinkId);
       throw new EntityNotFoundException(EEAErrorMessage.ID_LINK_INCORRECT, e);
     }
-    LOG.info("delete the link with id : {}", webLinkId);
+    LOG.info("Deleted the link with id : {}", webLinkId);
   }
 
   /**
@@ -206,7 +206,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     weblinkFound.get().setUrl(weblink.getUrl());
     weblinkFound.get().setIsPublic(weblink.getIsPublic());
     webLinkRepository.save(weblinkFound.get());
-    LOG.info("Save the link with id : {}", weblink.getId());
+    LOG.info("Updated the link with id : {}", weblink.getId());
 
   }
 

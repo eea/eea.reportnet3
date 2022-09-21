@@ -86,6 +86,9 @@ public class IntegrationControllerImpl implements IntegrationController {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(IntegrationControllerImpl.class);
+
   /**
    * Find all integrations by criteria.
    *
@@ -169,9 +172,11 @@ public class IntegrationControllerImpl implements IntegrationController {
           example = "0") @PathVariable("integrationId") Long integrationId,
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {
+      LOG.info("Deleting integration with id {} for dataflowId {}", integrationId, dataflowId);
       integrationService.deleteIntegration(integrationId);
+      LOG.info("Successfully deleted integration with id {} for dataflowId {}", integrationId, dataflowId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting an integration. Message: {}", e.getMessage());
+      LOG_ERROR.error("Error deleting an integration with id {} for dataflowId {}. Message: {}", integrationId, dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_INTEGRATION);
     }
@@ -312,9 +317,11 @@ public class IntegrationControllerImpl implements IntegrationController {
     List<ExecutionResultVO> results = null;
     try {
       integrationService.addPopulateEUDatasetLock(dataflowId);
+      LOG.info("Executing EU dataset export for dataflowId {}", dataflowId);
       results = integrationService.executeEUDatasetExport(dataflowId);
+      LOG.info("Successfully executed EU dataset export for dataflowId {}", dataflowId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error executing the export from EUDataset with message: {}", e.getMessage());
+      LOG_ERROR.error("Error executing the export from EUDataset for dataflowId {} with message: {}", dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXPORTING_EU_DATASET);
     } finally {
@@ -359,7 +366,7 @@ public class IntegrationControllerImpl implements IntegrationController {
       integrationService.copyIntegrations(copyVO.getDataflowIdDestination(),
           copyVO.getOriginDatasetSchemaIds(), copyVO.getDictionaryOriginTargetObjectId());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error copying integrations: {}", e.getMessage());
+      LOG_ERROR.error("Error copying integrations copyVO {} Message: {}", copyVO, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.COPYING_INTEGRATIONS);
     }
@@ -379,9 +386,11 @@ public class IntegrationControllerImpl implements IntegrationController {
       @ApiParam(value = "Dataset Schema id",
           example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId) {
     try {
+      LOG.info("Creating default integration for dataflowId {} and datasetSchemaId {}", dataflowId, datasetSchemaId);
       integrationService.createDefaultIntegration(dataflowId, datasetSchemaId);
+      LOG.info("Successfully created default integration for dataflowId {} and datasetSchemaId {}", dataflowId, datasetSchemaId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error creating default integration. Message: {}", e.getMessage());
+      LOG_ERROR.error("Error creating default integration for dataflowId {} and datasetSchemaId {}. Message: {}", dataflowId, datasetSchemaId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_INTEGRATION);
     }
@@ -417,7 +426,9 @@ public class IntegrationControllerImpl implements IntegrationController {
   @ApiOperation(value = "Delete an Integration from its Schema", hidden = true)
   public void deleteSchemaIntegrations(@ApiParam(value = "Dataschema Id",
       example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId) {
+    LOG.info("Deleting schema integrations for datasetSchemaId {}", datasetSchemaId);
     integrationService.deleteSchemaIntegrations(datasetSchemaId);
+    LOG.info("Successfully deleted schema integrations for datasetSchemaId {}", datasetSchemaId);
   }
 
   /**
@@ -431,7 +442,9 @@ public class IntegrationControllerImpl implements IntegrationController {
   public void deleteExportEuDatasetIntegration(
       @RequestParam("datasetSchemaId") String datasetSchemaId) {
     try {
+      LOG.info("Deleting export eu dataset integration for datasetSchemaId {}", datasetSchemaId);
       integrationService.deleteExportEuDataset(datasetSchemaId);
+      LOG.info("Deleting export eu dataset integration for datasetSchemaId {}", datasetSchemaId);
     } catch (EEAException e) {
       LOG_ERROR.error(
           "Error deleting and export eu dataset integration with the datasetSchemaId {}, with message: {}",
@@ -474,8 +487,10 @@ public class IntegrationControllerImpl implements IntegrationController {
 
     try {
       integrationService.addLocks(datasetId);
+      LOG.info("Executing external integration with id {} for datasetId {}", integrationId, datasetId);
       integrationService.executeExternalIntegration(datasetId, integrationId,
           IntegrationOperationTypeEnum.IMPORT_FROM_OTHER_SYSTEM, replace);
+      LOG.info("Successfully executed external integration with id {} for datasetId {}", integrationId, datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error(
           "Error executing an external integration with id {} on the datasetId {}, with message: {}",
