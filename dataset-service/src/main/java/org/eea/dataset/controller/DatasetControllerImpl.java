@@ -262,10 +262,10 @@ public class DatasetControllerImpl implements DatasetController {
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
 
     try {
-      LOG.info("Importing big file for dataflowID {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
+      LOG.info("Importing big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
       fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId,
           delimiter);
-      LOG.info("Successfully imported big file for dataflowID {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
+      LOG.info("Successfully imported big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
     } catch (EEAException e) {
       LOG_ERROR.error(
           "File import failed: dataflowId={} datasetId={}, tableSchemaId={}, fileName={}. Message: {}", dataflowId, datasetId,
@@ -322,10 +322,10 @@ public class DatasetControllerImpl implements DatasetController {
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
 
     try {
-      LOG.info("Importing file for dataflowID {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
+      LOG.info("Importing file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
       fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId,
           delimiter);
-      LOG.info("Successfully imported big file for dataflowID {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
+      LOG.info("Successfully imported file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
     } catch (EEAException e) {
       LOG_ERROR.error(
           "File import failed: datasetId={}, tableSchemaId={}, fileName={}. Message: {}", datasetId,
@@ -515,8 +515,8 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(value = "list of records") @RequestBody List<RecordVO> records) {
     if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, records.get(0).getIdRecordSchema(),
         EntityTypeEnum.RECORD)) {
-      LOG_ERROR.error("Error inserting record in the datasetId {} and tableSchemaId. The table is read only",
-          tableSchemaId, datasetId);
+      LOG_ERROR.error("Error inserting record in the datasetId {} and tableSchemaId {}. The table is read only",
+          datasetId, tableSchemaId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
@@ -524,18 +524,17 @@ public class DatasetControllerImpl implements DatasetController {
         && !DatasetTypeEnum.REFERENCE.equals(datasetType))
         && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
             records.get(0).getIdRecordSchema(), EntityTypeEnum.RECORD))) {
-      LOG_ERROR.error(
-          "Error inserting record in the datasetId {} and tableSchemaId. The table has a fixed number of records",
-          tableSchemaId, datasetId);
+      LOG_ERROR.error("Error inserting record in the datasetId {} and tableSchemaId {}. The table has a fixed number of records",
+              datasetId, tableSchemaId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String
           .format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, records.get(0).getIdRecordSchema()));
     }
     try {
-      LOG.info("Inserting records for datasetId {} and tableSchemaId", datasetId, tableSchemaId);
+      LOG.info("Inserting records for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       updateRecordHelper.executeCreateProcess(datasetId, records, tableSchemaId);
-      LOG.info("Successfully inserted records for datasetId {} and tableSchemaId", datasetId, tableSchemaId);
+      LOG.info("Successfully inserted records for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error inserting records: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error inserting records for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.INSERTING_TABLE_DATA);
     }
@@ -564,7 +563,7 @@ public class DatasetControllerImpl implements DatasetController {
       updateRecordHelper.executeMultiCreateProcess(datasetId, tableRecords);
       LOG.info("Successfully inserted multiple records for datasetId {}", datasetId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error inserting records: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error inserting records for datasetId {} Message : {}", datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.INSERTING_TABLE_DATA);
     }
@@ -807,7 +806,7 @@ public class DatasetControllerImpl implements DatasetController {
       fileTreatmentHelper.exportFile(datasetId, mimeType, tableSchemaId, tableName, exportFilterVO);
       LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.info("Error exporting table data from dataset id {} and tableSchemaId {}.", datasetId, tableSchemaId);
+      LOG_ERROR.info("Error exporting table data from dataset id {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR);
     }
@@ -846,7 +845,7 @@ public class DatasetControllerImpl implements DatasetController {
       datasetService.exportFileThroughIntegration(datasetId, integrationId);
       LOG.info("Successfully exported data through integration for datasetId {} and integrationId {}", datasetId, integrationId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error exporting file through integration for datasetId {} and integrationId {}. {}", datasetId, integrationId, e.getMessage(), e);
+      LOG_ERROR.error("Error exporting file through integration for datasetId {} and integrationId {} Message: {}", datasetId, integrationId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXPORTING_FILE_INTEGRATION);
     }
@@ -872,7 +871,7 @@ public class DatasetControllerImpl implements DatasetController {
       datasetService.insertSchema(datasetId, idDatasetSchema);
       LOG.info("Successfully inserted dataSchema for datasetId {} and dataSchemaId {}", datasetId, idDatasetSchema);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error inserting dataSchema for datasetId {} and dataSchemaId {}", datasetId, idDatasetSchema, e.getMessage(), e);
+      LOG_ERROR.error("Error inserting dataSchema for datasetId {} and dataSchemaId {} Message: {}", datasetId, idDatasetSchema, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.INSERTING_DATASCHEMA);
     }
   }
@@ -1141,7 +1140,7 @@ public class DatasetControllerImpl implements DatasetController {
       fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId);
       LOG.info("Successfully called etlImport for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (EEAException e) {
-      LOG_ERROR.error("The etlImportDataset failed on dataflowId {} and datasetId {} because {}", dataflowId, datasetId,
+      LOG_ERROR.error("The etlImportDataset failed on dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.IMPORTING_DATA_DATASET);

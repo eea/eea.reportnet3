@@ -327,7 +327,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         datasetMetabase.getDataProviderId(), datasetMetabase.getId(), datasetMetabase.getStatus(),
         designDataset.isPresent() ? designDataset.get().getDataSetName() : null,
         EventType.UPDATED_DATASET_STATUS.toString());
-    LOG.info("Automatic feedback message created of dataflowId {}. Message: {}",
+    LOG.info("Automatic feedback message created for dataflowId {}. Message: {}",
         datasetStatusMessageVO.getDataflowId(), message.getContent());
   }
 

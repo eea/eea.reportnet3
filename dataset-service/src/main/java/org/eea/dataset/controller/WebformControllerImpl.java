@@ -79,7 +79,12 @@ public class WebformControllerImpl implements WebformController {
           webformConfig.getType());
       LOG.info("Successfully inserted webform config {} with type {}", webformConfig.getName(), webformConfig.getType());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error when inserting webform config {} with type {}. Message: {}", webformConfig.getName(), webformConfig.getType(), e.getMessage());
+      if(webformConfig != null){
+        LOG_ERROR.error("Error when inserting webform config {} with type {}. Message: {}", webformConfig.getName(), webformConfig.getType(), e.getMessage());
+      }
+      else{
+        LOG_ERROR.error("Error when inserting webform config because object is null. Message: {}", e.getMessage());
+      }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
     }
   }
@@ -102,7 +107,12 @@ public class WebformControllerImpl implements WebformController {
           webformConfig.getContent(), webformConfig.getType());
       LOG.info("Successfully updated webform config {} with type {}", webformConfig.getName(), webformConfig.getType());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error when updating webform config {} with type {}. Message: {}", webformConfig.getName(), webformConfig.getType(), e.getMessage());
+      if(webformConfig != null){
+        LOG_ERROR.error("Error when updating webform config {} with type {}. Message: {}", webformConfig.getName(), webformConfig.getType(), e.getMessage());
+      }
+      else{
+        LOG_ERROR.error("Error when updating webform config because object is null. Message: {}", e.getMessage());
+      }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
     }
   }

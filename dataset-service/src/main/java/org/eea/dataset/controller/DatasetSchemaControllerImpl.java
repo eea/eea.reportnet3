@@ -976,7 +976,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       try {
         schemas.add(dataschemaService.getDataSchemaByDatasetId(false, design.getId()));
       } catch (EEAException e) {
-        LOG_ERROR.error("Error finding dataset schema by dataflow id {}. Message: {}",
+        LOG_ERROR.error("Error finding dataset schema by dataflowId {}. Message: {}",
             idDataflow, e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND);
       }
@@ -1508,10 +1508,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
-      LOG.info("Importing field Schemas for datasetId", datasetId);
+      LOG.info("Importing field Schemas for datasetId {}", datasetId);
       dataschemaService.importFieldsSchema(tableSchemaId, datasetSchemaId, datasetId,
           file.getInputStream(), replace);
-      LOG.info("Successfully imported field Schemas for datasetId", datasetId);
+      LOG.info("Successfully imported field Schemas for datasetId {}", datasetId);
     } catch (IOException e) {
       LOG_ERROR.error("File importing field schemas for datasetId {} failed. fileName={}", datasetId,
           file.getOriginalFilename(), e);
@@ -1564,12 +1564,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public ResponseEntity<byte[]> exportFieldSchemasFromDataset(@ApiParam(type = "Long",
       value = "Dataset id", example = "0") @PathVariable("datasetId") Long datasetId) {
     try {
-      LOG.info("Exporting field Schemas for datasetId", datasetId);
+      LOG.info("Exporting field Schemas for datasetId {}", datasetId);
       byte[] fileZip = dataschemaService.exportZipFieldSchemas(datasetId);
       String fileName = "fieldschemas_export_dataset_" + datasetId + ".zip";
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-      LOG.info("Successfully exported field Schemas for datasetId", datasetId);
+      LOG.info("Successfully exported field Schemas for datasetId {}", datasetId);
       return new ResponseEntity<>(fileZip, httpHeaders, HttpStatus.OK);
     } catch (EEAException e) {
       LOG_ERROR.error("Error exporting the zip field schemas for datasetId {}", datasetId, e);

@@ -2860,7 +2860,7 @@ public class DatasetServiceImpl implements DatasetService {
         new File(new File(pathPublicFile, "dataset-" + datasetId), FilenameUtils.getName(fileName));
     if (!file.exists()) {
       LOG_ERROR.error(
-          "Trying to download a file generated during the export dataset data process for datasetId {} but the file is not found", datasetId);
+          "Trying to download a file generated during the export dataset data process for datasetId {} but the file {} is not found", datasetId, fileName);
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
     return file;
@@ -3067,7 +3067,7 @@ public class DatasetServiceImpl implements DatasetService {
           tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes).getBytes());
       LOG.info("Finish ETL Export proccess for datasetId {}", datasetId);
     } catch (IOException e) {
-      LOG.error("ETLExport error for datasetId {}", datasetId, e);
+      LOG.error("ETLExport error for datasetId {} Message: {}", datasetId, e.getMessage(), e);
     }
   }
 

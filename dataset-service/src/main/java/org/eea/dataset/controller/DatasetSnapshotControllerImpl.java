@@ -104,7 +104,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     try {
       snapshot = datasetSnapshotService.getById(idSnapshot);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error getting the snapshot for snapshotId. Error message: {}", idSnapshot, e.getMessage(), e);
+      LOG_ERROR.error("Error getting the snapshot for snapshotId {}. Error message: {}", idSnapshot, e.getMessage(), e);
     }
     return snapshot;
   }
@@ -670,7 +670,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    LOG.info("The user invoking DataSetSnaphotControllerImpl.createReleaseSnapshots  for dataflowId {} and dataProvider {} is {}",
+    LOG.info("The user invoking DataSetSnaphotControllerImpl.createReleaseSnapshots  for dataflowId {} and dataProviderId {} is {}",
         dataflowId, dataProviderId, SecurityContextHolder.getContext().getAuthentication().getName());
 
     DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);
@@ -678,13 +678,13 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       try {
         datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId,
             restrictFromPublic, validate);
-        LOG.info("Successfully created release snapshots for dataflowId {} and dataProvider {}", dataflowId, dataProviderId);
+        LOG.info("Successfully created release snapshots for dataflowId {} and dataProviderId {}", dataflowId, dataProviderId);
       } catch (EEAException e) {
-        LOG_ERROR.error("Error releasing a snapshot for dataflowId {} and dataProvider {} . Error Message: {}", dataflowId, dataProviderId, e.getMessage(), e);
+        LOG_ERROR.error("Error releasing a snapshot for dataflowId {} and dataProviderId {} . Error Message: {}", dataflowId, dataProviderId, e.getMessage(), e);
         try {
           datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
         } catch (EEAException e1) {
-          LOG_ERROR.error("Error releasing snapshot locks. for dataflowId {} and dataProvider {} . Error Message: {}", dataflowId, dataProviderId, e1.getMessage(), e1);
+          LOG_ERROR.error("Error releasing snapshot locks for dataflowId {} and dataProviderId {} . Error Message: {}", dataflowId, dataProviderId, e1.getMessage(), e1);
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
               EEAErrorMessage.EXECUTION_ERROR);
         }

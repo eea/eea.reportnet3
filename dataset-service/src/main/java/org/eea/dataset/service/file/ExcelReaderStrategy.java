@@ -151,18 +151,14 @@ public class ExcelReaderStrategy implements ReaderStrategy {
     Iterator<Row> rows = sheet.rowIterator();
     Row headersRow = rows.next();
     List<FieldSchema> headers = readHeaders(headersRow, idTableSchema, dataSetSchema);
-    Integer numberOfHeaders = 0;
     if(headers != null){
-      numberOfHeaders = headers.size();
+      LOG.info("RN3-Import: Read {} headers of Excel file for tableSchemaId {}", headers.size(), idTableSchema);
     }
-    LOG.info("RN3-Import: Read {} headers of Excel file for tableSchemaId {}", headers.size(), idTableSchema);
     List<RecordValue> records =
         readRecords(rows, headers, partitionId, idTableSchema, dataSetSchema, table);
-    Integer numberOfRecords = 0;
     if(records != null){
-      numberOfRecords = records.size();
+      LOG.info("RN3-Import: Read {} records of Excel file for tableSchemaId {}", records.size(), idTableSchema);
     }
-    LOG.info("RN3-Import: Read {} records of Excel file for tableSchemaId {}", headers.size(), idTableSchema);
     table.setRecords(records);
     table.setIdTableSchema(idTableSchema);
 

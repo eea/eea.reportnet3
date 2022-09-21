@@ -139,7 +139,7 @@ public class DocumentServiceImpl implements DocumentService {
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
               .dataflowId((documentVO != null) ? documentVO.getDataflowId() : null)
               .fileName(fileName).error(e.getMessage()).build());
-      LOG_ERROR.error("Error in uploadDocument {} due to", fileName, e);
+      LOG_ERROR.error("Error in uploadDocument {} due to exception: {}", fileName, e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     } finally {
       inputStream.close();
@@ -168,7 +168,7 @@ public class DocumentServiceImpl implements DocumentService {
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
               .dataflowId(documentVO.getDataflowId()).fileName(documentVO.getName()).build());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error in uploadDocument for file with id {} and dataflowId {} due to", documentVO.getId(), documentVO.getDataflowId(), e);
+      LOG_ERROR.error("Error in uploadDocument for file with id {} and dataflowId {} due to exception {}", documentVO.getId(), documentVO.getDataflowId(), e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     }
   }

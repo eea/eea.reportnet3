@@ -138,7 +138,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
       final Long partitionId, final String idTableSchema, Long datasetId, String fileName,
       boolean replace, DataSetSchema schema, ConnectionDataVO connectionDataVO)
       throws EEAException {
-    LOG.info("Starting csv file reading for dataflowId {}, datasetId {} amd fileName {}", dataflowId, datasetId, fileName);
+    LOG.info("Starting csv file reading for dataflowId {}, datasetId {} and fileName {}", dataflowId, datasetId, fileName);
     readLines(inputStream, partitionId, idTableSchema, datasetId, fileName, replace, schema,
         connectionDataVO);
   }
@@ -207,7 +207,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
         final List<String> values = Arrays.asList(line);
         sanitizeAndCreateDataSet(partitionId, table, tables, values, headers, idTableSchema,
             idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords);
-        LOG.info("RN3 Import: Sanitized and created dataset from file {} with datasetId {} and tableSchemaId {}", allCSVNumLines, fileName, datasetId, idTableSchema);
+        LOG.info("RN3 Import: Sanitized and created dataset from file {} with datasetId {} and tableSchemaId {}", fileName, datasetId, idTableSchema);
         numLines++;
         if (numLines == batchRecordSave) {
           dataset.setTableValues(tables);

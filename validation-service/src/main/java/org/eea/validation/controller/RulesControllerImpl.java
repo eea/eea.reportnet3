@@ -372,7 +372,12 @@ public class RulesControllerImpl implements RulesController {
     try {
       rulesService.updateAutomaticRule(datasetId, ruleVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error updating automatic rule for datsetId {} Message: {}", datasetId, e.getMessage());
+      if(ruleVO != null){
+        LOG_ERROR.error("Error updating automatic rule {} for datasetId {} Message: {}", ruleVO.getRuleId(), datasetId, e.getMessage());
+      }
+      else{
+        LOG_ERROR.error("Error updating automatic rule for datasetId {} ruleVO is null. Message: {}", datasetId, e.getMessage());
+      }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.ERROR_UPDATING_RULE);
     }
@@ -857,7 +862,12 @@ public class RulesControllerImpl implements RulesController {
               defaultValue = "false") boolean showInternalFields) {
     List<List<ValueVO>> obtainedTableValues = new ArrayList<>();
     try {
-      LOG.info("Running sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
+      if(sqlRule != null){
+        LOG.info("Running sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
+      }
+      else{
+        LOG.info("Sql rule is null for datasetId {}", datasetId);
+      }
       obtainedTableValues =
           sqlRulesService.runSqlRule(datasetId, sqlRule.getSqlRule(), showInternalFields);
       LOG.info("Successfully ran sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
@@ -914,7 +924,12 @@ public class RulesControllerImpl implements RulesController {
       @ApiParam(value = "SQL rule that is going to be evaluated") @RequestBody SqlRuleVO sqlRule) {
     double sqlCost = 0;
     try {
-      LOG.info("Evaluating sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
+      if(sqlRule != null){
+        LOG.info("Evaluating sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
+      }
+      else{
+        LOG.info("Sql rule is null for datasetId {}", datasetId);
+      }
       sqlCost = sqlRulesService.evaluateSqlRule(datasetId, sqlRule.getSqlRule());
       LOG.info("Successfully evaluated sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
 

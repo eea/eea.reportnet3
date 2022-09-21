@@ -1716,7 +1716,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
       }
     }
-    LOG.info("Updated pk catalogue deleting schema dor datasetId {}", datasetId);
+    LOG.info("Updated pk catalogue deleting schema for datasetId {}", datasetId);
   }
 
   /**

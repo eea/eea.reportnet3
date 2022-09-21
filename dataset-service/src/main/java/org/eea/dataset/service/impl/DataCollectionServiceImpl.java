@@ -577,7 +577,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             referenceDataflow);
 
       } catch (SQLException e) {
-        LOG_ERROR.error("Error rolling back manageDataCollection for dataflowId {}. Message: ", dataflowId, e);
+        LOG_ERROR.error("Error rolling back manageDataCollection for dataflowId {}. Message: {}", dataflowId, e.getMessage(), e);
       }
     }
   }
