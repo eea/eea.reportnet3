@@ -316,7 +316,7 @@ public class ValidationHelper implements DisposableBean {
     dataflow.getDeadlineDate();
 
     if (dataflow.getDeadlineDate() == null || TypeStatusEnum.DESIGN.equals(dataflow.getStatus())
-        || DatasetTypeEnum.TEST.equals(datasetMetabaseControllerZuul.getType(dataset.getId()))) {
+        ) {
       priority = 70;
     } else {
       final LocalDateTime today = LocalDateTime.now();
