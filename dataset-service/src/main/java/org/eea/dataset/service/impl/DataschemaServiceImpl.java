@@ -355,6 +355,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     rulesControllerZuul.createEmptyRulesSchema(idDataSetSchema.toString(),
         new ObjectId().toString());
 
+    LOG.info("Empty dataset schema created with id {} for dataflowId {}", idDataSetSchema, dataflowId);
+
     return idDataSetSchema;
   }
 
@@ -370,6 +372,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
         .getGroupsByIdResourceType(datasetId, ResourceTypeEnum.DATA_SCHEMA);
     resourceManagementControllerZull.deleteResource(resourceCustodian);
+    LOG.info("Deleted group for datasetId {}", datasetId);
   }
 
   /**
@@ -478,6 +481,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // we delete the integrity rules associated with this dataset and delete the integrity in mongo
     rulesControllerZuul.deleteDatasetRuleAndIntegrityByDatasetSchemaId(schemaId, datasetId);
     schemasRepository.deleteDatasetSchemaById(schemaId);
+    LOG.info("Dataset schema with id {} was deleted for datasetId {}", schemaId, datasetId);
   }
 
   /**
@@ -690,6 +694,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (Boolean.TRUE.equals(tableSchema.getNotEmpty())) {
       deleteNotEmptyRule(tableSchemaId, datasetId);
     }
+
+    LOG.info("Deleted table schema with tableSchemaId {} and datasetId {}", tableSchemaId, datasetId);
   }
 
   /**
@@ -1210,7 +1216,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     for (ValidationSchemaCommand command : validationCommands) {
       isValid = Boolean.TRUE.equals(isValid) ? command.execute(schema, dataflowType) : isValid;
     }
-
+    LOG.info("Validated schema with datasetSchemaId {}. Result is: {}", datasetSchemaId, isValid);
     return isValid;
   }
 
@@ -1718,6 +1724,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
       }
     }
+    LOG.info("Updated pk catalogue deleting schema for datasetId {}", datasetId);
   }
 
   /**
@@ -1819,7 +1826,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
       });
     }
-
+    LOG.info("Deleted from pk catalogue for tableSchemaId {} and datasetId {}", tableSchemaId, datasetId);
   }
 
 
@@ -1965,6 +1972,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     for (UniqueConstraintSchema uniqueConstraintSchema : constraints) {
       deleteUniqueConstraint(uniqueConstraintSchema.getUniqueId().toString());
     }
+    LOG.info("Deleted unique constraints for tableSchemaId {}", tableSchemaId);
   }
 
   /**
@@ -2019,6 +2027,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     for (UniqueConstraintVO uniqueConstraint : constraints) {
       deleteUniqueConstraint(uniqueConstraint.getUniqueId());
     }
+    LOG.info("Unique constraints have been deleted from dataset for datasetSchemaId {}", datasetSchemaId);
   }
 
   /**
@@ -2473,6 +2482,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         Thread.sleep(timeToWaitBeforeContinueCopy);
       }
 
+      LOG.info("Dataset schemas were created for dataflowId {} during the import schemas process", dataflowId);
+
       // After creating the datasets schemas on the DB, fill them and create the permissions
       List<String> newDatasetSchemasIds = new ArrayList<>();
       for (Map.Entry<Long, DataSetSchema> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
@@ -2488,13 +2499,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema().toString()));
       }
 
+      LOG.info("Dataset schemas were filled with values for dataflowId {} during the import schemas process", dataflowId);
+
       // Modify the FK, if the schemas copied have fields of type Link, to update the
       // relations to
       // the correct ones
       processToModifyTheFK(dictionaryOriginTargetObjectId, mapDatasetIdFKRelations);
+      LOG.info("Foreign keys were modified for dataflowId {} during the import process", dataflowId);
 
       // Import the unique catalogue (in case there are Links in the schemas involved)
       importUniqueConstraintsCatalogue(importClasses.getUniques(), dictionaryOriginTargetObjectId);
+      LOG.info("Unique constraints have been imported in the catalogue for dataflowId {} during the import schemas process", dataflowId);
 
       // Use an auxiliary class to store all the information needed by the validation micro service
       // to import the rules
@@ -2503,16 +2518,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       importRules.setIntegritiesVO(importClasses.getIntegrities());
       importRules.setQcRulesBytes(importClasses.getQcRulesBytes());
       rulesControllerZuul.importRulesSchema(importRules);
+      LOG.info("Rules have been imported for dataflowId {} during the import schemas process", dataflowId);
 
       // Import the external integrations
       createExternalIntegrations(importClasses.getExternalIntegrations(), dataflowId,
           dictionaryOriginTargetObjectId, newDatasetSchemasIds);
+      LOG.info("External integrations have been created for dataflowId {} during the import schemas process", dataflowId);
 
       // Launch a SQL QC Validation
       mapDatasetsDestinyAndSchemasOrigin.forEach((Long datasetCreated, DataSetSchema schema) -> {
         rulesControllerZuul.validateSqlRules(datasetCreated,
             dictionaryOriginTargetObjectId.get(schema.getIdDataSetSchema().toString()), false);
       });
+      LOG.info("SQL QC Validation was launched for dataflowId {} during the import schemas process", dataflowId);
 
       // Success notification
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_COMPLETED_EVENT,
@@ -2522,7 +2540,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               .dataflowId(dataflowId).build());
 
     } catch (Exception e) {
-      LOG_ERROR.error("An error in the import process happened. Message: {}", e.getMessage(), e);
+      LOG_ERROR.error("An error in the import process happened for dataflowId {}. Message: {}", dataflowId, e.getMessage(), e);
       if (e instanceof InterruptedException) {
         Thread.currentThread().interrupt();
       }
@@ -2657,7 +2675,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
                 .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .datasetId(datasetId).tableSchemaName(tableSchemaName).build());
       } else {
-        LOG_ERROR.error("datasetSchema is null");
+        LOG_ERROR.error("Error when importing field schemas for datasetId {}. datasetSchema is null", datasetId);
         throw new EEAException("datasetSchema is null");
       }
     } catch (
@@ -2740,7 +2758,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private void readFieldLines(final InputStream inputStream, final String tableSchemaId,
       Long datasetId, boolean replace, DataSetSchema datasetSchema)
       throws EEAException, IOException {
-    LOG.info("Processing entries at method readFieldLines");
+    LOG.info("Processing entries at method readFieldLines for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
     // Init variables
     String[] line;
 
@@ -2819,7 +2837,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               datasetId);
         }
       }
-      LOG.info("Inserting Csv Field Schemas File Completed Into Dataset {}", datasetId);
+      LOG.info("Inserting Csv Field Schemas File Completed Into Dataset {} and tableSchemaId {}", datasetId, tableSchemaId);
     }
   }
 
