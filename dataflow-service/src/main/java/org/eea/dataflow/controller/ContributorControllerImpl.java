@@ -357,7 +357,7 @@ public class ContributorControllerImpl implements ContributorController {
         LOG.info("Successfully inserted user {} into temp user table for dataflowId {}", contributorVO.getAccount(), dataflowId);
       } else {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            "There's already a user assigned with the same e-mail to dataflow " + dataflowId);
+                "There's already a user assigned with the same e-mail to this dataflow");
       }
     } catch (EEAException e) {
       if (HttpStatus.NOT_FOUND.toString().equals(e.getMessage())) {
