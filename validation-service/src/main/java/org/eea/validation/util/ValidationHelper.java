@@ -472,6 +472,7 @@ public class ValidationHelper implements DisposableBean {
     releaseTableValidation(dataset, processId);
     datasetMetabaseControllerZuul.updateDatasetRunningStatus(dataset.getId(),
         DatasetRunningStatusEnum.VALIDATING);
+    LOG.info("Validation process has been executed for datasetId {} and processId {}", dataset.getId(), processId);
   }
 
 
@@ -861,11 +862,12 @@ public class ValidationHelper implements DisposableBean {
       try {
         json = objectMapper.writeValueAsString(eeaEventVO);
       } catch (JsonProcessingException e) {
-        LOG_ERROR.error("error processing json");
+        LOG_ERROR.error("error processing json for processId {}", processId);
       }
       Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
           json, 0, null);
       taskRepository.save(task);
+      LOG.info("Added validation task {} in process {}",task.getId(), processId);
     }
   }
 
