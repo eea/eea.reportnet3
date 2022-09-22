@@ -168,7 +168,12 @@ public class DocumentServiceImpl implements DocumentService {
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
               .dataflowId(documentVO.getDataflowId()).fileName(documentVO.getName()).build());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error in uploadDocument for file with id {} and dataflowId {} due to exception {}", documentVO.getId(), documentVO.getDataflowId(), e.getMessage(), e);
+      if(documentVO != null){
+        LOG_ERROR.error("Error in updateDocument for file with id {} and dataflowId {} due to exception {}", documentVO.getId(), documentVO.getDataflowId(), e.getMessage(), e);
+      }
+      else{
+        LOG_ERROR.error("Error in updateDocument due to exception {}", e.getMessage(), e);
+      }
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     }
   }
