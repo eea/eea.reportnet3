@@ -435,7 +435,12 @@ public class DataflowControllerImpl implements DataFlowController {
         LOG.info("Successfully created dataflow with id {}", dataflowId);
         message = dataflowId.toString();
       } catch (EEAException e) {
-        LOG_ERROR.error("Creating dataflow failed. ", e.getCause());
+        if(dataFlowVO != null){
+          LOG_ERROR.error("Creating dataflow with name {} failed. Message: {} ", dataFlowVO.getName(), e.getMessage());
+        }
+        else{
+          LOG_ERROR.error("Creating dataflow failed because object is null. Message: {} ", e.getMessage());
+        }
         message = "There was an unknown error creating the dataflow.";
         status = HttpStatus.INTERNAL_SERVER_ERROR;
       }

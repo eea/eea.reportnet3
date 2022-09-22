@@ -94,7 +94,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       return representativeService.createRepresentative(dataflowId, representativeVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error creating new representative for dataflowId {}: {}", dataflowId, e.getMessage());
+      LOG_ERROR.error("Error creating new representative for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.CREATING_REPRESENTATIVE);
     }
@@ -196,7 +196,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       representativeVOs = representativeService.getRepresetativesByIdDataFlow(dataflowId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error retrieving representatives for dataflowId {}: {}", dataflowId, e.getMessage(), e);
+      LOG_ERROR.error("Error retrieving representatives for dataflowId {} Message: {}", dataflowId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
@@ -321,7 +321,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + fileName);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error("Error while exporting lead reporters for dataflowId {} :", dataflowId, e);
+      LOG_ERROR.error("Error while exporting lead reporters for dataflowId {} Message: {}", dataflowId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXPORT_LEAD_REPORTERS);
     }
@@ -353,7 +353,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + fileName);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error("Error exporting lead reporters template. for groupId {}", groupId, e);
+      LOG_ERROR.error("Error exporting lead reporters template for groupId {} ", groupId, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXPORT_LEAD_REPORTERS);
     }
@@ -457,7 +457,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       LOG.info("Successfully created lead reporter for dataflowId {} and representativeId {}", dataflowId, representativeId);
       return reporterId;
     } catch (EEAException e) {
-      LOG_ERROR.error("Error creating new lead reporter for dataflowId {} and representativeId {}: {}", dataflowId, representativeId, e.getMessage(), e);
+      LOG_ERROR.error("Error creating new lead reporter for dataflowId {} and representativeId {} Message: {}", dataflowId, representativeId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.CREATE_LEAD_REPORTER);
     }
@@ -552,7 +552,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       representativeService.validateLeadReporters(dataflowId, true);
       LOG.info("Successfully validated lead reporters for dataflowId {}", dataflowId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error validating lead reporters: dataflowId ={}", dataflowId, e);
+      LOG_ERROR.error("Error validating lead reporters: dataflowId {}", dataflowId, e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.ERROR_VALIDATING_LEAD_REPORTERS);
     }
@@ -622,7 +622,13 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @ApiOperation(value = "Updates the internal representative", response = Long.class, hidden = true)
   public Long updateInternalRepresentative(@ApiParam(
       value = "Representative VO object") @RequestBody RepresentativeVO representativeVO) {
-    LOG.info("Updating internal representative with id {}", representativeVO.getId());
+    if(representativeVO != null){
+      LOG.info("Updating internal representative with id {}", representativeVO.getId());
+    }
+    else{
+      LOG.info("Updating internal representative but object is null");
+    }
+
     Long representativeId = representativeService.updateDataflowRepresentative(representativeVO);
     LOG.info("Successfully updated internal representative with id {}", representativeVO.getId());
     return representativeId;

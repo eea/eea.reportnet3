@@ -92,11 +92,21 @@ public class DataflowDocumentControllerImpl implements DataFlowDocumentControlle
   public void updateDocument(
       @ApiParam(type = "Object", value = "Document") @RequestBody DocumentVO document) {
     try {
-      LOG.info("Updating document {}", document.getId());
+      if(document != null){
+        LOG.info("Updating document {}", document.getId());
+      }
+      else{
+        LOG.info("Updating document but object is null");
+      }
       dataflowService.updateDocument(document);
       LOG.info("Successfully updated document {}", document.getId());
     } catch (EEAException e) {
-      LOG.error("Error when updating document {}", document.getId());
+      if(document != null){
+        LOG.error("Error when updating document {}", document.getId());
+      }
+      else{
+        LOG.error("Error when updating document because object is null");
+      }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
           e);
     }
@@ -117,10 +127,20 @@ public class DataflowDocumentControllerImpl implements DataFlowDocumentControlle
   public Long insertDocument(
       @ApiParam(type = "Object", value = "Document object") @RequestBody DocumentVO document) {
     try {
-      LOG.info("Inserting document {}", document.getName());
+      if(document != null){
+        LOG.info("Inserting document {}", document.getName());
+      }
+      else{
+        LOG.info("Inserting document but object is null");
+      }
       return dataflowService.insertDocument(document);
     } catch (EEAException e) {
-      LOG.error("Error when inserting document {}", document.getName());
+      if(document != null){
+        LOG.error("Error when inserting document {}", document.getId());
+      }
+      else{
+        LOG.error("Error when inserting document because object is null");
+      }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
           e);
     }

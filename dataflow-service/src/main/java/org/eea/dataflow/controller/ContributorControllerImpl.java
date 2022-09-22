@@ -102,7 +102,13 @@ public class ContributorControllerImpl implements ContributorController {
     checkIsBussinesCustodian(dataflowId);
     // we can only remove role of editor, reporter or reporter partition type
     try {
-      LOG.info("Deleting requester {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
+      if(contributorVO != null){
+        LOG.info("Deleting requester {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
+      }
+      else{
+        LOG.info("Deleting null requester for dataflowId {}", dataflowId);
+      }
+
       if (checkAccount(dataflowId, contributorVO.getAccount())) {
         contributorService.deleteContributor(dataflowId, contributorVO.getAccount(),
             contributorVO.getRole(), null);
@@ -115,8 +121,12 @@ public class ContributorControllerImpl implements ContributorController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
             String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount()));
       }
-      LOG_ERROR.error("Error deleting the requester {} in the dataflow: {}",
-          contributorVO.getAccount(), dataflowId);
+      if(contributorVO != null){
+        LOG_ERROR.error("Error deleting requester {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
+      }
+      else{
+        LOG_ERROR.error("Error deleting null requester for dataflowId {}", dataflowId);
+      }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_REQUESTER);
     }
@@ -147,7 +157,12 @@ public class ContributorControllerImpl implements ContributorController {
           value = "Contributors Properties") @RequestBody ContributorVO contributorVO) {
     // we can only remove role of editor, reporter or reporter partition type
     try {
-      LOG.info("Deleting reporter {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
+      if(contributorVO != null){
+        LOG.info("Deleting reporter {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
+      }
+      else{
+        LOG.info("Deleting null reporter for dataflowId {}", dataflowId);
+      }
       if (checkAccount(dataflowId, contributorVO.getAccount())) {
         contributorService.deleteContributor(dataflowId, contributorVO.getAccount(),
             contributorVO.getRole(), dataProviderId);
@@ -165,8 +180,12 @@ public class ContributorControllerImpl implements ContributorController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
             String.format(THE_EMAIL_NOT_EXISTS, contributorVO.getAccount()));
       }
-      LOG_ERROR.error("Error deleting the reporter {} in the dataflow: {}",
-          contributorVO.getAccount(), dataflowId);
+      if(contributorVO != null){
+        LOG_ERROR.error("Error deleting reporter {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
+      }
+      else{
+        LOG_ERROR.error("Error deleting null reporter for dataflowId {}", dataflowId);
+      }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_REPORTER);
     }
@@ -257,7 +276,12 @@ public class ContributorControllerImpl implements ContributorController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
-      LOG.info("Updating requester {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
+      if(contributorVO != null){
+        LOG.info("Updating requester {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
+      }
+      else{
+        LOG.info("Updating null requester for dataflowId {}", dataflowId);
+      }
       if (checkAccount(dataflowId, contributorVO.getAccount())) {
         contributorService.updateContributor(dataflowId, contributorVO, null);
         LOG.info("Successfully updated requester {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
@@ -272,9 +296,12 @@ public class ContributorControllerImpl implements ContributorController {
         message = e.getMessage();
         status = HttpStatus.INTERNAL_SERVER_ERROR;
       }
-      LOG_ERROR.error("Error updating the requester {} in the dataflow: {}",
-          contributorVO.getAccount(), dataflowId);
-
+      if(contributorVO != null){
+        LOG_ERROR.error("Error updating requester {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
+      }
+      else{
+        LOG_ERROR.error("Error updating null requester for dataflowId {}", dataflowId);
+      }
     }
     return new ResponseEntity<>(message, status);
   }
@@ -312,7 +339,12 @@ public class ContributorControllerImpl implements ContributorController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     try {
-      LOG.info("Updating reporter {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
+      if(contributorVO != null){
+        LOG.info("Updating reporter {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
+      }
+      else{
+        LOG.info("Updating null reporter for dataflowId {}", dataflowId);
+      }
       if (checkAccount(dataflowId, contributorVO.getAccount())) {
         contributorService.updateContributor(dataflowId, contributorVO, dataProviderId);
         LOG.info("Successfully updated reporter {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
@@ -335,8 +367,12 @@ public class ContributorControllerImpl implements ContributorController {
         message = e.getMessage();
         status = HttpStatus.INTERNAL_SERVER_ERROR;
       }
-      LOG_ERROR.error("Error updating the reporter {} in the dataflow: {}",
-          contributorVO.getAccount(), dataflowId);
+      if(contributorVO != null){
+        LOG_ERROR.error("Error updating reporter {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
+      }
+      else{
+        LOG_ERROR.error("Error updating null reporter for dataflowId {}", dataflowId);
+      }
     }
     return new ResponseEntity<>(message, status);
   }
@@ -399,7 +435,7 @@ public class ContributorControllerImpl implements ContributorController {
       contributorService.createAssociatedPermissions(dataflowId, datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error(
-          "Error creating  the associated permissions for requester role in datasetschema {} in the dataflow: {} ",
+          "Error creating  the associated permissions for requester role in datasetId {} in the dataflowId: {} ",
           datasetId, dataflowId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_ASSOCIATED_PERMISSIONS);

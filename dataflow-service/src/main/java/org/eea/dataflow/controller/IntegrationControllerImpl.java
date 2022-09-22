@@ -366,7 +366,11 @@ public class IntegrationControllerImpl implements IntegrationController {
       integrationService.copyIntegrations(copyVO.getDataflowIdDestination(),
           copyVO.getOriginDatasetSchemaIds(), copyVO.getDictionaryOriginTargetObjectId());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error copying integrations copyVO {} Message: {}", copyVO, e.getMessage());
+      if(copyVO != null){
+        LOG_ERROR.error("Error copying integrations to dataflowId {}. Message: {}", copyVO.getDataflowIdDestination(), e.getMessage());
+      }else{
+        LOG_ERROR.error("Error copying integrations because object is null. Message: {}", e.getMessage());
+      }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.COPYING_INTEGRATIONS);
     }
