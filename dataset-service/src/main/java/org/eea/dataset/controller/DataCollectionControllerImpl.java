@@ -93,7 +93,9 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
+    LOG.info("Undoing data collection creation for dataflowId {}", dataflowId);
     dataCollectionService.undoDataCollectionCreation(datasetIds, dataflowId, isCreation);
+    LOG.info("Successfully undid data collection creation for dataflowId {}", dataflowId);
   }
 
   /**
@@ -173,9 +175,10 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
+    LOG.info("Creating empty data collection for dataflowId {}", dataflowId);
     dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
         manualCheck, showPublicInfo, referenceDataflow, stopAndNotifyPKError);
-    LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
+    LOG.info("Successfully created empty data collection for dataflowId {}", dataflowId);
   }
 
   /**
@@ -218,8 +221,9 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     // This method will release the lock
+    LOG.info("Updating data collection for dataflowId {}", dataflowId);
     dataCollectionService.updateDataCollection(dataflowId, referenceDataflow);
-    LOG.info("DataCollection update for Dataflow {} started", dataflowId);
+    LOG.info("Successfully updated data collection for dataflowId {}", dataflowId);
   }
 
   /**

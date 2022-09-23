@@ -219,7 +219,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     representative.setId(0L);
     representative.setLeadReporters(new ArrayList<>());
 
-    LOG.info("Insert new representative relation to dataflow: {}", dataflowId);
+    LOG.info("Inserted new representative relation to dataflow: {}", dataflowId);
     return representativeRepository.save(representative).getId();
   }
 
@@ -235,7 +235,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     if (dataflowRepresentativeId == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
-    LOG.info("Deleting the representative relation");
     representativeRepository.deleteById(dataflowRepresentativeId);
   }
 
@@ -424,7 +423,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
       }
     } catch (IOException e) {
-      LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
+      LOG_ERROR.error("Error in exporting representatives for dataflowId {} Message: {}", dataflowId, EEAErrorMessage.CSV_FILE_ERROR, e);
     }
     // Once read we convert it to string
     String csv = writer.getBuffer().toString();
@@ -673,7 +672,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       modifyLeadReporterPermissions(leadReporter.get().getEmail(),
           leadReporter.get().getRepresentative(), true);
     }
-    LOG.info("Deleting the lead reporter relation");
     leadReporterRepository.deleteById(leadReporterId);
   }
 

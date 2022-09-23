@@ -56,7 +56,6 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
   @Override
   @Transactional
   public Long insertDocument(DocumentVO documentVO) throws EEAException {
-    LOG.info("inserting document in metabase");
     if (documentVO == null) {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
@@ -66,7 +65,7 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
       document.setName(documentVO.getName());
       document.setDataflow(dataflow);
       document = documentRepository.save(document);
-      LOG.info("document saved");
+      LOG.info("Document with id {} was inserted", documentVO.getId());
       return document.getId();
     } else {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
@@ -87,7 +86,6 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     documentRepository.deleteById(documentId);
-    LOG.info("document deleted");
   }
 
   /**
@@ -118,7 +116,6 @@ public class DataflowDocumentServiceImpl implements DataflowDocumentService {
    */
   @Override
   public void updateDocument(DocumentVO documentVO) throws EEAException {
-    LOG.info("updating document in metabase");
     Document document = documentRepository.findById(documentVO.getId()).orElse(null);
     if (document == null) {
       throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND);
