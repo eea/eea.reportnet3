@@ -324,7 +324,7 @@ public class ValidationHelper implements DisposableBean {
     dataflow.getDeadlineDate();
 
     if (dataflow.getDeadlineDate() == null || TypeStatusEnum.DESIGN.equals(dataflow.getStatus())
-        || DatasetTypeEnum.TEST.equals(datasetMetabaseControllerZuul.getType(dataset.getId()))) {
+        ) {
       priority = 70;
     } else {
       final LocalDateTime today = LocalDateTime.now();
@@ -927,6 +927,16 @@ public class ValidationHelper implements DisposableBean {
    */
   public List<Long> getLastHighPriorityTask(int limit) {
     return taskRepository.findLastTask(limit);
+  }
+
+  /**
+   * update task status
+   * @param taskId
+   * @param status
+   */
+  @Transactional
+  public void updateTaskStatus(Long taskId, ProcessStatusEnum status) {
+    taskRepository.updateStatus(taskId, status.toString());
   }
 
   /**

@@ -696,6 +696,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       Long idPartition = obtainPartition(idDataset, "root").getId();
       recordStoreControllerZuul.createSnapshotData(idDataset, idSnapshot, idPartition, null, false);
       LOG.info("Successfully added snapshot with snapshotId {} and datasetId {}", idSnapshot, idDataset);
+
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for datasetId {}", idDataset, e);
       releaseEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage());
@@ -838,7 +839,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     // Delete the file values
     recordStoreControllerZuul.deleteSnapshotData(idDataset, idSnapshot);
-    LOG.info("Successfully removed schema snapshot with id {} for datasetId {} ", idSnapshot, idDataset);
   }
 
   /**

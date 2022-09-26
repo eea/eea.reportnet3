@@ -59,6 +59,9 @@ public class FieldSchemaVO {
   /** The read only. */
   private Boolean readOnly;
 
+  /** The links should be ignored case. */
+  private Boolean ignoreCaseInLinks;
+
   /**
    * Hash code.
    *
@@ -68,7 +71,7 @@ public class FieldSchemaVO {
   public int hashCode() {
 
     return Objects.hash(id, description, idRecord, name, type, codelistItems, required, pk,
-        pkMustBeUsed, validExtensions, maxSize, readOnly);
+        pkMustBeUsed, validExtensions, maxSize, readOnly, ignoreCaseInLinks);
 
   }
 
@@ -91,6 +94,7 @@ public class FieldSchemaVO {
         && Objects.equals(description, other.description) && Objects.equals(name, other.name)
         && Objects.equals(type, other.type) && Objects.equals(required, other.required)
         && Objects.equals(pk, other.pk) && Objects.equals(pkMustBeUsed, other.pkMustBeUsed)
-        && Objects.equals(maxSize, other.maxSize) && Objects.equals(readOnly, other.readOnly);
+        && Objects.equals(maxSize, other.maxSize) && Objects.equals(readOnly, other.readOnly)
+        && Objects.equals(ignoreCaseInLinks, other.ignoreCaseInLinks);
   }
 }
