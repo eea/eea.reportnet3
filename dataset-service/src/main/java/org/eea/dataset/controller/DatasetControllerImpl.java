@@ -616,7 +616,6 @@ public class DatasetControllerImpl implements DatasetController {
     }
     LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
     deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false);
-    LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
   }
 
   /**
@@ -653,7 +652,6 @@ public class DatasetControllerImpl implements DatasetController {
     }
     LOG.info("Privately deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
     deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted);
-    LOG.info("Successfully privately deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
   }
 
   /**
@@ -734,7 +732,6 @@ public class DatasetControllerImpl implements DatasetController {
     LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
     // This method will release the lock
     deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
-    LOG.info("Successfully deleted table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
   }
 
 
@@ -804,7 +801,6 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("Exporting table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       fileTreatmentHelper.exportFile(datasetId, mimeType, tableSchemaId, tableName, exportFilterVO);
-      LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
     } catch (EEAException | IOException e) {
       LOG_ERROR.info("Error exporting table data from dataset id {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -1278,6 +1274,7 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(value = "file") @RequestParam("file") MultipartFile file) {
 
     try {
+      LOG.info("Method updateAttachment was called for dataflowId {} datasetId {} and fieldId {}", dataflowId, datasetId, idField);
       // Not allow insert attachment if the table is marked as read only. This not applies to design
       // datasets
       if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
@@ -1467,7 +1464,6 @@ public class DatasetControllerImpl implements DatasetController {
         SecurityContextHolder.getContext().getAuthentication().getName());
     LOG.info("Deleting data before replacing for datasetId {} and integrationId {}", datasetId, integrationId);
     deleteHelper.executeDeleteImportDataAsyncBeforeReplacing(datasetId, integrationId, operation);
-    LOG.info("Successfully deleting data before replacing for datasetId {} and integrationId {}", datasetId, integrationId);
   }
 
 
@@ -1700,6 +1696,8 @@ public class DatasetControllerImpl implements DatasetController {
   private boolean validateAttachment(Long datasetId, String idField, String originalFilename,
       Long size) throws EEAException {
 
+    LOG.info("Validating attachment for datasetId {}, fieldId {} and fileName {}", datasetId, idField, originalFilename);
+
     Boolean result = true;
     String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
     if (datasetSchemaId == null) {
@@ -1724,6 +1722,7 @@ public class DatasetControllerImpl implements DatasetController {
         result = false;
       }
     }
+    LOG.info("Successfully validated attachment for datasetId {}, fieldId {} and fileName {} Result: {}", datasetId, idField, originalFilename, result);
     return result;
   }
 }

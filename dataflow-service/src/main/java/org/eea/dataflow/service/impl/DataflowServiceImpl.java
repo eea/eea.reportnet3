@@ -667,9 +667,10 @@ public class DataflowServiceImpl implements DataflowService {
       deleteDataflowResources(idDataflow);
       LOG.info("Deleted dataflow resources for dataflowId: {}", idDataflow);
 
-
       NotificationVO notificationVO = NotificationVO.builder().dataflowId(idDataflow)
           .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
+
+      LOG.info("Successfully deleted dataflow with id {}", idDataflow);
 
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATAFLOW_COMPLETED_EVENT,
@@ -1636,6 +1637,7 @@ public class DataflowServiceImpl implements DataflowService {
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(
           EventType.VALIDATE_ALL_REPORTERS_COMPLETED_EVENT, null, notificationVO);
+      LOG.info("Successfully validated all reporters with userId {}", userId);
 
     } catch (EEAException e) {
       LOG.error(

@@ -112,8 +112,9 @@ public class DeleteHelper {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing notification: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error releasing notification for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
     }
+    LOG.info("Successfully deleted table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
   }
 
   /**
@@ -164,6 +165,7 @@ public class DeleteHelper {
         LOG_ERROR.error("Error releasing notification for datasetId {} Message: {}", datasetId, e.getMessage());
       }
     }
+    LOG.info("Successfully deleted dataset data for datasetId {}", datasetId);
   }
 
 
@@ -190,6 +192,7 @@ public class DeleteHelper {
     value.put(LiteralConstants.INTEGRATION_ID, integrationId);
     value.put(LiteralConstants.OPERATION, operation);
     kafkaSenderUtils.releaseKafkaEvent(EventType.DATA_DELETE_TO_REPLACE_COMPLETED_EVENT, value);
+    LOG.info("Successfully deleted data before replacing for datasetId {} and integrationId {}", datasetId, integrationId);
   }
 
 

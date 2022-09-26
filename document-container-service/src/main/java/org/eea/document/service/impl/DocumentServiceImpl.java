@@ -130,6 +130,7 @@ public class DocumentServiceImpl implements DocumentService {
             NotificationVO.builder()
                 .user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
                 .dataflowId(documentVO.getDataflowId()).fileName(fileName).build());
+        LOG.info("Successfully uploaded document {} with id {}", fileName, idDocument);
       } else {
         throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
       }
@@ -167,6 +168,7 @@ public class DocumentServiceImpl implements DocumentService {
           null,
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
               .dataflowId(documentVO.getDataflowId()).fileName(documentVO.getName()).build());
+      LOG.info("Successfully updated document with id {}", documentVO.getId());
     } catch (EEAException e) {
       if(documentVO != null){
         LOG_ERROR.error("Error in updateDocument for file with id {} and dataflowId {} due to exception {}", documentVO.getId(), documentVO.getDataflowId(), e.getMessage(), e);
@@ -252,8 +254,9 @@ public class DocumentServiceImpl implements DocumentService {
 
       // Physical delete. This won't be notified
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
+      LOG.info("Successfully deleted document with id {} for dataflowId {}", documentId, dataFlowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Error in deleteDocument due to", e);
+      LOG_ERROR.error("Error in deleteDocument with id {} for dataflowId {} due to", documentId, dataFlowId, e);
       // Release finish event
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DOCUMENT_FAILED_EVENT, null,
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
@@ -299,7 +302,7 @@ public class DocumentServiceImpl implements DocumentService {
       if (StringUtils.isBlank(modifiedFilename)) {
         throw new EEAException(EEAErrorMessage.FILE_NAME);
       }
-      LOG.info("Inserted schema snapshot document {} for designDataset {}", filename, designDataset);
+      LOG.info("Successfully uploaded schema snapshot document {} for designDatasetId {}", filename, designDataset);
 
     } catch (RepositoryException | EEAException e) {
       LOG_ERROR.error("Error in uploadSnapshotSchema, document {}, designDatasetId {} due to {}", filename, designDataset,
@@ -377,6 +380,7 @@ public class DocumentServiceImpl implements DocumentService {
           PATH_DELIMITER_SNAPSHOT_DELETE + designDatasetId.toString(), documentName);
       LOG.info("File {} deleted for designDatasetId {}", documentName, designDatasetId);
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
+      LOG.info("Successfully deleted schema snapshot document {} for designDatasetId {}", documentName, designDatasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Error in deleteSnapshotDocument for file {} and designDatasetId {} due to", documentName, designDatasetId, e);
       if (e.getClass().equals(PathNotFoundException.class)) {
@@ -426,7 +430,7 @@ public class DocumentServiceImpl implements DocumentService {
       if (StringUtils.isBlank(modifiedFilename)) {
         throw new EEAException(EEAErrorMessage.FILE_NAME);
       }
-      LOG.info("Inserted collaboration document {} for dataflowId {}", filename, dataflowId);
+      LOG.info("Successfully uploaded collaboration document {} for dataflowId {}", filename, dataflowId);
 
     } catch (RepositoryException | EEAException e) {
       LOG_ERROR.error("Error in uploadCollaborationDocument, document {} dataflowId {} due to {}", filename, dataflowId,
@@ -465,6 +469,7 @@ public class DocumentServiceImpl implements DocumentService {
           PATH_DELIMITER_COLLABORATION_DATAFLOW_DELETE + dataflowId,
           messageId + "_" + documentName);
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
+      LOG.info("Successfully deleted collaboration document {} for dataflowId {}", documentName, dataflowId);
     } catch (Exception e) {
       LOG_ERROR.error("Error deleting file {} for dataflowId {} in deleteCollaborationDocument due to", documentName, dataflowId,
           e);

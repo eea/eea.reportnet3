@@ -2531,6 +2531,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(dataflowId).build());
 
+      LOG.info("Successfully imported schemas from the dataflowId {}", dataflowId);
+
     } catch (Exception e) {
       LOG_ERROR.error("An error in the import process happened for dataflowId {}. Message: {}", dataflowId, e.getMessage(), e);
       if (e instanceof InterruptedException) {
@@ -2666,6 +2668,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             NotificationVO.builder()
                 .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .datasetId(datasetId).tableSchemaName(tableSchemaName).build());
+
+        LOG.info("Successfully imported field Schemas for datasetId {}", datasetId);
       } else {
         LOG_ERROR.error("Error when importing field schemas for datasetId {}. datasetSchema is null", datasetId);
         throw new EEAException("datasetSchema is null");

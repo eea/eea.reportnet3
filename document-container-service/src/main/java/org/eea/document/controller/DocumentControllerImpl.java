@@ -127,7 +127,6 @@ public class DocumentControllerImpl implements DocumentController {
       LOG.info("Uploading document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
       documentService.uploadDocument(file.getInputStream(), file.getContentType(),
           file.getOriginalFilename(), documentVO, file.getSize());
-      LOG.info("Successfully uploaded document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         LOG_ERROR.error("Error uploading document to dataflow help: Dataflow {} is not DRAFT",
@@ -301,7 +300,6 @@ public class DocumentControllerImpl implements DocumentController {
       }
       LOG.info("Deleting document with id {} for dataflowId {}", documentId, dataflowId);
       documentService.deleteDocument(documentId, document.getDataflowId(), deleteMetabase);
-      LOG.info("Successfully deleted document with id {} for dataflowId {}", documentId, dataflowId);
     } catch (final FeignException e) {
       LOG_ERROR.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
           documentId, dataflowId, e.getMessage(), e);
@@ -407,7 +405,6 @@ public class DocumentControllerImpl implements DocumentController {
         documentService.uploadDocument(file.getInputStream(), file.getContentType(),
             file.getOriginalFilename(), documentVO, file.getSize());
       }
-      LOG.info("Successfully updated document with id {} for dataflowId {}", idDocument, dataflowId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         LOG_ERROR.error("Error updating document: DocumentId {}. DataflowId {}. Message: {}",
@@ -523,7 +520,6 @@ public class DocumentControllerImpl implements DocumentController {
       ByteArrayInputStream inStream = new ByteArrayInputStream(file);
       LOG.info("Uploading schema snapshot document {} for designDatasetId {}", fileName, designDatasetId);
       documentService.uploadSchemaSnapshot(inStream, "json", fileName, designDatasetId);
-      LOG.info("Successfully uploaded schema snapshot document {} for designDatasetId {}", fileName, designDatasetId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         LOG_ERROR.error(
@@ -604,7 +600,6 @@ public class DocumentControllerImpl implements DocumentController {
       }
       LOG.info("Deleting schema snapshot document {} for designDatasetId {}", fileName, idDesignDataset);
       documentService.deleteSnapshotDocument(fileName, idDesignDataset);
-      LOG.info("Successfully deleted schema snapshot document {} for designDatasetId {}", fileName, idDesignDataset);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         LOG_ERROR.error(
@@ -653,7 +648,6 @@ public class DocumentControllerImpl implements DocumentController {
       LOG.info("Uploading collaboration document {} for dataflowId {}", fileName, dataflowId);
       documentService.uploadCollaborationDocument(inStream, extension, fileName, dataflowId,
           messageId);
-      LOG.info("Successfully uploaded collaboration document {} for dataflowId {}", fileName, dataflowId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         LOG_ERROR.error(
@@ -695,7 +689,6 @@ public class DocumentControllerImpl implements DocumentController {
       }
       LOG.info("Deleting collaboration document {} for dataflowId {}", fileName, dataflowId);
       documentService.deleteCollaborationDocument(fileName, dataflowId, messageId);
-      LOG.info("Successfully deleted collaboration document {} for dataflowId {}", fileName, dataflowId);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         LOG_ERROR.error(

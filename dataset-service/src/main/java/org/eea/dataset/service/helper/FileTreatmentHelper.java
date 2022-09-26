@@ -437,6 +437,7 @@ public class FileTreatmentHelper implements DisposableBean {
         out.write(file);
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT,
             null, notificationVO);
+        LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       }
     } catch (IOException | EEAException e) {
       LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId,
