@@ -71,6 +71,10 @@ public class FieldSchema {
   @Field(value = "pkHasMultipleValues")
   private Boolean pkHasMultipleValues;
 
+  /** The links should be ignored case. */
+  @Field(value = "ignoreCaseInLinks")
+  private Boolean ignoreCaseInLinks;
+
   /**
    * Hash code.
    *
@@ -79,7 +83,7 @@ public class FieldSchema {
   @Override
   public int hashCode() {
     return Objects.hash(headerName, idFieldSchema, idRecord, type, codelistItems, required,
-        description, isPK, pkMustBeUsed, pkHasMultipleValues);
+        description, isPK, pkMustBeUsed, pkHasMultipleValues, ignoreCaseInLinks);
   }
 
 
@@ -103,7 +107,8 @@ public class FieldSchema {
         && Objects.equals(idRecord, other.idRecord) && Objects.equals(required, other.required)
         && Objects.equals(isPK, other.isPK) && Objects.equals(description, other.description)
         && Objects.equals(pkMustBeUsed, other.pkMustBeUsed)
-        && Objects.equals(pkHasMultipleValues, other.pkHasMultipleValues);
+        && Objects.equals(pkHasMultipleValues, other.pkHasMultipleValues)
+        && Objects.equals(ignoreCaseInLinks, other.ignoreCaseInLinks);
   }
 
 

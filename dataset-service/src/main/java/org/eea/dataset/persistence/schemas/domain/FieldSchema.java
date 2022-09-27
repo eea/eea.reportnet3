@@ -88,6 +88,9 @@ public class FieldSchema {
   @Field(value = "readOnly")
   private Boolean readOnly;
 
+  /** The links should be ignored case. */
+  @Field(value = "ignoreCaseInLinks")
+  private Boolean ignoreCaseInLinks;
 
   /**
    * Hash code.
@@ -97,7 +100,7 @@ public class FieldSchema {
   @Override
   public int hashCode() {
     return Objects.hash(headerName, idFieldSchema, idRecord, type, codelistItems, required,
-        description, pk, pkMustBeUsed, validExtensions, maxSize, readOnly);
+        description, pk, pkMustBeUsed, validExtensions, maxSize, readOnly, ignoreCaseInLinks);
   }
 
 
@@ -121,7 +124,8 @@ public class FieldSchema {
         && Objects.equals(idRecord, other.idRecord) && Objects.equals(required, other.required)
         && Objects.equals(pk, other.pk) && Objects.equals(description, other.description)
         && Objects.equals(pkMustBeUsed, other.pkMustBeUsed)
-        && Objects.equals(maxSize, other.maxSize) && Objects.equals(readOnly, other.readOnly);
+        && Objects.equals(maxSize, other.maxSize) && Objects.equals(readOnly, other.readOnly)
+        && Objects.equals(ignoreCaseInLinks, other.ignoreCaseInLinks);
   }
 
 
