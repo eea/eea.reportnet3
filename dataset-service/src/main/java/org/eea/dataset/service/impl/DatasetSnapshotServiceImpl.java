@@ -839,6 +839,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // Delete the file values
     recordStoreControllerZuul.deleteSnapshotData(idDataset, idSnapshot);
     LOG.info("Successfully removed schema snapshot with id {} for datasetId {} ", idSnapshot, idDataset);
+
   }
 
   /**
