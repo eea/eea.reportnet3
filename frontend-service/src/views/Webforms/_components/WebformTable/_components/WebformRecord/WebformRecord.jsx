@@ -217,8 +217,8 @@ export const WebformRecord = ({
                     fieldStyle.width = elementWidth;
                 }
                 let dependantElement = null;
-                if (element.isRequiredOnCondition) {
-                    dependantElement = elements.find(el => el.name === element.isRequiredOnCondition.field);
+                if (element.showRequiredOnCondition) {
+                    dependantElement = elements.find(el => el.name === element.showRequiredOnCondition.field);
                 }
                 return (
                     checkLabelVisibility(element) &&
@@ -232,7 +232,7 @@ export const WebformRecord = ({
                                         <span className={styles.requiredMark}>
                       {element.required ||
                       element.showRequiredCharacter ||
-                      (element.isRequiredOnCondition && dependantElement.value == element.isRequiredOnCondition.value)
+                      (element.showRequiredOnCondition && dependantElement.value == element.showRequiredOnCondition.value)
                           ? ' *'
                           : ''}
                     </span>
