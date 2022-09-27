@@ -62,22 +62,24 @@ public class JobForRestartingDelayedTasks {
      * and sets their status to status=IN_QUEUE.
      */
     public void restartDelayedTasks() {
-        LOG.info("Running scheduled task restartInProgressTasksExceedingTime");
+        LOG.info("Running scheduled task restartDelayedTasks");
         try {
             List<BigInteger> tasksInProgress = validationControllerZuul.listTasksInProgress(maxTimeInMinutesForInProgressTasks);
-            TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            tasksInProgress.stream().forEach(taskId -> {
-                try {
-                    validationControllerZuul.restartTask(taskId.longValue());
-                } catch (Exception e) {
-                   LOG.error("Error while running scheduled task restartInProgressTasksExceedingTime for task " + taskId);
-                }
-            });
+            if (tasksInProgress.size() > 0) {
+                TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                tasksInProgress.stream().forEach(taskId -> {
+                    try {
+                        validationControllerZuul.restartTask(taskId.longValue());
+                    } catch (Exception e) {
+                        LOG.error("Error while running scheduled task restartDelayedTasks for task " + taskId);
+                    }
+                });
+            }
         } catch (Exception e) {
-            LOG.error("Error while running scheduled task restartInProgressTasksExceedingTime " + e.getMessage());
+            LOG.error("Error while running scheduled task restartDelayedTasks " + e.getMessage());
         }
     }
 }
