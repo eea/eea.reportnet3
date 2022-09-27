@@ -1278,6 +1278,7 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(value = "file") @RequestParam("file") MultipartFile file) {
 
     try {
+      LOG.info("Method updateAttachment was called for dataflowId {} datasetId {} and fieldId {}", dataflowId, datasetId, idField);
       // Not allow insert attachment if the table is marked as read only. This not applies to design
       // datasets
       if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
@@ -1700,6 +1701,8 @@ public class DatasetControllerImpl implements DatasetController {
   private boolean validateAttachment(Long datasetId, String idField, String originalFilename,
       Long size) throws EEAException {
 
+    LOG.info("Validating attachment for datasetId {}, fieldId {} and fileName {}", datasetId, idField, originalFilename);
+
     Boolean result = true;
     String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
     if (datasetSchemaId == null) {
@@ -1724,6 +1727,7 @@ public class DatasetControllerImpl implements DatasetController {
         result = false;
       }
     }
+    LOG.info("Successfully validated attachment for datasetId {}, fieldId {} and fileName {} Result: {}", datasetId, idField, originalFilename, result);
     return result;
   }
 }

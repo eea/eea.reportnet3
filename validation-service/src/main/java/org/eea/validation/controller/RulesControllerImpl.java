@@ -169,6 +169,7 @@ public class RulesControllerImpl implements RulesController {
           example = "5cf0e9b3b793310e9ceca190") String datasetSchemaId,
       @ApiParam(value = "Dataset id used in the delete process", example = "5") Long datasetId) {
     rulesService.deleteEmptyRulesSchema(datasetSchemaId, datasetId);
+    LOG.info("Deleted empty rules schema for datasetSchemaId {} and datasetId {}", datasetSchemaId, datasetId);
   }
 
   /**

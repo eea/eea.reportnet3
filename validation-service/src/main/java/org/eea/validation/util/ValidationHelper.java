@@ -293,6 +293,7 @@ public class ValidationHelper implements DisposableBean {
         hasSqlEnabled = false;
       }
 
+      LOG.info("In executeValidation for datasetId {} and processId {} updateViews is {} and hasSqlEnabled is {}", datasetId, processId, updateViews, hasSqlEnabled);
       if (Boolean.FALSE.equals(updateViews) || Boolean.FALSE.equals(hasSqlEnabled)) {
         executeValidationProcess(dataset, processId);
       } else {
@@ -307,6 +308,7 @@ public class ValidationHelper implements DisposableBean {
         kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
       }
     }
+    LOG.info("Successfully executed validation for datasetId {}", datasetId);
     dataset = null;
   }
 
@@ -448,9 +450,8 @@ public class ValidationHelper implements DisposableBean {
   /**
    * Execute validation process.
    *
-   * @param datasetId the dataset id
+   * @param dataset the dataset metabase object
    * @param processId the process id
-   * @param released the released
    */
   public void executeValidationProcess(final DataSetMetabaseVO dataset, String processId) {
     // Initialize process as coordinator
@@ -850,6 +851,7 @@ public class ValidationHelper implements DisposableBean {
   public void addValidationTaskToProcess(final String processId, final EventType eventType,
       final Map<String, Object> value) {
     if (checkStartedProcess(processId)) {
+      LOG.info("Adding validation task for process {}", processId);
       EEAEventVO eeaEventVO = new EEAEventVO();
       eeaEventVO.setEventType(eventType);
       value.put("processId", processId);
@@ -867,7 +869,7 @@ public class ValidationHelper implements DisposableBean {
       Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
           json, 0, null);
       taskRepository.save(task);
-      LOG.info("Added validation task {} in process {}",task.getId(), processId);
+      LOG.info("Added validation task {} for process {}",task.getId(), processId);
     }
   }
 
@@ -963,13 +965,6 @@ public class ValidationHelper implements DisposableBean {
 
   /**
    * Instantiates a new validation task.
-   *
-   * @param taskId the task id
-   * @param eeaEventVO the eea event VO
-   * @param validator the validator
-   * @param datasetId the dataset id
-   * @param kieBase the kie base
-   * @param processId the process id
    */
   @AllArgsConstructor
   private static class ValidationTask {

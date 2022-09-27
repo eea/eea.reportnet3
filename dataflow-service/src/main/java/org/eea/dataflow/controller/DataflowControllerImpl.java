@@ -1067,6 +1067,7 @@ public class DataflowControllerImpl implements DataFlowController {
             .get(AuthenticationDetails.USER_ID);
 
     try {
+      LOG.info("Validating all reporters with userId {}", userId);
       dataflowService.validateAllReporters(userId);
     } catch (Exception e) {
       message =
