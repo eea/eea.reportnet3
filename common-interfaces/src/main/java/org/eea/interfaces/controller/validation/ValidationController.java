@@ -111,4 +111,11 @@ public interface ValidationController {
   @GetMapping("/downloadFile/{datasetId}")
   void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
       HttpServletResponse response);
+
+  /**
+   * Sets the status to IN_QUEUE for a given task id
+   * @param taskId
+   */
+  @PutMapping(value = "/task/{taskId}")
+  void restartTask(@PathVariable("taskId") Long taskId);
 }
