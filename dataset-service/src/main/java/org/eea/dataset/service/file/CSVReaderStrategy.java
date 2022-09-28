@@ -203,11 +203,11 @@ public class CSVReaderStrategy implements ReaderStrategy {
       // through the file
       int numLines = 0;
       int allCSVNumLines = 0;
+      LOG.info("RN3 Import: Going to sanitize and create dataset from file {} with datasetId {} and tableSchemaId {}", fileName, datasetId, idTableSchema);
       while ((line = reader.readNext()) != null && numLines < 5000) {
         final List<String> values = Arrays.asList(line);
         sanitizeAndCreateDataSet(partitionId, table, tables, values, headers, idTableSchema,
             idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords);
-        LOG.info("RN3 Import: Sanitized and created dataset from file {} with datasetId {} and tableSchemaId {}", fileName, datasetId, idTableSchema);
         numLines++;
         if (numLines == batchRecordSave) {
           dataset.setTableValues(tables);
@@ -221,8 +221,8 @@ public class CSVReaderStrategy implements ReaderStrategy {
           tables.add(table);
         }
         allCSVNumLines++;
-        LOG.info("RN3 Import: Added line {} from file {} in datasetId {} and tableSchemaId {}", allCSVNumLines, fileName, datasetId, idTableSchema);
       }
+      LOG.info("RN3 Import: Added {} lines from file {} in datasetId {} and tableSchemaId {}", allCSVNumLines, fileName, datasetId, idTableSchema);
       dataset.setTableValues(tables);
       // Set the dataSetSchemaId of MongoDB
       dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
