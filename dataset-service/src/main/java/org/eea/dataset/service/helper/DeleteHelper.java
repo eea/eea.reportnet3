@@ -3,6 +3,8 @@ package org.eea.dataset.service.helper;
 import java.util.HashMap;
 import java.util.Map;
 import javax.transaction.Transactional;
+
+import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
@@ -204,12 +206,16 @@ public class DeleteHelper {
    */
   @Transactional
   public void deleteRecordValuesByProvider(Long datasetId, String providerCode) {
-    LOG.info("Deleting data with providerCode: {} ", providerCode);
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    recordRepository.deleteByDataProviderCode(providerCode);
+    RecordValue recordValue = recordRepository.findFirstByDataProviderCode(providerCode);
+    if (recordValue!=null) {
+      LOG.info("Deleting data with providerCode: {} ", providerCode);
+      recordRepository.deleteByDataProviderCode(providerCode);
+    }
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
+    LOG.info("Deleting table tempEtlExport for dataset ", datasetId);
     datasetService.deleteTempEtlExport(datasetId);
   }
 
