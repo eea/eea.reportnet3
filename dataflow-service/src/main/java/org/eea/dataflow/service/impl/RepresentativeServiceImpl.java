@@ -708,6 +708,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
             EventType.VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT, null, notificationVO);
       }
 
+      LOG.info("Successfully validated lead reporters for dataflowId {}", dataflowId);
+
     } catch (Exception e) {
       LOG.error("An error was produced while validating lead reporters for dataflow {}", dataflowId,
           e);

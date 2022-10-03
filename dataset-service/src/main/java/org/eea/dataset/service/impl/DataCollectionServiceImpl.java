@@ -379,6 +379,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Async
   public void updateDataCollection(Long dataflowId, boolean referenceDataflow) {
     manageDataCollection(dataflowId, null, false, false, false, referenceDataflow, false);
+    LOG.info("Successfully updated data collection for dataflowId {}", dataflowId);
   }
 
   /**
@@ -403,6 +404,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     LOG.info("Managed creating data collection for dataflowId {}", dataflowId);
 
     updateReportingDatasetsVisibility(dataflowId, showPublicInfo);
+    LOG.info("Successfully created empty data collection for dataflowId {}", dataflowId);
 
   }
 

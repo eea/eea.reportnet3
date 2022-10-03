@@ -498,9 +498,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid email");
     }
     try {
-      LOG.info("Creating lead reporter for dataflowId {}", dataflowId);
+      LOG.info("Updating lead reporter for dataflowId {}", dataflowId);
       Long reporterId = representativeService.updateLeadReporter(leadReporterVO);
-      LOG.info("Successfully created lead reporter for dataflowId {}", dataflowId);
+      LOG.info("Successfully updated lead reporter for dataflowId {}", dataflowId);
       return reporterId;
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating lead reporter: duplicated representative. leadReporterVO={}",

@@ -364,6 +364,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
       recordStoreControllerZuul.createSnapshotData(idDataset, snap.getId(), idPartition,
           dateRelease, prefillingReference);
+      LOG.info("Successfully added snapshot for datasetId {}", idDataset);
 
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for datasetId {}", idDataset, e);
@@ -446,6 +447,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     Long idPartition = obtainPartition(idDataset, "root").getId();
     recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, idPartition,
         DatasetTypeEnum.REPORTING, false, deleteData, false);
+    LOG.info("Successfully restored snapshot with id {} for datasetId {}", idSnapshot, idDataset);
   }
 
   /**
@@ -535,6 +537,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     LOG.info("The user releasing kafka event on DatasetSnapshotServiceImpl.releaseSnapshot for snapshotId {} and datasetId {} is {}",
         idSnapshot, idDataset, SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
+    LOG.info("Successfully released snapshot with id {} for datasetId {}", idSnapshot, idDataset);
   }
 
   /**
@@ -692,7 +695,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // we need the partitionId. By now only consider the user root
       Long idPartition = obtainPartition(idDataset, "root").getId();
       recordStoreControllerZuul.createSnapshotData(idDataset, idSnapshot, idPartition, null, false);
-      LOG.info("Data files created for snapshotId {} and datasetId {}", idSnapshot, idDataset);
+      LOG.info("Successfully added snapshot with snapshotId {} and datasetId {}", idSnapshot, idDataset);
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for datasetId {}", idDataset, e);
       releaseEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage());
@@ -788,7 +791,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // Redo the views of the dataset
       recordStoreControllerZuul.createUpdateQueryView(idDataset, false);
 
-      LOG.info("Schema Snapshot {} totally restored", idSnapshot);
+      LOG.info("Successfully restored snapshot with id {} for datasetId {}", idSnapshot, idDataset);
     } catch (EEAException | FeignException e) {
       LOG_ERROR.error("Error restoring a schema snapshot: datasetId={}, snapshotId={}", idDataset,
           idSnapshot, e);
@@ -835,6 +838,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     // Delete the file values
     recordStoreControllerZuul.deleteSnapshotData(idDataset, idSnapshot);
+    LOG.info("Successfully removed schema snapshot with id {} for datasetId {} ", idSnapshot, idDataset);
   }
 
   /**
@@ -857,6 +861,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         LOG_ERROR.error("Error deleting the schema snapshot {} for datasetId {}", s.getId(), idDesignDataset, e);
       }
     });
+    LOG.info("Deleted all schema snapshots for datasetId {}", idDesignDataset);
   }
 
 
@@ -1095,6 +1100,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       value.put("user", notificationUser);
       kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
     }
+    LOG.info("Successfully created release snapshots for dataflowId {} and dataProviderId {}", dataflowId, dataProviderId);
 
   }
 

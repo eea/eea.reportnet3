@@ -153,7 +153,6 @@ public class ValidationControllerImpl implements ValidationController {
     try {
       LOG.info("Executing validation for datasetId {}", datasetId);
       validationHelper.executeValidation(datasetId, uuid, released, true);
-      LOG.info("Successfully executed validation for datasetId {}", datasetId);
 
       // Add lock to the release process if necessary
       validationHelper.addLockToReleaseProcess(datasetId);

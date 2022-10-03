@@ -178,7 +178,6 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     LOG.info("Creating empty data collection for dataflowId {}", dataflowId);
     dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
         manualCheck, showPublicInfo, referenceDataflow, stopAndNotifyPKError);
-    LOG.info("Successfully created empty data collection for dataflowId {}", dataflowId);
   }
 
   /**
@@ -223,7 +222,6 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     // This method will release the lock
     LOG.info("Updating data collection for dataflowId {}", dataflowId);
     dataCollectionService.updateDataCollection(dataflowId, referenceDataflow);
-    LOG.info("Successfully updated data collection for dataflowId {}", dataflowId);
   }
 
   /**

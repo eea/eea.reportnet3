@@ -173,13 +173,13 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           EEAErrorMessage.DATASET_NAME_DUPLICATED);
     }
     try {
+      LOG.info("Creating dataset schema {} for dataflowId {} ", nameTrimmed, dataflowId);
       String datasetSchemaId = dataschemaService.createEmptyDataSetSchema(dataflowId).toString();
       Future<Long> futureDatasetId = datasetMetabaseService.createEmptyDataset(
           DatasetTypeEnum.DESIGN, datasetSchemaName, datasetSchemaId, dataflowId, null, null, 0);
 
       // we find if the dataflow has any permission to give the permission to this new datasetschema
       contributorControllerZuul.createAssociatedPermissions(dataflowId, futureDatasetId.get());
-      LOG.info("Creating dataset schema {} with datasetSchemaId {} for dataflowId {} ", nameTrimmed, datasetSchemaId, dataflowId);
       integrationControllerZuul.createDefaultIntegration(dataflowId, datasetSchemaId);
       LOG.info("Successfully created dataset schema {} with datasetSchemaId {} for dataflowId {} ", nameTrimmed, datasetSchemaId, dataflowId);
     } catch (InterruptedException | ExecutionException | EEAException e) {
@@ -383,7 +383,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         recordStoreControllerZuul.deleteDataset("dataset_" + datasetId);
 
         dataschemaService.deleteGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA);
-        LOG.info("Successfully deleted dataset schema with datasetId {}", datasetId);
+
       } else {
         LOG_ERROR.error("Not enough permissions to delete dataset schema with datasetId {}", datasetId);
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
