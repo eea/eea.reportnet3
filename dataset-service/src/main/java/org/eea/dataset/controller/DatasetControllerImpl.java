@@ -5,10 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -1627,7 +1624,7 @@ public class DatasetControllerImpl implements DatasetController {
   @HystrixCommand
   @GetMapping(value = "/checkImportProcess/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Test import file to dataset data (Large files)", notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD\n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @ApiResponses(value = {
       @ApiResponse(code = 200, message = "There is no import process in progress"),
       @ApiResponse(code = 400, message = "Error testing import process"),
@@ -1657,27 +1654,62 @@ public class DatasetControllerImpl implements DatasetController {
 
       if (importDataCriteria == null && importBigDataCriteria == null) {
         checkLockVO.setImportInProgress(Boolean.FALSE);
-        checkLockVO.setDescription("There is no import process in progress");
-      } else if (importDataCriteria == null) {
-        checkLockVO.setImportInProgress(Boolean.TRUE);
-        checkLockVO.setDescription(LockSignature.IMPORT_FILE_DATA.getValue() + " in progress");
-      } else if (importBigDataCriteria == null) {
-        checkLockVO.setImportInProgress(Boolean.TRUE);
-        checkLockVO.setDescription(LockSignature.IMPORT_BIG_FILE_DATA.getValue() + " in progress");
+        checkLockVO.setMessage(LiteralConstants.NO_IMPORT_IN_PROGRESS);
       } else {
         checkLockVO.setImportInProgress(Boolean.TRUE);
-        checkLockVO.setDescription(LockSignature.IMPORT_BIG_FILE_DATA.getValue() + " and " + LockSignature.IMPORT_FILE_DATA.getValue() + " in progress");
+        checkLockVO.setMessage(LiteralConstants.IMPORT_LOCKED);
       }
 
       LOG.info("Method testImportProcess result for dateset id: {}, checkLockVO: {}", datasetId, checkLockVO);
-
     } catch (Exception e) {
       LOG_ERROR.error("Error while executing method testImportProcess for dataset id: {} with exception: {}", datasetId, e);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     return new ResponseEntity<>(checkLockVO, HttpStatus.OK);
+  }
 
+
+  /**
+   * Check all locks with criteria
+   *
+   * @param datasetId
+   * @param dataflowId
+   * @param dataProviderId
+   * @return ResponseEntity<List<LockVO>>
+   */
+  @PostMapping(value = "/checkLocks", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Get Locks for input data", hidden = true)
+  public ResponseEntity<List<LockVO>> checkLocks(
+      @ApiParam(type = "Long", value = "Dataset id", example = "0" )@RequestParam("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataset id", example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Dataset id", example = "0") @RequestParam("dataProviderId") Long dataProviderId) {
+
+    LOG.info("Method checkLocks called for datasetId: {}, dataflowId: {}, dataProviderId: {}", datasetId, dataflowId, dataProviderId);
+
+    List<LockVO> results = new ArrayList<>();
+    try {
+
+      List<LockVO> locks = lockService.findAll();
+
+      //Get locks by dataset id
+      if (datasetId != null) {
+        results.addAll(lockService.findAllByCriteria(locks, datasetId));
+      }
+
+      //Get locks by dataflow id and then parse these results by data provider id
+      if (dataflowId != null && dataProviderId != null) {
+        List<LockVO> dataflowLocks = lockService.findAllByCriteria(locks, dataflowId);
+        results.addAll(lockService.findAllByCriteria(dataflowLocks, dataProviderId));
+      }
+
+      LOG.info("Method checkLocks results: {},", results);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error while executing method checkLocks ffor datasetId: {}, dataflowId: {}, dataProviderId: {}", datasetId, dataflowId, dataProviderId, e);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    return new ResponseEntity<>(results, HttpStatus.OK);
   }
 
   /**
