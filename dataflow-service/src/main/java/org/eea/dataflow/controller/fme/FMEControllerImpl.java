@@ -1,5 +1,6 @@
 package org.eea.dataflow.controller.fme;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -170,6 +171,8 @@ public class FMEControllerImpl implements FMEController {
       InputStream is = fmeCommunicationService.receiveFile(datasetId, providerId, fileName);
       try {
         streamingUtil.copy(is, out);
+      } catch (IOException e){
+        LOG_ERROR.error("Error copying file {} for datasetId {} and providerId {} Message: {}", fileName, datasetId, providerId, e.getMessage(), e);
       } finally {
         is.close();
       }
