@@ -432,7 +432,6 @@ public class DocumentServiceImpl implements DocumentService {
       }
       LOG.info("Successfully uploaded collaboration document {} for dataflowId {}", filename, dataflowId);
 
-
     } catch (RepositoryException | EEAException e) {
       LOG_ERROR.error("Error in uploadCollaborationDocument, document {} dataflowId {} due to {}", filename, dataflowId,
           e.getMessage(), e);
