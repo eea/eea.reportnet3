@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -1748,7 +1749,7 @@ public class DatasetControllerImplTest {
     ResponseEntity<CheckLockVO> checkLockVOResponseEntity = checkImportProcessInit(null, null);
 
     assertEquals(Boolean.FALSE, checkLockVOResponseEntity.getBody().isImportInProgress());
-    assertEquals("There is no import process in progress", checkLockVOResponseEntity.getBody().getDescription());
+    assertEquals(LiteralConstants.NO_IMPORT_IN_PROGRESS, checkLockVOResponseEntity.getBody().getMessage());
 
     Mockito.verify(lockService, times(2)).findByCriteria(Mockito.anyMap());
   }
@@ -1759,7 +1760,7 @@ public class DatasetControllerImplTest {
     ResponseEntity<CheckLockVO> checkLockVOResponseEntity = checkImportProcessInit(null, new LockVO());
 
     assertEquals(Boolean.TRUE, checkLockVOResponseEntity.getBody().isImportInProgress());
-    assertEquals(LockSignature.IMPORT_FILE_DATA.getValue() + " in progress", checkLockVOResponseEntity.getBody().getDescription());
+    assertEquals(LiteralConstants.IMPORT_LOCKED, checkLockVOResponseEntity.getBody().getMessage());
 
     Mockito.verify(lockService, times(2)).findByCriteria(Mockito.anyMap());
   }
@@ -1770,7 +1771,7 @@ public class DatasetControllerImplTest {
     ResponseEntity<CheckLockVO> checkLockVOResponseEntity = checkImportProcessInit(new LockVO(), null);
 
     assertEquals(Boolean.TRUE, checkLockVOResponseEntity.getBody().isImportInProgress());
-    assertEquals(LockSignature.IMPORT_BIG_FILE_DATA.getValue() + " in progress", checkLockVOResponseEntity.getBody().getDescription());
+    assertEquals(LiteralConstants.IMPORT_LOCKED, checkLockVOResponseEntity.getBody().getMessage());
 
     Mockito.verify(lockService, times(2)).findByCriteria(Mockito.anyMap());
   }
@@ -1782,8 +1783,7 @@ public class DatasetControllerImplTest {
     ResponseEntity<CheckLockVO> checkLockVOResponseEntity = checkImportProcessInit(new LockVO(), new LockVO());
 
     assertEquals(Boolean.TRUE, checkLockVOResponseEntity.getBody().isImportInProgress());
-    assertEquals(LockSignature.IMPORT_BIG_FILE_DATA.getValue() + " and " + LockSignature.IMPORT_FILE_DATA.getValue() + " in progress",
-        checkLockVOResponseEntity.getBody().getDescription());
+    assertEquals(LiteralConstants.IMPORT_LOCKED, checkLockVOResponseEntity.getBody().getMessage());
 
     Mockito.verify(lockService, times(2)).findByCriteria(Mockito.anyMap());
   }
@@ -1814,4 +1814,21 @@ public class DatasetControllerImplTest {
     assertEquals(HttpStatus.NOT_FOUND, checkLockVOResponseEntity.getStatusCode());
   }
 
+  @Test
+  public void checkLocksTest() {
+    Map<String, Object> lockCriteria = new HashMap<>();
+    List<LockVO> results = new ArrayList<>();
+    LockVO lockVO = new LockVO();
+
+    lockCriteria.put("key", 1L);
+    lockVO.setLockCriteria(lockCriteria);
+    results.add(lockVO);
+
+    Mockito.when(lockService.findAll()).thenReturn(results);
+    Mockito.when(lockService.findAllByCriteria(results, 1L)).thenReturn(results);
+
+    datasetControllerImpl.checkLocks(1L, 1L, 1L);
+
+    Mockito.verify(lockService, times(3)).findAllByCriteria(Mockito.anyList(), Mockito.anyLong());
+  }
 }

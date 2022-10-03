@@ -70,4 +70,13 @@ public interface LockService {
    * @param lockId the lock id
    */
   void scheduleLockRemovalTask(Integer lockId);
+
+
+  /**
+   * Find locks by criteria
+   *
+   * @param locks
+   * @param id
+   */
+  List<LockVO> findAllByCriteria(List<LockVO> locks, Long id);
 }

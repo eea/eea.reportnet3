@@ -14,7 +14,7 @@ public class CheckLockVO implements Serializable {
     private static final long serialVersionUID = -5875161356251419768L;
 
     /** The description */
-    private String description;
+    private String message;
 
     /** The importInProgress */
     private boolean importInProgress;
