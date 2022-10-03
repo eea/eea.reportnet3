@@ -383,6 +383,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         recordStoreControllerZuul.deleteDataset("dataset_" + datasetId);
 
         dataschemaService.deleteGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA);
+
       } else {
         LOG_ERROR.error("Not enough permissions to delete dataset schema with datasetId {}", datasetId);
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
@@ -1391,6 +1392,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       LOG.info("Importing schemas from the dataflowId {}", dataflowId);
       dataschemaService.importSchemas(dataflowId, file.getInputStream(),
           file.getOriginalFilename());
+      LOG.info("Successfully imported schemas from the dataflowId {}", dataflowId);
     } catch (Exception e) {
       LOG_ERROR.error("Error importing schemas on the dataflowId {}. Message: {}", dataflowId,
           e.getMessage(), e);
@@ -1509,6 +1511,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       LOG.info("Importing field Schemas for datasetId {}", datasetId);
       dataschemaService.importFieldsSchema(tableSchemaId, datasetSchemaId, datasetId,
           file.getInputStream(), replace);
+      LOG.info("Successfully imported field Schemas for datasetId {}", datasetId);
     } catch (IOException e) {
       LOG_ERROR.error("File importing field schemas for datasetId {} failed. fileName={}", datasetId,
           file.getOriginalFilename(), e);
