@@ -151,7 +151,9 @@ public class ValidationControllerImpl implements ValidationController {
       }
     }
     try {
+      LOG.info("Executing validation for datasetId {}", datasetId);
       validationHelper.executeValidation(datasetId, uuid, released, true);
+
       // Add lock to the release process if necessary
       validationHelper.addLockToReleaseProcess(datasetId);
     } catch (EEAException e) {

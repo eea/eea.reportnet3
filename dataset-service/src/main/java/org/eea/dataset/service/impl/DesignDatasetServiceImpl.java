@@ -258,6 +258,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       // Modify the FK, if the schemas copied have fields of type Link, to update the relations to
       // the correct ones
       processToModifyTheFK(dictionaryOriginTargetObjectId, mapDatasetIdFKRelations);
+      LOG.info("Foreign keys modified during the copyDesignDatasets process of dataflowId {} to dataflowId {} ", idDataflowOrigin, idDataflowDestination);
 
       // We use an auxiliary bean to store all the data we need to continue the process. The
       // dictionarys and the dataflowIds involved
@@ -268,17 +269,21 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       copy.setDictionaryOriginTargetDatasetsId(dictionaryOriginTargetDatasetsId);
       // Copy the rules
       dictionaryOriginTargetObjectId = rulesControllerZuul.copyRulesSchema(copy);
+      LOG.info("Schema rules copied during the copyDesignDatasets process of dataflowId {} to dataflowId {} ", idDataflowOrigin, idDataflowDestination);
 
       // Copy the unique catalogue (in case there are Links in the schemas involved)
       dataschemaService.copyUniqueConstraintsCatalogue(originDatasetSchemaIds,
           dictionaryOriginTargetObjectId);
+      LOG.info("Unique constraints copied during the copyDesignDatasets process of dataflowId {} to dataflowId {} ", idDataflowOrigin, idDataflowDestination);
 
       // Copy the integrations (in case the design datasets have integrations (to use with FME)
       // created)
       integrationControllerZuul.copyIntegrations(copy);
+      LOG.info("Integration copied during the copyDesignDatasets process of dataflowId {} to dataflowId {} ", idDataflowOrigin, idDataflowDestination);
 
       // Copy the data inside the design datasets, but only the tables that are prefilled
       datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
+      LOG.info("Prefilled data copied during the copyDesignDatasets process of dataflowId {} to dataflowId {} ", idDataflowOrigin, idDataflowDestination);
 
       // Release the notification
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_COMPLETED_EVENT,

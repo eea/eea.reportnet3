@@ -124,6 +124,7 @@ public class DocumentControllerImpl implements DocumentController {
       documentVO.setDescription(description);
       documentVO.setLanguage(language);
       documentVO.setIsPublic(isPublic);
+      LOG.info("Uploading document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
       documentService.uploadDocument(file.getInputStream(), file.getContentType(),
           file.getOriginalFilename(), documentVO, file.getSize());
     } catch (EEAException | IOException e) {
@@ -189,13 +190,11 @@ public class DocumentControllerImpl implements DocumentController {
       FileResponse file = documentService.getDocument(documentId, document.getDataflowId());
       return new ByteArrayResource(file.getBytes());
     } catch (final EEAException e) {
+      LOG_ERROR.error("Error retrieving document with documentId {} for dataflowId {}. Message: {}", documentId, dataflowId,
+              e.getMessage(), e);
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        LOG_ERROR.error("Error retrieving document: DocumentId {}. Message: {}", documentId,
-            e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      LOG_ERROR.error("Error retrieving document: DocumentId {}. Message: {}", documentId,
-          e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_DOCUMENT);
     }
@@ -299,6 +298,7 @@ public class DocumentControllerImpl implements DocumentController {
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
+      LOG.info("Deleting document with id {} for dataflowId {}", documentId, dataflowId);
       documentService.deleteDocument(documentId, document.getDataflowId(), deleteMetabase);
     } catch (final FeignException e) {
       LOG_ERROR.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
@@ -398,6 +398,7 @@ public class DocumentControllerImpl implements DocumentController {
       if (isPublic != null) {
         documentVO.setIsPublic(isPublic);
       }
+      LOG.info("Updating document with id {} for dataflowId {}", idDocument, dataflowId);
       if (file == null || file.isEmpty()) {
         documentService.updateDocument(documentVO);
       } else {
@@ -517,6 +518,7 @@ public class DocumentControllerImpl implements DocumentController {
     }
     try {
       ByteArrayInputStream inStream = new ByteArrayInputStream(file);
+      LOG.info("Uploading schema snapshot document {} for designDatasetId {}", fileName, designDatasetId);
       documentService.uploadSchemaSnapshot(inStream, "json", fileName, designDatasetId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
@@ -596,6 +598,7 @@ public class DocumentControllerImpl implements DocumentController {
       if (idDesignDataset == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
+      LOG.info("Deleting schema snapshot document {} for designDatasetId {}", fileName, idDesignDataset);
       documentService.deleteSnapshotDocument(fileName, idDesignDataset);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
@@ -642,6 +645,7 @@ public class DocumentControllerImpl implements DocumentController {
     }
     try {
       ByteArrayInputStream inStream = new ByteArrayInputStream(file);
+      LOG.info("Uploading collaboration document {} for dataflowId {}", fileName, dataflowId);
       documentService.uploadCollaborationDocument(inStream, extension, fileName, dataflowId,
           messageId);
     } catch (EEAException | IOException e) {
@@ -683,6 +687,7 @@ public class DocumentControllerImpl implements DocumentController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND,
             EEAErrorMessage.DATAFLOW_INCORRECT_ID);
       }
+      LOG.info("Deleting collaboration document {} for dataflowId {}", fileName, dataflowId);
       documentService.deleteCollaborationDocument(fileName, dataflowId, messageId);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
