@@ -58,5 +58,6 @@ export const DatasetConfig = {
   updateTableDesign: '/dataschema/{:datasetId}/tableSchema',
   validate: '/validation/dataset/{:datasetId}',
   validateSql: '/rules/validateSqlRules?datasetId={:datasetId}&datasetSchemaId={:datasetSchemaId}',
-  validationViewer: '/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}'
+  validationViewer: '/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}',
+  testImportProcess: '/dataset/checkImportProcess/{:datasetId}'
 };
