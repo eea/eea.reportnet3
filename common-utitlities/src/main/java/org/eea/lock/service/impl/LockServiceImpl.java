@@ -182,6 +182,32 @@ public class LockServiceImpl implements LockService {
     TASKS.put(lockId, task);
   }
 
+
+  /** Find locks by criteria
+   *
+   * @param locks
+   * @param id
+   * @return List<LockVO>
+   */
+  @Override
+  public List<LockVO> findAllByCriteria(List<LockVO> locks, Long id) {
+    LOG.info("Method findAllByCriteria called for id: {}", id);
+    List<LockVO> results = new ArrayList<>();
+    for (LockVO lock : locks) {
+      boolean exist = lock.getLockCriteria()
+          .values()
+          .stream()
+          .anyMatch(value -> value.equals(id));
+      if (exist) {
+        results.add(lock);
+      }
+    }
+
+    LOG.info("Method findAllByCriteria results {}", results);
+
+    return results;
+  }
+
   /**
    * Scheduled remove lock.
    *

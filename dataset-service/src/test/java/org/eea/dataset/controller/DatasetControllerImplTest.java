@@ -9,10 +9,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
@@ -39,6 +36,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.lock.service.LockService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -1745,6 +1743,24 @@ public class DatasetControllerImplTest {
   public void getCheckViewTest() {
     datasetControllerImpl.getCheckView(1L);
     Mockito.verify(datasetService, times(1)).getCheckView(Mockito.anyLong());
+  }
+
+  @Test
+  public void checkLocksTest() {
+    Map<String, Object> lockCriteria = new HashMap<>();
+    List<LockVO> results = new ArrayList<>();
+    LockVO lockVO = new LockVO();
+
+    lockCriteria.put("key", 1L);
+    lockVO.setLockCriteria(lockCriteria);
+    results.add(lockVO);
+
+    Mockito.when(lockService.findAll()).thenReturn(results);
+    Mockito.when(lockService.findAllByCriteria(results, 1L)).thenReturn(results);
+
+    datasetControllerImpl.checkLocks(1L, 1L, 1L);
+
+    Mockito.verify(lockService, times(3)).findAllByCriteria(Mockito.anyList(), Mockito.anyLong());
   }
 
 }

@@ -5,10 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -37,6 +34,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -1624,7 +1622,47 @@ public class DatasetControllerImpl implements DatasetController {
     datasetService.deleteTempEtlExport(datasetId);
   }
 
+  /**
+   * Check all locks with criteria
+   *
+   * @param datasetId
+   * @param dataflowId
+   * @param dataProviderId
+   * @return ResponseEntity<List<LockVO>>
+   */
+  @PostMapping(value = "/checkLocks", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Get Locks for input data", hidden = true)
+  public ResponseEntity<List<LockVO>> checkLocks(
+      @ApiParam(type = "Long", value = "Dataset id", example = "0" )@RequestParam("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataset id", example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Dataset id", example = "0") @RequestParam("dataProviderId") Long dataProviderId) {
 
+    LOG.info("Method checkLocks called for datasetId: {}, dataflowId: {}, dataProviderId: {}", datasetId, dataflowId, dataProviderId);
+
+    List<LockVO> results = new ArrayList<>();
+    try {
+
+      List<LockVO> locks = lockService.findAll();
+
+      //Get locks by dataset id
+      if (datasetId != null) {
+        results.addAll(lockService.findAllByCriteria(locks, datasetId));
+      }
+
+      //Get locks by dataflow id and then parse these results by data provider id
+      if (dataflowId != null && dataProviderId != null) {
+        List<LockVO> dataflowLocks = lockService.findAllByCriteria(locks, dataflowId);
+        results.addAll(lockService.findAllByCriteria(dataflowLocks, dataProviderId));
+      }
+
+      LOG.info("Method checkLocks results: {},", results);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error while executing method checkLocks ffor datasetId: {}, dataflowId: {}, dataProviderId: {}", datasetId, dataflowId, dataProviderId, e);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    return new ResponseEntity<>(results, HttpStatus.OK);
+  }
 
   /**
    * Creates the response entity.
