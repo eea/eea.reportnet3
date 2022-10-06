@@ -1688,9 +1688,13 @@ public class DatasetControllerImpl implements DatasetController {
       }
 
       //Get locks by dataflow id and then parse these results by data provider id
-      if (dataflowId != null && dataProviderId != null) {
+      if (dataflowId != null) {
         List<LockVO> dataflowLocks = lockService.findAllByCriteria(locks, dataflowId);
-        results.addAll(lockService.findAllByCriteria(dataflowLocks, dataProviderId));
+        if (dataProviderId != null) {
+          results.addAll(lockService.findAllByCriteria(dataflowLocks, dataProviderId));
+        } else {
+          results.addAll(dataflowLocks);
+        }
       }
 
       LOG.info("Method checkLocks results: {},", results);
