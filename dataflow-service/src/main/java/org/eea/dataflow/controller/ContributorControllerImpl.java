@@ -119,7 +119,8 @@ public class ContributorControllerImpl implements ContributorController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_REQUESTER);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting the requester {} in the dataflow: {}. Message: {}", contributorVO.getAccount(), dataflowId, e.getMessage(), e);
+      String account = (contributorVO != null) ? contributorVO.getAccount() : null;
+      LOG_ERROR.error("Unexpected error! Error deleting the requester {} in the dataflow: {}. Message: {}", account, dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -171,7 +172,8 @@ public class ContributorControllerImpl implements ContributorController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_REPORTER);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting the reporter {} in the dataflow: {}. Message: {}", contributorVO.getAccount(), dataflowId, e.getMessage(), e);
+      String account = (contributorVO != null) ? contributorVO.getAccount() : null;
+      LOG_ERROR.error("Unexpected error! Error deleting the reporter {} in the dataflow: {}. Message: {}", account, dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -278,7 +280,8 @@ public class ContributorControllerImpl implements ContributorController {
       LOG_ERROR.error("Error update the requester {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error updating the requester {} in the dataflow: {}. Message: {}", contributorVO.getAccount(), dataflowId, e.getMessage(), e);
+      String account = (contributorVO != null) ? contributorVO.getAccount() : null;
+      LOG_ERROR.error("Unexpected error! Error updating the requester {} in the dataflow: {}. Message: {}", account, dataflowId, e.getMessage());
       throw e;
     }
     return new ResponseEntity<>(message, status);
@@ -342,7 +345,8 @@ public class ContributorControllerImpl implements ContributorController {
       LOG_ERROR.error("Error update the reporter {}.in the dataflow: {}",
           contributorVO.getAccount(), dataflowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error updating the reporter {} in the dataflow: {}. Message: {}", contributorVO.getAccount(), dataflowId, e.getMessage(), e);
+      String account = (contributorVO != null) ? contributorVO.getAccount() : null;
+      LOG_ERROR.error("Unexpected error! Error updating the reporter {} in the dataflow: {}. Message: {}", account, dataflowId, e.getMessage());
       throw e;
     }
     return new ResponseEntity<>(message, status);
@@ -381,8 +385,8 @@ public class ContributorControllerImpl implements ContributorController {
       status = HttpStatus.BAD_REQUEST;
     }
     catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error creating the associated permissions for requested reporter in the dataflow: {} with data provider ID {} Message: {}",
-              dataflowId, dataProviderId, e.getMessage(), e);
+      LOG_ERROR.error("Unexpected error! Error creating the associated permissions for requested reporter in the dataflow: {} with dataProviderId {} Message: {}",
+              dataflowId, dataProviderId, e.getMessage());
       throw e;
     }
     return new ResponseEntity<>(message, status);
@@ -417,7 +421,7 @@ public class ContributorControllerImpl implements ContributorController {
     }
     catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error creating the associated permissions for requested role in the dataflow: {} with datasetId {} Message: {}",
-              dataflowId, datasetId, e.getMessage(), e);
+              dataflowId, datasetId, e.getMessage());
       throw e;
     }
   }

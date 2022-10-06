@@ -82,9 +82,10 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_WEBLINK);
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve link with id {} Message: {}", idLink, e.getMessage());
+      throw e;
     }
-
-
   }
 
   /**
@@ -125,8 +126,12 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_WEBLINK);
+    } catch (Exception e){
+      Long linkId = (weblinkVO != null) ? weblinkVO.getId() : null;
+      String linkUrl = (weblinkVO != null) ? weblinkVO.getUrl() : null;
+      LOG_ERROR.error("Unexpected error! Could not save link for dataflowId {} linkId {} and linlUrl {} Message: {}", dataflowId, linkId, linkUrl, e.getMessage());
+      throw e;
     }
-
   }
 
   /**
@@ -184,6 +189,9 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_WEBLINK);
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not remove link with id {} for dataflowId {} Message: {}", idLink, dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -249,8 +257,12 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
       LOG_ERROR.error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.UPDATING_WEBLINK);
+    } catch (Exception e){
+      Long linkId = (weblinkVO != null) ? weblinkVO.getId() : null;
+      String linkUrl = (weblinkVO != null) ? weblinkVO.getUrl() : null;
+      LOG_ERROR.error("Unexpected error! Could not update link for dataflowId {} linkId {} and linlUrl {} Message: {}", dataflowId, linkId, linkUrl, e.getMessage());
+      throw e;
     }
-
   }
 
   @Override
@@ -292,6 +304,9 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
       weblinks = dataflowWebLinkService.getAllWeblinksByDataflowId(dataflowId);
     } catch (EEAException e) {
       LOG_ERROR.error("Not found dataflow {}", dataflowId);
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve links for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
     return weblinks;
   }

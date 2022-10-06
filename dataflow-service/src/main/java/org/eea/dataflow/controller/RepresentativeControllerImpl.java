@@ -92,6 +92,11 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       LOG_ERROR.error("Error creating new representative: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.CREATING_REPRESENTATIVE);
+    } catch(Exception e){
+      Long representativeId = (representativeVO != null) ? representativeVO.getId() : null;
+      Long dataProviderId = (representativeVO != null) ? representativeVO.getDataProviderId() : null;
+      LOG_ERROR.error("Unexpected error! Could not create representative with id {} and dataProviderId {} for dataflowId {} Message: {}", representativeId, dataProviderId, dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -194,6 +199,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       LOG_ERROR.error("Error retrieving representatives: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not find representatives for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
     return representativeVOs;
   }
@@ -264,6 +272,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       LOG_ERROR.error("Error deleting representative: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not delete representative with id {} for dataflowId {} Message: {}", dataflowRepresentativeId, dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -315,6 +326,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       LOG_ERROR.error("Error while exporting lead reporters: ", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXPORT_LEAD_REPORTERS);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not export lead reporters file for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -345,6 +359,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       LOG_ERROR.error("Error exporting lead reporters template.", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXPORT_LEAD_REPORTERS);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not export the template file for lead reporters for groupId {} Message: {}", groupId, e.getMessage());
+      throw e;
     }
   }
 
@@ -400,6 +417,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
           file.getName());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IMPORT_LEAD_REPORTERS);
+    } catch(Exception e){
+      String fileName = (file != null) ? file.getName() : null;
+      LOG_ERROR.error("Unexpected error! Could not import the country template file {} for groupId {} and dataflowId {} Message: {}", fileName, groupId, dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -444,6 +465,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       LOG_ERROR.error("Error creating new lead reporter: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.CREATE_LEAD_REPORTER);
+    } catch(Exception e){
+      Long reporterId = (leadReporterVO != null) ? leadReporterVO.getId() : null;
+      LOG_ERROR.error("Unexpected error! Could not create lead reporter with representativeId {} and reporterId {} for dataflowId {} Message: {}", representativeId, reporterId, dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -487,6 +512,11 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       LOG_ERROR.error("Error updating lead reporter: duplicated representative. leadReporterVO={}",
           leadReporterVO, e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Representative not found");
+    } catch(Exception e){
+      Long representativeId = (leadReporterVO != null) ? leadReporterVO.getRepresentativeId() : null;
+      Long reporterId = (leadReporterVO != null) ? leadReporterVO.getId() : null;
+      LOG_ERROR.error("Unexpected error! Could not update lead reporter with representativeId {} and reporterId {} for dataflowId {} Message: {}", representativeId, reporterId, dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -510,6 +540,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       LOG_ERROR.error("Error deleting lead reporter: leadReporterId ={}", leadReporterId, e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not delete lead reporter with reporterId {} for dataflowId {} Message: {}", leadReporterId, dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -532,6 +565,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       LOG_ERROR.error("Error validating lead reporters: leadReporterId ={}", dataflowId, e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.ERROR_VALIDATING_LEAD_REPORTERS);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not validate lead reporters for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -567,6 +603,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       }
     } catch (EEAException e) {
       LOG_ERROR.info("Error: {}", e.getMessage());
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not update representative visibility for dataProviderId {} and dataflowId {} Message: {}", dataProviderId, dataflowId, e.getMessage());
+      throw e;
     }
   }
 

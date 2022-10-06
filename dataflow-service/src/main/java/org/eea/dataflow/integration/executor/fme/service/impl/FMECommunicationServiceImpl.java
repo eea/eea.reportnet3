@@ -397,7 +397,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     } catch (HttpClientErrorException e) {
       LOG_ERROR.info("Error downloading file: {}  from FME", fileName, e);
     } catch (Exception e) {
-      LOG_ERROR.info("Unexpected error! Error downloading file: {}  from FME", fileName, e);
+      LOG_ERROR.info("Unexpected error! Error downloading file: {} from FME. Message: {}", fileName, e.getMessage());
+      throw e;
     }
     InputStream stream = null;
     if (null != checkResult && null != checkResult.getBody()) {
@@ -581,7 +582,8 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       LOG_ERROR.error("Error realeasing event: FMEJob={}", fmeJob, e);
     }
     catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error releasing event: FMEJob={}", fmeJob, e);
+      LOG_ERROR.error("Unexpected error! Error releasing event: FMEJob={} Message: {}", fmeJob, e.getMessage());
+      throw e;
     }
   }
 
