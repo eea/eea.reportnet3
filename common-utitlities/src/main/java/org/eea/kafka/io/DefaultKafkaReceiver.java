@@ -41,7 +41,7 @@ public class DefaultKafkaReceiver extends KafkaReceiver {
       } catch (EEAException e) {
         LOG_ERROR.error("Error processing event {}", message.getPayload(), e);
       } catch (Exception e) {
-        LOG_ERROR.error("Undetermined  processing message {}", message, e);
+        LOG_ERROR.error("Unexpected error! Undetermined processing message {}", message, e);
       }
     }
 
