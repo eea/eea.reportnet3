@@ -1598,7 +1598,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     String copyQueryField = COPY_DATASET + datasetId
         + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
 
-    for (int i=1; i <= splitSnapFile(nameFileFieldValue, idSnapshot); i++) {
+    int numberOfFiles = splitSnapFile(nameFileFieldValue, idSnapshot);
+
+    for (int i=1; i <= numberOfFiles; i++) {
       String splitFile = pathSnapshot
           + String.format(FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
       copyFromFile(copyQueryField, splitFile, cm);
