@@ -1,13 +1,6 @@
 package org.eea.recordstore.service.impl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,13 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
@@ -1610,7 +1597,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     String copyQueryField = COPY_DATASET + datasetId
         + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
-    copyFromFile(copyQueryField, nameFileFieldValue, cm);
+
+    for (int i=1; i <= splitSnapFile(nameFileFieldValue, idSnapshot); i++) {
+      String splitFile = pathSnapshot
+          + String.format(FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+      copyFromFile(copyQueryField, splitFile, cm);
+    }
 
     // Attachment value
     String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
@@ -1804,7 +1796,53 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+  private int splitSnapFile(String inputfile, Long idSnapshot) {
 
+    int numberOfFiles = 0;
+    try{
+      // Reading file and getting no. of files to be generated
+      double numberOfLines = 100000.0; //  No. of lines to be split and saved in each output file.
+      File file = new File(inputfile);
+      Scanner scanner = new Scanner(file);
+      int count = 0;
+      while (scanner.hasNextLine()) {
+        scanner.nextLine();
+        count++;
+      }
+      LOG.info("File {} has {} lines", inputfile, count);
+
+      numberOfFiles = (int) Math.ceil(count/numberOfLines);
+
+      LOG.info("File {} to be splitted to {} ", inputfile, numberOfFiles);
+      // Actual splitting of file into smaller files
+      FileInputStream fstream = new FileInputStream(inputfile); DataInputStream in = new DataInputStream(fstream);
+      BufferedReader br = new BufferedReader(new InputStreamReader(in));
+      String strLine;
+
+      for (int j=1; j <= numberOfFiles; j++) {
+        // Destination File Location
+        FileWriter fstream1 = new FileWriter(pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, j, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX));
+        BufferedWriter out = new BufferedWriter(fstream1);
+        for (int i=1; i <= numberOfLines; i++) {
+          strLine = br.readLine();
+          if (strLine != null) {
+            out.write(strLine);
+            if(i != numberOfLines) {
+              out.newLine();
+            }
+          }
+        }
+        out.close();
+      }
+
+      in.close();
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in file {} with error {}", inputfile,  e.getMessage());
+    }
+
+    return numberOfFiles;
+
+  }
 
   /**
    * Creates the index materialized view.
