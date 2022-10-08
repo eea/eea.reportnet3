@@ -119,7 +119,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
           obtainPartition(relatedDatasetsByIds.get(dataCollection.getId()), "root").getId(), null,
           false);
     }
-    LOG.info("EU dataset populated with dataflowId {}", dataflowId);
+    LOG.info("EU dataset populated for dataflowId {}", dataflowId);
 
   }
 

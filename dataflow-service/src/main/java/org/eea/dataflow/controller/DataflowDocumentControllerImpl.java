@@ -91,10 +91,22 @@ public class DataflowDocumentControllerImpl implements DataFlowDocumentControlle
   @ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)
   public void updateDocument(
       @ApiParam(type = "Object", value = "Document") @RequestBody DocumentVO document) {
-    LOG.info("updating document in controller");
     try {
+      if(document != null){
+        LOG.info("Updating document {}", document.getId());
+      }
+      else{
+        LOG.info("Updating document but object is null");
+      }
       dataflowService.updateDocument(document);
+      LOG.info("Successfully updated document {}", document.getId());
     } catch (EEAException e) {
+      if(document != null){
+        LOG.error("Error when updating document {}", document.getId());
+      }
+      else{
+        LOG.error("Error when updating document because object is null");
+      }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
           e);
     }
@@ -114,10 +126,21 @@ public class DataflowDocumentControllerImpl implements DataFlowDocumentControlle
   @ApiResponse(code = 400, message = EEAErrorMessage.DOCUMENT_NOT_FOUND)
   public Long insertDocument(
       @ApiParam(type = "Object", value = "Document object") @RequestBody DocumentVO document) {
-    LOG.info("inserting document in controller");
     try {
+      if(document != null){
+        LOG.info("Inserting document {}", document.getName());
+      }
+      else{
+        LOG.info("Inserting document but object is null");
+      }
       return dataflowService.insertDocument(document);
     } catch (EEAException e) {
+      if(document != null){
+        LOG.error("Error when inserting document {}", document.getId());
+      }
+      else{
+        LOG.error("Error when inserting document because object is null");
+      }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
           e);
     }
@@ -136,8 +159,11 @@ public class DataflowDocumentControllerImpl implements DataFlowDocumentControlle
   public void deleteDocument(
       @ApiParam(value = "Document id", example = "0") @PathVariable("documentId") Long documentId) {
     try {
+      LOG.info("Deleting document with id {}", documentId);
       dataflowService.deleteDocument(documentId);
+      LOG.info("Successfully deleted document with id {}", documentId);
     } catch (EEAException e) {
+      LOG.info("Error when deleting document with id {}", documentId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
           e);
     }

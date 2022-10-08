@@ -60,6 +60,16 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   List<Task> findByIdIn(@Param("ids") List<Long> ids);
 
   /**
+   * update status
+   * @param taskId
+   * @param status
+   */
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true, value = "update task set status= :status where id= :taskId")
+  void updateStatus(@Param("taskId") Long taskId, @Param("status") String status);
+
+  /**
    * Update status and finish date.
    *
    * @param taskId the task id
