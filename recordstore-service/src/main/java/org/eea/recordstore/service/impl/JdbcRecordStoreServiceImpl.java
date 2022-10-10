@@ -130,6 +130,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The Constant COMMA: {@value}. */
   private static final String COMMA = ", ";
 
+  /** The Constant FIELD_TYPE: {@value}. */
+  private static final String FIELD_TYPE = "FIELD";
+
+  /** The Constant ATTACHMENT_TYPE: {@value}. */
+  private static final String ATTACHMENT_TYPE = "ATTACHMENT";
+
   /** The user postgre db. */
   @Value("${spring.datasource.dataset.username}")
   private String userPostgreDb;
@@ -1538,6 +1544,45 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+  /**
+   * Restore specific file snapshot.
+   *
+   * @param datasetId      the dataset id
+   * @param idSnapshot     the id snapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param type
+   */
+  @Override
+  public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
+      Long startingNumber, Long endingNumber, String type) {
+
+    LOG.info("Method restoreSpecificFileSnapshot starts with datasetId: {}", datasetId);
+    try {
+      ConnectionDataVO connection =
+          getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+      Connection con =
+          DriverManager.getConnection(connection.getConnectionString(), connection.getUser(),
+              connection.getPassword());
+      con.setAutoCommit(true);
+
+      CopyManager cm = new CopyManager((BaseConnection) con);
+
+      copyProcessSpecificFileSnapshot(datasetId, idSnapshot, cm, startingNumber, endingNumber, type);
+
+      LOG.info("Method restoreSpecificFileSnapshot ends with datasetId: {}", datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in method restoreSpecificFileSnapshot for datasetId: {} with error {}",
+          datasetId, e);
+    }
+    /* finally {
+      Map<String, Object> lockCriteria = new HashMap<>();
+      lockCriteria.put(LiteralConstants.SIGNATURE, signature);
+      lockCriteria.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(lockCriteria);
+    }*/
+  }
+
 
   /**
    * Gets the providers code.
@@ -1617,6 +1662,45 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     String copyQueryAttachment = COPY_DATASET + datasetId
         + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
     copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
+  }
+
+
+  /**
+   * Copy process specific File snapshot
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @param cm the cm
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
+   */
+  private void copyProcessSpecificFileSnapshot(Long datasetId, Long idSnapshot,
+    CopyManager cm, Long startingNumber, Long endingNumber, String type)
+    throws IOException, SQLException {
+
+    LOG.info("Method copyProcessSpecificSnapshot starts with datasetId: {}", datasetId);
+    switch (type) {
+      case FIELD_TYPE:
+        String copyQueryField = COPY_DATASET + datasetId
+            + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
+
+        for (Long i = startingNumber; i <= endingNumber; i++) {
+          String splitFile = pathSnapshot
+              + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+          copyFromFile(copyQueryField, splitFile, cm);
+          deleteFile(Arrays.asList(splitFile));
+        }
+        break;
+      case ATTACHMENT_TYPE:
+        String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+            LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+
+        String copyQueryAttachment = COPY_DATASET + datasetId
+            + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
+        copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
+        break;
+    }
+    LOG.info("Method copyProcessSpecificSnapshot ends with datasetId: {}", datasetId);
   }
 
   /**
