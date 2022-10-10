@@ -104,6 +104,9 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
       } catch (IllegalStateException e) {
         ruleVO.setEnabled(false);
         LOG_ERROR.error("Error with the rule {}", ruleVO);
+      } catch (Exception e) {
+        LOG_ERROR.error("Unexpected error! Error in afterMapping with rule {}. Message: {}", ruleVO, e.getMessage());
+        throw e;
       }
     }
   }
