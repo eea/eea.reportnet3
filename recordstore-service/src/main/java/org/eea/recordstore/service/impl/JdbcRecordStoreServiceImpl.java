@@ -102,6 +102,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The Constant FILE_PATTERN_NAME: {@value}. */
   private static final String FILE_PATTERN_NAME = "snapshot_%s%s";
 
+  /** The Constant SPLIT_FILE_PATTERN_NAME: {@value}. */
+  private static final String SPLIT_FILE_PATTERN_NAME = "snapshot_%s_%s%s";
+
   /** The Constant FILE_CLONE_PATTERN_NAME: {@value}. */
   private static final String FILE_CLONE_PATTERN_NAME = "clone_%s_to_%s%s";
 
@@ -1606,8 +1609,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     for (int i=1; i <= numberOfFiles; i++) {
       String splitFile = pathSnapshot
-          + String.format(FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+          + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
       copyFromFile(copyQueryField, splitFile, cm);
+      deleteFile(Arrays.asList(splitFile));
     }
 
     // Attachment value
@@ -1808,7 +1812,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     int numberOfFiles = 0;
     try{
       // Reading file and getting no. of files to be generated
-      double numberOfLines = 100000.0; //  No. of lines to be split and saved in each output file.
+      double numberOfLines = 200000.0; //  No. of lines to be split and saved in each output file.
       File file = new File(inputfile);
       Scanner scanner = new Scanner(file);
       int count = 0;
@@ -1828,7 +1832,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       for (int j=1; j <= numberOfFiles; j++) {
         // Destination File Location
-        FileWriter fstream1 = new FileWriter(pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, j, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX));
+        FileWriter fstream1 = new FileWriter(pathSnapshot + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX));
         BufferedWriter out = new BufferedWriter(fstream1);
         for (int i=1; i <= numberOfLines; i++) {
           strLine = br.readLine();
