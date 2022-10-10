@@ -101,6 +101,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           datasetName, idDatasetSchema, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_EMPTY_DATASET);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating empty dataset {} with dataSchemaId {}. Message: {}", datasetName, idDatasetSchema, e.getMessage());
+      throw e;
     }
   }
 
@@ -124,6 +127,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       vo = recordStoreService.getConnectionDataForDataset(datasetName);
     } catch (final RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving connection to dataset {}. Message: {}", datasetName, e.getMessage());
+      throw e;
     }
     return vo;
   }
@@ -144,6 +150,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       vo = recordStoreService.getConnectionDataForDataset();
     } catch (final RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving dataset connection. Message: {}", e.getMessage());
+      throw e;
     }
     return vo;
   }
@@ -195,6 +204,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           datasetId, idSnapshot, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_SNAPSHOT);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating snapshot data with id {} for datasetId {}. Message: {}", idSnapshot, datasetId, e.getMessage());
+      throw e;
     }
 
   }
@@ -246,6 +258,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           datasetId, idSnapshot, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RESTORING_SNAPSHOT);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error restoring snapshot data with id {} for datasetId {}. Message: {}", idSnapshot, datasetId, e.getMessage());
+      throw e;
     }
 
   }
@@ -275,7 +290,10 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_SNAPSHOT);
     }
-
+    catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error removing snapshot data with id {} for datasetId {}. Message: {}", idSnapshot, datasetId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -289,7 +307,12 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @ApiOperation(value = "Delete dataset data for a given dataset schema name", hidden = true)
   public void deleteDataset(@ApiParam(value = "Dataset schema name",
       example = "Dataset schema displayed name") @PathVariable("datasetSchemaName") String datasetSchemaName) {
-    recordStoreService.deleteDataset(datasetSchemaName);
+    try {
+      recordStoreService.deleteDataset(datasetSchemaName);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting dataset {}. Message: {}", datasetSchemaName, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -319,9 +342,14 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    // This method will release the lock
-    recordStoreService.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation,
-        isMaterialized);
+    try {
+      // This method will release the lock
+      recordStoreService.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation,
+              isMaterialized);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating schemas for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -335,12 +363,15 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @ApiOperation(value = "Distribute into reference tables", hidden = true)
   public void distributeTables(
       @ApiParam(value = "Dataset Id", example = "0") @PathVariable("datasetId") Long datasetId) {
-
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
-        SecurityContextHolder.getContext().getAuthentication().getName());
-
-    recordStoreService.distributeTables(datasetId);
+            SecurityContextHolder.getContext().getAuthentication().getName());
+    try {
+      recordStoreService.distributeTables(datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error distributing tables for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
   }
 
 
@@ -357,7 +388,12 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @ApiParam(value = "Dataset Id", example = "0") @RequestParam("datasetId") Long datasetId,
       @ApiParam(value = "Is the schema going to be materialized?",
           example = "true") @RequestParam("isMaterialized") boolean isMaterialized) {
-    recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
+    try {
+      recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating update query view for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -376,8 +412,13 @@ public class RecordStoreControllerImpl implements RecordStoreController {
 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
-    recordStoreService.refreshMaterializedQuery(Arrays.asList(datasetId), false, false, datasetId,
-        processId);
+    try {
+      recordStoreService.refreshMaterializedQuery(Arrays.asList(datasetId), false, false, datasetId,
+              processId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error refreshing materialized view for datasetId {} and processId {}. Message: {}", datasetId, processId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -400,8 +441,13 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @RequestParam("tableSchemasId") List<String> tableSchemasIdPrefill) {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
-    recordStoreService.createSnapshotToClone(originDataset, targetDataset,
-        dictionaryOriginTargetObjectId, partitionDatasetTarget, tableSchemasIdPrefill);
+    try {
+      recordStoreService.createSnapshotToClone(originDataset, targetDataset,
+              dictionaryOriginTargetObjectId, partitionDatasetTarget, tableSchemasIdPrefill);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error cloning data from datasetId {} to datasetId {}. Message: {}", originDataset, targetDataset, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -415,7 +461,12 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @ApiOperation(value = "Private operation to update snapshot, disable and move the files",
       hidden = true)
   public void updateSnapshotDisabled(@PathVariable("datasetId") Long datasetId) {
-    recordStoreService.updateSnapshotDisabled(datasetId);
+    try {
+      recordStoreService.updateSnapshotDisabled(datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error updating snapshot disabled for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
   }
 
 }

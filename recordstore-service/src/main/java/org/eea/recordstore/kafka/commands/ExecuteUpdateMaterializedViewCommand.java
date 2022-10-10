@@ -62,29 +62,37 @@ public class ExecuteUpdateMaterializedViewCommand extends AbstractEEAEventHandle
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
-    Long datasetId =
-        Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
-    String user = String.valueOf(eeaEventVO.getData().get(LiteralConstants.USER));
-    Boolean released = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("released")));
-    String processId = String.valueOf(eeaEventVO.getData().get("processId"));
-    List<Integer> referencesToRefresh =
-        (List<Integer>) eeaEventVO.getData().get("referencesToRefresh");
+    try {
+      Long datasetId =
+              Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
+      String user = String.valueOf(eeaEventVO.getData().get(LiteralConstants.USER));
+      Boolean released = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("released")));
+      String processId = String.valueOf(eeaEventVO.getData().get("processId"));
+      List<Integer> referencesToRefresh =
+              (List<Integer>) eeaEventVO.getData().get("referencesToRefresh");
 
-    if (referencesToRefresh != null && !CollectionUtils.isEmpty(referencesToRefresh)) {
-      referencesToRefresh.stream().forEach(dataset -> {
-        try {
-          recordStoreService.launchUpdateMaterializedQueryView(Long.valueOf(dataset));
-        } catch (RecordStoreAccessException e) {
-          LOG_ERROR.error("Error refreshing the materialized view of the dataset {}", dataset, e);
-          processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.CANCELED,
-              ProcessTypeEnum.VALIDATION, processId,
-              SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
-          datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
-              DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
-        }
-      });
+      if (referencesToRefresh != null && !CollectionUtils.isEmpty(referencesToRefresh)) {
+        referencesToRefresh.stream().forEach(dataset -> {
+          try {
+            recordStoreService.launchUpdateMaterializedQueryView(Long.valueOf(dataset));
+          } catch (RecordStoreAccessException e) {
+            LOG_ERROR.error("Error refreshing the materialized view of the dataset {}", dataset, e);
+            processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.CANCELED,
+                    ProcessTypeEnum.VALIDATION, processId,
+                    SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
+            datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
+                    DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
+          } catch (Exception e) {
+            LOG_ERROR.error("Unexpected error! Error  refreshing the materialized view of the dataset {}. Message: {}", dataset, e.getMessage());
+            throw e;
+          }
+        });
+      }
+      recordStoreService.updateMaterializedQueryView(datasetId, user, released, processId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      throw e;
     }
-    recordStoreService.updateMaterializedQueryView(datasetId, user, released, processId);
   }
 
 }

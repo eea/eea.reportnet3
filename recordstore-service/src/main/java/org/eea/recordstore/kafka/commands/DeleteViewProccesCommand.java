@@ -6,6 +6,8 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.recordstore.util.ViewHelper;
 import org.eea.utils.LiteralConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,9 @@ public class DeleteViewProccesCommand extends AbstractEEAEventHandlerCommand {
   /** The view helper. */
   @Autowired
   private ViewHelper viewHelper;
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Gets the event type.
@@ -37,10 +42,15 @@ public class DeleteViewProccesCommand extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
-    Long datasetId =
-        Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
+    try {
+      Long datasetId =
+              Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
 
-    viewHelper.deleteProccesList(datasetId);
+      viewHelper.deleteProccesList(datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      throw e;
+    }
   }
 
 }

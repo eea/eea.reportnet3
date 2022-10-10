@@ -104,8 +104,13 @@ public class ProcessControllerImpl implements ProcessController {
       @RequestParam("processId") String processId, @RequestParam("user") String user,
       @RequestParam("priority") int priority,
       @RequestParam(required = false, value = "released") Boolean released) {
-    return processService.updateProcess(datasetId, dataflowId, status, type, processId, user,
-        priority, released);
+    try {
+      return processService.updateProcess(datasetId, dataflowId, status, type, processId, user,
+              priority, released);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error updating process with id {} for datasetId {} to status {} Message: {}", processId, datasetId, status.toString(), e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -123,7 +128,12 @@ public class ProcessControllerImpl implements ProcessController {
     if (priority > 100 || priority < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong priority range.");
     }
-    processService.updatePriority(processId, priority);
+    try {
+      processService.updatePriority(processId, priority);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error updating priority of process with id {} to value {} Message: {}", processId, priority, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -174,7 +184,12 @@ public class ProcessControllerImpl implements ProcessController {
   @HystrixCommand
   @GetMapping(value = "/private/finished/{processId}")
   public boolean isProcessFinished(String processId) {
-    return processService.isProcessFinished(processId);
+    try {
+      return processService.isProcessFinished(processId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error checking if process with id {} is finished. Message: {}", processId, e.getMessage());
+      throw e;
+    }
   }
 
 
@@ -188,7 +203,12 @@ public class ProcessControllerImpl implements ProcessController {
   @HystrixCommand
   @GetMapping(value = "/private/next/{processId}")
   public ProcessVO getNextProcess(String processId) {
-    return processService.findNextProcess(processId);
+    try {
+      return processService.findNextProcess(processId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error finding next process with id {} Message: {}", processId, e.getMessage());
+      throw e;
+    }
   }
 
 }
