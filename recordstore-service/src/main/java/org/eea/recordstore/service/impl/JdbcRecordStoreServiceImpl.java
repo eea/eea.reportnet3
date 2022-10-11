@@ -1583,42 +1583,47 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void copyProcess(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType,
       CopyManager cm) throws IOException, SQLException {
-    if (DatasetTypeEnum.DESIGN.equals(datasetType)
-        || DatasetTypeEnum.REFERENCE.equals(datasetType)) {
-      // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
-      // not neccesary
-      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+    try {
+      if (DatasetTypeEnum.DESIGN.equals(datasetType)
+              || DatasetTypeEnum.REFERENCE.equals(datasetType)) {
+        // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
+        // not neccesary
+        String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+                LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
-      modifySnapshotFile(null, Arrays.asList(nameFileTableValue), datasetId);
+        modifySnapshotFile(null, Arrays.asList(nameFileTableValue), datasetId);
 
-      String copyQueryTable =
-          COPY_DATASET + datasetId + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
-      copyFromFile(copyQueryTable, nameFileTableValue, cm);
+        String copyQueryTable =
+                COPY_DATASET + datasetId + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
+        copyFromFile(copyQueryTable, nameFileTableValue, cm);
+      }
+      // Record value
+      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+              LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
+
+      String copyQueryRecord = COPY_DATASET + datasetId
+              + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
+      copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
+
+      // Field value
+      String nameFileFieldValue = pathSnapshot
+              + String.format(FILE_PATTERN_NAME, idSnapshot, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+
+      String copyQueryField = COPY_DATASET + datasetId
+              + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
+      copyFromFile(copyQueryField, nameFileFieldValue, cm);
+
+      // Attachment value
+      String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+              LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+
+      String copyQueryAttachment = COPY_DATASET + datasetId
+              + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
+      copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error in copyProcess for datasetId {} and snapshotId {}. Message: {}", datasetId, idSnapshot, e.getMessage());
+      throw e;
     }
-    // Record value
-    String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-        LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
-
-    String copyQueryRecord = COPY_DATASET + datasetId
-        + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
-    copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
-
-    // Field value
-    String nameFileFieldValue = pathSnapshot
-        + String.format(FILE_PATTERN_NAME, idSnapshot, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-
-    String copyQueryField = COPY_DATASET + datasetId
-        + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
-    copyFromFile(copyQueryField, nameFileFieldValue, cm);
-
-    // Attachment value
-    String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-        LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
-
-    String copyQueryAttachment = COPY_DATASET + datasetId
-        + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
-    copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
   }
 
   /**
