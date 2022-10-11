@@ -3,3 +3,5 @@ server:
 spring:
   application:
     name: dataset
+  autoconfigure:
+    exclude: org.axonframework.springboot.autoconfig.JpaAutoConfiguration
