@@ -719,6 +719,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       if (cp.isActive()) {
         cp.cancelCopy();
       }
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error copying from file {} with query {} Message: {}", fileName, query, e.getMessage());
+      throw e;
     } finally {
       Files.deleteIfExists(path);
     }
