@@ -1554,6 +1554,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param endingNumber
    * @param type
    */
+  @Async
   @Override
   public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
       Long startingNumber, Long endingNumber, String type) {
@@ -1576,12 +1577,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG_ERROR.error("Error in method restoreSpecificFileSnapshot for datasetId: {} with error {}",
           datasetId, e);
     }
-    /* finally {
-      Map<String, Object> lockCriteria = new HashMap<>();
-      lockCriteria.put(LiteralConstants.SIGNATURE, signature);
-      lockCriteria.put(LiteralConstants.DATASETID, datasetId);
-      lockService.removeLockByCriteria(lockCriteria);
-    }*/
   }
 
 
