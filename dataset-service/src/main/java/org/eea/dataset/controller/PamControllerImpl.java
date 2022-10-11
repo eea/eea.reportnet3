@@ -61,6 +61,9 @@ public class PamControllerImpl implements PamController {
       LOG_ERROR.error("Error retrieving single PAM list. Error Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_SINGLE_PAM_LIST);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error single PAM list for datasetId {} and groupPaMId {}. Message: {}", datasetId, groupPaMId, e.getMessage());
+      throw e;
     }
   }
 

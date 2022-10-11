@@ -105,6 +105,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       snapshot = datasetSnapshotService.getById(idSnapshot);
     } catch (EEAException e) {
       LOG_ERROR.error("Error getting the snapshot. Error message: {}", e.getMessage(), e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving snapshot with id {} Message: {}", idSnapshot, e.getMessage());
+      throw e;
     }
     return snapshot;
   }
@@ -123,6 +126,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       snapshot = datasetSnapshotService.getSchemaById(idSnapshot);
     } catch (EEAException e) {
       LOG_ERROR.error("Error getting the snapshot schema. ", e.getMessage(), e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving snapshot schema with snapshotId {} Message: {}", idSnapshot, e.getMessage());
+      throw e;
     }
     return snapshot;
   }
@@ -153,6 +159,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       snapshots = datasetSnapshotService.getSnapshotsEnabledByIdDataset(datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error getting the list of snapshots. Error Message: {}", e.getMessage(), e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving snapshots enabled for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
     }
     return snapshots;
   }
@@ -178,8 +187,13 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    // This method will release the lock
-    datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null, null, false);
+    try {
+      // This method will release the lock
+      datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null, null, false);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error adding snapshot for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -211,6 +225,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting a snapshot. Error Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DELETING_SNAPSHOT);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting snapshot with id {} for datasetId {} Message: {}", idSnapshot, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -288,6 +305,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       LOG_ERROR.error("Error restoring a snapshot. Error Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error restoring snapshot with id {} for datasetId {} Message: {}", idSnapshot, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -330,6 +350,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     } catch (EEAException e) {
       LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error releasing snapshot with id {} for datasetId {} Message: {}", idSnapshot, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -360,6 +383,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     } catch (EEAException e) {
       LOG_ERROR.error("Error getting the list of schema snapshots. Error message: {}",
           e.getMessage(), e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving schema snapshots for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
     }
     return snapshots;
   }
@@ -389,8 +415,13 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    // This method will release the lock
-    datasetSnapshotService.addSchemaSnapshot(datasetId, idDatasetSchema, description);
+    try {
+      // This method will release the lock
+      datasetSnapshotService.addSchemaSnapshot(datasetId, idDatasetSchema, description);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error adding schema snapshots for datasetId {} and datasetSchemaId {} Message: {}", datasetId, idDatasetSchema, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -434,6 +465,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       LOG_ERROR.error("Error restoring a schema snapshot. Error Message {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error restoring schema snapshot with snapshotId {} for datasetId {} Message: {}", idSnapshot, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -483,6 +517,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       LOG_ERROR.error("Error deleting a schema snapshot. Error message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DELETING_SCHEMA_SNAPSHOT);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting schema snapshot with snapshotId {} for datasetId {} Message: {}", idSnapshot, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -505,13 +542,19 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
           example = "0") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(type = "Long", value = "Provider Id",
           example = "0") @PathVariable("dataProviderId") Long dataProviderId) {
-    StreamingResponseBody stream =
-        out -> datasetSnapshotService.createReceiptPDF(out, dataflowId, dataProviderId);
 
-    response.setContentType("application/pdf");
-    response.setHeader("Content-Disposition", "attachment;filename=receipt.pdf");
+    try {
+      StreamingResponseBody stream =
+              out -> datasetSnapshotService.createReceiptPDF(out, dataflowId, dataProviderId);
 
-    return new ResponseEntity<>(stream, HttpStatus.OK);
+      response.setContentType("application/pdf");
+      response.setHeader("Content-Disposition", "attachment;filename=receipt.pdf");
+
+      return new ResponseEntity<>(stream, HttpStatus.OK);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating receipt pdf for dataflowId {} and dataProviderId {} Message: {}", dataflowId, dataProviderId, e.getMessage());
+      throw e;
+    }
   }
 
 
@@ -542,6 +585,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     } catch (EEAException e) {
       LOG_ERROR.error("Error retrieving releases. Error message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving historic releases for dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId, e.getMessage());
+      throw e;
     }
 
     return releases;
@@ -610,7 +656,12 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @ApiOperation(value = "Update snapshot eu release", hidden = true)
   public void updateSnapshotEURelease(@ApiParam(type = "Long", value = "Dataset Id",
       example = "0") @PathVariable("idDataset") Long datasetId) {
-    datasetSnapshotService.updateSnapshotEURelease(datasetId);
+    try {
+      datasetSnapshotService.updateSnapshotEURelease(datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error updating snapshot EU release for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
   }
 
 
@@ -708,6 +759,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error releasing locks from release datasets for dataflowId {} and dataProviderId {} Message: {}", dataflowId, dataProviderId, e.getMessage());
+      throw e;
     }
   }
 

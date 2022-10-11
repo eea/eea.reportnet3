@@ -100,6 +100,9 @@ public class EUDatasetControllerImpl implements EUDatasetController {
       euDatasetService.populateEUDatasetWithDataCollection(dataflowId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error populating the EU Dataset because: {}", e.getMessage());
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error populating data from data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 

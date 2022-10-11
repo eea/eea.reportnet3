@@ -189,6 +189,9 @@ public class DatasetControllerImpl implements DatasetController {
       }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.OBTAINING_TABLE_DATA);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving dataTables values for datasetId {} and tableSchemaId {} Message: {}", datasetId, idTableSchema, e.getMessage());
+      throw e;
     }
 
     return result;
@@ -217,6 +220,10 @@ public class DatasetControllerImpl implements DatasetController {
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.UPDATING_DATASET);
+    } catch (Exception e) {
+      Long datasetId = (dataset != null) ? dataset.getId() : null;
+      LOG_ERROR.error("Unexpected error! Error updating dataset for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -274,6 +281,10 @@ public class DatasetControllerImpl implements DatasetController {
       lockService.removeLockByCriteria(importFileData);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IMPORTING_FILE_DATASET);
+    } catch (Exception e) {
+      String fileName = (file != null) ? file.getName() : null;
+      LOG_ERROR.error("Unexpected error! Error importing big file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
+      throw e;
     }
   }
 
@@ -332,6 +343,10 @@ public class DatasetControllerImpl implements DatasetController {
       lockService.removeLockByCriteria(importFileData);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IMPORTING_FILE_DATASET);
+    } catch (Exception e) {
+      String fileName = (file != null) ? file.getName() : null;
+      LOG_ERROR.error("Unexpected error! Error importing file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
+      throw e;
     }
   }
 
@@ -432,6 +447,9 @@ public class DatasetControllerImpl implements DatasetController {
       LOG_ERROR.error("Error updating records in the datasetId {}. Message: {}", datasetId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.UPDATING_TABLE_DATA);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error updating records for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -480,6 +498,9 @@ public class DatasetControllerImpl implements DatasetController {
       LOG_ERROR.error("Error deleting record in the datasetId {}. Message: {}", datasetId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DELETING_TABLE_DATA);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting record with id {} for datasetId {} Message: {}", recordId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -528,6 +549,9 @@ public class DatasetControllerImpl implements DatasetController {
       LOG_ERROR.error("Error inserting records: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.INSERTING_TABLE_DATA);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error inserting records for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
+      throw e;
     }
   }
 
@@ -555,6 +579,9 @@ public class DatasetControllerImpl implements DatasetController {
       LOG_ERROR.error("Error inserting records: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.INSERTING_TABLE_DATA);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error inserting records to multiple tables for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -603,7 +630,12 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
-    deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false);
+    try {
+      deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -638,7 +670,12 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
-    deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted);
+    try {
+      deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error privately deleting dataset data for dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -716,8 +753,13 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
-    // This method will release the lock
-    deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
+    try {
+      // This method will release the lock
+      deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting table data for dataflowId {} datasetId {} tableSchemaId {} and providerId {} Message: {}", dataflowId, datasetId, tableSchemaId, providerId, e.getMessage());
+      throw e;
+    }
   }
 
 
@@ -790,6 +832,9 @@ public class DatasetControllerImpl implements DatasetController {
       LOG_ERROR.info("Error exporting table data from dataset id {}.", datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTION_ERROR);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error exporting file for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
+      throw e;
     }
   }
 
@@ -827,6 +872,9 @@ public class DatasetControllerImpl implements DatasetController {
       LOG_ERROR.error("Error exporting file through integration: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXPORTING_FILE_INTEGRATION);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error exporting file through integration  with id {} for datasetId {} Message: {}", integrationId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -850,6 +898,9 @@ public class DatasetControllerImpl implements DatasetController {
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.INSERTING_DATASCHEMA);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error inserting dataSchema with id {} for datasetId {} Message: {}", idDatasetSchema, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -887,6 +938,10 @@ public class DatasetControllerImpl implements DatasetController {
       LOG_ERROR.error("Error updating a field in the dataset {}. Message: {}", datasetId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.UPDATING_FIELD);
+    } catch (Exception e) {
+      String fieldId = (field != null) ? field.getId() : null;
+      LOG_ERROR.error("Unexpected error! Error updating field with id {} for datasetId {} Message: {}", fieldId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -920,6 +975,9 @@ public class DatasetControllerImpl implements DatasetController {
       LOG_ERROR.error("Error with dataset id {}  caused {}", datasetIdOrigin, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_REFERENCED_FIELD);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving field values referenced for datasetSchemaId {} and fieldSchemaId {} Message: {}", datasetSchemaId, fieldSchemaId, e.getMessage());
+      throw e;
     }
   }
 
@@ -975,11 +1033,15 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
+    try {
+      StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
+              outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+      return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error in etlExportDataset for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
+      throw e;
+    }
 
-    StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
-        outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
-
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
   }
 
 
@@ -1022,10 +1084,15 @@ public class DatasetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
 
-    StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
-        outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+    try {
+      StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
+              outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
 
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
+      return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error in etlExportDatasetV2 for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -1118,6 +1185,9 @@ public class DatasetControllerImpl implements DatasetController {
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.IMPORTING_DATA_DATASET);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error in etlImportDataset for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1189,6 +1259,9 @@ public class DatasetControllerImpl implements DatasetController {
           datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving attachment for dataflowId {} datasetId {} fieldId {} and providerId {} Message: {}", dataflowId, datasetId, idField, providerId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1276,6 +1349,9 @@ public class DatasetControllerImpl implements DatasetController {
           datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.UPDATING_ATTACHMENT_IN_A_DATAFLOW);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving attachment for dataflowId {} datasetId {} fieldId {} and providerId {} Message: {}", dataflowId, datasetId, idField, providerId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1349,6 +1425,9 @@ public class DatasetControllerImpl implements DatasetController {
           datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.DELETING_ATTACHMENT_IN_A_DATAFLOW);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting attachment for dataflowId {} datasetId {} fieldId {} and providerId {} Message: {}", dataflowId, datasetId, idField, providerId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1435,7 +1514,12 @@ public class DatasetControllerImpl implements DatasetController {
     // When deleting the data finishes, we send a kafka event to make the FME call to import data
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
-    deleteHelper.executeDeleteImportDataAsyncBeforeReplacing(datasetId, integrationId, operation);
+    try {
+      deleteHelper.executeDeleteImportDataAsyncBeforeReplacing(datasetId, integrationId, operation);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting data before replacing for datasetId {} and integrationId {} Message: {}", datasetId, integrationId, e.getMessage());
+      throw e;
+    }
   }
 
 
@@ -1465,6 +1549,9 @@ public class DatasetControllerImpl implements DatasetController {
     } catch (IOException | EEAException e) {
       LOG_ERROR.error("File doesn't exist in the route {} ", fileName);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error exporting public file {} for dataflowId {} and dataProviderId {} Message: {}", fileName, dataflowId, dataProviderId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1492,6 +1579,9 @@ public class DatasetControllerImpl implements DatasetController {
     } catch (IOException | EEAException e) {
       LOG_ERROR.error("File doesn't exist in the route {} ", fileName);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error exporting public file {} for dataflowId {}  Message: {}", fileName, dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1534,8 +1624,12 @@ public class DatasetControllerImpl implements DatasetController {
     notificationControllerZuul.createUserNotificationPrivate("EXPORT_DATASET_DATA",
         userNotificationContentVO);
 
-    fileTreatmentHelper.exportDatasetFile(datasetId, mimeType);
-
+    try {
+      fileTreatmentHelper.exportDatasetFile(datasetId, mimeType);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error exporting dataset file for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
   }
 
 
@@ -1576,6 +1670,9 @@ public class DatasetControllerImpl implements DatasetController {
       LOG_ERROR.error(
           "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",
           datasetId, fileName, e.getMessage());
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error downloading file {} for datasetId {} Message: {}", fileName, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1621,7 +1718,12 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiOperation(value = "Empty the temporary etlExport table from the dataset schema DB",
       hidden = true)
   public void deleteTempEtlExport(@PathVariable("datasetId") Long datasetId) {
-    datasetService.deleteTempEtlExport(datasetId);
+    try {
+      datasetService.deleteTempEtlExport(datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting tempEtlExport table for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
   }
 
 

@@ -12,6 +12,8 @@ import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.thread.ThreadPropertiesManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +23,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataCollectionSnapshotCommand extends AbstractEEAEventHandlerCommand {
 
-
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The eu dataset repository. */
   @Autowired
@@ -53,18 +56,23 @@ public class DataCollectionSnapshotCommand extends AbstractEEAEventHandlerComman
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
-    Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-    Long snapshotId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("snapshot_id")));
-    ThreadPropertiesManager.setVariable("user", String.valueOf(eeaEventVO.getData().get("user")));
+    try {
+      Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+      Long snapshotId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("snapshot_id")));
+      ThreadPropertiesManager.setVariable("user", String.valueOf(eeaEventVO.getData().get("user")));
 
-    DataCollection dataCollection = dataCollectionRepository.findById(datasetId).orElse(null);
-    if (dataCollection != null) {
-      List<EUDataset> euDatasetList = euDatasetRepository.findByDataflowIdAndDatasetSchema(
-          dataCollection.getDataflowId(), dataCollection.getDatasetSchema());
-      if (!euDatasetList.isEmpty()) {
-        datasetSnapshotService.restoreSnapshotToCloneData(dataCollection.getId(),
-            euDatasetList.get(0).getId(), snapshotId, true, DatasetTypeEnum.EUDATASET, false);
+      DataCollection dataCollection = dataCollectionRepository.findById(datasetId).orElse(null);
+      if (dataCollection != null) {
+        List<EUDataset> euDatasetList = euDatasetRepository.findByDataflowIdAndDatasetSchema(
+                dataCollection.getDataflowId(), dataCollection.getDatasetSchema());
+        if (!euDatasetList.isEmpty()) {
+          datasetSnapshotService.restoreSnapshotToCloneData(dataCollection.getId(),
+                  euDatasetList.get(0).getId(), snapshotId, true, DatasetTypeEnum.EUDATASET, false);
+        }
       }
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      throw e;
     }
   }
 

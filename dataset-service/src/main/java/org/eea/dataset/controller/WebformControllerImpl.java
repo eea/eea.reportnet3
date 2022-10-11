@@ -75,6 +75,10 @@ public class WebformControllerImpl implements WebformController {
           webformConfig.getType());
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
+    } catch (Exception e) {
+      String name = (webformConfig != null) ? webformConfig.getName() : null;
+      LOG_ERROR.error("Unexpected error! Error inserting webform config with name {} Message: {}", name, e.getMessage());
+      throw e;
     }
   }
 
@@ -95,6 +99,10 @@ public class WebformControllerImpl implements WebformController {
           webformConfig.getContent(), webformConfig.getType());
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
+    } catch (Exception e) {
+      String name = (webformConfig != null) ? webformConfig.getName() : null;
+      LOG_ERROR.error("Unexpected error! Error updating webform config with name {} Message: {}", name, e.getMessage());
+      throw e;
     }
   }
 
@@ -118,6 +126,9 @@ public class WebformControllerImpl implements WebformController {
       LOG_ERROR.error("Error getting the json webconfig from the id {}", id, e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.OBTAINING_WEBFORM_CONFIG);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving webform config with id {} Message: {}", id, e.getMessage());
+      throw e;
     }
     return json;
   }
@@ -139,6 +150,9 @@ public class WebformControllerImpl implements WebformController {
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.ERROR_WEBFORM_IN_USE);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error removing webform config with id {} Message: {}", id, e.getMessage());
+      throw e;
     }
   }
 
