@@ -1899,7 +1899,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     LOG.info("Method splitSnapFile starts for file {} with idSnapshot {} and snapFileForSplitting {}", inputfile, idSnapshot, snapFileForSplitting);
     int numberOfFiles = snapFileForSplitting.getNumberOfFiles();
-    double maxLinesPerFile = 200000.0;
+    int maxLinesPerFile = 200000;
 
     try{
       // Actual splitting of file into smaller files
