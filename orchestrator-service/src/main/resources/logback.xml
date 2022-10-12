@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%-4relative [%thread] %d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level %logger{35} - %msg %n
+      </pattern>
+    </encoder>
+  </appender>
+
+  <appender name="stderr" class="ch.qos.logback.core.ConsoleAppender">
+    <target>System.err</target>
+    <encoder>
+      <pattern>%-4relative [%thread] %d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level %logger{35} - %msg %n
+      </pattern>
+    </encoder>
+  </appender>
+  <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>ERROR</level>
+    </filter>
+  </appender>
+
+  <!--in order to separate stdout and stderr, this logger will have a name and will be injected only for error logging-->
+  <logger name="error_logger" level="ERROR">
+    <appender-ref ref="stderr"/>
+  </logger>
+
+
+  <root level="INFO">
+    <appender-ref ref="Sentry"/>
+    <appender-ref ref="stdout"/>
+  </root>
+</configuration>

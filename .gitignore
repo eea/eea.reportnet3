@@ -4077,6 +4077,7 @@ indexsearch-service/.factorypath
 document-container-service/.factorypath
 common-interfaces/.factorypath
 collaboration-service/.factorypath
+orchestrator-service/.factorypath
 frontend-service/.vscode/launch.json
 frontend-service/public/env.js
 frontend-service/package-lock.json

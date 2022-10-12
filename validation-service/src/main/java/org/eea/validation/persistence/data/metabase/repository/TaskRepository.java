@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.data.metabase.repository;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 import org.eea.validation.persistence.data.metabase.domain.Task;
@@ -105,6 +106,10 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   @Query(nativeQuery = true,
       value = "select case when (exists (select id from task where process_id=:processId and status ='IN_QUEUE' limit 1)) then FALSE else TRUE end")
   boolean isProcessEnding(@Param("processId") String processId);
+
+  @Query(nativeQuery = true,
+      value = "select id from task where status='IN_PROGRESS' and (extract(epoch from now() - date_start) / 60) > :timeInMinutes")
+  List<BigInteger> getTasksInProgress(@Param("timeInMinutes") long timeInMinutes);
 }
 
 
