@@ -1,9 +1,9 @@
-package org.eea.orchestrator.axon.release.config;
+package org.eea.orchestrator.axon.config;
 
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.messaging.correlation.CorrelationDataProvider;
 import org.axonframework.messaging.correlation.SimpleCorrelationDataProvider;
-import org.eea.orchestrator.axon.release.interceptor.CorrelationDataInterceptor;
+import org.eea.orchestrator.axon.interceptor.CorrelationDataInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;

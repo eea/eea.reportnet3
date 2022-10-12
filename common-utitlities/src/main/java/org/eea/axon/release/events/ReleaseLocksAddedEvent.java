@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 public class ReleaseLocksAddedEvent {
 
-   private String datasetAggregate;
+   private String aggregate;
    private String id;
    private Long dataflowId;
    private Long dataProviderId;

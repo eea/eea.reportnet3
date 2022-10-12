@@ -15,7 +15,7 @@ import java.util.List;
 public class ExecuteValidationProcessCommand {
 
     @TargetAggregateIdentifier
-    private final String validationAggregate;
+    private String aggregate;
     private final String id;
     private final Long dataflowId;
     private final Long dataProviderId;

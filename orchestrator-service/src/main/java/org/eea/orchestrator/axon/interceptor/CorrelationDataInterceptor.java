@@ -1,4 +1,4 @@
-package org.eea.orchestrator.axon.release.interceptor;
+package org.eea.orchestrator.axon.interceptor;
 
 import org.axonframework.commandhandling.CommandMessage;
 import org.axonframework.messaging.InterceptorChain;

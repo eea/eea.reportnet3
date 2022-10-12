@@ -9,7 +9,7 @@ import lombok.*;
 @Setter
 public class ReleaseStartNotificationCreatedEvent {
 
-   private String communicationAggregate;
+   private String aggregate;
    private String id;
    private Long dataProviderId;
    private Long dataflowId;

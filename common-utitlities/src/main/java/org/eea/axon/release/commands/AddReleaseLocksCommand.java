@@ -1,6 +1,9 @@
 package org.eea.axon.release.commands;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 import java.util.List;
@@ -12,7 +15,7 @@ import java.util.List;
 public class AddReleaseLocksCommand {
 
     @TargetAggregateIdentifier
-    private final String datasetAggregate;
+    private final String aggregate;
     private final String id;
     private final Long dataflowId;
     private final Long dataProviderId;

@@ -153,7 +153,7 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
   @Bean
   public MongoTemplate axonMongoTemplate() {
     return DefaultMongoTemplate.builder()
-            .mongoDatabase(mongoClient(), "axon_orchestrator")
+            .mongoDatabase(mongoClient(), "axon_validation")
             .build();
   }
 

@@ -15,7 +15,7 @@ import java.util.List;
 public class UpdateRepresentativeVisibilityCommand {
 
     @TargetAggregateIdentifier
-    private final String dataflowAggregate;
+    private final String aggregate;
     private final String id;
     private final Long dataflowId;
     private final Long dataProviderId;

@@ -16,7 +16,7 @@ import java.util.List;
 public class UpdateInternalRepresentativeCommand {
 
     @TargetAggregateIdentifier
-    private final String datasetAggregate;
+    private final String aggregate;
     private final String id;
     private final Long dataflowId;
     private final Long dataProviderId;

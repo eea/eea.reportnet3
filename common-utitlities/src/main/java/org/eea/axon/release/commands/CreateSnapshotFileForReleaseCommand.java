@@ -16,7 +16,7 @@ import java.util.List;
 public class CreateSnapshotFileForReleaseCommand {
 
     @TargetAggregateIdentifier
-    private final String recordStoreAggregate;
+    private String aggregate;
     private final String id;
     private final Long dataflowId;
     private final Long dataProviderId;

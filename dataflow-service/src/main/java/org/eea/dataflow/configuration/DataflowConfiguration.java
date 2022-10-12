@@ -166,7 +166,7 @@ public class DataflowConfiguration implements WebMvcConfigurer {
   @Bean
   public MongoTemplate axonMongoTemplate() {
     return DefaultMongoTemplate.builder()
-            .mongoDatabase(mongoClient(), "axon_orchestrator")
+            .mongoDatabase(mongoClient(), "axon_dataflow")
             .build();
   }
 

@@ -2,6 +2,7 @@ package org.eea.axon.release.events;
 
 import lombok.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 @NoArgsConstructor
@@ -9,7 +10,7 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
-public class ValidationProcessForReleaseAddedEvent {
+public class DatasetRunningStatusUpdatedEvent {
 
     private String aggregate;
     private String id;
@@ -18,4 +19,5 @@ public class ValidationProcessForReleaseAddedEvent {
     private boolean restrictFromPublic;
     private boolean validate;
     private List<Long> datasetIds;
+    private HashMap<Long, Long> datasetSnapshots;
 }

@@ -6,17 +6,22 @@ import lombok.Getter;
 import lombok.Setter;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
-@AllArgsConstructor
+import java.util.HashMap;
+import java.util.List;
+
 @Builder
+@AllArgsConstructor
 @Getter
 @Setter
-public class CreateReleaseStartNotificationCommand {
+public class UpdateDatasetRunningStatusCommand {
 
     @TargetAggregateIdentifier
-    private final String aggregate;
+    private String aggregate;
     private final String id;
     private final Long dataflowId;
     private final Long dataProviderId;
     private final boolean restrictFromPublic;
     private final boolean validate;
+    private List<Long> datasetIds;
+    private HashMap<Long, Long> datasetSnapshots;
 }

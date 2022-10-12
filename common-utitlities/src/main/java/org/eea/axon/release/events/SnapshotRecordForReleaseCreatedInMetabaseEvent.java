@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 public class SnapshotRecordForReleaseCreatedInMetabaseEvent {
 
-    private String datasetAggregate;
+    private String aggregate;
     private String id;
     private Long dataProviderId;
     private Long dataflowId;
