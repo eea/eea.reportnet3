@@ -1,13 +1,6 @@
 package org.eea.recordstore.service.impl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,13 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
@@ -54,6 +41,7 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.SplitSnapfile;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -115,6 +103,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The Constant FILE_PATTERN_NAME: {@value}. */
   private static final String FILE_PATTERN_NAME = "snapshot_%s%s";
 
+  /** The Constant SPLIT_FILE_PATTERN_NAME: {@value}. */
+  private static final String SPLIT_FILE_PATTERN_NAME = "snapshot_%s_%s%s";
+
   /** The Constant FILE_CLONE_PATTERN_NAME: {@value}. */
   private static final String FILE_CLONE_PATTERN_NAME = "clone_%s_to_%s%s";
 
@@ -139,6 +130,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
   /** The Constant COMMA: {@value}. */
   private static final String COMMA = ", ";
+
+  /** The Constant FIELD_TYPE: {@value}. */
+  private static final String FIELD_TYPE = "FIELD";
+
+  /** The Constant ATTACHMENT_TYPE: {@value}. */
+  private static final String ATTACHMENT_TYPE = "ATTACHMENT";
 
   /** The user postgre db. */
   @Value("${spring.datasource.dataset.username}")
@@ -1549,6 +1546,40 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+  /**
+   * Restore specific file snapshot.
+   *
+   * @param datasetId      the dataset id
+   * @param idSnapshot     the id snapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param type
+   */
+  @Async
+  @Override
+  public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
+      Long startingNumber, Long endingNumber, String type) {
+
+    LOG.info("Method restoreSpecificFileSnapshot starts with datasetId: {}", datasetId);
+    try {
+      ConnectionDataVO connection =
+          getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+      Connection con =
+          DriverManager.getConnection(connection.getConnectionString(), connection.getUser(),
+              connection.getPassword());
+      con.setAutoCommit(true);
+
+      CopyManager cm = new CopyManager((BaseConnection) con);
+
+      copyProcessSpecificFileSnapshot(datasetId, idSnapshot, cm, startingNumber, endingNumber, type);
+
+      LOG.info("Method restoreSpecificFileSnapshot ends with datasetId: {}", datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in method restoreSpecificFileSnapshot for datasetId: {} with error {}",
+          datasetId, e);
+    }
+  }
+
 
   /**
    * Gets the providers code.
@@ -1614,8 +1645,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     String copyQueryField = COPY_DATASET + datasetId
         + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
-    copyFromFile(copyQueryField, nameFileFieldValue, cm);
-    LOG.info("Executed copyFromFile for field_value with file {} and datasetId {}", nameFileFieldValue, datasetId);
+
+    SplitSnapfile snapFileForSplitting = isSnapFileForSplitting(nameFileFieldValue);
+
+    if (snapFileForSplitting.isForSplitting() == true) {
+      splitSnapFile(nameFileFieldValue, idSnapshot, snapFileForSplitting);
+
+      for (int i=1; i <= snapFileForSplitting.getNumberOfFiles(); i++) {
+        String splitFile = pathSnapshot
+            + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+        copyFromFile(copyQueryField, splitFile, cm);
+        deleteFile(Arrays.asList(splitFile));
+      }
+    } else {
+      copyFromFile(copyQueryField, nameFileFieldValue, cm);
+    }
 
     // Attachment value
     String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
@@ -1625,6 +1669,45 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
     copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
     LOG.info("Executed copyFromFile for attachment_value with file {} and datasetId {}", nameFileAttachmentValue, datasetId);
+  }
+
+
+  /**
+   * Copy process specific File snapshot
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @param cm the cm
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
+   */
+  private void copyProcessSpecificFileSnapshot(Long datasetId, Long idSnapshot,
+    CopyManager cm, Long startingNumber, Long endingNumber, String type)
+    throws IOException, SQLException {
+
+    LOG.info("Method copyProcessSpecificSnapshot starts with datasetId: {}", datasetId);
+    switch (type) {
+      case FIELD_TYPE:
+        String copyQueryField = COPY_DATASET + datasetId
+            + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
+
+        for (Long i = startingNumber; i <= endingNumber; i++) {
+          String splitFile = pathSnapshot
+              + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+          copyFromFile(copyQueryField, splitFile, cm);
+          deleteFile(Arrays.asList(splitFile));
+        }
+        break;
+      case ATTACHMENT_TYPE:
+        String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+            LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+
+        String copyQueryAttachment = COPY_DATASET + datasetId
+            + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
+        copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
+        break;
+    }
+    LOG.info("Method copyProcessSpecificSnapshot ends with datasetId: {}", datasetId);
   }
 
   /**
@@ -1810,7 +1893,83 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+  /**
+   * Split the snapshot file
+   *
+   * @param inputfile
+   * @param idSnapshot
+   * @param snapFileForSplitting
+   */
+  private void splitSnapFile(String inputfile, Long idSnapshot, SplitSnapfile snapFileForSplitting) {
 
+    LOG.info("Method splitSnapFile starts for file {} with idSnapshot {} and snapFileForSplitting {}", inputfile, idSnapshot, snapFileForSplitting);
+    int numberOfFiles = snapFileForSplitting.getNumberOfFiles();
+    int numberOfLines = snapFileForSplitting.getNumberOfLines();
+
+    try{
+      // Actual splitting of file into smaller files
+      FileInputStream fstream = new FileInputStream(inputfile); DataInputStream in = new DataInputStream(fstream);
+      BufferedReader br = new BufferedReader(new InputStreamReader(in));
+      String strLine;
+
+      for (int j=1; j <= numberOfFiles; j++) {
+        // Destination File Location
+        FileWriter fstream1 = new FileWriter(pathSnapshot + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX));
+        BufferedWriter out = new BufferedWriter(fstream1);
+        for (int i=1; i <= numberOfLines; i++) {
+          strLine = br.readLine();
+          if (strLine != null) {
+            out.write(strLine);
+            if(i != numberOfLines) {
+              out.newLine();
+            }
+          }
+        }
+        out.close();
+      }
+
+      in.close();
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in file {} with error {}", inputfile,  e.getMessage());
+    }
+
+    LOG.info("Method splitSnapFile ends for file {} ", inputfile);
+  }
+
+  /**
+   * Check if the snapshot will be splitted and get the number of files and rows
+   *
+   * @param inputfile
+   */
+  private SplitSnapfile isSnapFileForSplitting(String inputfile) {
+
+    LOG.info("Method isSnapFileForSplitting starts for file {}", inputfile);
+    SplitSnapfile splitSnapfile = new SplitSnapfile();
+
+    int numberOfLines = 0;
+    double maxLinesPerFile = 200000.0;
+
+    try {
+      File file = new File(inputfile);
+      Scanner scanner = new Scanner(file);
+      while (scanner.hasNextLine()) {
+        scanner.nextLine();
+        numberOfLines++;
+      }
+
+      int numberOfFiles = (int) Math.ceil(numberOfLines / maxLinesPerFile);
+
+      splitSnapfile.setNumberOfLines(numberOfLines);
+      splitSnapfile.setNumberOfFiles(numberOfFiles);
+      splitSnapfile.setForSplitting(numberOfFiles >= 3 ? true : false);
+
+      LOG.info("Method isSnapFileForSplitting ends for file {} with {} lines into {} files", inputfile, numberOfLines, numberOfFiles);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in file {} with error {}", inputfile,  e.getMessage());
+    }
+
+    return splitSnapfile;
+  }
 
   /**
    * Creates the index materialized view.

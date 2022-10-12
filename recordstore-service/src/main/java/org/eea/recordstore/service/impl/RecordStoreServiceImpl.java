@@ -497,4 +497,19 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   public void createUpdateQueryViewAsync(Long datasetId, boolean isMaterialized) {
     LOG.info("Create or Update Query-Materialized View");
   }
+
+  /**
+   * Restore specific file snapshot
+   *
+   * @param datasetId
+   * @param idSnapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param type
+   */
+  @Override
+  public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot, Long startingNumber,
+      Long endingNumber, String type) {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
 }
