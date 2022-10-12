@@ -1904,7 +1904,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     LOG.info("Method splitSnapFile starts for file {} with idSnapshot {} and snapFileForSplitting {}", inputfile, idSnapshot, snapFileForSplitting);
     int numberOfFiles = snapFileForSplitting.getNumberOfFiles();
-    int numberOfLines = snapFileForSplitting.getNumberOfLines();
+    int maxLinesPerFile = 200000;
 
     try{
       // Actual splitting of file into smaller files
@@ -1916,11 +1916,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         // Destination File Location
         FileWriter fstream1 = new FileWriter(pathSnapshot + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX));
         BufferedWriter out = new BufferedWriter(fstream1);
-        for (int i=1; i <= numberOfLines; i++) {
+        for (int i=1; i <= maxLinesPerFile; i++) {
           strLine = br.readLine();
           if (strLine != null) {
             out.write(strLine);
-            if(i != numberOfLines) {
+            if(i != maxLinesPerFile) {
               out.newLine();
             }
           }
@@ -1959,7 +1959,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       int numberOfFiles = (int) Math.ceil(numberOfLines / maxLinesPerFile);
 
-      splitSnapfile.setNumberOfLines(numberOfLines);
       splitSnapfile.setNumberOfFiles(numberOfFiles);
       splitSnapfile.setForSplitting(numberOfFiles >= 3 ? true : false);
 

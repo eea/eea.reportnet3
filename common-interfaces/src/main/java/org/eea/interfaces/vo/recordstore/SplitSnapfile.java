@@ -9,9 +9,6 @@ import lombok.ToString;
 @ToString
 public class SplitSnapfile {
 
-    /** The number of lines. */
-    private int numberOfLines;
-
     /** The number of splitted files. */
     private int numberOfFiles;
 
