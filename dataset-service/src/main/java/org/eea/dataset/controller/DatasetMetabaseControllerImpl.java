@@ -177,7 +177,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
       datasetMetabaseService.createEmptyDataset(datasetType, datasetname, idDatasetSchema,
           idDataflow, null, Arrays.asList(representative), 0);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG_ERROR.error("Error when creating empty dataset {} with dataSchemaId {} for dataflowId {}. Message: {}", datasetname, idDatasetSchema, idDataflow, e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_UNKNOW_TYPE);
     } catch (Exception e) {
@@ -278,7 +278,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
     try {
       statistics = datasetMetabaseService.getStatistics(datasetId);
     } catch (EEAException | InstantiationException | IllegalAccessException e) {
-      LOG_ERROR.error("Error getting statistics. Error message: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error getting statistics for datasetId {}. Error message: {}",datasetId, e.getMessage(), e);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error retrieving statistics for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;
@@ -312,7 +312,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
     try {
       statistics = datasetMetabaseService.getGlobalStatistics(dataschemaId);
     } catch (EEAException | InstantiationException | IllegalAccessException e) {
-      LOG_ERROR.error("Error getting global statistics. Error message: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error getting global statistics for dataflowId {} and dataSchemaId {}. Error message: {}", dataflowId, dataschemaId, e.getMessage(), e);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error retrieving global statistics for datasetSchemaId {} and dataflowId {} Message: {}", dataschemaId, dataflowId, e.getMessage());
       throw e;

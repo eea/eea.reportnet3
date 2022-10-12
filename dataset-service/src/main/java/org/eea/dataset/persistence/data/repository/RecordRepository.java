@@ -124,4 +124,11 @@ public interface RecordRepository
   @Query("select count(r.id) from RecordValue r where r.tableValue.idTableSchema= :idTableSchema")
   Long countByTableSchema(@Param("idTableSchema") String idTableSchema);
 
+  /**
+   * find first by data provider code
+   * @param providerCode
+   * @return
+   */
+  RecordValue findFirstByDataProviderCode(String providerCode);
+
 }

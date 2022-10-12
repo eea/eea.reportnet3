@@ -167,6 +167,12 @@ public final class LiteralConstants {
   /** The Constant REPORTER: {@value}. */
   public static final String REPORTER = "REPORTER";
 
+  /** The Constant IMPORT_LOCKED. */
+  public static final String IMPORT_LOCKED = "Import is locked";
+
+  /** The Constant NO_IMPORT_IN_PROGRESS. */
+  public static final String NO_IMPORT_IN_PROGRESS = "There is no import process in progress";
+
   /**
    * Instantiates a new literal constants.
    */

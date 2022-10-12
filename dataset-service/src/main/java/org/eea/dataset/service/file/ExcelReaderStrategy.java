@@ -115,20 +115,21 @@ public class ExcelReaderStrategy implements ReaderStrategy {
       List<TableValue> tables = new ArrayList<>();
 
       if (null == idTableSchema) {
-        LOG.info("Reading all Excel's file pages");
+        LOG.info("RN3-Import: Reading all Excel's file pages for file {}, dataflowId {}, datasetId {} and tableSchemaId {}", fileName, dataflowId, datasetId, idTableSchema);
         for (Sheet sheet : workbook) {
           tables.add(createTable(sheet, fileCommon.getIdTableSchema(sheet.getSheetName(), schema),
               schema, partitionId));
         }
       } else {
-        LOG.info("Reading the first Excel's file page");
+        LOG.info("RN3-Import: Reading first Excel's file page for file {}, dataflowId {}, datasetId {} and tableSchemaId {}", fileName, dataflowId, datasetId, idTableSchema);
         tables.add(createTable(workbook.getSheetAt(0), idTableSchema, schema, partitionId));
       }
 
-      LOG.info("Finishing reading Exel file");
+      LOG.info("RN3-Import: Finishing reading Excel file {}, dataflowId {}, datasetId {} and tableSchemaId {}", fileName, dataflowId, datasetId, idTableSchema);
       createDataSet(schema, tables, idTableSchema, fileName, replace, schema, connectionDataVO);
     } catch (EncryptedDocumentException | InvalidFormatException | IOException | SQLException
         | IllegalArgumentException e) {
+      LOG.error("RN3-Import: Error when reading Excel file {}, dataflowId {}, datasetId {} and tableSchemaId {}. Message: ", fileName, dataflowId, datasetId, idTableSchema, e.getMessage());
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
     }
   }
@@ -150,9 +151,14 @@ public class ExcelReaderStrategy implements ReaderStrategy {
     Iterator<Row> rows = sheet.rowIterator();
     Row headersRow = rows.next();
     List<FieldSchema> headers = readHeaders(headersRow, idTableSchema, dataSetSchema);
+    if(headers != null){
+      LOG.info("RN3-Import: Read {} headers of Excel file for tableSchemaId {}", headers.size(), idTableSchema);
+    }
     List<RecordValue> records =
         readRecords(rows, headers, partitionId, idTableSchema, dataSetSchema, table);
-
+    if(records != null){
+      LOG.info("RN3-Import: Read {} records of Excel file for tableSchemaId {}", records.size(), idTableSchema);
+    }
     table.setRecords(records);
     table.setIdTableSchema(idTableSchema);
 

@@ -643,29 +643,34 @@ public class DataflowServiceImpl implements DataflowService {
       // // PART DELETE DOCUMENTS
       if (null != dataflowVO.getDocuments() && !dataflowVO.getDocuments().isEmpty()) {
         deleteDocuments(idDataflow, dataflowVO);
+        LOG.info("Deleted documents for dataflowId: {}", idDataflow);
       }
 
       // PART OF DELETE ALL THE DATASETSCHEMA we have in the dataflow
       if (null != dataflowVO.getDesignDatasets() && !dataflowVO.getDesignDatasets().isEmpty()) {
-        LOG.info("Deleting dataflow schemas with DataflowId: {}", idDataflow);
         deleteDatasetSchemas(idDataflow, dataflowVO);
+        LOG.info("Deleted dataflow schemas with dataflowId: {}", idDataflow);
       }
 
       // PART OF DELETE ALL THE REPRESENTATIVE we have in the dataflow
       if (null != dataflowVO.getRepresentatives() && !dataflowVO.getRepresentatives().isEmpty()) {
         deleteRepresentatives(dataflowVO);
+        LOG.info("Deleted representatives for dataflowId: {}", idDataflow);
       }
 
       // Delete the dataflow metabase info. Also by the foreign keys of the database, entities
       // like weblinks are also deleted
       deleteDataflowMetabaseInfo(idDataflow);
+      LOG.info("Deleted metabase info for dataflowId: {}", idDataflow);
 
       // add resource to delete(DATAFLOW PART)
       deleteDataflowResources(idDataflow);
-
+      LOG.info("Deleted dataflow resources for dataflowId: {}", idDataflow);
 
       NotificationVO notificationVO = NotificationVO.builder().dataflowId(idDataflow)
           .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
+
+      LOG.info("Successfully deleted dataflow with id {}", idDataflow);
 
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DATAFLOW_COMPLETED_EVENT,
@@ -1378,9 +1383,6 @@ public class DataflowServiceImpl implements DataflowService {
       List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
           .getGroupsByIdResourceType(dataflowId, ResourceTypeEnum.DATAFLOW);
       resourceManagementControllerZull.deleteResource(resourceCustodian);
-
-      LOG.info("Delete full keycloak data to dataflow with id: {}", dataflowId);
-
     } catch (Exception e) {
       LOG.error("Error deleting resources in keycloak, group with the id: {}, and exception {}",
           dataflowId, e.getMessage());
@@ -1397,7 +1399,6 @@ public class DataflowServiceImpl implements DataflowService {
   private void deleteDataflowMetabaseInfo(Long dataflowId) throws EEAException {
     try {
       dataflowRepository.deleteNativeDataflow(dataflowId);
-      LOG.info("Delete full dataflow with id: {}", dataflowId);
     } catch (Exception e) {
       LOG_ERROR.error("Error deleting native dataflow with id: {}", dataflowId, e);
       throw new EEAException(
@@ -1644,6 +1645,7 @@ public class DataflowServiceImpl implements DataflowService {
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(
           EventType.VALIDATE_ALL_REPORTERS_COMPLETED_EVENT, null, notificationVO);
+      LOG.info("Successfully validated all reporters with userId {}", userId);
 
     } catch (EEAException e) {
       LOG.error(

@@ -220,4 +220,16 @@ public interface RecordStoreService {
    * @param isMaterialized the is materialized
    */
   void createUpdateQueryViewAsync(Long datasetId, boolean isMaterialized);
+
+  /**
+   * Restore specific file snapshot
+   *
+   * @param datasetId
+   * @param idSnapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param type
+   */
+  void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot, Long startingNumber,
+      Long endingNumber, String type);
 }
