@@ -127,12 +127,12 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       // Fill the table changes to eu_dataset and put there are changes in the DC data
       ChangesEUDataset providerRelease = new ChangesEUDataset();
       Optional<DataCollection> dc =
-              dataCollectionRepository.findFirstByDatasetSchema(dataset.getDatasetSchema());
+          dataCollectionRepository.findFirstByDatasetSchema(dataset.getDatasetSchema());
       if (dc.isPresent()) {
         providerRelease.setDatacollection(dc.get().getId());
       }
       DataProviderVO provider =
-              representativeControllerZuul.findDataProviderById(dataset.getDataProviderId());
+          representativeControllerZuul.findDataProviderById(dataset.getDataProviderId());
       providerRelease.setProvider(provider.getCode());
       changesEUDatasetRepository.saveAndFlush(providerRelease);
 
@@ -145,7 +145,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
         datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease, false);
 
-
       } else {
 
         // now when all finish we create the file to save the data to public export
@@ -154,8 +153,8 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
           try {
             fileTreatmentHelper.savePublicFiles(dataflowVO.getId(), dataset.getDataProviderId());
           } catch (IOException e) {
-            LOG_ERROR.error("Folder not created in dataflow {} with dataprovider {} message {}",
-                    dataset.getDataflowId(), dataset.getDataProviderId(), e.getMessage(), e);
+            LOG_ERROR.error("Folder not created in dataflow {} with dataprovider {} and datasetId {} message {}",
+                dataset.getDataflowId(), dataset.getDataProviderId(), datasetId, e.getMessage(), e);
           } catch (Exception e) {
             LOG_ERROR.error("Unexpected error! Error creating folder for dataflow {} with dataprovider {}. Message {}",
                     dataset.getDataflowId(), dataset.getDataProviderId(), e.getMessage());
@@ -165,34 +164,36 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         // At this point the process of releasing all the datasets has been finished so we unlock
         // everything involved
         datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
-                dataset.getDataProviderId());
+            dataset.getDataProviderId());
 
         // Send email to requesters
         sendMail(dateRelease, dataset, dataflowVO);
 
-        LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {}",
-                dataset.getDataflowId(), dataset.getDataProviderId());
+        LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {} DatasetId: {}",
+            dataset.getDataflowId(), dataset.getDataProviderId(), datasetId);
         List<Long> datasetMetabaseListIds =
-                datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(dataflowVO.getId(),
-                        dataset.getDataProviderId());
+            datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(dataflowVO.getId(),
+                dataset.getDataProviderId());
+
 
 
         // we send diferent notification if have morethan one dataset or have only one to redirect
         if (!Collections.isEmpty(datasetMetabaseListIds) && datasetMetabaseListIds.size() > 1) {
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_PROVIDER_COMPLETED_EVENT,
-                  null,
-                  NotificationVO.builder()
-                          .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                          .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
-                          .providerId(dataset.getDataProviderId()).build());
+              null,
+              NotificationVO.builder()
+                  .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                  .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
+                  .providerId(dataset.getDataProviderId()).build());
+
 
 
         } else {
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
-                  NotificationVO.builder()
-                          .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                          .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
-                          .providerId(dataset.getDataProviderId()).build());
+              NotificationVO.builder()
+                  .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                  .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
+                  .providerId(dataset.getDataProviderId()).build());
         }
 
         // send feedback message
@@ -204,8 +205,8 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         messageVO.setContent(country + " released " + dataflowName + " successfully");
         messageVO.setAutomatic(true);
         collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO);
-        LOG.info("Automatic feedback message created of dataflow {}. Message: {}", dataflowVO.getId(),
-                messageVO.getContent());
+        LOG.info("Automatic feedback message created of dataflow {} and datasetId {}. Message: {}", dataflowVO.getId(), datasetId,
+            messageVO.getContent());
 
       }
     } catch (Exception e) {

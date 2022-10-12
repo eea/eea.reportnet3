@@ -350,9 +350,10 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       checkResult =
           this.restTemplate.exchange(url, HttpMethod.POST, request, FileSubmitResult.class);
     } catch (HttpClientErrorException e) {
-      LOG.info("FME called successfully but directory already exist");
+      LOG.info("FME called successfully but directory already exist. datasetId {}, providerId {}", idDataset, idProvider);
       return e.getStatusCode();
     }
+    LOG.info("Created directory. datasetId {}, providerId {}", idDataset, idProvider);
     return checkResult.getStatusCode();
 
   }
@@ -395,9 +396,9 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
           .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
           byte[].class);
     } catch (HttpClientErrorException e) {
-      LOG_ERROR.info("Error downloading file: {}  from FME", fileName, e);
+      LOG_ERROR.info("Error downloading file: {}  from FME for datasetId {}", fileName, idDataset, e);
     } catch (Exception e) {
-      LOG_ERROR.info("Unexpected error! Error downloading file: {} from FME. Message: {}", fileName, e.getMessage());
+      LOG_ERROR.info("Unexpected error! Error downloading file: {} from FME for datasetId {}. Message: {}", fileName, idDataset, e.getMessage());
       throw e;
     }
     InputStream stream = null;

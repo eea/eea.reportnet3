@@ -67,7 +67,7 @@ public class ProcessControllerImpl implements ProcessController {
   @GetMapping
   @ApiOperation(value = "Gets all the system processes", response = ProcessVO.class,
       responseContainer = "List", hidden = false)
-  @PreAuthorize("hasAnyRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
   public ProcessesVO getProcesses(Integer pageNum, Integer pageSize, boolean asc, String status,
       Long dataflowId, String user, String header) {
     Pageable pageable = PageRequest.of(pageNum, pageSize);
