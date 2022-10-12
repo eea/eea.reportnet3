@@ -865,6 +865,7 @@ public class DatasetServiceImpl implements DatasetService {
         integrationController.findExportIntegration(datasetSchemaId, integrationId);
     integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
         IntegrationOperationTypeEnum.EXPORT, null, datasetId, integrationVO);
+    LOG.info("Executed FME export integration process  for datasetId {}", datasetId);
   }
 
   /**
@@ -1049,6 +1050,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void deleteTableValue(Long datasetId, String idTableSchema) {
     tableRepository.deleteByIdTableSchema(idTableSchema);
+    LOG.info("Deleted table value with tableSchemaId {} and datasetId {}", idTableSchema, datasetId);
   }
 
   /**
@@ -1322,12 +1324,12 @@ public class DatasetServiceImpl implements DatasetService {
       String dataProviderCodes) {
     try {
       long startTime = System.currentTimeMillis();
-      LOG.info("ETL Export process initiated to DatasetId: {}", datasetId);
+      LOG.info("ETL Export process initiated to datasetId: {}", datasetId);
       exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset, filterValue,
           columnName, dataProviderCodes);
       outputStream.flush();
       long endTime = System.currentTimeMillis() - startTime;
-      LOG.info("ETL Export process completed for DatasetId: {} in {} seconds", datasetId,
+      LOG.info("ETL Export process completed for datasetId: {} in {} seconds", datasetId,
           endTime / 1000);
     } catch (IOException | EEAException e) {
       LOG.error("ETLExport error in  Dataset:", datasetId, e);
@@ -1541,10 +1543,14 @@ public class DatasetServiceImpl implements DatasetService {
     is.close();
     attachment.setContent(content);
     attachmentRepository.save(attachment);
+    LOG.info("Attachment was saved in ATTACHMENT_VALUE table for datasetId {}, fieldId {} and fileName {}", datasetId, fieldId, fileName);
 
     // Field table
     field.setValue(fileName);
     fieldRepository.save(field);
+
+    LOG.info("Attachment was saved in FIELD_VALUE table for datasetId {}, fieldId {} and fileName {}", datasetId, fieldId, fileName);
+
     // now the view is not updated, update the check to false
     updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
@@ -1663,6 +1669,7 @@ public class DatasetServiceImpl implements DatasetService {
   public void deleteTempEtlExport(@DatasetId Long datasetId) {
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     datasetRepository.removeTempEtlExport(datasetId);
+    LOG.info("Removed everything from table temp_etlexport for datasetId {}", datasetId);
   }
 
 
@@ -2484,6 +2491,7 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValues.add(fieldValue);
       }
     }
+    LOG.info("Created {} records for datasetId {}", recordValues.size(), datasetId);
     return recordValues;
   }
 
@@ -2852,7 +2860,7 @@ public class DatasetServiceImpl implements DatasetService {
         new File(new File(pathPublicFile, "dataset-" + datasetId), FilenameUtils.getName(fileName));
     if (!file.exists()) {
       LOG_ERROR.error(
-          "Trying to download a file generated during the export dataset data process but the file is not found");
+          "Trying to download a file generated during the export dataset data process for datasetId {} but the file {} is not found", datasetId, fileName);
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
     return file;
@@ -3057,9 +3065,9 @@ public class DatasetServiceImpl implements DatasetService {
       // Delete the query log and the timestamp part later, once the tests are finished.
       outputStream.write(recordRepository.findAndGenerateETLJson(datasetId, outputStream,
           tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes).getBytes());
-      LOG.info("Finish ETL Export proccess for Dataset:{}", datasetId);
+      LOG.info("Finish ETL Export proccess for datasetId {}", datasetId);
     } catch (IOException e) {
-      LOG.error("ETLExport error in  Dataset: {}", datasetId, e);
+      LOG.error("ETLExport error for datasetId {} Message: {}", datasetId, e.getMessage(), e);
     }
   }
 
@@ -3266,6 +3274,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Transactional
   public void updateCheckView(@DatasetId Long datasetId, Boolean updated) {
     datasetRepository.updateCheckView(datasetId, updated);
+    LOG.info("Updated check view for datasetId {} with value {}", datasetId, updated);
   }
 
   /**

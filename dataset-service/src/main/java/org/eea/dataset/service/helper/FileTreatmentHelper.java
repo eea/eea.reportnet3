@@ -253,7 +253,7 @@ public class FileTreatmentHelper implements DisposableBean {
       boolean replace, Long integrationId, String delimiter) throws EEAException {
 
     if (delimiter != null && delimiter.length() > 1) {
-      LOG_ERROR.error("the size of the delimiter cannot be greater than 1");
+      LOG_ERROR.error("Error when importing file data for datasetId {} and tableSchemaId {}. ReplaceData is {}. The size of the delimiter cannot be greater than 1", datasetId, tableSchemaId, replace);
       datasetMetabaseService.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_IMPORT);
       throw new EEAException("The size of the delimiter cannot be greater than 1");
@@ -404,8 +404,7 @@ public class FileTreatmentHelper implements DisposableBean {
       LOG_ERROR.error("File not created in dataflow {}. Message: {}", dataset.getDataflowId(),
           e.getMessage(), e);
     }
-    LOG.info("File created in dataflowId {}", dataset.getDataflowId());
-
+    LOG.info("Reference file created in dataflowId {} for datasetId {}", dataset.getDataflowId(), dataset.getId());
   }
 
   /**
@@ -438,6 +437,7 @@ public class FileTreatmentHelper implements DisposableBean {
         out.write(file);
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT,
             null, notificationVO);
+        LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       }
     } catch (IOException | EEAException e) {
       LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId,
@@ -541,7 +541,7 @@ public class FileTreatmentHelper implements DisposableBean {
     tableValueFor(datasetId, dataset, readOnlyTables, fixedNumberTables, allRecords,
         tableWithAttachmentFieldSet, datasetSchema.getTableSchemas());
     recordRepository.saveAll(allRecords);
-    LOG.info("Data saved into dataset {}", datasetId);
+    LOG.info("Data saved for datasetId {}", datasetId);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
@@ -600,9 +600,9 @@ public class FileTreatmentHelper implements DisposableBean {
         includeZip = true;
       }
       generateFile(datasetId, extension, contents, includeZip, datasetType);
-      LOG.info("End of exportDatasetFile datasetId {}", datasetId);
+      LOG.info("Exported dataset data for datasetId {}", datasetId);
     } catch (EEAException | IOException | NullPointerException e) {
-      LOG_ERROR.error("Error exporting dataset data. DatasetId {}, file type {}. Message {}",
+      LOG_ERROR.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
           datasetId, mimeType, e.getMessage(), e);
       // Send notification
       NotificationVO notificationVO = NotificationVO.builder()
@@ -613,8 +613,8 @@ public class FileTreatmentHelper implements DisposableBean {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null,
             notificationVO);
       } catch (EEAException ex) {
-        LOG_ERROR.error("Error sending export dataset fail notification. Message {}",
-            e.getMessage(), ex);
+        LOG_ERROR.error("Error sending export dataset fail notification for datasetId {}. Message {}",
+            datasetId, e.getMessage(), ex);
       }
     }
 
@@ -648,7 +648,7 @@ public class FileTreatmentHelper implements DisposableBean {
     // check schema has geometry and check field Value has geometry
     if (checkSchemaGeometry(datasetSchema)) {
       LOG.info("Updating geometries for dataset {}", datasetId);
-      // update geometryes (native)
+      // update geometries (native)
       Map<Integer, Map<String, String>> mapFieldValue = getFieldValueGeometry(datasetId);
       int size = mapFieldValue.keySet().size();
       for (int i = 0; i < size; i++) {
@@ -802,7 +802,7 @@ public class FileTreatmentHelper implements DisposableBean {
     } else {
       integrationVO = getIntegrationVO(integrationId);
       if (null == integrationVO) {
-        LOG_ERROR.error("Error. Integration {} not found", integrationId);
+        LOG_ERROR.error("Error in fileManagement. Integration {} not found. datasetId: {} and tableSchemaId: {}", integrationId, datasetId, tableSchemaId);
       }
     }
 
@@ -838,8 +838,8 @@ public class FileTreatmentHelper implements DisposableBean {
           releaseLock(datasetId);
           datasetMetabaseService.updateDatasetRunningStatus(datasetId,
               DatasetRunningStatusEnum.ERROR_IN_IMPORT);
-          LOG_ERROR.error("Error trying to import a zip file into dataset {}. Empty zip file",
-              datasetId);
+          LOG_ERROR.error("Error trying to import a zip file into datasetId {} and tableSchemaId: {}. Empty zip file",
+              datasetId, tableSchemaId);
           throw new EEAException("Empty zip file");
         }
       } else {
@@ -850,7 +850,7 @@ public class FileTreatmentHelper implements DisposableBean {
         try (FileOutputStream output = new FileOutputStream(file)) {
           IOUtils.copyLarge(input, output);
           files.add(file);
-          LOG.info("Stored file {}", file.getPath());
+          LOG.info("Stored file {} in fileManagement. For datasetId {} and tableSchemaId {}", file.getPath(), datasetId, tableSchemaId);
         }
 
         // if the import goes it's a zip file, check if the zip is not empty to show
@@ -861,18 +861,20 @@ public class FileTreatmentHelper implements DisposableBean {
             if (zipFile.size() == 0) {
               zipFile.close();
               releaseLock(datasetId);
-              throw new EEAException("Empty zip file");
+              throw new EEAException("Empty zip file for datasetId " + datasetId + " and tableSchemaId " + tableSchemaId);
             }
             zipFile.close();
           } catch (IOException e) {
             releaseLock(datasetId);
-            throw new EEAException("Empty zip file");
+            throw new EEAException("Empty zip file for datasetId " + datasetId + " and tableSchemaId " + tableSchemaId);
           }
         }
 
         // Queue import task for the stored file
         queueImportProcess(datasetId, tableSchemaId, schema, files, originalFileName, integrationVO,
             replace, delimiter, multipartFileMimeType);
+
+        LOG.info("Queued import process for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       }
 
     } catch (EEAException | FeignException | IOException e) {
@@ -951,6 +953,7 @@ public class FileTreatmentHelper implements DisposableBean {
   private void queueImportProcess(Long datasetId, String tableSchemaId, DataSetSchema schema,
       List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
       String delimiter, String mimeType) throws IOException, EEAException {
+      LOG.info("Queueing import process for datasetId {} tableSchemaId {} and file {}", datasetId, tableSchemaId, originalFileName);
     if (null != integrationVO) {
       prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
           replace);
@@ -960,13 +963,14 @@ public class FileTreatmentHelper implements DisposableBean {
           rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, replace,
               delimiter);
         } catch (Exception e) {
-          LOG_ERROR.error("RN3-Import: Unexpected error. {}", e.getMessage(), e);
+          LOG_ERROR.error("RN3-Import: Unexpected error in queueImportProcess for datasetId {} and tableSchemaId {}. {}", datasetId, tableSchemaId, e.getMessage(), e);
           if (e instanceof InterruptedException) {
             Thread.currentThread().interrupt();
           }
         }
       });
     }
+    LOG.info("Finished queueing import process for datasetId {} tableSchemaId {} and file {}", datasetId, tableSchemaId, originalFileName);
   }
 
 
@@ -1007,8 +1011,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
     // delete precious data if necessary
     if (replace) {
-      LOG.info("Replacing data checked");
       wipeDataAsync(datasetId, tableSchemaId, file, integrationVO);
+      LOG.info("Data has been wiped for datasetId {}", datasetId);
     } else {
       Map<String, Object> valuesFME = new HashMap<>();
       valuesFME.put("datasetId", datasetId);
@@ -1037,6 +1041,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
     // delete precious data if necessary
     wipeData(datasetId, tableSchemaId, replace);
+    LOG.info("Data has been wiped during rn3FileProcess datasetId {}, files {}", datasetId, files);
 
     // Wait a second before continue to avoid duplicated insertions
     Thread.sleep(1000);
@@ -1087,6 +1092,7 @@ public class FileTreatmentHelper implements DisposableBean {
     } else {
       finishImportProcess(datasetId, null, originalFileName, error, errorWrongFilename);
     }
+    LOG.info("Finished import process for datasetId {} and file {}", datasetId, originalFileName);
 
   }
 
@@ -1173,7 +1179,7 @@ public class FileTreatmentHelper implements DisposableBean {
             value, notificationWarning);
       }
     } catch (EEAException e) {
-      LOG_ERROR.error("RN3-Import file error", e);
+      LOG_ERROR.error("RN3-Import file error for datasetId {}", datasetId, e);
     }
   }
 
@@ -1265,15 +1271,18 @@ public class FileTreatmentHelper implements DisposableBean {
       throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
+      LOG_ERROR.error("RN3 Import process: Filename is null. DatasetId {}", datasetId);
       throw new EEAException(EEAErrorMessage.FILE_NAME);
     }
     final String mimeType = datasetService.getMimetype(fileName).toLowerCase();
     // validates file types for the data load
     validateFileType(mimeType);
+    LOG.info("RN3 Import process: file type has been validated for file {} and datasetId {}",fileName, datasetId);
 
     try {
       // Get the partition for the partiton id
       final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
+      LOG.info("RN3 Import process: partition has been obtained for datasetId {}",fileName, datasetId);
 
       // Get the dataFlowId from the metabase
       final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -1281,15 +1290,17 @@ public class FileTreatmentHelper implements DisposableBean {
       // create the right file parser for the file type
       final IFileParseContext context =
           fileParserFactory.createContext(mimeType, datasetId, delimiter);
+      LOG.info("RN3 Import process: context has been created for datasetId {}",fileName, datasetId);
 
       ConnectionDataVO connectionDataVO = recordStoreControllerZuul
           .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
 
       context.parse(is, dataflowId, partition.getId(), idTableSchema, datasetId, fileName, replace,
           schema, connectionDataVO);
+      LOG.info("RN3 Import process: context has been parsed for datasetId {}",fileName, datasetId);
 
     } catch (Exception e) {
-      LOG.error("error processing file", e);
+      LOG.error("Error in RN3 Import process: processing file for datasetId {}", datasetId, e);
       throw e;
     } finally {
       is.close();

@@ -153,8 +153,8 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         try {
           fileTreatmentHelper.savePublicFiles(dataflowVO.getId(), dataset.getDataProviderId());
         } catch (IOException e) {
-          LOG_ERROR.error("Folder not created in dataflow {} with dataprovider {} message {}",
-              dataset.getDataflowId(), dataset.getDataProviderId(), e.getMessage(), e);
+          LOG_ERROR.error("Folder not created in dataflow {} with dataprovider {} and datasetId {} message {}",
+              dataset.getDataflowId(), dataset.getDataProviderId(), datasetId, e.getMessage(), e);
         }
       }
 
@@ -166,8 +166,8 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       // Send email to requesters
       sendMail(dateRelease, dataset, dataflowVO);
 
-      LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {}",
-          dataset.getDataflowId(), dataset.getDataProviderId());
+      LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {} DatasetId: {}",
+          dataset.getDataflowId(), dataset.getDataProviderId(), datasetId);
       List<Long> datasetMetabaseListIds =
           datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(dataflowVO.getId(),
               dataset.getDataProviderId());
@@ -202,7 +202,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       messageVO.setContent(country + " released " + dataflowName + " successfully");
       messageVO.setAutomatic(true);
       collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO);
-      LOG.info("Automatic feedback message created of dataflow {}. Message: {}", dataflowVO.getId(),
+      LOG.info("Automatic feedback message created of dataflow {} and datasetId {}. Message: {}", dataflowVO.getId(), datasetId,
           messageVO.getContent());
 
     }

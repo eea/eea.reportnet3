@@ -290,6 +290,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   public void deleteDataset(@ApiParam(value = "Dataset schema name",
       example = "Dataset schema displayed name") @PathVariable("datasetSchemaName") String datasetSchemaName) {
     recordStoreService.deleteDataset(datasetSchemaName);
+    LOG.info("Deleted dataset with name {}", datasetSchemaName);
   }
 
   /**

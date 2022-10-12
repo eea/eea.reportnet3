@@ -96,10 +96,10 @@ public class EUDatasetControllerImpl implements EUDatasetController {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
-      LOG.info("Populating data in dataflow {}", dataflowId);
+      LOG.info("Populating data for dataflowId {}", dataflowId);
       euDatasetService.populateEUDatasetWithDataCollection(dataflowId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error populating the EU Dataset because: {}", e.getMessage());
+      LOG_ERROR.error("Error populating the EU Dataset for dataflowId {} because: {}", dataflowId, e.getMessage());
     }
   }
 

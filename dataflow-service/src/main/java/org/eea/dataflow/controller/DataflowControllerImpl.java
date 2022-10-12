@@ -432,9 +432,15 @@ public class DataflowControllerImpl implements DataFlowController {
     if (status == HttpStatus.OK) {
       try {
         Long dataflowId = dataflowService.createDataFlow(dataFlowVO);
+        LOG.info("Successfully created dataflow with id {}", dataflowId);
         message = dataflowId.toString();
       } catch (EEAException e) {
-        LOG_ERROR.error("Create dataflow failed. ", e.getCause());
+        if(dataFlowVO != null){
+          LOG_ERROR.error("Creating dataflow with name {} failed. Message: {} ", dataFlowVO.getName(), e.getMessage());
+        }
+        else{
+          LOG_ERROR.error("Creating dataflow failed because object is null. Message: {} ", e.getMessage());
+        }
         message = "There was an unknown error creating the dataflow.";
         status = HttpStatus.INTERNAL_SERVER_ERROR;
       }
@@ -533,6 +539,7 @@ public class DataflowControllerImpl implements DataFlowController {
     if (status == HttpStatus.OK) {
       try {
         dataflowService.updateDataFlow(dataFlowVO);
+        LOG.info("Successfully updated dataflow with id {}", dataFlowVO.getId());
       } catch (EEAException e) {
         LOG_ERROR.error("Update dataflow failed. ", e.getCause());
         message = "There was an unknown error updating the dataflow.";
@@ -637,7 +644,9 @@ public class DataflowControllerImpl implements DataFlowController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           "Can't delete a Business Dataflow without being an admin user.");
     } else {
+      LOG.info("Deleting dataflow with id {}", dataflowId);
       dataflowService.deleteDataFlow(dataflowId);
+      LOG.info("Successfully deleted dataflow with id {}", dataflowId);
     }
   }
 
@@ -944,7 +953,9 @@ public class DataflowControllerImpl implements DataFlowController {
     notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_SCHEMAS_INFO_START",
         userNotificationContentVO);
     try {
+      LOG.info("Exporting schema information for dataflow with id {}", dataflowId);
       dataflowHelper.exportSchemaInformation(dataflowId);
+      LOG.info("Successfully exported schema information for dataflow with id {}", dataflowId);
     } catch (IOException | EEAException e) {
       LOG_ERROR.error(
           "Error downloading file generated from export from the dataflowId {}. Message: {}",
@@ -971,6 +982,7 @@ public class DataflowControllerImpl implements DataFlowController {
           "Downloading file generated when exporting Schema Information. DataflowId {}. Filename {}",
           dataflowId, fileName);
       File file = dataflowHelper.downloadSchemaInformation(dataflowId, fileName);
+      LOG.info("Successfully downloaded file generated when exporting Schema Information. DataflowId {}. Filename {}", dataflowId, fileName);
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
       OutputStream out = response.getOutputStream();
@@ -1006,14 +1018,14 @@ public class DataflowControllerImpl implements DataFlowController {
 
     try {
       dataflowService.getPublicDataflowById(dataflowId);
-      LOG.info("Downloading file Schema Information from DataflowId {}.", dataflowId);
-
+      LOG.info("Downloading file Schema Information from dataflowId {}", dataflowId);
       String composedFileName = "dataflow-" + dataflowId + "-Schema_Information";
       String fileNameWithExtension = composedFileName + "_"
           + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss")) + "."
           + FileTypeEnum.XLSX.getValue();
 
       byte[] file = dataflowHelper.downloadPublicSchemaInformation(dataflowId);
+      LOG.info("Successfully downloaded file Schema Information from dataflowId {}", dataflowId);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
           "attachment; filename=" + fileNameWithExtension);
@@ -1055,6 +1067,7 @@ public class DataflowControllerImpl implements DataFlowController {
             .get(AuthenticationDetails.USER_ID);
 
     try {
+      LOG.info("Validating all reporters with userId {}", userId);
       dataflowService.validateAllReporters(userId);
     } catch (Exception e) {
       message =

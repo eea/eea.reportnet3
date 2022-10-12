@@ -59,6 +59,11 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(RepresentativeControllerImpl.class);
+
   /** The Constant EMAIL_REGEX: {@value}. */
   private static final String EMAIL_REGEX =
       "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"; // NOSONAR
@@ -89,7 +94,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       return representativeService.createRepresentative(dataflowId, representativeVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error creating new representative: {}", e.getMessage());
+      LOG_ERROR.error("Error creating new representative for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.CREATING_REPRESENTATIVE);
     }
@@ -191,7 +196,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       representativeVOs = representativeService.getRepresetativesByIdDataFlow(dataflowId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error retrieving representatives: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error retrieving representatives for dataflowId {} Message: {}", dataflowId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
@@ -259,9 +264,11 @@ public class RepresentativeControllerImpl implements RepresentativeController {
           example = "0") @PathVariable("dataflowRepresentativeId") Long dataflowRepresentativeId,
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {
+      LOG.info("Deleting dataflow representative for dataflowId {} and dataflowRepresentativeId {}", dataflowId, dataflowRepresentativeId);
       representativeService.deleteDataflowRepresentative(dataflowRepresentativeId);
+      LOG.info("Successfully deleted dataflow representative for dataflowId {} and dataflowRepresentativeId {}", dataflowId, dataflowRepresentativeId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting representative: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error deleting representative for dataflowRepresentativeId {} and dataflowId {} Message: {}", dataflowRepresentativeId, dataflowId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     }
@@ -306,13 +313,15 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   public ResponseEntity<byte[]> exportLeadReportersFile(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {
+      LOG.info("Exporting lead reporters file for dataflowId {}", dataflowId);
       byte[] file = representativeService.exportFile(dataflowId);
       String fileName = "Dataflow-" + dataflowId + "-Lead-Reporters.csv";
+      LOG.info("Successfully exported lead reporters file {} for dataflowId {}", fileName, dataflowId);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + fileName);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error("Error while exporting lead reporters: ", e);
+      LOG_ERROR.error("Error while exporting lead reporters for dataflowId {} Message: {}", dataflowId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXPORT_LEAD_REPORTERS);
     }
@@ -336,13 +345,15 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       @ApiParam(value = "Group Id", example = "0") @PathVariable("groupId") Long groupId) {
 
     try {
+      LOG.info("Exporting template reporters file for groupId {}", groupId);
       byte[] file = representativeService.exportTemplateReportersFile(groupId);
       String fileName = "CountryCodes-Lead-Reporters.csv";
+      LOG.info("Successfully exported template reporters file {} for groupId {}", fileName, groupId);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + fileName);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error("Error exporting lead reporters template.", e);
+      LOG_ERROR.error("Error exporting lead reporters template for groupId {} ", groupId, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXPORT_LEAD_REPORTERS);
     }
@@ -390,14 +401,16 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     }
 
     try {
+      LOG.info("Importing file country template for dataflowId {} and groupId {}", dataflowId, groupId);
       byte[] fileEnded = representativeService.importLeadReportersFile(dataflowId, groupId, file);
       String fileName = "Dataflow-" + dataflowId + "-Lead-Reporters-Errors-improt.csv";
+      LOG.info("Importing file country template {} for dataflowId {} and groupId {}", fileName, dataflowId, groupId);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + fileName);
       return new ResponseEntity<>(fileEnded, httpHeaders, HttpStatus.OK);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error("File import failed lead reporters in dataflow={}, fileName={}", dataflowId,
-          file.getName());
+      LOG_ERROR.error("File import failed lead reporters in dataflow={}, fileName={}. Message: ", dataflowId,
+          file.getName(), e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IMPORT_LEAD_REPORTERS);
     }
@@ -439,9 +452,12 @@ public class RepresentativeControllerImpl implements RepresentativeController {
           String.format(EEAErrorMessage.NOT_EMAIL, leadReporterVO.getEmail()));
     }
     try {
-      return representativeService.createLeadReporter(representativeId, leadReporterVO);
+      LOG.info("Creating lead reporter for dataflowId {} and representativeId {}", dataflowId, representativeId);
+      Long reporterId = representativeService.createLeadReporter(representativeId, leadReporterVO);
+      LOG.info("Successfully created lead reporter for dataflowId {} and representativeId {}", dataflowId, representativeId);
+      return reporterId;
     } catch (EEAException e) {
-      LOG_ERROR.error("Error creating new lead reporter: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error creating new lead reporter for dataflowId {} and representativeId {} Message: {}", dataflowId, representativeId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.CREATE_LEAD_REPORTER);
     }
@@ -482,7 +498,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid email");
     }
     try {
-      return representativeService.updateLeadReporter(leadReporterVO);
+      LOG.info("Updating lead reporter for dataflowId {}", dataflowId);
+      Long reporterId = representativeService.updateLeadReporter(leadReporterVO);
+      LOG.info("Successfully updated lead reporter for dataflowId {}", dataflowId);
+      return reporterId;
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating lead reporter: duplicated representative. leadReporterVO={}",
           leadReporterVO, e);
@@ -505,7 +524,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   public void deleteLeadReporter(@PathVariable("leadReporterId") Long leadReporterId,
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {
+      LOG.info("Deleting lead reporter {} for dataflowId {}", leadReporterId, dataflowId);
       representativeService.deleteLeadReporter(leadReporterId);
+      LOG.info("Successfully deleted lead reporter {} for dataflowId {}", leadReporterId, dataflowId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting lead reporter: leadReporterId ={}", leadReporterId, e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -527,9 +548,11 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   public void validateLeadReporters(@ApiParam(value = "Dataflow ID", required = true,
       example = "1") @PathVariable("dataflowId") Long dataflowId) {
     try {
+      LOG.info("Validating lead reporters for dataflowId {}", dataflowId);
       representativeService.validateLeadReporters(dataflowId, true);
+      LOG.info("Successfully validated lead reporters for dataflowId {}", dataflowId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error validating lead reporters: leadReporterId ={}", dataflowId, e);
+      LOG_ERROR.error("Error validating lead reporters: dataflowId {}", dataflowId, e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.ERROR_VALIDATING_LEAD_REPORTERS);
     }
@@ -558,8 +581,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       if (representativeService.checkDataHaveBeenRelease(dataflowId, dataProviderId)
           && representativeService.checkRestrictFromPublic(dataflowId, dataProviderId)) {
+        LOG.info("Updating representative visibility restrictions for dataflowId {} and dataProviderId {}", dataflowId, dataProviderId);
         representativeService.updateRepresentativeVisibilityRestrictions(dataflowId, dataProviderId,
             restrictFromPublic);
+        LOG.info("Successfully updated representative visibility restrictions for dataflowId {} and dataProviderId {}", dataflowId, dataProviderId);
       } else {
         LOG_ERROR.info(
             "Error, you can't change the restrict from public value for the representative with dataflowId {} and dataProviderId {}",
@@ -597,8 +622,16 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @ApiOperation(value = "Updates the internal representative", response = Long.class, hidden = true)
   public Long updateInternalRepresentative(@ApiParam(
       value = "Representative VO object") @RequestBody RepresentativeVO representativeVO) {
+    if(representativeVO != null){
+      LOG.info("Updating internal representative with id {}", representativeVO.getId());
+    }
+    else{
+      LOG.info("Updating internal representative but object is null");
+    }
 
-    return representativeService.updateDataflowRepresentative(representativeVO);
+    Long representativeId = representativeService.updateDataflowRepresentative(representativeVO);
+    LOG.info("Successfully updated internal representative with id {}", representativeVO.getId());
+    return representativeId;
   }
 
   /**
@@ -667,8 +700,10 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       @ApiParam(value = "Should the representative be restricted to public view?", required = true,
           defaultValue = "false") @RequestParam(value = "restrictFromPublic", required = true,
               defaultValue = "false") boolean restrictFromPublic) {
+    LOG.info("Updating representative visibility restrictions for dataflowId {} and dataProviderId {}", dataflowId, dataProviderId);
     representativeService.updateRepresentativeVisibilityRestrictions(dataflowId, dataProviderId,
         restrictFromPublic);
+    LOG.info("Successfully updated representative visibility restrictions for dataflowId {} and dataProviderId {}", dataflowId, dataProviderId);
   }
 
 
