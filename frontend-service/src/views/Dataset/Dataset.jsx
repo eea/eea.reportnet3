@@ -139,6 +139,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [webformData, setWebformData] = useState(null);
   const [webformOptions, setWebformOptions] = useState([]);
+  const [importProcessing, setImportProcessing] = useState(false);
+  const [importProcessingMessage, setImportProcessingMessage] = useState(null);
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -274,6 +276,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     snapshotListData,
     snapshotState
   } = useReporterDataset(datasetId, dataflowId);
+
+  useEffect(() => {
+    testImport();
+  }, [datasetId]);
 
   useEffect(() => {
     onLoadDataflow();
@@ -958,7 +964,29 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
   };
 
+  const testImport = () => {
+    const timeout = ms => {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    };
+    const testImportTimer = async () => {
+      const importStatus = await DatasetService.testImportProcess(datasetId);
+
+      if (importStatus?.data && !importStatus?.data?.importInProgress) {
+        setImportProcessing(false);
+        setImportProcessingMessage(null);
+      } else {
+        setImportProcessingMessage(importStatus?.data?.message);
+        await timeout(5000);
+        testImportTimer();
+      }
+    };
+    setImportProcessing(true);
+    testImportTimer();
+  };
+
   const onUpload = async () => {
+    testImport();
+
     setIsImportDatasetDialogVisible(false);
     setSelectedCustomImportIntegration({ id: null, name: null });
     const {
@@ -1156,9 +1184,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                   className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${
                     !hasWritePermissions ? null : 'p-button-animated-blink'
                   }`}
-                  disabled={!hasWritePermissions}
-                  icon="import"
-                  label={resourcesContext.messages['importDataset']}
+                  disabled={!hasWritePermissions || importProcessing}
+                  icon={importProcessing ? 'spinnerAnimate' : 'import'}
+                  label={importProcessingMessage ? importProcessingMessage : resourcesContext.messages['importDataset']}
                   onClick={event => importMenuRef.current.show(event)}
                 />
                 <Menu
