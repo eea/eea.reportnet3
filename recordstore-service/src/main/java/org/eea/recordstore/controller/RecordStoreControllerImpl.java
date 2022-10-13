@@ -419,4 +419,44 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     recordStoreService.updateSnapshotDisabled(datasetId);
   }
 
+
+
+  /**
+   * Restore specific file snapshot data.
+   *
+   * @param datasetId
+   * @param idSnapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param type
+   */
+  @HystrixCommand
+  @PostMapping(value = "/restoreSpecificFileSnapshotData")
+  @ApiOperation(value = "Restore specific snapshot data", hidden = true)
+  @ApiResponse(code = 500, message = "Could not restore the specific snapshot data")
+  public void restoreSpecificFileSnapshotData(
+      @ApiParam(value = "Dataset Id", example = "0", required = true)
+      @RequestParam("datasetId") Long datasetId,
+      @ApiParam(value = "Snapshot Id", example = "0", required = true)
+      @RequestParam("idSnapshot") Long idSnapshot,
+      @ApiParam(value = "Starting number", example = "0", required = true)
+      @RequestParam("startingNumber") Long startingNumber,
+      @ApiParam(value = "Ending number", example = "0", required = true)
+      @RequestParam("endingNumber") Long endingNumber,
+      @ApiParam(value = "FIELD or ATTACHMENT", example = "FIELD", required = true)
+      @RequestParam("type") String type) {
+
+    try {
+      LOG.info("Method restoreSpecificSnapshotData starts for datasetId: {}, idSnapshot: {}, startingNumber: {}, endingNumber: {}, type: {}",
+          datasetId, idSnapshot, startingNumber, endingNumber, type);
+
+      recordStoreService.restoreSpecificFileSnapshot(datasetId, idSnapshot, startingNumber, endingNumber, type);
+
+      LOG.info("Method restoreSpecificFileSnapshot ends");
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in method restoreSpecificSnapshotData for datasetId: {} with error {}", datasetId, e);
+    }
+
+  }
+
 }
