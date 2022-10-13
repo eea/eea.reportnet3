@@ -3,6 +3,7 @@ package org.eea.recordstore.service.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -496,5 +497,15 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void createUpdateQueryViewAsync(Long datasetId, boolean isMaterialized) {
     LOG.info("Create or Update Query-Materialized View");
+  }
+
+  @Override
+  public void createDataSnapshotForRelease(Long idDataset, Long idSnapshot, Long idPartitionDataset, boolean prefillingReference) throws SQLException, IOException, InterruptedException {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
+
+  @Override
+  public void restoreFromSnapshot(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType, Connection con) throws SQLException, IOException {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 }

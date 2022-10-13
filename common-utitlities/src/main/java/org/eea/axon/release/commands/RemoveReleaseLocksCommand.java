@@ -12,10 +12,10 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-public class CreateSnapshotFileForReleaseCommand {
+public class RemoveReleaseLocksCommand {
 
     @TargetAggregateIdentifier
-    private String aggregate;
+    private final String aggregate;
     private final String id;
     private final Long dataflowId;
     private final Long dataProviderId;

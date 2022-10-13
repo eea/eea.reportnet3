@@ -1,32 +1,6 @@
 package org.eea.recordstore.service.impl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.sql.DataSource;
+import feign.FeignException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
@@ -40,13 +14,7 @@ import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetContro
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
-import org.eea.interfaces.vo.dataset.DataCollectionVO;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.DesignDatasetVO;
-import org.eea.interfaces.vo.dataset.EUDatasetVO;
-import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
-import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.dataset.TestDatasetVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -77,7 +45,16 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import feign.FeignException;
+
+import javax.sql.DataSource;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.*;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The Class JdbcRecordStoreServiceImpl.
@@ -536,121 +513,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
         connectionDataVO.getUser(), connectionDataVO.getPassword())) {
       type = checkType(idDataset, idSnapshot);
-      CopyManager cm = new CopyManager((BaseConnection) con);
-
-      // Copy dataset_value
-      String nameFileDatasetValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX);
-      String copyQueryDataset = "COPY (SELECT id, id_dataset_schema FROM dataset_" + idDataset
-          + ".dataset_value) to STDOUT";
-
-      printToFile(nameFileDatasetValue, copyQueryDataset, cm);
-      // Copy table_value
-      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
-
-      String copyQueryTable = "COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
-          + idDataset + ".table_value) to STDOUT";
-
-      printToFile(nameFileTableValue, copyQueryTable, cm);
-
       DatasetTypeEnum typeDataset = datasetControllerZuul.getDatasetType(idDataset);
-      String copyQueryRecord;
-      String copyQueryField;
-      // Special case to make the snapshot to copy from DataCollection to EUDataset. The sql copy
-      // all the values from the DC, no matter what partitionId has the origin, but we need to put
-      // in the file the partitionId of the EUDataset destination
-      String copyQueryAttachment =
-          "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
-              + idDataset + ".attachment_value at) to STDOUT";
-      if (DatasetTypeEnum.COLLECTION.equals(typeDataset)) {
-        String providersCode = getProvidersCode(idDataset);
-        copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
-            + ",data_provider_code FROM dataset_" + idDataset
-            + ".record_value WHERE data_provider_code in (" + providersCode
-            + ") order by data_position) to STDOUT";
-        copyQueryField =
-            "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
-                + idDataset + ".field_value fv, dataset_" + idDataset
-                + ".record_value rv WHERE fv.id_record = rv.id " + "AND rv.data_provider_code in ("
-                + providersCode + ")) to STDOUT";
-        copyQueryAttachment =
-            "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
-                + idDataset + ".attachment_value at, dataset_" + idDataset
-                + ".field_value fv, dataset_" + idDataset
-                + ".record_value rv WHERE at.field_value_id = fv.id AND fv.id_record = rv.id "
-                + "AND rv.data_provider_code in (" + providersCode + ")) to STDOUT";
-      } else if (!DatasetTypeEnum.COLLECTION.equals(typeDataset)
-          && Boolean.TRUE.equals(prefillingReference)) {
-        copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
-            + ",data_provider_code FROM dataset_" + idDataset
-            + ".record_value order by data_position) to STDOUT";
-        copyQueryField =
-            "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
-                + idDataset + ".field_value fv) to STDOUT";
-      } else {
-        copyQueryRecord =
-            "COPY (SELECT id, id_record_schema, id_table, dataset_partition_id, data_provider_code FROM dataset_"
-                + idDataset + ".record_value WHERE dataset_partition_id=" + idPartitionDataset
-                + " order by data_position) to STDOUT";
-        copyQueryField =
-            "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
-                + idDataset + ".field_value fv inner join dataset_" + idDataset
-                + ".record_value rv on fv.id_record = rv.id where rv.dataset_partition_id="
-                + idPartitionDataset + ") to STDOUT";
-      }
-
-      // Copy record_value
-      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
-
-      printToFile(nameFileRecordValue, copyQueryRecord, cm);
-
-      // Copy field_value
-      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-
-      printToFile(nameFileFieldValue, copyQueryField, cm);
-
-      // Copy attachment_value
-      String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
-
-      printToFile(nameFileAttachmentValue, copyQueryAttachment, cm);
-
-      LOG.info("Snapshot {} data files created", idSnapshot);
-
-      // Check if the snapshot is completed. If it is an schema snapshot, check the rules file.
-      // Otherwise check the attachment file
-      long startTime = System.currentTimeMillis();
-      String nameFileRules =
-          String.format("rulesSnapshot_%s-DesignDataset_%s", idSnapshot, idDataset)
-              + LiteralConstants.SNAPSHOT_EXTENSION;
-      if (DatasetTypeEnum.DESIGN.equals(typeDataset) && Boolean.FALSE.equals(prefillingReference)) {
-        while ((System.currentTimeMillis() - startTime) < 30000) {
-          try {
-            documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
-            break;
-          } catch (FeignException e) {
-            LOG.info(
-                "Document: {} still not created from dataset: {} and snapshot: {}, wait {} milliseconds",
-                nameFileRules, idDataset, idSnapshot, timeToWaitBeforeReleasingNotification);
-            Thread.sleep(timeToWaitBeforeReleasingNotification);
-          }
-        }
-      } else {
-        while ((System.currentTimeMillis() - startTime) < 30000) {
-          try {
-            FileUtils.touch(new File(nameFileAttachmentValue));
-            break;
-          } catch (IOException e) {
-            LOG.info(
-                "Waiting to finish the snapshot {} from dataset {} to complete before sending the notification",
-                idSnapshot, idDataset);
-            Thread.sleep(timeToWaitBeforeReleasingNotification);
-          }
-        }
-      }
+      createSnapshot(idDataset,idSnapshot,idPartitionDataset,prefillingReference,typeDataset, con);
 
       notificationCreateAndCheckRelease(idDataset, idSnapshot, type, dateRelease,
           prefillingReference);
@@ -702,6 +566,124 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
         createSchemaSnapshot.put(LiteralConstants.DATASETID, idDataset);
         lockService.removeLockByCriteria(createSchemaSnapshot);
+      }
+    }
+  }
+
+  public void createSnapshot(Long idDataset, Long idSnapshot, Long idPartitionDataset,
+                             boolean prefillingReference, DatasetTypeEnum typeDataset, Connection con) throws IOException, SQLException, InterruptedException {
+    CopyManager cm = new CopyManager((BaseConnection) con);
+
+    // Copy dataset_value
+    String nameFileDatasetValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+            LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX);
+    String copyQueryDataset = "COPY (SELECT id, id_dataset_schema FROM dataset_" + idDataset
+            + ".dataset_value) to STDOUT";
+
+    printToFile(nameFileDatasetValue, copyQueryDataset, cm);
+    // Copy table_value
+    String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+            LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+
+    String copyQueryTable = "COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
+            + idDataset + ".table_value) to STDOUT";
+
+    printToFile(nameFileTableValue, copyQueryTable, cm);
+
+    String copyQueryRecord;
+    String copyQueryField;
+    // Special case to make the snapshot to copy from DataCollection to EUDataset. The sql copy
+    // all the values from the DC, no matter what partitionId has the origin, but we need to put
+    // in the file the partitionId of the EUDataset destination
+    String copyQueryAttachment =
+            "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
+                    + idDataset + ".attachment_value at) to STDOUT";
+    if (DatasetTypeEnum.COLLECTION.equals(typeDataset)) {
+      String providersCode = getProvidersCode(idDataset);
+      copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
+              + ",data_provider_code FROM dataset_" + idDataset
+              + ".record_value WHERE data_provider_code in (" + providersCode
+              + ") order by data_position) to STDOUT";
+      copyQueryField =
+              "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
+                      + idDataset + ".field_value fv, dataset_" + idDataset
+                      + ".record_value rv WHERE fv.id_record = rv.id " + "AND rv.data_provider_code in ("
+                      + providersCode + ")) to STDOUT";
+      copyQueryAttachment =
+              "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
+                      + idDataset + ".attachment_value at, dataset_" + idDataset
+                      + ".field_value fv, dataset_" + idDataset
+                      + ".record_value rv WHERE at.field_value_id = fv.id AND fv.id_record = rv.id "
+                      + "AND rv.data_provider_code in (" + providersCode + ")) to STDOUT";
+    } else if (!DatasetTypeEnum.COLLECTION.equals(typeDataset)
+            && Boolean.TRUE.equals(prefillingReference)) {
+      copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
+              + ",data_provider_code FROM dataset_" + idDataset
+              + ".record_value order by data_position) to STDOUT";
+      copyQueryField =
+              "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
+                      + idDataset + ".field_value fv) to STDOUT";
+    } else {
+      copyQueryRecord =
+              "COPY (SELECT id, id_record_schema, id_table, dataset_partition_id, data_provider_code FROM dataset_"
+                      + idDataset + ".record_value WHERE dataset_partition_id=" + idPartitionDataset
+                      + " order by data_position) to STDOUT";
+      copyQueryField =
+              "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
+                      + idDataset + ".field_value fv inner join dataset_" + idDataset
+                      + ".record_value rv on fv.id_record = rv.id where rv.dataset_partition_id="
+                      + idPartitionDataset + ") to STDOUT";
+    }
+
+    // Copy record_value
+    String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+            LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
+
+    printToFile(nameFileRecordValue, copyQueryRecord, cm);
+
+    // Copy field_value
+    String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+            LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+
+    printToFile(nameFileFieldValue, copyQueryField, cm);
+
+    // Copy attachment_value
+    String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+            LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+
+    printToFile(nameFileAttachmentValue, copyQueryAttachment, cm);
+
+    LOG.info("Snapshot {} data files created", idSnapshot);
+
+    // Check if the snapshot is completed. If it is an schema snapshot, check the rules file.
+    // Otherwise check the attachment file
+    long startTime = System.currentTimeMillis();
+    String nameFileRules =
+            String.format("rulesSnapshot_%s-DesignDataset_%s", idSnapshot, idDataset)
+                    + LiteralConstants.SNAPSHOT_EXTENSION;
+    if (DatasetTypeEnum.DESIGN.equals(typeDataset) && Boolean.FALSE.equals(prefillingReference)) {
+      while ((System.currentTimeMillis() - startTime) < 30000) {
+        try {
+          documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
+          break;
+        } catch (FeignException e) {
+          LOG.info(
+                  "Document: {} still not created from dataset: {} and snapshot: {}, wait {} milliseconds",
+                  nameFileRules, idDataset, idSnapshot, timeToWaitBeforeReleasingNotification);
+          Thread.sleep(timeToWaitBeforeReleasingNotification);
+        }
+      }
+    } else {
+      while ((System.currentTimeMillis() - startTime) < 30000) {
+        try {
+          FileUtils.touch(new File(nameFileAttachmentValue));
+          break;
+        } catch (IOException e) {
+          LOG.info(
+                  "Waiting to finish the snapshot {} from dataset {} to complete before sending the notification",
+                  idSnapshot, idDataset);
+          Thread.sleep(timeToWaitBeforeReleasingNotification);
+        }
       }
     }
   }
@@ -1009,6 +991,19 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             LOG_ERROR.error("Error creating Query view: {}", e.getMessage(), e);
           }
         });
+  }
+
+  @Override
+  public void createDataSnapshotForRelease(Long idDataset, Long idSnapshot, Long idPartitionDataset, boolean prefillingReference) {
+    ConnectionDataVO connectionDataVO =
+            getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idDataset);
+    try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+            connectionDataVO.getUser(), connectionDataVO.getPassword())) {
+      DatasetTypeEnum typeDataset = datasetControllerZuul.getDatasetType(idDataset);
+      createSnapshot(idDataset,idSnapshot,idPartitionDataset,prefillingReference,typeDataset, con);
+    } catch (Exception e) {
+
+    }
   }
 
 
@@ -1469,10 +1464,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         stmt.executeUpdate(sqlDeleteTempEtlExport);
       }
 
-
-      CopyManager cm = new CopyManager((BaseConnection) con);
-      LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
-      copyProcess(datasetId, idSnapshot, datasetType, cm);
+      restoreFromSnapshot(datasetId, idSnapshot, datasetType, con);
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
           && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
@@ -1546,6 +1538,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         lockService.removeLockByCriteria(lockCriteria);
       }
     }
+  }
+
+  @Override
+  public void restoreFromSnapshot(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType, Connection con) throws SQLException, IOException {
+    CopyManager cm = new CopyManager((BaseConnection) con);
+    LOG.info("Init restoring the snapshot files from Snapshot {}", idSnapshot);
+    copyProcess(datasetId, idSnapshot, datasetType, cm);
   }
 
 

@@ -9,7 +9,7 @@ import java.util.List;
 @Builder
 @Getter
 @Setter
-public class DatasetRunningStatusUpdatedEvent {
+public class SnapshotMarkedReleasedEvent {
 
     private String aggregate;
     private String id;

@@ -1,4 +1,4 @@
-package org.eea.communication.axon.release;
+package org.eea.communication.axon;
 
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
@@ -20,13 +20,17 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 @Component
-@ProcessingGroup("communication-release-group")
+@ProcessingGroup("release-group")
 public class CommunicationReleaseEventsHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommunicationReleaseEventsHandler.class);
 
+    private NotificationService notificationService;
+
     @Autowired
-    NotificationService notificationService;
+    public CommunicationReleaseEventsHandler(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
 
     @EventHandler
     public void on(ReleaseStartNotificationCreatedEvent event, MetaData metaData) throws EEAException {

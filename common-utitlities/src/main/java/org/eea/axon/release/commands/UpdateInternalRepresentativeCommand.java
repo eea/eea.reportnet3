@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
-import java.util.HashMap;
 import java.util.List;
 
 @Builder
@@ -23,5 +22,4 @@ public class UpdateInternalRepresentativeCommand {
     private final boolean restrictFromPublic;
     private final boolean validate;
     private List<Long> datasetIds;
-    private HashMap<Long, Long> datasetSnapshots;
 }

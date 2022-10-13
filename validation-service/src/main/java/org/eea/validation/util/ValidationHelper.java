@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
+import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
+import org.eea.axon.release.commands.CreateSnapshotRecordRorReleaseInMetabaseCommand;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -165,6 +168,12 @@ public class ValidationHelper implements DisposableBean {
   /** The data flow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Autowired
+  private DataSetControllerZuul dataSetControllerZuul;
+
+  @Autowired
+  private CommandGateway commandGateway;
 
   /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
@@ -1107,8 +1116,14 @@ public class ValidationHelper implements DisposableBean {
                 executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
                     false);
               } else if (processControllerZuul.isProcessFinished(processId)) {
-                kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
-                    value);
+                DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+                List<Long> datasetIds = dataSetControllerZuul.findDatasetIdsByDataflowId(dataset.getDataflowId(), dataset.getDataProviderId());
+                CreateSnapshotRecordRorReleaseInMetabaseCommand createReleaseSnapshotCommand = CreateSnapshotRecordRorReleaseInMetabaseCommand.builder().aggregate(UUID.randomUUID().toString()).id(UUID.randomUUID().toString())
+                        .dataflowId(dataset.getDataflowId()).dataProviderId(dataset.getDataProviderId()).datasetIds(datasetIds).build();
+                commandGateway.send(createReleaseSnapshotCommand);
+
+//                kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
+//                    value);
               }
 
             } else {

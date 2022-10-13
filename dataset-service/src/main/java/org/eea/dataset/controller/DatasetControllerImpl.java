@@ -9,11 +9,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
+import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
+import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -122,6 +125,9 @@ public class DatasetControllerImpl implements DatasetController {
   /** The notification controller zuul. */
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
+
+  @Autowired
+  private ReportingDatasetRepository reportingDatasetRepository;
 
   /**
    * Gets the data tables values.
@@ -1624,6 +1630,12 @@ public class DatasetControllerImpl implements DatasetController {
     datasetService.deleteTempEtlExport(datasetId);
   }
 
+  @Override
+  @GetMapping("/datasetIds/{dataflowId}/{dataProviderId}")
+  public List<Long> findDatasetIdsByDataflowId(@PathVariable("dataflowId") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId) {
+    return reportingDatasetRepository.findByDataflowId(dataflowId).stream().filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
+            .distinct().collect(Collectors.toList());
+  }
 
 
   /**

@@ -1,41 +1,16 @@
 package org.eea.dataset.service.impl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TimeZone;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
-import org.eea.dataset.persistence.metabase.domain.DataCollection;
-import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.DesignDataset;
-import org.eea.dataset.persistence.metabase.domain.EUDataset;
-import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
-import org.eea.dataset.persistence.metabase.domain.Snapshot;
-import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
-import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
-import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
+import org.eea.dataset.persistence.metabase.domain.*;
+import org.eea.dataset.persistence.metabase.repository.*;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
@@ -80,6 +55,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -88,10 +64,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The Class DatasetSnapshotServiceImpl.
@@ -302,65 +284,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
 
     try {
+      Snapshot snap = createSnapshotInMetabase(idDataset, createSnapshotVO);
 
-      // 1. Create the snapshot in the metabase
-      Snapshot snap = new Snapshot();
-      TimeZone.setDefault(TimeZone.getTimeZone("CET"));
-      snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
-      snap.setDescription(createSnapshotVO.getDescription());
-      DataSetMetabase dataset = new DataSetMetabase();
-      dataset.setId(idDataset);
-      if (DatasetTypeEnum.REPORTING
-          .equals(datasetMetabaseService.findDatasetMetabase(idDataset).getDatasetTypeEnum())) {
-        dataset = metabaseRepository.findById(idDataset).orElse(new DataSetMetabase());
-        if (dataset.getDatasetSchema() != null) {
-          DataCollection dataCollection = dataCollectionRepository
-              .findFirstByDatasetSchema(dataset.getDatasetSchema()).orElse(new DataCollection());
-          snap.setDataCollectionId(dataCollection.getId());
-        }
-      }
-      snap.setReportingDataset(dataset);
-      snap.setDataSetName("snapshot from dataset_" + idDataset);
-      if (Boolean.TRUE.equals(createSnapshotVO.getReleased())) {
-        snap.setDcReleased(true);
-      } else {
-        snap.setDcReleased(false);
-      }
-      snap.setEuReleased(false);
-      snap.setEnabled(true);
-
-      Long dataflowId = metabaseRepository.findDataflowIdById(idDataset);
-      if (snap.getReportingDataset() != null
-          && snap.getReportingDataset().getDataProviderId() != null) {
-        List<RepresentativeVO> representatives =
-            representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
-        for (RepresentativeVO representative : representatives) {
-          if (snap.getReportingDataset().getDataProviderId()
-              .equals(representative.getDataProviderId())) {
-            snap.setRestrictFromPublic(representative.isRestrictFromPublic());
-          }
-        }
-      }
-
-      snap.setAutomatic(
-          Boolean.TRUE.equals(createSnapshotVO.getAutomatic()) ? Boolean.TRUE : Boolean.FALSE);
-
-      snapshotRepository.save(snap);
       LOG.info("Snapshot {} created into the metabase", snap.getId());
       snap.getId();
 
       // 2. Create the data file of the snapshot, calling to recordstore-service
       // we need the partitionId. By now only consider the user root
-      Long idPartition = obtainPartition(idDataset, "root").getId();
-
-      // The partitionIdDestination will come with data only in the case of the EUDataset. We need
-      // to put in that case
-      // the partitionId of the destination, cause we try to make a snapshot from a DataCollection
-      // to a EUDataset, so we need in
-      // the snapshot files the partitionId of the EUDataset
-      if (partitionIdDestination != null) {
-        idPartition = partitionIdDestination;
-      }
+      Long idPartition = getPartitionId(idDataset, partitionIdDestination);
 
       recordStoreControllerZuul.createSnapshotData(idDataset, snap.getId(), idPartition,
           dateRelease, prefillingReference);
@@ -376,6 +307,74 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       lockService.removeLockByCriteria(createSnapshot);
     }
     // release snapshot when the user press create+release
+  }
+
+  @Override
+  public Long getPartitionId(Long idDataset, Long partitionIdDestination) throws EEAException {
+    Long idPartition = obtainPartition(idDataset, "root").getId();
+
+    // to put in that case
+    // The partitionIdDestination will come with data only in the case of the EUDataset. We need
+    // the partitionId of the destination, cause we try to make a snapshot from a DataCollection
+    // to a EUDataset, so we need in
+    // the snapshot files the partitionId of the EUDataset
+    if (partitionIdDestination != null) {
+      idPartition = partitionIdDestination;
+    }
+    return idPartition;
+  }
+
+  @Override
+  public Snapshot createSnapshotInMetabase(Long idDataset, CreateSnapshotVO createSnapshotVO) {
+    // 1. Create the snapshot in the metabase
+    Snapshot snap = new Snapshot();
+    TimeZone.setDefault(TimeZone.getTimeZone("CET"));
+    snap.setCreationDate(Timestamp.valueOf(LocalDateTime.now()));
+    snap.setDescription(createSnapshotVO.getDescription());
+    DataSetMetabase dataset = new DataSetMetabase();
+    dataset.setId(idDataset);
+    if (DatasetTypeEnum.REPORTING
+        .equals(datasetMetabaseService.findDatasetMetabase(idDataset).getDatasetTypeEnum())) {
+      dataset = metabaseRepository.findById(idDataset).orElse(new DataSetMetabase());
+      if (dataset.getDatasetSchema() != null) {
+        DataCollection dataCollection = dataCollectionRepository
+            .findFirstByDatasetSchema(dataset.getDatasetSchema()).orElse(new DataCollection());
+        snap.setDataCollectionId(dataCollection.getId());
+      }
+    }
+    snap.setReportingDataset(dataset);
+    snap.setDataSetName("snapshot from dataset_" + idDataset);
+    if (Boolean.TRUE.equals(createSnapshotVO.getReleased())) {
+      snap.setDcReleased(true);
+    } else {
+      snap.setDcReleased(false);
+    }
+    snap.setEuReleased(false);
+    snap.setEnabled(true);
+
+    Long dataflowId = metabaseRepository.findDataflowIdById(idDataset);
+    if (snap.getReportingDataset() != null
+        && snap.getReportingDataset().getDataProviderId() != null) {
+      List<RepresentativeVO> representatives =
+          representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowId);
+      for (RepresentativeVO representative : representatives) {
+        if (snap.getReportingDataset().getDataProviderId()
+            .equals(representative.getDataProviderId())) {
+          snap.setRestrictFromPublic(representative.isRestrictFromPublic());
+        }
+      }
+    }
+
+    snap.setAutomatic(
+        Boolean.TRUE.equals(createSnapshotVO.getAutomatic()) ? Boolean.TRUE : Boolean.FALSE);
+
+    snapshotRepository.save(snap);
+    return snap;
+  }
+
+  @Override
+  public Long findFirstByReportingDatasetId(Long reportingDatasetId) {
+    return snapshotRepository.findFirstByReportingDatasetId(reportingDatasetId).getId();
   }
 
   /**
@@ -485,33 +484,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void releaseSnapshot(Long idDataset, Long idSnapshot, String dateRelease)
       throws EEAException {
 
-    Long providerId = 0L;
-    DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(idDataset);
-    if (metabase.getDataProviderId() != null) {
-      providerId = metabase.getDataProviderId();
-    }
-
-    final Long idDataProvider = providerId;
-
-    // Get the provider
-    DataProviderVO provider = representativeControllerZuul.findDataProviderById(idDataProvider);
-
-    // Get the dataCollection
-    DataSetMetabase dataset = metabaseRepository.findById(idDataset).orElse(null);
-
-    // Mark the released dataset with the status
-    String datasetSchema = "";
-    if (dataset != null) {
-      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
-      datasetSchema = dataset.getDatasetSchema();
-      dataset.setStatus(dataflow.isManualAcceptance() ? DatasetStatusEnum.FINAL_FEEDBACK
-          : DatasetStatusEnum.RELEASED);
-      metabaseRepository.save(dataset);
-    }
-    Optional<DataCollection> dataCollection =
-        dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
-    Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
-
+    String datasetSchema = updateDatasetStatus(idDataset);
 
     // Delete data of the same provider
     Date dateReleasing = null;
@@ -524,7 +497,21 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
             "Error during the snapshot release. Problem parsing the date of the release");
       }
     }
-    deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection,
+
+    Long providerId = 0L;
+    DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(idDataset);
+    if (metabase.getDataProviderId() != null) {
+      providerId = metabase.getDataProviderId();
+    }
+
+    final Long idDataProvider = providerId;
+
+    // Get the provider
+    DataProviderVO provider = representativeControllerZuul.findDataProviderById(idDataProvider);
+    Optional<DataCollection> dataCollection =
+            dataCollectionRepository.findFirstByDatasetSchema(datasetSchema);
+    Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
+    deleteDataProviderAndRelease(idDataset, idSnapshot, idDataProvider, provider, idDataCollection,
         dateReleasing);
 
     Map<String, Object> value = new HashMap<>();
@@ -537,6 +524,35 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
   }
 
+  @Override
+  public void deleteProvider(@DatasetId Long idDataset, Long providerId) {
+    DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+    DataSetMetabase dataset = metabaseRepository.findById(idDataset).orElse(null);
+    Optional<DataCollection> dataCollection =
+            dataCollectionRepository.findFirstByDatasetSchema(dataset.getDatasetSchema());
+    Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
+    if (provider != null && idDataCollection != null) {
+      TenantResolver
+              .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataCollection));
+      deleteHelper.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
+    }
+  }
+
+  @Override
+  public String updateDatasetStatus(Long idDataset) {    // Get the dataCollection
+    DataSetMetabase dataset = metabaseRepository.findById(idDataset).orElse(null);
+    // Mark the released dataset with the status
+    String datasetSchema = "";
+    if (dataset != null) {
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
+      datasetSchema = dataset.getDatasetSchema();
+      dataset.setStatus(dataflow.isManualAcceptance() ? DatasetStatusEnum.FINAL_FEEDBACK
+              : DatasetStatusEnum.RELEASED);
+      metabaseRepository.save(dataset);
+    }
+    return datasetSchema;
+  }
+
   /**
    * Delete data provider.
    *
@@ -547,8 +563,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idDataCollection the id data collection
    * @throws EEAException the EEA exception
    */
-  private void deleteDataProvider(Long idDataset, Long idSnapshot, final Long idDataProvider,
-      DataProviderVO provider, Long idDataCollection, Date dateRelease) throws EEAException {
+  private void deleteDataProviderAndRelease(Long idDataset, Long idSnapshot, final Long idDataProvider,
+                                            DataProviderVO provider, Long idDataCollection, Date dateRelease) throws EEAException {
     Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
     if (provider != null && idDataCollection != null) {
       TenantResolver
@@ -557,22 +573,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
       // Restore data from snapshot
       try {
-        // Mark the receipt button as outdated because a new release has been done, so it would be
-        // necessary to generate a new receipt
-        List<RepresentativeVO> representatives = representativeControllerZuul
-            .findRepresentativesByIdDataFlow(idDataflow).stream()
-            .filter(r -> r.getDataProviderId().equals(idDataProvider)).collect(Collectors.toList());
-        if (!representatives.isEmpty()) {
-          RepresentativeVO representative = representatives.get(0);
-          // We only update the representative if the receipt is not outdated
-          if (Boolean.FALSE.equals(representative.getReceiptOutdated())) {
-            representative.setReceiptOutdated(true);
-            representativeControllerZuul.updateInternalRepresentative(representative);
-            LOG.info(
-                "Receipt marked as outdated: dataflowId={}, datasetId={}, providerId={}, representativeId={}",
-                idDataflow, idDataset, provider.getId(), representative.getId());
-          }
-        }
+        updateInternalRepresentative(idDataset, idDataProvider, idDataflow);
 
         // This method will release the lock and the notification
         restoreSnapshot(idDataCollection, idSnapshot, false);
@@ -598,6 +599,26 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot");
       removeLockRelatedToCopyDataToEUDataset(idDataflow);
       releaseLocksRelatedToRelease(idDataflow, idDataProvider);
+    }
+  }
+
+  @Override
+  public void updateInternalRepresentative(Long idDataset, Long idDataProvider, Long idDataflow) {
+    // Mark the receipt button as outdated because a new release has been done, so it would be
+    // necessary to generate a new receipt
+    List<RepresentativeVO> representatives = representativeControllerZuul
+        .findRepresentativesByIdDataFlow(idDataflow).stream()
+        .filter(r -> r.getDataProviderId().equals(idDataProvider)).collect(Collectors.toList());
+    if (!representatives.isEmpty()) {
+      RepresentativeVO representative = representatives.get(0);
+      // We only update the representative if the receipt is not outdated
+      if (Boolean.FALSE.equals(representative.getReceiptOutdated())) {
+        representative.setReceiptOutdated(true);
+        representativeControllerZuul.updateInternalRepresentative(representative);
+        LOG.info(
+            "Receipt marked as outdated: dataflowId={}, datasetId={}, providerId={}, representativeId={}",
+            idDataflow, idDataset, idDataProvider, representative.getId());
+      }
     }
   }
 
@@ -1232,11 +1253,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * Adds the locks related to release.
    *
    * @param datasets the datasets
-   * @param representatives the representatives
    * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  private void addLocksRelatedToRelease(List<Long> datasets, Long dataflowId) throws EEAException {
+  @Override
+  public void addLocksRelatedToRelease(List<Long> datasets, Long dataflowId) throws EEAException {
 
     String userName = SecurityContextHolder.getContext().getAuthentication().getName();
     Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -1309,5 +1330,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     if (lockVO == null) {
       lockService.createLock(timestamp, userName, LockType.METHOD, populateEuDataset);
     }
+  }
+
+  @Override
+  public Long findDataCollectionIdBySnapshotId(Long snapshotId) {
+    return snapshotRepository.findDataCollectionIdBySnapshotId(snapshotId);
   }
 }

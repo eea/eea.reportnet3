@@ -1,8 +1,11 @@
 package org.eea.dataset;
 
+import org.axonframework.config.EventProcessingConfigurer;
+import org.eea.dataset.axon.error.DatasetErrorHandler;
 import org.eea.lock.annotation.EnableLockAspect;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
@@ -31,5 +34,9 @@ public class DataSetApplication {
     SpringApplication.run(DataSetApplication.class, args);
   }
 
-
+  @Autowired
+  public void configure(EventProcessingConfigurer config) {
+    config.registerListenerInvocationErrorHandler("release-group",
+            conf -> new DatasetErrorHandler());
+  }
 }

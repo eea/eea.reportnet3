@@ -119,4 +119,12 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
   @Query(nativeQuery = true,
       value = "DELETE FROM snapshot WHERE reporting_dataset_id=:idDataset AND date_released is null ")
   void deleteSnapshotByDatasetIdAndDateReleasedIsNull(@Param("idDataset") Long idDataset);
+
+  /**
+   *
+   * @param id
+   * @return
+   */
+  @Query(value = "select s.dataCollectionId from Snapshot s where s.id= :id")
+  Long findDataCollectionIdBySnapshotId(@Param("id") Long id);
 }

@@ -2,7 +2,6 @@ package org.eea.axon.release.events;
 
 import lombok.*;
 
-import java.util.HashMap;
 import java.util.List;
 
 @NoArgsConstructor
@@ -19,5 +18,4 @@ public class SnapshotFileForReleaseCreatedEvent {
     private boolean restrictFromPublic;
     private boolean validate;
     private List<Long> datasetIds;
-    private HashMap<Long, Long> datasetSnapshots;
 }

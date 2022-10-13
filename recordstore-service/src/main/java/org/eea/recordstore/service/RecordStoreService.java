@@ -4,6 +4,7 @@
 package org.eea.recordstore.service;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.postgresql.core.BaseConnection;
 
 /**
  * The Interface RecordStoreService.
@@ -220,4 +222,24 @@ public interface RecordStoreService {
    * @param isMaterialized the is materialized
    */
   void createUpdateQueryViewAsync(Long datasetId, boolean isMaterialized);
+
+  /**
+   *
+   * @param idDataset
+   * @param idSnapshot
+   * @param idPartitionDataset
+   * @param prefillingReference
+   */
+  void createDataSnapshotForRelease(Long idDataset, Long idSnapshot, Long idPartitionDataset, boolean prefillingReference) throws SQLException, IOException, InterruptedException;
+
+  /**
+   *
+   * @param datasetId
+   * @param idSnapshot
+   * @param datasetType
+   * @param con
+   * @throws SQLException
+   * @throws IOException
+   */
+  void restoreFromSnapshot(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType, Connection con) throws SQLException, IOException;
 }

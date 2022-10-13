@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-public class CreateSnapshotFileForReleaseCommand {
+public class MarkSnapshotReleasedCommand {
 
     @TargetAggregateIdentifier
     private String aggregate;

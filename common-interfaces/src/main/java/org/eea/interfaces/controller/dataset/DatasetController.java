@@ -629,4 +629,11 @@ public interface DatasetController {
   @DeleteMapping("/private/deleteTempEtlExport/{datasetId}")
   void deleteTempEtlExport(@PathVariable("datasetId") Long datasetId);
 
+  /**
+   *
+   * @param dataflowId
+   * @return
+   */
+  @GetMapping("/datasetIds/{dataflowId}/{dataProviderId}")
+  List<Long> findDatasetIdsByDataflowId(@PathVariable("dataflowId") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId);
 }

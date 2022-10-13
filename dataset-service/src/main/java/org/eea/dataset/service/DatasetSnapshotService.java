@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -246,6 +247,14 @@ public interface DatasetSnapshotService {
       throws EEAException;
 
   /**
+   * get partitionId
+   * @param idDataset
+   * @param partitionIdDestination
+   * @return
+   */
+  Long getPartitionId(Long idDataset, Long partitionIdDestination) throws EEAException;
+
+  /**
    * Update snapshot disabled.
    *
    * @param datasetId the dataset id
@@ -259,4 +268,53 @@ public interface DatasetSnapshotService {
    */
   public void deleteSnapshotByDatasetIdAndDateReleasedIsNull(Long datasetId);
 
+  /**
+   * Add locks releated to release
+   * @param datasets
+   * @param dataflowId
+   */
+  void addLocksRelatedToRelease(List<Long> datasets, Long dataflowId) throws EEAException;
+
+  /**
+   * Create snapshot in metabase
+   * @param idDataset
+   * @param createSnapshotVO
+   * @return
+   */
+ Snapshot createSnapshotInMetabase(Long idDataset, CreateSnapshotVO createSnapshotVO);
+
+  /**
+   *
+   * @param reportingDatasetId
+   * @return
+   */
+  Long findFirstByReportingDatasetId(Long reportingDatasetId);
+
+  /**
+   *
+   * @param datasetId
+   */
+  String updateDatasetStatus(Long datasetId);
+
+  /**
+   *
+   * @param idDataset
+   * @param idDataProvider
+   * @param idDataflow
+   */
+  void updateInternalRepresentative(Long idDataset, Long idDataProvider, Long idDataflow);
+
+  /**
+   *
+   * @param idDataset
+   * @param providerId
+   */
+  void deleteProvider(Long idDataset, Long providerId);
+
+  /**
+   *
+   * @param snapshotId
+   * @return
+   */
+  Long findDataCollectionIdBySnapshotId(Long snapshotId);
 }

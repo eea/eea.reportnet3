@@ -9,7 +9,6 @@ import org.eea.axon.release.commands.*;
 import org.eea.axon.release.events.*;
 import org.springframework.beans.BeanUtils;
 
-import java.util.HashMap;
 import java.util.List;
 
 @Aggregate
@@ -23,7 +22,6 @@ public class ReleaseAggregate {
     private boolean restrictFromPublic;
     private boolean validate;
     private List<Long> datasetIds;
-    private HashMap<Long, Long> datasetSnapshots;
 
     public ReleaseAggregate() {
 
@@ -47,6 +45,24 @@ public class ReleaseAggregate {
     }
 
     @CommandHandler
+    public ReleaseAggregate(AddReleaseLocksCommand command) {
+        ReleaseLocksAddedEvent event = new ReleaseLocksAddedEvent();
+        BeanUtils.copyProperties(command, event);
+        AggregateLifecycle.apply(event);
+    }
+
+    @EventSourcingHandler
+    public void on(ReleaseLocksAddedEvent event) {
+        this.aggregate = event.getAggregate();
+        this.id = event.getId();
+        this.dataflowId = event.getDataflowId();
+        this.dataProviderId = event.getDataProviderId();
+        this.restrictFromPublic = event.isRestrictFromPublic();
+        this.validate = event.isValidate();
+        this.datasetIds = event.getDatasetIds();
+    }
+
+    @CommandHandler
     public ReleaseAggregate(UpdateRepresentativeVisibilityCommand command) {
         RepresentativeVisibilityUpdatedEvent event = new RepresentativeVisibilityUpdatedEvent();
         BeanUtils.copyProperties(command, event);
@@ -65,33 +81,14 @@ public class ReleaseAggregate {
     }
 
     @CommandHandler
-    public ReleaseAggregate(UpdateInternalRepresentativeCommand command) {
-        InternalRepresentativeUpdatedEvent event = new InternalRepresentativeUpdatedEvent();
+    public ReleaseAggregate(ExecuteValidationProcessCommand command) {
+        ValidationProcessForReleaseAddedEvent event = new ValidationProcessForReleaseAddedEvent();
         BeanUtils.copyProperties(command, event);
         AggregateLifecycle.apply(event);
     }
 
     @EventSourcingHandler
-    public void on(InternalRepresentativeUpdatedEvent event) {
-        this.aggregate = event.getAggregate();
-        this.id = event.getId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
-    }
-
-    @CommandHandler
-    public ReleaseAggregate(AddReleaseLocksCommand command) {
-        ReleaseLocksAddedEvent event = new ReleaseLocksAddedEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
-
-    @EventSourcingHandler
-    public void on(ReleaseLocksAddedEvent event) {
+    public void on(ValidationProcessForReleaseAddedEvent event) {
         this.aggregate = event.getAggregate();
         this.id = event.getId();
         this.dataflowId = event.getDataflowId();
@@ -120,6 +117,24 @@ public class ReleaseAggregate {
     }
 
     @CommandHandler
+    public ReleaseAggregate(CreateSnapshotFileForReleaseCommand command) {
+        SnapshotFileForReleaseCreatedEvent event = new SnapshotFileForReleaseCreatedEvent();
+        BeanUtils.copyProperties(command, event);
+        AggregateLifecycle.apply(event);
+    }
+
+    @EventSourcingHandler
+    public void on(SnapshotFileForReleaseCreatedEvent event) {
+        this.aggregate = event.getAggregate();
+        this.id = event.getId();
+        this.dataflowId = event.getDataflowId();
+        this.dataProviderId = event.getDataProviderId();
+        this.restrictFromPublic = event.isRestrictFromPublic();
+        this.validate = event.isValidate();
+        this.datasetIds = event.getDatasetIds();
+    }
+
+    @CommandHandler
     public ReleaseAggregate(UpdateDatasetStatusCommand command) {
         DatasetStatusUpdatedEvent event = new DatasetStatusUpdatedEvent();
         BeanUtils.copyProperties(command, event);
@@ -135,7 +150,6 @@ public class ReleaseAggregate {
         this.restrictFromPublic = event.isRestrictFromPublic();
         this.validate = event.isValidate();
         this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
     }
 
     @CommandHandler
@@ -154,7 +168,24 @@ public class ReleaseAggregate {
         this.restrictFromPublic = event.isRestrictFromPublic();
         this.validate = event.isValidate();
         this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
+    }
+
+    @CommandHandler
+    public ReleaseAggregate(UpdateInternalRepresentativeCommand command) {
+        InternalRepresentativeUpdatedEvent event = new InternalRepresentativeUpdatedEvent();
+        BeanUtils.copyProperties(command, event);
+        AggregateLifecycle.apply(event);
+    }
+
+    @EventSourcingHandler
+    public void on(InternalRepresentativeUpdatedEvent event) {
+        this.aggregate = event.getAggregate();
+        this.id = event.getId();
+        this.dataflowId = event.getDataflowId();
+        this.dataProviderId = event.getDataProviderId();
+        this.restrictFromPublic = event.isRestrictFromPublic();
+        this.validate = event.isValidate();
+        this.datasetIds = event.getDatasetIds();
     }
 
     @CommandHandler
@@ -173,43 +204,60 @@ public class ReleaseAggregate {
         this.restrictFromPublic = event.isRestrictFromPublic();
         this.validate = event.isValidate();
         this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
     }
 
     @CommandHandler
-    public ReleaseAggregate(CreateSnapshotFileForReleaseCommand command) {
-        SnapshotFileForReleaseCreatedEvent event = new SnapshotFileForReleaseCreatedEvent();
+    public ReleaseAggregate(RestoreDataFromSnapshotCommand command) {
+        DataRestoredFromSnapshotEvent event = new DataRestoredFromSnapshotEvent();
         BeanUtils.copyProperties(command, event);
         AggregateLifecycle.apply(event);
     }
 
     @EventSourcingHandler
-    public void on(SnapshotFileForReleaseCreatedEvent event) {
+    public void on(DataRestoredFromSnapshotEvent event) {
         this.aggregate = event.getAggregate();
         this.id = event.getId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();
         this.validate = event.isValidate();
-        this.datasetSnapshots = event.getDatasetSnapshots();
         this.datasetIds = event.getDatasetIds();
     }
 
     @CommandHandler
-    public ReleaseAggregate(ExecuteValidationProcessCommand command) {
-        ValidationProcessForReleaseAddedEvent event = new ValidationProcessForReleaseAddedEvent();
+    public ReleaseAggregate(MarkSnapshotReleasedCommand command) {
+        SnapshotMarkedReleasedEvent event = new SnapshotMarkedReleasedEvent();
         BeanUtils.copyProperties(command, event);
         AggregateLifecycle.apply(event);
     }
 
     @EventSourcingHandler
-    public void on(ValidationProcessForReleaseAddedEvent event) {
+    public void on(SnapshotMarkedReleasedEvent event) {
         this.aggregate = event.getAggregate();
         this.id = event.getId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();
         this.validate = event.isValidate();
+        this.datasetIds = event.getDatasetIds();
+    }
+
+    @CommandHandler
+    public ReleaseAggregate(RemoveReleaseLocksCommand command) {
+        ReleaseLocksRemovedEvent event = new ReleaseLocksRemovedEvent();
+        BeanUtils.copyProperties(command, event);
+        AggregateLifecycle.apply(event);
+    }
+
+    @EventSourcingHandler
+    public void on(ReleaseLocksRemovedEvent event) {
+        this.aggregate = event.getAggregate();
+        this.id = event.getId();
+        this.dataflowId = event.getDataflowId();
+        this.dataProviderId = event.getDataProviderId();
+        this.restrictFromPublic = event.isRestrictFromPublic();
+        this.validate = event.isValidate();
+        this.datasetIds = event.getDatasetIds();
     }
 }
 

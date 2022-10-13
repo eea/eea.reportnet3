@@ -32,15 +32,19 @@ public class OrchestratorControllerImpl implements OrchestratorController {
     @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER') OR hasAnyRole('ADMIN')")
     @PostMapping(value = "/release/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
     public void release(Long dataflowId, Long dataProviderId, boolean restrictFromPublic, boolean validate) {
-        restrictFromPublic = true;
-        validate = false;
+       try {
+           restrictFromPublic = true;
+           validate = false;
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CreateReleaseStartNotificationCommand command = CreateReleaseStartNotificationCommand.builder().communicationAggregate(UUID.randomUUID().toString()).id(UUID.randomUUID().toString())
-                .dataflowId(dataflowId).dataProviderId(dataProviderId).restrictFromPublic(restrictFromPublic)
-                .validate(validate).build();
-        Map<String, String> map = new HashMap<>();
-        map.put("auth", authentication.getName());
-        commandGateway.send(GenericCommandMessage.asCommandMessage(command).withMetaData(MetaData.with("auth", authentication)));
+           Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+           CreateReleaseStartNotificationCommand command = CreateReleaseStartNotificationCommand.builder().id(UUID.randomUUID().toString()).aggregate(UUID.randomUUID().toString())
+                   .dataflowId(dataflowId).dataProviderId(dataProviderId).restrictFromPublic(restrictFromPublic)
+                   .validate(validate).build();
+           Map<String, String> map = new HashMap<>();
+           map.put("auth", authentication.getName());
+           commandGateway.send(GenericCommandMessage.asCommandMessage(command).withMetaData(MetaData.with("auth", authentication)));
+       } catch (Exception e) {
+           System.out.println("------------------EXCEPTION------------------------------");
+       }
     }
 }
