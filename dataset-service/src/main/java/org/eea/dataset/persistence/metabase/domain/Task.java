@@ -1,22 +1,10 @@
-package org.eea.validation.persistence.data.metabase.domain;
+package org.eea.dataset.persistence.metabase.domain;
 
-import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Version;
+import lombok.*;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+
+import javax.persistence.*;
+import java.util.Date;
 import org.eea.interfaces.vo.metabase.TaskType;
 
 
@@ -76,4 +64,16 @@ public class Task {
   /** The pod. */
   @Column(name = "pod")
   private String pod;
+
+  public Task(Long id, String processId, ProcessStatusEnum status, TaskType taskType, Date createDate, Date startingDate, Date finishDate, String json, int version) {
+    this.id = id;
+    this.processId = processId;
+    this.status = status;
+    this.taskType = taskType;
+    this.createDate = createDate;
+    this.startingDate = startingDate;
+    this.finishDate = finishDate;
+    this.json = json;
+    this.version = version;
+  }
 }
