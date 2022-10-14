@@ -13,20 +13,20 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.5.6-SANDBOX</api-gateway.version>
-    <communication.version>v3.1.5.6-SANDBOX</communication.version>
-    <collaboration.version>v3.1.5.6-SANDBOX</collaboration.version>
-    <dataflow.version>v3.1.5.6-SANDBOX</dataflow.version>
-    <dataset.version>v3.1.5.6-SANDBOX</dataset.version>
-    <document.version>v3.1.5.6-SANDBOX</document.version>
-    <frontend.version>v3.1.5.6-SANDBOX</frontend.version>
-    <indexsearch.version>v3.1.5.6-SANDBOX</indexsearch.version>
-    <inspire.version>v3.1.5.6-SANDBOX</inspire.version>
-    <recordstore.version>v3.1.5.6-SANDBOX</recordstore.version>
-    <ums.version>v3.1.5.6-SANDBOX</ums.version>
-    <validation.version>v3.1.5.6-SANDBOX</validation.version>
-    <common-interfaces.version>v3.1.5.6-SANDBOX</common-interfaces.version>
-    <common-utitlities.version>v3.1.5.6-SANDBOX</common-utitlities.version>
-    <rod.version>v3.1.5.6-SANDBOX</rod.version>
+    <api-gateway.version>v3.1.5.7-SANDBOX</api-gateway.version>
+    <communication.version>v3.1.5.7-SANDBOX</communication.version>
+    <collaboration.version>v3.1.5.7-SANDBOX</collaboration.version>
+    <dataflow.version>v3.1.5.7-SANDBOX</dataflow.version>
+    <dataset.version>v3.1.5.7-SANDBOX</dataset.version>
+    <document.version>v3.1.5.7-SANDBOX</document.version>
+    <frontend.version>v3.1.5.7-SANDBOX</frontend.version>
+    <indexsearch.version>v3.1.5.7-SANDBOX</indexsearch.version>
+    <inspire.version>v3.1.5.7-SANDBOX</inspire.version>
+    <recordstore.version>v3.1.5.7-SANDBOX</recordstore.version>
+    <ums.version>v3.1.5.7-SANDBOX</ums.version>
+    <validation.version>v3.1.5.7-SANDBOX</validation.version>
+    <common-interfaces.version>v3.1.5.7-SANDBOX</common-interfaces.version>
+    <common-utitlities.version>v3.1.5.7-SANDBOX</common-utitlities.version>
+    <rod.version>v3.1.5.7-SANDBOX</rod.version>
   </properties>
 </project>
