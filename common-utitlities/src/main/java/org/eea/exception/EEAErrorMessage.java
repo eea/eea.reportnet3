@@ -32,9 +32,6 @@ public final class EEAErrorMessage {
   /** The Constant DATASET_INCORRECT_ID: {@value}. */
   public static final String DATASET_INCORRECT_ID = "Dataset Id incorrect";
 
-  /** The Constant TASK_INCORRECT_ID: {@value}. */
-  public static final String TASK_INCORRECT_ID = "Task Id incorrect";
-
   /** The Constant DATASET_NAME_DUPLICATED: {@value}. */
   public static final String DATASET_NAME_DUPLICATED = "Dataset name duplicated in this dataflow";
 
@@ -714,6 +711,10 @@ public final class EEAErrorMessage {
 
   /** The Constant DATAFLOW_UPDATE_ERROR: {@value}. */
   public static final String DATAFLOW_UPDATE_ERROR = "Dataflow can't be updated";
+
+  /** The Constant RESTARTING_TASK: {@value}. */
+  public static final String RESTARTING_TASK =
+          "An unknown error happenned while restarting task.";
 
   /**
    * Instantiates a new EEA error message.

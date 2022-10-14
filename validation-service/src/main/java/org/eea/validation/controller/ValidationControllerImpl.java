@@ -1,12 +1,9 @@
 package org.eea.validation.controller;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.UUID;
-import javax.servlet.http.HttpServletResponse;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -43,18 +40,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.math.BigInteger;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * The Class ValidationControllerImpl.
@@ -399,10 +395,9 @@ public class ValidationControllerImpl implements ValidationController {
   }
 
   @Override
-  @PutMapping(value = "/restartTask/{taskId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/restartTask/{taskId}")
   @PreAuthorize("hasAnyRole('ADMIN')")
   @ApiOperation(value = "Sets the status to IN_QUEUE for a given task id", hidden = true)
-  @ApiResponse(code = 400, message = EEAErrorMessage.TASK_INCORRECT_ID)
   public void restartTask(@ApiParam(
           value = "Task id of task to restart",
           example = "15") @PathVariable("taskId") Long taskId) {
@@ -412,6 +407,23 @@ public class ValidationControllerImpl implements ValidationController {
         LOG.info("Task with id " + taskId + " restarted.");
       } catch (Exception e) {
         LOG.error("Error restarting task with id " + taskId);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                EEAErrorMessage.RESTARTING_TASK);
       }
+  }
+
+  @Override
+  @GetMapping(value = "/listTasksInProgress/{timeInMinutes}")
+  @ApiOperation(value = "Lists the tasks that are in progress for more than the specified period of time", hidden = true)
+  public List<BigInteger> listTasksInProgress(@ApiParam(
+          value = "Time limit in minutes that in progress tasks exceed",
+          example = "15") @PathVariable("timeInMinutes") long timeInMinutes) {
+    LOG.info("Finding in progress tasks that exceed " + timeInMinutes + " minutes");
+    try {
+      return validationHelper.getTasksInProgress(timeInMinutes);
+    } catch (Exception e) {
+      LOG.error("Finding in progress tasks that exceed " + timeInMinutes + " minutes");
+      return null;
+    }
   }
 }

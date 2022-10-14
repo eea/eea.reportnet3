@@ -28,5 +28,6 @@
     <common-interfaces.version>v3.1.5.6-DEV</common-interfaces.version>
     <common-utitlities.version>v3.1.5.6-DEV</common-utitlities.version>
     <rod.version>v3.1.5.6-DEV</rod.version>
+    <orchestrator.version>v3.1.5.6-DEV</orchestrator.version>
   </properties>
 </project>

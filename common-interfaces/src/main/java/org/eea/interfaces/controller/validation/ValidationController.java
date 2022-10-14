@@ -1,17 +1,16 @@
 package org.eea.interfaces.controller.validation;
 
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.math.BigInteger;
+import java.util.List;
+
 
 /**
  * The Interface ValidationController.
@@ -116,6 +115,14 @@ public interface ValidationController {
    * Sets the status to IN_QUEUE for a given task id
    * @param taskId
    */
-  @PutMapping(value = "/task/{taskId}")
+  @PutMapping(value = "/restartTask/{taskId}")
   void restartTask(@PathVariable("taskId") Long taskId);
+
+  /**
+   * Lists the task ids of tasks that are in progress for more than the specified period of time
+   * @param timeInMinutes
+   * @return
+   */
+  @GetMapping(value = "/listTasksInProgress/{timeInMinutes}")
+  List<BigInteger> listTasksInProgress(@PathVariable("timeInMinutes") long timeInMinutes);
 }

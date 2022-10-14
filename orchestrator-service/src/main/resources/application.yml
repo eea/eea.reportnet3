@@ -1,0 +1,7 @@
+server:
+  port: 8091
+spring:
+  application:
+    name: orchestrator
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration, org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration

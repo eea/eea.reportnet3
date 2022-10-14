@@ -41,6 +41,7 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.SplitSnapfile;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -1646,15 +1647,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         String copyQueryField = COPY_DATASET + datasetId
             + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
 
-        int numberOfFiles = splitSnapFile(nameFileFieldValue, idSnapshot);
+        SplitSnapfile snapFileForSplitting = isSnapFileForSplitting(nameFileFieldValue);
 
-        for (int i=1; i <= numberOfFiles; i++) {
-          String splitFile = pathSnapshot
-              + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-          copyFromFile(copyQueryField, splitFile, cm);
-          deleteFile(Arrays.asList(splitFile));
+        if (snapFileForSplitting.isForSplitting() == true) {
+          splitSnapFile(nameFileFieldValue, idSnapshot, snapFileForSplitting);
+
+          for (int i=1; i <= snapFileForSplitting.getNumberOfFiles(); i++) {
+            String splitFile = pathSnapshot
+            + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+            copyFromFile(copyQueryField, splitFile, cm);
+            deleteFile(Arrays.asList(splitFile));
+          }
+        } else {
+          copyFromFile(copyQueryField, nameFileFieldValue, cm);
         }
-
+        
         // Attachment value
         String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
             LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
@@ -1894,24 +1901,20 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
-  private int splitSnapFile(String inputfile, Long idSnapshot) {
+  /**
+   * Split the snapshot file
+   *
+   * @param inputfile
+   * @param idSnapshot
+   * @param snapFileForSplitting
+   */
+  private void splitSnapFile(String inputfile, Long idSnapshot, SplitSnapfile snapFileForSplitting) {
 
-    int numberOfFiles = 0;
+    LOG.info("Method splitSnapFile starts for file {} with idSnapshot {} and snapFileForSplitting {}", inputfile, idSnapshot, snapFileForSplitting);
+    int numberOfFiles = snapFileForSplitting.getNumberOfFiles();
+    int numberOfLines = snapFileForSplitting.getNumberOfLines();
+
     try{
-      // Reading file and getting no. of files to be generated
-      double numberOfLines = 200000.0; //  No. of lines to be split and saved in each output file.
-      File file = new File(inputfile);
-      Scanner scanner = new Scanner(file);
-      int count = 0;
-      while (scanner.hasNextLine()) {
-        scanner.nextLine();
-        count++;
-      }
-      LOG.info("File {} has {} lines", inputfile, count);
-
-      numberOfFiles = (int) Math.ceil(count/numberOfLines);
-
-      LOG.info("File {} to be splitted to {} ", inputfile, numberOfFiles);
       // Actual splitting of file into smaller files
       FileInputStream fstream = new FileInputStream(inputfile); DataInputStream in = new DataInputStream(fstream);
       BufferedReader br = new BufferedReader(new InputStreamReader(in));
@@ -1938,8 +1941,42 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG_ERROR.error("Error in file {} with error {}", inputfile,  e.getMessage());
     }
 
-    return numberOfFiles;
+    LOG.info("Method splitSnapFile ends for file {} ", inputfile);
+  }
 
+  /**
+   * Check if the snapshot will be splitted and get the number of files and rows
+   *
+   * @param inputfile
+   */
+  private SplitSnapfile isSnapFileForSplitting(String inputfile) {
+
+    LOG.info("Method isSnapFileForSplitting starts for file {}", inputfile);
+    SplitSnapfile splitSnapfile = new SplitSnapfile();
+
+    int numberOfLines = 0;
+    double maxLinesPerFile = 200000.0;
+
+    try {
+      File file = new File(inputfile);
+      Scanner scanner = new Scanner(file);
+      while (scanner.hasNextLine()) {
+        scanner.nextLine();
+        numberOfLines++;
+      }
+
+      int numberOfFiles = (int) Math.ceil(numberOfLines / maxLinesPerFile);
+
+      splitSnapfile.setNumberOfLines(numberOfLines);
+      splitSnapfile.setNumberOfFiles(numberOfFiles);
+      splitSnapfile.setForSplitting(numberOfFiles >= 3 ? true : false);
+
+      LOG.info("Method isSnapFileForSplitting ends for file {} with {} lines into {} files", inputfile, numberOfLines, numberOfFiles);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in file {} with error {}", inputfile,  e.getMessage());
+    }
+
+    return splitSnapfile;
   }
 
   /**
