@@ -5,25 +5,41 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.ISOLATION_LEVEL_C
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import javax.sql.DataSource;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.eea.kafka.domain.EEAEventVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
 
 /**
  * The Class OrchestratorConfiguration.
  */
 @Configuration
+@EnableJpaRepositories(entityManagerFactoryRef = "orchestratorEntityManagerFactory",
+        transactionManagerRef = "orchestratorTransactionManager",
+        basePackages = "org.eea.orchestrator.persistence.repository")
+@EnableTransactionManagement
+@EntityScan(basePackages = "org.eea.orchestrator.persistence.domain")
 public class OrchestratorConfiguration {
 
   /**
@@ -37,6 +53,30 @@ public class OrchestratorConfiguration {
    */
   @Value(value = "${spring.application.name}")
   private String groupId;
+
+  /**
+   * The url.
+   */
+  @Value("${spring.datasource.metasource.url}")
+  private String url;
+
+  /**
+   * The username.
+   */
+  @Value("${spring.datasource.metasource.username}")
+  private String username;
+
+  /**
+   * The password.
+   */
+  @Value("${spring.datasource.metasource.password}")
+  private String password;
+
+  /**
+   * The driver.
+   */
+  @Value("${spring.datasource.metasource.driver-class-name}")
+  private String driver;
 
   /**
    * Broadcast consumer factory consumer factory.
@@ -69,5 +109,56 @@ public class OrchestratorConfiguration {
         new ConcurrentKafkaListenerContainerFactory<>();
     factory.setConsumerFactory(broadcastConsumerFactory());
     return factory;
+  }
+
+  /**
+   * Data source data source.
+   *
+   * @return the data source
+   */
+  @Bean
+  public DataSource metabaseDatasource() {
+    DriverManagerDataSource metaDataSource = new DriverManagerDataSource();
+    metaDataSource.setDriverClassName(driver);
+    metaDataSource.setUrl(url);
+    metaDataSource.setUsername(username);
+    metaDataSource.setPassword(password);
+
+    return metaDataSource;
+  }
+
+  /**
+   * Orchestrator entity manager factory.
+   *
+   * @return the local container entity manager factory bean
+   */
+  @Bean
+  @Primary
+  @Qualifier("orchestratorEntityManagerFactory")
+  public LocalContainerEntityManagerFactoryBean orchestratorEntityManagerFactory() {
+    final LocalContainerEntityManagerFactoryBean orchestratorEM =
+            new LocalContainerEntityManagerFactoryBean();
+    orchestratorEM.setDataSource(metabaseDatasource());
+    orchestratorEM.setPackagesToScan("org.eea.orchestrator.persistence.domain");
+    final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+    orchestratorEM.setJpaVendorAdapter(vendorAdapter);
+
+    return orchestratorEM;
+  }
+
+  /**
+   * Orchestrator transaction manager.
+   *
+   * @param entityManagerFactory the entity manager factory
+   *
+   * @return the platform transaction manager
+   */
+  @Bean
+  @Primary
+  public PlatformTransactionManager orchestratorTransactionManager(
+          @Autowired EntityManagerFactory entityManagerFactory) {
+    final JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
+    schemastransactionManager.setEntityManagerFactory(orchestratorEntityManagerFactory().getObject());
+    return schemastransactionManager;
   }
 }
