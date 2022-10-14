@@ -9,7 +9,7 @@ public enum JobTypeEnum {
     VALIDATION("VALIDATION"),
 
     /** The release type. */
-    RELEASE("RELEASE(");
+    RELEASE("RELEASE");
 
     /** The value. */
     private final String value;

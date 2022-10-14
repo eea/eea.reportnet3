@@ -57,25 +57,25 @@ public class OrchestratorConfiguration {
   /**
    * The url.
    */
-  @Value("${spring.datasource.metasource.url}")
+  @Value("${spring.datasource.orchestratorDb.url}")
   private String url;
 
   /**
    * The username.
    */
-  @Value("${spring.datasource.metasource.username}")
+  @Value("${spring.datasource.orchestratorDb.username}")
   private String username;
 
   /**
    * The password.
    */
-  @Value("${spring.datasource.metasource.password}")
+  @Value("${spring.datasource.orchestratorDb.password}")
   private String password;
 
   /**
    * The driver.
    */
-  @Value("${spring.datasource.metasource.driver-class-name}")
+  @Value("${spring.datasource.orchestratorDb.driver-class-name}")
   private String driver;
 
   /**
@@ -117,14 +117,14 @@ public class OrchestratorConfiguration {
    * @return the data source
    */
   @Bean
-  public DataSource metabaseDatasource() {
-    DriverManagerDataSource metaDataSource = new DriverManagerDataSource();
-    metaDataSource.setDriverClassName(driver);
-    metaDataSource.setUrl(url);
-    metaDataSource.setUsername(username);
-    metaDataSource.setPassword(password);
+  public DataSource orchestratorDatasource() {
+    DriverManagerDataSource orchestratorDataSource = new DriverManagerDataSource();
+    orchestratorDataSource.setDriverClassName(driver);
+    orchestratorDataSource.setUrl(url);
+    orchestratorDataSource.setUsername(username);
+    orchestratorDataSource.setPassword(password);
 
-    return metaDataSource;
+    return orchestratorDataSource;
   }
 
   /**
@@ -138,7 +138,7 @@ public class OrchestratorConfiguration {
   public LocalContainerEntityManagerFactoryBean orchestratorEntityManagerFactory() {
     final LocalContainerEntityManagerFactoryBean orchestratorEM =
             new LocalContainerEntityManagerFactoryBean();
-    orchestratorEM.setDataSource(metabaseDatasource());
+    orchestratorEM.setDataSource(orchestratorDatasource());
     orchestratorEM.setPackagesToScan("org.eea.orchestrator.persistence.domain");
     final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
     orchestratorEM.setJpaVendorAdapter(vendorAdapter);
@@ -157,8 +157,8 @@ public class OrchestratorConfiguration {
   @Primary
   public PlatformTransactionManager orchestratorTransactionManager(
           @Autowired EntityManagerFactory entityManagerFactory) {
-    final JpaTransactionManager schemastransactionManager = new JpaTransactionManager();
-    schemastransactionManager.setEntityManagerFactory(orchestratorEntityManagerFactory().getObject());
-    return schemastransactionManager;
+    final JpaTransactionManager transactionManager = new JpaTransactionManager();
+    transactionManager.setEntityManagerFactory(orchestratorEntityManagerFactory().getObject());
+    return transactionManager;
   }
 }
