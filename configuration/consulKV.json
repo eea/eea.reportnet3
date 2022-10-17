@@ -1818,5 +1818,25 @@
   {
     "key": "config/orchestrator/scheduling.inProgress.task.max.time",
     "value": "JHtJTl9QUk9HUkVTU19UQVNLX01BWF9USU1FOjEyMH0="
+  },
+  {
+    "key": "config/application/spring.datasource.orchestratorDb.driver-class-name",
+    "value": "JHtPUkNIRVNUQVRPUl9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
+  },
+  {
+    "key": "config/application/spring.datasource.orchestratorDb.password",
+    "value": "JHtPUkNIRVNUUkFUT1JfQ09OTkVDVElPTl9QQVNTV09SRDpyb290fQ=="
+  },
+  {
+    "key": "config/application/spring.datasource.orchestratorDb.url",
+    "value": "JHtPUkNIRVNUUkFUT1JfQ09OTkVDVElPTl9VUkw6amRiYzpwb3N0Z3Jlc3FsOi8vbG9jYWxob3N0OjU0MzEvb3JjaGVzdHJhdG9yX2RifQ=="
+  },
+  {
+    "key": "config/application/spring.datasource.orchestratorDb.username",
+    "value": "JHtPUkNIRVNUUkFUT1JfQ09OTkVDVElPTl9VU0VSOnJvb3R9"
+  },
+  {
+    "key": "config/application/spring.jpa.hibernate.orchestratorDb.ddl-auto",
+    "value": "JHtPUkNIRVNUUkFUT1JfRERMX0FVVE86dmFsaWRhdGV9"
   }
 ]
