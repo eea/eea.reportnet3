@@ -1646,20 +1646,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     String copyQueryField = COPY_DATASET + datasetId
         + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
 
-    SplitSnapfile snapFileForSplitting = isSnapFileForSplitting(nameFileFieldValue);
+      SplitSnapfile snapFileForSplitting = isSnapFileForSplitting(nameFileFieldValue);
 
-    if (snapFileForSplitting.isForSplitting() == true) {
-      splitSnapFile(nameFileFieldValue, idSnapshot, snapFileForSplitting);
+      if (snapFileForSplitting.isForSplitting() == true) {
+        splitSnapFile(nameFileFieldValue, idSnapshot, snapFileForSplitting);
 
-      for (int i=1; i <= snapFileForSplitting.getNumberOfFiles(); i++) {
-        String splitFile = pathSnapshot
-            + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-        copyFromFile(copyQueryField, splitFile, cm);
-        deleteFile(Arrays.asList(splitFile));
+        for (int i = 1; i <= snapFileForSplitting.getNumberOfFiles(); i++) {
+          String splitFile = pathSnapshot + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i,
+              LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+          try {
+            LOG.info("Copy file {}", splitFile);
+            copyFromFile(copyQueryField, splitFile, cm);
+            LOG.info("File {} copied and will be deleted", splitFile);
+            deleteFile(Arrays.asList(splitFile));
+            LOG.info("File {} has been deleted", splitFile);
+          } catch (Exception e) {
+            LOG_ERROR.error("Error in copy field process for snapshotId {} with error {}", idSnapshot, e);
+          }
+        }
+      } else {
+        copyFromFile(copyQueryField, nameFileFieldValue, cm);
       }
-    } else {
-      copyFromFile(copyQueryField, nameFileFieldValue, cm);
-    }
 
     // Attachment value
     String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
