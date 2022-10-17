@@ -5,10 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -26,17 +23,12 @@ import org.eea.interfaces.controller.communication.NotificationController.Notifi
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.ETLDatasetVO;
-import org.eea.interfaces.vo.dataset.ExportFilterVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -1667,7 +1659,105 @@ public class DatasetControllerImpl implements DatasetController {
     LOG.info("Successfully deleted everything from temp_etlexport table for datasetId {}", datasetId);
   }
 
+  /**
+   * Test import process.
+   *
+   * @param datasetId the dataset id
+   */
+  @HystrixCommand
+  @GetMapping(value = "/checkImportProcess/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Test import file to dataset data (Large files)", notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD\n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "There is no import process in progress"),
+      @ApiResponse(code = 400, message = "Error testing import process"),
+      @ApiResponse(code = 500, message = "Error testing import process")})
+  public ResponseEntity<CheckLockVO> checkImportProcess(
+      @ApiParam(type = "Long", value = "Dataset id", example = "0")
+      @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId) {
 
+    LOG.info("Method testImportProcess called for dataset id: {}", datasetId);
+    CheckLockVO checkLockVO = new CheckLockVO();
+
+    try {
+      Map<String, Object> importData = new HashMap<>();
+
+      // Check if the IMPORT_FILE_DATA process is running and locked
+      importData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importData.put(LiteralConstants.DATASETID, datasetId);
+      LockVO importDataCriteria = lockService.findByCriteria(importData);
+
+      //Clear map
+      importData.clear();
+
+      // Check if the IMPORT_BIG_FILE_DATA process is running and locked
+      importData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+      importData.put(LiteralConstants.DATASETID, datasetId);
+      LockVO importBigDataCriteria = lockService.findByCriteria(importData);
+
+      if (importDataCriteria == null && importBigDataCriteria == null) {
+        checkLockVO.setImportInProgress(Boolean.FALSE);
+        checkLockVO.setMessage(LiteralConstants.NO_IMPORT_IN_PROGRESS);
+      } else {
+        checkLockVO.setImportInProgress(Boolean.TRUE);
+        checkLockVO.setMessage(LiteralConstants.IMPORT_LOCKED);
+      }
+
+      LOG.info("Method testImportProcess result for dateset id: {}, checkLockVO: {}", datasetId, checkLockVO);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error while executing method testImportProcess for dataset id: {} with exception: {}", datasetId, e);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    return new ResponseEntity<>(checkLockVO, HttpStatus.OK);
+  }
+
+
+  /**
+   * Check all locks with criteria
+   *
+   * @param datasetId
+   * @param dataflowId
+   * @param dataProviderId
+   * @return ResponseEntity<List<LockVO>>
+   */
+  @PostMapping(value = "/checkLocks", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Get Locks for input data", hidden = true)
+  public ResponseEntity<List<LockVO>> checkLocks(
+      @ApiParam(type = "Long", value = "Dataset id", example = "0" )@RequestParam("datasetId") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataset id", example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Dataset id", example = "0") @RequestParam("dataProviderId") Long dataProviderId) {
+
+    LOG.info("Method checkLocks called for datasetId: {}, dataflowId: {}, dataProviderId: {}", datasetId, dataflowId, dataProviderId);
+
+    List<LockVO> results = new ArrayList<>();
+    try {
+
+      List<LockVO> locks = lockService.findAll();
+
+      //Get locks by dataset id
+      if (datasetId != null) {
+        results.addAll(lockService.findAllByCriteria(locks, datasetId));
+      }
+
+      //Get locks by dataflow id and then parse these results by data provider id
+      if (dataflowId != null) {
+        List<LockVO> dataflowLocks = lockService.findAllByCriteria(locks, dataflowId);
+        if (dataProviderId != null) {
+          results.addAll(lockService.findAllByCriteria(dataflowLocks, dataProviderId));
+        } else {
+          results.addAll(dataflowLocks);
+        }
+      }
+
+      LOG.info("Method checkLocks results: {},", results);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error while executing method checkLocks ffor datasetId: {}, dataflowId: {}, dataProviderId: {}", datasetId, dataflowId, dataProviderId, e);
+      return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    return new ResponseEntity<>(results, HttpStatus.OK);
+  }
 
   /**
    * Creates the response entity.
