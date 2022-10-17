@@ -1,3 +1,6 @@
+/*
+ *
+ */
 package org.eea.kafka.domain;
 
 import org.eea.utils.LiteralConstants;

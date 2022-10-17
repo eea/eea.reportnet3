@@ -890,7 +890,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         if (!remove) {
           userManagementControllerZull.addContributorsToResources(assignments);
         } else {
-          userManagementControllerZull.removeContributorsFromResources(assignments);
+          if (CollectionUtils.isNotEmpty(assignments)) {
+            userManagementControllerZull.removeContributorsFromResources(assignments);
+          }
         }
       }
     } else {
