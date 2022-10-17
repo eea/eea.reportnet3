@@ -311,6 +311,9 @@ public class UserManagementControllerImpl implements UserManagementController {
       LOG_ERROR.error("Error adding user to resource. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not add user {} to resource with id {} Message: {}", userId, idResource, e.getMessage());
+      throw e;
     }
   }
 
@@ -352,6 +355,10 @@ public class UserManagementControllerImpl implements UserManagementController {
       LOG_ERROR.error("Error creating users", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_USERS_THROUGH_FILE);
+    } catch(Exception e){
+      String filename = (file != null) ? file.getName() : null;
+      LOG_ERROR.error("Unexpected error! Could not create users from file {} Message: {}", filename, e.getMessage());
+      throw e;
     }
   }
 
@@ -513,6 +520,9 @@ public class UserManagementControllerImpl implements UserManagementController {
       LOG_ERROR.error(ERROR_ADDING_CONTRIBUTOR, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not add contributor to resource {} Message: {}", idResource, e.getMessage());
+      throw e;
     }
   }
 
@@ -541,6 +551,9 @@ public class UserManagementControllerImpl implements UserManagementController {
       LOG_ERROR.error(ERROR_ADDING_CONTRIBUTOR, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not remove contributor from resource {} Message: {}", idResource, e.getMessage());
+      throw e;
     }
   }
 
@@ -562,6 +575,9 @@ public class UserManagementControllerImpl implements UserManagementController {
       LOG_ERROR.error(ERROR_ADDING_CONTRIBUTOR, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not add contributor to resources. Message: {}", e.getMessage());
+      throw e;
     }
   }
 
@@ -583,6 +599,9 @@ public class UserManagementControllerImpl implements UserManagementController {
       LOG_ERROR.error("Error removing contributor to resource. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not remove contributors from resources. Message: {}", e.getMessage());
+      throw e;
     }
   }
 
@@ -609,6 +628,9 @@ public class UserManagementControllerImpl implements UserManagementController {
         LOG_ERROR.error("Error adding user to resource. Message: {}", e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
             EEAErrorMessage.PERMISSION_NOT_CREATED);
+      } catch(Exception e){
+        LOG_ERROR.error("Unexpected error! Could not add user {} to resources. Message: {}", userId, e.getMessage());
+        throw e;
       }
     }
   }
@@ -636,6 +658,9 @@ public class UserManagementControllerImpl implements UserManagementController {
         LOG_ERROR.error("Error removing user to resource. Message: {}", e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
             EEAErrorMessage.PERMISSION_NOT_CREATED);
+      } catch(Exception e){
+        LOG_ERROR.error("Unexpected error! Could not remove user {} to resources. Message: {}", userId, e.getMessage());
+        throw e;
       }
     }
   }
@@ -669,6 +694,9 @@ public class UserManagementControllerImpl implements UserManagementController {
       LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not create api key for dataflowId {} dataProviderId {} and user {} Message: {}", dataflowId, dataProvider, userId, e.getMessage());
+      throw e;
     }
   }
 
@@ -847,6 +875,9 @@ public class UserManagementControllerImpl implements UserManagementController {
       LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve api key for dataflowId {} dataProviderId {} and user {} Message: {}", dataflowId, dataProvider, userId, e.getMessage());
+      throw e;
     }
   }
 
@@ -872,6 +903,9 @@ public class UserManagementControllerImpl implements UserManagementController {
     } catch (IOException | EEAException e) {
       LOG_ERROR.error("Error exporting users by country from dataflow {}. Message: {}", dataflowId,
           e.getMessage());
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not export users by country for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -918,6 +952,9 @@ public class UserManagementControllerImpl implements UserManagementController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
           "Trying to download a file generated during the export users by country process but the file is not found, dataflowId: %s + filename: %s",
           dataflowId, fileName));
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not download users by country for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -945,8 +982,11 @@ public class UserManagementControllerImpl implements UserManagementController {
       } else {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
       }
+    } catch(Exception e){
+      String countryCode = (nationalCoordinatorVO != null) ? nationalCoordinatorVO.getCountryCode() : null;
+      LOG_ERROR.error("Unexpected error! Could not create national coordinator for countryCode {}. Message: {}", countryCode, e.getMessage());
+      throw e;
     }
-
   }
 
   /**
@@ -987,6 +1027,10 @@ public class UserManagementControllerImpl implements UserManagementController {
       } else {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
       }
+    } catch(Exception e){
+      String countryCode = (nationalCoordinatorVO != null) ? nationalCoordinatorVO.getCountryCode() : null;
+      LOG_ERROR.error("Unexpected error! Could not delete national coordinator for countryCode {}. Message: {}", countryCode, e.getMessage());
+      throw e;
     }
 
   }

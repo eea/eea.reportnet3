@@ -96,6 +96,9 @@ public class CollaborationControllerImpl implements CollaborationController {
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating message for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -152,6 +155,9 @@ public class CollaborationControllerImpl implements CollaborationController {
           dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating message attachment for dataflowId {} and dataProviderId {} Message: {}", dataflowId, providerId, e.getMessage());
+      throw e;
     }
   }
 
@@ -181,6 +187,9 @@ public class CollaborationControllerImpl implements CollaborationController {
       LOG_ERROR.error("Error updating messages: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           EEAErrorMessage.UPDATING_A_MESSAGE_IN_A_DATAFLOW);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error updating message read status for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -217,6 +226,9 @@ public class CollaborationControllerImpl implements CollaborationController {
           e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.DELETING_A_MESSAGE_IN_A_DATAFLOW);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting message with id {} for dataflowId {} and dataProviderId {} Message: {}", messageId, dataflowId, providerId, e.getMessage());
+      throw e;
     }
   }
 
@@ -264,6 +276,9 @@ public class CollaborationControllerImpl implements CollaborationController {
       LOG_ERROR.error("Error finding messages: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           EEAErrorMessage.RETRIEVING_A_MESSAGE_FROM_A_DATAFLOW);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving messages for dataflowId {} and dataProviderId {} Message: {}", dataflowId, providerId, e.getMessage());
+      throw e;
     }
   }
 
@@ -301,6 +316,9 @@ public class CollaborationControllerImpl implements CollaborationController {
           dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving message attachment for messageId {} dataflowId {} and dataProviderId {} Message: {}", messageId, dataflowId, providerId, e.getMessage());
+      throw e;
     }
 
   }
@@ -329,7 +347,12 @@ public class CollaborationControllerImpl implements CollaborationController {
       @ApiParam(value = "Dataset name",
           example = "Im A Dataset") @RequestParam("datasetName") String datasetName,
       @ApiParam(value = "Event type") @RequestParam("eventType") String eventType) {
-    collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, modifiedDatasetId,
-        datasetStatus, datasetName, eventType);
+    try {
+      collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, modifiedDatasetId,
+              datasetStatus, datasetName, eventType);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error releasing new message notifications for dataflowId {} providerId {} modifiedDatasetId {} and eventType {}. Message: {}", dataflowId, providerId, modifiedDatasetId, eventType, e.getMessage());
+      throw e;
+    }
   }
 }

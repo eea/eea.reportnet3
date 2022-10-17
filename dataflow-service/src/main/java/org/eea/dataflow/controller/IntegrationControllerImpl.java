@@ -112,6 +112,11 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error(ERROR_FINDING_INTEGRATIONS, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_INTEGRATIONS);
+    } catch (Exception e){
+      Long integrationId = (integrationVO != null) ? integrationVO.getId() : null;
+      String integrationName = (integrationVO != null) ? integrationVO.getName() : null;
+      LOG_ERROR.error("Unexpected error! Could not retrieve integrations by criteria. id is {} and name is {}. Message: {}", integrationId, integrationName, e.getMessage());
+      throw e;
     }
   }
 
@@ -152,6 +157,11 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error("Error creating integration. Message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_INTEGRATION);
+    } catch (Exception e){
+      Long integrationId = (integration != null) ? integration.getId() : null;
+      String integrationName = (integration != null) ? integration.getName() : null;
+      LOG_ERROR.error("Unexpected error! Could not create integration with id {} and name {}. Message: {}", integrationId, integrationName, e.getMessage());
+      throw e;
     }
   }
 
@@ -179,6 +189,9 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error("Error deleting an integration with id {} for dataflowId {}. Message: {}", integrationId, dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_INTEGRATION);
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not delete integration with id {} for dataflowId {}. Message: {}", integrationId, dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -202,6 +215,11 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error("Error updating an integration. Message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_INTEGRATION);
+    } catch (Exception e){
+      Long integrationId = (integration != null) ? integration.getId() : null;
+      String integrationName = (integration != null) ? integration.getName() : null;
+      LOG_ERROR.error("Unexpected error! Could not update integration with id {} and name {}. Message: {}", integrationId, integrationName, e.getMessage());
+      throw e;
     }
   }
 
@@ -229,6 +247,11 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error(ERROR_FINDING_INTEGRATIONS, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_INTEGRATIONS);
+    } catch (Exception e){
+      Long integrationId = (integrationVO != null) ? integrationVO.getId() : null;
+      String integrationName = (integrationVO != null) ? integrationVO.getName() : null;
+      LOG_ERROR.error("Unexpected error! Could not find Integrations and Operations by Integration Criteria with id {} and name {}. Message: {}", integrationId, integrationName, e.getMessage());
+      throw e;
     }
   }
 
@@ -256,6 +279,11 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error(ERROR_FINDING_INTEGRATIONS, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_INTEGRATIONS);
+    } catch (Exception e){
+      Long integrationId = (integrationVO != null) ? integrationVO.getId() : null;
+      String integrationName = (integrationVO != null) ? integrationVO.getName() : null;
+      LOG_ERROR.error("Unexpected error! Could not find Integrations and Operations by Integration Criteria with id {} and name {}. Message: {}", integrationId, integrationName, e.getMessage());
+      throw e;
     }
   }
 
@@ -286,8 +314,13 @@ public class IntegrationControllerImpl implements IntegrationController {
       @ApiParam(value = "Dataset id", example = "0") @RequestParam("datasetId") Long datasetId,
       @ApiParam(type = "Object",
           value = "IntegrationVO Object") @RequestBody IntegrationVO integration) {
-    return integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
-        .execute(integrationOperationTypeEnum, file, datasetId, integration);
+    try{
+      return integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
+              .execute(integrationOperationTypeEnum, file, datasetId, integration);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Could not execute integration process for file {} and datasetId {}. Message: {}", file, datasetId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -308,14 +341,13 @@ public class IntegrationControllerImpl implements IntegrationController {
   public List<ExecutionResultVO> executeEUDatasetExport(
       @ApiParam(value = "Dataflow id", example = "0") @LockCriteria(
           name = "dataflowId") @RequestParam("dataflowId") Long dataflowId) {
-
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDataflowId(dataflowId);
-    notificationControllerZuul.createUserNotificationPrivate("EXPORT_EU_DATASET_INIT",
-        userNotificationContentVO);
-
     List<ExecutionResultVO> results = null;
-    try {
+    try{
+      UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+      userNotificationContentVO.setDataflowId(dataflowId);
+      notificationControllerZuul.createUserNotificationPrivate("EXPORT_EU_DATASET_INIT",
+          userNotificationContentVO);
+
       integrationService.addPopulateEUDatasetLock(dataflowId);
       LOG.info("Executing EU dataset export for dataflowId {}", dataflowId);
       results = integrationService.executeEUDatasetExport(dataflowId);
@@ -324,6 +356,9 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error("Error executing the export from EUDataset for dataflowId {} with message: {}", dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXPORTING_EU_DATASET);
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not execute EU dataset export for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     } finally {
       integrationService.releasePopulateEUDatasetLock(dataflowId);
     }
@@ -373,6 +408,10 @@ public class IntegrationControllerImpl implements IntegrationController {
       }
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.COPYING_INTEGRATIONS);
+    } catch (Exception e){
+      Long dataflowId = (copyVO != null) ? copyVO.getDataflowIdDestination() : null;
+      LOG_ERROR.error("Unexpected error! Could not copy integrations to dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -397,6 +436,9 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error("Error creating default integration for dataflowId {} and datasetSchemaId {}. Message: {}", dataflowId, datasetSchemaId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_INTEGRATION);
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not create default integration for dataflowId {} and datasetSchemaId {}. Message: {}", dataflowId, datasetSchemaId, e.getMessage());
+      throw e;
     }
   }
 
@@ -430,9 +472,14 @@ public class IntegrationControllerImpl implements IntegrationController {
   @ApiOperation(value = "Delete an Integration from its Schema", hidden = true)
   public void deleteSchemaIntegrations(@ApiParam(value = "Dataschema Id",
       example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId) {
-    LOG.info("Deleting schema integrations for datasetSchemaId {}", datasetSchemaId);
-    integrationService.deleteSchemaIntegrations(datasetSchemaId);
-    LOG.info("Successfully deleted schema integrations for datasetSchemaId {}", datasetSchemaId);
+    try {
+      LOG.info("Deleting schema integrations for datasetSchemaId {}", datasetSchemaId);
+      integrationService.deleteSchemaIntegrations(datasetSchemaId);
+      LOG.info("Successfully deleted schema integrations for datasetSchemaId {}", datasetSchemaId);
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not delete schema integration for datasetSchemaId {} Message: {}", datasetSchemaId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -453,6 +500,9 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error(
           "Error deleting and export eu dataset integration with the datasetSchemaId {}, with message: {}",
           datasetSchemaId, e.getMessage());
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not delete an export EU Dataset Integration for datasetSchemaId {}. Message: {}", datasetSchemaId, e.getMessage());
+      throw e;
     }
   }
 
@@ -481,6 +531,7 @@ public class IntegrationControllerImpl implements IntegrationController {
           example = "true", defaultValue = "false") @RequestParam(value = "replace",
               defaultValue = "false") Boolean replace) {
 
+    try {
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDatasetId(datasetId);
     DataSetMetabaseVO datasetMetabaseVO =
@@ -489,7 +540,6 @@ public class IntegrationControllerImpl implements IntegrationController {
     notificationControllerZuul.createUserNotificationPrivate("DATASET_IMPORT_INIT",
         userNotificationContentVO);
 
-    try {
       integrationService.addLocks(datasetId);
       LOG.info("Executing external integration with id {} for datasetId {}", integrationId, datasetId);
       integrationService.executeExternalIntegration(datasetId, integrationId,
@@ -507,6 +557,9 @@ public class IntegrationControllerImpl implements IntegrationController {
       integrationService.releaseLocks(datasetId);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXECUTING_INTEGRATIONS);
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not execute external integration with id {} for datasetId {}. Message: {}", integrationId, datasetId, e.getMessage());
+      throw e;
     }
 
   }
@@ -531,6 +584,9 @@ public class IntegrationControllerImpl implements IntegrationController {
       LOG_ERROR.error("Error creating integrations. Message: {}", e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_INTEGRATION);
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not create integrations. Message: {}", e.getMessage());
+      throw e;
     }
   }
 

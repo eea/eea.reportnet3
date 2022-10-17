@@ -1613,64 +1613,69 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
-  private void copyProcess(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType,
+ private void copyProcess(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType,
       CopyManager cm) throws IOException, SQLException {
-    if (DatasetTypeEnum.DESIGN.equals(datasetType)
-        || DatasetTypeEnum.REFERENCE.equals(datasetType)) {
-      // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
-      // not neccesary
-      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+    try{
+        if (DatasetTypeEnum.DESIGN.equals(datasetType)
+            || DatasetTypeEnum.REFERENCE.equals(datasetType)) {
+          // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
+          // not neccesary
+          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+              LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
-      modifySnapshotFile(null, Arrays.asList(nameFileTableValue), datasetId);
-      LOG.info("Modified the file {} during the data copy in cloning process for datasetId {}", nameFileTableValue, datasetId);
+          modifySnapshotFile(null, Arrays.asList(nameFileTableValue), datasetId);
+          LOG.info("Modified the file {} during the data copy in cloning process for datasetId {}", nameFileTableValue, datasetId);
 
-      String copyQueryTable =
-          COPY_DATASET + datasetId + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
-      copyFromFile(copyQueryTable, nameFileTableValue, cm);
-      LOG.info("Executed copyFromFile for table_value with file {} and datasetId {}", nameFileTableValue, datasetId);
-    }
-    // Record value
-    String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-        LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
+          String copyQueryTable =
+              COPY_DATASET + datasetId + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
+          copyFromFile(copyQueryTable, nameFileTableValue, cm);
+          LOG.info("Executed copyFromFile for table_value with file {} and datasetId {}", nameFileTableValue, datasetId);
+        }
+        // Record value
+        String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+            LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
 
-    String copyQueryRecord = COPY_DATASET + datasetId
-        + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
-    copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
-    LOG.info("Executed copyFromFile for record_value with file {} and datasetId {}", nameFileRecordValue, datasetId);
+        String copyQueryRecord = COPY_DATASET + datasetId
+            + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
+        copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
+        LOG.info("Executed copyFromFile for record_value with file {} and datasetId {}", nameFileRecordValue, datasetId);
 
-    // Field value
-    String nameFileFieldValue = pathSnapshot
-        + String.format(FILE_PATTERN_NAME, idSnapshot, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+        // Field value
+        String nameFileFieldValue = pathSnapshot
+            + String.format(FILE_PATTERN_NAME, idSnapshot, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
 
-    String copyQueryField = COPY_DATASET + datasetId
-        + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
+        String copyQueryField = COPY_DATASET + datasetId
+            + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
 
-    SplitSnapfile snapFileForSplitting = isSnapFileForSplitting(nameFileFieldValue);
+        SplitSnapfile snapFileForSplitting = isSnapFileForSplitting(nameFileFieldValue);
 
-    if (snapFileForSplitting.isForSplitting() == true) {
-      splitSnapFile(nameFileFieldValue, idSnapshot, snapFileForSplitting);
+        if (snapFileForSplitting.isForSplitting() == true) {
+          splitSnapFile(nameFileFieldValue, idSnapshot, snapFileForSplitting);
 
-      for (int i=1; i <= snapFileForSplitting.getNumberOfFiles(); i++) {
-        String splitFile = pathSnapshot
+          for (int i=1; i <= snapFileForSplitting.getNumberOfFiles(); i++) {
+            String splitFile = pathSnapshot
             + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-        copyFromFile(copyQueryField, splitFile, cm);
-        deleteFile(Arrays.asList(splitFile));
-      }
-    } else {
-      copyFromFile(copyQueryField, nameFileFieldValue, cm);
+            copyFromFile(copyQueryField, splitFile, cm);
+            deleteFile(Arrays.asList(splitFile));
+          }
+        } else {
+          copyFromFile(copyQueryField, nameFileFieldValue, cm);
+        }
+        
+        // Attachment value
+        String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+            LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+
+        String copyQueryAttachment = COPY_DATASET + datasetId
+            + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
+        copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
+        LOG.info("Executed copyFromFile for attachment_value with file {} and datasetId {}", nameFileAttachmentValue, datasetId);
+     } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error in copyProcess for datasetId {} and snapshotId {}. Message: {}", datasetId, idSnapshot, e.getMessage());
+      throw e;
     }
-
-    // Attachment value
-    String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-        LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
-
-    String copyQueryAttachment = COPY_DATASET + datasetId
-        + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
-    copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
-    LOG.info("Executed copyFromFile for attachment_value with file {} and datasetId {}", nameFileAttachmentValue, datasetId);
   }
-
+  
 
   /**
    * Copy process specific File snapshot
@@ -1709,7 +1714,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
     LOG.info("Method copyProcessSpecificSnapshot ends with datasetId: {}", datasetId);
   }
-
+  
   /**
    * Compose delete sql.
    *
@@ -1890,6 +1895,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       if (cp.isActive()) {
         cp.cancelCopy();
       }
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error copying from file {} with query {} Message: {}", fileName, query, e.getMessage());
+      throw e;
     }
   }
 

@@ -30,16 +30,21 @@ public class SendNotificationCommand extends DefaultEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
-    if (eeaEventVO.getData().containsKey("notification")) {
-      Object object = eeaEventVO.getData().get("notification");
-      if (object instanceof Map) {
-        Map<String, Object> notification = (HashMap<String, Object>) object;
-        String user = (String) notification.remove("user");
-        if (notificationService.send(user, eeaEventVO.getEventType(), notification)) {
-          return;
+    try {
+      if (eeaEventVO.getData().containsKey("notification")) {
+        Object object = eeaEventVO.getData().get("notification");
+        if (object instanceof Map) {
+          Map<String, Object> notification = (HashMap<String, Object>) object;
+          String user = (String) notification.remove("user");
+          if (notificationService.send(user, eeaEventVO.getEventType(), notification)) {
+            return;
+          }
         }
+        LOG_ERROR.error("Error sending notification: {}", eeaEventVO);
       }
-      LOG_ERROR.error("Error sending notification: {}", eeaEventVO);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error sending notification {}. Message: {}", eeaEventVO, e.getMessage());
+      throw e;
     }
   }
 }

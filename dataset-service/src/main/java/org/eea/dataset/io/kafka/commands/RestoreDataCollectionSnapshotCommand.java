@@ -16,6 +16,8 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -52,6 +54,10 @@ public class RestoreDataCollectionSnapshotCommand extends AbstractEEAEventHandle
   @Autowired
   private ChangesEUDatasetRepository changesRepository;
 
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
   /**
@@ -73,27 +79,32 @@ public class RestoreDataCollectionSnapshotCommand extends AbstractEEAEventHandle
   @Override
   @Transactional
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
-    Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-    ThreadPropertiesManager.setVariable("user", String.valueOf(eeaEventVO.getData().get("user")));
+    try {
+      Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+      ThreadPropertiesManager.setVariable("user", String.valueOf(eeaEventVO.getData().get("user")));
 
-    if (datasetSnapshotService.getSnapshotsByIdDataset(datasetId).isEmpty()) {
-      Map<String, Object> value = new HashMap<>();
-      value.put(LiteralConstants.DATASET_ID, datasetId);
-      DataSetMetabaseVO datasetMetabase = datasetMetabaseService.findDatasetMetabase(datasetId);
-      Boolean removed =
-          euDatasetService.removeLocksRelatedToPopulateEU(datasetMetabase.getDataflowId());
+      if (datasetSnapshotService.getSnapshotsByIdDataset(datasetId).isEmpty()) {
+        Map<String, Object> value = new HashMap<>();
+        value.put(LiteralConstants.DATASET_ID, datasetId);
+        DataSetMetabaseVO datasetMetabase = datasetMetabaseService.findDatasetMetabase(datasetId);
+        Boolean removed =
+                euDatasetService.removeLocksRelatedToPopulateEU(datasetMetabase.getDataflowId());
 
-      if (Boolean.TRUE.equals(removed)) {
-        kafkaSenderUtils.releaseNotificableKafkaEvent(
-            EventType.COPY_DATA_TO_EUDATASET_COMPLETED_EVENT, value,
-            NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .datasetId(datasetId).build());
+        if (Boolean.TRUE.equals(removed)) {
+          kafkaSenderUtils.releaseNotificableKafkaEvent(
+                  EventType.COPY_DATA_TO_EUDATASET_COMPLETED_EVENT, value,
+                  NotificationVO.builder()
+                          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                          .datasetId(datasetId).build());
 
-        // delete the datacollections in the table of changes now that the data is copied
-        dataCollectionRepository.findByDataflowId(datasetMetabase.getDataflowId()).stream()
-            .forEach(dc -> changesRepository.deleteByDatacollection(dc.getId()));
+          // delete the datacollections in the table of changes now that the data is copied
+          dataCollectionRepository.findByDataflowId(datasetMetabase.getDataflowId()).stream()
+                  .forEach(dc -> changesRepository.deleteByDatacollection(dc.getId()));
+        }
       }
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      throw e;
     }
 
   }
