@@ -4,6 +4,11 @@ import {HTTPRequester} from './_utils/HTTPRequester';
 // import {dataschema_getSchemas_dataset_8495} from "./mockResponses";
 
 export const DatasetRepository = {
+    testImportProcess: async datasetId =>
+      await HTTPRequester.get({
+        url: getUrl(DatasetConfig.testImportProcess, { datasetId })
+      }),
+
     createRecordDesign: async (datasetId, datasetTableRecordField) =>
         await HTTPRequester.post({
             url: getUrl(DatasetConfig.createRecordDesign, {datasetId}),

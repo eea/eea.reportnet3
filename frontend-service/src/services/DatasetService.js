@@ -562,5 +562,7 @@ export const DatasetService = {
     validate: async datasetId => await DatasetRepository.validate(datasetId),
 
     validateSqlRules: async (datasetId, datasetSchemaId) =>
-        await DatasetRepository.validateSqlRules(datasetId, datasetSchemaId)
+        await DatasetRepository.validateSqlRules(datasetId, datasetSchemaId),
+    
+    testImportProcess: async datasetId => await DatasetRepository.testImportProcess(datasetId),
 };
