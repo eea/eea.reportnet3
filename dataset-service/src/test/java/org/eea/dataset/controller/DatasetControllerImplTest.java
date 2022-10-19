@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -25,19 +26,17 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.ETLDatasetVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.lock.service.LockService;
+import org.eea.utils.LiteralConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -1743,24 +1742,6 @@ public class DatasetControllerImplTest {
   public void getCheckViewTest() {
     datasetControllerImpl.getCheckView(1L);
     Mockito.verify(datasetService, times(1)).getCheckView(Mockito.anyLong());
-  }
-
-  @Test
-  public void checkLocksTest() {
-    Map<String, Object> lockCriteria = new HashMap<>();
-    List<LockVO> results = new ArrayList<>();
-    LockVO lockVO = new LockVO();
-
-    lockCriteria.put("key", 1L);
-    lockVO.setLockCriteria(lockCriteria);
-    results.add(lockVO);
-
-    Mockito.when(lockService.findAll()).thenReturn(results);
-    Mockito.when(lockService.findAllByCriteria(results, 1L)).thenReturn(results);
-
-    datasetControllerImpl.checkLocks(1L, 1L, 1L);
-
-    Mockito.verify(lockService, times(3)).findAllByCriteria(Mockito.anyList(), Mockito.anyLong());
   }
 
 }
