@@ -3,8 +3,8 @@ package org.eea.orchestrator.controller;
 import org.axonframework.commandhandling.GenericCommandMessage;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.MetaData;
-import org.eea.interfaces.controller.orchestrator.OrchestratorController;
 import org.eea.axon.release.commands.CreateReleaseStartNotificationCommand;
+import org.eea.interfaces.controller.orchestrator.OrchestratorController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -21,7 +21,7 @@ import java.util.UUID;
 @RequestMapping(value = "/orchestrator")
 public class OrchestratorControllerImpl implements OrchestratorController {
 
-    private final CommandGateway commandGateway;
+    private transient CommandGateway commandGateway;
 
     @Autowired
     public OrchestratorControllerImpl(CommandGateway commandGateway) {

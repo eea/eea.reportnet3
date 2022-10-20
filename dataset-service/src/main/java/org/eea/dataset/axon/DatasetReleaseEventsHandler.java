@@ -68,6 +68,9 @@ public class DatasetReleaseEventsHandler {
         // Lock all the operations related to the datasets involved
         datasetSnapshotService.addLocksRelatedToRelease(event.getDatasetIds(), event.getDataflowId());
         LOG.info("Release locks added for DataflowId: {} DataProviderId: {}", event.getDataflowId(), event.getDataProviderId());
+//        if (true) {
+//            throw new EEAException();
+//        }
     }
 
     @EventHandler

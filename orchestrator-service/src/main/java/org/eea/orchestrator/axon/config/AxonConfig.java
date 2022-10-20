@@ -1,25 +1,46 @@
 package org.eea.orchestrator.axon.config;
 
-import org.axonframework.commandhandling.CommandBus;
-import org.axonframework.messaging.correlation.CorrelationDataProvider;
-import org.axonframework.messaging.correlation.SimpleCorrelationDataProvider;
-import org.eea.orchestrator.axon.interceptor.CorrelationDataInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+
+import javax.sql.DataSource;
+
 
 @Configuration
 public class AxonConfig {
 
-    @Autowired
-    public void registerCreateProductCommandInterceptor(ApplicationContext context,
-                                                        CommandBus commandBus) {
-        commandBus.registerHandlerInterceptor(new CorrelationDataInterceptor(correlationDataProviders()));
-    }
+    /** The url. */
+    private String url;
+
+    /** The username. */
+    @Value("${spring.datasource.metasource.username}")
+    private String username;
+
+    /** The password. */
+    @Value("${spring.datasource.metasource.password}")
+    private String password;
+
+    /** The driver. */
+    @Value("${spring.datasource.metasource.driver-class-name}")
+    private String driver;
+
+
+//    @Autowired
+//    public void configure(EventProcessingConfigurer config) {
+//        config.usingSubscribingEventProcessors();
+//    }
 
     @Bean
-    CorrelationDataProvider correlationDataProviders() {
-        return new SimpleCorrelationDataProvider("auth");
+    public DataSource axon() {
+        DriverManagerDataSource metaDataSource = new DriverManagerDataSource();
+        metaDataSource.setDriverClassName(driver);
+        metaDataSource.setUrl("jdbc:postgresql://localhost/axon");
+        metaDataSource.setUsername(username);
+        metaDataSource.setPassword(password);
+
+        return metaDataSource;
     }
+
 }
