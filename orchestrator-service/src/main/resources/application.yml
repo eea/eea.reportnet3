@@ -6,12 +6,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-
+#  autoconfigure:
+#    exclude: org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration, org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
 axon:
-  serializer:
-    general: jackson
-    events: jackson
-    messages: jackson
   distributed:
     enabled: true
     load-factor: 100
@@ -20,10 +17,21 @@ axon:
       fallback-url: /message-routing-information
       mode: rest
       enable-ignore-listing: true
-      #    enable-accept-all-commands: true
+#      enable-accept-all-commands: true
       rest-mode-url: /message-routing-information
 
+  #  eventhandling:
+#    processors:
+#      release-group:
+#        mode: subscribing
+#        source: eventBus
+  serializer:
+    general: jackson
+    events: jackson
+    messages: jackson
 logging:
   level:
-    root: INFO
-    org.axonframework: DEBUG
+    org:
+      axonframework: debug
+
+

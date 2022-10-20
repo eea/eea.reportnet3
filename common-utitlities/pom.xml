@@ -159,14 +159,19 @@
 		</dependency>
 		<dependency>
 			<groupId>org.axonframework.extensions.springcloud</groupId>
-			<artifactId>axon-springcloud-spring-boot-starter</artifactId>
+			<artifactId>axon-springcloud</artifactId>
 			<version>4.6.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.axonframework.extensions.springcloud</groupId>
-			<artifactId>axon-springcloud</artifactId>
+			<artifactId>axon-springcloud-spring-boot-starter</artifactId>
 			<version>4.6.0</version>
 		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.axonframework.extensions.mongo</groupId>-->
+<!--			<artifactId>axon-mongo</artifactId>-->
+<!--			<version>4.6.0</version>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
