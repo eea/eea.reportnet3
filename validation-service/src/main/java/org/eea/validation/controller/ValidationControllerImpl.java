@@ -12,6 +12,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
@@ -90,9 +91,12 @@ public class ValidationControllerImpl implements ValidationController {
   @Autowired
   private ProcessControllerZuul processControllerZuul;
 
+  /** The job controller zuul. */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
 
   /**
-   * Validate data set data.
+   * Adds a new validation job
    *
    * @param datasetId the dataset id
    * @param released the released
@@ -103,17 +107,63 @@ public class ValidationControllerImpl implements ValidationController {
   @LockMethod(removeWhenFinish = false)
   @ApiOperation(value = "Validates dataset data for a given dataset id", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
+  public void addValidateDataSetDataJob(
+          @LockCriteria(name = "datasetId") @ApiParam(
+                  value = "Dataset id whose data is going to be validated",
+                  example = "15") @PathVariable("id") Long datasetId,
+          @ApiParam(value = "Is the dataset released?", example = "true",
+                  required = false) @RequestParam(value = "released", required = false) boolean released) {
+
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+    LOG.info(
+            "The user invoking ValidationControllerImpl.addValidateDataSetDataJob is {} and the datasetId {}",
+            username, datasetId);
+
+
+    // Set the user name on the thread
+    ThreadPropertiesManager.setVariable("user",
+            SecurityContextHolder.getContext().getAuthentication().getName());
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    try {
+      LOG.info("Adding validation job for datasetId {}, released {} and creator {}", datasetId, released, username);
+      jobControllerZuul.addValidationJob(datasetId, released, username);
+      LOG.info("Successfully added validation job for datasetId {}, released {} and creator {}", datasetId, released, username);
+    } catch (Exception e){
+      LOG.error("Unexpected error! Could not add validation job for datasetId {}, released {} and creator {}. Message: {}", datasetId, released, username, e.getMessage());
+      throw e;
+    }
+
+  }
+
+
+  /**
+   * Executes the validation job
+   *
+   * @param datasetId the dataset id
+   * @param released the released
+   * @param jobId the job id
+   * @return
+   */
+  @Override
+  @PutMapping(value = "/v2/dataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')  OR hasAnyRole('ADMIN')")
+  @LockMethod(removeWhenFinish = false)
+  @ApiOperation(value = "Exeuctes a job that validates dataset data for a given dataset id", hidden = true)
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
   public void validateDataSetData(
       @LockCriteria(name = "datasetId") @ApiParam(
           value = "Dataset id whose data is going to be validated",
           example = "15") @PathVariable("id") Long datasetId,
       @ApiParam(value = "Is the dataset released?", example = "true",
-          required = false) @RequestParam(value = "released", required = false) boolean released) {
+          required = false) @RequestParam(value = "released", required = false) boolean released,
+      @ApiParam(value = "The job id", example = "true",
+              required = false) @RequestParam(value = "jobId", required = false) Long jobId) {
 
-    LOG.info(
-        "The user invoking ValidationControllerImpl.validateDataSetData is {} and the datasetId {}",
-        SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
-
+    LOG.info("Called ValidationControllerImpl.validateDataSetData for datasetId {} and released {}", datasetId, released);
 
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
@@ -147,6 +197,9 @@ public class ValidationControllerImpl implements ValidationController {
       }
     }
     try {
+      if(jobId != null){
+        jobControllerZuul.updateJobInProgress(jobId, uuid);
+      }
       LOG.info("Executing validation for datasetId {}", datasetId);
       validationHelper.executeValidation(datasetId, uuid, released, true);
 
@@ -161,7 +214,6 @@ public class ValidationControllerImpl implements ValidationController {
       LOG_ERROR.error("Unexpected error! Error validating dataset data for datasetId {}. Message: {}", datasetId, e.getMessage());
       throw e;
     }
-
   }
 
   /**

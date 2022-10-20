@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import javax.transaction.Transactional;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
@@ -50,6 +51,10 @@ public class ProcessServiceImpl implements ProcessService {
   /** The dataset metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+
+  /** The job controller zuul. */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
 
 
   /**
@@ -157,6 +162,9 @@ public class ProcessServiceImpl implements ProcessService {
       } catch (ObjectOptimisticLockingFailureException e) {
         updated = false;
       }
+    }
+    if(updated){
+      jobControllerZuul.updateStatusByProcessId(status.toString(), processId);
     }
     return updated;
   }

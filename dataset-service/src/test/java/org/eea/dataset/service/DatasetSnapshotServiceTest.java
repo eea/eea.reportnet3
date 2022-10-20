@@ -1062,7 +1062,7 @@ public class DatasetSnapshotServiceTest {
             .findFirstByDataflowIdAndDataProviderIdOrderByIdAsc(Mockito.anyLong(), Mockito.any()))
         .thenReturn(dataset);
     Mockito.doNothing().when(validationControllerZuul).validateDataSetData(Mockito.any(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyLong());
 
     Mockito.when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong()))
         .thenReturn(Arrays.asList(dataset));
@@ -1077,7 +1077,7 @@ public class DatasetSnapshotServiceTest {
     Mockito.doNothing().when(reportingDatasetService).updateReportingDatasetMetabase(Mockito.any());
     datasetSnapshotService.createReleaseSnapshots(1L, 1L, true, true);
     Mockito.verify(validationControllerZuul, times(1)).validateDataSetData(Mockito.any(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyLong());
   }
 
   @Test

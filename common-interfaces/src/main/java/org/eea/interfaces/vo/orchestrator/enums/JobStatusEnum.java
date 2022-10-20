@@ -9,7 +9,7 @@ public enum JobStatusEnum {
     QUEUED("QUEUED"),
 
     /** The in progress. */
-    IN_PROGRESS("IN PROGRESS"),
+    IN_PROGRESS("IN_PROGRESS"),
 
     /** The aborted. */
     ABORTED("ABORTED"),

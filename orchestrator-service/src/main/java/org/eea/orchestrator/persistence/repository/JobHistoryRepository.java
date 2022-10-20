@@ -14,7 +14,7 @@ public interface JobHistoryRepository extends JpaRepository<JobHistory, Long> {
      *
      * Retrieves history of a job
      *
-     * @param jobId the job is
+     * @param jobId the job id
      * @return the list of the history entries
      */
     List<JobHistory> findAllByJobId(Long jobId);

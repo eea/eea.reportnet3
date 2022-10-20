@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS public.jobs (
    date_status_changed timestamp NOT NULL,
    parameters varchar NULL,
    creator_username varchar NULL,
+   process_id varchar NULL,
    CONSTRAINT jobs_pk PRIMARY KEY (id)
 );
 
@@ -28,6 +29,7 @@ CREATE TABLE IF NOT EXISTS public.job_history (
     date_status_changed timestamp NOT NULL,
     parameters varchar NULL,
     creator_username varchar NULL,
+    process_id varchar NULL,
     CONSTRAINT job_history_pk PRIMARY KEY (id)
 );
 

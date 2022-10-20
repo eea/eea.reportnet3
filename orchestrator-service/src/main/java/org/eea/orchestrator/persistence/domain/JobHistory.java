@@ -45,4 +45,7 @@ public class JobHistory {
 
     @Column(name = "CREATOR_USERNAME")
     private String creatorUsername;
+
+    @Column(name = "PROCESS_ID")
+    private String processId;
 }

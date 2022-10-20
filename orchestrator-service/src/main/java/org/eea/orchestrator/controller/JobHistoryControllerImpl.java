@@ -3,12 +3,16 @@ package org.eea.orchestrator.controller;
 import io.swagger.annotations.Api;
 import org.eea.interfaces.controller.orchestrator.JobHistoryController;
 import org.eea.interfaces.vo.orchestrator.JobHistoryVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
+import org.eea.orchestrator.persistence.domain.Job;
 import org.eea.orchestrator.service.JobHistoryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+import java.sql.Timestamp;
 
 import java.util.List;
 
@@ -21,9 +25,6 @@ public class JobHistoryControllerImpl implements JobHistoryController {
     /** The Constant LOG. */
     private static final Logger LOG = LoggerFactory.getLogger(JobHistoryControllerImpl.class);
 
-    /** The Constant LOG_ERROR. */
-    private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
     /** The job service. */
     @Autowired
     private JobHistoryService jobHistoryService;
@@ -34,7 +35,7 @@ public class JobHistoryControllerImpl implements JobHistoryController {
         try{
             return jobHistoryService.testRetrieveJobHistory(jobId);
         } catch (Exception e){
-            LOG.error("Could not save retrieve job history for jobId {}. Message: {}", jobId, e.getMessage());
+            LOG.error("Unexpected error! Could not save retrieve job history for jobId {}. Message: {}", jobId, e.getMessage());
             throw e;
         }
     }
@@ -42,9 +43,10 @@ public class JobHistoryControllerImpl implements JobHistoryController {
     @PostMapping("/add")
     public void addJobHistoryEntry(){
         try {
-            jobHistoryService.testSaveJobHistory();
+            Job job1 = new Job(null, JobTypeEnum.IMPORT, JobStatusEnum.CREATED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "testUser", null);
+            jobHistoryService.saveJobHistory(job1);
         } catch (Exception e){
-            LOG.error("Could not save job history entry. Message: {}", e.getMessage());
+            LOG.error("Unexpected error! Could not save job history entry. Message: {}", e.getMessage());
             throw e;
         }
     }

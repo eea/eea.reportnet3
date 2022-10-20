@@ -40,4 +40,7 @@ public class JobVO {
 
     /** The creator username. */
     private String creatorUsername;
+
+    /** The process id. */
+    private String processId;
 }
