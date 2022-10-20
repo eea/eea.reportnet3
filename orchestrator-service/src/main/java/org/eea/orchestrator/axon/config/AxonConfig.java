@@ -1,10 +1,19 @@
 package org.eea.orchestrator.axon.config;
 
 import org.axonframework.commandhandling.CommandBus;
+import org.axonframework.commandhandling.distributed.CommandRouter;
+import org.axonframework.commandhandling.distributed.RoutingStrategy;
+import org.axonframework.extensions.springcloud.commandhandling.SpringCloudCommandRouter;
+import org.axonframework.extensions.springcloud.commandhandling.mode.CapabilityDiscoveryMode;
 import org.axonframework.messaging.correlation.CorrelationDataProvider;
 import org.axonframework.messaging.correlation.SimpleCorrelationDataProvider;
+import org.axonframework.serialization.Serializer;
 import org.eea.orchestrator.axon.interceptor.CorrelationDataInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,7 +53,7 @@ public class AxonConfig {
 
     private Predicate<ServiceInstance> serviceInstanceFilter = (serviceInstance) -> {
         //TODO replace hardoded IP
-        return  serviceInstance.getHost().equals("192.168.1.8");
+        return  serviceInstance.getHost().equals("192.168.1.3");
     };
 
 

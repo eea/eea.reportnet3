@@ -27,7 +27,6 @@ public class CommunicationReleaseCommandHandler  {
 
     @EventSourcingHandler
     public void on(UserNotifationForReleaseSentEvent event) {
-        this.aggregate = event.getId();
     }
 
 }
