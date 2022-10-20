@@ -34,6 +34,7 @@ public class ReleaseAggregate {
         AggregateLifecycle.apply(event);
     }
 
+
     @EventSourcingHandler
     public void on(ReleaseStartNotificationCreatedEvent event) {
         this.aggregate = event.getAggregate();

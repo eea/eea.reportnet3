@@ -3,24 +3,40 @@ package org.eea.communication.configuration;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
+import org.axonframework.commandhandling.CommandBus;
+import org.axonframework.commandhandling.SimpleCommandBus;
+import org.axonframework.commandhandling.distributed.AnnotationRoutingStrategy;
+import org.axonframework.commandhandling.distributed.CommandBusConnector;
+import org.axonframework.commandhandling.distributed.CommandRouter;
+import org.axonframework.commandhandling.distributed.DistributedCommandBus;
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
 import org.axonframework.eventhandling.tokenstore.TokenStore;
 import org.axonframework.eventsourcing.eventstore.EmbeddedEventStore;
 import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
 import org.axonframework.eventsourcing.eventstore.EventStore;
-import org.axonframework.extensions.mongo.DefaultMongoTemplate;
-import org.axonframework.extensions.mongo.MongoTemplate;
-import org.axonframework.extensions.mongo.eventsourcing.eventstore.MongoEventStorageEngine;
-import org.axonframework.extensions.mongo.eventsourcing.tokenstore.MongoTokenStore;
+import org.axonframework.extensions.springcloud.commandhandling.SpringCloudHttpBackupCommandRouter;
+import org.axonframework.extensions.springcloud.commandhandling.SpringHttpCommandBusConnector;
 import org.axonframework.serialization.Serializer;
 import org.axonframework.serialization.json.JacksonSerializer;
 import org.axonframework.spring.config.AxonConfiguration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.serviceregistry.Registration;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.client.RestTemplate;
+
+import javax.sql.DataSource;
 
 @Configuration
 @EnableTransactionManagement
@@ -28,7 +44,28 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableMongoRepositories(basePackages = "org.eea.communication.persistence.repository")
 public class UserNotificationConfiguration extends AbstractMongoConfiguration {
 
+  @Autowired
+  DiscoveryClient discoveryClient;
+
+  @Autowired
+  private ApplicationContext appContext;
+
+  public static final String AXON_SPRING_CLOUD_FALLBACK_URL="/message-routing-information";
+
+  /** The username. */
+  @Value("${spring.datasource.metasource.username}")
+  private String username;
+
+  /** The password. */
+  @Value("${spring.datasource.metasource.password}")
+  private String password;
+
+  /** The driver. */
+  @Value("${spring.datasource.metasource.driver-class-name}")
+  private String driver;
+
   /**
+   *
    * The dll.
    */
   @Value("${mongodb.hibernate.ddl-auto}")
@@ -47,10 +84,6 @@ public class UserNotificationConfiguration extends AbstractMongoConfiguration {
    *
    * @return the mongo transaction manager
    */
-//  @Bean
-//  public MongoTransactionManager schemasTransactionManager(MongoDbFactory dbFactory) {
-//    return new MongoTransactionManager(dbFactory);
-//  }
 
   /**
    * Gets the database name.
@@ -72,6 +105,8 @@ public class UserNotificationConfiguration extends AbstractMongoConfiguration {
     return mongoClient().getDatabase(getDatabaseName());
   }
 
+
+
   /**
    * Mongo client.
    *
@@ -84,35 +119,6 @@ public class UserNotificationConfiguration extends AbstractMongoConfiguration {
         new MongoClientURI(new StringBuilder("mongodb://").append(mongoHosts).toString()));
   }
 
-  @Bean
-  public MongoTemplate axonMongoTemplate() {
-    return DefaultMongoTemplate.builder()
-            .mongoDatabase(mongoClient(), "axon_communication")
-            .build();
-  }
 
-  @Bean
-  public TokenStore tokenStore(Serializer serializer) {
-    return MongoTokenStore.builder()
-            .mongoTemplate(axonMongoTemplate())
-            .serializer(serializer)
-            .build();
-  }
 
-  @Bean
-  public EventStorageEngine storageEngine(MongoClient client) {
-    return MongoEventStorageEngine.builder()
-            .mongoTemplate(DefaultMongoTemplate.builder()
-                    .mongoDatabase(client)
-                    .build()).eventSerializer(JacksonSerializer.defaultSerializer()).snapshotSerializer(JacksonSerializer.defaultSerializer())
-            .build();
-  }
-
-  @Bean
-  public EmbeddedEventStore eventStore(EventStorageEngine storageEngine, AxonConfiguration configuration) {
-    return EmbeddedEventStore.builder()
-            .storageEngine(storageEngine)
-            .messageMonitor(configuration.messageMonitor(EventStore.class, "eventStore"))
-            .build();
-  }
 }

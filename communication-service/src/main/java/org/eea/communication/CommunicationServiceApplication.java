@@ -1,5 +1,6 @@
 package org.eea.communication;
 
+import org.axonframework.extensions.springcloud.commandhandling.SpringCloudHttpBackupCommandRouter;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
@@ -7,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.ComponentScan;
 
 
 /**
@@ -18,6 +20,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableEEASwagger
 @EeaEnableSecurity
 @EnableCaching
+
 public class CommunicationServiceApplication {
 
 
