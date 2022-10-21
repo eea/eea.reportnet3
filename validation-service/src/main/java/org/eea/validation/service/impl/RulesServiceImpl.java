@@ -1600,7 +1600,6 @@ public class RulesServiceImpl implements RulesService {
       fillQCExportData(csvWriter, datasetId, nHeaders);
 
     }
-
     catch (IOException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_FAILED_EVENT, null,
           notificationVO);
@@ -1608,6 +1607,9 @@ public class RulesServiceImpl implements RulesService {
           .error(String.format(EEAErrorMessage.FILE_NOT_FOUND + ". DatasetId: %s, with error: %s",
               datasetId, e.getMessage(), e));
       return;
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in exportQCCSV csvWriter.writeNext or fillQCExportData for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
 
     // Convert the writer data to a bytes array to write it into a file
@@ -1628,6 +1630,9 @@ public class RulesServiceImpl implements RulesService {
       LOG_ERROR
           .error(String.format(EEAErrorMessage.FILE_NOT_FOUND + ". DatasetId: %s, with error: %s",
               datasetId, e.getMessage(), e));
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in exportQCCSV when releasing notification (EXPORT_QC_COMPLETED_EVENT) for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 

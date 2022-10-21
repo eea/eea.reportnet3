@@ -694,7 +694,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       recordStoreControllerZuul.createSnapshotData(idDataset, idSnapshot, idPartition, null, false);
       LOG.info("Snapshot schema {} data files created", idSnapshot);
     } catch (Exception e) {
-      LOG_ERROR.error("Error creating snapshot for dataset schema {}", idDataset, e);
+      LOG_ERROR.error("Unexpected error! Error creating snapshot for dataset schema {}", idDataset, e);
       releaseEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage());
       // Release the lock manually
       Map<String, Object> createSchemaSnapshot = new HashMap<>();

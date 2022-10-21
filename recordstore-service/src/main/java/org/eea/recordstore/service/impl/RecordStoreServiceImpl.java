@@ -139,6 +139,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       throw new RecordStoreAccessException(
           String.format("Error reading commands file to create the dataset. %s", e.getMessage()),
           e);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in createEmptyDataSet for datasetSchemaId {}. Message: {}", idDatasetSchema, e.getMessage());
+      throw e;
     }
 
     for (String command : commands) {

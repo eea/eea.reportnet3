@@ -2812,6 +2812,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         }
       }
       LOG.info("Inserting Csv Field Schemas File Completed Into Dataset {}", datasetId);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in readFieldLines for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+      throw e;
     }
   }
 

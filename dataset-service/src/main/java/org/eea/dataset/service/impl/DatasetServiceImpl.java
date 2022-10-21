@@ -3109,6 +3109,9 @@ public class DatasetServiceImpl implements DatasetService {
     } catch (SQLException e) {
       LOG_ERROR.error("Cannot save the records for dataset {}", datasetId, e);
       throw e;
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in storeRecords for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 

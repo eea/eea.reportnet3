@@ -574,6 +574,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             referenceDataflow);
       } catch (SQLException e) {
         LOG_ERROR.error("Error rolling back: ", e);
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error in processDataCollectionAndRoles for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+        throw e;
       }
     }
   }
@@ -858,6 +861,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       metabaseStatement.addBatch(String.format(INSERT_TEST_INTO_TEST_DATASET, datasetId));
       metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
       return datasetId;
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in persistTest for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1137,6 +1143,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       metabaseStatement.addBatch(String.format(INSERT_DC_INTO_DATA_COLLECTION, datasetId, dueDate));
       metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
       return datasetId;
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in persistDC for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1160,6 +1169,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       metabaseStatement.addBatch(String.format(INSERT_EU_INTO_EU_DATASET, datasetId));
       metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
       return datasetId;
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in persistEU for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1186,6 +1198,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       metabaseStatement.addBatch(String.format(INSERT_RD_INTO_REPORTING_DATASET, datasetId));
       metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
       return datasetId;
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in persistRD for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1210,6 +1225,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       metabaseStatement.addBatch(String.format(INSERT_REFERENCE_INTO_REFERENCE_DATASET, datasetId));
       metabaseStatement.addBatch(String.format(INSERT_INTO_PARTITION_DATASET, datasetId));
       return datasetId;
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in persistReferenceDataset for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 

@@ -515,6 +515,9 @@ public class DataflowHelper {
       }
 
       workbook.write(byteArrayOutputStream);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error in writeFile for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
 
     return byteArrayOutputStream.toByteArray();

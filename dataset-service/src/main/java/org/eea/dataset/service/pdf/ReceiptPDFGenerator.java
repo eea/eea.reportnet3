@@ -62,7 +62,7 @@ public class ReceiptPDFGenerator {
    */
   public void generatePDF(ReleaseReceiptVO receipt, OutputStream out) {
     if (out != null) {
-      try (PDDocument document = new PDDocument();) {
+      try (PDDocument document = new PDDocument()) {
         // Create and add an A4 page
         PDPage page = new PDPage(A4);
         document.addPage(page);
@@ -75,6 +75,10 @@ public class ReceiptPDFGenerator {
             receipt.getProviderAssignation(), receipt.getIdDataflow(), receipt.getDataflowName());
       } catch (IOException e) {
         LOG_ERROR.error("Unexpected exception: ", e);
+      } catch (Exception e) {
+        Long dataflowId = (receipt != null) ? receipt.getIdDataflow() : null;
+        LOG.error("Unexpected error! Error in generatePDF for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+        throw e;
       }
     }
   }
@@ -109,6 +113,10 @@ public class ReceiptPDFGenerator {
       font = PDType0Font.load(document, helvetica);
       fontBold = PDType0Font.load(document, helveticaBold);
       pdImage = PDImageXObject.createFromByteArray(document, IOUtils.toByteArray(bg), BACKGROUND);
+    } catch (Exception e) {
+      Long dataflowId = (receipt != null) ? receipt.getIdDataflow() : null;
+      LOG.error("Unexpected error! Error in printContentPDF for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
 
     // Print background

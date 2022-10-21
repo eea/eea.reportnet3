@@ -228,6 +228,9 @@ public class CSVReaderStrategy implements ReaderStrategy {
     } catch (final IOException | SQLException e) {
       LOG_ERROR.error(e.getMessage());
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in readLines for file {}, datasetId {} and tableSchemaId {}. Message: {}", fileName, datasetId, idTableSchema, e.getMessage());
+      throw e;
     }
     LOG.info("Reading Csv File Completed in dataset {}", datasetId);
     return dataset;

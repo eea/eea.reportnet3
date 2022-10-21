@@ -1665,6 +1665,9 @@ public class DatasetControllerImpl implements DatasetController {
         in.close();
         // delete the file after downloading it
         FileUtils.forceDelete(file);
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error in copying large file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage());
+        throw e;
       }
     } catch (IOException | EEAException e) {
       LOG_ERROR.error(

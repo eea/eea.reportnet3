@@ -130,6 +130,9 @@ public class ExcelReaderStrategy implements ReaderStrategy {
     } catch (EncryptedDocumentException | InvalidFormatException | IOException | SQLException
         | IllegalArgumentException e) {
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in parseFile for file {}, datasetId {} and tableSchemaId {}. Message: {}", fileName, datasetId, idTableSchema, e.getMessage());
+      throw e;
     }
   }
 
