@@ -13,20 +13,20 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.5.6-DEV</api-gateway.version>
-    <communication.version>v3.1.5.6-DEV</communication.version>
-    <collaboration.version>v3.1.5.6-DEV</collaboration.version>
-    <dataflow.version>v3.1.5.6-DEV</dataflow.version>
-    <dataset.version>v3.1.5.6-DEV</dataset.version>
-    <document.version>v3.1.5.6-DEV</document.version>
-    <frontend.version>v3.1.5.6-DEV</frontend.version>
-    <indexsearch.version>v3.1.5.6-DEV</indexsearch.version>
-    <inspire.version>v3.1.5.6-DEV</inspire.version>
-    <recordstore.version>v3.1.5.6-DEV</recordstore.version>
-    <ums.version>v3.1.5.6-DEV</ums.version>
-    <validation.version>v3.1.5.6-DEV</validation.version>
-    <common-interfaces.version>v3.1.5.6-DEV</common-interfaces.version>
-    <common-utitlities.version>v3.1.5.6-DEV</common-utitlities.version>
-    <rod.version>v3.1.5.6-DEV</rod.version>
+    <api-gateway.version>v3.1.6-EXCEPTIONS</api-gateway.version>
+    <communication.version>v3.1.6-EXCEPTIONS</communication.version>
+    <collaboration.version>v3.1.6-EXCEPTIONS</collaboration.version>
+    <dataflow.version>v3.1.6-EXCEPTIONS</dataflow.version>
+    <dataset.version>v3.1.6-EXCEPTIONS</dataset.version>
+    <document.version>v3.1.6-EXCEPTIONS</document.version>
+    <frontend.version>v3.1.6-EXCEPTIONS</frontend.version>
+    <indexsearch.version>v3.1.6-EXCEPTIONS</indexsearch.version>
+    <inspire.version>v3.1.6-EXCEPTIONS</inspire.version>
+    <recordstore.version>v3.1.6-EXCEPTIONS</recordstore.version>
+    <ums.version>v3.1.6-EXCEPTIONS</ums.version>
+    <validation.version>v3.1.6-EXCEPTIONS</validation.version>
+    <common-interfaces.version>v3.1.6-EXCEPTIONS</common-interfaces.version>
+    <common-utitlities.version>v3.1.6-EXCEPTIONS</common-utitlities.version>
+    <rod.version>v3.1.6-EXCEPTIONS</rod.version>
   </properties>
 </project>
