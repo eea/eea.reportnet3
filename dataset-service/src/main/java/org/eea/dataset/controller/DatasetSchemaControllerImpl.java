@@ -1028,6 +1028,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       @ApiResponse(code = 400, message = "schema not found")})
   public List<DataSetSchemaVO> findDataSchemasByIdDataflow(@ApiParam(type = "Long",
       value = "Dataflow Id", example = "0") @PathVariable("idDataflow") Long idDataflow) {
+    try {
+      List<DataSetSchemaVO> schemas = new ArrayList<>();
 
     try {
       List<DataSetSchemaVO> schemas = new ArrayList<>();

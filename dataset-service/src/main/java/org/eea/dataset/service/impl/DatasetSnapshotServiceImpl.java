@@ -697,7 +697,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       recordStoreControllerZuul.createSnapshotData(idDataset, idSnapshot, idPartition, null, false);
       LOG.info("Successfully added snapshot with snapshotId {} and datasetId {}", idSnapshot, idDataset);
     } catch (Exception e) {
-      LOG_ERROR.error("Error creating snapshot for datasetId {}", idDataset, e);
+      LOG_ERROR.error("Unexpected error! Error creating snapshot for dataset schema {}", idDataset, e);
       releaseEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage());
       // Release the lock manually
       Map<String, Object> createSchemaSnapshot = new HashMap<>();
@@ -1161,6 +1161,10 @@ public void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId)
         restoreSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RESTORE_SNAPSHOT.getValue());
         restoreSnapshots.put(LiteralConstants.DATASETID, datasetId);
 
+        Map<String, Object> insertRecordsMultitable = new HashMap<>();
+        insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
+                LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
+        insertRecordsMultitable.put(LiteralConstants.DATASETID, datasetId);
 
         Map<String, Object> insertRecordsMultitable = new HashMap<>();
         insertRecordsMultitable.put(LiteralConstants.SIGNATURE,

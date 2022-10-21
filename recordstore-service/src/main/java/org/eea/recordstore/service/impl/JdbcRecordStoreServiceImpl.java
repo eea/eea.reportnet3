@@ -328,6 +328,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     } catch (InterruptedException e) {
       LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
       Thread.currentThread().interrupt();
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in createSchemas for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -363,8 +366,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       } catch (RecordStoreAccessException e1) {
         LOG.info(e1.getMessage(), e);
       }
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in distributeTables for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
-
   }
 
 
@@ -400,6 +405,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       } catch (RecordStoreAccessException e1) {
         LOG.info(e1.getMessage(), e);
       }
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in distributeTablesJob for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
 
   }
@@ -443,6 +451,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       throw new RecordStoreAccessException(
           String.format("Error reading commands file to create the dataset. %s", e.getMessage()),
           e);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in createEmptyDataSet for datasetSchemaId {}. Message: {}", idDatasetSchema, e.getMessage());
+      throw e;
     }
     for (String command : commands) {
       command = command.replace("%dataset_name%", datasetName);
@@ -785,6 +796,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG_ERROR.error("Error creating the data from the origin dataset {}", originDataset, e);
       deleteFile(Arrays.asList(nameFileTableValue, nameFileRecordValue, nameFileFieldValue,
           nameFileAttachmentValue));
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in createSnapshotToClone in print for originDataset {} and targetDataset {}. Message: {}", originDataset, targetDataset, e.getMessage());
+      throw e;
     }
 
     // Copy the data from the snapshot file into the target dataset
@@ -819,6 +833,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     } catch (SQLException | IOException e) {
       LOG_ERROR.error("Error restoring the data into the target dataset {}", targetDataset, e);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in createSnapshotToClone in copy for originDataset {} and targetDataset {}. Message: {}", originDataset, targetDataset, e.getMessage());
+      throw e;
     } finally {
       // Deleting the snapshot files after copy
       deleteFile(Arrays.asList(nameFileRecordValue, nameFileFieldValue, nameFileAttachmentValue));
@@ -1249,6 +1266,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           Files.write(pathFile, replaced);
         } catch (IOException e) {
           LOG_ERROR.error("Error modifying the file {} during the data copy in cloning process for datasetId {}", f, datasetId);
+        } catch (Exception e) {
+          LOG.error("Unexpected error! Error in modifySnapshotFile for datasetId {}. Message: {}", datasetId, e.getMessage());
+          throw e;
         }
       });
     }
@@ -1861,6 +1881,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       while ((buffer = copyOut.readFromCopy()) != null) {
         to.write(buffer);
       }
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in printToFile for fileName {} and query {}. Message: {}", fileName, query, e.getMessage());
+      throw e;
     } finally {
       if (copyOut.isActive()) {
         copyOut.cancelCopy();

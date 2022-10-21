@@ -141,6 +141,9 @@ public class ZipUtils {
         fileUnziped.setQcRulesBytes(qcrulesBytes);
         fileUnziped.setIntegrities(integrities);
         fileUnziped.setSchemaIds(schemaIds);
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error in unZipImportSchema for fileName {}. Message: {}", fileName, e.getMessage());
+        throw e;
       } finally {
         is.close();
       }
@@ -198,8 +201,7 @@ public class ZipUtils {
 
 
     } catch (Exception e) {
-      LOG_ERROR.error("Error exporting schemas from the dataflowId {} to a ZIP file. Message {}",
-          dataflowId, e.getMessage(), e);
+      LOG_ERROR.error("Unexpected error! Error in zipSchema for dataflowId {}. Message: {}", dataflowId , e.getMessage());
     }
     return bos.toByteArray();
 
@@ -228,7 +230,7 @@ public class ZipUtils {
       }
 
     } catch (Exception e) {
-      LOG_ERROR.error("Error exporting fieldschemas from the dataset {} to a ZIP file. Message {}",
+      LOG_ERROR.error("Unexpected error! Error in zipArrayListFieldSchemas from the dataset {} to a ZIP file. Message {}",
           datasetId, e.getMessage(), e);
     }
     return bos.toByteArray();
