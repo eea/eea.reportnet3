@@ -1163,11 +1163,6 @@ public void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId)
 
         Map<String, Object> insertRecordsMultitable = new HashMap<>();
         insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
-                LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
-        insertRecordsMultitable.put(LiteralConstants.DATASETID, datasetId);
-
-        Map<String, Object> insertRecordsMultitable = new HashMap<>();
-        insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
             LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
         insertRecordsMultitable.put(LiteralConstants.DATASETID, datasetId);
 
