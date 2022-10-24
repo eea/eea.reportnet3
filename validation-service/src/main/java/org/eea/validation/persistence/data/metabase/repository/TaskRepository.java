@@ -1,14 +1,15 @@
 package org.eea.validation.persistence.data.metabase.repository;
 
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.List;
 import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.List;
 
 /**
  * The Interface TaskRepository.
