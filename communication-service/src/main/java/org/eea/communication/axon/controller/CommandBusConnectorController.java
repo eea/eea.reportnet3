@@ -1,4 +1,4 @@
-package org.eea.communication.controller;
+package org.eea.communication.axon.controller;
 
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.extensions.springcloud.commandhandling.MessageRoutingInformation;

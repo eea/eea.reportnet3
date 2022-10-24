@@ -8,8 +8,8 @@ import lombok.*;
 @Getter
 @Setter
 public class UserNotifationForReleaseSentEvent {
-    private String aggregate;
-    private String id;
+    private String commReleaseAggregate;
+    private String transactionId;
     private Long dataProviderId;
     private Long dataflowId;
     private boolean restrictFromPublic;

@@ -12,7 +12,7 @@ import java.util.List;
 public class ValidationProcessForReleaseAddedEvent {
 
     private String aggregate;
-    private String id;
+    private String transactionId;
     private Long dataProviderId;
     private Long dataflowId;
     private boolean restrictFromPublic;

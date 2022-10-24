@@ -35,9 +35,9 @@ public class OrchestratorControllerImpl implements OrchestratorController {
        try {
            restrictFromPublic = true;
            validate = false;
-
+           System.out.println("---------------GOT REQUEST FOR DATAFLOW ID---------------------------" + dataflowId);
            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-           CreateReleaseStartNotificationCommand command = CreateReleaseStartNotificationCommand.builder().id(UUID.randomUUID().toString()).aggregate(UUID.randomUUID().toString())
+           CreateReleaseStartNotificationCommand command = CreateReleaseStartNotificationCommand.builder().transactionId(UUID.randomUUID().toString()).aggregate(UUID.randomUUID().toString())
                    .dataflowId(dataflowId).dataProviderId(dataProviderId).restrictFromPublic(restrictFromPublic)
                    .validate(validate).build();
            Map<String, String> map = new HashMap<>();

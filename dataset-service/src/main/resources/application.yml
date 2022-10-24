@@ -3,5 +3,24 @@ server:
 spring:
   application:
     name: dataset
-  autoconfigure:
-    exclude: org.axonframework.springboot.autoconfig.JpaAutoConfiguration
+#  autoconfigure:
+#    exclude: org.axonframework.springboot.autoconfig.TransactionAutoConfiguration
+axon:
+  distributed:
+    enabled: true
+    load-factor: 100
+    spring-cloud:
+      fallback-to-http-get: true
+      fallback-url: /message-routing-information
+      mode: rest
+      enable-ignore-listing: true
+      #      enable-accept-all-commands: true
+      rest-mode-url: /message-routing-information
+  serializer:
+    general: jackson
+    events: jackson
+    messages: jackson
+logging:
+  level:
+    org:
+      axonframework: debug

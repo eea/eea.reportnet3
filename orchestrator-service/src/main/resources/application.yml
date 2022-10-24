@@ -3,11 +3,19 @@ server:
 spring:
   application:
     name: orchestrator
-  jpa:
-    hibernate:
-      ddl-auto: update
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
+#    properties:
+#      hibernate:
+#        jdbc:
+#          lob:
+#            non_contextual_creation: false
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+#    database-platform: fully.qualified.classname.NoToastPostgresSQLDialect
+
 #  autoconfigure:
-#    exclude: org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration, org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+#    exclude: org.axonframework.springboot.autoconfig.JpaAutoConfiguration, org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration, org.axonframework.springboot.autoconfig.JpaEventStoreAutoConfiguration, org.axonframework.springboot.autoconfig.TransactionAutoConfiguration
 axon:
   distributed:
     enabled: true
@@ -19,12 +27,6 @@ axon:
       enable-ignore-listing: true
 #      enable-accept-all-commands: true
       rest-mode-url: /message-routing-information
-
-  #  eventhandling:
-#    processors:
-#      release-group:
-#        mode: subscribing
-#        source: eventBus
   serializer:
     general: jackson
     events: jackson

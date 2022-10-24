@@ -10,7 +10,7 @@ import lombok.*;
 public class ReleaseStartNotificationCreatedEvent {
 
    private String aggregate;
-   private String id;
+   private String transactionId;
    private Long dataProviderId;
    private Long dataflowId;
    private boolean restrictFromPublic;

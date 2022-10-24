@@ -14,20 +14,31 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
+import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.serviceregistry.Registration;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.JpaVendorAdapter;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
 
 import javax.sql.DataSource;
+import java.util.Properties;
 import java.util.function.Predicate;
 
-
+//@EnableJpaRepositories(entityManagerFactoryRef = "axonEntityManagerFactory",
+//        transactionManagerRef = "axonPlatformTransactionManager",
+//        basePackages = "org.axonframework.modelling.saga.repository.jpa")
+@EnableTransactionManagement
 @Configuration
 public class AxonConfig {
 
@@ -49,11 +60,9 @@ public class AxonConfig {
     @Autowired
     DiscoveryClient discoveryClient;
 
-    @Autowired
-    private ApplicationContext appContext;
 
     private Predicate<ServiceInstance> serviceInstanceFilter = (serviceInstance) -> {
-        return  serviceInstance.getHost().equals("192.168.1.3");
+        return  serviceInstance.getHost().equals("192.168.1.4");
     };
 
     @Bean
@@ -63,7 +72,6 @@ public class AxonConfig {
         metaDataSource.setUrl("jdbc:postgresql://localhost/axon");
         metaDataSource.setUsername(username);
         metaDataSource.setPassword(password);
-
         return metaDataSource;
     }
 
@@ -97,4 +105,37 @@ public class AxonConfig {
                 .serializer(serializer)
                 .build();
     }
+
+//    @Bean(name = "axonEntityManagerFactory")
+//    public LocalContainerEntityManagerFactoryBean axonEntityManagerFactory() {
+//        final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
+//        em.setDataSource(axon());
+//        em.setPackagesToScan(
+//                "org.axonframework.eventsourcing.eventstore.jpa",
+//                "org.axonframework.eventhandling.saga.repository.jpa",
+//                "org.axonframework.modelling.saga.repository.jpa",
+//                "org.axonframework.eventhandling.tokenstore.jpa");
+//        JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+//        em.setJpaVendorAdapter(vendorAdapter);
+//        em.setJpaProperties(jpaProperties());
+////        em.setMappingResources("/orm.xml");
+//        return em;
+//    }
+//
+//    public Properties jpaProperties() {
+//        Properties properties = new Properties();
+//        properties.setProperty("hibernate.physical_naming_strategy", SpringPhysicalNamingStrategy.class.getName());
+//        properties.setProperty("hibernate.implicit_naming_strategy", SpringImplicitNamingStrategy.class.getName());
+//        properties.setProperty("hibernate.hbm2ddl.auto", "update");
+//        properties.setProperty("hibernate.dialect","org.hibernate.dialect.PostgreSQL94Dialect");
+//        return properties;
+//    }
+//
+//    @Bean
+//    public PlatformTransactionManager axonPlatformTransactionManager() {
+//        JpaTransactionManager axonTransactionManager = new JpaTransactionManager();
+//        axonTransactionManager
+//                .setEntityManagerFactory(axonEntityManagerFactory().getObject());
+//        return axonTransactionManager;
+//    }
 }

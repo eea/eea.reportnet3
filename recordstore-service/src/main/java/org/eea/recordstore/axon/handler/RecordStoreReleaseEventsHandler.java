@@ -1,5 +1,7 @@
-package org.eea.recordstore.axon;
+package org.eea.recordstore.axon.handler;
 
+import io.lettuce.core.dynamic.annotation.Command;
+import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.config.ProcessingGroup;
 import org.axonframework.eventhandling.EventHandler;
 import org.eea.axon.release.events.DataRestoredFromSnapshotEvent;
@@ -22,7 +24,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 @Component
-@ProcessingGroup("release-group")
 public class RecordStoreReleaseEventsHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(RecordStoreReleaseEventsHandler.class);
@@ -36,8 +37,8 @@ public class RecordStoreReleaseEventsHandler {
         this.dataSetSnapshotControllerZuul = dataSetSnapshotControllerZuul;
     }
 
-    @EventHandler
-    public void on(SnapshotFileForReleaseCreatedEvent event) throws SQLException, IOException, InterruptedException {
+    @CommandHandler
+    public void RecordStoreReleaseEventsHandler(SnapshotFileForReleaseCreatedEvent event) throws SQLException, IOException, InterruptedException {
         for (Long id : event.getDatasetIds()) {
             LOG.info("Creating snapshot file for dataflowId: {} dataProvider: {} dataset: {}", event.getDataflowId(), event.getDataProviderId(), id);
             Long partitionId = dataSetSnapshotControllerZuul.obtainPartition(id, "root");
@@ -47,8 +48,8 @@ public class RecordStoreReleaseEventsHandler {
         }
     }
 
-    @EventHandler
-    public void on(DataRestoredFromSnapshotEvent event) throws SQLException, RecordStoreAccessException, IOException {
+    @CommandHandler
+    public void handle(DataRestoredFromSnapshotEvent event) throws SQLException, RecordStoreAccessException, IOException {
         for (Long id : event.getDatasetIds()) {
             Long snapshotId = dataSetSnapshotControllerZuul.findSnapshotIdByReportingDataset(id);
             Long dataCollectionId = dataSetSnapshotControllerZuul.findDataCollectionIdByIdSnapshotId(snapshotId);

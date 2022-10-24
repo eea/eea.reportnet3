@@ -5,8 +5,6 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.eea.axon.release.commands.CreateReleaseStartNotificationCommand;
-import org.eea.axon.release.events.ReleaseStartNotificationCreatedEvent;
 import org.eea.axon.release.commands.*;
 import org.eea.axon.release.events.*;
 import org.springframework.beans.BeanUtils;
@@ -18,7 +16,7 @@ public class ReleaseAggregate {
 
     @AggregateIdentifier
     private String aggregate;
-    private String id;
+    private String transactionId;
     private Long dataProviderId;
     private Long dataflowId;
     private boolean restrictFromPublic;
@@ -40,47 +38,47 @@ public class ReleaseAggregate {
     @EventSourcingHandler
     public void on(ReleaseStartNotificationCreatedEvent event) {
         this.aggregate = event.getAggregate();
-        this.id = event.getId();
+        this.transactionId = event.getTransactionId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();
         this.validate = event.isValidate();
     }
 
-    @CommandHandler
-    public void handle(SendUserNotificationCommand command) {
-        UserNotificationCreatedEvent event = new UserNotificationCreatedEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
+//    @CommandHandler
+//    public void handle(SendUserNotificationForReleaseStartedCommand command) {
+//        SendUserNotificationForReleaseStartedCommand event = new SendUserNotificationForReleaseStartedCommand();
+//        BeanUtils.copyProperties(command, event);
+//        AggregateLifecycle.apply(event);
+//    }
+//
+//    @EventSourcingHandler
+//    public void on(UserNotifationForReleaseSentEvent event) {
+//        this.aggregate = event.getAggregate();
+//        this.id = event.getTransactionId();
+//        this.dataflowId = event.getDataflowId();
+//        this.dataProviderId = event.getDataProviderId();
+//        this.restrictFromPublic = event.isRestrictFromPublic();
+//        this.validate = event.isValidate();
+//    }
 
-    @EventSourcingHandler
-    public void on(UserNotificationCreatedEvent event) {
-        this.aggregate = event.getAggregate();
-        this.id = event.getId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-    }
-
-    @CommandHandler
-    public ReleaseAggregate(AddReleaseLocksCommand command) {
-        ReleaseLocksAddedEvent event = new ReleaseLocksAddedEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
-
-    @EventSourcingHandler
-    public void on(ReleaseLocksAddedEvent event) {
-        this.aggregate = event.getAggregate();
-        this.id = event.getId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-    }
+//    @CommandHandler
+//    public ReleaseAggregate(AddReleaseLocksCommand command) {
+//        ReleaseLocksAddedEvent event = new ReleaseLocksAddedEvent();
+//        BeanUtils.copyProperties(command, event);
+//        AggregateLifecycle.apply(event);
+//    }
+//
+//    @EventSourcingHandler
+//    public void on(ReleaseLocksAddedEvent event) {
+//        this.aggregate = event.getAggregate();
+//        this.transactionId = event.getTransactionId();
+//        this.dataflowId = event.getDataflowId();
+//        this.dataProviderId = event.getDataProviderId();
+//        this.restrictFromPublic = event.isRestrictFromPublic();
+//        this.validate = event.isValidate();
+//        this.datasetIds = event.getDatasetIds();
+//    }
 
     @CommandHandler
     public ReleaseAggregate(UpdateRepresentativeVisibilityCommand command) {
@@ -92,7 +90,7 @@ public class ReleaseAggregate {
     @EventSourcingHandler
     public void on(RepresentativeVisibilityUpdatedEvent event) {
         this.aggregate = event.getAggregate();
-        this.id = event.getId();
+        this.transactionId = event.getTransactionId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();
@@ -110,7 +108,7 @@ public class ReleaseAggregate {
     @EventSourcingHandler
     public void on(ValidationProcessForReleaseAddedEvent event) {
         this.aggregate = event.getAggregate();
-        this.id = event.getId();
+        this.transactionId = event.getTransactionId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();
@@ -128,7 +126,7 @@ public class ReleaseAggregate {
     @EventSourcingHandler
     public void on(SnapshotRecordForReleaseCreatedInMetabaseEvent event) {
         this.aggregate = event.getAggregate();
-        this.id = event.getId();
+        this.transactionId = event.getTransactionId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();
@@ -146,7 +144,7 @@ public class ReleaseAggregate {
     @EventSourcingHandler
     public void on(SnapshotFileForReleaseCreatedEvent event) {
         this.aggregate = event.getAggregate();
-        this.id = event.getId();
+        this.transactionId = event.getTransactionId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();
@@ -164,7 +162,7 @@ public class ReleaseAggregate {
     @EventSourcingHandler
     public void on(DatasetStatusUpdatedEvent event) {
         this.aggregate = event.getAggregate();
-        this.id = event.getId();
+        this.transactionId = event.getTransactionId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();
@@ -182,7 +180,7 @@ public class ReleaseAggregate {
     @EventSourcingHandler
     public void on(ProviderDeletedEvent event) {
         this.aggregate = event.getAggregate();
-        this.id = event.getId();
+        this.transactionId = event.getTransactionId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();
@@ -200,7 +198,7 @@ public class ReleaseAggregate {
     @EventSourcingHandler
     public void on(InternalRepresentativeUpdatedEvent event) {
         this.aggregate = event.getAggregate();
-        this.id = event.getId();
+        this.transactionId = event.getTransactionId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();
@@ -218,7 +216,7 @@ public class ReleaseAggregate {
     @EventSourcingHandler
     public void on(DatasetRunningStatusUpdatedEvent event) {
         this.aggregate = event.getAggregate();
-        this.id = event.getId();
+        this.transactionId = event.getTransactionId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();
@@ -236,7 +234,7 @@ public class ReleaseAggregate {
     @EventSourcingHandler
     public void on(DataRestoredFromSnapshotEvent event) {
         this.aggregate = event.getAggregate();
-        this.id = event.getId();
+        this.transactionId = event.getTransactionId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();
@@ -254,7 +252,7 @@ public class ReleaseAggregate {
     @EventSourcingHandler
     public void on(SnapshotMarkedReleasedEvent event) {
         this.aggregate = event.getAggregate();
-        this.id = event.getId();
+        this.transactionId = event.getTransactionId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();
@@ -272,7 +270,7 @@ public class ReleaseAggregate {
     @EventSourcingHandler
     public void on(ReleaseLocksRemovedEvent event) {
         this.aggregate = event.getAggregate();
-        this.id = event.getId();
+        this.transactionId = event.getTransactionId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
         this.restrictFromPublic = event.isRestrictFromPublic();

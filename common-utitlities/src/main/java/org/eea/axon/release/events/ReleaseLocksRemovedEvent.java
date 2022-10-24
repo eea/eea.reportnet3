@@ -12,7 +12,7 @@ import java.util.List;
 public class ReleaseLocksRemovedEvent {
 
    private String aggregate;
-   private String id;
+   private String transactionId;
    private Long dataflowId;
    private Long dataProviderId;
    private boolean restrictFromPublic;

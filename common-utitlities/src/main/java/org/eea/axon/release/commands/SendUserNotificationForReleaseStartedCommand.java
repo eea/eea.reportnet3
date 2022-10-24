@@ -14,8 +14,8 @@ import java.util.Map;
 @Setter
 public class SendUserNotificationForReleaseStartedCommand   {
     @TargetAggregateIdentifier
-    private  String aggregate;
-    private  String id;
+    private  String commReleaseAggregate;
+    private  String transactionId;
     private  Long dataflowId;
     private  Long dataProviderId;
     private  boolean restrictFromPublic;

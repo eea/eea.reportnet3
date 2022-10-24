@@ -1,14 +1,12 @@
 package org.eea.orchestrator.axon.sagas;
 
+import org.axonframework.commandhandling.GenericCommandMessage;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.MetaData;
 import org.axonframework.modelling.saga.EndSaga;
 import org.axonframework.modelling.saga.SagaEventHandler;
 import org.axonframework.modelling.saga.StartSaga;
 import org.axonframework.spring.stereotype.Saga;
-import org.eea.axon.release.events.ReleaseStartNotificationCreatedEvent;
-import org.eea.axon.release.commands.SendUserNotificationCommand;
-import org.eea.axon.release.events.UserNotificationCreatedEvent;
 import org.eea.axon.release.commands.*;
 import org.eea.axon.release.events.*;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -16,8 +14,9 @@ import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.stereotype.Component;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,47 +36,43 @@ public class ReleaseSaga {
     private DataSetControllerZuul dataSetControllerZuul;
 
     @StartSaga
-    @SagaEventHandler(associationProperty = "id")
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ReleaseStartNotificationCreatedEvent event) {
-        SendUserNotificationForReleaseStartedCommand command  = new SendUserNotificationForReleaseStartedCommand();
-     //   List<Long> datasetIds = dataSetControllerZuul.findDatasetIdsByDataflowId(event.getDataflowId(), event.getDataProviderId());
-        AddReleaseLocksCommand addReleaseLocksCommand = AddReleaseLocksCommand.builder().aggregate(UUID.randomUUID().toString()).id(event.getId()).dataflowId(event.getDataflowId())
+        SendUserNotificationForReleaseStartedCommand command = SendUserNotificationForReleaseStartedCommand.builder().commReleaseAggregate(UUID.randomUUID().toString()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
                 .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).build();
-       //This command should go to CommunicationService
-        command.setId(event.getId());
-        command.setAggregate(event.getAggregate());
-
+        LOG.info("---------------STARTING SAGA FOR DATAFLOWID----------------" + event.getDataflowId());
         commandGateway.send(command);
     }
 
-    @StartSaga
-    @SagaEventHandler(associationProperty = "id")
-    public void handle(UserNotifationForReleaseSentEvent event) {
-           List<Long> datasetIds = dataSetControllerZuul.findDatasetIdsByDataflowId(event.getDataflowId(), event.getDataProviderId());
-        AddReleaseLocksCommand addReleaseLocksCommand = AddReleaseLocksCommand.builder().aggregate(UUID.randomUUID().toString()).id(event.getId()).dataflowId(event.getDataflowId())
-                .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(datasetIds).build();
-        commandGateway.send(addReleaseLocksCommand).exceptionally(er -> {
-            System.out.println(er);
-            return er;
-        });
+    @SagaEventHandler(associationProperty = "transactionId")
+    public void handle(UserNotifationForReleaseSentEvent event, MetaData metaData) {
+        AddReleaseLocksCommand addReleaseLocksCommand = AddReleaseLocksCommand.builder().datasetReleaseAggregate(UUID.randomUUID().toString()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
+                .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).build();
+
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+        commandGateway.send(GenericCommandMessage.asCommandMessage(addReleaseLocksCommand).withMetaData(MetaData.with("auth", auth)));
+//        commandGateway.send(addReleaseLocksCommand).exceptionally(er -> {
+//            System.out.println(er);
+//            return er;
+//        });
     }
 
-    @SagaEventHandler(associationProperty = "id")
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ReleaseLocksAddedEvent event) {
         UpdateRepresentativeVisibilityCommand updateRepresentativeVisibilityCommand = UpdateRepresentativeVisibilityCommand.builder()
-                .aggregate(event.getAggregate()).id(event.getId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic())
+                .aggregate(UUID.randomUUID().toString()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic())
                 .validate(event.isValidate()).datasetIds(event.getDatasetIds()).build();
         commandGateway.sendAndWait(updateRepresentativeVisibilityCommand);
     }
 
-    @SagaEventHandler(associationProperty = "id")
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(RepresentativeVisibilityUpdatedEvent event, MetaData metaData) {
         if (!isAdmin(metaData) || event.isValidate()) {
-            ExecuteValidationProcessCommand executeValidationProcessCommand = ExecuteValidationProcessCommand.builder().aggregate(event.getAggregate()).id(event.getId())
+            ExecuteValidationProcessCommand executeValidationProcessCommand = ExecuteValidationProcessCommand.builder().aggregate(event.getAggregate()).transactionId(event.getTransactionId())
                     .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).build();
             commandGateway.send(executeValidationProcessCommand);
         } else {
-            CreateSnapshotRecordRorReleaseInMetabaseCommand createReleaseSnapshotCommand = CreateSnapshotRecordRorReleaseInMetabaseCommand.builder().aggregate(event.getAggregate()).id(event.getId())
+            CreateSnapshotRecordRorReleaseInMetabaseCommand createReleaseSnapshotCommand = CreateSnapshotRecordRorReleaseInMetabaseCommand.builder().aggregate(event.getAggregate()).transactionId(event.getTransactionId())
                     .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic())
                     .validate(event.isValidate()).datasetIds(event.getDatasetIds()).build();
             commandGateway.send(createReleaseSnapshotCommand);
@@ -98,73 +93,73 @@ public class ReleaseSaga {
         return false;
     }
 
-    @SagaEventHandler(associationProperty = "id")
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ValidationProcessForReleaseAddedEvent event) {
         LOG.info("Validation process added for datasets {} of dataflow {} ", event.getDatasetIds(), event.getDataflowId());
-//        CreateSnapshotRecordRorReleaseInMetabaseCommand createReleaseSnapshotCommand = CreateSnapshotRecordRorReleaseInMetabaseCommand.builder().aggregate(UUID.randomUUID().toString()).id(event.getId())
+//        CreateSnapshotRecordRorReleaseInMetabaseCommand createReleaseSnapshotCommand = CreateSnapshotRecordRorReleaseInMetabaseCommand.builder().aggregate(UUID.randomUUID().toString()).transactionId(event.getTransactionId())
 //                .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic())
 //                .validate(event.isValidate()).datasetIds(event.getDatasetIds()).build();
 //        commandGateway.send(createReleaseSnapshotCommand);
     }
 
-    @SagaEventHandler(associationProperty = "id")
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(SnapshotRecordForReleaseCreatedInMetabaseEvent event) {
-        CreateSnapshotFileForReleaseCommand createReleaseSnapshotCommand = CreateSnapshotFileForReleaseCommand.builder().aggregate(event.getAggregate()).id(event.getId())
+        CreateSnapshotFileForReleaseCommand createReleaseSnapshotCommand = CreateSnapshotFileForReleaseCommand.builder().aggregate(event.getAggregate()).transactionId(event.getTransactionId())
                 .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic())
                 .validate(event.isValidate()).datasetIds(event.getDatasetIds()).build();
         commandGateway.send(createReleaseSnapshotCommand);
     }
 
-    @SagaEventHandler(associationProperty = "id")
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(SnapshotFileForReleaseCreatedEvent event) {
-        UpdateDatasetStatusCommand updateDatasetStatusCommand = UpdateDatasetStatusCommand.builder().aggregate(event.getAggregate()).id(event.getId())
+        UpdateDatasetStatusCommand updateDatasetStatusCommand = UpdateDatasetStatusCommand.builder().aggregate(event.getAggregate()).transactionId(event.getTransactionId())
                 .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic())
                 .validate(event.isValidate()).datasetIds(event.getDatasetIds()).build();
         commandGateway.send(updateDatasetStatusCommand);
     }
 
-    @SagaEventHandler(associationProperty = "id")
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(DatasetStatusUpdatedEvent event) {
-        DeleteProviderCommand deleteProviderCommand = DeleteProviderCommand.builder().aggregate(event.getAggregate()).id(event.getId())
+        DeleteProviderCommand deleteProviderCommand = DeleteProviderCommand.builder().aggregate(event.getAggregate()).transactionId(event.getTransactionId())
                 .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic())
                 .validate(event.isValidate()).datasetIds(event.getDatasetIds()).build();
         commandGateway.send(deleteProviderCommand);
     }
 
-    @SagaEventHandler(associationProperty = "id")
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ProviderDeletedEvent event) {
-        UpdateInternalRepresentativeCommand updateInternalRepresentativeCommand = UpdateInternalRepresentativeCommand.builder().aggregate(event.getAggregate()).id(event.getId())
+        UpdateInternalRepresentativeCommand updateInternalRepresentativeCommand = UpdateInternalRepresentativeCommand.builder().aggregate(event.getAggregate()).transactionId(event.getTransactionId())
                 .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic())
                 .validate(event.isValidate()).datasetIds(event.getDatasetIds()).build();
         commandGateway.send(updateInternalRepresentativeCommand);
     }
 
-    @SagaEventHandler(associationProperty = "id")
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(InternalRepresentativeUpdatedEvent event) {
-        UpdateDatasetRunningStatusCommand updateDatasetRunningStatusCommand = UpdateDatasetRunningStatusCommand.builder().aggregate(event.getAggregate()).id(event.getId())
+        UpdateDatasetRunningStatusCommand updateDatasetRunningStatusCommand = UpdateDatasetRunningStatusCommand.builder().aggregate(event.getAggregate()).transactionId(event.getTransactionId())
                 .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic())
                 .validate(event.isValidate()).datasetIds(event.getDatasetIds()).build();
         commandGateway.send(updateDatasetRunningStatusCommand);
     }
 
-    @SagaEventHandler(associationProperty = "id")
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(DatasetRunningStatusUpdatedEvent event) {
-        RestoreDataFromSnapshotCommand restoreDataFromSnapshotCommand = RestoreDataFromSnapshotCommand.builder().aggregate(event.getAggregate()).id(event.getId())
+        RestoreDataFromSnapshotCommand restoreDataFromSnapshotCommand = RestoreDataFromSnapshotCommand.builder().aggregate(event.getAggregate()).transactionId(event.getTransactionId())
                 .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic())
                 .validate(event.isValidate()).datasetIds(event.getDatasetIds()).build();
         commandGateway.send(restoreDataFromSnapshotCommand);
     }
 
     @EndSaga
-    @SagaEventHandler(associationProperty = "id")
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(DataRestoredFromSnapshotEvent event) {
-        MarkSnapshotReleasedCommand markSnapshotReleasedCommand = MarkSnapshotReleasedCommand.builder().aggregate(event.getAggregate()).id(event.getId())
+        MarkSnapshotReleasedCommand markSnapshotReleasedCommand = MarkSnapshotReleasedCommand.builder().aggregate(event.getAggregate()).transactionId(event.getTransactionId())
                 .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic())
                 .validate(event.isValidate()).datasetIds(event.getDatasetIds()).build();
         commandGateway.send(markSnapshotReleasedCommand);
     }
 
-    @SagaEventHandler(associationProperty = "id")
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ReleaseLocksRemovedEvent event) {
         LOG.info("-----------------------REMOVE RELEASE LOCKS-------------------------------");
     }

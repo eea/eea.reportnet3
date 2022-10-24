@@ -16,7 +16,7 @@ public class DeleteProviderCommand {
 
     @TargetAggregateIdentifier
     private String aggregate;
-    private final String id;
+    private final String transactionId;
     private final Long dataflowId;
     private final Long dataProviderId;
     private final boolean restrictFromPublic;
