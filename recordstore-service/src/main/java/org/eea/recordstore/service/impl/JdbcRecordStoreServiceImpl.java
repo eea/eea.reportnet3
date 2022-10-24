@@ -1696,8 +1696,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         for (Long i = startingNumber; i <= endingNumber; i++) {
           String splitFile = pathSnapshot
               + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-          copyFromFile(copyQueryField, splitFile, cm);
-          deleteFile(Arrays.asList(splitFile));
+          try {
+            LOG.info("Recover copy file {}", splitFile);
+            copyFromFileRecovery(copyQueryField, splitFile, cm);
+            LOG.info("Recover file {} copied and will be deleted", splitFile);
+            deleteFile(Arrays.asList(splitFile));
+            LOG.info("Recover file {} has been deleted", splitFile);
+          } catch (Exception e) {
+            LOG_ERROR.error("Error in recover copy field process for snapshotId {} with error {}", idSnapshot, e);
+          }
         }
         break;
       case ATTACHMENT_TYPE:
@@ -1895,6 +1902,35 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+  /**
+   * Copy from file recovery.
+   *
+   * @param query the query
+   * @param fileName the file name
+   * @param copyManager the copy manager
+   */
+  private void copyFromFileRecovery(String query, String fileName, CopyManager copyManager) {
+    try {
+      Path path = Paths.get(fileName);
+      // bufferFile it's a size in bytes defined in consul variable. It can be 65536
+      char[] cbuf = new char[bufferFile];
+      int len = 0;
+
+      // Copy the data from the file by chunks
+      CopyIn cp = copyManager.copyIn(query);
+      FileReader from = new FileReader(path.toString());
+      while ((len = from.read(cbuf)) > 0) {
+        byte[] buf = new String(cbuf, 0, len).getBytes();
+        cp.writeToCopy(buf, 0, buf.length);
+      }
+      cp.endCopy();
+      if (cp.isActive()) {
+        cp.cancelCopy();
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in recover copy field process for fileName {} with error {}", fileName, e);
+    }
+  }
   /**
    * Split the snapshot file
    *
