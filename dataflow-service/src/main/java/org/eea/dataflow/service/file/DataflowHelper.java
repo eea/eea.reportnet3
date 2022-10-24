@@ -128,6 +128,8 @@ public class DataflowHelper {
       kafkaSenderUtils.releaseNotificableKafkaEvent(
           EventType.EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT, null, notificationVO);
 
+      LOG.info("Successfully exported schema information for dataflow with id {}", dataflowId);
+
     } catch (IOException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(
           EventType.EXPORT_SCHEMA_INFORMATION_FAILED_EVENT, null, notificationVO);
@@ -515,6 +517,9 @@ public class DataflowHelper {
       }
 
       workbook.write(byteArrayOutputStream);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error in writeFile for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
 
     return byteArrayOutputStream.toByteArray();

@@ -278,7 +278,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         resourceInfoVO.stream().map(ResourceInfoVO::getName).collect(Collectors.toList());
     if (null != resourceNames && !resourceNames.isEmpty()) {
       deleteResourceInstancesByName(resourceNames);
-      LOG.info("Resources {} removed succesfully", resourceInfoVO);
+      LOG.info("Resources {} removed successfully", resourceInfoVO);
     }
 
   }
@@ -311,7 +311,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         for (String resource : resources.values()) {
           keycloakConnectorService.deleteGroupDetail(resource);
         }
-        LOG.info("Resources {} removed succesfully", resources);
+        LOG.info("Resources {} removed successfully", resources);
       }
 
     }
@@ -366,7 +366,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       // Finally add the user to the group
       if (StringUtils.isNotBlank(groupId)) {
         keycloakConnectorService.addUserToGroup(userId, groupId);
-        LOG.info("User {} added to group {} succesfully", userId, groupName);
+        LOG.info("User {} added to group {} successfully", userId, groupName);
       }
     }
 
@@ -384,7 +384,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     GroupInfo[] groups = keycloakConnectorService.getGroupsWithSearch(groupName);
     if (null != groups && groups.length > 0) {
       keycloakConnectorService.removeUserFromGroup(userId, groups[0].getId());
-      LOG.info("User {} remove to group {} succesfully", userId, groupName);
+      LOG.info("User {} remove to group {} successfully", userId, groupName);
     }
   }
 
@@ -643,6 +643,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
             e.getMessage(), e);
         deleteResourceInstances(resourceInfoVOs.subList(0, i));
         throw e;
+      } catch(Exception e){
+        LOG_ERROR.error("Unexpected error! Error creating group {} Message: {}", groupInfo.getName(), e.getMessage());
+        throw e;
       }
     }
 
@@ -703,7 +706,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
           .map(RoleRepresentation::getName).collect(Collectors.toSet()));
 
       tokenVO.setPreferredUsername(user.getUsername());
-      LOG.info("User {} logged in and cached succesfully via api key {}",
+      LOG.info("User {} logged in and cached successfully via api key {}",
           tokenVO.getPreferredUsername(), apiKey);
     } else {
       LOG_ERROR.error("{} users found with api key {} ", userRepresentations.size(), apiKey);
@@ -759,7 +762,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       tokenVO.setRoles(Arrays.asList(keycloakConnectorService.getUserRoles(user.getId())).stream()
           .map(RoleRepresentation::getName).collect(Collectors.toSet()));
 
-      LOG.info("User {} logged in and cached succesfully via email {}",
+      LOG.info("User {} logged in and cached successfully via email {}",
           tokenVO.getPreferredUsername(), email);
     } else {
       LOG_ERROR.error("{} users found with email {} ", userRepresentations.size(), email);
@@ -897,6 +900,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       token = jwtTokenProvider.parseToken(tokenInfo.getAccessToken());
     } catch (VerificationException e) {
       LOG_ERROR.error("Error trying to parse token", e);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Error in mapTokenToVO. Message: {}", e.getMessage());
+      throw e;
     }
 
     if (null != token) {
@@ -942,18 +948,19 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   /**
    * Checks if is numeric.
    *
-   * @param cadena the cadena
+   * @param str the string
    * @return true, if is numeric
    */
-  private static boolean isNumeric(String cadena) {
-    boolean resultado;
+  private static boolean isNumeric(String str) {
+    boolean result;
     try {
-      Integer.parseInt(cadena);
-      resultado = true;
-    } catch (NumberFormatException excepcion) {
-      resultado = false;
+      Integer.parseInt(str);
+      result = true;
+    } catch (NumberFormatException exception) {
+      LOG_ERROR.error("Error in isNumeric for value {}", str);
+      result = false;
     }
 
-    return resultado;
+    return result;
   }
 }

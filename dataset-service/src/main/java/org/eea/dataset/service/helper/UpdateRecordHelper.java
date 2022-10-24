@@ -78,7 +78,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
   public void executeUpdateProcess(final Long datasetId, List<RecordVO> records,
       boolean updateCascadePK) throws EEAException {
     datasetService.updateRecords(datasetId, records, updateCascadePK);
-    LOG.info("Records have been modified");
+    LOG.info("Records have been modified for datasetId {}", datasetId);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
@@ -98,7 +98,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
   public void executeCreateProcess(final Long datasetId, List<RecordVO> records,
       String tableSchemaId) throws EEAException {
     datasetService.insertRecords(datasetId, records, tableSchemaId);
-    LOG.info("Records have been created");
+    LOG.info("Records have been created for datasetId {}", datasetId);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
@@ -126,7 +126,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     for (TableVO tableVO : tableRecords) {
       datasetService.insertRecords(datasetId, tableVO.getRecords(), tableVO.getIdTableSchema());
     }
-    LOG.info("Records have been created");
+    LOG.info("Records have been created for datasetId {}", datasetId);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
@@ -146,7 +146,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
   public void executeDeleteProcess(Long datasetId, String recordId, boolean deleteCascadePK)
       throws EEAException {
     datasetService.deleteRecord(datasetId, recordId, deleteCascadePK);
-    LOG.info("Records have been deleted");
+    LOG.info("Records have been deleted for datasetId {}", datasetId);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
@@ -167,7 +167,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
   public void executeFieldUpdateProcess(Long datasetId, FieldVO field, boolean updateCascadePK)
       throws EEAException {
     datasetService.updateField(datasetId, field, updateCascadePK);
-    LOG.info("Field is modified");
+    LOG.info("Field with id {} was modified for datasetId {}", field.getId(), datasetId);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport

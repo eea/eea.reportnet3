@@ -182,7 +182,7 @@ public class FKValidationUtils {
   /** The Constant FK_SINGLE_WRONG_IGNORE_CASE_LINK: {@value}. */
   private static final String FK_SINGLE_WRONG_IGNORE_CASE_LINK =
       "with fktable as (select * from dataset_%s.field_value fv where ID_FIELD_SCHEMA = '%s'),\r\n"
-          + " pktable as (select string_agg(pk_value, '; ') pk_value  from (select distinct field_value.VALUE pk_value\r\n"
+          + " pktable as (select string_agg(pk_value, '; ') pk_value  from (select distinct LOWER(field_value.VALUE) pk_value\r\n"
           + " from dataset_%s.field_value field_value\r\n"
           + " where field_value.id_field_schema = '%s') table_aux),\r\n"
           + " fkcrosspk as (select *, (pkas @> fkas) is_contained  from (\r\n"

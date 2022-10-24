@@ -147,7 +147,9 @@ public class ValidationControllerImpl implements ValidationController {
       }
     }
     try {
+      LOG.info("Executing validation for datasetId {}", datasetId);
       validationHelper.executeValidation(datasetId, uuid, released, true);
+
       // Add lock to the release process if necessary
       validationHelper.addLockToReleaseProcess(datasetId);
     } catch (EEAException e) {
@@ -155,6 +157,9 @@ public class ValidationControllerImpl implements ValidationController {
           DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
       LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);
       validationHelper.deleteLockToReleaseProcess(datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error validating dataset data for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
 
   }
@@ -225,6 +230,9 @@ public class ValidationControllerImpl implements ValidationController {
           levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving validations for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
 
     return validations;
@@ -297,6 +305,9 @@ public class ValidationControllerImpl implements ValidationController {
           levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, headers, asc);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving group validations for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
 
     return validations;
@@ -326,6 +337,9 @@ public class ValidationControllerImpl implements ValidationController {
     } catch (EEAException | IOException e) {
       LOG_ERROR.error("Error exporting validation data from the dataset {}.  Message: {}",
           datasetId, e.getMessage());
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error validation data for datasetId {} to CSV. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -374,7 +388,9 @@ public class ValidationControllerImpl implements ValidationController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
           "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s",
           datasetId, fileName));
-
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error downloading validations file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage());
+      throw e;
     }
   }
 

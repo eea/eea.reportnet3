@@ -96,7 +96,7 @@ public class FileParserFactory implements IFileParserFactory {
           break;
       }
     } catch (NullPointerException e) {
-      LOG_ERROR.error("Bad mimeType: {}", mimeType, e);
+      LOG_ERROR.error("Bad mimeType: {}, datasetId {} ", mimeType, datasetId, e);
     }
     return context;
   }

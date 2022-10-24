@@ -68,6 +68,10 @@ public class ExecuteExternalIntegrationEvent extends AbstractEEAEventHandlerComm
           integrationId, datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
     }
+    catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Could not execute an external integration with id {} on the datasetId {}. Message: {}",  integrationId, datasetId, e.getMessage());
+      throw e;
+    }
   }
 
 

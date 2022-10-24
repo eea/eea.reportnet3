@@ -143,6 +143,9 @@ public class DataflowControllerImpl implements DataFlowController {
       }
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve dataflow with id {} and providerId {}. Message: {}", dataflowId, providerId, e.getMessage());
+      throw e;
     }
     return result;
   }
@@ -187,6 +190,9 @@ public class DataflowControllerImpl implements DataFlowController {
       dataflows = dataflowService.getByStatus(status);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve dataflow by status. Message: {}", e.getMessage());
+      throw e;
     }
     return dataflows;
   }
@@ -219,6 +225,9 @@ public class DataflowControllerImpl implements DataFlowController {
           orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve dataflows for userId {}. Message: {}", userId, e.getMessage());
+      throw e;
     }
     return dataflows;
   }
@@ -251,6 +260,9 @@ public class DataflowControllerImpl implements DataFlowController {
           orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve reference dataflows for userId {}. Message: {}", userId, e.getMessage());
+      throw e;
     }
     return dataflows;
   }
@@ -284,6 +296,9 @@ public class DataflowControllerImpl implements DataFlowController {
           orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve business dataflows for userId {}. Message: {}", userId, e.getMessage());
+      throw e;
     }
     return dataflows;
   }
@@ -316,6 +331,9 @@ public class DataflowControllerImpl implements DataFlowController {
           orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve citizen science dataflows for userId {}. Message: {}", userId, e.getMessage());
+      throw e;
     }
     return dataflows;
   }
@@ -342,6 +360,9 @@ public class DataflowControllerImpl implements DataFlowController {
       dataflows = dataflowService.getCloneableDataflows(userId);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve clonable dataflows for userId {}. Message: {}", userId, e.getMessage());
+      throw e;
     }
     return dataflows;
   }
@@ -375,6 +396,9 @@ public class DataflowControllerImpl implements DataFlowController {
       dataflows = dataflowService.getCompleted(userId, pageable);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve completed dataflows for userId {}. Message: {}", userId, e.getMessage());
+      throw e;
     }
     return dataflows;
   }
@@ -432,11 +456,22 @@ public class DataflowControllerImpl implements DataFlowController {
     if (status == HttpStatus.OK) {
       try {
         Long dataflowId = dataflowService.createDataFlow(dataFlowVO);
+        LOG.info("Successfully created dataflow with id {}", dataflowId);
         message = dataflowId.toString();
       } catch (EEAException e) {
-        LOG_ERROR.error("Create dataflow failed. ", e.getCause());
+        if(dataFlowVO != null){
+          LOG_ERROR.error("Creating dataflow with name {} failed. Message: {} ", dataFlowVO.getName(), e.getMessage());
+        }
+        else{
+          LOG_ERROR.error("Creating dataflow failed because object is null. Message: {} ", e.getMessage());
+        }
         message = "There was an unknown error creating the dataflow.";
         status = HttpStatus.INTERNAL_SERVER_ERROR;
+      } catch (Exception e){
+        Long dataflowId = (dataFlowVO != null) ? dataFlowVO.getId() : null;
+        String dataflowName = (dataFlowVO != null) ? dataFlowVO.getName() : null;
+        LOG_ERROR.error("Unexpected error! Could not create dataflow with id {} and name {}. Message: {}", dataflowId, dataflowName, e.getMessage());
+        throw e;
       }
     }
 
@@ -501,6 +536,10 @@ public class DataflowControllerImpl implements DataFlowController {
         }
       } catch (EEAException e) {
         LOG_ERROR.error("Error finding dataflow metabase from dataflow id {}", dataFlowVO.getId());
+      } catch (Exception e){
+        Long dataflowId = (dataFlowVO != null) ? dataFlowVO.getId() : null;
+        LOG_ERROR.error("Unexpected error! Could not find dataflow with id {} in metabase. Message: {}", dataflowId, e.getMessage());
+        throw e;
       }
     }
 
@@ -527,16 +566,25 @@ public class DataflowControllerImpl implements DataFlowController {
       } catch (EEAException e) {
         LOG_ERROR.error("Error finding the representatives from the dataflowId {}",
             dataFlowVO.getId());
+      } catch (Exception e){
+        Long dataflowId = (dataFlowVO != null) ? dataFlowVO.getId() : null;
+        LOG_ERROR.error("Unexpected error! Could not find the representatives for dataflow with id {}. Message: {}", dataflowId, e.getMessage());
+        throw e;
       }
     }
 
     if (status == HttpStatus.OK) {
       try {
         dataflowService.updateDataFlow(dataFlowVO);
+        LOG.info("Successfully updated dataflow with id {}", dataFlowVO.getId());
       } catch (EEAException e) {
         LOG_ERROR.error("Update dataflow failed. ", e.getCause());
         message = "There was an unknown error updating the dataflow.";
         status = HttpStatus.INTERNAL_SERVER_ERROR;
+      } catch (Exception e){
+        Long dataflowId = (dataFlowVO != null) ? dataFlowVO.getId() : null;
+        LOG_ERROR.error("Unexpected error! Could not update dataflow with id {} Message: {}", dataflowId, e.getMessage());
+        throw e;
       }
     }
 
@@ -570,6 +618,9 @@ public class DataflowControllerImpl implements DataFlowController {
 
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve dataflow metadata for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
     return result;
   }
@@ -613,6 +664,9 @@ public class DataflowControllerImpl implements DataFlowController {
       LOG.error(String.format(
           "Couldn't retrieve the dataflow information with the provided dataflowId %s",
           dataflowId));
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve dataflow information for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -637,7 +691,14 @@ public class DataflowControllerImpl implements DataFlowController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           "Can't delete a Business Dataflow without being an admin user.");
     } else {
-      dataflowService.deleteDataFlow(dataflowId);
+      try{
+        LOG.info("Deleting dataflow with id {}", dataflowId);
+        dataflowService.deleteDataFlow(dataflowId);
+        LOG.info("Successfully deleted dataflow with id {}", dataflowId);
+      } catch (Exception e){
+        LOG_ERROR.error("Unexpected error! Could not delete dataflow with id {} Message: {}", dataflowId, e.getMessage());
+        throw e;
+      }
     }
   }
 
@@ -662,7 +723,7 @@ public class DataflowControllerImpl implements DataFlowController {
       dataflowService.updateDataFlowStatus(dataflowId, status, deadlineDate);
     } catch (Exception e) {
       LOG.error(String.format(
-          "Couldn't update the dataflow status with the provided dataflowId %s.", dataflowId), e);
+          "Unexpected error! Could not update the dataflow status with the provided dataflowId %s.", dataflowId), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Couldn't update the dataflow status. An unknown error happenned.");
     }
@@ -696,6 +757,9 @@ public class DataflowControllerImpl implements DataFlowController {
           "Couldn't retrieve the public dataflow with the provided dataflowId %s.", dataflowId), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "An error happenned trying to retrieve the dataflow");
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve public dataflow with id {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -723,6 +787,9 @@ public class DataflowControllerImpl implements DataFlowController {
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "An error happenned trying to retrieve the dataflows");
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve public dataflows. Message: {}", e.getMessage());
+      throw e;
     }
   }
 
@@ -765,6 +832,9 @@ public class DataflowControllerImpl implements DataFlowController {
               countryCode),
           e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATAFLOW_GET_ERROR);
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve public dataflows for countryCode {} Message: {}", countryCode, e.getMessage());
+      throw e;
     }
   }
 
@@ -804,11 +874,19 @@ public class DataflowControllerImpl implements DataFlowController {
       dataProviderIds = representativeService.getProviderIds();
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.UNAUTHORIZED);
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve provider ids. Message: {}", e.getMessage());
+      throw e;
     }
 
-    dataflows = dataflowService.getDataflowsByDataProviderIds(dataProviderIds);
-    dataProviderIds.stream().forEach(
-        dataProvider -> result.addAll(dataflowService.getUserRoles(dataProvider, dataflows)));
+    try {
+      dataflows = dataflowService.getDataflowsByDataProviderIds(dataProviderIds);
+      dataProviderIds.stream().forEach(
+              dataProvider -> result.addAll(dataflowService.getUserRoles(dataProvider, dataflows)));
+    } catch (Exception e){
+      LOG_ERROR.error("Unexpected error! Could not retrieve dataflows by providerIds. Message: {}", e.getMessage());
+      throw e;
+    }
 
     return result;
   }
@@ -874,6 +952,9 @@ public class DataflowControllerImpl implements DataFlowController {
       return dataflowService.getPrivateDataflowById(dataflowId);
     } catch (EEAException e) {
       LOG_ERROR.info(String.format("Couldn't find a dataflow with id %s", dataflowId));
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Could not retrieve private dataflowId {}. Message {}", dataflowId, e.getMessage());
+      throw e;
     }
     return dataflowPrivateVO;
   }
@@ -898,6 +979,9 @@ public class DataflowControllerImpl implements DataFlowController {
       LOG_ERROR.error(String.format(
           "There was an error while retrieving the amount of dataflows of each dataflow type: %s",
           e.getMessage()));
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Could not retrieve number of dataflows. Message {}", e.getMessage());
+      throw e;
     }
     return dataflowTypesCount;
   }
@@ -924,6 +1008,9 @@ public class DataflowControllerImpl implements DataFlowController {
     } catch (EEAException e) {
       LOG_ERROR.info(String.format("Error obtaining the dataset types for the dataflow with id %s.",
           dataflowId));
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Could not retrieve dataset types for dataflowId {}. Message {}", dataflowId, e.getMessage());
+      throw e;
     }
     return datasetsSummary;
   }
@@ -944,11 +1031,16 @@ public class DataflowControllerImpl implements DataFlowController {
     notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_SCHEMAS_INFO_START",
         userNotificationContentVO);
     try {
+      LOG.info("Exporting schema information for dataflow with id {}", dataflowId);
       dataflowHelper.exportSchemaInformation(dataflowId);
+      LOG.info("Successfully exported schema information for dataflow with id {}", dataflowId);
     } catch (IOException | EEAException e) {
       LOG_ERROR.error(
           "Error downloading file generated from export from the dataflowId {}. Message: {}",
           dataflowId, e.getMessage());
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Could not export schema information for dataflowId {}. Message {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -971,6 +1063,7 @@ public class DataflowControllerImpl implements DataFlowController {
           "Downloading file generated when exporting Schema Information. DataflowId {}. Filename {}",
           dataflowId, fileName);
       File file = dataflowHelper.downloadSchemaInformation(dataflowId, fileName);
+      LOG.info("Successfully downloaded file generated when exporting Schema Information. DataflowId {}. Filename {}", dataflowId, fileName);
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
       OutputStream out = response.getOutputStream();
@@ -988,6 +1081,9 @@ public class DataflowControllerImpl implements DataFlowController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
           "Trying to download a file generated during the export Schema Information process but the file is not found: dataflowId: %s, filename: %s",
           dataflowId, fileName));
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Could not download schema information for dataflowId {}. Message {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1006,14 +1102,14 @@ public class DataflowControllerImpl implements DataFlowController {
 
     try {
       dataflowService.getPublicDataflowById(dataflowId);
-      LOG.info("Downloading file Schema Information from DataflowId {}.", dataflowId);
-
+      LOG.info("Downloading file Schema Information from dataflowId {}", dataflowId);
       String composedFileName = "dataflow-" + dataflowId + "-Schema_Information";
       String fileNameWithExtension = composedFileName + "_"
           + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss")) + "."
           + FileTypeEnum.XLSX.getValue();
 
       byte[] file = dataflowHelper.downloadPublicSchemaInformation(dataflowId);
+      LOG.info("Successfully downloaded file Schema Information from dataflowId {}", dataflowId);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION,
           "attachment; filename=" + fileNameWithExtension);
@@ -1029,6 +1125,9 @@ public class DataflowControllerImpl implements DataFlowController {
           dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           "There was an error downloading the dataflow schema information.");
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Could not download public schema information for dataflowId {}. Message {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1055,10 +1154,12 @@ public class DataflowControllerImpl implements DataFlowController {
             .get(AuthenticationDetails.USER_ID);
 
     try {
+      LOG.info("Validating all reporters with userId {}", userId);
       dataflowService.validateAllReporters(userId);
     } catch (Exception e) {
       message =
           "Couldn't validate all reporters and lead reporters, an error was produced during the process.";
+      LOG.error("Unexpected error! Could not validate all reporters and lead reporters, an error was produced during the process.");
       status = HttpStatus.BAD_REQUEST;
     }
 
@@ -1083,7 +1184,7 @@ public class DataflowControllerImpl implements DataFlowController {
           automaticReportingDelete);
     } catch (Exception e) {
       LOG.error(String.format(
-          "Couldn't update the dataflow automatic delete data and snapshots with the provided dataflowId %s.",
+          "Unexpected error! Could not update the dataflow automatic delete data and snapshots with the provided dataflowId %s.",
           dataflowId), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           "Couldn't update the dataflow automatic delete data and snapshots. An unknown error happenned.");
