@@ -108,7 +108,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   boolean isProcessEnding(@Param("processId") String processId);
 
   @Query(nativeQuery = true,
-      value = "select id from task where status='IN_PROGRESS' and (extract(epoch from now() - date_start) / 60) > :timeInMinutes")
+      value = "select id from task where status='IN_PROGRESS' and (extract(epoch from now() AT TIME ZONE 'UTC' - date_start) / 60) > :timeInMinutes")
   List<BigInteger> getTasksInProgress(@Param("timeInMinutes") long timeInMinutes);
 }
 
