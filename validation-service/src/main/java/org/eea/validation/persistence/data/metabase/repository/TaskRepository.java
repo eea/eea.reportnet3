@@ -1,14 +1,15 @@
 package org.eea.validation.persistence.data.metabase.repository;
 
-import java.math.BigInteger;
-import java.util.Date;
-import java.util.List;
 import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.List;
 
 /**
  * The Interface TaskRepository.
@@ -108,7 +109,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   boolean isProcessEnding(@Param("processId") String processId);
 
   @Query(nativeQuery = true,
-      value = "select id from task where status='IN_PROGRESS' and (extract(epoch from now() AT TIME ZONE 'UTC' - date_start) / 60) > :timeInMinutes")
+      value = "select id from task where status='IN_PROGRESS' and (extract(epoch from now() AT TIME ZONE 'UTC' - date_start AT TIME ZONE 'UTC') / 60) > :timeInMinutes")
   List<BigInteger> getTasksInProgress(@Param("timeInMinutes") long timeInMinutes);
 }
 
