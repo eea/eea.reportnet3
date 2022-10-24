@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.springframework.boot</groupId>
@@ -13,20 +13,20 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.5.6</api-gateway.version>
-    <communication.version>v3.1.5.6</communication.version>
-    <collaboration.version>v3.1.5.6</collaboration.version>
-    <dataflow.version>v3.1.5.6</dataflow.version>
-    <dataset.version>v3.1.5.6</dataset.version>
-    <document.version>v3.1.5.6</document.version>
-    <frontend.version>v3.1.5.6</frontend.version>
-    <indexsearch.version>v3.1.5.6</indexsearch.version>
-    <inspire.version>v3.1.5.6</inspire.version>
-    <recordstore.version>v3.1.5.6</recordstore.version>
-    <ums.version>v3.1.5.6</ums.version>
-    <validation.version>v3.1.5.6</validation.version>
-    <common-interfaces.version>v3.1.5.6</common-interfaces.version>
-    <common-utitlities.version>v3.1.5.6</common-utitlities.version>
-    <rod.version>v3.1.5.6</rod.version>
+    <api-gateway.version>v3.1.5.7-HOTFIX</api-gateway.version>
+    <communication.version>v3.1.5.7-HOTFIX</communication.version>
+    <collaboration.version>v3.1.5.7-HOTFIX</collaboration.version>
+    <dataflow.version>v3.1.5.7-HOTFIX</dataflow.version>
+    <dataset.version>v3.1.5.7-HOTFIX</dataset.version>
+    <document.version>v3.1.5.7-HOTFIX</document.version>
+    <frontend.version>v3.1.5.7-HOTFIX</frontend.version>
+    <indexsearch.version>v3.1.5.7-HOTFIX</indexsearch.version>
+    <inspire.version>v3.1.5.7-HOTFIX</inspire.version>
+    <recordstore.version>v3.1.5.7-HOTFIX</recordstore.version>
+    <ums.version>v3.1.5.7-HOTFIX</ums.version>
+    <validation.version>v3.1.5.7-HOTFIX</validation.version>
+    <common-interfaces.version>v3.1.5.7-HOTFIX</common-interfaces.version>
+    <common-utitlities.version>v3.1.5.7-HOTFIX</common-utitlities.version>
+    <rod.version>v3.1.5.7-HOTFIX</rod.version>
   </properties>
 </project>
