@@ -2,26 +2,38 @@ package org.eea.dataset.axon.config;
 
 import org.axonframework.commandhandling.distributed.CommandRouter;
 import org.axonframework.commandhandling.distributed.RoutingStrategy;
+import org.axonframework.common.jdbc.ConnectionProvider;
+import org.axonframework.common.jdbc.PersistenceExceptionResolver;
+import org.axonframework.common.jdbc.UnitOfWorkAwareConnectionProviderWrapper;
 import org.axonframework.common.jpa.EntityManagerProvider;
 import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.config.EventProcessingConfigurer;
 import org.axonframework.eventhandling.EventBus;
 import org.axonframework.eventhandling.TrackedEventMessage;
 import org.axonframework.eventhandling.tokenstore.TokenStore;
+import org.axonframework.eventhandling.tokenstore.jdbc.JdbcTokenStore;
+import org.axonframework.eventhandling.tokenstore.jdbc.TokenSchema;
 import org.axonframework.eventhandling.tokenstore.jpa.JpaTokenStore;
 import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
 import org.axonframework.eventsourcing.eventstore.jpa.JpaEventStorageEngine;
+import org.axonframework.eventsourcing.eventstore.jpa.SQLErrorCodesResolver;
 import org.axonframework.extensions.springcloud.commandhandling.SpringCloudCommandRouter;
 import org.axonframework.extensions.springcloud.commandhandling.mode.CapabilityDiscoveryMode;
 import org.axonframework.messaging.StreamableMessageSource;
+import org.axonframework.modelling.saga.repository.SagaStore;
+import org.axonframework.modelling.saga.repository.jdbc.GenericSagaSqlSchema;
+import org.axonframework.modelling.saga.repository.jdbc.JdbcSagaStore;
+import org.axonframework.modelling.saga.repository.jdbc.SagaSqlSchema;
 import org.axonframework.modelling.saga.repository.jpa.JpaSagaStore;
 import org.axonframework.serialization.Serializer;
+import org.axonframework.spring.jdbc.SpringDataSourceConnectionProvider;
 import org.axonframework.spring.messaging.unitofwork.SpringTransactionManager;
 import org.axonframework.springboot.util.RegisterDefaultEntities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
 import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
 import org.springframework.cache.annotation.EnableCaching;
@@ -151,7 +163,6 @@ public class AxonConfig {
     }
 
     @Bean("axonPlatformTransactionManager")
-    @Qualifier("axonPlatformTransactionManager")
     public PlatformTransactionManager axonPlatformTransactionManager(@Qualifier("axonEntityManagerFactory") LocalContainerEntityManagerFactoryBean axonEntityManagerFactory) {
         JpaTransactionManager axonTransactionManager = new JpaTransactionManager();
         axonTransactionManager
@@ -159,8 +170,8 @@ public class AxonConfig {
         return axonTransactionManager;
     }
 
-    @Bean
-    public TransactionManager axonTransactionManager(PlatformTransactionManager axonPlatformTransactionManager) {
+    @Bean("axonTransactionManager")
+    public TransactionManager axonTransactionManager(@Qualifier("axonPlatformTransactionManager")PlatformTransactionManager axonPlatformTransactionManager) {
         return new SpringTransactionManager(axonPlatformTransactionManager);
     }
 
@@ -170,23 +181,60 @@ public class AxonConfig {
      * @param entityManagerFactory
      * @return
      */
-    @Bean
+    @Bean("axonEntityManagerProvider")
     public EntityManagerProvider entityManagerProvider(@Qualifier("axonEntityManagerFactory") LocalContainerEntityManagerFactoryBean entityManagerFactory) {
         return () -> entityManagerFactory.getObject().createEntityManager();
     }
 
     @Bean
-    public EventStorageEngine eventStorageEngine(EntityManagerProvider entityManagerProvider, TransactionManager axonTransactionManager) throws SQLException {
+    @Primary
+    public EventStorageEngine eventStorageEngine(@Qualifier("axonEntityManagerProvider")EntityManagerProvider entityManagerProvider, @Qualifier("axonTransactionManager")TransactionManager axonTransactionManager) throws SQLException {
         return JpaEventStorageEngine.builder().dataSource(axon()).entityManagerProvider(entityManagerProvider).transactionManager(axonTransactionManager).build();
     }
 
     @Bean
-    public TokenStore tokenStore(Serializer serializer, EntityManagerProvider entityManagerProvider) {
+    @Primary
+    public TokenStore tokenStore(Serializer serializer, @Qualifier("axonEntityManagerProvider")EntityManagerProvider entityManagerProvider) {
         return JpaTokenStore.builder()
                 .entityManagerProvider(entityManagerProvider)
                 .serializer(serializer)
                 .build();
     }
 
+    @Bean("axonConnectionProvider")
+    public ConnectionProvider axonConnectionProvider(@Qualifier("axon")DataSource dataSource) {
+        return new UnitOfWorkAwareConnectionProviderWrapper(new SpringDataSourceConnectionProvider(dataSource));
+    }
+    @Bean({"tokenStore"})
+    @Primary
+    @ConditionalOnBean({TokenSchema.class})
+    public TokenStore tokenStoreWithCustomSchema(ConnectionProvider connectionProvider, Serializer serializer, TokenSchema tokenSchema) {
+        return JdbcTokenStore.builder().connectionProvider(connectionProvider).schema(tokenSchema).serializer(serializer).build();
+    }
 
+    @Bean({"tokenStore"})
+    @Primary
+    public TokenStore tokenStoreWithDefaultSchema(@Qualifier("axonConnectionProvider")ConnectionProvider connectionProvider, Serializer serializer) {
+        return JdbcTokenStore.builder().connectionProvider(connectionProvider).schema(new TokenSchema()).serializer(serializer).build();
+    }
+
+    @Bean
+    @Primary
+    public JdbcSagaStore sagaStore(@Qualifier("axonConnectionProvider")ConnectionProvider connectionProvider, Serializer serializer) {
+        return JdbcSagaStore.builder().connectionProvider(connectionProvider).sqlSchema(new GenericSagaSqlSchema()).serializer(serializer).build();
+    }
+
+    @Bean
+    @Primary
+    @ConditionalOnBean({SagaSqlSchema.class})
+    public JdbcSagaStore sagaStore(@Qualifier("axonConnectionProvider")ConnectionProvider connectionProvider, Serializer serializer, SagaSqlSchema schema) {
+        return JdbcSagaStore.builder().connectionProvider(connectionProvider).sqlSchema(schema).serializer(serializer).build();
+    }
+
+
+    @Bean
+    @Primary
+    public PersistenceExceptionResolver persistenceExceptionResolver(@Qualifier("axon")DataSource dataSource) throws SQLException {
+        return new SQLErrorCodesResolver(dataSource);
+    }
 }
