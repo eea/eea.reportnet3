@@ -1788,8 +1788,28 @@
     "value": "JHtLRVlDTE9BS19BRE1JTl9VU0VSOnJlcG9ydG5ldF9hZG1pbn0="
   },
   {
+    "key": "config/orchestrator/feign.client.config.default.connectTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/orchestrator/feign.client.config.default.loggerLevel",
+    "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
+  },
+  {
+    "key": "config/orchestrator/feign.client.config.default.readTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
     "key": "config/orchestrator/kafka.bootstrapAddress",
     "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/orchestrator/management.endpoint.health.show-details",
+    "value": "YWx3YXlz"
+  },
+  {
+    "key": "config/orchestrator/management.endpoints.web.exposure.include",
+    "value": "Kg=="
   },
   {
     "key": "config/orchestrator/management.metrics.export.elastic.enabled",
