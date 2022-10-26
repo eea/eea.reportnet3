@@ -1662,6 +1662,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             LOG.info("File {} has been deleted", splitFile);
           } catch (Exception e) {
             LOG_ERROR.error("Error in copy field process for snapshotId {} with error {}", idSnapshot, e);
+            throw e;
           }
         }
       } else {
@@ -1709,6 +1710,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             LOG.info("Recover file {} has been deleted", splitFile);
           } catch (Exception e) {
             LOG_ERROR.error("Error in recover copy field process for snapshotId {} with error {}", idSnapshot, e);
+            throw e;
           }
         }
         break;
