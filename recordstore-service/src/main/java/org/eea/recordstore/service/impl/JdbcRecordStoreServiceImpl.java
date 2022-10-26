@@ -1661,7 +1661,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             deleteFile(Arrays.asList(splitFile));
             LOG.info("File {} has been deleted", splitFile);
           } catch (Exception e) {
-            LOG_ERROR.error("Error in copy field process for snapshotId {} with error {}", idSnapshot, e);
+            LOG_ERROR.error("Error in copy field process for snapshotId {} with error", idSnapshot, e);
             throw e;
           }
         }
@@ -1709,7 +1709,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             deleteFile(Arrays.asList(splitFile));
             LOG.info("Recover file {} has been deleted", splitFile);
           } catch (Exception e) {
-            LOG_ERROR.error("Error in recover copy field process for snapshotId {} with error {}", idSnapshot, e);
+            LOG_ERROR.error("Error in recover copy field process for snapshotId {} with error", idSnapshot, e);
             throw e;
           }
         }
@@ -1936,7 +1936,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         cp.cancelCopy();
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Error in recover copy field process for fileName {} with error {}", fileName, e);
+      LOG_ERROR.error("Error in recover copy field process for fileName {} with error", fileName, e);
       throw e;
     }
   }
@@ -1977,7 +1977,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       in.close();
     } catch (Exception e) {
-      LOG_ERROR.error("Error in file {} with error {}", inputfile,  e.getMessage());
+      LOG_ERROR.error("Error in file {} with error", inputfile,  e);
     }
 
     LOG.info("Method splitSnapFile ends for file {} ", inputfile);
@@ -2011,7 +2011,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       LOG.info("Method isSnapFileForSplitting ends for file {} with {} lines into {} files", inputfile, numberOfLines, numberOfFiles);
     } catch (Exception e) {
-      LOG_ERROR.error("Error in file {} with error {}", inputfile,  e.getMessage());
+      LOG_ERROR.error("Error in file {} with error", inputfile,  e);
     }
 
     return splitSnapfile;
