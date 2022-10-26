@@ -1916,7 +1916,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param fileName the file name
    * @param copyManager the copy manager
    */
-  private void copyFromFileRecovery(String query, String fileName, CopyManager copyManager) {
+  private void copyFromFileRecovery(String query, String fileName, CopyManager copyManager)
+      throws SQLException, IOException {
     try {
       Path path = Paths.get(fileName);
       // bufferFile it's a size in bytes defined in consul variable. It can be 65536
@@ -1936,6 +1937,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
     } catch (Exception e) {
       LOG_ERROR.error("Error in recover copy field process for fileName {} with error {}", fileName, e);
+      throw e;
     }
   }
   /**
