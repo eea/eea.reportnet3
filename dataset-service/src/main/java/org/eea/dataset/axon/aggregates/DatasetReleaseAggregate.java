@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
-@Component
 @Aggregate
 public class DatasetReleaseAggregate {
 
@@ -72,6 +71,11 @@ public class DatasetReleaseAggregate {
 //        }
         ReleaseLocksAddedEvent event = new ReleaseLocksAddedEvent();
         BeanUtils.copyProperties(command, event);
+        event.setDatasetReleaseAggregate(command.getDatasetReleaseAggregate());
+        event.setTransactionId(command.getTransactionId());
+        event.setDataflowId(command.getDataflowId());
+        event.setDataProviderId(command.getDataProviderId());
+
         apply(event);
     }
 
