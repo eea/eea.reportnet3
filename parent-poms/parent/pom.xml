@@ -13,20 +13,20 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.5.7-HOTFIX</api-gateway.version>
-    <communication.version>v3.1.5.7-HOTFIX</communication.version>
-    <collaboration.version>v3.1.5.7-HOTFIX</collaboration.version>
-    <dataflow.version>v3.1.5.7-HOTFIX</dataflow.version>
-    <dataset.version>v3.1.5.7-HOTFIX</dataset.version>
-    <document.version>v3.1.5.7-HOTFIX</document.version>
-    <frontend.version>v3.1.5.7-HOTFIX</frontend.version>
-    <indexsearch.version>v3.1.5.7-HOTFIX</indexsearch.version>
-    <inspire.version>v3.1.5.7-HOTFIX</inspire.version>
-    <recordstore.version>v3.1.5.7-HOTFIX</recordstore.version>
-    <ums.version>v3.1.5.7-HOTFIX</ums.version>
-    <validation.version>v3.1.5.7-HOTFIX</validation.version>
-    <common-interfaces.version>v3.1.5.7-HOTFIX</common-interfaces.version>
-    <common-utitlities.version>v3.1.5.7-HOTFIX</common-utitlities.version>
-    <rod.version>v3.1.5.7-HOTFIX</rod.version>
+    <api-gateway.version>v3.1.5.7</api-gateway.version>
+    <communication.version>v3.1.5.7</communication.version>
+    <collaboration.version>v3.1.5.7</collaboration.version>
+    <dataflow.version>v3.1.5.7</dataflow.version>
+    <dataset.version>v3.1.5.7</dataset.version>
+    <document.version>v3.1.5.7</document.version>
+    <frontend.version>v3.1.5.7</frontend.version>
+    <indexsearch.version>v3.1.5.7</indexsearch.version>
+    <inspire.version>v3.1.5.7</inspire.version>
+    <recordstore.version>v3.1.5.7</recordstore.version>
+    <ums.version>v3.1.5.7</ums.version>
+    <validation.version>v3.1.5.7</validation.version>
+    <common-interfaces.version>v3.1.5.7</common-interfaces.version>
+    <common-utitlities.version>v3.1.5.7</common-utitlities.version>
+    <rod.version>v3.1.5.7</rod.version>
   </properties>
 </project>
