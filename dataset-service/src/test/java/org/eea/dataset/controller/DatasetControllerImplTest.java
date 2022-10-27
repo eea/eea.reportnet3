@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -25,19 +26,17 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.ETLDatasetVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
+import org.eea.interfaces.vo.lock.LockVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.service.LockService;
+import org.eea.utils.LiteralConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -1746,6 +1745,77 @@ public class DatasetControllerImplTest {
   }
 
   @Test
+  public void checkImportProcessNoImportFileInProgressTest() {
+
+    ResponseEntity<CheckLockVO> checkLockVOResponseEntity = checkImportProcessInit(null, null);
+
+    assertEquals(Boolean.FALSE, checkLockVOResponseEntity.getBody().isImportInProgress());
+    assertEquals(LiteralConstants.NO_IMPORT_IN_PROGRESS, checkLockVOResponseEntity.getBody().getMessage());
+
+    Mockito.verify(lockService, times(2)).findByCriteria(Mockito.anyMap());
+  }
+
+  @Test
+  public void checkImportProcessImportInProgressTest() {
+
+    ResponseEntity<CheckLockVO> checkLockVOResponseEntity = checkImportProcessInit(null, new LockVO());
+
+    assertEquals(Boolean.TRUE, checkLockVOResponseEntity.getBody().isImportInProgress());
+    assertEquals(LiteralConstants.IMPORT_LOCKED, checkLockVOResponseEntity.getBody().getMessage());
+
+    Mockito.verify(lockService, times(2)).findByCriteria(Mockito.anyMap());
+  }
+
+  @Test
+  public void checkImportProcessNoImportBigFileInProgressTest() {
+
+    ResponseEntity<CheckLockVO> checkLockVOResponseEntity = checkImportProcessInit(new LockVO(), null);
+
+    assertEquals(Boolean.TRUE, checkLockVOResponseEntity.getBody().isImportInProgress());
+    assertEquals(LiteralConstants.IMPORT_LOCKED, checkLockVOResponseEntity.getBody().getMessage());
+
+    Mockito.verify(lockService, times(2)).findByCriteria(Mockito.anyMap());
+  }
+
+
+  @Test
+  public void checkImportProcessBothImportsInProgressTest() {
+
+    ResponseEntity<CheckLockVO> checkLockVOResponseEntity = checkImportProcessInit(new LockVO(), new LockVO());
+
+    assertEquals(Boolean.TRUE, checkLockVOResponseEntity.getBody().isImportInProgress());
+    assertEquals(LiteralConstants.IMPORT_LOCKED, checkLockVOResponseEntity.getBody().getMessage());
+
+    Mockito.verify(lockService, times(2)).findByCriteria(Mockito.anyMap());
+  }
+
+  private ResponseEntity<CheckLockVO> checkImportProcessInit(LockVO fileData, LockVO bigFileData) {
+    Map<String, Object> importData = new HashMap<>();
+    importData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+    importData.put(LiteralConstants.DATASETID, 1L);
+
+    Mockito.when(lockService.findByCriteria(Mockito.anyMap())).thenReturn(fileData);
+
+    importData.clear();
+    importData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+    importData.put(LiteralConstants.DATASETID, 1L);
+
+    Mockito.when(lockService.findByCriteria(importData)).thenReturn(bigFileData);
+
+    return datasetControllerImpl.checkImportProcess(1L);
+  }
+
+  @Test
+  public void checkImportProcessExceptionTest() {
+
+    Mockito.when(lockService.findByCriteria(Mockito.anyMap())).thenThrow(new RuntimeException());
+
+    ResponseEntity<CheckLockVO> checkLockVOResponseEntity = datasetControllerImpl.checkImportProcess(1L);
+
+    assertEquals(HttpStatus.NOT_FOUND, checkLockVOResponseEntity.getStatusCode());
+  }
+
+  @Test
   public void checkLocksTest() {
     Map<String, Object> lockCriteria = new HashMap<>();
     List<LockVO> results = new ArrayList<>();
@@ -1762,5 +1832,4 @@ public class DatasetControllerImplTest {
 
     Mockito.verify(lockService, times(3)).findAllByCriteria(Mockito.anyList(), Mockito.anyLong());
   }
-
 }
