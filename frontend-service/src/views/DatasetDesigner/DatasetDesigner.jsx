@@ -88,6 +88,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     QuerystringUtils.getUrlParamValue('view') !== '' ? QuerystringUtils.getUrlParamValue('view') : 'design'
   );
 
+  const [importProcessing, setImportProcessing] = useState(false);
+  const [importProcessingMessage, setImportProcessingMessage] = useState(null);
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
     arePrefilledTablesDeleted: false,
@@ -282,6 +284,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   useEffect(() => {
     getImportList();
   }, [designerState.externalOperationsList]);
+
+  useEffect(() => {
+    testImport();
+  }, [datasetId]);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -967,7 +973,28 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onUpdateSchema = schema => designerDispatch({ type: 'ON_UPDATE_SCHEMA', payload: { schema } });
 
+  const testImport = () => {
+    const timeout = ms => {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    };
+    const testImportTimer = async () => {
+      const importStatus = await DatasetService.testImportProcess(datasetId);
+
+      if (importStatus?.data && !importStatus?.data?.importInProgress) {
+        setImportProcessing(false);
+        setImportProcessingMessage(null);
+      } else {
+        setImportProcessingMessage(importStatus?.data?.message);
+        await timeout(5000);
+        testImportTimer();
+      }
+    };
+    setImportProcessing(true);
+    testImportTimer();
+  };
+
   const onUpload = async () => {
+    testImport();
     manageDialogs('isImportDatasetDialogVisible', false);
     setSelectedCustomImportIntegration({ id: null, name: null });
     try {
@@ -1589,9 +1616,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 className={`p-button-rounded p-button-secondary ${
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
-                disabled={isDataflowOpen || isDesignDatasetEditorRead}
-                icon="import"
-                label={resourcesContext.messages['importDataset']}
+                disabled={isDataflowOpen || isDesignDatasetEditorRead || importProcessing}
+                icon={importProcessing ? 'spinnerAnimate' : 'import'}
+                label={importProcessingMessage ? importProcessingMessage : resourcesContext.messages['importDataset']}
                 onClick={event => importMenuRef.current.show(event)}
               />
               <Menu
