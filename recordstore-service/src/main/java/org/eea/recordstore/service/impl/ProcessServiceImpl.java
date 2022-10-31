@@ -163,9 +163,6 @@ public class ProcessServiceImpl implements ProcessService {
         updated = false;
       }
     }
-    if(updated){
-      jobControllerZuul.updateStatusByProcessId(status.toString(), processId);
-    }
     return updated;
   }
 

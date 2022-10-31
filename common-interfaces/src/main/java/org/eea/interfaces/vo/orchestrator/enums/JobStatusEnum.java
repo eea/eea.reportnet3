@@ -2,9 +2,6 @@ package org.eea.interfaces.vo.orchestrator.enums;
 
 public enum JobStatusEnum {
 
-    /** The created. */
-    CREATED("CREATED"),
-
     /** The queued. */
     QUEUED("QUEUED"),
 
@@ -14,11 +11,14 @@ public enum JobStatusEnum {
     /** The aborted. */
     ABORTED("ABORTED"),
 
-    /** The success. */
-    SUCCESS("SUCCESS"),
+    /** The cancelled. */
+    CANCELLED("CANCELLED"),
 
-    /** The job failure. */
-    FAILURE("FAILURE");
+    /** The failed. */
+    FAILED("FAILED"),
+
+    /** The finished. */
+    FINISHED("FINISHED");
 
     /** The value. */
     private final String value;

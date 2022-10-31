@@ -16,20 +16,4 @@ public interface JobHistoryController {
     interface JobHistoryControllerZuul extends JobHistoryController {
     }
 
-    /**
-     * Retrieves the history of a job
-     *
-     * @param jobId the job id
-     * @return a list of job history entries
-     */
-    @GetMapping(value = "/{jobId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<JobHistoryVO> getJobHistory(@PathVariable("jobId") Long jobId);
-
-    /**
-     * Adds a job history entry.
-     **
-     */
-    @PostMapping("/add")
-    void addJobHistoryEntry();
-
 }

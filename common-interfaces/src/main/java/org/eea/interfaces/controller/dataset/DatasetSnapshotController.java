@@ -233,11 +233,27 @@ public interface DatasetSnapshotController {
    */
   @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
-  void createReleaseSnapshots(@PathVariable(value = "dataflowId", required = true) Long dataflowId,
+  void addReleaseSnapshotJob(@PathVariable(value = "dataflowId", required = true) Long dataflowId,
       @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,
       @RequestParam(name = "restrictFromPublic", required = true,
           defaultValue = "false") boolean restrictFromPublic,
       @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate);
+
+  /**
+   * Creates the release snapshots.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderId the data provider id
+   * @param restrictFromPublic the restrict from public
+   * @param validate the validate
+   */
+  @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release/execute",
+          produces = MediaType.APPLICATION_JSON_VALUE)
+  void createReleaseSnapshots(@PathVariable(value = "dataflowId", required = true) Long dataflowId,
+                              @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,
+                              @RequestParam(name = "restrictFromPublic", required = true,
+                                      defaultValue = "false") boolean restrictFromPublic,
+                              @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate);
 
 
   /**

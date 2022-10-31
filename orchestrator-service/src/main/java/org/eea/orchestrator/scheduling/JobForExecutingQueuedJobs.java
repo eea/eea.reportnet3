@@ -1,8 +1,6 @@
 package org.eea.orchestrator.scheduling;
 
-import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.controller.ums.UserManagementController;
-import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
@@ -24,8 +22,6 @@ import java.util.List;
 
 @Component
 public class JobForExecutingQueuedJobs {
-    @Value(value = "${scheduling.inProgress.task.max.time}")
-    private long maxTimeInMinutesForInProgressTasks;
 
     /**
      * The admin user.
@@ -56,11 +52,11 @@ public class JobForExecutingQueuedJobs {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> executeQueuedJobs(),
-                new CronTrigger("0 */5 * * * *"));
+                new CronTrigger("0 */2 * * * *"));
     }
 
     /**
-     * The job runs every 5 minutes. It finds jobs that have status=QUEUED and executes them
+     * The job runs every 2 minutes. It finds jobs that have status=QUEUED and executes them
      */
     public void executeQueuedJobs() {
         LOG.info("Running scheduled task executeQueuedJobs");
@@ -70,24 +66,30 @@ public class JobForExecutingQueuedJobs {
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(adminUser, LiteralConstants.BEARER_TOKEN + tokenVo.getAccessToken(), null);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            for (JobVO job: jobs){
-                if(!jobService.canJobBeExecuted(job)){
-                    LOG.info("Job with id {} and of type {} can not be executed right now.", job.getId(), job.getJobType().getValue());
-                    continue;
-                }
-                if(job.getJobType() == JobTypeEnum.VALIDATION){
-                    //call validation mechanism
-                    jobService.prepareAndExecuteValidationJob(job);
-                }
-                else if(job.getJobType() == JobTypeEnum.IMPORT){
-                    //call import mechanism
-                }
-                else if(job.getJobType() == JobTypeEnum.RELEASE){
-                    //call release mechanism
-                }
-                else{
-                    LOG.error("Unexpected error! Error trying to execute queued job with id {}. Job type is {}", job.getId(), job.getJobType().getValue());
-                    //maybe remove job from table?
+            for (JobVO job: jobs) {
+                try {
+                    if (!jobService.canJobBeExecuted(job)) {
+                        LOG.info("Job with id {} and of type {} can not be executed right now.", job.getId(), job.getJobType().getValue());
+                        continue;
+                    }
+                    if (job.getJobType() == JobTypeEnum.VALIDATION) {
+                        //call validation mechanism
+                        jobService.prepareAndExecuteValidationJob(job);
+                    } else if (job.getJobType() == JobTypeEnum.IMPORT) {
+                        //call import mechanism
+                    } else if (job.getJobType() == JobTypeEnum.RELEASE) {
+                        //call release mechanism
+                        jobService.prepareAndExecuteReleaseJob(job);
+                    } else if (job.getJobType() == JobTypeEnum.EXPORT) {
+                        //call export mechanism
+                    } else if (job.getJobType() == JobTypeEnum.COPY_TO_EU_DATASET) {
+                        //call COPY_TO_EU_DATASET mechanism
+                    } else {
+                        LOG.error("Error trying to execute queued job with id {}. Job type is {}", job.getId(), job.getJobType().getValue());
+                        jobService.deleteJob(job);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Unexpected error! Error while handling job with id {}. Message: {}", job.getId(), e.getMessage());
                 }
             }
         } catch (Exception e) {

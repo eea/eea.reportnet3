@@ -5,13 +5,10 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.Arrays;
 import java.util.List;
 
 public interface JobService {
-
-    void testSaveJob();
-
-    JobVO testRetrieveJob(Long id);
 
     List<JobVO> getJobsByStatus(JobStatusEnum status);
 
@@ -19,9 +16,17 @@ public interface JobService {
 
     void addValidationJob(Long datasetId, Boolean released, String creator);
 
+    void addReleaseJob(Long dataflowId, Long dataProviderId, Boolean restrictFromPublic, Boolean validate, String creator);
+
     void prepareAndExecuteValidationJob(JobVO jobVO);
 
-    void updateStatusByProcessId(String status, String processId);
+    void prepareAndExecuteReleaseJob(JobVO jobVO);
 
-    void updateJobInProgress(Long jobId, String processId);
+    void updateJobStatusByProcessId(JobStatusEnum status, String processId);
+
+    void deleteFinishedJobsBasedOnDuration(Long duration);
+
+    void updateJobStatus(Long jobId, JobStatusEnum status, String processId);
+
+    void deleteJob(JobVO jobVO);
 }

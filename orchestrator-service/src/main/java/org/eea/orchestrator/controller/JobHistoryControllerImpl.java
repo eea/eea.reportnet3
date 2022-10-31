@@ -29,25 +29,4 @@ public class JobHistoryControllerImpl implements JobHistoryController {
     @Autowired
     private JobHistoryService jobHistoryService;
 
-    @Override
-    @GetMapping("job/{id}")
-    public List<JobHistoryVO> getJobHistory(@PathVariable("id") Long jobId){
-        try{
-            return jobHistoryService.testRetrieveJobHistory(jobId);
-        } catch (Exception e){
-            LOG.error("Unexpected error! Could not save retrieve job history for jobId {}. Message: {}", jobId, e.getMessage());
-            throw e;
-        }
-    }
-
-    @PostMapping("/add")
-    public void addJobHistoryEntry(){
-        try {
-            Job job1 = new Job(null, JobTypeEnum.IMPORT, JobStatusEnum.CREATED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "testUser", null);
-            jobHistoryService.saveJobHistory(job1);
-        } catch (Exception e){
-            LOG.error("Unexpected error! Could not save job history entry. Message: {}", e.getMessage());
-            throw e;
-        }
-    }
 }

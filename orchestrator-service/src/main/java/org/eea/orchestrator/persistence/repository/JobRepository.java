@@ -7,7 +7,9 @@ import org.eea.orchestrator.persistence.domain.JobHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -32,5 +34,26 @@ public interface JobRepository extends JpaRepository<Job, Long> {
      * @return a job
      */
     Job findOneByProcessId(String processId);
+
+    /**
+     *
+     * Deletes jobs based on statuses and duration
+     * @param statuses the statuses
+     * @param duration the duration
+     */
+    @Transactional
+    @Modifying
+    @Query(nativeQuery = true,
+            value = "DELETE FROM jobs WHERE jobStatus in :statuses AND dateStatusChanged < DATEADD(MINUTE, :duration, GETDATE())")
+    void deleteJobsBasedOnStatusAndDuration(@Param("statuses") List<JobStatusEnum> statuses, @Param("duration") Long duration);
+
+    /**
+     *
+     * Retrieves number of jobs based on status
+     *
+     * @param jobStatus the job status
+     * @return the number of entries
+     */
+    Long countByJobStatus(JobStatusEnum jobStatus);
 }
 

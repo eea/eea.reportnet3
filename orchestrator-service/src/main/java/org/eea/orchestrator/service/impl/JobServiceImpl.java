@@ -1,10 +1,10 @@
 package org.eea.orchestrator.service.impl;
 
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.orchestrator.mapper.JobMapper;
 import org.eea.orchestrator.persistence.domain.Job;
 import org.eea.orchestrator.persistence.repository.JobRepository;
@@ -13,19 +13,22 @@ import org.eea.orchestrator.service.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class JobServiceImpl implements JobService {
 
     private static final Logger LOG = LoggerFactory.getLogger(JobServiceImpl.class);
+
+    @Value(value = "${scheduling.inProgress.maximum.jobs}")
+    private Long maximumNumberOfInProgressJobs;
+
+    @Autowired
+    private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
 
     @Autowired
     private ValidationControllerZuul validationControllerZuul;
@@ -40,31 +43,6 @@ public class JobServiceImpl implements JobService {
     @Autowired
     private JobHistoryService jobHistoryService;
 
-    @Transactional
-    @Override
-    public void testSaveJob(){
-        Job job1 = new Job(null, JobTypeEnum.IMPORT, JobStatusEnum.CREATED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "testUser", null);
-        jobRepository.save(job1);
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("a",1);
-        parameters.put("b","2");
-        Map<String, Object> parameters2 = new HashMap<>();
-        parameters2.put("c",3);
-        parameters2.put("d","4");
-        parameters.put("e", parameters2);
-        Job job2 = new Job(null, JobTypeEnum.VALIDATION, JobStatusEnum.IN_PROGRESS, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), parameters, "testUser2", null);
-        jobRepository.save(job2);
-    }
-
-    @Override
-    public JobVO testRetrieveJob(Long id){
-        Optional<Job> job = jobRepository.findById(id);
-        if(job.isPresent()){
-            return jobMapper.entityToClass(job.get());
-        }
-        return null;
-    }
-
     @Override
     public List<JobVO> getJobsByStatus(JobStatusEnum status){
         List<Job> jobs = jobRepository.findAllByJobStatus(status);
@@ -78,16 +56,34 @@ public class JobServiceImpl implements JobService {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("datasetId", datasetId);
         parameters.put("released", released);
-        //maybe queued should be changed to created ?
         Job validationJob = new Job(null, JobTypeEnum.VALIDATION, JobStatusEnum.QUEUED, ts, ts, parameters, creator, null);
         jobRepository.save(validationJob);
         jobHistoryService.saveJobHistory(validationJob);
+        LOG.info("Added validation job with id {} for datasetId {}", validationJob.getId(), datasetId);
+    }
+
+    @Transactional
+    @Override
+    public void addReleaseJob(Long dataflowId, Long dataProviderId, Boolean restrictFromPublic, Boolean validate, String creator){
+        Timestamp ts = new Timestamp(System.currentTimeMillis());
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("dataflowId", dataflowId);
+        parameters.put("dataProviderId", dataProviderId);
+        parameters.put("restrictFromPublic", restrictFromPublic);
+        parameters.put("validate", validate);
+        Job releaseJob = new Job(null, JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, ts, ts, parameters, creator, null);
+        jobRepository.save(releaseJob);
+        jobHistoryService.saveJobHistory(releaseJob);
+        LOG.info("Added release job with id {} for dataflowId {} and dataProviderId {}", releaseJob.getId(), dataflowId, dataProviderId);
     }
 
     @Override
     public Boolean canJobBeExecuted(JobVO job){
         // TODO implement this
-        return true;
+        if( jobRepository.countByJobStatus(JobStatusEnum.IN_PROGRESS) <= maximumNumberOfInProgressJobs ){
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -99,22 +95,23 @@ public class JobServiceImpl implements JobService {
         validationControllerZuul.validateDataSetData(datasetId, released, job.getId());
     }
 
+    @Override
+    public void prepareAndExecuteReleaseJob(JobVO jobVO){
+        Job job = jobMapper.classToEntity(jobVO);
+        Map<String, Object> parameters = job.getParameters();
+        Long dataflowId = Long.valueOf((Integer) parameters.get("dataflowId"));
+        Long dataProviderId = Long.valueOf((Integer) parameters.get("dataProviderId"));
+        Boolean restrictFromPublic = (Boolean) parameters.get("restrictFromPublic");
+        Boolean validate = (Boolean) parameters.get("validate");
+        dataSetSnapshotControllerZuul.createReleaseSnapshots(dataflowId, dataProviderId, restrictFromPublic, validate);
+    }
+
     @Transactional
     @Override
-    public void updateStatusByProcessId(String status, String processId){
-        LOG.info("When updating job status for process id {} status was {}", processId, status);
-        JobStatusEnum jobStatus;
-        if(status.equals(ProcessStatusEnum.FINISHED.toString())){
-            jobStatus = JobStatusEnum.SUCCESS;
-        }
-        else if(status.equals(ProcessStatusEnum.CANCELED.toString())){
-            jobStatus = JobStatusEnum.ABORTED;
-        }
-        else{
-            return;
-        }
+    public void updateJobStatusByProcessId(JobStatusEnum status, String processId){
+        LOG.info("When updating job status for process id {} status was {}", processId, status.getValue());
         Job job = jobRepository.findOneByProcessId(processId);
-        job.setJobStatus(jobStatus);
+        job.setJobStatus(status);
         job.setDateStatusChanged(new Timestamp(System.currentTimeMillis()));
         jobRepository.save(job);
         jobHistoryService.saveJobHistory(job);
@@ -122,12 +119,28 @@ public class JobServiceImpl implements JobService {
 
     @Transactional
     @Override
-    public void updateJobInProgress(Long jobId, String processId){
+    public void updateJobStatus(Long jobId, JobStatusEnum status, String processId){
         Job job = jobRepository.getOne(jobId);
-        job.setJobStatus(JobStatusEnum.IN_PROGRESS);
+        job.setJobStatus(status);
         job.setDateStatusChanged(new Timestamp(System.currentTimeMillis()));
-        job.setProcessId(processId);
+        if(processId != null) {
+            job.setProcessId(processId);
+        }
         jobRepository.save(job);
         jobHistoryService.saveJobHistory(job);
     }
+
+    @Transactional
+    @Override
+    public void deleteFinishedJobsBasedOnDuration(Long duration){
+        jobRepository.deleteJobsBasedOnStatusAndDuration(Arrays.asList(JobStatusEnum.FINISHED, JobStatusEnum.ABORTED, JobStatusEnum.FAILED), duration * (-1));
+    }
+
+    @Transactional
+    @Override
+    public void deleteJob(JobVO jobVO){
+        jobRepository.deleteById(jobVO.getId());
+        LOG.info("Removed job with id {} and type {}", jobVO.getId(), jobVO.getJobType().getValue());
+    }
+
 }

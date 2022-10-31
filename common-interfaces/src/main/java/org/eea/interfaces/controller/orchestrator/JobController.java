@@ -18,15 +18,6 @@ public interface JobController {
     }
 
     /**
-     * Get a job entry.
-     *
-     * @param id the job id
-     * @return a job entry
-     */
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    JobVO getJob(@PathVariable("id") Long id);
-
-    /**
      * Get jobs based on status
      *
      * @param status the job status
@@ -47,29 +38,36 @@ public interface JobController {
     void addValidationJob(@PathVariable("datasetId") Long datasetId, @PathVariable("released") Boolean released, @PathVariable("creator") String creator);
 
     /**
+     * Adds a release job
+     *
+     * @param dataflowId the id of the dataflow
+     * @param dataProviderId the dataProviderId
+     * @param restrictFromPublic the restrictFromPublic
+     * @param validate the validate
+     * @param creator the creator's username
+     * @return
+     */
+    @PostMapping("/addRelease/{dataflowId}/{dataProviderId}/{restrictFromPublic}/{validate}/{creator}")
+    void addReleaseJob(@PathVariable("dataflowId") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId, @PathVariable("restrictFromPublic") Boolean restrictFromPublic,
+                              @PathVariable("validate") Boolean validate, @PathVariable("creator") String creator);
+
+    /**
      * Update status by process id
      *
      * @param processId the process id
      * @return
      */
     @PostMapping(value = "/updateStatus/{status}/{processId}")
-    void updateStatusByProcessId(@PathVariable("status") String status, @PathVariable("processId") String processId);
+    void updateStatusByProcessId(@PathVariable("status") JobStatusEnum status, @PathVariable("processId") String processId);
 
     /**
-     * Update job to in progress
+     * Update job's status
      *
      * @param jobId the job id
+     * @param status the job's status
      * @param processId the process id
      * @return
      */
-    @PostMapping(value = "/updateJobInProgress/{id}/{processId}")
-    void updateJobInProgress(@PathVariable("id") Long jobId, @PathVariable("processId") String processId);
-
-    /**
-     * Adds a job.
-     **
-     */
-    @PostMapping("/add")
-    void addJob();
-
+    @PostMapping(value = "/updateJobStatus/{id}/{status}/{processId}")
+    void updateJobStatus(@PathVariable("id") Long jobId, @PathVariable("status") JobStatusEnum status, @PathVariable("processId") String processId);
 }

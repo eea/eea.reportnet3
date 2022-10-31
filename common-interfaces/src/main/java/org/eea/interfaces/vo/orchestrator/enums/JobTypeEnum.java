@@ -9,7 +9,13 @@ public enum JobTypeEnum {
     VALIDATION("VALIDATION"),
 
     /** The release type. */
-    RELEASE("RELEASE");
+    RELEASE("RELEASE"),
+
+    /** The export type. */
+    EXPORT("EXPORT"),
+
+    /** The copy to eu dataset type. */
+    COPY_TO_EU_DATASET("COPY_TO_EU_DATASET");
 
     /** The value. */
     private final String value;

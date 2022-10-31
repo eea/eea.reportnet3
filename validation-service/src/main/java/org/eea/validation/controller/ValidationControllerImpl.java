@@ -21,6 +21,7 @@ import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
@@ -149,10 +150,10 @@ public class ValidationControllerImpl implements ValidationController {
    * @return
    */
   @Override
-  @PutMapping(value = "/v2/dataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/dataset/{id}/execute", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')  OR hasAnyRole('ADMIN')")
   @LockMethod(removeWhenFinish = false)
-  @ApiOperation(value = "Exeuctes a job that validates dataset data for a given dataset id", hidden = true)
+  @ApiOperation(value = "Executes a job that validates dataset data for a given dataset id", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
   public void validateDataSetData(
       @LockCriteria(name = "datasetId") @ApiParam(
@@ -197,8 +198,9 @@ public class ValidationControllerImpl implements ValidationController {
       }
     }
     try {
+      //TODO change this
       if(jobId != null){
-        jobControllerZuul.updateJobInProgress(jobId, uuid);
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS, uuid);
       }
       LOG.info("Executing validation for datasetId {}", datasetId);
       validationHelper.executeValidation(datasetId, uuid, released, true);
