@@ -345,7 +345,6 @@ public class DatasetReleaseAggregate {
                 Optional<Snapshot> snapshot = snapshotRepository.findById(snapshotId);
                 if (snapshot.isPresent()) {
                     Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now());
-//                   Date dateFormatted = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateRelease);
                     snapshot.get().setDateReleased(dateRelease);
                     snapshotRepository.save(snapshot.get());
                     datasetDateRelease.put(datasetId, dateRelease);
