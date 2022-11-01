@@ -93,6 +93,12 @@ public class EEAProcess {
   @Version
   private int version;
 
+  @Column(name = "saga_transaction_id")
+  private String sagaTransactionId;
+
+  @Column(name = "aggregate_id")
+  private String aggregateId;
+
   /**
    * Equals.
    *

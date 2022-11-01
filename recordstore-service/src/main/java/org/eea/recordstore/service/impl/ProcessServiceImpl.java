@@ -1,9 +1,6 @@
 package org.eea.recordstore.service.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import javax.transaction.Transactional;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
@@ -23,7 +20,11 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
-import com.fasterxml.jackson.core.JsonProcessingException;
+
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 
@@ -224,4 +225,8 @@ public class ProcessServiceImpl implements ProcessService {
         processToUpdate.getDataflowId(), dataset.getDataProviderId(), dataset.getId()));
   }
 
+  @Override
+  public void insertSagaTransactionIdAndAggregateId(String sagaTransactionId, String valReleaseAggregateId, String processId) {
+      processRepository.insertSagaTransactionIdAndAggregateId(sagaTransactionId, valReleaseAggregateId, processId);
+  }
 }

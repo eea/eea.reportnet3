@@ -52,4 +52,10 @@ public class ProcessVO {
   /** The process id. */
   private String processId;
 
+  /** the sagaTransactionId*/
+  private String sagaTransactionId;
+
+  /** the aggregateId*/
+  private String aggregateId;
+
 }

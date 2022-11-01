@@ -7,7 +7,6 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.data.domain.Pageable;
 
 
-
 /**
  * The Interface ProcessService.
  */
@@ -75,4 +74,12 @@ public interface ProcessService {
    * @return the process VO
    */
   ProcessVO findNextProcess(String processId);
+
+  /**
+   * Inserts sagaTransactionId and valReleaseAggregateId
+   * @param sagaTransactionId
+   * @param valReleaseAggregateId
+   */
+  void insertSagaTransactionIdAndAggregateId(String sagaTransactionId, String valReleaseAggregateId, String processId);
+
 }

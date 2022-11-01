@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -34,14 +32,12 @@ public class OrchestratorControllerImpl implements OrchestratorController {
     public void release(Long dataflowId, Long dataProviderId, boolean restrictFromPublic, boolean validate) {
        try {
            restrictFromPublic = true;
-           validate = false;
+           validate = true;
            System.out.println("---------------GOT REQUEST FOR DATAFLOW ID---------------------------" + dataflowId);
            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-           CreateReleaseStartNotificationCommand command = CreateReleaseStartNotificationCommand.builder().transactionId(UUID.randomUUID().toString()).aggregate(UUID.randomUUID().toString())
+           CreateReleaseStartNotificationCommand command = CreateReleaseStartNotificationCommand.builder().transactionId(UUID.randomUUID().toString()).releaseAggregateId(UUID.randomUUID().toString())
                    .dataflowId(dataflowId).dataProviderId(dataProviderId).restrictFromPublic(restrictFromPublic)
                    .validate(validate).build();
-           Map<String, String> map = new HashMap<>();
-           map.put("auth", authentication.getName());
            commandGateway.send(GenericCommandMessage.asCommandMessage(command).withMetaData(MetaData.with("auth", authentication)));
        } catch (Exception e) {
            System.out.println("------------------EXCEPTION------------------------------");

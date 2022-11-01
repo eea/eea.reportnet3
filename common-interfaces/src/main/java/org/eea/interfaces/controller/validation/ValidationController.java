@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.validation;
 
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -125,4 +126,12 @@ public interface ValidationController {
    */
   @GetMapping(value = "/listTasksInProgress/{timeInMinutes}")
   List<BigInteger> listTasksInProgress(@PathVariable("timeInMinutes") long timeInMinutes);
+
+  /**
+   *
+   * @param dataflowId
+   * @return
+   */
+  @GetMapping(value = "/getPriority/{dataflowId}")
+  int getPriority(@PathVariable("dataflowId") Long dataflowId);
 }

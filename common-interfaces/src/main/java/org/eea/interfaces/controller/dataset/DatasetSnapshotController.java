@@ -284,5 +284,5 @@ public interface DatasetSnapshotController {
    * @return
    */
   @GetMapping("/findDataCollection/{snapshotId}")
-  Long findDataCollectionIdByIdSnapshotId(@PathVariable("snapshotId") Long snapshotId);
+  Long findDataCollectionIdBySnapshotId(@PathVariable("snapshotId") Long snapshotId);
 }

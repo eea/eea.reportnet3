@@ -3,19 +3,6 @@ server:
 spring:
   application:
     name: orchestrator
-#  jpa:
-#    hibernate:
-#      ddl-auto: update
-#    properties:
-#      hibernate:
-#        jdbc:
-#          lob:
-#            non_contextual_creation: false
-#    database-platform: org.hibernate.dialect.PostgreSQLDialect
-#    database-platform: fully.qualified.classname.NoToastPostgresSQLDialect
-
-#  autoconfigure:
-#    exclude: org.axonframework.springboot.autoconfig.JpaAutoConfiguration, org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration, org.axonframework.springboot.autoconfig.JpaEventStoreAutoConfiguration, org.axonframework.springboot.autoconfig.TransactionAutoConfiguration
 axon:
   distributed:
     enabled: true

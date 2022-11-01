@@ -1,27 +1,10 @@
 package org.eea.validation.configuration;
 
-import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.ISOLATION_LEVEL_CONFIG;
-
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.axonframework.eventhandling.tokenstore.TokenStore;
-import org.axonframework.eventsourcing.eventstore.EmbeddedEventStore;
-import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
-import org.axonframework.eventsourcing.eventstore.EventStore;
-import org.axonframework.extensions.mongo.DefaultMongoTemplate;
-import org.axonframework.extensions.mongo.MongoTemplate;
-import org.axonframework.extensions.mongo.eventsourcing.eventstore.MongoEventStorageEngine;
-import org.axonframework.extensions.mongo.eventsourcing.tokenstore.MongoTokenStore;
-import org.axonframework.serialization.Serializer;
-import org.axonframework.serialization.json.JacksonSerializer;
-import org.axonframework.spring.config.AxonConfiguration;
 import org.eea.kafka.domain.EEAEventVO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +19,13 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.ISOLATION_LEVEL_CONFIG;
 
 /**
  * The Class ValidationConfiguration.
@@ -148,37 +138,5 @@ public class ValidationRulesConfiguration extends AbstractMongoConfiguration {
         new ConcurrentKafkaListenerContainerFactory<>();
     factory.setConsumerFactory(broadcastConsumerFactory());
     return factory;
-  }
-
-  @Bean
-  public MongoTemplate axonMongoTemplate() {
-    return DefaultMongoTemplate.builder()
-            .mongoDatabase(mongoClient(), "axon_validation")
-            .build();
-  }
-
-  @Bean
-  public TokenStore tokenStore(Serializer serializer) {
-    return MongoTokenStore.builder()
-            .mongoTemplate(axonMongoTemplate())
-            .serializer(serializer)
-            .build();
-  }
-
-  @Bean
-  public EventStorageEngine storageEngine(MongoClient client) {
-    return MongoEventStorageEngine.builder()
-            .mongoTemplate(DefaultMongoTemplate.builder()
-                    .mongoDatabase(client)
-                    .build()).eventSerializer(JacksonSerializer.defaultSerializer()).snapshotSerializer(JacksonSerializer.defaultSerializer())
-            .build();
-  }
-
-  @Bean
-  public EmbeddedEventStore eventStore(EventStorageEngine storageEngine, AxonConfiguration configuration) {
-    return EmbeddedEventStore.builder()
-            .storageEngine(storageEngine)
-            .messageMonitor(configuration.messageMonitor(EventStore.class, "eventStore"))
-            .build();
   }
 }

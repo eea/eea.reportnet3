@@ -124,7 +124,7 @@ public class ValidationControllerImpl implements ValidationController {
     }
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     String uuid = UUID.randomUUID().toString();
-    int priority = validationHelper.getPriority(dataset);
+    int priority = validationHelper.getPriority(dataset.getDataflowId());
     if (!released) {
       processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
           ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, uuid,
@@ -409,5 +409,12 @@ public class ValidationControllerImpl implements ValidationController {
       LOG.error("Finding in progress tasks that exceed " + timeInMinutes + " minutes");
       return null;
     }
+  }
+
+  @Override
+  @GetMapping(value = "/getPriority/{dataflowId}")
+  @ApiOperation(value = "Finds priority of the dataflow", hidden = true)
+  public int getPriority(@ApiParam(value = "The dataflowId", example = "15") @PathVariable("dataflowId") Long dataflowId) {
+     return validationHelper.getPriority(dataflowId);
   }
 }

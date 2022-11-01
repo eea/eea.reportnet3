@@ -1,9 +1,13 @@
 package org.eea.recordstore.persistence.repository;
 
 import org.eea.recordstore.persistence.domain.EEAProcess;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
 
 /**
  * The Interface ProcessRepository.
@@ -52,4 +56,17 @@ public interface ProcessRepository
       value = "select p.* from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.status='IN_QUEUE' and d.id <> :datasetId limit 1")
   EEAProcess findNextProcess(@Param("dataflowId") Long dataflowId,
       @Param("dataProviderId") Long dataProviderId, @Param("datasetId") Long datasetId);
+
+  /**
+   *
+   * @param sagaTransactionId
+   * @param aggregateId
+   * @param processId
+   */
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true,
+          value = "update process set saga_transaction_id=:sagaTransactionId , aggregate_id=:aggregateId where process_id=:processId ")
+  void insertSagaTransactionIdAndAggregateId(@Param("sagaTransactionId") String sagaTransactionId, @Param("aggregateId") String aggregateId, @Param("processId") String processId);
+
 }

@@ -994,7 +994,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   @Override
-  public void createDataSnapshotForRelease(Long idDataset, Long idSnapshot, Long idPartitionDataset, boolean prefillingReference) {
+  public void createDataSnapshotForRelease(Long idDataset, Long idSnapshot, Long idPartitionDataset, boolean prefillingReference) throws InterruptedException, SQLException, IOException {
     ConnectionDataVO connectionDataVO =
             getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idDataset);
     try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
@@ -1002,7 +1002,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       DatasetTypeEnum typeDataset = datasetControllerZuul.getDatasetType(idDataset);
       createSnapshot(idDataset,idSnapshot,idPartitionDataset,prefillingReference,typeDataset, con);
     } catch (Exception e) {
-
+      LOG.error("Error while creating snapshot file for release for dataset {} and snapshot {}, {}", idDataset, idSnapshot, e.getMessage());
+      throw e;
     }
   }
 

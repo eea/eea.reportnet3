@@ -344,7 +344,7 @@ public interface UserManagementController {
    * @return the user roles by dataflow
    */
   @GetMapping("/userRoles/dataflow/{dataflowId}")
-  List<UserRoleVO> getUserRolesByDataflow(Long dataflowId);
+  List<UserRoleVO> getUserRolesByDataflow(@PathVariable("dataflowId") Long dataflowId);
 
 
   /**

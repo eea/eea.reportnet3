@@ -5,10 +5,18 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
+import org.axonframework.commandhandling.GenericCommandMessage;
 import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.eventhandling.DomainEventMessage;
+import org.axonframework.eventsourcing.eventstore.DomainEventStream;
+import org.axonframework.eventsourcing.eventstore.EmbeddedEventStore;
+import org.axonframework.messaging.MetaData;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
+import org.eea.axon.release.commands.CancelReleaseBecauseOfFailedValidationCommand;
 import org.eea.axon.release.commands.CreateSnapshotRecordRorReleaseInMetabaseCommand;
+import org.eea.axon.release.events.ValidationProcessForReleaseCreatedEvent;
+import org.eea.axon.release.events.ValidationTasksForReleaseCreatedEvent;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -20,7 +28,6 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -175,6 +182,9 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private CommandGateway commandGateway;
 
+  @Autowired
+  private EmbeddedEventStore embeddedEventStore;
+
   /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
 
@@ -308,6 +318,22 @@ public class ValidationHelper implements DisposableBean {
                 dataset.getDataflowId(), dataset.getDatasetSchema())));
         values.put("processId", processId);
         kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
+        ProcessVO process = processControllerZuul.findById(processId);
+        if (process.isReleased()) {
+          DomainEventStream events = embeddedEventStore.readEvents(process.getAggregateId());
+          Optional<? extends DomainEventMessage<?>> domainEventMessage = events.asStream().findFirst();
+          if (domainEventMessage.isPresent()) {
+            MetaData metadata = domainEventMessage.get().getMetaData();
+            ValidationTasksForReleaseCreatedEvent event = (ValidationTasksForReleaseCreatedEvent) domainEventMessage.get().getPayload();
+            CancelReleaseBecauseOfFailedValidationCommand createReleaseSnapshotCommand = CancelReleaseBecauseOfFailedValidationCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
+                    .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).restrictFromPublic(event.isRestrictFromPublic()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).datasetIds(event.getDatasetIds())
+                    .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId())
+                    .validationReleaseAggregateId(event.getValidationReleaseAggregateId()).build();
+
+            commandGateway.send(GenericCommandMessage.asCommandMessage(createReleaseSnapshotCommand).withMetaData(metadata));
+          }
+        }
+
       }
     }
     dataset = null;
@@ -316,12 +342,12 @@ public class ValidationHelper implements DisposableBean {
   /**
    * Gets the priority.
    *
-   * @param dataset the dataset
+   * @param dataflowId
    * @return the priority
    */
-  public int getPriority(DataSetMetabaseVO dataset) {
+  public int getPriority(Long dataflowId) {
     int priority = 0;
-    DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
+    DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataflowId);
     dataflow.getDeadlineDate();
 
     if (dataflow.getDeadlineDate() == null || TypeStatusEnum.DESIGN.equals(dataflow.getStatus())
@@ -353,7 +379,7 @@ public class ValidationHelper implements DisposableBean {
    * @param datasetSchemaId the dataset schema id
    * @return the sets the
    */
-  private Set<Long> updateMaterializedViewsOfReferenceDatasetsInSQL(Long datasetId, Long dataflowId,
+  public Set<Long> updateMaterializedViewsOfReferenceDatasetsInSQL(Long datasetId, Long dataflowId,
       String datasetSchemaId) {
     List<Rule> rules = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
     Set<Long> datasetsToRefresh = new HashSet<>();
@@ -450,10 +476,8 @@ public class ValidationHelper implements DisposableBean {
 
   /**
    * Execute validation process.
-   *
-   * @param datasetId the dataset id
-   * @param processId the process id
-   * @param released the released
+   * @param dataset
+   * @param processId
    */
   public void executeValidationProcess(final DataSetMetabaseVO dataset, String processId) {
     // Initialize process as coordinator
@@ -1116,14 +1140,21 @@ public class ValidationHelper implements DisposableBean {
                 executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
                     false);
               } else if (processControllerZuul.isProcessFinished(processId)) {
-                DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-                List<Long> datasetIds = dataSetControllerZuul.findDatasetIdsByDataflowId(dataset.getDataflowId(), dataset.getDataProviderId());
-                CreateSnapshotRecordRorReleaseInMetabaseCommand createReleaseSnapshotCommand = CreateSnapshotRecordRorReleaseInMetabaseCommand.builder().aggregate(UUID.randomUUID().toString()).id(UUID.randomUUID().toString())
-                        .dataflowId(dataset.getDataflowId()).dataProviderId(dataset.getDataProviderId()).datasetIds(datasetIds).build();
-                commandGateway.send(createReleaseSnapshotCommand);
+                ProcessVO processVO = processControllerZuul.findById(processId);
 
-//                kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
-//                    value);
+                DomainEventStream events = embeddedEventStore.readEvents(processVO.getAggregateId());
+                Optional<? extends DomainEventMessage<?>> domainEventMessage = events.asStream().findFirst();
+                if (domainEventMessage.isPresent()) {
+                  MetaData metadata = domainEventMessage.get().getMetaData();
+                  ValidationProcessForReleaseCreatedEvent event = (ValidationProcessForReleaseCreatedEvent) domainEventMessage.get().getPayload();
+                  CreateSnapshotRecordRorReleaseInMetabaseCommand createReleaseSnapshotCommand = CreateSnapshotRecordRorReleaseInMetabaseCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
+                          .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).restrictFromPublic(event.isRestrictFromPublic()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).datasetIds(event.getDatasetIds())
+                          .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
+
+                  commandGateway.send(GenericCommandMessage.asCommandMessage(createReleaseSnapshotCommand).withMetaData(metadata));
+                } else {
+                  kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
+                }
               }
 
             } else {

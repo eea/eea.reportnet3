@@ -11,7 +11,13 @@ import java.util.List;
 @Setter
 public class RepresentativeVisibilityUpdatedEvent {
 
-    private String aggregate;
+    private String dataflowReleaseAggregateId;
+    private String datasetReleaseAggregateId;
+    private String releaseAggregateId;
+    private String communicationReleaseAggregateId;
+    private String validationReleaseAggregateId;
+    private String collaborationReleaseAggregateId;
+    private String recordStoreReleaseAggregateId;
     private String transactionId;
     private Long dataProviderId;
     private Long dataflowId;

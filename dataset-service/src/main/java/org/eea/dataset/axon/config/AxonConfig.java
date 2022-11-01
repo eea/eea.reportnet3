@@ -1,8 +1,15 @@
 package org.eea.dataset.axon.config;
 
+import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.distributed.CommandRouter;
 import org.axonframework.commandhandling.distributed.RoutingStrategy;
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
+import org.axonframework.commandhandling.gateway.ExponentialBackOffIntervalRetryScheduler;
+import org.axonframework.commandhandling.gateway.RetryScheduler;
+import org.axonframework.common.jdbc.ConnectionProvider;
 import org.axonframework.common.jdbc.PersistenceExceptionResolver;
+import org.axonframework.common.jdbc.UnitOfWorkAwareConnectionProviderWrapper;
 import org.axonframework.common.jpa.EntityManagerProvider;
 import org.axonframework.common.transaction.TransactionManager;
 import org.axonframework.eventhandling.tokenstore.TokenStore;
@@ -16,7 +23,7 @@ import org.axonframework.extensions.springcloud.commandhandling.SpringCloudComma
 import org.axonframework.extensions.springcloud.commandhandling.mode.CapabilityDiscoveryMode;
 import org.axonframework.modelling.saga.repository.jpa.JpaSagaStore;
 import org.axonframework.serialization.Serializer;
-import org.axonframework.serialization.json.JacksonSerializer;
+import org.axonframework.spring.jdbc.SpringDataSourceConnectionProvider;
 import org.axonframework.spring.messaging.unitofwork.SpringTransactionManager;
 import org.axonframework.springboot.util.RegisterDefaultEntities;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -40,6 +47,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Predicate;
 
 
@@ -55,24 +64,32 @@ import java.util.function.Predicate;
 public class AxonConfig {
 
     /** The url. */
+    @Value("${spring.datasource.axon.url}")
     private String url;
 
     /** The username. */
-    @Value("${spring.datasource.metasource.username}")
+    @Value("${spring.datasource.axon.username}")
     private String username;
 
     /** The password. */
-    @Value("${spring.datasource.metasource.password}")
+    @Value("${spring.datasource.axon.password}")
     private String password;
 
     /** The driver. */
-    @Value("${spring.datasource.metasource.driver-class-name}")
+    @Value("${spring.datasource.axon.driver-class-name}")
     private String driver;
 
     private Predicate<ServiceInstance> serviceInstanceFilter = (serviceInstance) -> {
         //TODO replace hardoded IP
-        return  serviceInstance.getHost().equals("192.168.1.4");
+        return  serviceInstance.getHost().equals("serviceIp");
     };
+
+    @Bean
+    public CommandGateway commandGateway(CommandBus commandBus) {
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+        RetryScheduler retryScheduler = ExponentialBackOffIntervalRetryScheduler.builder().retryExecutor(scheduledExecutorService).maxRetryCount(1).backoffFactor(1000).build();
+        return DefaultCommandGateway.builder().commandBus(commandBus).retryScheduler(retryScheduler).build();
+    }
 
     @Bean("springCloudCommandRouter")
     public CommandRouter springCloudCommandRouter(DiscoveryClient discoveryClient, Registration localServiceInstance, RoutingStrategy routingStrategy, CapabilityDiscoveryMode capabilityDiscoveryMode, Serializer serializer) {
@@ -84,14 +101,13 @@ public class AxonConfig {
     public DataSource axon() {
         DriverManagerDataSource metaDataSource = new DriverManagerDataSource();
         metaDataSource.setDriverClassName(driver);
-        metaDataSource.setUrl("jdbc:postgresql://localhost/axon");
+        metaDataSource.setUrl(url);
         metaDataSource.setUsername(username);
         metaDataSource.setPassword(password);
         return metaDataSource;
     }
 
     @Bean(name = "axonEntityManagerFactory")
-    @Qualifier("axonEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean axonEntityManagerFactory(@Qualifier("axon") DataSource axon) {
         final LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(axon);
@@ -103,6 +119,7 @@ public class AxonConfig {
         final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
         em.setJpaProperties(jpaProperties());
+//        em.setMappingResources("/orm.xml");
         em.setPersistenceUnitName("eventStorePersistenceUnit");
         return em;
     }
@@ -117,7 +134,6 @@ public class AxonConfig {
     }
 
     @Bean(name="axonPlatformTransactionManager")
-    @Qualifier("axonPlatformTransactionManager")
     public PlatformTransactionManager axonPlatformTransactionManager(@Qualifier("axonEntityManagerFactory") LocalContainerEntityManagerFactoryBean axonEntityManagerFactory) {
         JpaTransactionManager axonTransactionManager = new JpaTransactionManager();
         axonTransactionManager
@@ -126,9 +142,13 @@ public class AxonConfig {
     }
 
     @Bean(name="axonTransactionManager")
-    @Qualifier(("axonTransactionManager"))
     public TransactionManager axonTransactionManager(@Qualifier("axonPlatformTransactionManager")PlatformTransactionManager axonPlatformTransactionManager) {
         return new SpringTransactionManager(axonPlatformTransactionManager);
+    }
+
+    @Bean("axonConnectionProvider")
+    public ConnectionProvider axonConnectionProvider(@Qualifier("axon")DataSource dataSource) {
+        return new UnitOfWorkAwareConnectionProviderWrapper(new SpringDataSourceConnectionProvider(dataSource));
     }
 
     /**
@@ -145,8 +165,8 @@ public class AxonConfig {
 
     @Primary
     @Bean(name="eventStorageEngine")
-    public EventStorageEngine eventStorageEngine(Serializer defaultSerializer,@Qualifier("persistenceExceptionResolver") PersistenceExceptionResolver persistenceExceptionResolver, @Qualifier("eventSerializer") Serializer eventSerializer, org.axonframework.config.Configuration configuration, @Qualifier("axonEntityManagerProvider")EntityManagerProvider entityManagerProvider, @Qualifier("axonTransactionManager")TransactionManager transactionManager) {
-        return JpaEventStorageEngine.builder().eventSerializer(JacksonSerializer.defaultSerializer()).snapshotSerializer(JacksonSerializer.defaultSerializer()).upcasterChain(configuration.upcasterChain()).persistenceExceptionResolver(persistenceExceptionResolver).eventSerializer(eventSerializer).snapshotFilter(configuration.snapshotFilter()).entityManagerProvider(entityManagerProvider).transactionManager(transactionManager).build();
+    public EventStorageEngine eventStorageEngine(Serializer serializer,@Qualifier("persistenceExceptionResolver") PersistenceExceptionResolver persistenceExceptionResolver, org.axonframework.config.Configuration configuration, @Qualifier("axonEntityManagerProvider")EntityManagerProvider entityManagerProvider, @Qualifier("axonTransactionManager")TransactionManager transactionManager) {
+        return JpaEventStorageEngine.builder().snapshotSerializer(serializer).upcasterChain(configuration.upcasterChain()).persistenceExceptionResolver(persistenceExceptionResolver).eventSerializer(serializer).snapshotFilter(configuration.snapshotFilter()).entityManagerProvider(entityManagerProvider).transactionManager(transactionManager).build();
     }
 
     @Bean

@@ -14,12 +14,18 @@ import java.util.Map;
 @Setter
 public class SendUserNotificationForReleaseStartedCommand   {
     @TargetAggregateIdentifier
-    private  String commReleaseAggregate;
-    private  String transactionId;
-    private  Long dataflowId;
-    private  Long dataProviderId;
-    private  boolean restrictFromPublic;
-    private  boolean validate;
+    private String communicationReleaseAggregateId;
+    private String datasetReleaseAggregateId;
+    private String releaseAggregateId;
+    private String dataflowReleaseAggregateId;
+    private String validationReleaseAggregateId;
+    private String collaborationReleaseAggregateId;
+    private String recordStoreReleaseAggregateId;
+    private String transactionId;
+    private Long dataflowId;
+    private Long dataProviderId;
+    private boolean restrictFromPublic;
+    private boolean validate;
 
 
 }

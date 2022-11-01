@@ -1,8 +1,6 @@
 package org.eea.dataset.service.helper;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.transaction.Transactional;
+import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
@@ -25,6 +23,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import javax.transaction.Transactional;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The Class FileTreatmentHelper.
@@ -203,7 +205,11 @@ public class DeleteHelper {
   public void deleteRecordValuesByProvider(Long datasetId, String providerCode) {
     LOG.info("Deleting data with providerCode: {} ", providerCode);
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    recordRepository.deleteByDataProviderCode(providerCode);
+    RecordValue recordValue = recordRepository.findFirstByDataProviderCode(providerCode);
+    if (recordValue!=null) {
+      LOG.info("Deleting data with providerCode: {} ", providerCode);
+      recordRepository.deleteByDataProviderCode(providerCode);
+    }
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport

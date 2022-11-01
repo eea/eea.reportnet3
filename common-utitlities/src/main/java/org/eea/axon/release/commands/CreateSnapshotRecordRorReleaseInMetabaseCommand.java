@@ -15,11 +15,17 @@ import java.util.List;
 public class CreateSnapshotRecordRorReleaseInMetabaseCommand {
 
     @TargetAggregateIdentifier
-    private String aggregate;
-    private final String transactionId;
-    private final Long dataflowId;
-    private final Long dataProviderId;
-    private final boolean restrictFromPublic;
-    private final boolean validate;
+    private String datasetReleaseAggregateId;
+    private String releaseAggregateId;
+    private String communicationReleaseAggregateId;
+    private String dataflowReleaseAggregateId;
+    private String validationReleaseAggregateId;
+    private String collaborationReleaseAggregateId;
+    private String recordStoreReleaseAggregateId;
+    private String transactionId;
+    private Long dataflowId;
+    private Long dataProviderId;
+    private boolean restrictFromPublic;
+    private boolean validate;
     private List<Long> datasetIds;
 }

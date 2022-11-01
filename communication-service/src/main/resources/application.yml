@@ -3,11 +3,6 @@ server:
 spring:
   application:
     name: communication
-#  autoconfigure:
-#    exclude: org.axonframework.springboot.autoconfig.JpaAutoConfiguration, org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration, org.axonframework.springboot.autoconfig.JpaEventStoreAutoConfiguration, org.axonframework.springboot.autoconfig.TransactionAutoConfiguration
-#  jpa:
-#    hibernate:
-#      ddl-auto: update
 axon:
   distributed:
     enabled: true

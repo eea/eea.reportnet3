@@ -11,7 +11,13 @@ import java.util.List;
 @Setter
 public class ReleaseLocksAddedEvent {
 
-   private String datasetReleaseAggregate;
+   private String datasetReleaseAggregateId;
+   private String releaseAggregateId;
+   private String communicationReleaseAggregateId;
+   private String dataflowReleaseAggregateId;
+   private String validationReleaseAggregateId;
+   private String collaborationReleaseAggregateId;
+   private String recordStoreReleaseAggregateId;
    private String transactionId;
    private Long dataflowId;
    private Long dataProviderId;

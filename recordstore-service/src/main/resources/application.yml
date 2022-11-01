@@ -3,8 +3,6 @@ server:
 spring:
   application:
     name: recordstore
-#  autoconfigure:
-#    exclude: org.axonframework.springboot.autoconfig.JpaAutoConfiguration, org.axonframework.springboot.autoconfig.JdbcAutoConfiguration, org.axonframework.springboot.autoconfig.JpaEventStoreAutoConfiguration
 axon:
   distributed:
     enabled: true

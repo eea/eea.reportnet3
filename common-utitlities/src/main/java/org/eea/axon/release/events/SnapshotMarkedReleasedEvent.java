@@ -2,7 +2,9 @@ package org.eea.axon.release.events;
 
 import lombok.*;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -11,11 +13,20 @@ import java.util.List;
 @Setter
 public class SnapshotMarkedReleasedEvent {
 
-    private String aggregate;
+    private String datasetReleaseAggregateId;
+    private String releaseAggregateId;
+    private String communicationReleaseAggregateId;
+    private String dataflowReleaseAggregateId;
+    private String validationReleaseAggregateId;
+    private String collaborationReleaseAggregateId;
+    private String recordStoreReleaseAggregateId;
     private String transactionId;
     private Long dataProviderId;
     private Long dataflowId;
     private boolean restrictFromPublic;
     private boolean validate;
     private List<Long> datasetIds;
+    private Map<Long, Long> datasetSnapshots;
+    private Map<Long, Date> datasetDateRelease;
+    private Map<Long, Long> datasetDataCollection;
 }

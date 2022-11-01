@@ -8,7 +8,13 @@ import lombok.*;
 @Getter
 @Setter
 public class UserNotifationForReleaseSentEvent {
-    private String commReleaseAggregate;
+    private String communicationReleaseAggregateId;
+    private String datasetReleaseAggregateId;
+    private String releaseAggregateId;
+    private String dataflowReleaseAggregateId;
+    private String validationReleaseAggregateId;
+    private String collaborationReleaseAggregateId;
+    private String recordStoreReleaseAggregateId;
     private String transactionId;
     private Long dataProviderId;
     private Long dataflowId;

@@ -55,7 +55,6 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
-import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -525,16 +524,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
   @Override
-  public void deleteProvider(@DatasetId Long idDataset, Long providerId) {
+  public void deleteProvider(Long dataCollectionId, Long providerId) {
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
-    DataSetMetabase dataset = metabaseRepository.findById(idDataset).orElse(null);
-    Optional<DataCollection> dataCollection =
-            dataCollectionRepository.findFirstByDatasetSchema(dataset.getDatasetSchema());
-    Long idDataCollection = dataCollection.isPresent() ? dataCollection.get().getId() : null;
-    if (provider != null && idDataCollection != null) {
+    if (provider != null && dataCollectionId != null) {
       TenantResolver
-              .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataCollection));
-      deleteHelper.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
+              .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, dataCollectionId));
+      deleteHelper.deleteRecordValuesByProvider(dataCollectionId, provider.getCode());
     }
   }
 

@@ -632,11 +632,6 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       @ApiParam(type = "boolean", value = "Execute validations", example = "true") @RequestParam(
           name = "validate", required = false, defaultValue = "true") boolean validate) {
 
-
-//    orchestratorControllerZuul.release(dataflowId, dataProviderId, restrictFromPublic, validate);
-
-
-    //TO BE REMOVED
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDataflowId(dataflowId);
     userNotificationContentVO.setProviderId(dataProviderId);
@@ -757,7 +752,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
 
   @GetMapping("/findDataCollection/{snapshotId}")
   @Override
-  public Long findDataCollectionIdByIdSnapshotId(Long snapshotId) {
+  public Long findDataCollectionIdBySnapshotId(Long snapshotId) {
     return datasetSnapshotService.findDataCollectionIdBySnapshotId(snapshotId);
   }
 }

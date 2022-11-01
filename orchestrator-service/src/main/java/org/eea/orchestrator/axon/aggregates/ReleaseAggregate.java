@@ -5,8 +5,8 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.eea.axon.release.commands.*;
-import org.eea.axon.release.events.*;
+import org.eea.axon.release.commands.CreateReleaseStartNotificationCommand;
+import org.eea.axon.release.events.ReleaseStartNotificationCreatedEvent;
 import org.springframework.beans.BeanUtils;
 
 import java.util.List;
@@ -15,7 +15,7 @@ import java.util.List;
 public class ReleaseAggregate {
 
     @AggregateIdentifier
-    private String aggregate;
+    private String releaseAggregate;
     private String transactionId;
     private Long dataProviderId;
     private Long dataflowId;
@@ -34,10 +34,9 @@ public class ReleaseAggregate {
         AggregateLifecycle.apply(event);
     }
 
-
     @EventSourcingHandler
     public void on(ReleaseStartNotificationCreatedEvent event) {
-        this.aggregate = event.getAggregate();
+        this.releaseAggregate = event.getReleaseAggregateId();
         this.transactionId = event.getTransactionId();
         this.dataflowId = event.getDataflowId();
         this.dataProviderId = event.getDataProviderId();
@@ -45,238 +44,6 @@ public class ReleaseAggregate {
         this.validate = event.isValidate();
     }
 
-//    @CommandHandler
-//    public void handle(SendUserNotificationForReleaseStartedCommand command) {
-//        SendUserNotificationForReleaseStartedCommand event = new SendUserNotificationForReleaseStartedCommand();
-//        BeanUtils.copyProperties(command, event);
-//        AggregateLifecycle.apply(event);
-//    }
-//
-//    @EventSourcingHandler
-//    public void on(UserNotifationForReleaseSentEvent event) {
-//        this.aggregate = event.getAggregate();
-//        this.id = event.getTransactionId();
-//        this.dataflowId = event.getDataflowId();
-//        this.dataProviderId = event.getDataProviderId();
-//        this.restrictFromPublic = event.isRestrictFromPublic();
-//        this.validate = event.isValidate();
-//    }
-
-//    @CommandHandler
-//    public ReleaseAggregate(AddReleaseLocksCommand command) {
-//        ReleaseLocksAddedEvent event = new ReleaseLocksAddedEvent();
-//        BeanUtils.copyProperties(command, event);
-//        AggregateLifecycle.apply(event);
-//    }
-//
-//    @EventSourcingHandler
-//    public void on(ReleaseLocksAddedEvent event) {
-//        this.aggregate = event.getAggregate();
-//        this.transactionId = event.getTransactionId();
-//        this.dataflowId = event.getDataflowId();
-//        this.dataProviderId = event.getDataProviderId();
-//        this.restrictFromPublic = event.isRestrictFromPublic();
-//        this.validate = event.isValidate();
-//        this.datasetIds = event.getDatasetIds();
-//    }
-
-    @CommandHandler
-    public ReleaseAggregate(UpdateRepresentativeVisibilityCommand command) {
-        RepresentativeVisibilityUpdatedEvent event = new RepresentativeVisibilityUpdatedEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
-
-    @EventSourcingHandler
-    public void on(RepresentativeVisibilityUpdatedEvent event) {
-        this.aggregate = event.getAggregate();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-    }
-
-    @CommandHandler
-    public ReleaseAggregate(ExecuteValidationProcessCommand command) {
-        ValidationProcessForReleaseAddedEvent event = new ValidationProcessForReleaseAddedEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
-
-    @EventSourcingHandler
-    public void on(ValidationProcessForReleaseAddedEvent event) {
-        this.aggregate = event.getAggregate();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-    }
-
-    @CommandHandler
-    public ReleaseAggregate(CreateSnapshotRecordRorReleaseInMetabaseCommand command) {
-        SnapshotRecordForReleaseCreatedInMetabaseEvent event = new SnapshotRecordForReleaseCreatedInMetabaseEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
-
-    @EventSourcingHandler
-    public void on(SnapshotRecordForReleaseCreatedInMetabaseEvent event) {
-        this.aggregate = event.getAggregate();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-    }
-
-    @CommandHandler
-    public ReleaseAggregate(CreateSnapshotFileForReleaseCommand command) {
-        SnapshotFileForReleaseCreatedEvent event = new SnapshotFileForReleaseCreatedEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
-
-    @EventSourcingHandler
-    public void on(SnapshotFileForReleaseCreatedEvent event) {
-        this.aggregate = event.getAggregate();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-    }
-
-    @CommandHandler
-    public ReleaseAggregate(UpdateDatasetStatusCommand command) {
-        DatasetStatusUpdatedEvent event = new DatasetStatusUpdatedEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
-
-    @EventSourcingHandler
-    public void on(DatasetStatusUpdatedEvent event) {
-        this.aggregate = event.getAggregate();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-    }
-
-    @CommandHandler
-    public ReleaseAggregate(DeleteProviderCommand command) {
-        ProviderDeletedEvent event = new ProviderDeletedEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
-
-    @EventSourcingHandler
-    public void on(ProviderDeletedEvent event) {
-        this.aggregate = event.getAggregate();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-    }
-
-    @CommandHandler
-    public ReleaseAggregate(UpdateInternalRepresentativeCommand command) {
-        InternalRepresentativeUpdatedEvent event = new InternalRepresentativeUpdatedEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
-
-    @EventSourcingHandler
-    public void on(InternalRepresentativeUpdatedEvent event) {
-        this.aggregate = event.getAggregate();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-    }
-
-    @CommandHandler
-    public ReleaseAggregate(UpdateDatasetRunningStatusCommand command) {
-        DatasetRunningStatusUpdatedEvent event = new DatasetRunningStatusUpdatedEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
-
-    @EventSourcingHandler
-    public void on(DatasetRunningStatusUpdatedEvent event) {
-        this.aggregate = event.getAggregate();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-    }
-
-    @CommandHandler
-    public ReleaseAggregate(RestoreDataFromSnapshotCommand command) {
-        DataRestoredFromSnapshotEvent event = new DataRestoredFromSnapshotEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
-
-    @EventSourcingHandler
-    public void on(DataRestoredFromSnapshotEvent event) {
-        this.aggregate = event.getAggregate();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-    }
-
-    @CommandHandler
-    public ReleaseAggregate(MarkSnapshotReleasedCommand command) {
-        SnapshotMarkedReleasedEvent event = new SnapshotMarkedReleasedEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
-
-    @EventSourcingHandler
-    public void on(SnapshotMarkedReleasedEvent event) {
-        this.aggregate = event.getAggregate();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-    }
-
-    @CommandHandler
-    public ReleaseAggregate(RemoveReleaseLocksCommand command) {
-        ReleaseLocksRemovedEvent event = new ReleaseLocksRemovedEvent();
-        BeanUtils.copyProperties(command, event);
-        AggregateLifecycle.apply(event);
-    }
-
-    @EventSourcingHandler
-    public void on(ReleaseLocksRemovedEvent event) {
-        this.aggregate = event.getAggregate();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-    }
 }
 
 
