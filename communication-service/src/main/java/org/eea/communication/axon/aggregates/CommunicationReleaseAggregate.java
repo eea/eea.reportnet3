@@ -120,8 +120,11 @@ public class CommunicationReleaseAggregate {
         DataSetMetabaseVO dataset = null;
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), null));
+                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
 
             dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(command.getDatasetIds().get(0));
             // get custodian and stewards emails

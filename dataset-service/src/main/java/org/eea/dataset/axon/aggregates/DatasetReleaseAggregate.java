@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
@@ -80,8 +82,11 @@ public class DatasetReleaseAggregate {
         try {
             LOG.info("Adding release locks for DataflowId: {} DataProviderId: {}", command.getDataflowId(), command.getDataProviderId());
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), null));
+                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
 
             // Lock all the operations related to the datasets involved
             List<Long> datasetIds = reportingDatasetRepository.findByDataflowId(command.getDataflowId()).stream().filter(rd -> rd.getDataProviderId().equals(command.getDataProviderId())).map(ReportingDataset::getId)
@@ -121,8 +126,11 @@ public class DatasetReleaseAggregate {
                        @Autowired KafkaSenderUtils kafkaSenderUtils) throws EEAException {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), null));
+                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
 
             boolean haveBlockers = false;
             for (Long id : command.getDatasetIds()) {
@@ -194,8 +202,11 @@ public class DatasetReleaseAggregate {
                        DataCollectionRepository dataCollectionRepository) {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), null));
+                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
 
             datasetDataCollection = new HashMap<>();
             dataCollectionForDeletion = new ArrayList<>();
@@ -247,8 +258,11 @@ public class DatasetReleaseAggregate {
     public void handle(DeleteProviderCommand command, DatasetSnapshotService datasetSnapshotService, MetaData metaData) {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), null));
+                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
 
             Long dataCollectionId = command.getDataCollectionForDeletion().get(0);
             LOG.info("Deleting provider for dataflowId: {} dataProvider: {} dataCollection {}", command.getDataflowId(), command.getDataProviderId(), dataCollectionId);
@@ -386,8 +400,11 @@ public class DatasetReleaseAggregate {
     public void handle(UpdateChangesEuDatasetCommand command, RepresentativeControllerZuul representativeControllerZuul, ChangesEUDatasetRepository changesEUDatasetRepository, MetaData metaData) {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), null));
+                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
 
             command.getDatasetDataCollection().values().forEach(dataCollectionId -> {
                 ChangesEUDataset providerRelease = new ChangesEUDataset();
@@ -432,8 +449,11 @@ public class DatasetReleaseAggregate {
     public void handle(SavePublicFilesForReleaseCommand command, DataFlowControllerZuul dataflowControllerZuul, FileTreatmentHelper fileTreatmentHelper, MetaData metaData) throws IOException {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), null));
+                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
 
             DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(command.getDataflowId());
             if (dataflowVO.isShowPublicInfo()) {
@@ -507,8 +527,11 @@ public class DatasetReleaseAggregate {
                        @Autowired KafkaSenderUtils kafkaSenderUtils) throws EEAException {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), null));
+                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
 
             List<Long> datasetMetabaseListIds = datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(command.getDataflowId(), command.getDataProviderId());
 

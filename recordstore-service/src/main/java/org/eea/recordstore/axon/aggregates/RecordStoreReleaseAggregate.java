@@ -28,8 +28,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -69,8 +70,12 @@ public class RecordStoreReleaseAggregate {
     public RecordStoreReleaseAggregate(CreateValidationProcessForReleaseCommand command, MetaData metaData, ValidationControllerZuul validationControllerZuul, ProcessService processService) {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), null));
+                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
+
             datasetProcessId = new HashMap<>();
             command.getDatasetIds().forEach(datasetId -> {
                 int priority = validationControllerZuul.getPriority(command.getDataflowId());
