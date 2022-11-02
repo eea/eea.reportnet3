@@ -5,6 +5,8 @@ import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.messaging.MetaData;
 import org.eea.axon.release.commands.CreateReleaseStartNotificationCommand;
 import org.eea.interfaces.controller.orchestrator.OrchestratorController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -20,6 +22,7 @@ import java.util.UUID;
 public class OrchestratorControllerImpl implements OrchestratorController {
 
     private transient CommandGateway commandGateway;
+    private static final Logger LOG = LoggerFactory.getLogger(OrchestratorControllerImpl.class);
 
     @Autowired
     public OrchestratorControllerImpl(CommandGateway commandGateway) {
@@ -31,16 +34,14 @@ public class OrchestratorControllerImpl implements OrchestratorController {
     @PostMapping(value = "/release/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
     public void release(Long dataflowId, Long dataProviderId, boolean restrictFromPublic, boolean validate) {
        try {
-           restrictFromPublic = true;
-           validate = true;
-           System.out.println("---------------GOT REQUEST FOR DATAFLOW ID---------------------------" + dataflowId);
            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
            CreateReleaseStartNotificationCommand command = CreateReleaseStartNotificationCommand.builder().transactionId(UUID.randomUUID().toString()).releaseAggregateId(UUID.randomUUID().toString())
                    .dataflowId(dataflowId).dataProviderId(dataProviderId).restrictFromPublic(restrictFromPublic)
                    .validate(validate).build();
            commandGateway.send(GenericCommandMessage.asCommandMessage(command).withMetaData(MetaData.with("auth", authentication)));
        } catch (Exception e) {
-           System.out.println("------------------EXCEPTION------------------------------");
+            LOG.error("An error occurred while releasing dataflow {}, dataProvider {}", dataflowId, dataProviderId);
+           throw e;
        }
     }
 }
