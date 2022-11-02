@@ -49,11 +49,12 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     /**
      *
-     * Retrieves number of jobs based on status
+     * Retrieves number of jobs based on status and type
      *
      * @param jobStatus the job status
+     * @param jobType the job type
      * @return the number of entries
      */
-    Long countByJobStatus(JobStatusEnum jobStatus);
+    Integer countByJobStatusAndJobType(JobStatusEnum jobStatus, JobTypeEnum jobType);
 }
 

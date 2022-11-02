@@ -770,7 +770,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    LOG.info("The user invoking DataSetSnaphotControllerImpl.createReleaseSnapshots for dataflowId {} and dataProviderId {} is {}",
+    LOG.info("The user invoking DataSetSnapshotControllerImpl.createReleaseSnapshots for dataflowId {} and dataProviderId {} is {}",
         dataflowId, dataProviderId, SecurityContextHolder.getContext().getAuthentication().getName());
 
     DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);

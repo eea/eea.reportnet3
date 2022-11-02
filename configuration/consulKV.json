@@ -1824,8 +1824,24 @@
     "value": "JHtGSU5JU0hFRF9KT0JTX0RVUkFUSU9OX1RIUkVTSE9MRDo2MDB9"
   },
   {
-    "key": "config/orchestrator/scheduling.inProgress.maximum.jobs",
-    "value": "JHtJTl9QUk9HUkVTU19NQVhJTVVNX0pPQlM6Mn0="
+    "key": "config/orchestrator/scheduling.inProgress.import.maximum.jobs",
+    "value": "JHtJTl9QUk9HUkVTU19JTVBPUlRfTUFYSU1VTV9KT0JTOjJ9"
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.validation.maximum.jobs",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX01BWElNVU1fSk9CUzoyfQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.release.maximum.jobs",
+    "value": "JHtJTl9QUk9HUkVTU19SRUxFQVNFX01BWElNVU1fSk9CUzoyfQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.copyToEUDataset.maximum.jobs",
+    "value": "JHtJTl9QUk9HUkVTU19DT1BZX1RPX0VVX0RBVEFTRVRfTUFYSU1VTV9KT0JTOjJ9"
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.export.maximum.jobs",
+    "value": "JHtJTl9QUk9HUkVTU19FWFBPUlRfTUFYSU1VTV9KT0JTOjJ9"
   },
   {
     "key": "config/application/spring.datasource.orchestratorDb.driver-class-name",

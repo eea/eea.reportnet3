@@ -24,8 +24,20 @@ public class JobServiceImpl implements JobService {
 
     private static final Logger LOG = LoggerFactory.getLogger(JobServiceImpl.class);
 
-    @Value(value = "${scheduling.inProgress.maximum.jobs}")
-    private Long maximumNumberOfInProgressJobs;
+    @Value(value = "${scheduling.inProgress.import.maximum.jobs}")
+    private Long maximumNumberOfInProgressImportJobs;
+
+    @Value(value = "${scheduling.inProgress.validation.maximum.jobs}")
+    private Long maximumNumberOfInProgressValidationJobs;
+
+    @Value(value = "${scheduling.inProgress.release.maximum.jobs}")
+    private Long maximumNumberOfInProgressReleaseJobs;
+
+    @Value(value = "${scheduling.inProgress.copyToEUDataset.maximum.jobs}")
+    private Long maximumNumberOfInProgressCopyToEuDataseJobs;
+
+    @Value(value = "${scheduling.inProgress.export.maximum.jobs}")
+    private Long maximumNumberOfInProgressExportJobs;
 
     @Autowired
     private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
@@ -79,8 +91,21 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Boolean canJobBeExecuted(JobVO job){
-        // TODO implement this
-        if( jobRepository.countByJobStatus(JobStatusEnum.IN_PROGRESS) <= maximumNumberOfInProgressJobs ){
+        JobTypeEnum jobType = job.getJobType();
+        Integer numberOfCurrentJobs = jobRepository.countByJobStatusAndJobType(JobStatusEnum.IN_PROGRESS, jobType);
+        if(job.getJobType() == JobTypeEnum.IMPORT && numberOfCurrentJobs <= maximumNumberOfInProgressImportJobs){
+            return true;
+        }
+        else if(jobType == JobTypeEnum.VALIDATION && numberOfCurrentJobs <= maximumNumberOfInProgressValidationJobs){
+            return true;
+        }
+        else if(jobType == JobTypeEnum.RELEASE && numberOfCurrentJobs <= maximumNumberOfInProgressReleaseJobs){
+            return true;
+        }
+        else if(jobType == JobTypeEnum.COPY_TO_EU_DATASET && numberOfCurrentJobs <= maximumNumberOfInProgressCopyToEuDataseJobs){
+            return true;
+        }
+        else if(jobType == JobTypeEnum.EXPORT && numberOfCurrentJobs <= maximumNumberOfInProgressExportJobs){
             return true;
         }
         return false;
