@@ -18,7 +18,4 @@ axon:
     general: jackson
     events: jackson
     messages: jackson
-logging:
-  level:
-    org:
-      axonframework: debug
+
