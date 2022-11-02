@@ -33,6 +33,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
@@ -155,7 +157,9 @@ public class CommunicationReleaseAggregate {
             EmailVO emailVO = new EmailVO();
             emailVO.setBbc(emails);
             emailVO.setSubject(String.format(LiteralConstants.RELEASESUBJECT, dataset.getDataSetName(), dataflowVO.getName()));
-            emailVO.setText(String.format(LiteralConstants.RELEASEMESSAGE, dataset.getDataSetName(), dataflowVO.getName(), command.getDatasetDateRelease().get(0)));
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String dateRelease = dateFormat.format(command.getDatasetDateRelease().values().stream().findFirst().get());
+            emailVO.setText(String.format(LiteralConstants.RELEASEMESSAGE, dataset.getDataSetName(), dataflowVO.getName(), dateRelease));
             emailService.sendMessage(emailVO);
             LOG.info("Email for successful release sent for dataset {}, dataProvider {}, dataflow {}", dataset.getDataSetName(), command.getDataProviderId(), command.getDataflowId());
 

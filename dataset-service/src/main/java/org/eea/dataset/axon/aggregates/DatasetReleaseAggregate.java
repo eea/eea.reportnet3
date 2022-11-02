@@ -348,10 +348,10 @@ public class DatasetReleaseAggregate {
     @CommandHandler
     public void handle(MarkSnapshotReleasedCommand command, SnapshotRepository snapshotRepository, MetaData metaData) {
         try {
+            datasetDateRelease = new HashMap<>();
             command.getDatasetSnapshots().entrySet().stream().forEach(entry -> {
                 Long datasetId = entry.getKey();
                 Long snapshotId = entry.getValue();
-                datasetDateRelease = new HashMap<>();
                 LOG.info("Mark snapshot with id {} released for dataflow {}, dataProvider {}, dataset {}", snapshotId, command.getDataflowId(), command.getDataProviderId(), datasetId);
                 // Mark the snapshot released
                 snapshotRepository.releaseSnaphot(datasetId, snapshotId);
