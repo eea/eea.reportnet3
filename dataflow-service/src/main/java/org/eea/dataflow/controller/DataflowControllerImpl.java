@@ -692,8 +692,8 @@ public class DataflowControllerImpl implements DataFlowController {
           "Can't delete a Business Dataflow without being an admin user.");
     } else {
       try{
-      LOG.info("Deleting dataflow with id {}", dataflowId);
-      dataflowService.deleteDataFlow(dataflowId);
+        LOG.info("Deleting dataflow with id {}", dataflowId);
+        dataflowService.deleteDataFlow(dataflowId);
       } catch (Exception e){
         LOG_ERROR.error("Unexpected error! Could not delete dataflow with id {} Message: {}", dataflowId, e.getMessage());
         throw e;

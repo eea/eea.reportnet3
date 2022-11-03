@@ -184,8 +184,8 @@ public class RulesControllerImpl implements RulesController {
           example = "5cf0e9b3b793310e9ceca190") String datasetSchemaId,
       @ApiParam(value = "Dataset id used in the delete process", example = "5") Long datasetId) {
     try {
-    rulesService.deleteEmptyRulesSchema(datasetSchemaId, datasetId);
-    LOG.info("Deleted empty rules schema for datasetSchemaId {} and datasetId {}", datasetSchemaId, datasetId);
+      rulesService.deleteEmptyRulesSchema(datasetSchemaId, datasetId);
+      LOG.info("Deleted empty rules schema for datasetSchemaId {} and datasetId {}", datasetSchemaId, datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error deleting rules schema for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;

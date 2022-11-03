@@ -473,9 +473,9 @@ public class IntegrationControllerImpl implements IntegrationController {
   public void deleteSchemaIntegrations(@ApiParam(value = "Dataschema Id",
       example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId) {
     try {
-    LOG.info("Deleting schema integrations for datasetSchemaId {}", datasetSchemaId);
-    integrationService.deleteSchemaIntegrations(datasetSchemaId);
-    LOG.info("Successfully deleted schema integrations for datasetSchemaId {}", datasetSchemaId);
+      LOG.info("Deleting schema integrations for datasetSchemaId {}", datasetSchemaId);
+      integrationService.deleteSchemaIntegrations(datasetSchemaId);
+      LOG.info("Successfully deleted schema integrations for datasetSchemaId {}", datasetSchemaId);
     } catch (Exception e){
       LOG_ERROR.error("Unexpected error! Could not delete schema integration for datasetSchemaId {} Message: {}", datasetSchemaId, e.getMessage());
       throw e;

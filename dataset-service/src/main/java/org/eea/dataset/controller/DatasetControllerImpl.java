@@ -634,8 +634,8 @@ public class DatasetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-    LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
-    deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false);
+      LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
       throw e;
@@ -675,8 +675,8 @@ public class DatasetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-    LOG.info("Privately deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
-    deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted);
+      LOG.info("Privately deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error privately deleting dataset data for dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId, e.getMessage());
       throw e;
@@ -759,9 +759,9 @@ public class DatasetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-    LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
-    // This method will release the lock
-    deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
+      LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
+      // This method will release the lock
+      deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error deleting table data for dataflowId {} datasetId {} tableSchemaId {} and providerId {} Message: {}", dataflowId, datasetId, tableSchemaId, providerId, e.getMessage());
       throw e;
@@ -1045,11 +1045,11 @@ public class DatasetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-    LOG.info("Calling etlExport for dataflowId {} and datasetId {}", dataflowId, datasetId);
-    StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
-        outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
-    LOG.info("Successfully called etlExport for dataflowId {} and datasetId {}",dataflowId, datasetId);
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
+      LOG.info("Calling etlExport for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
+          outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+      LOG.info("Successfully called etlExport for dataflowId {} and datasetId {}",dataflowId, datasetId);
+      return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error in etlExportDataset for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
       throw e;
@@ -1096,11 +1096,10 @@ public class DatasetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-    LOG.info("Calling etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
-    StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
-        outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
-    LOG.info("Successfully called etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
-
+      LOG.info("Calling etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
+          outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+      LOG.info("Successfully called etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
       return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error in etlExportDatasetV2 for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
@@ -1535,8 +1534,8 @@ public class DatasetControllerImpl implements DatasetController {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
     try {
-    LOG.info("Deleting data before replacing for datasetId {} and integrationId {}", datasetId, integrationId);
-    deleteHelper.executeDeleteImportDataAsyncBeforeReplacing(datasetId, integrationId, operation);
+      LOG.info("Deleting data before replacing for datasetId {} and integrationId {}", datasetId, integrationId);
+      deleteHelper.executeDeleteImportDataAsyncBeforeReplacing(datasetId, integrationId, operation);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error deleting data before replacing for datasetId {} and integrationId {} Message: {}", datasetId, integrationId, e.getMessage());
       throw e;
@@ -1649,9 +1648,8 @@ public class DatasetControllerImpl implements DatasetController {
         userNotificationContentVO);
 
     try {
-    fileTreatmentHelper.exportDatasetFile(datasetId, mimeType);
-    LOG.info("Successfully exported dataset data from datasetId {}, with type {}", datasetId, mimeType);
-
+      fileTreatmentHelper.exportDatasetFile(datasetId, mimeType);
+      LOG.info("Successfully exported dataset data from datasetId {}, with type {}", datasetId, mimeType);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error exporting dataset file for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;
@@ -1752,9 +1750,9 @@ public class DatasetControllerImpl implements DatasetController {
       hidden = true)
   public void deleteTempEtlExport(@PathVariable("datasetId") Long datasetId) {
     try {
-    LOG.info("Deleting everything from temp_etlexport table for datasetId {}", datasetId);
-    datasetService.deleteTempEtlExport(datasetId);
-    LOG.info("Successfully deleted everything from temp_etlexport table for datasetId {}", datasetId);
+      LOG.info("Deleting everything from temp_etlexport table for datasetId {}", datasetId);
+      datasetService.deleteTempEtlExport(datasetId);
+      LOG.info("Successfully deleted everything from temp_etlexport table for datasetId {}", datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error deleting tempEtlExport table for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;

@@ -154,7 +154,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
           try {
             fileTreatmentHelper.savePublicFiles(dataflowVO.getId(), dataset.getDataProviderId());
           } catch (IOException e) {
-          LOG_ERROR.error("Folder not created in dataflow {} with dataprovider {} and datasetId {} message {}",
+            LOG_ERROR.error("Folder not created in dataflow {} with dataprovider {} and datasetId {} message {}",
               dataset.getDataflowId(), dataset.getDataProviderId(), datasetId, e.getMessage(), e);
           } catch (Exception e) {
             LOG_ERROR.error("Unexpected error! Error creating folder for dataflow {} with dataprovider {}. Message {}",
@@ -204,7 +204,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         messageVO.setContent(country + " released " + dataflowName + " successfully");
         messageVO.setAutomatic(true);
         collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO);
-        LOG.info("Automatic feedback message created of dataflow {}. Message: {}", dataflowVO.getId(),
+        LOG.info("Automatic feedback message created of dataflow {} and datasetID {}. Message: {}", dataflowVO.getId(), datasetId,
                 messageVO.getContent());
 
       }

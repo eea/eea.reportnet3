@@ -304,8 +304,9 @@ public class ContributorControllerImpl implements ContributorController {
         message = e.getMessage();
         status = HttpStatus.INTERNAL_SERVER_ERROR;
       }
-      LOG_ERROR.error("Error update the requester {}.in the dataflow: {}",
-          contributorVO.getAccount(), dataflowId);
+      String account = (contributorVO != null) ? contributorVO.getAccount() : null;
+      LOG_ERROR.error("Error update the requester {} in the dataflow: {}",
+              account, dataflowId);
     } catch (Exception e) {
       String account = (contributorVO != null) ? contributorVO.getAccount() : null;
       LOG_ERROR.error("Unexpected error! Error updating the requester {} in the dataflow: {}. Message: {}", account, dataflowId, e.getMessage());
@@ -375,8 +376,9 @@ public class ContributorControllerImpl implements ContributorController {
         message = e.getMessage();
         status = HttpStatus.INTERNAL_SERVER_ERROR;
       }
-      LOG_ERROR.error("Error update the reporter {}.in the dataflow: {}",
-          contributorVO.getAccount(), dataflowId);
+      String account = (contributorVO != null) ? contributorVO.getAccount() : null;
+      LOG_ERROR.error("Error update the reporter {} in the dataflow: {}",
+              account, dataflowId);
     } catch (Exception e) {
       String account = (contributorVO != null) ? contributorVO.getAccount() : null;
       LOG_ERROR.error("Unexpected error! Error updating the reporter {} in the dataflow: {}. Message: {}", account, dataflowId, e.getMessage());
