@@ -137,6 +137,9 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
     } catch (IOException e) {
       LOG_ERROR.error(e.getMessage());
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in writeFile for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+      throw e;
     }
 
     return out.toByteArray();
@@ -183,6 +186,9 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
     } catch (IOException e) {
       LOG_ERROR.error(e.getMessage());
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in writeFileList for datasetId {} and countryCode {}. Message: {}", datasetId, includeCountryCode, e.getMessage());
+      throw e;
     }
 
     byteList.add(out.toByteArray());

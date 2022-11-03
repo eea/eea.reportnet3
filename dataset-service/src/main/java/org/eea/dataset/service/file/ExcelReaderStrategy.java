@@ -131,6 +131,9 @@ public class ExcelReaderStrategy implements ReaderStrategy {
         | IllegalArgumentException e) {
       LOG.error("RN3-Import: Error when reading Excel file {}, dataflowId {}, datasetId {} and tableSchemaId {}. Message: ", fileName, dataflowId, datasetId, idTableSchema, e.getMessage());
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in parseFile for file {}, datasetId {} and tableSchemaId {}. Message: {}", fileName, datasetId, idTableSchema, e.getMessage());
+      throw e;
     }
   }
 

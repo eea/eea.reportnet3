@@ -433,11 +433,14 @@ public class FileTreatmentHelper implements DisposableBean {
       byte[] file = createFile(datasetId, mimeType, tableSchemaId, filters);
       File fileWrite =
           new File(new File(pathPublicFile, "dataset-" + datasetId), tableName + "." + mimeType);
-      try (OutputStream out = new FileOutputStream(fileWrite.toString());) {
+      try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
         out.write(file);
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT,
             null, notificationVO);
         LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error in exportFile for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+        throw e;
       }
     } catch (IOException | EEAException e) {
       LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId,
@@ -828,6 +831,9 @@ public class FileTreatmentHelper implements DisposableBean {
 
         try (ZipInputStream zip = new ZipInputStream(input)) {
           files = unzipAndStore(folder, saveLocationPath, zip);
+        } catch (Exception e) {
+          LOG.error("Unexpected error! Error in unzipAndStore for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+          throw e;
         }
 
         // Queue import tasks for stored files
@@ -851,6 +857,9 @@ public class FileTreatmentHelper implements DisposableBean {
           IOUtils.copyLarge(input, output);
           files.add(file);
           LOG.info("Stored file {} in fileManagement. For datasetId {} and tableSchemaId {}", file.getPath(), datasetId, tableSchemaId);
+        } catch (Exception e) {
+          LOG.error("Unexpected error! Error in copyLarge for fileName {} datasetId {} and tableSchemaId {}. Message: {}", originalFileName, datasetId, tableSchemaId, e.getMessage());
+          throw e;
         }
 
         // if the import goes it's a zip file, check if the zip is not empty to show
@@ -885,6 +894,9 @@ public class FileTreatmentHelper implements DisposableBean {
       datasetMetabaseService.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_IMPORT);
       throw new EEAException(e);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in fileManagement for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+      throw e;
     }
   }
 
@@ -925,6 +937,9 @@ public class FileTreatmentHelper implements DisposableBean {
       try (FileOutputStream output = new FileOutputStream(file)) {
         IOUtils.copyLarge(zip, output);
         LOG.info("Stored file {}", file.getPath());
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error in copyLarge for saveLocationPath {}. Message: {}", saveLocationPath, e.getMessage());
+        throw e;
       }
 
       files.add(file);
@@ -1082,6 +1097,9 @@ public class FileTreatmentHelper implements DisposableBean {
         LOG_ERROR.error("RN3-Import file failed: fileName={}, tableSchemaId={}", fileName,
             tableSchemaId, e);
         error = e.getMessage();
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error in copyLarge for fileName {} datasetId {} and tableSchemaId {}. Message: {}", fileName, datasetId, tableSchemaId, e.getMessage());
+        throw e;
       }
     }
 
@@ -1422,6 +1440,9 @@ public class FileTreatmentHelper implements DisposableBean {
           out.closeEntry();
         }
         LOG.info("Creating file {} in the route ", fileWriteZip);
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error in generateFile for datasetId {}. Message: {}", datasetId, e.getMessage());
+        throw e;
       }
     }
     // only the xlsx file
@@ -1435,6 +1456,9 @@ public class FileTreatmentHelper implements DisposableBean {
         for (Entry<String, byte[]> entry : files.entrySet()) {
           out.write(entry.getValue(), 0, entry.getValue().length);
         }
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error in generateFile when writing file for datasetId {}. Message: {}", datasetId, e.getMessage());
+        throw e;
       }
     }
     // Send notification
@@ -1815,6 +1839,9 @@ public class FileTreatmentHelper implements DisposableBean {
       out.write(file, 0, file.length);
       out.closeEntry();
       LOG.info("We create file {} in the route ", fileWriteZip);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in createFilesAndZip for dataflowId {} and dataProviderId {}. Message: {}", dataflowId, dataProviderId, e.getMessage());
+      throw e;
     }
   }
 

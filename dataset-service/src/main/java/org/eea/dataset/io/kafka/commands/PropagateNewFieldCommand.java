@@ -13,6 +13,8 @@ import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.lock.service.LockService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -23,7 +25,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class PropagateNewFieldCommand extends AbstractEEAEventHandlerCommand {
 
-
+  /**
+   * The Constant LOG_ERROR.
+   */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * The update record helper.
@@ -55,27 +60,29 @@ public class PropagateNewFieldCommand extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
-    Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-    Integer sizeRecords = (Integer) eeaEventVO.getData().get("sizeRecords");
-    String idTableSchema = (String) eeaEventVO.getData().get("idTableSchema");
-    Integer numPag = (Integer) eeaEventVO.getData().get("numPag");
-    String fieldSchemaId = (String) eeaEventVO.getData().get("idFieldSchema");
-    DataType typeField = DataType.fromValue(eeaEventVO.getData().get("typeField").toString());
+    try {
+      Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+      Integer sizeRecords = (Integer) eeaEventVO.getData().get("sizeRecords");
+      String idTableSchema = (String) eeaEventVO.getData().get("idTableSchema");
+      Integer numPag = (Integer) eeaEventVO.getData().get("numPag");
+      String fieldSchemaId = (String) eeaEventVO.getData().get("idFieldSchema");
+      DataType typeField = DataType.fromValue(eeaEventVO.getData().get("typeField").toString());
 
-    // Add lock to the delete fieldschema operation, to avoid the simultaneous propagation/deleting
-    // of a new field
-    Map<String, Object> mapCriteria = new HashMap<>();
-    mapCriteria.put("signature", LockSignature.DELETE_FIELD_SCHEMA.getValue());
-    mapCriteria.put("datasetId", datasetId);
-    mapCriteria.put("fieldSchemaId", fieldSchemaId);
-    lockService.createLock(new Timestamp(System.currentTimeMillis()),
-        SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
-        mapCriteria);
+      // Add lock to the delete fieldschema operation, to avoid the simultaneous propagation/deleting
+      // of a new field
+      Map<String, Object> mapCriteria = new HashMap<>();
+      mapCriteria.put("signature", LockSignature.DELETE_FIELD_SCHEMA.getValue());
+      mapCriteria.put("datasetId", datasetId);
+      mapCriteria.put("fieldSchemaId", fieldSchemaId);
+      lockService.createLock(new Timestamp(System.currentTimeMillis()),
+              SecurityContextHolder.getContext().getAuthentication().getName(), LockType.METHOD,
+              mapCriteria);
 
-    updateRecordHelper.propagateNewFieldDesign(datasetId, idTableSchema, sizeRecords, numPag,
-        UUID.randomUUID().toString(), fieldSchemaId, typeField);
-
+      updateRecordHelper.propagateNewFieldDesign(datasetId, idTableSchema, sizeRecords, numPag,
+              UUID.randomUUID().toString(), fieldSchemaId, typeField);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      throw e;
+    }
   }
-
-
 }

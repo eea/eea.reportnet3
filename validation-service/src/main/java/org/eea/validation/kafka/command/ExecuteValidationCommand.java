@@ -7,6 +7,8 @@ import org.eea.kafka.domain.EventType;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.ValidationHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Async;
@@ -17,6 +19,8 @@ import org.springframework.scheduling.annotation.Async;
  */
 public abstract class ExecuteValidationCommand extends AbstractEEAEventHandlerCommand {
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * The validation helper.
@@ -66,12 +70,17 @@ public abstract class ExecuteValidationCommand extends AbstractEEAEventHandlerCo
   @Override
   @Async
   public void execute(final EEAEventVO eeaEventVO) throws EEAException {
-    final Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-    final String processId = (String) eeaEventVO.getData().get("uuid");
-    final Long taskId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("task_id")));
-    TenantResolver.setTenantName("dataset_" + datasetId);
+    try {
+      final Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+      final String processId = (String) eeaEventVO.getData().get("uuid");
+      final Long taskId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("task_id")));
+      TenantResolver.setTenantName("dataset_" + datasetId);
 
-    validationHelper.processValidation(taskId, eeaEventVO, processId, datasetId,
-        this.getValidationAction(), this.getNotificationEventType());
+      validationHelper.processValidation(taskId, eeaEventVO, processId, datasetId,
+              this.getValidationAction(), this.getNotificationEventType());
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      throw e;
+    }
   }
 }

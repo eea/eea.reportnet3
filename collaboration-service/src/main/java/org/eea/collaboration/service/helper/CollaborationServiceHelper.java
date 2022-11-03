@@ -95,7 +95,7 @@ public class CollaborationServiceHelper {
         kafkaSenderUtils.releaseNotificableKafkaEvent(event, null, notificationVO);
       }
     } catch (EEAException e) {
-      LOG_ERROR.error("Unexpected exception realasing new message notifications", e);
+      LOG_ERROR.error("Unexpected exception releasing new message notifications for dataflowId {} providerId {} modifiedDatasetId {} and eventType {}. Message: {}", dataflowId, providerId, modifiedDatasetId, eventType, e.getMessage(), e);
     }
   }
 

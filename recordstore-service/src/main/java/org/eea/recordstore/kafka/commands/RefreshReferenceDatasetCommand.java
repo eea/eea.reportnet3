@@ -54,26 +54,31 @@ public class RefreshReferenceDatasetCommand extends AbstractEEAEventHandlerComma
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
-    Long datasetId =
-        Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
-    String user = String.valueOf(eeaEventVO.getData().get(LiteralConstants.USER));
-    Boolean released = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("released")));
-    List<Integer> referenceDatasets =
-        (List<Integer>) eeaEventVO.getData().get("referencesToRefresh");
-    String processId = String.valueOf(eeaEventVO.getData().get("processId"));
+    try {
+      Long datasetId =
+              Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
+      String user = String.valueOf(eeaEventVO.getData().get(LiteralConstants.USER));
+      Boolean released = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("released")));
+      List<Integer> referenceDatasets =
+              (List<Integer>) eeaEventVO.getData().get("referencesToRefresh");
+      String processId = String.valueOf(eeaEventVO.getData().get("processId"));
 
-    List<Long> referencesToRefresh = referenceDatasets.stream().mapToLong(Integer::longValue)
-        .boxed().collect(Collectors.toList());
+      List<Long> referencesToRefresh = referenceDatasets.stream().mapToLong(Integer::longValue)
+              .boxed().collect(Collectors.toList());
 
-    if (referencesToRefresh != null && !CollectionUtils.isEmpty(referencesToRefresh)) {
-      recordStoreService.refreshMaterializedQuery(referencesToRefresh, true, released, datasetId,
-          processId);
-    } else {
-      Map<String, Object> values = new HashMap<>();
-      values.put(LiteralConstants.DATASET_ID, datasetId);
-      values.put("released", released);
-      values.put("processId", processId);
-      kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
+      if (referencesToRefresh != null && !CollectionUtils.isEmpty(referencesToRefresh)) {
+        recordStoreService.refreshMaterializedQuery(referencesToRefresh, true, released, datasetId,
+                processId);
+      } else {
+        Map<String, Object> values = new HashMap<>();
+        values.put(LiteralConstants.DATASET_ID, datasetId);
+        values.put("released", released);
+        values.put("processId", processId);
+        kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      throw e;
     }
   }
 

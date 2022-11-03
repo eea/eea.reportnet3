@@ -52,25 +52,30 @@ public class CreateConnectionEvent extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) {
+    try {
 
-    String dataset = (String) eeaEventVO.getData().get(LiteralConstants.DATASET_ID);
-    String idDatasetSchema = (String) eeaEventVO.getData().get(LiteralConstants.ID_DATASET_SCHEMA);
-    if (StringUtils.isNotBlank(dataset) && StringUtils.isNotBlank(idDatasetSchema)) {
-      String[] aux = dataset.split("_");
-      Long idDataset = Long.valueOf(aux[aux.length - 1]);
-      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
-      // Dataset data and statistics initialization. Check first if this is not an error and the
-      // dataset is already initialized
-      if (tableRepository.count() > 0) {
-        LOG_ERROR.error("The dataset {} is already initialized", idDataset);
+      String dataset = (String) eeaEventVO.getData().get(LiteralConstants.DATASET_ID);
+      String idDatasetSchema = (String) eeaEventVO.getData().get(LiteralConstants.ID_DATASET_SCHEMA);
+      if (StringUtils.isNotBlank(dataset) && StringUtils.isNotBlank(idDatasetSchema)) {
+        String[] aux = dataset.split("_");
+        Long idDataset = Long.valueOf(aux[aux.length - 1]);
+        TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
+        // Dataset data and statistics initialization. Check first if this is not an error and the
+        // dataset is already initialized
+        if (tableRepository.count() > 0) {
+          LOG_ERROR.error("The dataset {} is already initialized", idDataset);
+        } else {
+          datasetService.initializeDataset(idDataset, idDatasetSchema);
+        }
+
       } else {
-        datasetService.initializeDataset(idDataset, idDatasetSchema);
+        LOG_ERROR.error(
+                "Error creating the processes creating a new dataset connection because of the null datasetId or idDatasetSchema. DatasetId: {}. IdDatasetSchema: {}",
+                dataset, idDatasetSchema);
       }
-
-    } else {
-      LOG_ERROR.error(
-          "Error creating the processes creating a new dataset connection because of the null datasetId or idDatasetSchema. DatasetId: {}. IdDatasetSchema: {}",
-          dataset, idDatasetSchema);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      throw e;
     }
   }
 

@@ -424,6 +424,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
     } catch (IOException e) {
       LOG_ERROR.error("Error in exporting representatives for dataflowId {} Message: {}", dataflowId, EEAErrorMessage.CSV_FILE_ERROR, e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error in exportFile for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
     // Once read we convert it to string
     String csv = writer.getBuffer().toString();
@@ -462,6 +465,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
     } catch (IOException e) {
       LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error in exportTemplateReportersFile for groupId {}. Message: {}", groupId, e.getMessage());
+      throw e;
     }
     // Once read we convert it to string
     String csv = writer.getBuffer().toString();
@@ -516,6 +522,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     } catch (EEAException e) {
       LOG_ERROR.error(EEAErrorMessage.DATAFLOW_NOTFOUND, e);
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error in importLeadReportersFile for dataflowId {} and groupId {}. Message: {}", dataflowId, groupId, e.getMessage());
+      throw e;
     }
 
     // Converts the read buffer to string and write it into the CSV file

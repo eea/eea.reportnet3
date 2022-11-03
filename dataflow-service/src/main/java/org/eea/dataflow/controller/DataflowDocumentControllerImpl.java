@@ -75,6 +75,9 @@ public class DataflowDocumentControllerImpl implements DataFlowDocumentControlle
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND,
           e);
+    } catch(Exception e){
+      LOG.error("Unexpected error! Could not retrieve document info by id for documentId {} Message: {}", documentId, e.getMessage());
+      throw e;
     }
     return document;
   }
@@ -109,6 +112,10 @@ public class DataflowDocumentControllerImpl implements DataFlowDocumentControlle
       }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
           e);
+    } catch(Exception e){
+      Long documentId = (document != null) ? document.getId() : null;
+      LOG.error("Unexpected error! Could not update document info for documentId {} Message: {}", documentId, e.getMessage());
+      throw e;
     }
   }
 
@@ -143,6 +150,11 @@ public class DataflowDocumentControllerImpl implements DataFlowDocumentControlle
       }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
           e);
+    } catch(Exception e){
+      Long documentId = (document != null) ? document.getId() : null;
+      String documentName = (document != null) ? document.getName() : null;
+      LOG.error("Unexpected error! Could not insert document for documentId {} and documentName {} Message: {}", documentId, documentName, e.getMessage());
+      throw e;
     }
   }
 
@@ -166,6 +178,9 @@ public class DataflowDocumentControllerImpl implements DataFlowDocumentControlle
       LOG.info("Error when deleting document with id {}", documentId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
           e);
+    } catch(Exception e){
+      LOG.error("Unexpected error! Could not delete document for documentId {} Message: {}", documentId, e.getMessage());
+      throw e;
     }
   }
 
@@ -188,6 +203,9 @@ public class DataflowDocumentControllerImpl implements DataFlowDocumentControlle
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DOCUMENT_NOT_FOUND,
           e);
+    } catch(Exception e){
+      LOG.error("Unexpected error! Could not retrieve all documents for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
     return documents;
   }

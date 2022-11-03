@@ -697,7 +697,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       recordStoreControllerZuul.createSnapshotData(idDataset, idSnapshot, idPartition, null, false);
       LOG.info("Successfully added snapshot with snapshotId {} and datasetId {}", idSnapshot, idDataset);
     } catch (Exception e) {
-      LOG_ERROR.error("Error creating snapshot for datasetId {}", idDataset, e);
+      LOG_ERROR.error("Unexpected error! Error creating snapshot for dataset schema {}", idDataset, e);
       releaseEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage());
       // Release the lock manually
       Map<String, Object> createSchemaSnapshot = new HashMap<>();
@@ -1071,37 +1071,41 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Async
   public void createReleaseSnapshots(Long dataflowId, Long dataProviderId,
       boolean restrictFromPublic, boolean validate) throws EEAException {
-    LOG.info("Releasing datasets process begins. DataflowId: {} DataProviderId: {}", dataflowId,
-        dataProviderId);
-    // First dataset involved in the process
-    ReportingDataset dataset = reportingDatasetRepository
-        .findFirstByDataflowIdAndDataProviderIdOrderByIdAsc(dataflowId, dataProviderId);
-    // List of the datasets involved
-    List<Long> datasetsFilters = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
-        .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
-        .distinct().collect(Collectors.toList());
+    try {
+      LOG.info("Releasing datasets process begins. DataflowId: {} DataProviderId: {}", dataflowId,
+              dataProviderId);
+      // First dataset involved in the process
+      ReportingDataset dataset = reportingDatasetRepository
+              .findFirstByDataflowIdAndDataProviderIdOrderByIdAsc(dataflowId, dataProviderId);
+      // List of the datasets involved
+      List<Long> datasetsFilters = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
+              .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
+              .distinct().collect(Collectors.toList());
 
-    // Lock all the operations related to the datasets involved
-    addLocksRelatedToRelease(datasetsFilters, dataflowId);
+      // Lock all the operations related to the datasets involved
+      addLocksRelatedToRelease(datasetsFilters, dataflowId);
 
-    // Update representative visibility
-    representativeControllerZuul.updateRepresentativeVisibilityRestrictions(dataflowId,
-        dataProviderId, restrictFromPublic);
+      // Update representative visibility
+      representativeControllerZuul.updateRepresentativeVisibilityRestrictions(dataflowId,
+              dataProviderId, restrictFromPublic);
 
-    // if the user is admin can release without validations
-    if (!isAdmin() || validate) {
-      validationControllerZuul.validateDataSetData(dataset.getId(), true);
-    } else {
-      String processId = UUID.randomUUID().toString();
-      String notificationUser = SecurityContextHolder.getContext().getAuthentication().getName();
-      Map<String, Object> value = new HashMap<>();
-      value.put(LiteralConstants.DATASET_ID, dataset.getId());
-      value.put("uuid", processId);
-      value.put("user", notificationUser);
-      kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
+      // if the user is admin can release without validations
+      if (!isAdmin() || validate) {
+        validationControllerZuul.validateDataSetData(dataset.getId(), true);
+      } else {
+        String processId = UUID.randomUUID().toString();
+        String notificationUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        Map<String, Object> value = new HashMap<>();
+        value.put(LiteralConstants.DATASET_ID, dataset.getId());
+        value.put("uuid", processId);
+        value.put("user", notificationUser);
+        kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating release snapshots for dataflowId {} and dataProviderId {} Message: {}", dataflowId, dataProviderId, e.getMessage());
+      throw e;
     }
     LOG.info("Successfully created release snapshots for dataflowId {} and dataProviderId {}", dataflowId, dataProviderId);
-
   }
 
 
@@ -1115,72 +1119,79 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId)
       throws EEAException {
+    try {
+      List<Long> datasets = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
+              .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
+              .collect(Collectors.toList());
 
-    List<Long> datasets = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
-        .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
-        .collect(Collectors.toList());
+      // We have to lock all the dataset operations (insert, delete, update...)
+      for (Long datasetId : datasets) {
 
-    // We have to lock all the dataset operations (insert, delete, update...)
-    for (Long datasetId : datasets) {
+        Map<String, Object> insertRecords = new HashMap<>();
+        insertRecords.put(LiteralConstants.SIGNATURE, LockSignature.INSERT_RECORDS.getValue());
+        insertRecords.put(LiteralConstants.DATASETID, datasetId);
 
-      Map<String, Object> insertRecords = new HashMap<>();
-      insertRecords.put(LiteralConstants.SIGNATURE, LockSignature.INSERT_RECORDS.getValue());
-      insertRecords.put(LiteralConstants.DATASETID, datasetId);
+        Map<String, Object> deleteRecords = new HashMap<>();
+        deleteRecords.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_RECORDS.getValue());
+        deleteRecords.put(LiteralConstants.DATASETID, datasetId);
 
-      Map<String, Object> deleteRecords = new HashMap<>();
-      deleteRecords.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_RECORDS.getValue());
-      deleteRecords.put(LiteralConstants.DATASETID, datasetId);
+        Map<String, Object> updateField = new HashMap<>();
+        updateField.put(LiteralConstants.SIGNATURE, LockSignature.UPDATE_FIELD.getValue());
+        updateField.put(LiteralConstants.DATASETID, datasetId);
 
-      Map<String, Object> updateField = new HashMap<>();
-      updateField.put(LiteralConstants.SIGNATURE, LockSignature.UPDATE_FIELD.getValue());
-      updateField.put(LiteralConstants.DATASETID, datasetId);
+        Map<String, Object> updateRecords = new HashMap<>();
+        updateRecords.put(LiteralConstants.SIGNATURE, LockSignature.UPDATE_RECORDS.getValue());
+        updateRecords.put(LiteralConstants.DATASETID, datasetId);
 
-      Map<String, Object> updateRecords = new HashMap<>();
-      updateRecords.put(LiteralConstants.SIGNATURE, LockSignature.UPDATE_RECORDS.getValue());
-      updateRecords.put(LiteralConstants.DATASETID, datasetId);
+        Map<String, Object> deleteDatasetValues = new HashMap<>();
+        deleteDatasetValues.put(LiteralConstants.SIGNATURE,
+                LockSignature.DELETE_DATASET_VALUES.getValue());
+        deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
 
-      Map<String, Object> deleteDatasetValues = new HashMap<>();
-      deleteDatasetValues.put(LiteralConstants.SIGNATURE,
-          LockSignature.DELETE_DATASET_VALUES.getValue());
-      deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
+        Map<String, Object> importFileData = new HashMap<>();
+        importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+        importFileData.put(LiteralConstants.DATASETID, datasetId);
+        Map<String, Object> importBigFileData = new HashMap<>();
+        importBigFileData.put(LiteralConstants.SIGNATURE,
+                LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+        importBigFileData.put(LiteralConstants.DATASETID, datasetId);
 
-      Map<String, Object> importFileData = new HashMap<>();
-      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
-      importFileData.put(LiteralConstants.DATASETID, datasetId);
-      Map<String, Object> importBigFileData = new HashMap<>();
-      importBigFileData.put(LiteralConstants.SIGNATURE,
-          LockSignature.IMPORT_BIG_FILE_DATA.getValue());
-      importBigFileData.put(LiteralConstants.DATASETID, datasetId);
-
-      Map<String, Object> restoreSnapshots = new HashMap<>();
-      restoreSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RESTORE_SNAPSHOT.getValue());
-      restoreSnapshots.put(LiteralConstants.DATASETID, datasetId);
+        Map<String, Object> restoreSnapshots = new HashMap<>();
+        restoreSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RESTORE_SNAPSHOT.getValue());
+        restoreSnapshots.put(LiteralConstants.DATASETID, datasetId);
 
 
-      Map<String, Object> insertRecordsMultitable = new HashMap<>();
-      insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
-          LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
-      insertRecordsMultitable.put(LiteralConstants.DATASETID, datasetId);
+        Map<String, Object> insertRecordsMultitable = new HashMap<>();
+        insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
+                LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
+        insertRecordsMultitable.put(LiteralConstants.DATASETID, datasetId);
 
-      lockService.removeLockByCriteria(insertRecords);
-      lockService.removeLockByCriteria(deleteRecords);
-      lockService.removeLockByCriteria(updateField);
-      lockService.removeLockByCriteria(updateRecords);
-      lockService.removeLockByCriteria(deleteDatasetValues);
-      lockService.removeLockByCriteria(importFileData);
-      lockService.removeLockByCriteria(importBigFileData);
-      lockService.removeLockByCriteria(insertRecordsMultitable);
-      lockService.removeLockByCriteria(restoreSnapshots);
+        lockService.removeLockByCriteria(insertRecords);
+        lockService.removeLockByCriteria(deleteRecords);
+        lockService.removeLockByCriteria(updateField);
+        lockService.removeLockByCriteria(updateRecords);
+        lockService.removeLockByCriteria(deleteDatasetValues);
+        lockService.removeLockByCriteria(importFileData);
+        lockService.removeLockByCriteria(importBigFileData);
+        lockService.removeLockByCriteria(insertRecordsMultitable);
+        lockService.removeLockByCriteria(restoreSnapshots);
 
-      // Delete tables and import tables
-      DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
-      for (TableSchemaVO table : schema.getTableSchemas()) {
-        Map<String, Object> deleteImportTable = new HashMap<>();
-        deleteImportTable.put(LiteralConstants.SIGNATURE,
-            LockSignature.DELETE_IMPORT_TABLE.getValue());
-        deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
-        deleteImportTable.put(LiteralConstants.TABLESCHEMAID, table.getIdTableSchema());
-        lockService.removeLockByCriteria(deleteImportTable);
+        // Delete tables and import tables
+        DataSetSchemaVO schema = schemaService.getDataSchemaByDatasetId(false, datasetId);
+        for (TableSchemaVO table : schema.getTableSchemas()) {
+          Map<String, Object> deleteImportTable = new HashMap<>();
+          deleteImportTable.put(LiteralConstants.SIGNATURE,
+                  LockSignature.DELETE_IMPORT_TABLE.getValue());
+          deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
+          deleteImportTable.put(LiteralConstants.TABLESCHEMAID, table.getIdTableSchema());
+          lockService.removeLockByCriteria(deleteImportTable);
+        }
+
+        // Set the 'releasing' property to false in the dataset metabase
+        ReportingDatasetVO reportingVO = new ReportingDatasetVO();
+        reportingVO.setId(datasetId);
+        reportingVO.setReleasing(false);
+        reportingDatasetService.updateReportingDatasetMetabase(reportingVO);
       }
 
       // Set the 'releasing' property to false in the dataset metabase
@@ -1190,19 +1201,22 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       reportingDatasetService.updateReportingDatasetMetabase(reportingVO);
     }
     LOG.info("All dataset operation have been locked for datasets in  dataflowId {} with dataProviderId {}", dataflowId, dataProviderId);
+      Map<String, Object> populateEuDataset = new HashMap<>();
+      populateEuDataset.put(LiteralConstants.SIGNATURE, LockSignature.POPULATE_EU_DATASET.getValue());
+      populateEuDataset.put(LiteralConstants.DATAFLOWID, dataflowId);
 
-    Map<String, Object> populateEuDataset = new HashMap<>();
-    populateEuDataset.put(LiteralConstants.SIGNATURE, LockSignature.POPULATE_EU_DATASET.getValue());
-    populateEuDataset.put(LiteralConstants.DATAFLOWID, dataflowId);
-
-    Map<String, Object> releaseSnapshots = new HashMap<>();
-    releaseSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
-    releaseSnapshots.put(LiteralConstants.DATAFLOWID, dataflowId);
-    releaseSnapshots.put(LiteralConstants.DATAPROVIDERID, dataProviderId);
+      Map<String, Object> releaseSnapshots = new HashMap<>();
+      releaseSnapshots.put(LiteralConstants.SIGNATURE, LockSignature.RELEASE_SNAPSHOTS.getValue());
+      releaseSnapshots.put(LiteralConstants.DATAFLOWID, dataflowId);
+      releaseSnapshots.put(LiteralConstants.DATAPROVIDERID, dataProviderId);
 
 
-    lockService.removeLockByCriteria(populateEuDataset);
-    lockService.removeLockByCriteria(releaseSnapshots);
+      lockService.removeLockByCriteria(populateEuDataset);
+      lockService.removeLockByCriteria(releaseSnapshots);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error releasing locks related to release for dataflowId {} and dataProviderId {} Message: {}", dataflowId, dataProviderId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
