@@ -4,9 +4,7 @@ import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,11 +29,10 @@ public interface JobController {
      *
      * @param datasetId the id of the dataset that will be validated
      * @param released the released
-     * @param creator the creator's username
      * @return
      */
-    @PostMapping(value = "/addValidation/{datasetId}/{released}/{creator}")
-    void addValidationJob(@PathVariable("datasetId") Long datasetId, @PathVariable("released") Boolean released, @PathVariable("creator") String creator);
+    @PutMapping(value = "/addValidationJob/{datasetId}")
+    void addValidationJob(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "released", required = false) boolean released);
 
     /**
      * Adds a release job

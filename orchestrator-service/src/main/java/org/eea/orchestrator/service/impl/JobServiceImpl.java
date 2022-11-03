@@ -112,6 +112,11 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public Boolean checkEligibilityOfJob(JobTypeEnum jobType, Long datasetId){
+        //TODO implement check and return something
+        return true;
+    }
+    @Override
     public void prepareAndExecuteValidationJob(JobVO jobVO){
         Job job = jobMapper.classToEntity(jobVO);
         Map<String, Object> parameters = job.getParameters();

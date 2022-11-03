@@ -26,16 +26,6 @@ public interface ValidationController {
   }
 
   /**
-   * Adds a new validation job
-   *
-   * @param datasetId the dataset id
-   * @param released the released
-   */
-  @PutMapping(value = "/dataset/{id}")
-  void addValidateDataSetDataJob(@PathVariable("id") Long datasetId,
-                           @RequestParam(value = "released", required = false) boolean released);
-
-  /**
    * Executes the validation job
    *
    * @param datasetId the dataset id

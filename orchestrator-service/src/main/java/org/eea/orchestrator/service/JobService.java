@@ -14,6 +14,8 @@ public interface JobService {
 
     Boolean canJobBeExecuted(JobVO job);
 
+    Boolean checkEligibilityOfJob(JobTypeEnum jobType, Long datasetId);
+
     void addValidationJob(Long datasetId, Boolean released, String creator);
 
     void addReleaseJob(Long dataflowId, Long dataProviderId, Boolean restrictFromPublic, Boolean validate, String creator);

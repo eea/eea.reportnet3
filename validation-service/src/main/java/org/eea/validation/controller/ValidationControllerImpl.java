@@ -96,50 +96,6 @@ public class ValidationControllerImpl implements ValidationController {
   @Autowired
   private JobControllerZuul jobControllerZuul;
 
-  /**
-   * Adds a new validation job
-   *
-   * @param datasetId the dataset id
-   * @param released the released
-   */
-  @Override
-  @PutMapping(value = "/dataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')  OR hasAnyRole('ADMIN')")
-  @LockMethod(removeWhenFinish = false)
-  @ApiOperation(value = "Validates dataset data for a given dataset id", hidden = true)
-  @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
-  public void addValidateDataSetDataJob(
-          @LockCriteria(name = "datasetId") @ApiParam(
-                  value = "Dataset id whose data is going to be validated",
-                  example = "15") @PathVariable("id") Long datasetId,
-          @ApiParam(value = "Is the dataset released?", example = "true",
-                  required = false) @RequestParam(value = "released", required = false) boolean released) {
-
-    String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-    LOG.info(
-            "The user invoking ValidationControllerImpl.addValidateDataSetDataJob is {} and the datasetId {}",
-            username, datasetId);
-
-
-    // Set the user name on the thread
-    ThreadPropertiesManager.setVariable("user",
-            SecurityContextHolder.getContext().getAuthentication().getName());
-    if (datasetId == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              EEAErrorMessage.DATASET_INCORRECT_ID);
-    }
-    try {
-      LOG.info("Adding validation job for datasetId {}, released {} and creator {}", datasetId, released, username);
-      jobControllerZuul.addValidationJob(datasetId, released, username);
-      LOG.info("Successfully added validation job for datasetId {}, released {} and creator {}", datasetId, released, username);
-    } catch (Exception e){
-      LOG.error("Unexpected error! Could not add validation job for datasetId {}, released {} and creator {}. Message: {}", datasetId, released, username, e.getMessage());
-      throw e;
-    }
-
-  }
-
 
   /**
    * Executes the validation job
