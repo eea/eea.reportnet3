@@ -309,7 +309,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       example = "Dataset schema displayed name") @PathVariable("datasetSchemaName") String datasetSchemaName) {
     try {
       recordStoreService.deleteDataset(datasetSchemaName);
-    LOG.info("Deleted dataset with name {}", datasetSchemaName);
+      LOG.info("Deleted dataset with name {}", datasetSchemaName);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error deleting dataset {}. Message: {}", datasetSchemaName, e.getMessage());
       throw e;

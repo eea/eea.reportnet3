@@ -94,9 +94,9 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     try {
       // This method will release the lock
-    LOG.info("Undoing data collection creation for dataflowId {}", dataflowId);
-    dataCollectionService.undoDataCollectionCreation(datasetIds, dataflowId, isCreation);
-    LOG.info("Successfully undid data collection creation for dataflowId {}", dataflowId);
+      LOG.info("Undoing data collection creation for dataflowId {}", dataflowId);
+      dataCollectionService.undoDataCollectionCreation(datasetIds, dataflowId, isCreation);
+      LOG.info("Successfully undid data collection creation for dataflowId {}", dataflowId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error undoing data collection creation for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
@@ -180,9 +180,9 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     try {
-    // This method will release the lock
-    LOG.info("Creating empty data collection for dataflowId {}", dataflowId);
-    dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
+      // This method will release the lock
+      LOG.info("Creating empty data collection for dataflowId {}", dataflowId);
+      dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
         manualCheck, showPublicInfo, referenceDataflow, stopAndNotifyPKError);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error creating empty data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
@@ -231,8 +231,8 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     try {
       // This method will release the lock
-    LOG.info("Updating data collection for dataflowId {}", dataflowId);
-    dataCollectionService.updateDataCollection(dataflowId, referenceDataflow);
+      LOG.info("Updating data collection for dataflowId {}", dataflowId);
+      dataCollectionService.updateDataCollection(dataflowId, referenceDataflow);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error updating data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;

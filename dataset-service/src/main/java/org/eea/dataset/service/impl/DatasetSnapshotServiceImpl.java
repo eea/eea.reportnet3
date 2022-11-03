@@ -1101,11 +1101,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         value.put("user", notificationUser);
         kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
       }
+      LOG.info("Successfully created release snapshots for dataflowId {} and dataProviderId {}", dataflowId, dataProviderId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error creating release snapshots for dataflowId {} and dataProviderId {} Message: {}", dataflowId, dataProviderId, e.getMessage());
       throw e;
     }
-    LOG.info("Successfully created release snapshots for dataflowId {} and dataProviderId {}", dataflowId, dataProviderId);
   }
 
 
@@ -1194,13 +1194,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         reportingDatasetService.updateReportingDatasetMetabase(reportingVO);
       }
 
-      // Set the 'releasing' property to false in the dataset metabase
-      ReportingDatasetVO reportingVO = new ReportingDatasetVO();
-      reportingVO.setId(datasetId);
-      reportingVO.setReleasing(false);
-      reportingDatasetService.updateReportingDatasetMetabase(reportingVO);
-    }
-    LOG.info("All dataset operation have been locked for datasets in  dataflowId {} with dataProviderId {}", dataflowId, dataProviderId);
+      LOG.info("All dataset operation have been locked for datasets in  dataflowId {} with dataProviderId {}", dataflowId, dataProviderId);
       Map<String, Object> populateEuDataset = new HashMap<>();
       populateEuDataset.put(LiteralConstants.SIGNATURE, LockSignature.POPULATE_EU_DATASET.getValue());
       populateEuDataset.put(LiteralConstants.DATAFLOWID, dataflowId);

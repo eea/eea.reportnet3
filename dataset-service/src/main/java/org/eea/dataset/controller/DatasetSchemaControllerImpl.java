@@ -970,8 +970,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public Boolean validateSchema(@ApiParam(type = "String", value = "Dataset Schema Id",
       example = "5cf0e9b3b793310e9ceca190") @PathVariable("schemaId") String datasetSchemaId) {
     try {
-    LOG.info("Validating schema with datasetSchemaId {}", datasetSchemaId);
-    return dataschemaService.validateSchema(datasetSchemaId, null);
+      LOG.info("Validating schema with datasetSchemaId {}", datasetSchemaId);
+      return dataschemaService.validateSchema(datasetSchemaId, null);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error validating dataset schema {} Message: {}", datasetSchemaId, e.getMessage());
       throw e;
@@ -996,7 +996,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       // Recover the designs datasets of the dataflowId given. And then, for each design dataset
       // executes a validation.
       // At the first wrong design dataset, it stops and returns false. Otherwise it returns true
-    LOG.info("Validating schemas for dataflowId {}", dataflowId);
+      LOG.info("Validating schemas for dataflowId {}", dataflowId);
       DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId, null);
       Boolean isValid = false;
       if (dataflow.getDesignDatasets() != null && !dataflow.getDesignDatasets().isEmpty()) {
@@ -1005,12 +1005,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
                 .collect(Collectors.toSet());
         isValid = results.contains(true) && !results.contains(false);
       }
+      LOG.info("Successfully validated schemas for dataflowId {}. Result is {}", dataflowId, isValid);
+      return isValid;
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error validating dataset schemas for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
-    LOG.info("Successfully validated schemas for dataflowId {}. Result is {}", dataflowId, isValid);
-    return isValid;
   }
 
   /**

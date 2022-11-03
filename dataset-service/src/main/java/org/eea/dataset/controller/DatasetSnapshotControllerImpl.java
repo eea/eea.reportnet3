@@ -188,10 +188,10 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     try {
-    LOG.info("Adding snapshot for datasetId {}", datasetId);
-    // This method will release the lock
-    datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null, null, false);
-    LOG.info("Successfully added snapshot for datasetId {}", datasetId);
+      LOG.info("Adding snapshot for datasetId {}", datasetId);
+      // This method will release the lock
+      datasetSnapshotService.addSnapshot(datasetId, createSnapshot, null, null, false);
+      LOG.info("Successfully added snapshot for datasetId {}", datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error adding snapshot for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;
@@ -425,10 +425,10 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     try {
-    LOG.info("Adding snapshot for datasetId {}", datasetId);
-    // This method will release the lock
-    datasetSnapshotService.addSchemaSnapshot(datasetId, idDatasetSchema, description);
-    LOG.info("Successfully added snapshot for datasetId {}", datasetId);
+      LOG.info("Adding snapshot for datasetId {}", datasetId);
+      // This method will release the lock
+      datasetSnapshotService.addSchemaSnapshot(datasetId, idDatasetSchema, description);
+      LOG.info("Successfully added snapshot for datasetId {}", datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error adding schema snapshots for datasetId {} and datasetSchemaId {} Message: {}", datasetId, idDatasetSchema, e.getMessage());
       throw e;
@@ -674,9 +674,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   public void updateSnapshotEURelease(@ApiParam(type = "Long", value = "Dataset Id",
       example = "0") @PathVariable("idDataset") Long datasetId) {
     try {
-    LOG.info("Updating snapshot EU Release for datasetId {}", datasetId);
-    datasetSnapshotService.updateSnapshotEURelease(datasetId);
-    LOG.info("Successfully updated snapshot EU Release for datasetId {}", datasetId);
+      LOG.info("Updating snapshot EU Release for datasetId {}", datasetId);
+      datasetSnapshotService.updateSnapshotEURelease(datasetId);
+      LOG.info("Successfully updated snapshot EU Release for datasetId {}", datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error updating snapshot EU release for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;

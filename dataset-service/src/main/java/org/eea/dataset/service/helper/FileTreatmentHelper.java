@@ -887,13 +887,13 @@ public class FileTreatmentHelper implements DisposableBean {
       }
 
     } catch (EEAException | FeignException | IOException e) {
-      LOG_ERROR.error(
+        LOG_ERROR.error(
           "Unexpected exception importing file data: datasetId={}, file={}. Message: {}", datasetId,
           multipartFile.getName(), e.getMessage(), e);
-      releaseLock(datasetId);
-      datasetMetabaseService.updateDatasetRunningStatus(datasetId,
+        releaseLock(datasetId);
+        datasetMetabaseService.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_IMPORT);
-      throw new EEAException(e);
+        throw new EEAException(e);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in fileManagement for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
       throw e;
