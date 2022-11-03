@@ -83,8 +83,7 @@ public class ExecutePropagateNewFieldCommand extends AbstractEEAEventHandlerComm
           typeField);
       LOG.info("field {} from datasetId {} propagated", fieldSchemaId, datasetId);
     } catch (Exception e) {
-      LOG_ERROR.error("Error processing propagations for new field column in dataset {}", datasetId,
-          e);
+      LOG_ERROR.error("Unexpected error! Error processing propagations for new field column in dataset {} event= {}. Message: {}", datasetId, eeaEventVO, e.getMessage());
       eeaEventVO.getData().put("error", e);
       removeLockDeleteFieldSchema(datasetId, fieldSchemaId);
     } finally {

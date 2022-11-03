@@ -1,5 +1,6 @@
 package org.eea.dataflow.controller.fme;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -138,6 +139,11 @@ public class FMEControllerImpl implements FMEController {
     } catch (EEAUnauthorizedException e) {
       exception = e;
       httpStatus = HttpStatus.UNAUTHORIZED;
+    } catch(Exception e){
+      Long datasetId = (fmeOperationInfoVO != null) ? fmeOperationInfoVO.getDatasetId() : null;
+      Long rn3JobId = (fmeOperationInfoVO != null) ? fmeOperationInfoVO.getRn3JobId() : null;
+      LOG_ERROR.error("Unexpected error! Could not notify a FME Operation finished for datasetId {} and rn3JobId {} Message: {}", datasetId, rn3JobId, e.getMessage());
+      throw e;
     }
 
     lockService.removeLockByCriteria(lockCriteria);
@@ -170,6 +176,9 @@ public class FMEControllerImpl implements FMEController {
       InputStream is = fmeCommunicationService.receiveFile(datasetId, providerId, fileName);
       try {
         streamingUtil.copy(is, out);
+      } catch (Exception e){
+        LOG_ERROR.error("Error copying file {} for datasetId {} and providerId {} Message: {}", fileName, datasetId, providerId, e.getMessage());
+        throw e;
       } finally {
         is.close();
       }

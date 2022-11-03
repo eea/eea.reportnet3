@@ -262,7 +262,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
       @Override
       public List<FieldVO> execute(Connection conn) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(finalQuery);
-            ResultSet rs = stmt.executeQuery();) {
+            ResultSet rs = stmt.executeQuery()) {
           List<FieldVO> fields = new ArrayList<>();
           while (rs.next()) {
             FieldVO field = new FieldVO();
@@ -271,6 +271,9 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
             fields.add(field);
           }
           return fields;
+        } catch (Exception e) {
+          LOG.error("Unexpected error! Error executing query {}. Message: {}", finalQuery, e.getMessage());
+          throw e;
         }
       }
     });
@@ -288,7 +291,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     return session.doReturningWork(new ReturningWork<List<FieldVO>>() {
       @Override
       public List<FieldVO> execute(Connection conn) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement(query);) {
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
           stmt.setMaxRows(resultsNumber);
           ResultSet rs = stmt.executeQuery();
           List<FieldVO> fields = new ArrayList<>();
@@ -301,6 +304,9 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
             fields.add(fieldVO);
           }
           return fields;
+        } catch (Exception e) {
+          LOG.error("Unexpected error! Error executing query {} with max rows {}. Message: {}", query, resultsNumber, e.getMessage());
+          throw e;
         }
       }
     });

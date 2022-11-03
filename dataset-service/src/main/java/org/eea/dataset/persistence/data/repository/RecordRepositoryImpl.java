@@ -655,6 +655,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     } catch (SQLException | IOException e) {
       LOG_ERROR.error("Error creating a file into the temp_etlexport from dataset {}", datasetId,
           e);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in fileTempEtlExport for query {} and datasetId {}. Message: {}", query, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -690,6 +693,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     } catch (SQLException | IOException | InterruptedException e) {
       LOG_ERROR.error("Error restoring a file into the temp_etlexport from dataset {}", datasetId,
           e);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in fileTempEtlImport for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -719,6 +725,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       if (cp.isActive()) {
         cp.cancelCopy();
       }
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error copying from file {} with query {} Message: {}", fileName, query, e.getMessage());
+      throw e;
     } finally {
       Files.deleteIfExists(path);
     }
@@ -743,6 +752,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       while ((buffer = copyOut.readFromCopy()) != null) {
         to.write(buffer);
       }
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in printToFile for fileName {} and query {}. Message: {}", fileName, query, e.getMessage());
+      throw e;
     } finally {
       if (copyOut.isActive()) {
         copyOut.cancelCopy();
@@ -1056,7 +1068,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     conn.setSchema("dataset_" + datasetId);
     List<RecordValue> records = new ArrayList<>();
 
-    try (PreparedStatement stmt = conn.prepareStatement(stringQuery);) {
+    try (PreparedStatement stmt = conn.prepareStatement(stringQuery)) {
 
       // Parametrize the levelError based on how many LevelErrors are in the enum, CORRECT mustn't
       // be included
@@ -1094,6 +1106,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
         records.add(record);
       }
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in findByTableValueOrdered for datasetId {} and tableId {}. Message: {}", datasetId, tableId, e.getMessage());
+      throw e;
     }
     return records;
   }

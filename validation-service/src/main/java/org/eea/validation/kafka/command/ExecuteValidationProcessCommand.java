@@ -6,6 +6,8 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.util.ValidationHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ExecuteValidationProcessCommand extends AbstractEEAEventHandlerCommand {
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
 
   /**
    * The validation helper.
@@ -42,17 +48,22 @@ public class ExecuteValidationProcessCommand extends AbstractEEAEventHandlerComm
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
-    Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-    ThreadPropertiesManager.setVariable("user", eeaEventVO.getData().get("user"));
-    Object aux = eeaEventVO.getData().get("updateViews");
-    String processId = String.valueOf(eeaEventVO.getData().get("processId"));
-    boolean updateViews = !(aux instanceof Boolean) || (boolean) aux;
-    aux = eeaEventVO.getData().get("released");
-    boolean released = aux instanceof Boolean && (boolean) aux;
+    try {
+      Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+      ThreadPropertiesManager.setVariable("user", eeaEventVO.getData().get("user"));
+      Object aux = eeaEventVO.getData().get("updateViews");
+      String processId = String.valueOf(eeaEventVO.getData().get("processId"));
+      boolean updateViews = !(aux instanceof Boolean) || (boolean) aux;
+      aux = eeaEventVO.getData().get("released");
+      boolean released = aux instanceof Boolean && (boolean) aux;
 
-    // Add lock to the release process if necessary
-    validationHelper.executeValidation(datasetId, processId, released, updateViews);
-    validationHelper.addLockToReleaseProcess(datasetId);
+      // Add lock to the release process if necessary
+      validationHelper.executeValidation(datasetId, processId, released, updateViews);
+      validationHelper.addLockToReleaseProcess(datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      throw e;
+    }
   }
 
 
