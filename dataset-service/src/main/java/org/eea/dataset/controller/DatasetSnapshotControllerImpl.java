@@ -688,52 +688,6 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
   /**
-   * Adds a release snapshots job.
-   *
-   * @param dataflowId the dataflow id
-   * @param dataProviderId the data provider id
-   */
-  @Override
-  @LockMethod(removeWhenFinish = false)
-  @HystrixCommand
-  @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
-          produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER') OR hasAnyRole('ADMIN')")
-  @ApiOperation(value = "Create release snapshots", hidden = true)
-  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create"),
-          @ApiResponse(code = 400, message = "Execution error"),
-          @ApiResponse(code = 412, message = "Dataflow not releasable")})
-  public void addReleaseSnapshotJob(
-          @ApiParam(type = "Long", value = "Dataflow Id", example = "0") @LockCriteria(
-                  name = "dataflowId") @PathVariable(value = "dataflowId", required = true) Long dataflowId,
-          @ApiParam(type = "Long", value = "Provider Id", example = "0") @LockCriteria(
-                  name = "dataProviderId") @PathVariable(value = "dataProviderId",
-                  required = true) Long dataProviderId,
-          @ApiParam(type = "boolean", value = "Restric from public", example = "true") @RequestParam(
-                  name = "restrictFromPublic", required = true,
-                  defaultValue = "false") boolean restrictFromPublic,
-          @ApiParam(type = "boolean", value = "Execute validations", example = "true") @RequestParam(
-                  name = "validate", required = false, defaultValue = "true") boolean validate) {
-
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDataflowId(dataflowId);
-    userNotificationContentVO.setProviderId(dataProviderId);
-    notificationControllerZuul.createUserNotificationPrivate("RELEASE_START_EVENT",
-            userNotificationContentVO);
-
-    ThreadPropertiesManager.setVariable("user",
-            SecurityContextHolder.getContext().getAuthentication().getName());
-
-    LOG.info("The user invoking DataSetSnaphotControllerImpl.addReleaseSnapshotJob  for dataflowId {} and dataProviderId {} is {}",
-            dataflowId, dataProviderId, SecurityContextHolder.getContext().getAuthentication().getName());
-
-    LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName());
-    jobControllerZuul.addReleaseJob(dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName());
-    LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName());
-  }
-
-
-  /**
    * Executes the release snapshots.
    *
    * @param dataflowId the dataflow id

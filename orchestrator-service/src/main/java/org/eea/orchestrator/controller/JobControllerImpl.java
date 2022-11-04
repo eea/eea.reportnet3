@@ -1,9 +1,7 @@
 package org.eea.orchestrator.controller;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.*;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.vo.orchestrator.JobVO;
@@ -85,16 +83,30 @@ public class JobControllerImpl implements JobController {
     /**
      * Adds a release job.
      */
-    @PostMapping("/addRelease/{dataflowId}/{dataProviderId}/{restrictFromPublic}/{validate}/{creator}")
-    public void addReleaseJob(@PathVariable("dataflowId") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId, @PathVariable("restrictFromPublic") Boolean restrictFromPublic,
-                              @PathVariable("validate") Boolean validate, @PathVariable("creator") String creator){
-        try {
-            LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={}", dataflowId, dataProviderId, restrictFromPublic, validate, creator);
-            jobService.addReleaseJob(dataflowId, dataProviderId, restrictFromPublic, validate, creator);
-        } catch (Exception e){
-            LOG.error("Unexpected error! release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={}. Message: {}", dataflowId, dataProviderId, restrictFromPublic, validate, creator, e.getMessage());
-            throw e;
-        }
+    @Override
+    @LockMethod(removeWhenFinish = false)
+    @HystrixCommand
+    @PostMapping(value = "/addRelease/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER') OR hasAnyRole('ADMIN')")
+    @ApiOperation(value = "Create release snapshots", hidden = true)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create"),
+            @ApiResponse(code = 400, message = "Execution error"),
+            @ApiResponse(code = 412, message = "Dataflow not releasable")})
+    public void addReleaseJob (@ApiParam(type = "Long", value = "Dataflow Id", example = "0") @PathVariable(value = "dataflowId", required = true) Long dataflowId,
+        @ApiParam(type = "Long", value = "Provider Id", example = "0") @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,
+        @ApiParam(type = "boolean", value = "Restric from public", example = "true") @RequestParam(name = "restrictFromPublic", required = true, defaultValue = "false") boolean restrictFromPublic,
+        @ApiParam(type = "boolean", value = "Execute validations", example = "true") @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate) {
+
+        ThreadPropertiesManager.setVariable("user",
+                SecurityContextHolder.getContext().getAuthentication().getName());
+
+        LOG.info("The user adding a release job for dataflowId {} and dataProviderId {} is {}",
+                dataflowId, dataProviderId, SecurityContextHolder.getContext().getAuthentication().getName());
+
+        LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName());
+        jobService.addReleaseJob(dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName());
+        LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName());
     }
 
     /**

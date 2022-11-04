@@ -41,12 +41,15 @@ public interface JobController {
      * @param dataProviderId the dataProviderId
      * @param restrictFromPublic the restrictFromPublic
      * @param validate the validate
-     * @param creator the creator's username
      * @return
      */
-    @PostMapping("/addRelease/{dataflowId}/{dataProviderId}/{restrictFromPublic}/{validate}/{creator}")
-    void addReleaseJob(@PathVariable("dataflowId") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId, @PathVariable("restrictFromPublic") Boolean restrictFromPublic,
-                              @PathVariable("validate") Boolean validate, @PathVariable("creator") String creator);
+    @PostMapping(value = "/addRelease/{dataflowId}/dataProvider/{dataProviderId}/release", produces = MediaType.APPLICATION_JSON_VALUE)
+    void addReleaseJob(@PathVariable(value = "dataflowId", required = true) Long dataflowId,
+                       @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,
+                       @RequestParam(name = "restrictFromPublic", required = true,
+                               defaultValue = "false") boolean restrictFromPublic,
+                       @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate);
+
 
     /**
      * Update status by process id
