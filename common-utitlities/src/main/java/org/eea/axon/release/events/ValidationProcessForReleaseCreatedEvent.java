@@ -12,12 +12,12 @@ import java.util.Map;
 @Setter
 public class ValidationProcessForReleaseCreatedEvent {
 
+    private String validationReleaseAggregateId;
     private String recordStoreReleaseAggregateId;
     private String datasetReleaseAggregateId;
     private String releaseAggregateId;
     private String communicationReleaseAggregateId;
     private String dataflowReleaseAggregateId;
-    private String validationReleaseAggregateId;
     private String collaborationReleaseAggregateId;
     private String transactionId;
     private Long dataProviderId;

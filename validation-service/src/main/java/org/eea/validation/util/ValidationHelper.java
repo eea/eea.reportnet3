@@ -318,22 +318,6 @@ public class ValidationHelper implements DisposableBean {
                 dataset.getDataflowId(), dataset.getDatasetSchema())));
         values.put("processId", processId);
         kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
-        ProcessVO process = processControllerZuul.findById(processId);
-        if (process.isReleased()) {
-          DomainEventStream events = embeddedEventStore.readEvents(process.getAggregateId());
-          Optional<? extends DomainEventMessage<?>> domainEventMessage = events.asStream().findFirst();
-          if (domainEventMessage.isPresent()) {
-            MetaData metadata = domainEventMessage.get().getMetaData();
-            ValidationTasksForReleaseCreatedEvent event = (ValidationTasksForReleaseCreatedEvent) domainEventMessage.get().getPayload();
-            CancelReleaseBecauseOfFailedValidationCommand createReleaseSnapshotCommand = CancelReleaseBecauseOfFailedValidationCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
-                    .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).restrictFromPublic(event.isRestrictFromPublic()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).datasetIds(event.getDatasetIds())
-                    .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId())
-                    .validationReleaseAggregateId(event.getValidationReleaseAggregateId()).build();
-
-            commandGateway.send(GenericCommandMessage.asCommandMessage(createReleaseSnapshotCommand).withMetaData(metadata));
-          }
-        }
-
       }
     }
     dataset = null;
@@ -1149,7 +1133,7 @@ public class ValidationHelper implements DisposableBean {
                   ValidationProcessForReleaseCreatedEvent event = (ValidationProcessForReleaseCreatedEvent) domainEventMessage.get().getPayload();
                   CreateSnapshotRecordRorReleaseInMetabaseCommand createReleaseSnapshotCommand = CreateSnapshotRecordRorReleaseInMetabaseCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
                           .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).restrictFromPublic(event.isRestrictFromPublic()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).datasetIds(event.getDatasetIds())
-                          .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
+                          .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
 
                   commandGateway.send(GenericCommandMessage.asCommandMessage(createReleaseSnapshotCommand).withMetaData(metadata));
                 } else {

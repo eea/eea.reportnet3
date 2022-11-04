@@ -15,12 +15,12 @@ import java.util.List;
 public class CreateValidationProcessForReleaseCommand {
 
     @TargetAggregateIdentifier
+    private String validationReleaseAggregateId;
     private String recordStoreReleaseAggregateId;
     private String datasetReleaseAggregateId;
     private String releaseAggregateId;
     private String communicationReleaseAggregateId;
     private String dataflowReleaseAggregateId;
-    private String validationReleaseAggregateId;
     private String collaborationReleaseAggregateId;
     private String transactionId;
     private Long dataflowId;

@@ -225,8 +225,9 @@ public class ProcessServiceImpl implements ProcessService {
         processToUpdate.getDataflowId(), dataset.getDataProviderId(), dataset.getId()));
   }
 
+  @Transactional
   @Override
-  public void insertSagaTransactionIdAndAggregateId(String sagaTransactionId, String valReleaseAggregateId, String processId) {
-      processRepository.insertSagaTransactionIdAndAggregateId(sagaTransactionId, valReleaseAggregateId, processId);
+  public void insertSagaTransactionIdAndAggregateId(String sagaTransactionId, String aggregateId, String processId) {
+      processRepository.insertSagaTransactionIdAndAggregateId(sagaTransactionId, aggregateId, processId);
   }
 }

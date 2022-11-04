@@ -7,21 +7,21 @@ import org.axonframework.messaging.MetaData;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.bson.types.ObjectId;
+import org.eea.axon.release.commands.CreateValidationProcessForReleaseCommand;
 import org.eea.axon.release.commands.CreateValidationTasksForReleaseCommand;
+import org.eea.axon.release.events.ValidationProcessForReleaseCreatedEvent;
 import org.eea.axon.release.events.ValidationProcessForReleaseFailedEvent;
 import org.eea.axon.release.events.ValidationTasksForReleaseCreatedEvent;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.notification.factory.NotificableEventFactory;
 import org.eea.security.jwt.utils.EeaUserDetails;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.persistence.repository.RulesRepository;
@@ -58,6 +58,7 @@ public class ValidationReleaseAggregate {
     private boolean restrictFromPublic;
     private boolean validate;
     private List<Long> datasetIds;
+    private Map<Long, String> datasetProcessId;
 
     private static final Logger LOG = LoggerFactory.getLogger(ValidationReleaseAggregate.class);
 
@@ -65,7 +66,56 @@ public class ValidationReleaseAggregate {
     }
 
     @CommandHandler
-    public ValidationReleaseAggregate(CreateValidationTasksForReleaseCommand command, MetaData metaData, DataSetMetabaseControllerZuul datasetMetabaseControllerZuul, RulesRepository rulesRepository,
+    public ValidationReleaseAggregate(CreateValidationProcessForReleaseCommand command, MetaData metaData, ValidationController.ValidationControllerZuul validationControllerZuul, ProcessControllerZuul processControllerZuul) {
+        try {
+            LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
+            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
+
+            Map<Long, String> datasetProcessId = new HashMap<>();
+            command.getDatasetIds().forEach(datasetId -> {
+                int priority = validationControllerZuul.getPriority(command.getDataflowId());
+                LOG.info("Adding validation process for dataflowId: {} dataProvider: {} dataset ", command.getDataflowId(), command.getDataProviderId(), datasetId);
+                String processId = UUID.randomUUID().toString();
+                datasetProcessId.put(datasetId, processId);
+                processControllerZuul.updateProcess(datasetId, command.getDataflowId(),
+                        ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId,
+                        SecurityContextHolder.getContext().getAuthentication().getName(), priority, true);
+                processControllerZuul.insertSagaTransactionIdAndAggregateId(command.getTransactionId(), command.getValidationReleaseAggregateId(), processId);
+            });
+            ValidationProcessForReleaseCreatedEvent event = new ValidationProcessForReleaseCreatedEvent();
+            BeanUtils.copyProperties(command, event);
+            event.setDatasetProcessId(datasetProcessId);
+            apply(event, metaData);
+        } catch (Exception e) {
+            LOG.error("Error while adding validation process for dataflowId: {} dataProvider: {}: {}", command.getDataflowId(), command.getDataProviderId(), e.getMessage());
+            throw e;
+        }
+    }
+
+    @EventSourcingHandler
+    public void on(ValidationProcessForReleaseCreatedEvent event) {
+        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
+        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
+        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
+        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
+        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
+        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
+        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
+        this.transactionId = event.getTransactionId();
+        this.dataflowId = event.getDataflowId();
+        this.dataProviderId = event.getDataProviderId();
+        this.restrictFromPublic = event.isRestrictFromPublic();
+        this.validate = event.isValidate();
+        this.datasetIds = event.getDatasetIds();
+        this.datasetProcessId = event.getDatasetProcessId();
+    }
+
+    @CommandHandler
+    public void handle(CreateValidationTasksForReleaseCommand command, MetaData metaData, DataSetMetabaseControllerZuul datasetMetabaseControllerZuul, RulesRepository rulesRepository,
                                       ProcessControllerZuul processControllerZuul, @Autowired ValidationHelper validationHelper, @Autowired KafkaSenderUtils kafkaSenderUtils) throws EEAException {
         try {
             AtomicReference<Boolean> validation = new AtomicReference<>(true);

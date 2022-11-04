@@ -191,4 +191,17 @@ public class ProcessControllerImpl implements ProcessController {
     return processService.findNextProcess(processId);
   }
 
+  /**
+   * Inserts sagaTransactionId and aggregateId
+   * @param sagaTransactionId
+   * @param aggregateId
+   * @param processId
+   */
+  @Override
+  @PostMapping(value = "/private/insertSagaInfo")
+  public void insertSagaTransactionIdAndAggregateId(@RequestParam("sagaTransactionId") String sagaTransactionId,
+                                             @RequestParam("aggregateId") String aggregateId, @RequestParam("processId") String processId) {
+    processService.insertSagaTransactionIdAndAggregateId(sagaTransactionId, aggregateId, processId);
+  }
+
 }

@@ -78,8 +78,8 @@ public interface ProcessService {
   /**
    * Inserts sagaTransactionId and valReleaseAggregateId
    * @param sagaTransactionId
-   * @param valReleaseAggregateId
+   * @param aggregateId
    */
-  void insertSagaTransactionIdAndAggregateId(String sagaTransactionId, String valReleaseAggregateId, String processId);
+  void insertSagaTransactionIdAndAggregateId(String sagaTransactionId, String aggregateId, String processId);
 
 }

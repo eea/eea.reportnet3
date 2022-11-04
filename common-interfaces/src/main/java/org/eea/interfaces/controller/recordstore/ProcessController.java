@@ -6,10 +6,9 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import javax.ws.rs.POST;
 
 /**
  * The Interface ProcessController.
@@ -125,4 +124,13 @@ public interface ProcessController {
   @GetMapping(value = "/private/next/{processId}")
   ProcessVO getNextProcess(@PathVariable("processId") String processId);
 
+  /**
+   * Inserts sagaTransactionId and aggregateId
+   * @param sagaTransactionId
+   * @param aggregateId
+   * @param processId
+   */
+  @PostMapping(value = "/private/insertSagaInfo")
+  void insertSagaTransactionIdAndAggregateId(@RequestParam("sagaTransactionId") String sagaTransactionId,
+                                             @RequestParam("aggregateId") String aggregateId, @RequestParam("processId") String processId);
 }

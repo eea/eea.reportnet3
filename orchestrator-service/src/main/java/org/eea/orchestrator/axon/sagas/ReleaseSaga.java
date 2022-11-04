@@ -33,9 +33,9 @@ public class ReleaseSaga {
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ReleaseStartNotificationCreatedEvent event) {
         SendUserNotificationForReleaseStartedCommand sendUserNotificationForReleaseStartedCommand = SendUserNotificationForReleaseStartedCommand.builder().communicationReleaseAggregateId(UUID.randomUUID().toString()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
-                .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).build();
+                .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).releaseAggregateId(event.getReleaseAggregateId()).build();
         commandGateway.send(sendUserNotificationForReleaseStartedCommand).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command SendUserNotificationForReleaseStartedCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -48,7 +48,7 @@ public class ReleaseSaga {
 
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(addReleaseLocksCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command AddReleaseLocksCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             ReleaseFailureRemoveLocksCommand releaseFailureRemoveLocksCommand = ReleaseFailureRemoveLocksCommand.builder().datasetReleaseAggregateId(UUID.randomUUID().toString()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
                     .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
                     .releaseAggregateId(event.getReleaseAggregateId()).build();
@@ -66,7 +66,7 @@ public class ReleaseSaga {
 
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(updateRepresentativeVisibilityCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command UpdateRepresentativeVisibilityCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -75,11 +75,11 @@ public class ReleaseSaga {
     public void handle(RepresentativeVisibilityUpdatedEvent event, MetaData metaData) {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         if (!isAdmin(metaData) || event.isValidate()) {
-            CreateValidationProcessForReleaseCommand executeValidationProcessCommand = CreateValidationProcessForReleaseCommand.builder().recordStoreReleaseAggregateId(UUID.randomUUID().toString()).transactionId(event.getTransactionId())
+            CreateValidationProcessForReleaseCommand executeValidationProcessCommand = CreateValidationProcessForReleaseCommand.builder().validationReleaseAggregateId(UUID.randomUUID().toString()).transactionId(event.getTransactionId())
                     .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
                     .datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
             commandGateway.send(GenericCommandMessage.asCommandMessage(executeValidationProcessCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-                LOG.error(er.getCause().toString());
+                LOG.error("Error while executing command CreateValidationProcessForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
                 return er;
             });
         } else {
@@ -88,7 +88,7 @@ public class ReleaseSaga {
                     .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId())
                     .releaseAggregateId(event.getReleaseAggregateId()).build();
             commandGateway.send(GenericCommandMessage.asCommandMessage(createReleaseSnapshotCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-                LOG.error(er.getCause().toString());
+                LOG.error("Error while executing command CreateSnapshotRecordRorReleaseInMetabaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
                 return er;
             });
         }
@@ -111,13 +111,13 @@ public class ReleaseSaga {
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ValidationProcessForReleaseCreatedEvent event, MetaData metaData) {
         LOG.info("Validation process added for datasets {} of dataflow {} ", event.getDatasetIds(), event.getDataflowId());
-        CreateValidationTasksForReleaseCommand createValidationTasksForReleaseCommand = CreateValidationTasksForReleaseCommand.builder().validationReleaseAggregateId(UUID.randomUUID().toString()).transactionId(event.getTransactionId())
+        CreateValidationTasksForReleaseCommand createValidationTasksForReleaseCommand = CreateValidationTasksForReleaseCommand.builder().validationReleaseAggregateId(event.getValidationReleaseAggregateId()).transactionId(event.getTransactionId())
                 .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetProcessId(event.getDatasetProcessId())
                 .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId())
                 .datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(createValidationTasksForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command CreateValidationTasksForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -135,19 +135,19 @@ public class ReleaseSaga {
                 .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).build();
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(createReleaseSnapshotCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command CreateSnapshotRecordRorReleaseInMetabaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(SnapshotRecordForReleaseCreatedInMetabaseEvent event) {
-        CreateSnapshotFileForReleaseCommand createReleaseSnapshotCommand = CreateSnapshotFileForReleaseCommand.builder().recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).transactionId(event.getTransactionId())
+        CreateSnapshotFileForReleaseCommand createReleaseSnapshotCommand = CreateSnapshotFileForReleaseCommand.builder().recordStoreReleaseAggregateId(UUID.randomUUID().toString()).transactionId(event.getTransactionId())
                 .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots())
                 .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId())
                 .validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
         commandGateway.send(createReleaseSnapshotCommand).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command CreateSnapshotFileForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -160,7 +160,7 @@ public class ReleaseSaga {
                 .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(updateDatasetStatusCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command UpdateDatasetStatusCommand for dataflow {},dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -174,7 +174,7 @@ public class ReleaseSaga {
 
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(deleteProviderCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command DeleteProviderCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -189,7 +189,7 @@ public class ReleaseSaga {
 
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
             commandGateway.send(GenericCommandMessage.asCommandMessage(deleteProviderCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-                LOG.error(er.getCause().toString());
+                LOG.error("Error while executing command DeleteProviderCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
                 return er;
             });
         } else {
@@ -198,7 +198,7 @@ public class ReleaseSaga {
                     .restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
                     .validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).datasetDataCollection(event.getDatasetDataCollection()).build();
             commandGateway.send(GenericCommandMessage.asCommandMessage(updateInternalRepresentativeCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-                LOG.error(er.getCause().toString());
+                LOG.error("Error while executing command UpdateInternalRepresentativeCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
                 return er;
             });
         }
@@ -212,7 +212,7 @@ public class ReleaseSaga {
                 .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId())
                 .recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).datasetDataCollection(event.getDatasetDataCollection()).build();
         commandGateway.send(GenericCommandMessage.asCommandMessage(updateDatasetRunningStatusCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command UpdateDatasetRunningStatusCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -225,7 +225,7 @@ public class ReleaseSaga {
                 .releaseAggregateId(event.getReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId())
                 .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).build();
         commandGateway.send(GenericCommandMessage.asCommandMessage(restoreDataFromSnapshotCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command RestoreDataFromSnapshotCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -237,7 +237,7 @@ public class ReleaseSaga {
                 .restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots()).datasetDataCollection(event.getDatasetDataCollection()).releaseAggregateId(event.getReleaseAggregateId())
                 .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).build();
         commandGateway.send(GenericCommandMessage.asCommandMessage(markSnapshotReleasedCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command MarkSnapshotReleasedCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -250,7 +250,7 @@ public class ReleaseSaga {
                 .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId())
                 .validationReleaseAggregateId(event.getValidationReleaseAggregateId()).build();
         commandGateway.send(GenericCommandMessage.asCommandMessage(updateChangesEuDatasetCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command UpdateChangesEuDatasetCommand for dataflow {}, dataProvider {}, {}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -263,7 +263,7 @@ public class ReleaseSaga {
                 .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId())
                 .validationReleaseAggregateId(event.getValidationReleaseAggregateId()).build();
         commandGateway.send(GenericCommandMessage.asCommandMessage(savePublicFilesForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command SavePublicFilesForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -276,7 +276,7 @@ public class ReleaseSaga {
                 .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId())
                 .validationReleaseAggregateId(event.getValidationReleaseAggregateId()).build();
         commandGateway.send(GenericCommandMessage.asCommandMessage(removeReleaseLocksCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command RemoveReleaseLocksCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -288,7 +288,7 @@ public class ReleaseSaga {
                 .restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetDataCollection(event.getDatasetDataCollection()).datasetSnapshots(event.getDatasetSnapshots()).datasetDateRelease(event.getDatasetDateRelease()).releaseAggregateId(event.getReleaseAggregateId())
                 .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).build();
         commandGateway.send(GenericCommandMessage.asCommandMessage(sendEmailForSuccessfulReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command SendEmailForSuccessfulReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -301,7 +301,7 @@ public class ReleaseSaga {
                 .datasetName(event.getDatasetName()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId())
                 .releaseAggregateId(event.getReleaseAggregateId()).build();
         commandGateway.send(GenericCommandMessage.asCommandMessage(sendNotificationForSuccessfulReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command SendNotificationForSuccessfulReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }
@@ -315,7 +315,7 @@ public class ReleaseSaga {
                 .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId())
                 .datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
         commandGateway.send(GenericCommandMessage.asCommandMessage(createMessageForSuccessfulReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error(er.getCause().toString());
+            LOG.error("Error while executing command CreateMessageForSuccessfulReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
             return er;
         });
     }

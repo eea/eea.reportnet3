@@ -67,55 +67,7 @@ public class RecordStoreReleaseAggregate {
     }
 
     @CommandHandler
-    public RecordStoreReleaseAggregate(CreateValidationProcessForReleaseCommand command, MetaData metaData, ValidationControllerZuul validationControllerZuul, ProcessService processService) {
-        try {
-            LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
-            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
-            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
-            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
-
-            datasetProcessId = new HashMap<>();
-            command.getDatasetIds().forEach(datasetId -> {
-                int priority = validationControllerZuul.getPriority(command.getDataflowId());
-                LOG.info("Adding validation process for dataflowId: {} dataProvider: {} dataset ", command.getDataflowId(), command.getDataProviderId(), datasetId);
-                String processId = UUID.randomUUID().toString();
-                datasetProcessId.put(datasetId, processId);
-                processService.updateProcess(datasetId, command.getDataflowId(),
-                        ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId,
-                        SecurityContextHolder.getContext().getAuthentication().getName(), priority, true);
-                processService.insertSagaTransactionIdAndAggregateId(command.getTransactionId(), command.getRecordStoreReleaseAggregateId(), processId);
-            });
-            ValidationProcessForReleaseCreatedEvent event = new ValidationProcessForReleaseCreatedEvent();
-            BeanUtils.copyProperties(command, event);
-            event.setDatasetProcessId(datasetProcessId);
-            apply(event, metaData);
-        } catch (Exception e) {
-            LOG.error("Error while adding validation process for dataflowId: {} dataProvider: {}: {}", command.getDataflowId(), command.getDataProviderId(), e.getMessage());
-            throw e;
-        }
-    }
-
-    @EventSourcingHandler
-    public void on(ValidationProcessForReleaseCreatedEvent event) {
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-    }
-
-    @CommandHandler
-    public void handle(CreateSnapshotFileForReleaseCommand command, DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul, @Qualifier("jdbcRecordStoreServiceImpl") RecordStoreService jdbcRecordStoreService, MetaData metaData) throws SQLException, IOException, InterruptedException {
+    public RecordStoreReleaseAggregate(CreateSnapshotFileForReleaseCommand command, DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul, @Qualifier("jdbcRecordStoreServiceImpl") RecordStoreService jdbcRecordStoreService, MetaData metaData) throws SQLException, IOException, InterruptedException {
         try {
             for (Map.Entry<Long, Long> entry : command.getDatasetSnapshots().entrySet()) {
                 Long datasetId = entry.getKey();
