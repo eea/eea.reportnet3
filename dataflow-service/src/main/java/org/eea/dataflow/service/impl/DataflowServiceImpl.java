@@ -982,6 +982,10 @@ public class DataflowServiceImpl implements DataflowService {
     } catch (EEAException e) {
       LOG_ERROR.error("Error knowing if the entity {} with id {} is reference. Message {}", entity,
           entityId, e.getMessage(), e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Could not find if the entity {} with id {} is reference. Message {}", entity,
+              entityId, e.getMessage());
+      throw e;
     }
     return reference;
   }
@@ -1023,6 +1027,10 @@ public class DataflowServiceImpl implements DataflowService {
     } catch (EEAException e) {
       LOG_ERROR.error("Error knowing if the entity {} with id {} is a dataflow type {}. Message {}",
           entity, entityId, dataflowType, e.getMessage(), e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Could not find if the entity {} with id {} is dataflow type. Message {}", entity,
+              entityId, e.getMessage());
+      throw e;
     }
     return correctType;
   }

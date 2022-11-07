@@ -3,6 +3,8 @@ package org.eea.validation.kafka.command;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.kie.api.KieBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
@@ -10,6 +12,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ExecuteDatasetValidationCommand extends ExecuteValidationCommand {
+
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
   /**
@@ -39,8 +44,13 @@ public class ExecuteDatasetValidationCommand extends ExecuteValidationCommand {
    */
   @Override
   public Validator getValidationAction() {
-    return (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase,
-        Long taskId) -> validationService.validateDataSet(datasetId, kieBase, taskId);
+    try {
+      return (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase,
+              Long taskId) -> validationService.validateDataSet(datasetId, kieBase, taskId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error in event COMMAND_VALIDATE_DATASET. Message: {}", e.getMessage());
+      throw e;
+    }
   }
 
 

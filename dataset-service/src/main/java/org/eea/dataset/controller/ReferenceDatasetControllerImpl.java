@@ -120,6 +120,9 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
           datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.UPDATING_REFERENCE_DATASET);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error updating reference dataset with id {} Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 }

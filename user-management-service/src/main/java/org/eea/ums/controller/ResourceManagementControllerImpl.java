@@ -72,6 +72,11 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
+    } catch(Exception e){
+      Long resourceId = (resourceInfoVO != null) ? resourceInfoVO.getResourceId() : null;
+      String resourceName = (resourceInfoVO != null) ? resourceInfoVO.getName() : null;
+      LOG_ERROR.error("Unexpected error! Could not create resource with id {} and name {} Message: {}", resourceId, resourceName, e.getMessage());
+      throw e;
     }
   }
 
@@ -188,6 +193,9 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
       LOG_ERROR.error("Error creating resources due to reason {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
+    } catch(Exception e){
+      LOG_ERROR.error("Unexpected error! Could not create resources. Message: {}", e.getMessage());
+      throw e;
     }
   }
 }

@@ -78,6 +78,9 @@ public class KafkaSender {
         if (e instanceof InterruptedException) {
           Thread.currentThread().interrupt();
         }
+      } catch (Exception e) {
+        LOG_ERROR.error("Unexpected error! Error sending message=[ {} ] to topic=[ {} ] Error message: {}", event, event.getEventType().getTopic(), e.getMessage());
+        throw e;
       }
       return sendResult;
     });

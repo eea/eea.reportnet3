@@ -80,54 +80,60 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
 
-    Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+    try {
 
-    LOG.info("The user on CheckBlockersDataSnapshotCommand.execute is {} and datasetId {}",
-        SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+      Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
 
-    // with one id we take all the datasets with the same dataProviderId and dataflowId
-    DataSetMetabase dataset =
-        dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
-    List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
-        dataset.getDataflowId(), dataset.getDataProviderId());
-    Collections.sort(datasets);
-    // we check if one or more dataset have error, if have we create a notification and abort
-    // process of releasing
-    boolean haveBlockers = false;
-    for (Long id : datasets) {
-      setTenant(id);
-      if (validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)) {
-        haveBlockers = true;
-        // Release the locks
-        datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
-            dataset.getDataProviderId());
-        LOG_ERROR.error(
-            "Error in the releasing process of the dataflowId {} and dataProviderId {}, the datasets have blocker errors",
-            dataset.getDataflowId(), dataset.getDataProviderId());
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
-            NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .datasetId(datasetId)
-                .error("One or more datasets have blockers errors, Release aborted")
-                .providerId(dataset.getDataProviderId()).build());
-        break;
+      LOG.info("The user on CheckBlockersDataSnapshotCommand.execute is {} and datasetId {}",
+              SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+
+      // with one id we take all the datasets with the same dataProviderId and dataflowId
+      DataSetMetabase dataset =
+              dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
+      List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
+              dataset.getDataflowId(), dataset.getDataProviderId());
+      Collections.sort(datasets);
+      // we check if one or more dataset have error, if have we create a notification and abort
+      // process of releasing
+      boolean haveBlockers = false;
+      for (Long id : datasets) {
+        setTenant(id);
+        if (validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)) {
+          haveBlockers = true;
+          // Release the locks
+          datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
+                  dataset.getDataProviderId());
+          LOG_ERROR.error(
+                  "Error in the releasing process of the dataflowId {} and dataProviderId {}, the datasets have blocker errors",
+                  dataset.getDataflowId(), dataset.getDataProviderId());
+          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
+                  NotificationVO.builder()
+                          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                          .datasetId(datasetId)
+                          .error("One or more datasets have blockers errors, Release aborted")
+                          .providerId(dataset.getDataProviderId()).build());
+          break;
+        }
       }
-    }
-    // If none blocker errors has found, we have to release datasets one by one
-    if (!haveBlockers) {
-      LOG.info(
-          "Releasing datasets process continues. At this point, the datasets from the dataflowId {} and dataProviderId {} have no blockers",
-          dataset.getDataflowId(), dataset.getDataProviderId());
-      CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
-      createSnapshotVO.setReleased(true);
-      createSnapshotVO.setAutomatic(Boolean.TRUE);
-      TimeZone.setDefault(TimeZone.getTimeZone("CET"));
-      Date ahora = new Date();
-      SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-      createSnapshotVO.setDescription("Release " + formateador.format(ahora) + " CET");
-      Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now());
-      datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
-          dateRelease.toString(), false);
+      // If none blocker errors has found, we have to release datasets one by one
+      if (!haveBlockers) {
+        LOG.info(
+                "Releasing datasets process continues. At this point, the datasets from the dataflowId {} and dataProviderId {} have no blockers",
+                dataset.getDataflowId(), dataset.getDataProviderId());
+        CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
+        createSnapshotVO.setReleased(true);
+        createSnapshotVO.setAutomatic(Boolean.TRUE);
+        TimeZone.setDefault(TimeZone.getTimeZone("CET"));
+        Date ahora = new Date();
+        SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        createSnapshotVO.setDescription("Release " + formateador.format(ahora) + " CET");
+        Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now());
+        datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
+                dateRelease.toString(), false);
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      throw e;
     }
   }
 

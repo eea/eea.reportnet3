@@ -13,20 +13,20 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.6-DEV</api-gateway.version>
-    <communication.version>v3.1.6-DEV</communication.version>
-    <collaboration.version>v3.1.6-DEV</collaboration.version>
-    <dataflow.version>v3.1.6-DEV</dataflow.version>
-    <dataset.version>v3.1.6-DEV</dataset.version>
-    <document.version>v3.1.6-DEV</document.version>
-    <frontend.version>v3.1.6-DEV</frontend.version>
-    <indexsearch.version>v3.1.6-DEV</indexsearch.version>
-    <inspire.version>v3.1.6-DEV</inspire.version>
-    <recordstore.version>v3.1.6-DEV</recordstore.version>
-    <ums.version>v3.1.6-DEV</ums.version>
-    <validation.version>v3.1.6-DEV</validation.version>
-    <common-interfaces.version>v3.1.6-DEV</common-interfaces.version>
-    <common-utitlities.version>v3.1.6-DEV</common-utitlities.version>
-    <rod.version>v3.1.6-DEV</rod.version>
+    <api-gateway.version>v3.1.6-SPRINT-52</api-gateway.version>
+    <communication.version>v3.1.6-SPRINT-52</communication.version>
+    <collaboration.version>v3.1.6-SPRINT-52</collaboration.version>
+    <dataflow.version>v3.1.6-SPRINT-52</dataflow.version>
+    <dataset.version>v3.1.6-SPRINT-52</dataset.version>
+    <document.version>v3.1.6-SPRINT-52</document.version>
+    <frontend.version>v3.1.6-SPRINT-52</frontend.version>
+    <indexsearch.version>v3.1.6-SPRINT-52</indexsearch.version>
+    <inspire.version>v3.1.6-SPRINT-52</inspire.version>
+    <recordstore.version>v3.1.6-SPRINT-52</recordstore.version>
+    <ums.version>v3.1.6-SPRINT-52</ums.version>
+    <validation.version>v3.1.6-SPRINT-52</validation.version>
+    <common-interfaces.version>v3.1.6-SPRINT-52</common-interfaces.version>
+    <common-utitlities.version>v3.1.6-SPRINT-52</common-utitlities.version>
+    <rod.version>v3.1.6-SPRINT-52</rod.version>
   </properties>
 </project>

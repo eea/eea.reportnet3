@@ -103,6 +103,9 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
 
       command.withHostConfig(hostConfig).exec();
       LOG.info("Container created with name:{}", containerName);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in createContainer for container {}. Message: {}", containerName, e.getMessage());
+      throw e;
     }
     return getContainer(containerName);
   }

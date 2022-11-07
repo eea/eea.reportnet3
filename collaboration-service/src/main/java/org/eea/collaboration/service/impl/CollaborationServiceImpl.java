@@ -258,7 +258,7 @@ public class CollaborationServiceImpl implements CollaborationService {
         messageRepository.delete(message);
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Error deleting message {}", e.getMessage());
+      LOG_ERROR.error("Unexpected error! Error deleting message  with id {} Message: {}", messageId, e.getMessage());
       throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGE_INCORRECT_ID);
     }
     LOG.info("Message {} deleted", messageId);

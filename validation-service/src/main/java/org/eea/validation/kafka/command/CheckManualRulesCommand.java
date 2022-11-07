@@ -116,37 +116,42 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
-    ThreadPropertiesManager.setVariable("user", eeaEventVO.getData().get("user"));
-    List<Rule> errorRulesList = new ArrayList<>();
-    Long datasetId =
-        Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
-    boolean checkNoSQL = (boolean) eeaEventVO.getData().get("checkNoSQL");
+    try {
+      ThreadPropertiesManager.setVariable("user", eeaEventVO.getData().get("user"));
+      List<Rule> errorRulesList = new ArrayList<>();
+      Long datasetId =
+              Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
+      boolean checkNoSQL = (boolean) eeaEventVO.getData().get("checkNoSQL");
 
-    String datasetSchemaId = datasetMetabaseController.findDatasetSchemaIdById(datasetId);
-    Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
+      String datasetSchemaId = datasetMetabaseController.findDatasetSchemaIdById(datasetId);
+      Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
 
-    RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
-    List<Rule> rulesSQLSchema = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
+      RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
+      List<Rule> rulesSQLSchema = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
 
-    if (null != rulesSchema && !rulesSchema.getRules().isEmpty()) {
-      rulesSchema.getRules().stream().filter(rule -> !rule.isAutomatic()).forEach(rule -> {
-        updateRuleState(errorRulesList, datasetId, checkNoSQL, datasetSchemaId, rulesSQLSchema,
-            rule);
-      });
-    }
+      if (null != rulesSchema && !rulesSchema.getRules().isEmpty()) {
+        rulesSchema.getRules().stream().filter(rule -> !rule.isAutomatic()).forEach(rule -> {
+          updateRuleState(errorRulesList, datasetId, checkNoSQL, datasetSchemaId, rulesSQLSchema,
+                  rule);
+        });
+      }
 
-    if (!errorRulesList.isEmpty()) {
-      RulesSchema rulesdisabled =
-          rulesRepository.getAllDisabledRules(new ObjectId(datasetSchemaId));
-      RulesSchema rulesUnchecked =
-          rulesRepository.getAllUncheckedRules(new ObjectId(datasetSchemaId));
-      NotificationVO notificationVO = NotificationVO.builder()
-          .user(SecurityContextHolder.getContext().getAuthentication().getName())
-          .datasetId(datasetId).dataflowId(dataflowId)
-          .invalidRules(rulesUnchecked.getRules().size())
-          .disabledRules(rulesdisabled.getRules().size()).build();
-      LOG.info("SQL rules contains errors");
-      releaseNotification(EventType.DISABLE_NAMES_TYPES_RULES_ERROR_EVENT, notificationVO);
+      if (!errorRulesList.isEmpty()) {
+        RulesSchema rulesdisabled =
+                rulesRepository.getAllDisabledRules(new ObjectId(datasetSchemaId));
+        RulesSchema rulesUnchecked =
+                rulesRepository.getAllUncheckedRules(new ObjectId(datasetSchemaId));
+        NotificationVO notificationVO = NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .datasetId(datasetId).dataflowId(dataflowId)
+                .invalidRules(rulesUnchecked.getRules().size())
+                .disabledRules(rulesdisabled.getRules().size()).build();
+        LOG.info("SQL rules contains errors");
+        releaseNotification(EventType.DISABLE_NAMES_TYPES_RULES_ERROR_EVENT, notificationVO);
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      throw e;
     }
   }
 
@@ -162,27 +167,33 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    */
   private void updateRuleState(List<Rule> errorRulesList, Long datasetId, boolean checkNoSQL,
       String datasetSchemaId, List<Rule> rulesSQLSchema, Rule rule) {
-    Boolean valid = null;
-    if (checkNoSQL && null == rule.getSqlSentence()) {
-      valid = validateRule(datasetSchemaId, rule);
-    }
-    if (rulesSQLSchema.contains(rule) && null != rule.getSqlSentence()) {
-      valid = validateSQLRule(rule.getSqlSentence(), datasetId, rule);
-    }
-
-    if (Boolean.TRUE.equals(valid)) {
-      rule.setVerified(true);
-    }
-    if (Boolean.FALSE.equals(valid)) {
-      if (rule.getVerified().equals(Boolean.TRUE)) {
-        rule.setVerified(false);
-        rule.setEnabled(false);
-        errorRulesList.add(rule);
-      } else {
-        rule.setEnabled(false);
+    try {
+      Boolean valid = null;
+      if (checkNoSQL && null == rule.getSqlSentence()) {
+        valid = validateRule(datasetSchemaId, rule);
       }
+      if (rulesSQLSchema.contains(rule) && null != rule.getSqlSentence()) {
+        valid = validateSQLRule(rule.getSqlSentence(), datasetId, rule);
+      }
+
+      if (Boolean.TRUE.equals(valid)) {
+        rule.setVerified(true);
+      }
+      if (Boolean.FALSE.equals(valid)) {
+        if (rule.getVerified().equals(Boolean.TRUE)) {
+          rule.setVerified(false);
+          rule.setEnabled(false);
+          errorRulesList.add(rule);
+        } else {
+          rule.setEnabled(false);
+        }
+      }
+      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
+    } catch (Exception e) {
+      ObjectId ruleId = (rule != null) ? rule.getRuleId() : null;
+      LOG_ERROR.error("Unexpected error! Error updating rule state for datasetId {} and ruleId {}. Message: {}", datasetId, ruleId, e.getMessage());
+      throw e;
     }
-    rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
   }
 
   /**
@@ -193,76 +204,87 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    * @return the boolean
    */
   private Boolean validateRule(String datasetSchemaId, Rule rule) {
-    Map<String, DataType> dataTypeMap = new HashMap<>();
-    EntityTypeEnum ruleType = rule.getType();
-    String ruleExpressionString = rule.getWhenCondition();
+    try {
+      Map<String, DataType> dataTypeMap = new HashMap<>();
+      EntityTypeEnum ruleType = rule.getType();
+      String ruleExpressionString = rule.getWhenCondition();
 
-    boolean isCorrect = false;
+      boolean isCorrect = false;
 
-    switch (ruleType) {
-      case RECORD:
-        String recordSchemaId = rule.getReferenceId().toString();
-        Document recordSchema = schemasRepository.findRecordSchema(datasetSchemaId, recordSchemaId);
-        for (Document field : (ArrayList<Document>) recordSchema.get("fieldSchemas")) {
-          String fieldSchemaId = field.get("_id").toString();
-          DataType fieldDataType = DataType.valueOf(field.get(TYPE_DATA).toString());
-          dataTypeMap.put(fieldSchemaId, fieldDataType);
-        }
-        break;
-      case FIELD:
-        String fieldSchemaId = rule.getReferenceId().toString();
-        Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId);
-        dataTypeMap.put("VALUE", DataType.valueOf(fieldSchema.get(TYPE_DATA).toString()));
-        break;
-      default:
-        return validateWithKiebase(rule);
+      switch (ruleType) {
+        case RECORD:
+          String recordSchemaId = rule.getReferenceId().toString();
+          Document recordSchema = schemasRepository.findRecordSchema(datasetSchemaId, recordSchemaId);
+          for (Document field : (ArrayList<Document>) recordSchema.get("fieldSchemas")) {
+            String fieldSchemaId = field.get("_id").toString();
+            DataType fieldDataType = DataType.valueOf(field.get(TYPE_DATA).toString());
+            dataTypeMap.put(fieldSchemaId, fieldDataType);
+          }
+          break;
+        case FIELD:
+          String fieldSchemaId = rule.getReferenceId().toString();
+          Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId);
+          dataTypeMap.put("VALUE", DataType.valueOf(fieldSchema.get(TYPE_DATA).toString()));
+          break;
+        default:
+          return validateWithKiebase(rule);
 
+      }
+      if (ruleExpressionService.isDataTypeCompatible(ruleExpressionString, ruleType, dataTypeMap)) {
+        isCorrect = true;
+        LOG.info("Rule validation passed: {}", rule);
+      } else {
+        isCorrect = false;
+        LOG.info("Rule validation not passed: {}", rule);
+      }
+      return isCorrect;
+    } catch (Exception e) {
+      ObjectId ruleId = (rule != null) ? rule.getRuleId() : null;
+      LOG_ERROR.error("Unexpected error! Error validating rule state for datasetSchemaId {} and ruleId {}. Message: {}", datasetSchemaId, ruleId, e.getMessage());
+      throw e;
     }
-    if (ruleExpressionService.isDataTypeCompatible(ruleExpressionString, ruleType, dataTypeMap)) {
-      isCorrect = true;
-      LOG.info("Rule validation passed: {}", rule);
-    } else {
-      isCorrect = false;
-      LOG.info("Rule validation not passed: {}", rule);
-    }
-    return isCorrect;
   }
 
   /**
    * Validate with kiebase.
    *
-   * @param datasetSchemaId the dataset schema id
    * @param rule the rule
    * @return the boolean
    */
   private Boolean validateWithKiebase(Rule rule) {
     boolean isCorrect = false;
-    if (EntityTypeEnum.TABLE.equals(rule.getType())) {
-      KieServices kieServices = KieServices.Factory.get();
-      ObjectDataCompiler compiler = new ObjectDataCompiler();
-      List<Map<String, String>> ruleAttribute = new ArrayList<>();
+    try {
+      if (EntityTypeEnum.TABLE.equals(rule.getType())) {
+        KieServices kieServices = KieServices.Factory.get();
+        ObjectDataCompiler compiler = new ObjectDataCompiler();
+        List<Map<String, String>> ruleAttribute = new ArrayList<>();
 
-      ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
-          TypeValidation.TABLE, SchemasDrools.ID_TABLE_SCHEMA.getValue(), rule.getWhenCondition(),
-          rule.getThenCondition().get(0), rule.getThenCondition().get(1), "tableName", "shortcode",
-          "fieldName"));
-      // We create the same text like in kiebase and with that part we check if the rule is correct
-      KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
+        ruleAttribute.add(passDataToMap(rule.getReferenceId().toString(), rule.getRuleId().toString(),
+                TypeValidation.TABLE, SchemasDrools.ID_TABLE_SCHEMA.getValue(), rule.getWhenCondition(),
+                rule.getThenCondition().get(0), rule.getThenCondition().get(1), "tableName", "shortcode",
+                "fieldName"));
+        // We create the same text like in kiebase and with that part we check if the rule is correct
+        KieHelper kieHelperTest = kiebaseAssemble(compiler, kieServices, ruleAttribute);
 
-      // Check rule integrity
-      Results results = kieHelperTest.verify();
+        // Check rule integrity
+        Results results = kieHelperTest.verify();
 
-      if (results.hasMessages(Message.Level.ERROR)) {
-        isCorrect = false;
-        LOG.info("Rule validation with Kiebase not passed: {}", rule);
+        if (results.hasMessages(Message.Level.ERROR)) {
+          isCorrect = false;
+          LOG.info("Rule validation with Kiebase not passed: {}", rule);
+        } else {
+          isCorrect = true;
+          LOG.info("Rule validation with Kiebase passed: {}", rule);
+        }
       } else {
-        isCorrect = true;
-        LOG.info("Rule validation with Kiebase passed: {}", rule);
+        LOG.info("Not a validable rule: {}", rule);
       }
-    } else {
-      LOG.info("Not a validable rule: {}", rule);
+      return isCorrect;
+    } catch (Exception e) {
+      ObjectId ruleId = (rule != null) ? rule.getRuleId() : null;
+      LOG_ERROR.error("Unexpected error! Error validating rule with kiebase for ruleId {}. Message: {}", ruleId, e.getMessage());
+      throw e;
     }
-    return isCorrect;
   }
 
   /**
@@ -334,7 +356,6 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    * @param query the query
    * @param datasetId the dataset id
    * @param rule the rule
-   * @param ischeckDC the ischeck DC
    * @return the boolean
    */
   private Boolean validateSQLRule(String query, Long datasetId, Rule rule) {
@@ -516,6 +537,11 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
+    } catch (Exception e) {
+      String eventTopic = (eventType != null) ? eventType.getTopic() : null;
+      Long datasetId = (notificationVO != null) ? notificationVO.getDatasetId() : null;
+      LOG_ERROR.error("Unexpected error! Error releasing notification for event topic {} and datasetId {}. Message: {}", eventTopic, datasetId, e.getMessage());
+      throw e;
     }
   }
 

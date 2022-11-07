@@ -107,12 +107,17 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
 
 
     newUsers.stream().forEach(user -> {
+      String userId = (user != null) ? user.getId() : null;
+      String username = (user != null) ? user.getUsername() : null;
       user.getGroups().stream().forEach(group -> {
         try {
           keycloakConnectorService.addUserToGroup(usersMap.get(user.getUsername()),
               groupsMap.get(group));
         } catch (EEAException e) {
           LOG_ERROR.error("Error adding USER to resource. Message: {}", e.getMessage(), e);
+        } catch(Exception e){
+          LOG_ERROR.error("Unexpected error! Could not add user with id {} and username {} to resource. Message: {}", userId, username, e.getMessage());
+          throw e;
         }
         LOG.info("Finish save group: " + group);
       });
@@ -129,7 +134,10 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
         keycloakConnectorService.addRole(json, usersMap.get(user.getUsername()));
         LOG.info("Finish save Roles");
       } catch (JsonProcessingException e) {
-        LOG_ERROR.error("Role not saved");
+        LOG_ERROR.error("Role not saved for user with id {} and username {} to resource. Message: {}", userId, username, e.getMessage());
+      } catch(Exception e){
+        LOG_ERROR.error("Unexpected error! Could not save roles for user with id {} and username {} to resource. Message: {}", userId, username, e.getMessage());
+        throw e;
       }
     });
 
@@ -193,6 +201,11 @@ public class BackupManagmentServiceImpl implements BackupManagmentService {
       keycloakConnectorService.addUser(json);
     } catch (JsonProcessingException e) {
       LOG_ERROR.error("User not saved");
+    } catch(Exception e){
+      String userId = (newUser != null) ? newUser.getId() : null;
+      String username = (newUser != null) ? newUser.getUsername() : null;
+      LOG_ERROR.error("Unexpected error! Could not save user with id {} and username {} to resource. Message: {}", userId, username, e.getMessage());
+      throw e;
     }
     LOG.info("User saved");
 
