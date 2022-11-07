@@ -10,7 +10,6 @@ import org.bson.types.ObjectId;
 import org.eea.axon.release.commands.CreateValidationProcessForReleaseCommand;
 import org.eea.axon.release.commands.CreateValidationTasksForReleaseCommand;
 import org.eea.axon.release.events.ValidationProcessForReleaseCreatedEvent;
-import org.eea.axon.release.events.ValidationProcessForReleaseFailedEvent;
 import org.eea.axon.release.events.ValidationTasksForReleaseCreatedEvent;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -37,7 +36,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
@@ -70,7 +68,7 @@ public class ValidationReleaseAggregate {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
             authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                     EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
@@ -116,12 +114,11 @@ public class ValidationReleaseAggregate {
 
     @CommandHandler
     public void handle(CreateValidationTasksForReleaseCommand command, MetaData metaData, DataSetMetabaseControllerZuul datasetMetabaseControllerZuul, RulesRepository rulesRepository,
-                                      ProcessControllerZuul processControllerZuul, @Autowired ValidationHelper validationHelper, @Autowired KafkaSenderUtils kafkaSenderUtils) throws EEAException {
+                       ProcessControllerZuul processControllerZuul, @Autowired ValidationHelper validationHelper, @Autowired KafkaSenderUtils kafkaSenderUtils) throws EEAException {
         try {
-            AtomicReference<Boolean> validation = new AtomicReference<>(true);
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
             authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                     EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
@@ -147,7 +144,6 @@ public class ValidationReleaseAggregate {
                     validationHelper.executeValidationProcess(dataset, command.getDatasetProcessId().get(datasetId));
                 } else {
                     validationHelper.deleteLockToReleaseProcess(datasetId);
-                    validation.set(false);
                     Map<String, Object> values = new HashMap<>();
                     values.put(LiteralConstants.DATASET_ID, datasetId);
                     values.put("released", true);
@@ -159,15 +155,9 @@ public class ValidationReleaseAggregate {
                 }
             }
 
-            if (validation.get()) {
-                ValidationTasksForReleaseCreatedEvent event = new ValidationTasksForReleaseCreatedEvent();
-                BeanUtils.copyProperties(command, event);
-                apply(event, metaData);
-            } else {
-                ValidationProcessForReleaseFailedEvent event = new ValidationProcessForReleaseFailedEvent();
-                BeanUtils.copyProperties(command, event);
-                apply(event);
-            }
+            ValidationTasksForReleaseCreatedEvent event = new ValidationTasksForReleaseCreatedEvent();
+            BeanUtils.copyProperties(command, event);
+            apply(event, metaData);
         } catch (Exception e) {
             LOG.error("Error while adding validation process for dataflowId: {} dataProvider: {}: {}", command.getDataflowId(), command.getDataProviderId(), e.getMessage());
             throw e;
