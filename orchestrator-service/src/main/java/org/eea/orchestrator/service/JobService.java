@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public interface JobService {
 
@@ -16,11 +17,11 @@ public interface JobService {
 
     Boolean canJobBeExecuted(JobVO job);
 
-    Boolean checkEligibilityOfJob(JobTypeEnum jobType, Long datasetId);
+    JobStatusEnum checkEligibilityOfJob(JobTypeEnum jobType, Map<String, Object> parameters);
 
-    void addValidationJob(Long datasetId, Boolean released, String creator);
+    void addValidationJob(Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert);
 
-    void addReleaseJob(Long dataflowId, Long dataProviderId, Boolean restrictFromPublic, Boolean validate, String creator);
+    void addReleaseJob(Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert);
 
     void prepareAndExecuteValidationJob(JobVO jobVO);
 

@@ -69,30 +69,20 @@ public class JobServiceImpl implements JobService {
 
     @Transactional
     @Override
-    public void addValidationJob(Long datasetId, Boolean released, String creator){
+    public void addValidationJob(Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert){
         Timestamp ts = new Timestamp(System.currentTimeMillis());
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("datasetId", datasetId);
-        parameters.put("released", released);
-        Job validationJob = new Job(null, JobTypeEnum.VALIDATION, JobStatusEnum.QUEUED, ts, ts, parameters, creator, null);
+        Job validationJob = new Job(null, JobTypeEnum.VALIDATION, statusToInsert, ts, ts, parameters, creator, null);
         jobRepository.save(validationJob);
         jobHistoryService.saveJobHistory(validationJob);
-        LOG.info("Added validation job with id {} for datasetId {}", validationJob.getId(), datasetId);
     }
 
     @Transactional
     @Override
-    public void addReleaseJob(Long dataflowId, Long dataProviderId, Boolean restrictFromPublic, Boolean validate, String creator){
+    public void addReleaseJob(Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert){
         Timestamp ts = new Timestamp(System.currentTimeMillis());
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("dataflowId", dataflowId);
-        parameters.put("dataProviderId", dataProviderId);
-        parameters.put("restrictFromPublic", restrictFromPublic);
-        parameters.put("validate", validate);
-        Job releaseJob = new Job(null, JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, ts, ts, parameters, creator, null);
+        Job releaseJob = new Job(null, JobTypeEnum.RELEASE, statusToInsert, ts, ts, parameters, creator, null);
         jobRepository.save(releaseJob);
         jobHistoryService.saveJobHistory(releaseJob);
-        LOG.info("Added release job with id {} for dataflowId {} and dataProviderId {}", releaseJob.getId(), dataflowId, dataProviderId);
     }
 
     @Override
@@ -118,9 +108,22 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Boolean checkEligibilityOfJob(JobTypeEnum jobType, Long datasetId){
+    public JobStatusEnum checkEligibilityOfJob(JobTypeEnum jobType, Map<String, Object> parameters){
         //TODO implement check and return something
-        return true;
+        if(jobType == JobTypeEnum.RELEASE){
+            Long dataflowId = (Long) parameters.get("dataflowId");
+            Long dataProviderId = (Long) parameters.get("dataProviderId");
+            List<Job> jobList = jobRepository.findByJobTypeAndJobStatusIn(JobTypeEnum.RELEASE, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
+            for(Job job: jobList){
+                Map<String, Object> insertedParameters = job.getParameters();
+                Long insertedDataflowId = Long.valueOf((Integer) insertedParameters.get("dataflowId"));
+                Long insertedDataProviderId = Long.valueOf((Integer) insertedParameters.get("dataProviderId"));
+                if(dataflowId == insertedDataflowId && dataProviderId == insertedDataProviderId){
+                    return JobStatusEnum.ABORTED;
+                }
+            }
+        }
+        return JobStatusEnum.QUEUED;
     }
     @Override
     public void prepareAndExecuteValidationJob(JobVO jobVO){
