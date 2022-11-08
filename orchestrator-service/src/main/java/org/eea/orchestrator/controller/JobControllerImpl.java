@@ -37,13 +37,24 @@ public class JobControllerImpl implements JobController {
     private JobService jobService;
 
     @Override
+    @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<JobVO> getAllJobs(){
+        try {
+            return jobService.getAllJobs();
+        } catch (Exception e){
+            LOG.error("Unexpected error! Could not retrieve all jobs");
+            throw e;
+        }
+    }
+
+    @Override
     @GetMapping("/{status}")
     public List<JobVO> getJobsByStatus(@PathVariable("status") JobStatusEnum status){
         try{
             LOG.info("Retrieving jobs for status {}", status.getValue());
             return jobService.getJobsByStatus(status);
         } catch (Exception e){
-            LOG.error("Unexpected error! Could not save retrieve jobs that have status {}. Message: {}", status.getValue(), e.getMessage());
+            LOG.error("Unexpected error! Could not retrieve jobs that have status {}. Message: {}", status.getValue(), e.getMessage());
             throw e;
         }
     }

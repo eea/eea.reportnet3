@@ -18,6 +18,14 @@ public interface JobController {
     /**
      * Get jobs based on status
      *
+     * @return a list of job entries
+     */
+    @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
+    List<JobVO> getAllJobs();
+
+    /**
+     * Get jobs based on status
+     *
      * @param status the job status
      * @return a list of job entries
      */

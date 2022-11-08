@@ -10,6 +10,8 @@ import java.util.List;
 
 public interface JobService {
 
+    List<JobVO> getAllJobs();
+
     List<JobVO> getJobsByStatus(JobStatusEnum status);
 
     Boolean canJobBeExecuted(JobVO job);

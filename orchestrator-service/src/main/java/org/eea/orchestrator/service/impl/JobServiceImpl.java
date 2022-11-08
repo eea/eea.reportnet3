@@ -56,6 +56,12 @@ public class JobServiceImpl implements JobService {
     private JobHistoryService jobHistoryService;
 
     @Override
+    public List<JobVO> getAllJobs(){
+        List<Job> jobs = jobRepository.findAll();
+        return jobMapper.entityListToClass(jobs);
+    }
+
+    @Override
     public List<JobVO> getJobsByStatus(JobStatusEnum status){
         List<Job> jobs = jobRepository.findAllByJobStatus(status);
         return jobMapper.entityListToClass(jobs);
@@ -93,19 +99,19 @@ public class JobServiceImpl implements JobService {
     public Boolean canJobBeExecuted(JobVO job){
         JobTypeEnum jobType = job.getJobType();
         Integer numberOfCurrentJobs = jobRepository.countByJobStatusAndJobType(JobStatusEnum.IN_PROGRESS, jobType);
-        if(job.getJobType() == JobTypeEnum.IMPORT && numberOfCurrentJobs <= maximumNumberOfInProgressImportJobs){
+        if(job.getJobType() == JobTypeEnum.IMPORT && numberOfCurrentJobs < maximumNumberOfInProgressImportJobs){
             return true;
         }
-        else if(jobType == JobTypeEnum.VALIDATION && numberOfCurrentJobs <= maximumNumberOfInProgressValidationJobs){
+        else if(jobType == JobTypeEnum.VALIDATION && numberOfCurrentJobs < maximumNumberOfInProgressValidationJobs){
             return true;
         }
-        else if(jobType == JobTypeEnum.RELEASE && numberOfCurrentJobs <= maximumNumberOfInProgressReleaseJobs){
+        else if(jobType == JobTypeEnum.RELEASE && numberOfCurrentJobs < maximumNumberOfInProgressReleaseJobs){
             return true;
         }
-        else if(jobType == JobTypeEnum.COPY_TO_EU_DATASET && numberOfCurrentJobs <= maximumNumberOfInProgressCopyToEuDataseJobs){
+        else if(jobType == JobTypeEnum.COPY_TO_EU_DATASET && numberOfCurrentJobs < maximumNumberOfInProgressCopyToEuDataseJobs){
             return true;
         }
-        else if(jobType == JobTypeEnum.EXPORT && numberOfCurrentJobs <= maximumNumberOfInProgressExportJobs){
+        else if(jobType == JobTypeEnum.EXPORT && numberOfCurrentJobs < maximumNumberOfInProgressExportJobs){
             return true;
         }
         return false;
@@ -141,6 +147,10 @@ public class JobServiceImpl implements JobService {
     public void updateJobStatusByProcessId(JobStatusEnum status, String processId){
         LOG.info("When updating job status for process id {} status was {}", processId, status.getValue());
         Job job = jobRepository.findOneByProcessId(processId);
+        if(job == null){
+            LOG.info("Could not find job with processId {}", processId);
+            return;
+        }
         job.setJobStatus(status);
         job.setDateStatusChanged(new Timestamp(System.currentTimeMillis()));
         jobRepository.save(job);
