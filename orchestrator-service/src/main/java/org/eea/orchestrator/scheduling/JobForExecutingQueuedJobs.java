@@ -72,6 +72,7 @@ public class JobForExecutingQueuedJobs {
                         LOG.info("Job with id {} and of type {} can not be executed right now.", job.getId(), job.getJobType().getValue());
                         continue;
                     }
+                    LOG.info("Job with id {} and of type {} will be executed.", job.getId(), job.getJobType().getValue());
                     if (job.getJobType() == JobTypeEnum.VALIDATION) {
                         //call validation mechanism
                         jobService.prepareAndExecuteValidationJob(job);
