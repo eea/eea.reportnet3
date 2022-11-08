@@ -52,11 +52,11 @@ public class JobForExecutingQueuedJobs {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> executeQueuedJobs(),
-                new CronTrigger("0 */2 * * * *"));
+                new CronTrigger("0 */1 * * * *"));
     }
 
     /**
-     * The job runs every 2 minutes. It finds jobs that have status=QUEUED and executes them
+     * The job runs every 1 minute. It finds jobs that have status=QUEUED and executes them
      */
     public void executeQueuedJobs() {
         LOG.info("Running scheduled task executeQueuedJobs");

@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/jobs")
@@ -77,14 +79,13 @@ public class JobControllerImpl implements JobController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_INCORRECT_ID);
         }
         try {
-            Boolean isJobEligible = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION, datasetId);
-            if(!isJobEligible){
-                //TODO do something else
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_INCORRECT_ID);
-            }
-            LOG.info("Adding validation job for datasetId {} and released {} for creator {}", datasetId, released, username);
-            jobService.addValidationJob(datasetId, released, username);
-            LOG.info("Successfully added validation job for datasetId {}, released {} and creator {}", datasetId, released, username);
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("datasetId", datasetId);
+            parameters.put("released", released);
+            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION, parameters);
+            LOG.info("Adding validation job for datasetId {} and released {} for creator {} with status {}", datasetId, released, username, statusToInsert);
+            jobService.addValidationJob(parameters, username, statusToInsert);
+            LOG.info("Successfully added validation job for datasetId {}, released {} and creator {} with status {}", datasetId, released, username, statusToInsert);
         } catch (Exception e){
             LOG.error("Unexpected error! Could not add validation job for datasetId {}, released {} and creator {}. Message: {}", datasetId, released, username, e.getMessage());
             throw e;
@@ -112,12 +113,16 @@ public class JobControllerImpl implements JobController {
         ThreadPropertiesManager.setVariable("user",
                 SecurityContextHolder.getContext().getAuthentication().getName());
 
-        LOG.info("The user adding a release job for dataflowId {} and dataProviderId {} is {}",
-                dataflowId, dataProviderId, SecurityContextHolder.getContext().getAuthentication().getName());
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("dataflowId", dataflowId);
+        parameters.put("dataProviderId", dataProviderId);
+        parameters.put("restrictFromPublic", restrictFromPublic);
+        parameters.put("validate", validate);
+        JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE, parameters);
 
-        LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName());
-        jobService.addReleaseJob(dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName());
-        LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName());
+        LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
+        jobService.addReleaseJob(parameters, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
+        LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
     }
 
     /**
@@ -140,7 +145,7 @@ public class JobControllerImpl implements JobController {
     @PostMapping(value = "/updateJobStatus/{id}/{status}/{processId}")
     public void updateJobStatus(@PathVariable("id") Long jobId, @PathVariable("status") JobStatusEnum status, @PathVariable("processId") String processId){
         try {
-            LOG.info("Updating job to in progress for id {} and processId {}", jobId, processId);
+            LOG.info("Updating job with id {} and processId {} to status {}", jobId, processId, status.getValue());
             jobService.updateJobStatus(jobId, status, processId);
         } catch (Exception e){
             LOG.error("Unexpected error! Could not update job to in progress for id {} processId {} and status {}. Message: {}", jobId, processId, status.getValue(), e.getMessage());
