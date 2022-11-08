@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.6-JOBS-IMPL</api-gateway.version>
-    <communication.version>v3.1.6-JOBS-IMPL</communication.version>
-    <collaboration.version>v3.1.6-JOBS-IMPL</collaboration.version>
-    <dataflow.version>v3.1.6-JOBS-IMPL</dataflow.version>
-    <dataset.version>v3.1.6-JOBS-IMPL</dataset.version>
-    <document.version>v3.1.6-JOBS-IMPL</document.version>
-    <frontend.version>v3.1.6-JOBS-IMPL</frontend.version>
-    <indexsearch.version>v3.1.6-JOBS-IMPL</indexsearch.version>
-    <inspire.version>v3.1.6-JOBS-IMPL</inspire.version>
-    <recordstore.version>v3.1.6-JOBS-IMPL</recordstore.version>
-    <ums.version>v3.1.6-JOBS-IMPL</ums.version>
-    <validation.version>v3.1.6-JOBS-IMPL</validation.version>
-    <common-interfaces.version>v3.1.6-JOBS-IMPL</common-interfaces.version>
-    <common-utitlities.version>v3.1.6-JOBS-IMPL</common-utitlities.version>
-    <rod.version>v3.1.6-JOBS-IMPL</rod.version>
-    <orchestrator.version>v3.1.6-JOBS-IMPL</orchestrator.version>
+    <api-gateway.version>v3.1.6-DEMO-1-ARCHITECTURE</api-gateway.version>
+    <communication.version>v3.1.6-DEMO-1-ARCHITECTURE</communication.version>
+    <collaboration.version>v3.1.6-DEMO-1-ARCHITECTURE</collaboration.version>
+    <dataflow.version>v3.1.6-DEMO-1-ARCHITECTURE</dataflow.version>
+    <dataset.version>v3.1.6-DEMO-1-ARCHITECTURE</dataset.version>
+    <document.version>v3.1.6-DEMO-1-ARCHITECTURE</document.version>
+    <frontend.version>v3.1.6-DEMO-1-ARCHITECTURE</frontend.version>
+    <indexsearch.version>v3.1.6-DEMO-1-ARCHITECTURE</indexsearch.version>
+    <inspire.version>v3.1.6-DEMO-1-ARCHITECTURE</inspire.version>
+    <recordstore.version>v3.1.6-DEMO-1-ARCHITECTURE</recordstore.version>
+    <ums.version>v3.1.6-DEMO-1-ARCHITECTURE</ums.version>
+    <validation.version>v3.1.6-DEMO-1-ARCHITECTURE</validation.version>
+    <common-interfaces.version>v3.1.6-DEMO-1-ARCHITECTURE</common-interfaces.version>
+    <common-utitlities.version>v3.1.6-DEMO-1-ARCHITECTURE</common-utitlities.version>
+    <rod.version>v3.1.6-DEMO-1-ARCHITECTURE</rod.version>
+    <orchestrator.version>v3.1.6-DEMO-1-ARCHITECTURE</orchestrator.version>
   </properties>
 </project>
