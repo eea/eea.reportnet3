@@ -3,7 +3,6 @@ package org.eea.orchestrator.scheduling;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.ums.TokenVO;
-import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +35,9 @@ public class JobForRestartingDelayedTasks {
     @Value("${eea.keycloak.admin.password}")
     private String adminPass;
 
+
+    private static final String BEARER = "Bearer ";
+
     /**
      * The Constant LOG.
      */
@@ -64,20 +66,21 @@ public class JobForRestartingDelayedTasks {
         try {
             List<BigInteger> tasksInProgress = validationControllerZuul.listTasksInProgress(maxTimeInMinutesForInProgressTasks);
             if (tasksInProgress.size() > 0) {
+                LOG.info("Restarting tasks " + tasksInProgress);
                 TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(adminUser, LiteralConstants.BEARER_TOKEN + tokenVo.getAccessToken(), null);
+                        new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 tasksInProgress.stream().forEach(taskId -> {
                     try {
                         validationControllerZuul.restartTask(taskId.longValue());
                     } catch (Exception e) {
-                        LOG.error("Unexpected error!  Error while running scheduled task restartDelayedTasks for task {}. Message: {}", taskId, e.getMessage());
+                        LOG.error("Error while running scheduled task restartDelayedTasks for task " + taskId);
                     }
                 });
             }
         } catch (Exception e) {
-            LOG.error("Unexpected error! Error while running scheduled task restartDelayedTasks. Message: {}", e.getMessage());
+            LOG.error("Error while running scheduled task restartDelayedTasks " + e.getMessage());
         }
     }
 }

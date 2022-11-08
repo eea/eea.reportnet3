@@ -54,6 +54,7 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.UUID;
 
+import java.util.ArrayList;
 /**
  * The Class ValidationControllerImpl.
  */
@@ -432,8 +433,8 @@ public class ValidationControllerImpl implements ValidationController {
     try {
       return validationHelper.getTasksInProgress(timeInMinutes);
     } catch (Exception e) {
-      LOG.error("Finding in progress tasks that exceed " + timeInMinutes + " minutes");
-      return null;
+      LOG.error("Error while finding in progress tasks that exceed " + timeInMinutes + " minutes " + e.getMessage());
+      return new ArrayList<>();
     }
   }
 }

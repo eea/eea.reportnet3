@@ -3,7 +3,7 @@ spring:
     consul:
       discovery:
         preferIpAddress: true
-        instanceId: ${spring.application.name}:8091
+        instanceId: ${spring.application.name}:${random.value}
         deregister: true
       config:
         name: orchestrator
