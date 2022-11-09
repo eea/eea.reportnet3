@@ -128,6 +128,62 @@ public class ReleaseSaga {
     }
 
     @SagaEventHandler(associationProperty = "transactionId")
+    public void handle(MaterializedViewShouldBeRefreshedEvent event, MetaData metaData) {
+        LOG.info("MaterializedViewShouldBeRefreshedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
+        RefreshMaterializedViewForReferenceDatasetCommand refreshMaterializedViewForReferenceDatasetCommand = RefreshMaterializedViewForReferenceDatasetCommand.builder().validationReleaseAggregateId(event.getValidationReleaseAggregateId())
+                .transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetProcessId(event.getDatasetProcessId())
+                .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId())
+                .datasetIForMaterializedViewEvent(event.getDatasetIForMaterializedViewEvent()).referencesToRefresh(event.getReferencesToRefresh()).build();
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+        commandGateway.send(GenericCommandMessage.asCommandMessage(refreshMaterializedViewForReferenceDatasetCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
+            LOG.error("Error while executing command RefreshMaterializedViewForReferenceDatasetCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+            return er;
+        });
+    }
+
+    @SagaEventHandler(associationProperty = "transactionId")
+    public void handle(MaterializedViewForReferenceDatasetRefreshedEvent event, MetaData metaData) {
+        LOG.info("MaterializedViewForReferenceDatasetRefreshedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
+        UpdateMaterializedViewCommand updateMaterializedViewCommand = UpdateMaterializedViewCommand.builder().validationReleaseAggregateId(event.getValidationReleaseAggregateId())
+                .transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetProcessId(event.getDatasetProcessId())
+                .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId())
+                .datasetIForMaterializedViewEvent(event.getDatasetIForMaterializedViewEvent()).referencesToRefresh(event.getReferencesToRefresh()).build();
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+        commandGateway.send(GenericCommandMessage.asCommandMessage(updateMaterializedViewCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
+            LOG.error("Error while executing command UpdateMaterializedViewCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+            return er;
+        });
+    }
+
+    @SagaEventHandler(associationProperty = "transactionId")
+    public void handle(MaterializedViewShouldBeUpdatedEvent event, MetaData metaData) {
+        LOG.info("MaterializedViewForReferenceDatasetRefreshedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
+        UpdateMaterializedViewCommand updateMaterializedViewCommand = UpdateMaterializedViewCommand.builder().validationReleaseAggregateId(event.getValidationReleaseAggregateId())
+                .transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetProcessId(event.getDatasetProcessId())
+                .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId())
+                .datasetIForMaterializedViewEvent(event.getDatasetIForMaterializedViewEvent()).referencesToRefresh(event.getReferencesToRefresh()).build();
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+        commandGateway.send(GenericCommandMessage.asCommandMessage(updateMaterializedViewCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
+            LOG.error("Error while executing command UpdateMaterializedViewCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+            return er;
+        });
+    }
+
+    @SagaEventHandler(associationProperty = "transactionId")
+    public void handle(MaterializedViewUpdatedEvent event, MetaData metaData) {
+        LOG.info("MaterializedViewUpdatedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
+        CreateValidationTasksForReleaseCommand createValidationTasksForReleaseCommand = CreateValidationTasksForReleaseCommand.builder().validationReleaseAggregateId(event.getValidationReleaseAggregateId())
+                .transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetProcessId(event.getDatasetProcessId())
+                .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId())
+                .datasetIForMaterializedViewEvent(event.getDatasetIForMaterializedViewEvent()).build();
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+        commandGateway.send(GenericCommandMessage.asCommandMessage(createValidationTasksForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
+            LOG.error("Error while executing command CreateValidationTasksForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+            return er;
+        });
+    }
+
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ValidationForReleaseFinishedEvent event, MetaData metaData) {
         CreateSnapshotRecordRorReleaseInMetabaseCommand createReleaseSnapshotCommand = CreateSnapshotRecordRorReleaseInMetabaseCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
                 .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).releaseAggregateId(event.getReleaseAggregateId())

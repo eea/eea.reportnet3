@@ -233,7 +233,7 @@ public interface RecordStoreService {
   void createDataSnapshotForRelease(Long idDataset, Long idSnapshot, Long idPartitionDataset, boolean prefillingReference) throws SQLException, IOException, InterruptedException;
 
   /**
-   *
+   * Restores from snapshot
    * @param datasetId
    * @param idSnapshot
    * @param datasetType
@@ -242,4 +242,16 @@ public interface RecordStoreService {
    * @throws IOException
    */
   void restoreFromSnapshot(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType, Connection con) throws SQLException, IOException;
+
+  /**
+   * Updates materialized view
+   * @param datasetId
+   */
+  void updateMaterializedView(Long datasetId);
+
+  /**
+   * Refreshes materialized view
+   * @param datasetIds
+   */
+  void refreshMaterializedView(List<Long> datasetIds);
 }

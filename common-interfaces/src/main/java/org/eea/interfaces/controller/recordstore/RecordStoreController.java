@@ -1,17 +1,12 @@
 package org.eea.interfaces.controller.recordstore;
 
-import java.util.List;
-import java.util.Map;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * The Interface RecordStoreController.
@@ -186,4 +181,25 @@ public interface RecordStoreController {
    */
   @PutMapping("/private/dataset/create/dataCollection/finish/{datasetId}")
   void distributeTables(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Updates materialized view
+   * @param datasetId
+   */
+  @PutMapping("/private/dataset/updateMaterializedView/{datasetId}")
+  void updateMaterializedView(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Refreshes materialized view
+   * @param datasetIds
+   */
+  @PutMapping("/private/refreshMaterializedView/v2")
+  void refreshMaterializedViewV2(@RequestParam("datasetIds") List<Long> datasetIds);
+
+  /**
+   * Launch update materialized query view
+   * @param datasetId
+   */
+  @PutMapping("/private/launchUpdateMaterializedQueryView/{datasetId}")
+  void launchUpdateMaterializedQueryView(@PathVariable("datasetId") Long datasetId) throws Exception;
 }

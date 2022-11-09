@@ -1,13 +1,10 @@
 package org.eea.recordstore.controller;
 
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -26,21 +23,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The Class RecordStoreControllerImpl.
@@ -343,7 +336,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     recordStoreService.distributeTables(datasetId);
   }
 
-
   /**
    * Creates the update query view.
    *
@@ -416,6 +408,40 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       hidden = true)
   public void updateSnapshotDisabled(@PathVariable("datasetId") Long datasetId) {
     recordStoreService.updateSnapshotDisabled(datasetId);
+  }
+
+  /**
+   * Updates materialized view
+   * @param datasetId
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/dataset/updateMaterializedView/{datasetId}")
+  public void updateMaterializedView(@PathVariable("datasetId") Long datasetId) {
+    recordStoreService.updateMaterializedView(datasetId);
+  }
+
+  /**
+   * Refreshes materialized view
+   * @param datasetIds
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/refreshMaterializedView/v2")
+  public void refreshMaterializedViewV2(@RequestParam("datasetIds") List<Long> datasetIds) {
+    recordStoreService.refreshMaterializedView(datasetIds);
+  }
+
+  /**
+   * Launch update materialized query view
+   * @param datasetId
+   * @throws RecordStoreAccessException
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/launchUpdateMaterializedQueryView/{datasetId}")
+  public void launchUpdateMaterializedQueryView(@PathVariable("datasetId") Long datasetId) throws RecordStoreAccessException {
+    recordStoreService.launchUpdateMaterializedQueryView(datasetId);
   }
 
 }

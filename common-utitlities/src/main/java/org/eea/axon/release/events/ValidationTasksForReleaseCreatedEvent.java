@@ -3,6 +3,7 @@ package org.eea.axon.release.events;
 import lombok.*;
 
 import java.util.List;
+import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,4 +25,5 @@ public class ValidationTasksForReleaseCreatedEvent {
     private boolean restrictFromPublic;
     private boolean validate;
     private List<Long> datasetIds;
+    private Map<Long, String> datasetProcessId;
 }

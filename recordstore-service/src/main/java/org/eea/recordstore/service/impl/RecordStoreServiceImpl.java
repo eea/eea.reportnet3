@@ -508,4 +508,14 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   public void restoreFromSnapshot(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType, Connection con) throws SQLException, IOException {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
+
+  @Override
+  public void updateMaterializedView(Long datasetId) {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
+
+  @Override
+  public void refreshMaterializedView(List<Long> datasetIds) {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
 }

@@ -13,10 +13,10 @@ import org.axonframework.eventsourcing.eventstore.EmbeddedEventStore;
 import org.axonframework.messaging.MetaData;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
-import org.eea.axon.release.commands.CancelReleaseBecauseOfFailedValidationCommand;
 import org.eea.axon.release.commands.CreateSnapshotRecordRorReleaseInMetabaseCommand;
+import org.eea.axon.release.commands.RefreshMaterializedViewForReferenceDatasetCommand;
+import org.eea.axon.release.commands.UpdateMaterializedViewCommand;
 import org.eea.axon.release.events.ValidationProcessForReleaseCreatedEvent;
-import org.eea.axon.release.events.ValidationTasksForReleaseCreatedEvent;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -310,14 +310,46 @@ public class ValidationHelper implements DisposableBean {
         executeValidationProcess(dataset, processId);
       } else {
         deleteLockToReleaseProcess(datasetId);
-        Map<String, Object> values = new HashMap<>();
-        values.put(LiteralConstants.DATASET_ID, datasetId);
-        values.put("released", released);
-        values.put("referencesToRefresh",
-            List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
-                dataset.getDataflowId(), dataset.getDatasetSchema())));
-        values.put("processId", processId);
-        kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
+
+        ProcessVO process = processControllerZuul.findById(processId);
+        if (process.getAggregateId()!=null) {
+          DomainEventStream events = embeddedEventStore.readEvents(process.getAggregateId());
+          Optional<? extends DomainEventMessage<?>> domainEventMessage = events.asStream().findFirst();
+          if (domainEventMessage.isPresent()) {
+              MetaData metadata = domainEventMessage.get().getMetaData();
+              ValidationProcessForReleaseCreatedEvent event = (ValidationProcessForReleaseCreatedEvent) domainEventMessage.get().getPayload();
+              List<Long> referencesToRefresh = List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
+                      dataset.getDataflowId(), dataset.getDatasetSchema()));
+              if (referencesToRefresh.size() > 0) {
+                  RefreshMaterializedViewForReferenceDatasetCommand command = RefreshMaterializedViewForReferenceDatasetCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
+                          .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).restrictFromPublic(event.isRestrictFromPublic()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).datasetIds(event.getDatasetIds())
+                          .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).datasetProcessId(event.getDatasetProcessId()).build();
+
+                command.setDatasetIForMaterializedViewEvent(datasetId);
+                command.setReferencesToRefresh(referencesToRefresh);
+                commandGateway.send(GenericCommandMessage.asCommandMessage(command).withMetaData(metadata));
+              } else {
+                UpdateMaterializedViewCommand command = UpdateMaterializedViewCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
+                          .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).restrictFromPublic(event.isRestrictFromPublic()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).datasetIds(event.getDatasetIds())
+                          .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
+
+                command.setDatasetIForMaterializedViewEvent(datasetId);
+                command.setReferencesToRefresh(referencesToRefresh);
+                commandGateway.send(GenericCommandMessage.asCommandMessage(command).withMetaData(metadata));
+              }
+          }
+        } else {
+          Map<String, Object> values = new HashMap<>();
+          values.put(LiteralConstants.DATASET_ID, datasetId);
+          values.put("released", released);
+          values.put("referencesToRefresh",
+                  List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
+                          dataset.getDataflowId(), dataset.getDatasetSchema())));
+          values.put("processId", processId);
+          kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
+        }
+
+
       }
     }
     dataset = null;
@@ -1122,7 +1154,7 @@ public class ValidationHelper implements DisposableBean {
               ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
               if (null != nextProcess) {
                 executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
-                    false);
+                    true);
               } else if (processControllerZuul.isProcessFinished(processId)) {
                 ProcessVO processVO = processControllerZuul.findById(processId);
 

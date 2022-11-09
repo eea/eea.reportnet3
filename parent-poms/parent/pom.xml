@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.6-myBranch</api-gateway.version>
-    <communication.version>v3.1.6-myBranch</communication.version>
-    <collaboration.version>v3.1.6-myBranch</collaboration.version>
-    <dataflow.version>v3.1.6-myBranch</dataflow.version>
-    <dataset.version>v3.1.6-myBranch</dataset.version>
-    <document.version>v3.1.6-myBranch</document.version>
-    <frontend.version>v3.1.6-myBranch</frontend.version>
-    <indexsearch.version>v3.1.6-myBranch</indexsearch.version>
-    <inspire.version>v3.1.6-myBranch</inspire.version>
-    <recordstore.version>v3.1.6-myBranch</recordstore.version>
-    <ums.version>v3.1.6-myBranch</ums.version>
-    <validation.version>v3.1.6-myBranch</validation.version>
-    <common-interfaces.version>v3.1.6-myBranch</common-interfaces.version>
-    <common-utitlities.version>v3.1.6-myBranch</common-utitlities.version>
-    <rod.version>v3.1.6-myBranch</rod.version>
-    <orchestrator.version>v3.1.6-myBranch</orchestrator.version>
+    <api-gateway.version>v3.1.6-sagaBranch</api-gateway.version>
+    <communication.version>v3.1.6-sagaBranch</communication.version>
+    <collaboration.version>v3.1.6-sagaBranch</collaboration.version>
+    <dataflow.version>v3.1.6-sagaBranch</dataflow.version>
+    <dataset.version>v3.1.6-sagaBranch</dataset.version>
+    <document.version>v3.1.6-sagaBranch</document.version>
+    <frontend.version>v3.1.6-sagaBranch</frontend.version>
+    <indexsearch.version>v3.1.6-sagaBranch</indexsearch.version>
+    <inspire.version>v3.1.6-sagaBranch</inspire.version>
+    <recordstore.version>v3.1.6-sagaBranch</recordstore.version>
+    <ums.version>v3.1.6-sagaBranch</ums.version>
+    <validation.version>v3.1.6-sagaBranch</validation.version>
+    <common-interfaces.version>v3.1.6-sagaBranch</common-interfaces.version>
+    <common-utitlities.version>v3.1.6-sagaBranch</common-utitlities.version>
+    <rod.version>v3.1.6-sagaBranch</rod.version>
+    <orchestrator.version>v3.1.6-sagaBranch</orchestrator.version>
   </properties>
 </project>

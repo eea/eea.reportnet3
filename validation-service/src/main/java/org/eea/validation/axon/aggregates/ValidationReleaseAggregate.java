@@ -9,16 +9,18 @@ import org.axonframework.spring.stereotype.Aggregate;
 import org.bson.types.ObjectId;
 import org.eea.axon.release.commands.CreateValidationProcessForReleaseCommand;
 import org.eea.axon.release.commands.CreateValidationTasksForReleaseCommand;
-import org.eea.axon.release.events.ValidationProcessForReleaseCreatedEvent;
-import org.eea.axon.release.events.ValidationTasksForReleaseCreatedEvent;
+import org.eea.axon.release.commands.RefreshMaterializedViewForReferenceDatasetCommand;
+import org.eea.axon.release.commands.UpdateMaterializedViewCommand;
+import org.eea.axon.release.events.*;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
-import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.security.jwt.utils.EeaUserDetails;
@@ -57,6 +59,8 @@ public class ValidationReleaseAggregate {
     private boolean validate;
     private List<Long> datasetIds;
     private Map<Long, String> datasetProcessId;
+    private Long datasetIForMaterializedViewEvent;
+    private List<Long> referencesToRefresh;
 
     private static final Logger LOG = LoggerFactory.getLogger(ValidationReleaseAggregate.class);
 
@@ -123,7 +127,12 @@ public class ValidationReleaseAggregate {
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                     EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
 
-            Long datasetId = command.getDatasetIds().get(0);
+            Long datasetId;
+            if (command.getDatasetIForMaterializedViewEvent()!=null) {
+                datasetId = command.getDatasetIForMaterializedViewEvent();
+            } else {
+                datasetId = command.getDatasetIds().get(0);
+            }
             DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
             List<Rule> listSql = rulesRepository.findSqlRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
             Boolean hasSqlEnabled = true;
@@ -140,24 +149,32 @@ public class ValidationReleaseAggregate {
                 // validation
                 TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + dataset.getId());
 
-                if (Boolean.FALSE.equals(hasSqlEnabled)) {
+                if (Boolean.FALSE.equals(hasSqlEnabled) || command.getDatasetIForMaterializedViewEvent()!=null) {
                     validationHelper.executeValidationProcess(dataset, command.getDatasetProcessId().get(datasetId));
+
+                    ValidationTasksForReleaseCreatedEvent event = new ValidationTasksForReleaseCreatedEvent();
+                    BeanUtils.copyProperties(command, event);
+                    apply(event, metaData);
                 } else {
                     validationHelper.deleteLockToReleaseProcess(datasetId);
-                    Map<String, Object> values = new HashMap<>();
-                    values.put(LiteralConstants.DATASET_ID, datasetId);
-                    values.put("released", true);
-                    values.put("referencesToRefresh",
-                            List.copyOf(validationHelper.updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
-                                    dataset.getDataflowId(), dataset.getDatasetSchema())));
-                    values.put("processId", command.getDatasetProcessId().get(datasetId));
-                    kafkaSenderUtils.releaseKafkaEvent(EventType.REFRESH_MATERIALIZED_VIEW_EVENT, values);
+
+                    List<Long> referencesToRefresh = List.copyOf(validationHelper.updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
+                            dataset.getDataflowId(), dataset.getDatasetSchema()));
+                    if (referencesToRefresh.size()>0) {
+                        MaterializedViewShouldBeRefreshedEvent event = new MaterializedViewShouldBeRefreshedEvent();
+                        BeanUtils.copyProperties(command, event);
+                        event.setDatasetIForMaterializedViewEvent(datasetId);
+                        event.setReferencesToRefresh(referencesToRefresh);
+                        apply(event, metaData);
+                    } else {
+                        MaterializedViewUpdatedEvent event = new MaterializedViewUpdatedEvent();
+                        BeanUtils.copyProperties(command, event);
+                        event.setDatasetIForMaterializedViewEvent(datasetId);
+                        event.setReferencesToRefresh(referencesToRefresh);
+                        apply(event, metaData);
+                    }
                 }
             }
-
-            ValidationTasksForReleaseCreatedEvent event = new ValidationTasksForReleaseCreatedEvent();
-            BeanUtils.copyProperties(command, event);
-            apply(event, metaData);
         } catch (Exception e) {
             LOG.error("Error while adding validation process for dataflowId: {} dataProvider: {}: {}", command.getDataflowId(), command.getDataProviderId(), e.getMessage());
             throw e;
@@ -180,7 +197,113 @@ public class ValidationReleaseAggregate {
         this.restrictFromPublic = event.isRestrictFromPublic();
         this.validate = event.isValidate();
         this.datasetIds = event.getDatasetIds();
-
+        this.datasetProcessId = event.getDatasetProcessId();
     }
 
+    @EventSourcingHandler
+    public void on(MaterializedViewShouldBeRefreshedEvent event) {
+        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
+        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
+        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
+        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
+        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
+        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
+        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
+        this.releaseAggregateId = event.getReleaseAggregateId();
+        this.transactionId = event.getTransactionId();
+        this.dataflowId = event.getDataflowId();
+        this.dataProviderId = event.getDataProviderId();
+        this.restrictFromPublic = event.isRestrictFromPublic();
+        this.validate = event.isValidate();
+        this.datasetIds = event.getDatasetIds();
+        this.datasetProcessId = event.getDatasetProcessId();
+        this.datasetIForMaterializedViewEvent = event.getDatasetIForMaterializedViewEvent();
+        this.referencesToRefresh = event.getReferencesToRefresh();
+    }
+
+    @CommandHandler
+    public void handle(RefreshMaterializedViewForReferenceDatasetCommand command, MetaData metaData, RecordStoreControllerZuul recordStoreControllerZuul) {
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+        authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
+
+        recordStoreControllerZuul.refreshMaterializedViewV2(command.getReferencesToRefresh());
+
+        MaterializedViewForReferenceDatasetRefreshedEvent event = new MaterializedViewForReferenceDatasetRefreshedEvent();
+        BeanUtils.copyProperties(command, event);
+        apply(event, metaData);
+    }
+
+    @EventSourcingHandler
+    public void on(MaterializedViewForReferenceDatasetRefreshedEvent event) {
+        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
+        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
+        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
+        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
+        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
+        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
+        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
+        this.releaseAggregateId = event.getReleaseAggregateId();
+        this.transactionId = event.getTransactionId();
+        this.dataflowId = event.getDataflowId();
+        this.dataProviderId = event.getDataProviderId();
+        this.restrictFromPublic = event.isRestrictFromPublic();
+        this.validate = event.isValidate();
+        this.datasetIds = event.getDatasetIds();
+        this.datasetIForMaterializedViewEvent = event.getDatasetIForMaterializedViewEvent();
+        this.referencesToRefresh = event.getReferencesToRefresh();
+    }
+
+    @CommandHandler
+    public void handle(UpdateMaterializedViewCommand command, MetaData metaData, RecordStoreControllerZuul recordStoreControllerZuul, ProcessControllerZuul processControllerZuul, DataSetMetabaseControllerZuul datasetMetabaseControllerZuul) {
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+        authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
+
+        if (command.getReferencesToRefresh() != null && !org.springframework.util.CollectionUtils.isEmpty(command.getReferencesToRefresh())) {
+            command.getReferencesToRefresh().stream().forEach(dataset -> {
+                try {
+                    recordStoreControllerZuul.launchUpdateMaterializedQueryView(Long.valueOf(dataset));
+                } catch (Exception e) {
+                    LOG.error("Error refreshing the materialized view of the dataset {}", dataset, e);
+                    processControllerZuul.updateProcess(command.getDatasetIForMaterializedViewEvent(), -1L, ProcessStatusEnum.CANCELED,
+                            ProcessTypeEnum.VALIDATION, command.getDatasetProcessId().get(command.getDatasetIForMaterializedViewEvent()),
+                            SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
+                    datasetMetabaseControllerZuul.updateDatasetRunningStatus(command.getDatasetIForMaterializedViewEvent(),
+                            DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
+                }
+            });
+        }
+        recordStoreControllerZuul.updateMaterializedView(command.getDatasetIForMaterializedViewEvent());
+
+        MaterializedViewUpdatedEvent event = new MaterializedViewUpdatedEvent();
+        BeanUtils.copyProperties(command, event);
+        apply(event, metaData);
+    }
+
+    @EventSourcingHandler
+    public void on(MaterializedViewUpdatedEvent event) {
+        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
+        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
+        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
+        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
+        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
+        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
+        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
+        this.releaseAggregateId = event.getReleaseAggregateId();
+        this.transactionId = event.getTransactionId();
+        this.dataflowId = event.getDataflowId();
+        this.dataProviderId = event.getDataProviderId();
+        this.restrictFromPublic = event.isRestrictFromPublic();
+        this.validate = event.isValidate();
+        this.datasetIds = event.getDatasetIds();
+        this.datasetIForMaterializedViewEvent = event.getDatasetIForMaterializedViewEvent();
+        this.referencesToRefresh = event.getReferencesToRefresh();
+    }
 }

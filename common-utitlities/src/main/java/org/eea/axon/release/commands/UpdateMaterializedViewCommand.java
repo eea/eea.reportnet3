@@ -13,16 +13,16 @@ import java.util.Map;
 @AllArgsConstructor
 @Getter
 @Setter
-public class CreateValidationTasksForReleaseCommand {
+public class UpdateMaterializedViewCommand {
 
     @TargetAggregateIdentifier
     private String validationReleaseAggregateId;
+    private String recordStoreReleaseAggregateId;
     private String datasetReleaseAggregateId;
     private String releaseAggregateId;
     private String communicationReleaseAggregateId;
     private String dataflowReleaseAggregateId;
     private String collaborationReleaseAggregateId;
-    private String recordStoreReleaseAggregateId;
     private String transactionId;
     private Long dataflowId;
     private Long dataProviderId;
@@ -31,4 +31,5 @@ public class CreateValidationTasksForReleaseCommand {
     private List<Long> datasetIds;
     private Map<Long, String> datasetProcessId;
     private Long datasetIForMaterializedViewEvent;
+    private List<Long> referencesToRefresh;
 }

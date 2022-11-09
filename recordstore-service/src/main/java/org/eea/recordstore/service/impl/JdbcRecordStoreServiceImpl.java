@@ -1020,6 +1020,24 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Async
   public void updateMaterializedQueryView(Long datasetId, String user, Boolean released,
       String processId) {
+    updateMaterializedView(datasetId);
+    Map<String, Object> values = new HashMap<>();
+    values.put(LiteralConstants.DATASET_ID, datasetId);
+    values.put(LiteralConstants.USER,
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    values.put("released", released);
+    values.put("updateViews", false);
+    values.put("processId", processId);
+    LOG.info(
+        "The user set on updateMaterializedQueryView threadPropertiesManager is {}, dataset {}",
+        SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+    LOG.info("The user set on securityContext is {}",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+    kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
+  }
+
+  @Override
+  public void updateMaterializedView(Long datasetId) {
     LOG.info(" Update Materialized Views from Dataset id: {}", datasetId);
 
     DataSetMetabaseVO datasetMetabaseVO =
@@ -1078,19 +1096,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     } catch (RecordStoreAccessException e) {
       LOG_ERROR.error("Error updating Materialized view: {}", e.getMessage(), e);
     }
-    Map<String, Object> values = new HashMap<>();
-    values.put(LiteralConstants.DATASET_ID, datasetId);
-    values.put(LiteralConstants.USER,
-        SecurityContextHolder.getContext().getAuthentication().getName());
-    values.put("released", released);
-    values.put("updateViews", false);
-    values.put("processId", processId);
-    LOG.info(
-        "The user set on updateMaterializedQueryView threadPropertiesManager is {}, dataset {}",
-        SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
-    LOG.info("The user set on securityContext is {}",
-        SecurityContextHolder.getContext().getAuthentication().getName());
-    kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_EXECUTE_VALIDATION, values);
   }
 
   /**
@@ -1132,6 +1137,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Async
   public void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation,
       boolean released, Long datasetId, String processId) {
+    refreshMaterializedView(datasetIds);
+    if (Boolean.TRUE.equals(continueValidation)) {
+      Map<String, Object> values = new HashMap<>();
+      values.put(LiteralConstants.DATASET_ID, datasetId);
+      values.put("released", released);
+      values.put("processId", processId);
+      kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
+    }
+  }
+
+  @Override
+  public void refreshMaterializedView(List<Long> datasetIds) {
     datasetIds.forEach(id -> {
       if (!Boolean.TRUE.equals(datasetControllerZuul.getCheckView(id))) {
         datasetControllerZuul.updateCheckView(id, true);
@@ -1153,13 +1170,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         LOG.info("The views from the dataset {} are updated, no need to refresh.", id);
       }
     });
-    if (Boolean.TRUE.equals(continueValidation)) {
-      Map<String, Object> values = new HashMap<>();
-      values.put(LiteralConstants.DATASET_ID, datasetId);
-      values.put("released", released);
-      values.put("processId", processId);
-      kafkaSenderUtils.releaseKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEW_EVENT, values);
-    }
   }
 
   /**

@@ -1,20 +1,5 @@
 package org.eea.recordstore.service.impl;
 
-import static org.junit.Assert.assertFalse;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
@@ -27,12 +12,7 @@ import org.eea.interfaces.controller.dataset.ReferenceDatasetController.Referenc
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataset.DataCollectionVO;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.EUDatasetVO;
-import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
-import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.dataset.TestDatasetVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -45,20 +25,10 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.thread.ThreadPropertiesManager;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.postgresql.copy.CopyIn;
 import org.postgresql.copy.CopyOperation;
@@ -73,6 +43,19 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
+
+import static org.junit.Assert.assertFalse;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -357,14 +340,6 @@ public class JdbcRecordStoreServiceImplTest {
         .thenReturn(DatasetTypeEnum.DESIGN);
     final Connection connection = Mockito.mock(BaseConnection.class);
 
-    Mockito.when(((BaseConnection) connection).getEncoding())
-        .thenReturn(Encoding.defaultEncoding());
-    QueryExecutor queryExector = Mockito.mock(QueryExecutor.class);
-    CopyOperation copyOut = Mockito.mock(CopyOut.class);
-    Mockito.when(copyOut.isActive()).thenReturn(true);
-    Mockito.when(queryExector.startCopy(Mockito.anyString(), Mockito.anyBoolean()))
-        .thenReturn(copyOut);
-    Mockito.when(((BaseConnection) connection).getQueryExecutor()).thenReturn(queryExector);
     doThrow(new NullPointerException("")).when(datasetControllerZuul).getDatasetType(Mockito.any());
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
@@ -401,14 +376,6 @@ public class JdbcRecordStoreServiceImplTest {
         .thenReturn(reportings);
     final Connection connection = Mockito.mock(BaseConnection.class);
 
-    Mockito.when(((BaseConnection) connection).getEncoding())
-        .thenReturn(Encoding.defaultEncoding());
-    QueryExecutor queryExector = Mockito.mock(QueryExecutor.class);
-    CopyOperation copyOut = Mockito.mock(CopyOut.class);
-    Mockito.when(copyOut.isActive()).thenReturn(true);
-    Mockito.when(queryExector.startCopy(Mockito.anyString(), Mockito.anyBoolean()))
-        .thenReturn(copyOut);
-    Mockito.when(((BaseConnection) connection).getQueryExecutor()).thenReturn(queryExector);
     doThrow(new NullPointerException("")).when(datasetControllerZuul).getDatasetType(Mockito.any());
     DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
     datasetMetabaseVO.setDataflowId(1L);
