@@ -107,7 +107,7 @@ public class ValidationControllerImpl implements ValidationController {
    * @return
    */
   @Override
-  @PutMapping(value = "/dataset/{id}/execute", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PutMapping(value = "/dataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')  OR hasAnyRole('ADMIN')")
   @LockMethod(removeWhenFinish = false)
   @ApiOperation(value = "Executes a job that validates dataset data for a given dataset id", hidden = true)

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -34,7 +35,7 @@ public class JobServiceImpl implements JobService {
     private Long maximumNumberOfInProgressReleaseJobs;
 
     @Value(value = "${scheduling.inProgress.copyToEUDataset.maximum.jobs}")
-    private Long maximumNumberOfInProgressCopyToEuDataseJobs;
+    private Long maximumNumberOfInProgressCopyToEuDatasetJobs;
 
     @Value(value = "${scheduling.inProgress.export.maximum.jobs}")
     private Long maximumNumberOfInProgressExportJobs;
@@ -63,7 +64,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<JobVO> getJobsByStatus(JobStatusEnum status){
-        List<Job> jobs = jobRepository.findAllByJobStatus(status);
+        List<Job> jobs = jobRepository.findAllByJobStatusOrderById(status);
         return jobMapper.entityListToClass(jobs);
     }
 
@@ -98,7 +99,7 @@ public class JobServiceImpl implements JobService {
         else if(jobType == JobTypeEnum.RELEASE && numberOfCurrentJobs < maximumNumberOfInProgressReleaseJobs){
             return true;
         }
-        else if(jobType == JobTypeEnum.COPY_TO_EU_DATASET && numberOfCurrentJobs < maximumNumberOfInProgressCopyToEuDataseJobs){
+        else if(jobType == JobTypeEnum.COPY_TO_EU_DATASET && numberOfCurrentJobs < maximumNumberOfInProgressCopyToEuDatasetJobs){
             return true;
         }
         else if(jobType == JobTypeEnum.EXPORT && numberOfCurrentJobs < maximumNumberOfInProgressExportJobs){
@@ -175,8 +176,8 @@ public class JobServiceImpl implements JobService {
 
     @Transactional
     @Override
-    public void deleteFinishedJobsBasedOnDuration(Long duration){
-        jobRepository.deleteJobsBasedOnStatusAndDuration(Arrays.asList(JobStatusEnum.FINISHED, JobStatusEnum.ABORTED, JobStatusEnum.FAILED), duration * (-1));
+    public void deleteFinishedJobsBasedOnDuration(){
+        jobRepository.deleteJobsBasedOnStatusAndDuration(new HashSet<>(Arrays.asList(JobStatusEnum.FINISHED.getValue(), JobStatusEnum.ABORTED.getValue(), JobStatusEnum.FAILED.getValue(), JobStatusEnum.CANCELLED.getValue())));
     }
 
     @Transactional

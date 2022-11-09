@@ -231,7 +231,7 @@ public interface DatasetSnapshotController {
    * @param restrictFromPublic the restrict from public
    * @param validate the validate
    */
-  @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release/execute",
+  @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
           produces = MediaType.APPLICATION_JSON_VALUE)
   void createReleaseSnapshots(@PathVariable(value = "dataflowId", required = true) Long dataflowId,
                               @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,

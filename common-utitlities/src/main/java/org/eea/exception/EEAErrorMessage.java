@@ -716,6 +716,9 @@ public final class EEAErrorMessage {
   public static final String RESTARTING_TASK =
           "An unknown error happenned while restarting task.";
 
+  /** The Constant DUPLICATE_RELEASE_JOB: {@value}. */
+  public static final String DUPLICATE_RELEASE_JOB = "There is already a duplicate release job to be executed";
+
   /**
    * Instantiates a new EEA error message.
    */

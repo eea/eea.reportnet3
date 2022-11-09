@@ -123,6 +123,9 @@ public class JobControllerImpl implements JobController {
         LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
         jobService.addReleaseJob(parameters, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
         LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
+        if (statusToInsert == JobStatusEnum.ABORTED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
+        }
     }
 
     /**
