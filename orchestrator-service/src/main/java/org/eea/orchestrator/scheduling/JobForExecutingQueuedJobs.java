@@ -59,9 +59,12 @@ public class JobForExecutingQueuedJobs {
      * The job runs every 1 minute. It finds jobs that have status=QUEUED and executes them
      */
     public void executeQueuedJobs() {
-        LOG.info("Running scheduled task executeQueuedJobs");
         try {
             List<JobVO> jobs = jobService.getJobsByStatus(JobStatusEnum.QUEUED);
+            if(jobs == null || jobs.size() == 0){
+                return;
+            }
+            LOG.info("Running scheduled task executeQueuedJobs");
             TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(adminUser, LiteralConstants.BEARER_TOKEN + tokenVo.getAccessToken(), null);

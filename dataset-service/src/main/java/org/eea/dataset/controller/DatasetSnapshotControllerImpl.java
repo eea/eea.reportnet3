@@ -696,7 +696,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @LockMethod(removeWhenFinish = false)
   @HystrixCommand
-  @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release/execute",
+  @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Create release snapshots", hidden = true)

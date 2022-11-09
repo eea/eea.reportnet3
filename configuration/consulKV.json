@@ -1820,10 +1820,6 @@
     "value": "JHtJTl9QUk9HUkVTU19UQVNLX01BWF9USU1FOjEyMH0="
   },
   {
-    "key": "config/orchestrator/scheduling.finishedJobs.duration.minutes.threshold",
-    "value": "JHtGSU5JU0hFRF9KT0JTX0RVUkFUSU9OX1RIUkVTSE9MRDo2MDB9"
-  },
-  {
     "key": "config/orchestrator/scheduling.inProgress.import.maximum.jobs",
     "value": "JHtJTl9QUk9HUkVTU19JTVBPUlRfTUFYSU1VTV9KT0JTOjJ9"
   },

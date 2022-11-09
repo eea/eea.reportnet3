@@ -29,7 +29,7 @@ public interface JobService {
 
     void updateJobStatusByProcessId(JobStatusEnum status, String processId);
 
-    void deleteFinishedJobsBasedOnDuration(Long duration);
+    void deleteFinishedJobsBasedOnDuration();
 
     void updateJobStatus(Long jobId, JobStatusEnum status, String processId);
 

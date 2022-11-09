@@ -33,7 +33,7 @@ public interface ValidationController {
    * @param jobId the job Id
    * @return
    */
-  @PutMapping(value = "/dataset/{id}/execute")
+  @PutMapping(value = "/dataset/{id}")
   void validateDataSetData(@PathVariable("id") Long datasetId,
       @RequestParam(value = "released", required = false) boolean released, @RequestParam(value = "jobId", required = false) Long jobId);
 
