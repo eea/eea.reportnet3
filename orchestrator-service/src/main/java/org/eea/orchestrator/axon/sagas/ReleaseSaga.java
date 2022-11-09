@@ -185,6 +185,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ValidationForReleaseFinishedEvent event, MetaData metaData) {
+        LOG.info("ValidationForReleaseFinishedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         CreateSnapshotRecordRorReleaseInMetabaseCommand createReleaseSnapshotCommand = CreateSnapshotRecordRorReleaseInMetabaseCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
                 .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).releaseAggregateId(event.getReleaseAggregateId())
                 .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId())
@@ -198,6 +199,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(SnapshotRecordForReleaseCreatedInMetabaseEvent event) {
+        LOG.info("SnapshotRecordForReleaseCreatedInMetabaseEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         CreateSnapshotFileForReleaseCommand createReleaseSnapshotCommand = CreateSnapshotFileForReleaseCommand.builder().recordStoreReleaseAggregateId(UUID.randomUUID().toString()).transactionId(event.getTransactionId())
                 .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots())
                 .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId())
@@ -210,6 +212,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(SnapshotFileForReleaseCreatedEvent event, MetaData metaData) {
+        LOG.info("SnapshotFileForReleaseCreatedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         UpdateDatasetStatusCommand updateDatasetStatusCommand = UpdateDatasetStatusCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
                 .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots())
                 .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId())
@@ -223,6 +226,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(DatasetStatusUpdatedEvent event, MetaData metaData) {
+        LOG.info("DatasetStatusUpdatedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         DeleteProviderCommand deleteProviderCommand = DeleteProviderCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
                 .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots())
                 .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId())
@@ -237,6 +241,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ProviderDeletedEvent event, MetaData metaData) {
+        LOG.info("ProviderDeletedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         if (event.getDataCollectionForDeletion().size()>0) {
             DeleteProviderCommand deleteProviderCommand = DeleteProviderCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
                     .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots())
@@ -262,6 +267,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(InternalRepresentativeUpdatedEvent event, MetaData metaData) {
+        LOG.info("InternalRepresentativeUpdatedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         UpdateDatasetRunningStatusCommand updateDatasetRunningStatusCommand = UpdateDatasetRunningStatusCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
                 .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots()).releaseAggregateId(event.getReleaseAggregateId())
@@ -275,6 +281,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(DatasetRunningStatusUpdatedEvent event, MetaData metaData) {
+        LOG.info("DatasetRunningStatusUpdatedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         RestoreDataFromSnapshotCommand restoreDataFromSnapshotCommand = RestoreDataFromSnapshotCommand.builder().recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
                 .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots()).datasetDataCollection(event.getDatasetDataCollection())
@@ -288,6 +295,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(DataRestoredFromSnapshotEvent event, MetaData metaData) {
+        LOG.info("DataRestoredFromSnapshotEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         MarkSnapshotReleasedCommand markSnapshotReleasedCommand = MarkSnapshotReleasedCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId())
                 .restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots()).datasetDataCollection(event.getDatasetDataCollection()).releaseAggregateId(event.getReleaseAggregateId())
@@ -300,6 +308,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(SnapshotMarkedReleasedEvent event, MetaData metaData) {
+        LOG.info("SnapshotMarkedReleasedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         UpdateChangesEuDatasetCommand updateChangesEuDatasetCommand = UpdateChangesEuDatasetCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId())
                 .restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots()).datasetDataCollection(event.getDatasetDataCollection()).datasetDateRelease(event.getDatasetDateRelease())
@@ -313,6 +322,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ChangesEuDatasetUpdatedEvent event, MetaData metaData) {
+        LOG.info("ChangesEuDatasetUpdatedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         SavePublicFilesForReleaseCommand savePublicFilesForReleaseCommand = SavePublicFilesForReleaseCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId())
                 .restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetDataCollection(event.getDatasetDataCollection()).datasetSnapshots(event.getDatasetSnapshots()).datasetDateRelease(event.getDatasetDateRelease())
@@ -326,6 +336,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(PublicFilesForReleaseSavedEvent event, MetaData metaData) {
+        LOG.info("PublicFilesForReleaseSavedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         RemoveReleaseLocksCommand removeReleaseLocksCommand = RemoveReleaseLocksCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId())
                 .restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetDataCollection(event.getDatasetDataCollection()).datasetSnapshots(event.getDatasetSnapshots()).datasetDateRelease(event.getDatasetDateRelease())
@@ -339,6 +350,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ReleaseLocksRemovedEvent event, MetaData metaData) {
+        LOG.info("ReleaseLocksRemovedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         SendEmailForSuccessfulReleaseCommand sendEmailForSuccessfulReleaseCommand = SendEmailForSuccessfulReleaseCommand.builder().communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId())
                 .restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetDataCollection(event.getDatasetDataCollection()).datasetSnapshots(event.getDatasetSnapshots()).datasetDateRelease(event.getDatasetDateRelease()).releaseAggregateId(event.getReleaseAggregateId())
@@ -351,6 +363,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(EmailForSuccessfulReleaseSentEvent event, MetaData metaData) {
+        LOG.info("EmailForSuccessfulReleaseSentEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         SendNotificationForSuccessfulReleaseCommand sendNotificationForSuccessfulReleaseCommand = SendNotificationForSuccessfulReleaseCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId())
                 .restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetDataCollection(event.getDatasetDataCollection()).datasetSnapshots(event.getDatasetSnapshots()).datasetDateRelease(event.getDatasetDateRelease()).dataflowName(event.getDataflowName())
@@ -365,6 +378,7 @@ public class ReleaseSaga {
     @EndSaga
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(NotificationForSuccessfulReleaseSentEvent event, MetaData metaData) {
+        LOG.info("NotificationForSuccessfulReleaseSentEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         CreateMessageForSuccessfulReleaseCommand createMessageForSuccessfulReleaseCommand = CreateMessageForSuccessfulReleaseCommand.builder().collaborationReleaseAggregateId(UUID.randomUUID().toString()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId())
                 .restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetDataCollection(event.getDatasetDataCollection()).datasetSnapshots(event.getDatasetSnapshots()).datasetDateRelease(event.getDatasetDateRelease()).dataflowName(event.getDataflowName()).datasetName(event.getDatasetName())
@@ -378,7 +392,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(FailureReleaseLocksRemovedEvent event) {
-        LOG.info("-----------------------REMOVE RELEASE LOCKS-------------------------------");
+        LOG.info("FailureReleaseLocksRemovedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
     }
 }
 
