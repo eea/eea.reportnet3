@@ -5,6 +5,7 @@ package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -1062,7 +1063,7 @@ public class DatasetSnapshotServiceTest {
             .findFirstByDataflowIdAndDataProviderIdOrderByIdAsc(Mockito.anyLong(), Mockito.any()))
         .thenReturn(dataset);
     Mockito.doNothing().when(validationControllerZuul).validateDataSetData(Mockito.any(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.any());
 
     Mockito.when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong()))
         .thenReturn(Arrays.asList(dataset));
@@ -1077,7 +1078,7 @@ public class DatasetSnapshotServiceTest {
     Mockito.doNothing().when(reportingDatasetService).updateReportingDatasetMetabase(Mockito.any());
     datasetSnapshotService.createReleaseSnapshots(1L, 1L, true, true);
     Mockito.verify(validationControllerZuul, times(1)).validateDataSetData(Mockito.any(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.any());
   }
 
   @Test

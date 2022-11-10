@@ -62,7 +62,6 @@ public class JobForRestartingDelayedTasks {
      * and sets their status to status=IN_QUEUE.
      */
     public void restartDelayedTasks() {
-        LOG.info("Running scheduled task restartDelayedTasks");
         try {
             List<BigInteger> tasksInProgress = validationControllerZuul.listTasksInProgress(maxTimeInMinutesForInProgressTasks);
             if (tasksInProgress.size() > 0) {

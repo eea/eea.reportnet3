@@ -15,6 +15,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
@@ -82,6 +83,10 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   /** The notification controller zuul. */
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
+
+  /** The job controller zuul. */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
 
   /** The lock service. */
   @Autowired
@@ -682,9 +687,8 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     }
   }
 
-
   /**
-   * Creates the release snapshots.
+   * Executes the release snapshots.
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
@@ -720,7 +724,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    LOG.info("The user invoking DataSetSnaphotControllerImpl.createReleaseSnapshots  for dataflowId {} and dataProviderId {} is {}",
+    LOG.info("The user invoking DataSetSnapshotControllerImpl.createReleaseSnapshots for dataflowId {} and dataProviderId {} is {}",
         dataflowId, dataProviderId, SecurityContextHolder.getContext().getAuthentication().getName());
 
     DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);

@@ -25,16 +25,17 @@ public interface ValidationController {
 
   }
 
-
   /**
-   * Validate data set data.
+   * Executes the validation job
    *
    * @param datasetId the dataset id
    * @param released the released
+   * @param jobId the job Id
+   * @return
    */
   @PutMapping(value = "/dataset/{id}")
   void validateDataSetData(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "released", required = false) boolean released);
+      @RequestParam(value = "released", required = false) boolean released, @RequestParam(value = "jobId", required = false) Long jobId);
 
   /**
    * Gets the failed validations by id dataset.

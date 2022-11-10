@@ -232,12 +232,12 @@ public interface DatasetSnapshotController {
    * @param validate the validate
    */
   @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+          produces = MediaType.APPLICATION_JSON_VALUE)
   void createReleaseSnapshots(@PathVariable(value = "dataflowId", required = true) Long dataflowId,
-      @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,
-      @RequestParam(name = "restrictFromPublic", required = true,
-          defaultValue = "false") boolean restrictFromPublic,
-      @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate);
+                              @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,
+                              @RequestParam(name = "restrictFromPublic", required = true,
+                                      defaultValue = "false") boolean restrictFromPublic,
+                              @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate);
 
 
   /**

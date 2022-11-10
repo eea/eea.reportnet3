@@ -56,7 +56,7 @@ export const DatasetConfig = {
   updateField: '/dataset/{:datasetId}/updateField?updateCascadePK={:updateInCascade}',
   updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}',
   updateTableDesign: '/dataschema/{:datasetId}/tableSchema',
-  validate: '/validation/dataset/{:datasetId}',
+  validate: '/orchestrator/jobs/addValidationJob/{:datasetId}',
   validateSql: '/rules/validateSqlRules?datasetId={:datasetId}&datasetSchemaId={:datasetSchemaId}',
   validationViewer: '/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}',
   testImportProcess: '/dataset/checkImportProcess/{:datasetId}'
