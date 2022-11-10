@@ -43,18 +43,6 @@ import javax.sql.DataSource;
 public class OrchestratorConfiguration {
 
   /**
-   * The bootstrap address.
-   */
-  @Value(value = "${kafka.bootstrapAddress}")
-  private String bootstrapAddress;
-
-  /**
-   * The group id.
-   */
-  @Value(value = "${spring.application.name}")
-  private String groupId;
-
-  /**
    * The url.
    */
   @Value("${spring.datasource.orchestratorDb.url}")
@@ -77,39 +65,6 @@ public class OrchestratorConfiguration {
    */
   @Value("${spring.datasource.orchestratorDb.driver-class-name}")
   private String driver;
-
-  /**
-   * Broadcast consumer factory consumer factory.
-   *
-   * @return the consumer factory
-   */
-  @Bean
-  public ConsumerFactory<String, EEAEventVO> broadcastConsumerFactory() {
-    final Map<String, Object> props = new HashMap<>();
-    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-    // single group in one partition topic garantees broadcasting
-    props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId + UUID.randomUUID());
-    props.put(ENABLE_AUTO_COMMIT_CONFIG, "true");
-    props.put(ISOLATION_LEVEL_CONFIG, "read_committed");
-
-    JsonDeserializer<EEAEventVO> deserializer = new JsonDeserializer<>(EEAEventVO.class);
-    deserializer.addTrustedPackages("org.eea.kafka.domain");
-    return new DefaultKafkaConsumerFactory(props, new StringDeserializer(), deserializer);
-  }
-
-  /**
-   * Kafka listener container factory.
-   *
-   * @return the concurrent kafka listener container factory
-   */
-  @Bean
-  public ConcurrentKafkaListenerContainerFactory<String, EEAEventVO> broadcastKafkaListenerContainerFactory() {
-
-    final ConcurrentKafkaListenerContainerFactory<String, EEAEventVO> factory =
-        new ConcurrentKafkaListenerContainerFactory<>();
-    factory.setConsumerFactory(broadcastConsumerFactory());
-    return factory;
-  }
 
   /**
    * Data source data source.
