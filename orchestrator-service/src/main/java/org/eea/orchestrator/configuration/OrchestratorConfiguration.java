@@ -1,14 +1,6 @@
 package org.eea.orchestrator.configuration;
 
-import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.ISOLATION_LEVEL_CONFIG;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
-import java.util.UUID;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.eea.kafka.domain.EEAEventVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,10 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -66,6 +54,22 @@ public class OrchestratorConfiguration {
    */
   @Value("${spring.datasource.orchestratorDb.driver-class-name}")
   private String driver;
+
+  /** The dll. */
+  @Value("${spring.jpa.hibernate.ddl-auto}")
+  private String dll;
+
+  /** The dialect. */
+  @Value("${spring.jpa.properties.hibernate.dialect}")
+  private String dialect;
+
+  /** The show sql. */
+  @Value("${spring.jpa.hibernate.show-sql}")
+  private String showSql;
+
+  /** The flush mode. */
+  @Value("${spring.jpa.hibernate.flushMode}")
+  private String flushMode;
 
   /**
    * Data source data source.
@@ -127,10 +131,10 @@ public class OrchestratorConfiguration {
    */
   private Properties additionalProperties() {
     final Properties properties = new Properties();
-    properties.setProperty("hibernate.hbm2ddl.auto", "update");
-    properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-    properties.setProperty("hibernate.show_sql", "false");
-    properties.setProperty("hibernate.flushMode", "commit");
+    properties.setProperty("hibernate.hbm2ddl.auto", dll);
+    properties.setProperty("hibernate.dialect", dialect);
+    properties.setProperty("hibernate.show_sql", showSql);
+    properties.setProperty("hibernate.flushMode", flushMode);
     return properties;
   }
 }
