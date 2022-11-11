@@ -58,7 +58,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<JobVO> getAllJobs(){
-        List<Job> jobs = jobRepository.findAll();
+        List<Job> jobs = jobRepository.findAllByOrderById();
         return jobMapper.entityListToClass(jobs);
     }
 

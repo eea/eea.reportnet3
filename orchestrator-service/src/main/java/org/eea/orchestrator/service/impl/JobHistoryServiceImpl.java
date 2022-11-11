@@ -36,7 +36,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
 
     @Override
     public List<JobHistoryVO> getJobHistory(Long jobId){
-        List<JobHistory> jobHistoryList = jobHistoryRepository.findAllByJobId(jobId);
+        List<JobHistory> jobHistoryList = jobHistoryRepository.findAllByJobIdOrderById(jobId);
         return jobHistoryMapper.entityListToClass(jobHistoryList);
     }
 }
