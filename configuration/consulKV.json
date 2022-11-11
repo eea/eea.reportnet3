@@ -1858,5 +1858,21 @@
   {
     "key": "config/application/spring.jpa.hibernate.orchestratorDb.ddl-auto",
     "value": "JHtPUkNIRVNUUkFUT1JfRERMX0FVVE86dmFsaWRhdGV9"
+  },
+  {
+    "key": "config/orchestrator/spring.jpa.hibernate.ddl-auto",
+    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
+    "key": "config/orchestrator/spring.jpa.properties.hibernate.dialect",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+  },
+  {
+    "key": "config/orchestrator/spring.jpa.hibernate.show-sql",
+    "value": "JHtTSE9XX1NRTDpmYWxzZX0="
+  },
+  {
+    "key": "config/orchestrator/spring.jpa.hibernate.flushMode",
+    "value": "Y29tbWl0"
   }
 ]
