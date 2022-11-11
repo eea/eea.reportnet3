@@ -4,6 +4,7 @@ import static org.apache.kafka.clients.consumer.ConsumerConfig.ENABLE_AUTO_COMMI
 import static org.apache.kafka.clients.consumer.ConsumerConfig.ISOLATION_LEVEL_CONFIG;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.UUID;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -95,6 +96,8 @@ public class OrchestratorConfiguration {
             new LocalContainerEntityManagerFactoryBean();
     orchestratorEM.setDataSource(orchestratorDatasource());
     orchestratorEM.setPackagesToScan("org.eea.orchestrator.persistence.domain");
+    orchestratorEM.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+    orchestratorEM.setJpaProperties(additionalProperties());
     final JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
     orchestratorEM.setJpaVendorAdapter(vendorAdapter);
 
@@ -115,5 +118,19 @@ public class OrchestratorConfiguration {
     final JpaTransactionManager transactionManager = new JpaTransactionManager();
     transactionManager.setEntityManagerFactory(orchestratorEntityManagerFactory().getObject());
     return transactionManager;
+  }
+
+  /**
+   * Additional properties.
+   *
+   * @return the properties
+   */
+  private Properties additionalProperties() {
+    final Properties properties = new Properties();
+    properties.setProperty("hibernate.hbm2ddl.auto", "update");
+    properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+    properties.setProperty("hibernate.show_sql", "false");
+    properties.setProperty("hibernate.flushMode", "commit");
+    return properties;
   }
 }
