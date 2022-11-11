@@ -19,6 +19,14 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     /**
      *
+     * Retrieves all jobs ordered by id
+     *
+     * @return the list of job entries
+     */
+    List<Job> findAllByOrderById();
+
+    /**
+     *
      * Retrieves jobs that have specific status
      *
      * @param jobStatus the job status
