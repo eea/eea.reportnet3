@@ -27,4 +27,6 @@ public class DatasetRunningStatusUpdatedEvent {
     private List<Long> datasetIds;
     private Map<Long, Long> datasetSnapshots;
     private Map<Long, Long> datasetDataCollection;
+    private boolean canRelease;
+    private String internalProcessType;
 }

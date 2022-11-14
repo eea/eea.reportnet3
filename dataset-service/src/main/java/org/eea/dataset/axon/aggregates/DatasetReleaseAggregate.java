@@ -8,11 +8,13 @@ import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.eea.axon.release.commands.*;
 import org.eea.axon.release.events.*;
+import org.eea.dataset.persistence.data.repository.DatasetExtendedRepository;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.*;
 import org.eea.dataset.persistence.metabase.repository.*;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.InternalProcessService;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -20,8 +22,10 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.dataset.PgStatActivityVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.InternalProcessTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -32,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -41,6 +46,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
@@ -68,11 +74,16 @@ public class DatasetReleaseAggregate {
     private Map<Long, Date> datasetDateRelease;
     private String dataflowName;
     private String datasetName;
+    private boolean canDelete;
+    private boolean canRelease;
+    private String internalProcessType;
 
     /**
      * The Constant LOG.
      */
     private static final Logger LOG = LoggerFactory.getLogger(DatasetReleaseAggregate.class);
+
+    private static final String COPY = "COPY";
 
     public DatasetReleaseAggregate() {
     }
@@ -83,7 +94,7 @@ public class DatasetReleaseAggregate {
             LOG.info("Adding release locks for DataflowId: {} DataProviderId: {}", command.getDataflowId(), command.getDataProviderId());
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
             authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                     EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
@@ -127,7 +138,7 @@ public class DatasetReleaseAggregate {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
             authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                     EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
@@ -199,11 +210,11 @@ public class DatasetReleaseAggregate {
 
     @CommandHandler
     public void handle(UpdateDatasetStatusCommand command, DatasetSnapshotService datasetSnapshotService, MetaData metaData, DataSetMetabaseRepository metabaseRepository,
-                       DataCollectionRepository dataCollectionRepository) {
+                       DataCollectionRepository dataCollectionRepository, @Qualifier("datasetExtendedRepositoryImpl") DatasetExtendedRepository datasetExtendedRepository) {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
             authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                     EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
@@ -222,10 +233,22 @@ public class DatasetReleaseAggregate {
                 datasetDataCollection.put(id, idDataCollection);
                 dataCollectionForDeletion.add(idDataCollection);
             });
+
+            AtomicBoolean canDelete = new AtomicBoolean(true);
+            datasetDataCollection.values().forEach(dc -> {
+                List<PgStatActivityVO> results = datasetExtendedRepository.getPgStatActivityResults();
+                for (PgStatActivityVO pgStatActivity : results) {
+                    if (pgStatActivity.getQuery().contains(COPY + " " + String.format(LiteralConstants.DATASET_FORMAT_NAME, dc))) {
+                        canDelete.set(false);
+                    }
+                }
+            });
             DatasetStatusUpdatedEvent event = new DatasetStatusUpdatedEvent();
             BeanUtils.copyProperties(command, event);
             event.setDatasetDataCollection(datasetDataCollection);
             event.setDataCollectionForDeletion(dataCollectionForDeletion);
+            event.setCanDelete(canDelete.get());
+            event.setInternalProcessType(InternalProcessTypeEnum.DELETE.getValue());
             apply(event, metaData);
         } catch (Exception e) {
             LOG.error("Error while updating dataset status for dataflowId: {} dataProvider: {}", command.getDataflowId(), command.getDataProviderId());
@@ -252,6 +275,57 @@ public class DatasetReleaseAggregate {
         this.datasetSnapshots = event.getDatasetSnapshots();
         this.datasetDataCollection = event.getDatasetDataCollection();
         this.dataCollectionForDeletion = event.getDataCollectionForDeletion();
+        this.canDelete = event.isCanDelete();
+        this.internalProcessType = event.getInternalProcessType();
+    }
+
+    @CommandHandler
+    public void handle(CreateInternalProcessCommand command, MetaData metaData, InternalProcessService internalProcessService) {
+        try {
+            LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
+            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
+
+            command.getDatasetDataCollection().values().forEach(dc -> {
+                LOG.info("Creating internal process for {} for dataflowId: {} dataProvider: {} dataCollection {}", command.getInternalProcessType(), command.getDataflowId(), command.getDataProviderId(), dc);
+                InternalProcess internalProcess = new InternalProcess(command.getInternalProcessType(), command.getDataflowId(), command.getDataProviderId(), dc,
+                        command.getTransactionId(), command.getDatasetReleaseAggregateId());
+                internalProcessService.save(internalProcess);
+                LOG.info("Created internal process for {} for dataflowId: {} dataProvider: {} dataCollection {}", command.getInternalProcessType(), command.getDataflowId(), command.getDataProviderId(), dc);
+            });
+
+            InternalProcessCreatedEvent event = new InternalProcessCreatedEvent();
+            BeanUtils.copyProperties(command, event);
+            event.setInternalProcessType(command.getInternalProcessType());
+            apply(event, metaData);
+        } catch (Exception e) {
+            LOG.info("Error while creating internal process for {} for dataflowId: {} dataProvider: {}", command.getInternalProcessType(), command.getDataflowId(), command.getDataProviderId());
+            throw e;
+        }
+    }
+
+    @EventSourcingHandler
+    public void on(InternalProcessCreatedEvent event) {
+        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
+        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
+        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
+        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
+        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
+        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
+        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
+        this.releaseAggregateId = event.getReleaseAggregateId();
+        this.transactionId = event.getTransactionId();
+        this.dataflowId = event.getDataflowId();
+        this.dataProviderId = event.getDataProviderId();
+        this.restrictFromPublic = event.isRestrictFromPublic();
+        this.validate = event.isValidate();
+        this.datasetIds = event.getDatasetIds();
+        this.datasetSnapshots = event.getDatasetSnapshots();
+        this.datasetDataCollection = event.getDatasetDataCollection();
+        this.dataCollectionForDeletion = event.getDataCollectionForDeletion();
     }
 
     @CommandHandler
@@ -259,13 +333,15 @@ public class DatasetReleaseAggregate {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
             authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                     EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
 
             Long dataCollectionId = command.getDataCollectionForDeletion().get(0);
             LOG.info("Deleting provider for dataflowId: {} dataProvider: {} dataCollection {}", command.getDataflowId(), command.getDataProviderId(), dataCollectionId);
+
+            TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, dataCollectionId));
             datasetSnapshotService.deleteProvider(dataCollectionId, command.getDataProviderId());
             LOG.info("Provider deleted for dataflowId: {} dataProvider: {} dataCollection {}", command.getDataflowId(), command.getDataProviderId(), dataCollectionId);
             ProviderDeletedEvent event = new ProviderDeletedEvent();
@@ -300,7 +376,7 @@ public class DatasetReleaseAggregate {
     }
 
     @CommandHandler
-    public void handle(UpdateDatasetRunningStatusCommand command, DataSetMetabaseRepository dataSetMetabaseRepository, MetaData metaData) {
+    public void handle(UpdateDatasetRunningStatusCommand command, DataSetMetabaseRepository dataSetMetabaseRepository, MetaData metaData, @Qualifier("datasetExtendedRepositoryImpl") DatasetExtendedRepository datasetExtendedRepository) {
         try {
             command.getDatasetIds().stream().forEach(id -> {
                 Long idDataCollection = command.getDatasetDataCollection().get(id);
@@ -315,9 +391,22 @@ public class DatasetReleaseAggregate {
                             idDataCollection, command.getDataflowId(), command.getDataProviderId());
                 }
             });
+
+            AtomicBoolean canRelease = new AtomicBoolean(true);
+            command.getDatasetDataCollection().values().forEach(dc -> {
+                List<PgStatActivityVO> results = datasetExtendedRepository.getPgStatActivityResults();
+                for (PgStatActivityVO pgStatActivity : results) {
+                    if (pgStatActivity.getQuery().contains(COPY + " " + String.format(LiteralConstants.DATASET_FORMAT_NAME, dc))) {
+                        canRelease.set(false);
+                    }
+                }
+            });
+
             DatasetRunningStatusUpdatedEvent event = new DatasetRunningStatusUpdatedEvent();
             BeanUtils.copyProperties(command, event);
             event.setDatasetDataCollection(datasetDataCollection);
+            event.setCanRelease(canRelease.get());
+            event.setInternalProcessType(InternalProcessTypeEnum.RESTORE.getValue());
             apply(event, metaData);
         } catch (Exception e) {
             LOG.error("Error while updating dataset running status to {} for dataset of dataflow {} and dataProvider {}: {]", DatasetRunningStatusEnum.RESTORING_SNAPSHOT,
@@ -343,6 +432,7 @@ public class DatasetReleaseAggregate {
         this.validate = event.isValidate();
         this.datasetIds = event.getDatasetIds();
         this.datasetSnapshots = event.getDatasetSnapshots();
+        this.internalProcessType = event.getInternalProcessType();
     }
 
     @CommandHandler
@@ -401,7 +491,7 @@ public class DatasetReleaseAggregate {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
             authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                     EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
@@ -450,7 +540,7 @@ public class DatasetReleaseAggregate {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
             authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                     EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
@@ -528,7 +618,7 @@ public class DatasetReleaseAggregate {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
             authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
             SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                     EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));

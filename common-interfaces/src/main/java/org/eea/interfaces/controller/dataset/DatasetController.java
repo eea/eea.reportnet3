@@ -2,13 +2,10 @@ package org.eea.interfaces.controller.dataset;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import lombok.Getter;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.ETLDatasetVO;
-import org.eea.interfaces.vo.dataset.ExportFilterVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -636,4 +633,25 @@ public interface DatasetController {
    */
   @GetMapping("/datasetIds/{dataflowId}/{dataProviderId}")
   List<Long> findDatasetIdsByDataflowId(@PathVariable("dataflowId") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId);
+
+  /**
+   * Gets internal processes
+   * @return
+   */
+  @GetMapping("/private/internalProcess")
+  List<InternalProcessVO> getInternalProcesses();
+
+  /**
+   * Removes internal process with id
+   * @param id
+   */
+  @PutMapping("/private/internalProcess/{id}")
+  void removeInternalProcess(@PathVariable("id") Long id);
+
+  /**
+   * Gets pg_stat_activity results
+   * @return
+   */
+  @GetMapping("/private/pgStatActivity")
+  List<PgStatActivityVO> getPgStatActivityResults();
 }

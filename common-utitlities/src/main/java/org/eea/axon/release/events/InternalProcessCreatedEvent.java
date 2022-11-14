@@ -10,7 +10,7 @@ import java.util.Map;
 @Builder
 @Getter
 @Setter
-public class DatasetStatusUpdatedEvent {
+public class InternalProcessCreatedEvent {
 
     private String datasetReleaseAggregateId;
     private String releaseAggregateId;

@@ -203,7 +203,6 @@ public class DeleteHelper {
    */
   @Transactional
   public void deleteRecordValuesByProvider(Long datasetId, String providerCode) {
-    LOG.info("Deleting data with providerCode: {} ", providerCode);
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     RecordValue recordValue = recordRepository.findFirstByDataProviderCode(providerCode);
     if (recordValue!=null) {
