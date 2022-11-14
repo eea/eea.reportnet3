@@ -79,10 +79,10 @@ public class AxonConfig {
     @Value("${spring.datasource.axon.driver-class-name}")
     private String driver;
 
-    private Predicate<ServiceInstance> serviceInstanceFilter = (serviceInstance) -> {
-        //TODO replace hardoded IP
-        return  serviceInstance.getHost().equals("serviceIp");
-    };
+//    private Predicate<ServiceInstance> serviceInstanceFilter = (serviceInstance) -> {
+//        //TODO replace hardoded IP
+//        return  serviceInstance.getHost().equals("serviceIp");
+//    };
 
     @Bean
     public CommandGateway commandGateway(CommandBus commandBus) {
@@ -91,11 +91,11 @@ public class AxonConfig {
         return DefaultCommandGateway.builder().commandBus(commandBus).retryScheduler(retryScheduler).build();
     }
 
-    @Bean("springCloudCommandRouter")
-    public CommandRouter springCloudCommandRouter(DiscoveryClient discoveryClient, Registration localServiceInstance, RoutingStrategy routingStrategy, CapabilityDiscoveryMode capabilityDiscoveryMode, Serializer serializer) {
-        return SpringCloudCommandRouter.builder().discoveryClient(discoveryClient).localServiceInstance(localServiceInstance).routingStrategy(routingStrategy).capabilityDiscoveryMode(capabilityDiscoveryMode).serializer(serializer)
-                .serviceInstanceFilter(serviceInstanceFilter).build();
-    }
+//    @Bean("springCloudCommandRouter")
+//    public CommandRouter springCloudCommandRouter(DiscoveryClient discoveryClient, Registration localServiceInstance, RoutingStrategy routingStrategy, CapabilityDiscoveryMode capabilityDiscoveryMode, Serializer serializer) {
+//        return SpringCloudCommandRouter.builder().discoveryClient(discoveryClient).localServiceInstance(localServiceInstance).routingStrategy(routingStrategy).capabilityDiscoveryMode(capabilityDiscoveryMode).serializer(serializer)
+//                .serviceInstanceFilter(serviceInstanceFilter).build();
+//    }
 
     @Bean(name="axon")
     public DataSource axon() {
