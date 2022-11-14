@@ -371,11 +371,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     return snap;
   }
 
-  @Override
-  public Long findFirstByReportingDatasetId(Long reportingDatasetId) {
-    return snapshotRepository.findFirstByReportingDatasetId(reportingDatasetId).getId();
-  }
-
   /**
    * Release event.
    *

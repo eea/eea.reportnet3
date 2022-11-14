@@ -285,13 +285,6 @@ public interface DatasetSnapshotService {
 
   /**
    *
-   * @param reportingDatasetId
-   * @return
-   */
-  Long findFirstByReportingDatasetId(Long reportingDatasetId);
-
-  /**
-   *
    * @param datasetId
    */
   String updateDatasetStatus(Long datasetId);

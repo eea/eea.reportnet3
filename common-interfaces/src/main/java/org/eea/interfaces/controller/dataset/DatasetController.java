@@ -1,9 +1,5 @@
 package org.eea.interfaces.controller.dataset;
 
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-
-import lombok.Getter;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -12,15 +8,12 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * The Interface DatasetController.
@@ -625,14 +618,6 @@ public interface DatasetController {
    */
   @DeleteMapping("/private/deleteTempEtlExport/{datasetId}")
   void deleteTempEtlExport(@PathVariable("datasetId") Long datasetId);
-
-  /**
-   *
-   * @param dataflowId
-   * @return
-   */
-  @GetMapping("/datasetIds/{dataflowId}/{dataProviderId}")
-  List<Long> findDatasetIdsByDataflowId(@PathVariable("dataflowId") Long dataflowId, @PathVariable("dataProviderId") Long dataProviderId);
 
   /**
    * Gets internal processes

@@ -730,7 +730,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     datasetSnapshotService.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
   }
 
-  @GetMapping("/obtainPartition/{datasetId}/{user}")
+  @GetMapping("/private/obtainPartition/{datasetId}/{user}")
   @Override
   public Long obtainPartition(@PathVariable("datasetId") Long datasetId, @PathVariable("user") String user) {
     try {
@@ -744,13 +744,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     return null;
   }
 
-  @GetMapping("/findSnapshot/{reportingDatasetId}")
-  @Override
-  public Long findSnapshotIdByReportingDataset(Long reportingDatasetId) {
-    return datasetSnapshotService.findFirstByReportingDatasetId(reportingDatasetId);
-  }
-
-  @GetMapping("/findDataCollection/{snapshotId}")
+  @GetMapping("/private/findDataCollection/{snapshotId}")
   @Override
   public Long findDataCollectionIdBySnapshotId(Long snapshotId) {
     return datasetSnapshotService.findDataCollectionIdBySnapshotId(snapshotId);
