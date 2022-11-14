@@ -28,6 +28,22 @@
     "value": "JHtNRVRBQkFTRV9DT05ORUNUSU9OX1VSTDpqZGJjOnBvc3RncmVzcWw6Ly9sb2NhbGhvc3QvbWV0YWJhc2V9"
   },
   {
+    "key": "config/application/spring.datasource.axon.driver-class-name",
+    "value": "JHtBWE9OX0RSSVZFUl9DTEFTUzpvcmcucG9zdGdyZXNxbC5Ecml2ZXJ9"
+  },
+  {
+    "key": "config/application/spring.datasource.axon.password",
+    "value": "JHtBWE9OX0NPTk5FQ1RJT05fUEFTU1dPUkQ6cm9vdH0="
+  },
+  {
+    "key": "config/application/spring.datasource.axon.url",
+    "value": "JHtBWE9OX0NPTk5FQ1RJT05fVVJMOmpkYmM6cG9zdGdyZXNxbDovL2xvY2FsaG9zdC9heG9ufQ=="
+  },
+  {
+    "key": "config/application/spring.datasource.axon.username",
+    "value": "JHtBWE9OX1VTRVJOQU1FOnJvb3R9"
+  },
+  {
     "key": "config/dataset/spring.datasource.metasource.hikari.connection-timeout",
     "value": "JHtNRVRBQkFTRV9ISUtBUklfQ09OTkVDVElPTl9USU1FT1VUOjYwMDAwfQ=="
   },
