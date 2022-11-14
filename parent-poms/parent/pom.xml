@@ -13,20 +13,20 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.5.7</api-gateway.version>
-    <communication.version>v3.1.5.7</communication.version>
-    <collaboration.version>v3.1.5.7</collaboration.version>
-    <dataflow.version>v3.1.5.7</dataflow.version>
-    <dataset.version>v3.1.5.7</dataset.version>
-    <document.version>v3.1.5.7</document.version>
-    <frontend.version>v3.1.5.7</frontend.version>
-    <indexsearch.version>v3.1.5.7</indexsearch.version>
-    <inspire.version>v3.1.5.7</inspire.version>
-    <recordstore.version>v3.1.5.7</recordstore.version>
-    <ums.version>v3.1.5.7</ums.version>
-    <validation.version>v3.1.5.7</validation.version>
-    <common-interfaces.version>v3.1.5.7</common-interfaces.version>
-    <common-utitlities.version>v3.1.5.7</common-utitlities.version>
-    <rod.version>v3.1.5.7</rod.version>
+    <api-gateway.version>v3.1.6-Sec-updates</api-gateway.version>
+    <communication.version>v3.1.6-Sec-updates</communication.version>
+    <collaboration.version>v3.1.6-Sec-updates</collaboration.version>
+    <dataflow.version>v3.1.6-Sec-updates</dataflow.version>
+    <dataset.version>v3.1.6-Sec-updates</dataset.version>
+    <document.version>v3.1.6-Sec-updates</document.version>
+    <frontend.version>vv3.1.6-Sec-updates</frontend.version>
+    <indexsearch.version>v3.1.6-Sec-updates</indexsearch.version>
+    <inspire.version>v3.1.6-Sec-updates</inspire.version>
+    <recordstore.version>v3.1.6-Sec-updates</recordstore.version>
+    <ums.version>v3.1.6-Sec-updates</ums.version>
+    <validation.version>v3.1.6-Sec-updates</validation.version>
+    <common-interfaces.version>v3.1.6-Sec-updates</common-interfaces.version>
+    <common-utitlities.version>v3.1.6-Sec-updates</common-utitlities.version>
+    <rod.version>v3.1.6-Sec-updates</rod.version>
   </properties>
 </project>

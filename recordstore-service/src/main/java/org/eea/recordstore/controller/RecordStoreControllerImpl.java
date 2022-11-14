@@ -259,6 +259,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @Override
   @HystrixCommand
   @PostMapping(value = "/dataset/{datasetId}/snapshot/delete")
+  @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Delete snapshot data for a given Dataset", hidden = true)
   @ApiResponse(code = 500, message = "Could not delete the snapshot data")
   public void deleteSnapshotData(
@@ -285,6 +286,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Override
   @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping(value = "/dataset/{datasetSchemaName}")
   @ApiOperation(value = "Delete dataset data for a given dataset schema name", hidden = true)
   public void deleteDataset(@ApiParam(value = "Dataset schema name",
