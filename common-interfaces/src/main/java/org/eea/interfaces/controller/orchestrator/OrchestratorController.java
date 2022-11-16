@@ -10,7 +10,7 @@ public interface OrchestratorController {
     /**
      * The Interface OrchestratorControllerZuul.
      */
-    @FeignClient(value = "orchestrator", path = "/orchestrator")
+    @FeignClient(value = "orchestrator", contextId = "processes" , path = "/processes")
     interface OrchestratorControllerZuul extends OrchestratorController {
 
     }

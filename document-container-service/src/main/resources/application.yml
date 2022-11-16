@@ -3,3 +3,18 @@ server:
 spring:
   application:
     name: document
+axon:
+  distributed:
+    enabled: true
+    load-factor: 100
+    spring-cloud:
+      fallback-to-http-get: true
+      fallback-url: /message-routing-information
+      mode: rest
+      enable-ignore-listing: true
+      #      enable-accept-all-commands: true
+      rest-mode-url: /message-routing-information
+  serializer:
+    general: jackson
+    events: jackson
+    messages: jackson
