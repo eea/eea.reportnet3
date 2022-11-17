@@ -1,6 +1,5 @@
 import {Fragment, useContext, useEffect, useState} from 'react';
 import {useRecoilValue} from 'recoil';
-import {useNavigate} from 'react-router-dom';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import {config} from 'conf';
@@ -27,15 +26,12 @@ import {filterByCustomFilterStore} from 'views/_components/Filters/_functions/St
 import {useApplyFilters} from 'views/_functions/Hooks/useApplyFilters';
 import {useDateTimeFormatByUserPreferences} from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 import {FiltersUtils} from 'views/_components/Filters/_functions/Utils/FiltersUtils';
-import {getUrl} from "repositories/_utils/UrlUtils";
-import {routes} from "conf/routes";
 import {UserContext} from "../../../_functions/Contexts/UserContext";
 
 const {permissions} = config;
 
 export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
     const filterBy = useRecoilValue(filterByCustomFilterStore('jobsStatuses'));
-    const navigate = useNavigate();
 
     const resourcesContext = useContext(ResourcesContext);
     const notificationContext = useContext(NotificationContext);
@@ -45,18 +41,14 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
     const [editedValidationStatusPriority, setEditedValidationStatusPriority] = useState();
     const [filteredRecords, setFilteredRecords] = useState(0);
     const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-    const [isEditDialogVisible, setIsEditDialogVisible] = useState(false);
     const [isFiltered, setIsFiltered] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [isUpdating, setIsUpdating] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [loadingStatus, setLoadingStatus] = useState('idle');
     const [pagination, setPagination] = useState({firstRow: 0, numberRows: 10, pageNum: 0});
     const [sort, setSort] = useState({field: 'queuedDate', order: -1});
     const [totalRecords, setTotalRecords] = useState(0);
     const [jobsStatuses, setJobsStatusesList] = useState([]);
-    const [validationStatus, setValidationStatus] = useState(null);
-
     const [jobStatus, setJobStatus] = useState(null);
 
     const {getDateTimeFormatByUserPreferences} = useDateTimeFormatByUserPreferences();
@@ -68,28 +60,22 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
         getJobsStatuses();
     }, [pagination, sort]);
 
-    useEffect(() => {
-        if (isEditDialogVisible) {
-            setEditedValidationStatusPriority(validationStatus.priority);
-        }
-    }, [isEditDialogVisible]);
-
     const getJobsStatuses = async () => {
         setLoadingStatus('pending');
 
         try {
             const data = await JobsStatusesService.getJobsStatuses();
             console.log("Data:"+data);
-            setTotalRecords(data.totalRecords);
+            setTotalRecords(data.length);
             setJobsStatusesList(data);
             setFilteredRecords(data.filteredRecords);
             setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
             setData(data);
             setLoadingStatus('success');
         } catch (error) {
-            console.error('ValidationsStatus - getJobsStatuses.', error);
+            console.error('JobsStatus - getJobsStatuses.', error);
             setLoadingStatus('error');
-            notificationContext.add({type: 'GET_VALIDATIONS_STATUSES_ERROR'}, true);
+            notificationContext.add({type: 'GET_JOBS_STATUSES_ERROR'}, true);
         } finally {
             setIsLoading(false);
             setIsRefreshing(false);
@@ -108,18 +94,13 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
 
             notificationContext.add({status: 'DELETE_VALIDATION_FROM_QUEUE_ERROR'}, true);
         } finally {
-            setValidationStatus(null);
+            setJobStatus(null);
         }
     };
 
     const onHideDeleteDialog = () => {
         setIsDeleteDialogVisible(false);
-        setValidationStatus(null);
-    };
-
-    const onHideEditDialog = () => {
-        setIsEditDialogVisible(false);
-        setValidationStatus(null);
+        setJobStatus(null);
     };
 
     const onSort = event => setSort({field: event.sortField, order: event.sortOrder});
@@ -127,92 +108,106 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
     const filterOptions = [
         {
             nestedOptions: [
-                {key: 'dataflowId', label: resourcesContext.messages['dataflowId'], keyfilter: 'pint'},
-                {key: 'user', label: resourcesContext.messages['user']}
+                {key: 'id', label: resourcesContext.messages['jobId'], keyfilter: 'pint'},
+                {key: 'jobType', label: resourcesContext.messages['jobType']},
+                {key: 'processid', label: resourcesContext.messages['processid']},
+                {key: 'creatorUsername', label: resourcesContext.messages['creatorUsername']}
             ],
             type: 'INPUT'
         },
         {
-            key: 'status',
-            label: resourcesContext.messages['status'],
+            key: 'jobStatus',
+            label: resourcesContext.messages['jobStatus'],
             multiSelectOptions: [
                 {
-                    type: resourcesContext.messages[config.datasetRunningStatus.IN_PROGRESS.label].toUpperCase(),
-                    value: config.datasetRunningStatus.IN_PROGRESS.key
+                    type: resourcesContext.messages[config.jobRunningStatus.FAILED.label].toUpperCase(),
+                    value: config.jobRunningStatus.FAILED.key
                 },
                 {
-                    type: resourcesContext.messages[config.datasetRunningStatus.IN_QUEUE.label].toUpperCase(),
-                    value: config.datasetRunningStatus.IN_QUEUE.key
+                    type: resourcesContext.messages[config.jobRunningStatus.QUEUED.label].toUpperCase(),
+                    value: config.jobRunningStatus.QUEUED.key
                 },
                 {
-                    type: resourcesContext.messages[config.datasetRunningStatus.FINISHED.label].toUpperCase(),
-                    value: config.datasetRunningStatus.FINISHED.key
+                    type: resourcesContext.messages[config.jobRunningStatus.REFUSED.label].toUpperCase(),
+                    value: config.jobRunningStatus.REFUSED.key
                 },
                 {
-                    type: resourcesContext.messages[config.datasetRunningStatus.CANCELED.label].toUpperCase(),
-                    value: config.datasetRunningStatus.CANCELED.key
+                    type: resourcesContext.messages[config.jobRunningStatus.FINISHED.label].toUpperCase(),
+                    value: config.jobRunningStatus.FINISHED.key
+                },
+                {
+                    type: resourcesContext.messages[config.jobRunningStatus.CANCELLED.label].toUpperCase(),
+                    value: config.jobRunningStatus.CANCELLED.key
+                },
+                {
+                    type: resourcesContext.messages[config.jobRunningStatus.IN_PROGRESS.label].toUpperCase(),
+                    value: config.jobRunningStatus.IN_PROGRESS.key
                 }
             ],
-            template: 'ValidationsStatus',
+            template: 'JobsStatus',
             type: 'MULTI_SELECT'
         }
     ];
 
     
+    const getJobStatusTemplate = job => (
+        <div>
+            <LevelError
+                className={config.jobRunningStatus[job.jobStatus].label}
+                type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
+            />
+        </div>
+    );
 
     const getTableColumns = () => {
         const columns = [
             {
                 key: 'id',
-                header: 'Job ID',
+                header: resourcesContext.messages['jobId'],
                 template: getJobIdTemplate,
-                className: styles.largeColumn
+                className: styles.middleColumn
             },
             {
-                key: 'jobType',
-                header:'Job Type ',
-                template: getJobTypeTemplate,
-                className: styles.largeColumn
-            },
-            {
-                key: 'jobStatus',
-                header:'Job Status ',
-                template: getJobStatusTemplate,
-                className: styles.largeColumn
-            },
-            {
-                key: 'dateAdded',
-                header: 'Date Added',
-                template: job => getDateAddedTemplate(job, 'dateAdded'),
-                className: styles.largeColumn
-            },
-            {
-                key: 'dateStatusChanged',
-                header: 'Date Status Changed',
-                template: job => getDateStatusChangedTemplate(job, 'dateStatusChanged'),
+                key: 'processid',
+                header: resourcesContext.messages['processid'],
+                template: getJobProcessIdTemplate,
                 className: styles.largeColumn
             },
             {
                 key: 'creatorUsername',
-                header:'Creator Username ',
+                header: resourcesContext.messages['creatorUsername'],
                 template: getJobCreatorUsernameTemplate,
-                className: styles.largeColumn
+                className: styles.middleColumn
             },
             {
-                key: 'processid',
-                header:'Process ID  ',
-                template: getJobProcessIdTemplate,
-                className: styles.largeColumn
+                key: 'jobType',
+                header: resourcesContext.messages['jobType'],
+                template: getJobTypeTemplate,
+                className: styles.middleColumn
             },
-      
-       
-          
+            {
+                key: 'jobStatus',
+                header: resourcesContext.messages['jobStatus'],
+                template: getJobStatusTemplate,
+                className: styles.middleColumn
+            },
+            {
+                key: 'dateAdded',
+                header: resourcesContext.messages['dateAdded'],
+                template: job => getDateAddedTemplate(job, 'dateAdded'),
+                className: styles.smallColumn
+            },
+            {
+                key: 'dateStatusChanged',
+                header: resourcesContext.messages['dateStatusChanged'],
+                template: job => getDateStatusChangedTemplate(job, 'dateStatusChanged'),
+                className: styles.smallColumn
+            },
         ];
         if (isAdmin) {
             columns.push({
                 key: 'buttonsUniqueId',
-                header: resourcesContext.messages['actions'],
-                template: getEditButton
+                header: resourcesContext.messages['actions']
             })
         }
 
@@ -229,21 +224,9 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
         ));
     };
 
-    const getEditButton = rowData => (
-        <ActionsColumn
-            isUpdating={isUpdating}
-            onEditClick={() => {
-                setIsEditDialogVisible(true);
-                setValidationStatus(rowData);
-            }}
-            rowDataId={rowData.id}
-        />
-    );
-
-    
     const getJobIdTemplate = job => (
         <p>
-            {job.id} 
+            {job.id}
         </p>
     );
     const getJobTypeTemplate = job => (
@@ -252,11 +235,6 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
         </p>
     );
     
-    const getJobStatusTemplate = job => (
-        <p>
-            {job.jobStatus} 
-        </p>
-    );
 
     const getDateAddedTemplate = (job, field) =>
     isNil(job[field]) ? '-' : getDateTimeFormatByUserPreferences(job[field]);
@@ -276,14 +254,11 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
         </p>
     );
 
-
-
     const onRefresh = () => {
         setIsRefreshing(true);
         getJobsStatuses();
     };
 
- 
     const dialogFooter = (
         <div className={styles.footer}>
             <Button
@@ -302,47 +277,13 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
         </div>
     );
 
-    const onUpdatePriority = async () => {
-        try {
-            setIsUpdating(true);
-            await BackgroundProcessService.update({
-                processId: validationStatus.id,
-                priority: editedValidationStatusPriority
-            });
-
-            getJobsStatuses();
-        } catch (error) {
-            console.error('ValidationsStatus - onUpdatePriority.', error);
-            notificationContext.add({type: 'SET_VALIDATIONS_STATUS_PRIORITY_ERROR'}, true);
-        } finally {
-            setIsUpdating(false);
-            setIsEditDialogVisible(false);
-        }
-    };
-
-    const editDialogFooter = (
-        <div>
-            <Button
-                disabled={isUpdating || editedValidationStatusPriority < 1 || editedValidationStatusPriority > 100}
-                icon={isUpdating ? 'spinnerAnimate' : 'check'}
-                label={resourcesContext.messages['update']}
-                onClick={onUpdatePriority}
-            />
-            <Button
-                className={`p-button-secondary ${styles.buttonPushRight}`}
-                icon="cancel"
-                label={resourcesContext.messages['cancel']}
-                onClick={onHideEditDialog}
-            />
-        </div>
-    );
-
     const renderFilters = () => (
         <Filters
             className="lineItems"
             isLoading={loadingStatus === 'pending'}
             onFilter={() => setPagination({firstRow: 0, numberRows: pagination.numberRows, pageNum: 0})}
             onReset={() => setPagination({firstRow: 0, numberRows: pagination.numberRows, pageNum: 0})}
+            options={filterOptions}
             recoilId="jobsStatuses"
         />
     );
@@ -361,7 +302,8 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                 <div className={styles.dialogContent}>
                     {renderFilters()}
                     <div className={styles.noDataContent}>
-                        <p>{resourcesContext.messages['jobsStatusesNotMatchingFilter']}</p>
+                        <p>{resourcesContext.messages
+                        ['jobsStatusesNotMatchingFilter']}</p>
                     </div>
                 </div>
             );
@@ -380,11 +322,11 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                 {renderFilters()}
                 <DataTable
                     autoLayout={true}
-                    className={styles.validationStatusesTable}
+                    className={styles.jobStatusesTable}
                     first={firstRow}
                     hasDefaultCurrentPage={true}
                     lazy={true}
-                    loading={loadingStatus === 'pending' && isNil(validationStatus)}
+                    loading={loadingStatus === 'pending' && isNil(jobStatus)}
                     onPage={event => setPagination({
                         firstRow: event.first,
                         numberRows: event.rows,
@@ -436,7 +378,7 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                 blockScroll={false}
                 className="responsiveBigDialog"
                 footer={dialogFooter}
-                header='Jobs Status'
+                header={resourcesContext.messages['jobsStatus']}
                 modal={true}
                 onHide={onCloseDialog}
                 visible={isDialogVisible}>
@@ -454,17 +396,6 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                     visible={isDeleteDialogVisible}>
                     {resourcesContext.messages['validationRemoveQueueDialogContent']}
                 </ConfirmDialog>
-            )}
-
-            {isEditDialogVisible && (
-                <Dialog
-                    footer={editDialogFooter}
-                    header={resourcesContext.messages['editValidationsStatus']}
-                    modal={true}
-                    onHide={onHideEditDialog}
-                    visible={isEditDialogVisible}>
-                    {renderEditDialogContent()}
-                </Dialog>
             )}
         </Fragment>
     );

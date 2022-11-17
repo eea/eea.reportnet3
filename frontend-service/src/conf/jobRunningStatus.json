@@ -1,0 +1,8 @@
+{
+  "QUEUED": { "key": "QUEUED", "label": "queued" },
+  "IN_PROGRESS": { "key": "IN_PROGRESS", "label": "inProgress" },
+  "REFUSED": { "key": "REFUSED", "label": "refused" },
+  "CANCELLED": { "key": "CANCELLED", "label": "cancelled" },
+  "FAILED": { "key": "FAILED", "label": "failed" },
+  "FINISHED": { "key": "FINISHED", "label": "finished" }
+}
