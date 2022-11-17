@@ -1,14 +1,12 @@
 package org.eea.orchestrator.scheduling;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.axonframework.commandhandling.GenericCommandMessage;
-import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventhandling.DomainEventMessage;
+import org.axonframework.eventhandling.GenericDomainEventMessage;
+import org.axonframework.eventhandling.gateway.EventGateway;
 import org.axonframework.eventsourcing.eventstore.DomainEventStream;
 import org.axonframework.eventsourcing.eventstore.EmbeddedEventStore;
 import org.axonframework.messaging.MetaData;
-import org.eea.axon.release.commands.DeleteProviderCommand;
-import org.eea.axon.release.commands.RestoreDataFromSnapshotCommand;
 import org.eea.axon.release.events.DatasetRunningStatusUpdatedEvent;
 import org.eea.axon.release.events.DatasetStatusUpdatedEvent;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -19,7 +17,6 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
@@ -46,7 +43,7 @@ public class JobForCheckingInternalProcess {
     private DataSetControllerZuul dataSetControllerZuul;
 
     @Autowired
-    private CommandGateway commandGateway;
+    private EventGateway eventGateway;
 
     @Autowired
     private EmbeddedEventStore embeddedEventStore;
@@ -56,11 +53,11 @@ public class JobForCheckingInternalProcess {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> checkInternalProcess(),
-                new CronTrigger("0 */1 * * * *"));
+                new CronTrigger("0 */30 * * * *"));
     }
 
     /**
-     * The job runs every 30 minutes. It finds internal processes and creates respective commands
+     * The job runs every 30 minutes. It finds internal processes and creates respective events
      */
     public void checkInternalProcess() {
         LOG.info("Running scheduled task checkInternalProcess");
@@ -95,11 +92,8 @@ public class JobForCheckingInternalProcess {
                             if (message.getPayload() instanceof DatasetStatusUpdatedEvent) {
                                 MetaData metadata = message.getMetaData();
                                 DatasetStatusUpdatedEvent event = (DatasetStatusUpdatedEvent) message.getPayload();
-                                DeleteProviderCommand command = DeleteProviderCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
-                                        .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots())
-                                        .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId())
-                                        .validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).dataCollectionForDeletion(event.getDataCollectionForDeletion()).datasetDataCollection(event.getDatasetDataCollection()).build();
-                                commandGateway.send(GenericCommandMessage.asCommandMessage(command).withMetaData(metadata));
+                                event.setCanDelete(true);
+                                eventGateway.publish(GenericDomainEventMessage.asEventMessage(event).withMetaData(metadata));
                                 internalProcessList.forEach(intProc -> dataSetControllerZuul.removeInternalProcess(intProc.getId()));
                             }
                         }
@@ -108,11 +102,8 @@ public class JobForCheckingInternalProcess {
                             if (message.getPayload() instanceof DatasetRunningStatusUpdatedEvent) {
                                 MetaData metadata = message.getMetaData();
                                 DatasetRunningStatusUpdatedEvent event = (DatasetRunningStatusUpdatedEvent) message.getPayload();
-                                RestoreDataFromSnapshotCommand command = RestoreDataFromSnapshotCommand.builder().recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
-                                        .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots()).datasetDataCollection(event.getDatasetDataCollection())
-                                        .releaseAggregateId(event.getReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId())
-                                        .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).build();
-                                commandGateway.send(GenericCommandMessage.asCommandMessage(command).withMetaData(metadata));
+                                event.setCanRelease(true);
+                                eventGateway.publish(GenericDomainEventMessage.asEventMessage(event).withMetaData(metadata));
                                 internalProcessList.forEach(intProc -> dataSetControllerZuul.removeInternalProcess(intProc.getId()));
                             }
                         }

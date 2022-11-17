@@ -20,7 +20,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
@@ -29,23 +32,6 @@ public class CollaborationReleaseAggregate {
 
     @AggregateIdentifier
     private String collaborationReleaseAggregateId;
-    private String datasetReleaseAggregateId;
-    private String releaseAggregateId;
-    private String communicationReleaseAggregateId;
-    private String dataflowReleaseAggregateId;
-    private String validationReleaseAggregateId;
-    private String recordStoreReleaseAggregateId;
-    private String transactionId;
-    private Long dataProviderId;
-    private Long dataflowId;
-    private boolean restrictFromPublic;
-    private boolean validate;
-    private List<Long> datasetIds;
-    private Map<Long, Long> datasetSnapshots;
-    private Map<Long, Long> datasetDataCollection;
-    private Map<Long, Date> datasetDateRelease;
-    private String dataflowName;
-    private String datasetName;
 
     private static final Logger LOG = LoggerFactory.getLogger(CollaborationReleaseAggregate.class);
 
@@ -81,24 +67,6 @@ public class CollaborationReleaseAggregate {
     @EventSourcingHandler
     public void on(MessageForSuccessfulReleaseCreatedEvent event) {
         this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
-        this.datasetDataCollection = event.getDatasetDataCollection();
-        this.datasetDateRelease = event.getDatasetDateRelease();
-        this.dataflowName = event.getDataflowName();
-        this.datasetName = event.getDatasetName();
     }
 }
 

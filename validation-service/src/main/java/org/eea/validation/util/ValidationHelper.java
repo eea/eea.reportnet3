@@ -5,18 +5,15 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
-import org.axonframework.commandhandling.GenericCommandMessage;
-import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.eventhandling.DomainEventMessage;
+import org.axonframework.eventhandling.GenericDomainEventMessage;
+import org.axonframework.eventhandling.gateway.EventGateway;
 import org.axonframework.eventsourcing.eventstore.DomainEventStream;
 import org.axonframework.eventsourcing.eventstore.EmbeddedEventStore;
 import org.axonframework.messaging.MetaData;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
-import org.eea.axon.release.commands.CreateSnapshotRecordRorReleaseInMetabaseCommand;
-import org.eea.axon.release.commands.RefreshMaterializedViewForReferenceDatasetCommand;
-import org.eea.axon.release.commands.UpdateMaterializedViewCommand;
-import org.eea.axon.release.events.ValidationProcessForReleaseCreatedEvent;
+import org.eea.axon.release.events.*;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -62,6 +59,7 @@ import org.eea.validation.util.model.ValidationProcessVO;
 import org.kie.api.KieBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -180,7 +178,7 @@ public class ValidationHelper implements DisposableBean {
   private DataSetControllerZuul dataSetControllerZuul;
 
   @Autowired
-  private CommandGateway commandGateway;
+  private EventGateway eventGateway;
 
   @Autowired
   private EmbeddedEventStore embeddedEventStore;
@@ -321,21 +319,21 @@ public class ValidationHelper implements DisposableBean {
               List<Long> referencesToRefresh = List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
                       dataset.getDataflowId(), dataset.getDatasetSchema()));
               if (referencesToRefresh.size() > 0) {
-                  RefreshMaterializedViewForReferenceDatasetCommand command = RefreshMaterializedViewForReferenceDatasetCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
+                  MaterializedViewShouldBeRefreshedEvent materializedViewShouldBeRefreshedEvent = MaterializedViewShouldBeRefreshedEvent.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
                           .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).restrictFromPublic(event.isRestrictFromPublic()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).datasetIds(event.getDatasetIds())
                           .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).datasetProcessId(event.getDatasetProcessId()).build();
 
-                command.setDatasetIForMaterializedViewEvent(datasetId);
-                command.setReferencesToRefresh(referencesToRefresh);
-                commandGateway.send(GenericCommandMessage.asCommandMessage(command).withMetaData(metadata));
+                materializedViewShouldBeRefreshedEvent.setDatasetIForMaterializedViewEvent(datasetId);
+                materializedViewShouldBeRefreshedEvent.setReferencesToRefresh(referencesToRefresh);
+                eventGateway.publish(GenericDomainEventMessage.asEventMessage(materializedViewShouldBeRefreshedEvent).withMetaData(metadata));
               } else {
-                UpdateMaterializedViewCommand command = UpdateMaterializedViewCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
+                MaterializedViewShouldBeUpdatedEvent materializedViewShouldBeUpdatedEvent = MaterializedViewShouldBeUpdatedEvent.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
                           .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).restrictFromPublic(event.isRestrictFromPublic()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).datasetIds(event.getDatasetIds())
                           .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
 
-                command.setDatasetIForMaterializedViewEvent(datasetId);
-                command.setReferencesToRefresh(referencesToRefresh);
-                commandGateway.send(GenericCommandMessage.asCommandMessage(command).withMetaData(metadata));
+                materializedViewShouldBeUpdatedEvent.setDatasetIForMaterializedViewEvent(datasetId);
+                materializedViewShouldBeUpdatedEvent.setReferencesToRefresh(referencesToRefresh);
+                eventGateway.publish(GenericDomainEventMessage.asEventMessage(materializedViewShouldBeUpdatedEvent).withMetaData(metadata));
               }
           }
         } else {
@@ -1162,12 +1160,10 @@ public class ValidationHelper implements DisposableBean {
                 Optional<? extends DomainEventMessage<?>> domainEventMessage = events.asStream().findFirst();
                 if (domainEventMessage.isPresent()) {
                   MetaData metadata = domainEventMessage.get().getMetaData();
-                  ValidationProcessForReleaseCreatedEvent event = (ValidationProcessForReleaseCreatedEvent) domainEventMessage.get().getPayload();
-                  CreateSnapshotRecordRorReleaseInMetabaseCommand createReleaseSnapshotCommand = CreateSnapshotRecordRorReleaseInMetabaseCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
-                          .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).restrictFromPublic(event.isRestrictFromPublic()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).datasetIds(event.getDatasetIds())
-                          .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
-
-                  commandGateway.send(GenericCommandMessage.asCommandMessage(createReleaseSnapshotCommand).withMetaData(metadata));
+                  ValidationProcessForReleaseCreatedEvent processForReleaseCreatedEvent = (ValidationProcessForReleaseCreatedEvent) domainEventMessage.get().getPayload();
+                  ValidationForReleaseFinishedEvent event = new ValidationForReleaseFinishedEvent();
+                  BeanUtils.copyProperties(processForReleaseCreatedEvent, event);
+                  eventGateway.publish(GenericDomainEventMessage.asEventMessage(event).withMetaData(metadata));
                 } else {
                   kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
                 }

@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Map;
 
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
@@ -35,21 +34,6 @@ public class RecordStoreReleaseAggregate {
 
     @AggregateIdentifier
     private String recordStoreReleaseAggregateId;
-    private String datasetReleaseAggregateId;
-    private String releaseAggregateId;
-    private String communicationReleaseAggregateId;
-    private String dataflowReleaseAggregateId;
-    private String validationReleaseAggregateId;
-    private String collaborationReleaseAggregateId;
-    private String transactionId;
-    private Long dataProviderId;
-    private Long dataflowId;
-    private boolean restrictFromPublic;
-    private boolean validate;
-    private List<Long> datasetIds;
-    private Map<Long, String> datasetProcessId;
-    private Map<Long, Long> datasetSnapshots;
-    private Map<Long, Long> datasetDataCollection;
 
     private static final Logger LOG = LoggerFactory.getLogger(RecordStoreReleaseAggregate.class);
 
@@ -79,20 +63,6 @@ public class RecordStoreReleaseAggregate {
     @EventSourcingHandler
     public void on(SnapshotFileForReleaseCreatedEvent event) {
         this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
     }
 
     @CommandHandler
@@ -119,26 +89,6 @@ public class RecordStoreReleaseAggregate {
             LOG.error("Error while restoring snapshot for dataCollection of dataflow {}, {}", command.getDataflowId(), e.getMessage());
             throw e;
         }
-    }
-
-    @EventSourcingHandler
-    public void on(DataRestoredFromSnapshotEvent event) {
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
-        this.datasetDataCollection = event.getDatasetDataCollection();
     }
 }
 

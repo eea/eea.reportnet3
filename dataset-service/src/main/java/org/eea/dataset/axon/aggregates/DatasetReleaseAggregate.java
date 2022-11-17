@@ -56,24 +56,11 @@ public class DatasetReleaseAggregate {
 
     @AggregateIdentifier
     private String datasetReleaseAggregateId;
-    private String releaseAggregateId;
-    private String communicationReleaseAggregateId;
-    private String dataflowReleaseAggregateId;
-    private String validationReleaseAggregateId;
-    private String collaborationReleaseAggregateId;
-    private String recordStoreReleaseAggregateId;
-    private String transactionId;
-    private Long dataProviderId;
-    private Long dataflowId;
-    private boolean restrictFromPublic;
-    private boolean validate;
     private List<Long> datasetIds;
     private Map<Long, Long> datasetSnapshots;
     private Map<Long, Long> datasetDataCollection;
     private List<Long> dataCollectionForDeletion;
     private Map<Long, Date> datasetDateRelease;
-    private String dataflowName;
-    private String datasetName;
     private boolean canDelete;
     private boolean canRelease;
     private String internalProcessType;
@@ -117,18 +104,6 @@ public class DatasetReleaseAggregate {
     @EventSourcingHandler
     public void on(ReleaseLocksAddedEvent event) {
         this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
         this.datasetIds = event.getDatasetIds();
     }
 
@@ -191,20 +166,6 @@ public class DatasetReleaseAggregate {
 
     @EventSourcingHandler
     public void on(SnapshotRecordForReleaseCreatedInMetabaseEvent event) {
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
         this.datasetSnapshots = event.getDatasetSnapshots();
     }
 
@@ -258,21 +219,6 @@ public class DatasetReleaseAggregate {
 
     @EventSourcingHandler
     public void on(DatasetStatusUpdatedEvent event) {
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
         this.datasetDataCollection = event.getDatasetDataCollection();
         this.dataCollectionForDeletion = event.getDataCollectionForDeletion();
         this.canDelete = event.isCanDelete();
@@ -299,33 +245,11 @@ public class DatasetReleaseAggregate {
 
             InternalProcessCreatedEvent event = new InternalProcessCreatedEvent();
             BeanUtils.copyProperties(command, event);
-            event.setInternalProcessType(command.getInternalProcessType());
             apply(event, metaData);
         } catch (Exception e) {
             LOG.info("Error while creating internal process for {} for dataflowId: {} dataProvider: {}", command.getInternalProcessType(), command.getDataflowId(), command.getDataProviderId());
             throw e;
         }
-    }
-
-    @EventSourcingHandler
-    public void on(InternalProcessCreatedEvent event) {
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
-        this.datasetDataCollection = event.getDatasetDataCollection();
-        this.dataCollectionForDeletion = event.getDataCollectionForDeletion();
     }
 
     @CommandHandler
@@ -356,22 +280,6 @@ public class DatasetReleaseAggregate {
 
     @EventSourcingHandler
     public void on(ProviderDeletedEvent event) {
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
-        this.datasetDataCollection = event.getDatasetDataCollection();
         this.dataCollectionForDeletion = event.getDataCollectionForDeletion();
     }
 
@@ -417,21 +325,8 @@ public class DatasetReleaseAggregate {
 
     @EventSourcingHandler
     public void on(DatasetRunningStatusUpdatedEvent event) {
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
+        this.datasetDataCollection = event.getDatasetDataCollection();
+        this.canRelease = event.isCanRelease();
         this.internalProcessType = event.getInternalProcessType();
     }
 
@@ -467,23 +362,7 @@ public class DatasetReleaseAggregate {
 
     @EventSourcingHandler
     public void on(SnapshotMarkedReleasedEvent event) {
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
         this.datasetDateRelease = event.getDatasetDateRelease();
-        this.datasetDataCollection = event.getDatasetDataCollection();
     }
 
     @CommandHandler
@@ -514,27 +393,6 @@ public class DatasetReleaseAggregate {
         }
     }
 
-    @EventSourcingHandler
-    public void on(ChangesEuDatasetUpdatedEvent event) {
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
-        this.datasetDataCollection = event.getDatasetDataCollection();
-        this.datasetDateRelease = event.getDatasetDateRelease();
-    }
-
     @CommandHandler
     public void handle(SavePublicFilesForReleaseCommand command, DataFlowControllerZuul dataflowControllerZuul, FileTreatmentHelper fileTreatmentHelper, MetaData metaData) throws IOException {
         try {
@@ -559,26 +417,6 @@ public class DatasetReleaseAggregate {
         }
     }
 
-    @EventSourcingHandler
-    public void on(PublicFilesForReleaseSavedEvent event) {
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
-        this.datasetDataCollection = event.getDatasetDataCollection();
-        this.datasetDateRelease = event.getDatasetDateRelease();
-    }
-
     @CommandHandler
     public void handle(RemoveReleaseLocksCommand command, DatasetSnapshotService datasetSnapshotService, MetaData metaData) throws EEAException {
         try {
@@ -591,25 +429,6 @@ public class DatasetReleaseAggregate {
             LOG.error("Error while releasing locks for dataflow {} and dataProvider {}: {}", command.getDataflowId(), command.getDataProviderId(), e.getMessage());
             throw e;
         }
-    }
-
-    @EventSourcingHandler
-    public void on(ReleaseLocksRemovedEvent event) {
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetDataCollection = event.getDatasetDataCollection();
-        this.datasetDateRelease = event.getDatasetDateRelease();
     }
 
     @CommandHandler
@@ -650,28 +469,6 @@ public class DatasetReleaseAggregate {
         }
     }
 
-    @EventSourcingHandler
-    public void on(NotificationForSuccessfulReleaseSentEvent event) {
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
-        this.datasetDataCollection = event.getDatasetDataCollection();
-        this.datasetDateRelease = event.getDatasetDateRelease();
-        this.dataflowName = event.getDataflowName();
-        this.datasetName = event.getDatasetName();
-    }
-
     @CommandHandler
     public void handle(ReleaseFailureRemoveLocksCommand command, DatasetSnapshotService datasetSnapshotService) throws EEAException {
         try {
@@ -684,23 +481,6 @@ public class DatasetReleaseAggregate {
             LOG.error("Error while releasing locks for dataflow {} and dataProvider {}: {}", command.getDataflowId(), command.getDataProviderId(), e.getMessage());
             throw e;
         }
-    }
-
-    @EventSourcingHandler
-    public void on(FailureReleaseLocksRemovedEvent event) {
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
     }
 }
 

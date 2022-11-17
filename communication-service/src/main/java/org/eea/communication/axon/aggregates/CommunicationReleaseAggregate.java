@@ -35,7 +35,10 @@ import org.springframework.stereotype.Component;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
 
@@ -46,21 +49,6 @@ public class CommunicationReleaseAggregate {
 
     @AggregateIdentifier
     private String communicationReleaseAggregateId;
-    private String datasetReleaseAggregateId;
-    private String releaseAggregateId;
-    private String dataflowReleaseAggregateId;
-    private String validationReleaseAggregateId;
-    private String collaborationReleaseAggregateId;
-    private String recordStoreReleaseAggregateId;
-    private String transactionId;
-    private Long dataProviderId;
-    private Long dataflowId;
-    private boolean restrictFromPublic;
-    private boolean validate;
-    private List<Long> datasetIds;
-    private Map<Long, Long> datasetSnapshots;
-    private Map<Long, Long> datasetDataCollection;
-    private Map<Long, Date> datasetDateRelease;
     private String dataflowName;
     private String datasetName;
 
@@ -102,18 +90,6 @@ public class CommunicationReleaseAggregate {
     @EventSourcingHandler
     public void on(UserNotifationForReleaseSentEvent event) {
         this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
     }
 
     @CommandHandler
@@ -176,23 +152,7 @@ public class CommunicationReleaseAggregate {
 
     @EventSourcingHandler
     public void on(EmailForSuccessfulReleaseSentEvent event) {
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetSnapshots = event.getDatasetSnapshots();
-        this.datasetDataCollection = event.getDatasetDataCollection();
-        this.datasetDateRelease = event.getDatasetDateRelease();
-        this.dataflowName = event.getDatasetName();
+        this.dataflowName = event.getDataflowName();
+        this.datasetName = event.getDatasetName();
     }
 }

@@ -100,19 +100,7 @@ public class ValidationReleaseAggregate {
 
     @EventSourcingHandler
     public void on(ValidationProcessForReleaseCreatedEvent event) {
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
         this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
         this.datasetProcessId = event.getDatasetProcessId();
     }
 
@@ -182,41 +170,7 @@ public class ValidationReleaseAggregate {
     }
 
     @EventSourcingHandler
-    public void on(ValidationTasksForReleaseCreatedEvent event) {
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetProcessId = event.getDatasetProcessId();
-    }
-
-    @EventSourcingHandler
     public void on(MaterializedViewShouldBeRefreshedEvent event) {
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetProcessId = event.getDatasetProcessId();
         this.datasetIForMaterializedViewEvent = event.getDatasetIForMaterializedViewEvent();
         this.referencesToRefresh = event.getReferencesToRefresh();
     }
@@ -235,26 +189,6 @@ public class ValidationReleaseAggregate {
         MaterializedViewForReferenceDatasetRefreshedEvent event = new MaterializedViewForReferenceDatasetRefreshedEvent();
         BeanUtils.copyProperties(command, event);
         apply(event, metaData);
-    }
-
-    @EventSourcingHandler
-    public void on(MaterializedViewForReferenceDatasetRefreshedEvent event) {
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetIForMaterializedViewEvent = event.getDatasetIForMaterializedViewEvent();
-        this.referencesToRefresh = event.getReferencesToRefresh();
     }
 
     @CommandHandler
@@ -285,25 +219,5 @@ public class ValidationReleaseAggregate {
         MaterializedViewUpdatedEvent event = new MaterializedViewUpdatedEvent();
         BeanUtils.copyProperties(command, event);
         apply(event, metaData);
-    }
-
-    @EventSourcingHandler
-    public void on(MaterializedViewUpdatedEvent event) {
-        this.validationReleaseAggregateId = event.getValidationReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.collaborationReleaseAggregateId = event.getCollaborationReleaseAggregateId();
-        this.communicationReleaseAggregateId = event.getCommunicationReleaseAggregateId();
-        this.dataflowReleaseAggregateId = event.getDataflowReleaseAggregateId();
-        this.recordStoreReleaseAggregateId = event.getRecordStoreReleaseAggregateId();
-        this.datasetReleaseAggregateId = event.getDatasetReleaseAggregateId();
-        this.releaseAggregateId = event.getReleaseAggregateId();
-        this.transactionId = event.getTransactionId();
-        this.dataflowId = event.getDataflowId();
-        this.dataProviderId = event.getDataProviderId();
-        this.restrictFromPublic = event.isRestrictFromPublic();
-        this.validate = event.isValidate();
-        this.datasetIds = event.getDatasetIds();
-        this.datasetIForMaterializedViewEvent = event.getDatasetIForMaterializedViewEvent();
-        this.referencesToRefresh = event.getReferencesToRefresh();
     }
 }

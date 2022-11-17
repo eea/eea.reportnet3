@@ -9,8 +9,6 @@ import org.eea.axon.release.commands.CreateReleaseStartNotificationCommand;
 import org.eea.axon.release.events.ReleaseStartNotificationCreatedEvent;
 import org.springframework.beans.BeanUtils;
 
-import java.util.List;
-
 @Aggregate
 public class ReleaseAggregate {
 
@@ -21,7 +19,6 @@ public class ReleaseAggregate {
     private Long dataflowId;
     private boolean restrictFromPublic;
     private boolean validate;
-    private List<Long> datasetIds;
 
     public ReleaseAggregate() {
 
