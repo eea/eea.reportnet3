@@ -1,8 +1,9 @@
 package org.eea.orchestrator.axon.config;
 
 import org.axonframework.commandhandling.CommandBus;
+import org.axonframework.commandhandling.distributed.CommandBusConnector;
 import org.axonframework.commandhandling.distributed.CommandRouter;
-import org.axonframework.commandhandling.distributed.RoutingStrategy;
+import org.axonframework.commandhandling.distributed.DistributedCommandBus;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.commandhandling.gateway.DefaultCommandGateway;
 import org.axonframework.commandhandling.gateway.ExponentialBackOffIntervalRetryScheduler;
@@ -19,20 +20,18 @@ import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
 import org.axonframework.eventsourcing.eventstore.EventStore;
 import org.axonframework.eventsourcing.eventstore.jpa.JpaEventStorageEngine;
 import org.axonframework.eventsourcing.eventstore.jpa.SQLErrorCodesResolver;
-import org.axonframework.extensions.springcloud.commandhandling.SpringCloudCommandRouter;
-import org.axonframework.extensions.springcloud.commandhandling.mode.CapabilityDiscoveryMode;
+import org.axonframework.messaging.correlation.CorrelationDataProvider;
+import org.axonframework.messaging.correlation.SimpleCorrelationDataProvider;
 import org.axonframework.modelling.saga.repository.jpa.JpaSagaStore;
 import org.axonframework.serialization.Serializer;
 import org.axonframework.spring.jdbc.SpringDataSourceConnectionProvider;
 import org.axonframework.spring.messaging.unitofwork.SpringTransactionManager;
 import org.axonframework.springboot.util.RegisterDefaultEntities;
+import org.eea.orchestrator.axon.interceptor.CorrelationDataInterceptor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy;
 import org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.cloud.client.serviceregistry.Registration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -49,7 +48,6 @@ import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.Predicate;
 
 
 @EnableTransactionManagement
@@ -83,6 +81,20 @@ public class AxonConfig {
 //        //TODO replace hardoded IP
 //        return  serviceInstance.getHost().equals("serviceIp");
 //    };
+
+    @Bean
+    public CorrelationDataProvider correlationDataProviders() {
+        return new SimpleCorrelationDataProvider("auth");
+    }
+
+    @Bean("distributedCommandBus")
+    @Primary
+    public DistributedCommandBus distributedCommandBus(CommandRouter commandRouter, CommandBusConnector commandBusConnector) {
+        DistributedCommandBus commandBus = DistributedCommandBus.builder().commandRouter(commandRouter).connector(commandBusConnector).build();
+        commandBus.updateLoadFactor(101);
+        commandBus.registerHandlerInterceptor(new CorrelationDataInterceptor(correlationDataProviders()));
+        return commandBus;
+    }
 
     @Bean
     public CommandGateway commandGateway(CommandBus commandBus) {
