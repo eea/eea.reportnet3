@@ -637,6 +637,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
           name = "validate", required = false, defaultValue = "true") boolean validate) {
 
 
+      LOG.info("Release request for dataflow {}, dataProvider {}", dataflowId, dataProviderId);
       orchestratorControllerZuul.release(dataflowId, dataProviderId, restrictFromPublic, validate);
 //    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
 //    userNotificationContentVO.setDataflowId(dataflowId);
