@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(value = "/orchestrator")
+@RequestMapping(value = "/processes")
 public class OrchestratorControllerImpl implements OrchestratorController {
 
     private transient CommandGateway commandGateway;
