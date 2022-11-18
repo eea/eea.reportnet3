@@ -35,6 +35,7 @@ public class OrchestratorControllerImpl implements OrchestratorController {
             defaultValue = "false") boolean restrictFromPublic,
                         @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate) {
        try {
+           LOG.info("Starting release process for dataflow {}, dataProvider {}", dataflowId, dataProviderId);
            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
            CreateReleaseStartNotificationCommand command = CreateReleaseStartNotificationCommand.builder().transactionId(UUID.randomUUID().toString()).releaseAggregateId(UUID.randomUUID().toString())
                    .dataflowId(dataflowId).dataProviderId(dataProviderId).restrictFromPublic(restrictFromPublic)
