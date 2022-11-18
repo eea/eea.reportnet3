@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -32,7 +30,10 @@ public class OrchestratorControllerImpl implements OrchestratorController {
     @Override
     @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER') OR hasAnyRole('ADMIN')")
     @PostMapping(value = "/release/dataflow/{dataflowId}/dataProvider/{dataProviderId}")
-    public void release(Long dataflowId, Long dataProviderId, boolean restrictFromPublic, boolean validate) {
+    public void release(@PathVariable(value = "dataflowId", required = true) Long dataflowId, @PathVariable(value = "dataProviderId",
+            required = true) Long dataProviderId, @RequestParam(name = "restrictFromPublic", required = true,
+            defaultValue = "false") boolean restrictFromPublic,
+                        @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate) {
        try {
            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
            CreateReleaseStartNotificationCommand command = CreateReleaseStartNotificationCommand.builder().transactionId(UUID.randomUUID().toString()).releaseAggregateId(UUID.randomUUID().toString())
