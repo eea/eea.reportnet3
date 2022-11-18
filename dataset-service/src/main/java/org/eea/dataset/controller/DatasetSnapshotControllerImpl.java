@@ -11,7 +11,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
-import org.eea.interfaces.controller.orchestrator.OrchestratorController.OrchestratorControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
@@ -77,9 +76,6 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   /** The lock service. */
   @Autowired
   private LockService lockService;
-
-  @Autowired
-  private OrchestratorControllerZuul orchestratorControllerZuul;
 
   /**
    * Gets the by id.
@@ -636,48 +632,45 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       @ApiParam(type = "boolean", value = "Execute validations", example = "true") @RequestParam(
           name = "validate", required = false, defaultValue = "true") boolean validate) {
 
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
+    userNotificationContentVO.setProviderId(dataProviderId);
+    notificationControllerZuul.createUserNotificationPrivate("RELEASE_START_EVENT",
+        userNotificationContentVO);
 
-      LOG.info("Release request for dataflow {}, dataProvider {}", dataflowId, dataProviderId);
-      orchestratorControllerZuul.release(dataflowId, dataProviderId, restrictFromPublic, validate);
-//    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-//    userNotificationContentVO.setDataflowId(dataflowId);
-//    userNotificationContentVO.setProviderId(dataProviderId);
-//    notificationControllerZuul.createUserNotificationPrivate("RELEASE_START_EVENT",
-//        userNotificationContentVO);
-//
-//    ThreadPropertiesManager.setVariable("user",
-//        SecurityContextHolder.getContext().getAuthentication().getName());
-//
-//    LOG.info("The user invoking DataSetSnaphotControllerImpl.createReleaseSnapshots is {}",
-//        SecurityContextHolder.getContext().getAuthentication().getName());
-//
-//    DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);
-//    if (null != dataflow && dataflow.isReleasable()) {
-//      try {
-//        datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId,
-//            restrictFromPublic, validate);
-//      } catch (EEAException e) {
-//        LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
-//        try {
-//          datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
-//        } catch (EEAException e1) {
-//          LOG_ERROR.error("Error releasing snapshot locks. Error Message: {}", e.getMessage(), e1);
-//          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-//              EEAErrorMessage.EXECUTION_ERROR);
-//        }
-//        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR,
-//            e);
-//      }
-//    } else {
-//      try {
-//        datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
-//      } catch (EEAException e) {
-//        throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED,
-//            String.format(EEAErrorMessage.DATAFLOW_NOT_RELEASABLE, dataflowId));
-//      }
-//      throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED,
-//          String.format(EEAErrorMessage.DATAFLOW_NOT_RELEASABLE, dataflowId));
-//    }
+    ThreadPropertiesManager.setVariable("user",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
+    LOG.info("The user invoking DataSetSnaphotControllerImpl.createReleaseSnapshots is {}",
+        SecurityContextHolder.getContext().getAuthentication().getName());
+
+    DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);
+    if (null != dataflow && dataflow.isReleasable()) {
+      try {
+        datasetSnapshotService.createReleaseSnapshots(dataflowId, dataProviderId,
+            restrictFromPublic, validate);
+      } catch (EEAException e) {
+        LOG_ERROR.error("Error releasing a snapshot. Error Message: {}", e.getMessage(), e);
+        try {
+          datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
+        } catch (EEAException e1) {
+          LOG_ERROR.error("Error releasing snapshot locks. Error Message: {}", e.getMessage(), e1);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.EXECUTION_ERROR);
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR,
+            e);
+      }
+    } else {
+      try {
+        datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
+      } catch (EEAException e) {
+        throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED,
+            String.format(EEAErrorMessage.DATAFLOW_NOT_RELEASABLE, dataflowId));
+      }
+      throw new ResponseStatusException(HttpStatus.PRECONDITION_FAILED,
+          String.format(EEAErrorMessage.DATAFLOW_NOT_RELEASABLE, dataflowId));
+    }
   }
 
 
