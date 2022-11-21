@@ -3,22 +3,28 @@ package org.eea.orchestrator.service.impl;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
+import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.orchestrator.mapper.JobMapper;
 import org.eea.orchestrator.persistence.domain.Job;
+import org.eea.orchestrator.persistence.repository.JobExtendedRepository;
 import org.eea.orchestrator.persistence.repository.JobRepository;
 import org.eea.orchestrator.service.JobHistoryService;
 import org.eea.orchestrator.service.JobService;
+import org.eea.orchestrator.utils.JobUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -56,10 +62,22 @@ public class JobServiceImpl implements JobService {
     @Autowired
     private JobHistoryService jobHistoryService;
 
+    /** The job utils. */
+    @Autowired
+    private JobUtils jobUtils;
+
     @Override
-    public List<JobVO> getAllJobs(){
-        List<Job> jobs = jobRepository.findAllByOrderById();
-        return jobMapper.entityListToClass(jobs);
+    public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId,
+                               String jobTypes, String processId, String creatorUsername, String jobStatuses){
+        String sortedTableColumn = jobUtils.getJobColumnNameByObjectName(sortedColumn);
+        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, processId, creatorUsername, jobStatuses);
+        List<JobVO> jobVOList = jobMapper.entityListToClass(jobs);
+        JobsVO jobsVO = new JobsVO();
+        jobsVO.setTotalRecords(jobRepository.count());
+        jobsVO.setFilteredRecords(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, processId, creatorUsername, jobStatuses));
+        jobsVO.setJobsList(jobVOList);
+
+        return jobsVO;
     }
 
     @Override
@@ -120,7 +138,7 @@ public class JobServiceImpl implements JobService {
                 Long insertedDataflowId = Long.valueOf((Integer) insertedParameters.get("dataflowId"));
                 Long insertedDataProviderId = Long.valueOf((Integer) insertedParameters.get("dataProviderId"));
                 if(dataflowId == insertedDataflowId && dataProviderId == insertedDataProviderId){
-                    return JobStatusEnum.ABORTED;
+                    return JobStatusEnum.REFUSED;
                 }
             }
         }
@@ -164,20 +182,25 @@ public class JobServiceImpl implements JobService {
     @Transactional
     @Override
     public void updateJobStatus(Long jobId, JobStatusEnum status, String processId){
-        Job job = jobRepository.getOne(jobId);
-        job.setJobStatus(status);
-        job.setDateStatusChanged(new Timestamp(System.currentTimeMillis()));
-        if(processId != null) {
-            job.setProcessId(processId);
+        Optional<Job> job = jobRepository.findById(jobId);
+        if(job.isPresent()){
+            job.get().setJobStatus(status);
+            job.get().setDateStatusChanged(new Timestamp(System.currentTimeMillis()));
+            if(processId != null) {
+                job.get().setProcessId(processId);
+            }
+            jobRepository.save(job.get());
+            jobHistoryService.saveJobHistory(job.get());
         }
-        jobRepository.save(job);
-        jobHistoryService.saveJobHistory(job);
+        else{
+            LOG.info("Could not update status for jobId {} because the id does not exist", jobId);
+        }
     }
 
     @Transactional
     @Override
     public void deleteFinishedJobsBasedOnDuration(){
-        jobRepository.deleteJobsBasedOnStatusAndDuration(new HashSet<>(Arrays.asList(JobStatusEnum.FINISHED.getValue(), JobStatusEnum.ABORTED.getValue(), JobStatusEnum.FAILED.getValue(), JobStatusEnum.CANCELLED.getValue())));
+        jobRepository.deleteJobsBasedOnStatusAndDuration(new HashSet<>(Arrays.asList(JobStatusEnum.FINISHED.getValue(), JobStatusEnum.REFUSED.getValue(), JobStatusEnum.FAILED.getValue(), JobStatusEnum.CANCELLED.getValue())));
     }
 
     @Transactional

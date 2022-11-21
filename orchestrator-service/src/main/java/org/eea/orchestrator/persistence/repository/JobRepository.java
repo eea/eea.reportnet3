@@ -3,9 +3,9 @@ package org.eea.orchestrator.persistence.repository;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.orchestrator.persistence.domain.Job;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import javax.transaction.Transactional;
@@ -15,15 +15,7 @@ import java.util.Set;
 /**
  * The Interface JobRepository.
  */
-public interface JobRepository extends JpaRepository<Job, Long> {
-
-    /**
-     *
-     * Retrieves all jobs ordered by id
-     *
-     * @return the list of job entries
-     */
-    List<Job> findAllByOrderById();
+public interface JobRepository extends PagingAndSortingRepository<Job, Long>, JobExtendedRepository {
 
     /**
      *

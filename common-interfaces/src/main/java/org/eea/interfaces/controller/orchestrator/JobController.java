@@ -1,7 +1,10 @@
 package org.eea.interfaces.controller.orchestrator;
 
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
+import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +19,29 @@ public interface JobController {
     }
 
     /**
-     * Get jobs based on status
-     *
+     * Get jobs
+     * @param pageNum the page num
+     * @param pageSize the page size
+     * @param asc the asc
+     * @param sortedColumn the sortedColumn
+     * @param jobId the jobId
+     * @param jobTypes the jobTypes
+     * @param creatorUsername the creatorUsername
+     * @param processId the processId
+     * @param jobStatuses the jobStatuses
      * @return a list of job entries
      */
-    @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<JobVO> getAllJobs();
+    @GetMapping()
+    JobsVO getJobs(
+            @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+            @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+            @RequestParam(value = "sortedColumn", defaultValue = "jobId") String sortedColumn,
+            @RequestParam(value = "jobId", required = false) Long jobId,
+            @RequestParam(value = "jobType", required = false) String jobTypes,
+            @RequestParam(value = "processId", required = false) String processId,
+            @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
+            @RequestParam(value = "jobStatus", required = false) String jobStatuses);
 
     /**
      * Get jobs based on status

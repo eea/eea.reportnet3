@@ -5,14 +5,20 @@ import io.swagger.annotations.*;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.recordstore.ProcessesVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.orchestrator.service.JobService;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,11 +45,32 @@ public class JobControllerImpl implements JobController {
     @Autowired
     private JobService jobService;
 
+    /** The valid columns. */
+    List<String> validColumns = Arrays.asList("jobId", "processId", "creatorUsername", "jobType",
+            "jobStatus", "dateAdded", "dateStatusChanged");
+
     @Override
-    @GetMapping(value = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<JobVO> getAllJobs(){
+    @HystrixCommand
+    @GetMapping
+    @ApiOperation(value = "Gets the jobs", response = JobVO.class, responseContainer = "List", hidden = false)
+    //@PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
+    public JobsVO getJobs(
+            @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+            @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+            @RequestParam(value = "sortedColumn", defaultValue = "jobId") String sortedColumn,
+            @RequestParam(value = "jobId", required = false) Long jobId,
+            @RequestParam(value = "jobType", required = false) String jobTypes,
+            @RequestParam(value = "processId", required = false) String processId,
+            @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
+            @RequestParam(value = "jobStatus", required = false) String jobStatuses){
         try {
-            return jobService.getAllJobs();
+
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
+            if (!validColumns.contains(sortedColumn)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong sorting header provided.");
+            }
+            return jobService.getJobs(pageable, asc, sortedColumn, jobId, jobTypes, processId, creatorUsername, jobStatuses);
         } catch (Exception e){
             LOG.error("Unexpected error! Could not retrieve all jobs");
             throw e;
@@ -123,7 +151,7 @@ public class JobControllerImpl implements JobController {
         LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
         jobService.addReleaseJob(parameters, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
         LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
-        if (statusToInsert == JobStatusEnum.ABORTED) {
+        if (statusToInsert == JobStatusEnum.REFUSED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
         }
     }

@@ -8,8 +8,8 @@ public enum JobStatusEnum {
     /** The in progress. */
     IN_PROGRESS("IN_PROGRESS"),
 
-    /** The aborted. */
-    ABORTED("ABORTED"),
+    /** The refused. */
+    REFUSED("REFUSED"),
 
     /** The cancelled. */
     CANCELLED("CANCELLED"),
