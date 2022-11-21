@@ -32,13 +32,10 @@ const {permissions} = config;
 
 export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
     const filterBy = useRecoilValue(filterByCustomFilterStore('jobsStatuses'));
-
     const resourcesContext = useContext(ResourcesContext);
     const notificationContext = useContext(NotificationContext);
     const userContext = useContext(UserContext);
     const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
-
-    const [editedValidationStatusPriority, setEditedValidationStatusPriority] = useState();
     const [filteredRecords, setFilteredRecords] = useState(0);
     const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
     const [isFiltered, setIsFiltered] = useState(false);
@@ -46,7 +43,7 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [loadingStatus, setLoadingStatus] = useState('idle');
     const [pagination, setPagination] = useState({firstRow: 0, numberRows: 10, pageNum: 0});
-    const [sort, setSort] = useState({field: 'queuedDate', order: -1});
+    const [sort, setSort] = useState({field: 'dateAdded', order: -1});
     const [totalRecords, setTotalRecords] = useState(0);
     const [jobsStatuses, setJobsStatusesList] = useState([]);
     const [jobStatus, setJobStatus] = useState(null);
@@ -65,7 +62,6 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
 
         try {
             const data = await JobsStatusesService.getJobsStatuses();
-            console.log("Data:"+data);
             setTotalRecords(data.length);
             setJobsStatusesList(data);
             setFilteredRecords(data.filteredRecords);
@@ -204,12 +200,6 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                 className: styles.smallColumn
             },
         ];
-        if (isAdmin) {
-            columns.push({
-                key: 'buttonsUniqueId',
-                header: resourcesContext.messages['actions']
-            })
-        }
 
         return columns.map(column => (
             <Column
@@ -354,23 +344,6 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
             </div>
         );
     };
-
-    const renderEditDialogContent = () => (
-        <div>
-            <label>{resourcesContext.messages['priority']}</label>
-            <TooltipButton
-                message={resourcesContext.messages['priorityMessage']}
-                uniqueIdentifier={'process_priority'}></TooltipButton>
-            <InputText
-                className={
-                    editedValidationStatusPriority < 1 || editedValidationStatusPriority > 100 ? styles.error : styles.priority
-                }
-                keyfilter="pint"
-                onChange={e => setEditedValidationStatusPriority(e.target.value)}
-                value={editedValidationStatusPriority}
-            />
-        </div>
-    );
 
     return (
         <Fragment>
