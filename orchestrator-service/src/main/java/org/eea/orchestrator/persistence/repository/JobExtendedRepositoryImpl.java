@@ -113,7 +113,8 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * @param jobStatuses the jobStatuses
      */
     private void addFilters(StringBuilder query, Long jobId, String jobTypes, String processId, String creatorUsername, String jobStatuses) {
-        query.append((jobId != null) ? " where jobs.id = :jobId " : "");
+        query.append(" where 1=1 ");
+        query.append((jobId != null) ? " and jobs.id = :jobId " : "");
         query.append((jobTypes != null) ? " and jobs.job_type = :jobType " : "");
         query.append(StringUtils.isNotBlank(processId) ? " and jobs.process_id = :processId " : "");
         query.append(StringUtils.isNotBlank(creatorUsername) ? " and jobs.creator_username = :creatorUsername " : "");
