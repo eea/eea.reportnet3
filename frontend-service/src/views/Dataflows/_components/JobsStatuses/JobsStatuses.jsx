@@ -3,14 +3,12 @@ import {useRecoilValue} from 'recoil';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import {config} from 'conf';
-import {AwesomeIcons} from 'conf/AwesomeIcons';
 import styles from './JobsStatuses.module.scss';
 import {Column} from 'primereact/column';
 import {Button} from 'views/_components/Button';
 import {DataTable} from 'views/_components/DataTable';
 import {Dialog} from 'views/_components/Dialog';
 import {Filters} from 'views/_components/Filters';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {LevelError} from 'views/_components/LevelError';
 import {PaginatorRecordsCount} from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import {Spinner} from 'views/_components/Spinner';
@@ -355,7 +353,7 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                 blockScroll={false}
                 className="responsiveBigDialog"
                 footer={dialogFooter}
-                header={resourcesContext.messages['jobsStatus']}
+                header={resourcesContext.messages['jobsMonitoring']}
                 modal={true}
                 onHide={onCloseDialog}
                 visible={isDialogVisible}>

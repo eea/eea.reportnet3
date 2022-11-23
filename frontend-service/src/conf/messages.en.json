@@ -792,6 +792,7 @@
     "isReleasing": "Is releasing",
     "issues": "Issue",
     "isViewUpdated": "Note: If the results are not as expected, a possible cause is the data has changed since the last full dataset validation. Please re-validate the dataset first, as this refreshes a backend view the SQL executes on, and then try again here.",
+    "jobsMonitoring": "Jobs Monitoring",
     "jobsStatus": "Jobs Status",
     "jobStatus": "Status",
     "jobsStatusesNotMatchingFilter": "There are no jobs with the selected parameters",

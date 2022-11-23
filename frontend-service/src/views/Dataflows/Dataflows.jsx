@@ -58,7 +58,7 @@ import {CurrentPage, ErrorUtils} from 'views/_functions/Utils';
 import {DataflowsUtils} from './_functions/Utils/DataflowsUtils';
 import {PaginatorRecordsCount} from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import {TextUtils} from 'repositories/_utils/TextUtils';
-import { JobsStatuses } from './_components/JobsStatuses';
+import {JobsStatuses} from './_components/JobsStatuses';
 
 const {permissions} = config;
 
@@ -258,11 +258,11 @@ export const Dataflows = () => {
         };
         const adminJobsStatusBtn = {
             className: 'dataflowList-left-side-bar-create-dataflow-help-step',
-            icon: 'fa-list-check',
+            icon: 'laptop',
             isVisible: isAdmin || isCustodian,
             label: 'jobsStatus',
             onClick: () => manageDialogs('isJobStatusDialogVisible', true),
-            title: 'jobsStatus'
+            title: 'jobsMonitoring'
         };
 
         const adminManageNationalCoordinatorsBtn = {
