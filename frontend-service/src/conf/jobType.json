@@ -1,0 +1,7 @@
+{
+  "IMPORT": { "key": "IMPORT", "label": "import" },
+  "VALIDATION": { "key": "VALIDATION", "label": "validation" },
+  "RELEASE": { "key": "RELEASE", "label": "release" },
+  "EXPORT": { "key": "EXPORT", "label": "export" },
+  "COPY_TO_EU_DATASET": { "key": "COPY_TO_EU_DATASET", "label": "copyToEuDataset" }
+}

@@ -9,6 +9,7 @@ import fieldType from './fieldType.json';
 import footer from './footer.config.json';
 import importTypeCode from './importType.code.json';
 import jobRunningStatus from './jobRunningStatus.json';
+import jobType from './jobType.json';
 import languageCode from './language.code.json';
 import notifications from './notifications.json';
 import systemNotifications from './systemNotifications.json';
@@ -50,6 +51,7 @@ export const config = {
     icons: primeIcons,
     importTypes: importTypeCode,
     jobRunningStatus: jobRunningStatus,
+    jobType: jobType,
     languages: languageCode,
     notifications: notifications,
     systemNotifications: systemNotifications,

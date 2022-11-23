@@ -1,4 +1,4 @@
-import {Fragment, useContext, useEffect, useState} from 'react';
+import {useContext, useEffect, useState} from 'react';
 import {useRecoilValue} from 'recoil';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -6,38 +6,27 @@ import {config} from 'conf';
 import {AwesomeIcons} from 'conf/AwesomeIcons';
 import styles from './JobsStatuses.module.scss';
 import {Column} from 'primereact/column';
-import {ActionsColumn} from 'views/_components/ActionsColumn';
 import {Button} from 'views/_components/Button';
-import {ConfirmDialog} from 'views/_components/ConfirmDialog';
 import {DataTable} from 'views/_components/DataTable';
 import {Dialog} from 'views/_components/Dialog';
 import {Filters} from 'views/_components/Filters';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {InputText} from 'views/_components/InputText';
 import {LevelError} from 'views/_components/LevelError';
 import {PaginatorRecordsCount} from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import {Spinner} from 'views/_components/Spinner';
-import {TooltipButton} from 'views/_components/TooltipButton';
-import {BackgroundProcessService} from 'services/BackgroundProcessService';
-import { JobsStatusesService } from 'services/JobsStatusesService';
+import {JobsStatusesService} from 'services/JobsStatusesService';
 import {NotificationContext} from 'views/_functions/Contexts/NotificationContext';
 import {ResourcesContext} from 'views/_functions/Contexts/ResourcesContext';
 import {filterByCustomFilterStore} from 'views/_components/Filters/_functions/Stores/filterStore';
 import {useApplyFilters} from 'views/_functions/Hooks/useApplyFilters';
 import {useDateTimeFormatByUserPreferences} from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 import {FiltersUtils} from 'views/_components/Filters/_functions/Utils/FiltersUtils';
-import {UserContext} from "../../../_functions/Contexts/UserContext";
-
-const {permissions} = config;
 
 export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
     const filterBy = useRecoilValue(filterByCustomFilterStore('jobsStatuses'));
     const resourcesContext = useContext(ResourcesContext);
     const notificationContext = useContext(NotificationContext);
-    const userContext = useContext(UserContext);
-    const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
     const [filteredRecords, setFilteredRecords] = useState(0);
-    const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
     const [isFiltered, setIsFiltered] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -61,12 +50,23 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
         setLoadingStatus('pending');
 
         try {
-            const data = await JobsStatusesService.getJobsStatuses();
-            setTotalRecords(data.length);
-            setJobsStatusesList(data);
+            const data = await JobsStatusesService.getJobsStatuses({
+                pageNum,
+                numberRows,
+                sortOrder: sort.order,
+                sortField: sort.field,
+                jobId: filterBy.jobId,
+                jobType: filterBy.jobType,
+                processId: filterBy.processId,
+                creatorUsername: filterBy.creatorUsername,
+                jobStatus: filterBy.jobStatus?.join()
+            });
+            
+            setTotalRecords(data.totalRecords);
+            setJobsStatusesList(data.jobsList);
             setFilteredRecords(data.filteredRecords);
             setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
-            setData(data);
+            setData(data.jobsList);
             setLoadingStatus('success');
         } catch (error) {
             console.error('JobsStatus - getJobsStatuses.', error);
@@ -78,38 +78,44 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
         }
     };
 
-    const onConfirmDeleteDialog = async () => {
-        setLoadingStatus('pending');
-        setIsDeleteDialogVisible(false);
-
-        try {
-            getJobsStatuses();
-        } catch (error) {
-            console.error('ValidationsStatus - onConfirmDeleteDialog.', error);
-            setLoadingStatus('failed');
-
-            notificationContext.add({status: 'DELETE_VALIDATION_FROM_QUEUE_ERROR'}, true);
-        } finally {
-            setJobStatus(null);
-        }
-    };
-
-    const onHideDeleteDialog = () => {
-        setIsDeleteDialogVisible(false);
-        setJobStatus(null);
-    };
-
     const onSort = event => setSort({field: event.sortField, order: event.sortOrder});
 
     const filterOptions = [
         {
             nestedOptions: [
-                {key: 'id', label: resourcesContext.messages['jobId'], keyfilter: 'pint'},
-                {key: 'jobType', label: resourcesContext.messages['jobType']},
-                {key: 'processid', label: resourcesContext.messages['processid']},
+                {key: 'jobId', label: resourcesContext.messages['jobId'], keyfilter: 'pint'},
+                {key: 'processId', label: resourcesContext.messages['processId']},
                 {key: 'creatorUsername', label: resourcesContext.messages['creatorUsername']}
             ],
             type: 'INPUT'
+        },
+        {
+            key: 'jobType',
+            label: resourcesContext.messages['jobType'],
+            multiSelectOptions: [
+                {
+                    type: resourcesContext.messages[config.jobType.IMPORT.label].toUpperCase(),
+                    value: config.jobType.IMPORT.key
+                },
+                {
+                    type: resourcesContext.messages[config.jobType.VALIDATION.label].toUpperCase(),
+                    value: config.jobType.VALIDATION.key
+                },
+                {
+                    type: resourcesContext.messages[config.jobType.RELEASE.label].toUpperCase(),
+                    value: config.jobType.RELEASE.key
+                },
+                {
+                    type: resourcesContext.messages[config.jobType.EXPORT.label].toUpperCase(),
+                    value: config.jobType.EXPORT.key
+                },
+                {
+                    type: resourcesContext.messages[config.jobType.COPY_TO_EU_DATASET.label].toUpperCase(),
+                    value: config.jobType.COPY_TO_EU_DATASET.key
+                }
+            ],
+            template: 'jobType',
+            type: 'MULTI_SELECT'
         },
         {
             key: 'jobStatus',
@@ -145,27 +151,17 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
         }
     ];
 
-    
-    const getJobStatusTemplate = job => (
-        <div>
-            <LevelError
-                className={config.jobRunningStatus[job.jobStatus].label}
-                type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
-            />
-        </div>
-    );
-
     const getTableColumns = () => {
         const columns = [
             {
-                key: 'id',
+                key: 'jobId',
                 header: resourcesContext.messages['jobId'],
                 template: getJobIdTemplate,
                 className: styles.middleColumn
             },
             {
-                key: 'processid',
-                header: resourcesContext.messages['processid'],
+                key: 'processId',
+                header: resourcesContext.messages['processId'],
                 template: getJobProcessIdTemplate,
                 className: styles.largeColumn
             },
@@ -213,6 +209,15 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
             />
         ));
     };
+
+    const getJobStatusTemplate = job => (
+        <div>
+            <LevelError
+                className={config.jobRunningStatus[job.jobStatus].label}
+                type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
+            />
+        </div>
+    );
 
     const getJobIdTemplate = job => (
         <p>
@@ -304,7 +309,7 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                 <div className={styles.noDataContent}>
                     <span>{resourcesContext.messages['noData']}</span>
                 </div>
-            );
+            );  
         }
 
         return (
@@ -346,7 +351,6 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
     };
 
     return (
-        <Fragment>
             <Dialog
                 blockScroll={false}
                 className="responsiveBigDialog"
@@ -357,19 +361,5 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                 visible={isDialogVisible}>
                 {renderDialogContent()}
             </Dialog>
-
-            {isDeleteDialogVisible && (
-                <ConfirmDialog
-                    classNameConfirm="p-button-danger"
-                    header={resourcesContext.messages['validationRemoveQueueDialogHeader']}
-                    labelCancel={resourcesContext.messages['cancel']}
-                    labelConfirm={resourcesContext.messages['yes']}
-                    onConfirm={onConfirmDeleteDialog}
-                    onHide={onHideDeleteDialog}
-                    visible={isDeleteDialogVisible}>
-                    {resourcesContext.messages['validationRemoveQueueDialogContent']}
-                </ConfirmDialog>
-            )}
-        </Fragment>
     );
 };
