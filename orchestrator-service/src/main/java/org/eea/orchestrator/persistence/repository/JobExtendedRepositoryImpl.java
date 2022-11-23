@@ -115,10 +115,10 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
     private void addFilters(StringBuilder query, Long jobId, String jobTypes, String processId, String creatorUsername, String jobStatuses) {
         query.append(" where 1=1 ");
         query.append((jobId != null) ? " and jobs.id = :jobId " : "");
-        query.append((jobTypes != null) ? " and jobs.job_type = :jobType " : "");
+        query.append(StringUtils.isNotBlank(jobTypes) ? " and jobs.job_type in :jobType " : "");
         query.append(StringUtils.isNotBlank(processId) ? " and jobs.process_id = :processId " : "");
         query.append(StringUtils.isNotBlank(creatorUsername) ? " and jobs.creator_username = :creatorUsername " : "");
-        query.append((jobStatuses != null) ? " and jobs.job_status = :jobStatus " : "");
+        query.append(StringUtils.isNotBlank(jobStatuses) ? " and jobs.job_status in :jobStatus " : "");
     }
 
     /**
@@ -133,9 +133,9 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      */
     private void addParameters(Query query, Long jobId, String jobTypes, String processId, String creatorUsername, String jobStatuses) {
         if(jobId != null){
-            query.setParameter("jobId", jobId.toString());
+            query.setParameter("jobId", jobId);
         }
-        if(jobTypes != null){
+        if(StringUtils.isNotBlank(jobTypes)){
             query.setParameter("jobType", Arrays.asList(jobTypes.split(",")));
         }
         if (StringUtils.isNotBlank(processId)) {
@@ -144,7 +144,7 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
         if (StringUtils.isNotBlank(creatorUsername)) {
             query.setParameter("creatorUsername", creatorUsername);
         }
-        if(jobStatuses != null){
+        if(StringUtils.isNotBlank(jobStatuses)){
             query.setParameter("jobStatus", Arrays.asList(jobStatuses.split(",")));
         }
     }
