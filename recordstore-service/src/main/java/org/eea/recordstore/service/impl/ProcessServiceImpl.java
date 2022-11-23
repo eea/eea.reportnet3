@@ -230,4 +230,17 @@ public class ProcessServiceImpl implements ProcessService {
   public void insertSagaTransactionIdAndAggregateId(String sagaTransactionId, String aggregateId, String processId) {
       processRepository.insertSagaTransactionIdAndAggregateId(sagaTransactionId, aggregateId, processId);
   }
+
+  /**
+   * Finds processes by dataflow and dataset with specific status
+   * @param dataflowId
+   * @param datasetId
+   * @param status
+   * @return
+   */
+  @Override
+  public List<ProcessVO> getProcessByDataflowAndDataset(Long dataflowId, Long datasetId, List<ProcessStatusEnum> status) {
+    List<EEAProcess> processes =  processRepository.findProcessByDataflowAndDataset(dataflowId,datasetId, status);
+    return processMapper.entityListToClass(processes);
+  }
 }

@@ -5,6 +5,9 @@ import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 
 /**
@@ -81,5 +84,14 @@ public interface ProcessService {
    * @param aggregateId
    */
   void insertSagaTransactionIdAndAggregateId(String sagaTransactionId, String aggregateId, String processId);
+
+  /**
+   * Finds processes by dataflow and dataset with specific status
+   * @param dataflowId
+   * @param datasetId
+   * @param status
+   * @return
+   */
+  List<ProcessVO> getProcessByDataflowAndDataset(Long dataflowId, Long datasetId, List<ProcessStatusEnum> status);
 
 }

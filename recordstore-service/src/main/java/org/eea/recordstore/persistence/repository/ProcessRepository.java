@@ -1,5 +1,6 @@
 package org.eea.recordstore.persistence.repository;
 
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.recordstore.persistence.domain.EEAProcess;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -8,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * The Interface ProcessRepository.
@@ -69,4 +71,14 @@ public interface ProcessRepository
           value = "update process set saga_transaction_id=:sagaTransactionId , aggregate_id=:aggregateId where process_id=:processId ")
   void insertSagaTransactionIdAndAggregateId(@Param("sagaTransactionId") String sagaTransactionId, @Param("aggregateId") String aggregateId, @Param("processId") String processId);
 
+  /**
+   * Finds processes by dataflow and dataset with specific status
+   * @param dataflowId
+   * @param datasetId
+   * @param status
+   * @return
+   */
+  @Query(nativeQuery = true,
+          value = "select p.* from process p where p.dataflow_id =:dataflowId and p.dataset_id = :datasetId and p.status in :status")
+  List<EEAProcess> findProcessByDataflowAndDataset(Long dataflowId, Long datasetId, List<ProcessStatusEnum> status);
 }

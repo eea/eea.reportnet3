@@ -1,16 +1,14 @@
 package org.eea.validation.axon.aggregates;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.tomcat.jni.Proc;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.messaging.MetaData;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.bson.types.ObjectId;
-import org.eea.axon.release.commands.CreateValidationProcessForReleaseCommand;
-import org.eea.axon.release.commands.CreateValidationTasksForReleaseCommand;
-import org.eea.axon.release.commands.RefreshMaterializedViewForReferenceDatasetCommand;
-import org.eea.axon.release.commands.UpdateMaterializedViewCommand;
+import org.eea.axon.release.commands.*;
 import org.eea.axon.release.events.*;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -19,6 +17,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -68,7 +67,7 @@ public class ValidationReleaseAggregate {
     }
 
     @CommandHandler
-    public ValidationReleaseAggregate(CreateValidationProcessForReleaseCommand command, MetaData metaData, ValidationController.ValidationControllerZuul validationControllerZuul, ProcessControllerZuul processControllerZuul) {
+    public ValidationReleaseAggregate(CreateValidationProcessForReleaseCommand command, MetaData metaData, @Autowired ValidationHelper validationHelper, ProcessControllerZuul processControllerZuul) {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
@@ -78,8 +77,8 @@ public class ValidationReleaseAggregate {
                     EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
 
             Map<Long, String> datasetProcessId = new HashMap<>();
+            int priority = validationHelper.getPriority(command.getDataflowId());
             command.getDatasetIds().forEach(datasetId -> {
-                int priority = validationControllerZuul.getPriority(command.getDataflowId());
                 LOG.info("Adding validation process for dataflowId: {} dataProvider: {} dataset ", command.getDataflowId(), command.getDataProviderId(), datasetId);
                 String processId = UUID.randomUUID().toString();
                 datasetProcessId.put(datasetId, processId);
@@ -220,4 +219,63 @@ public class ValidationReleaseAggregate {
         BeanUtils.copyProperties(command, event);
         apply(event, metaData);
     }
+
+    @CommandHandler
+    public void handle(CancelValidationProcessForReleaseCommand command, MetaData metaData, ProcessControllerZuul processControllerZuul, @Autowired ValidationHelper validationHelper) {
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+        authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
+
+        List<ProcessStatusEnum> statuses = new ArrayList<>();
+        statuses.add(ProcessStatusEnum.IN_QUEUE);
+        statuses.add(ProcessStatusEnum.IN_PROGRESS);
+        int priority = validationHelper.getPriority(command.getDataflowId());
+        command.getDatasetIds().forEach(datasetId -> {
+            List<ProcessVO> datasetProcesses =  processControllerZuul.getProcessByDataflowAndDataset(command.getDataflowId(), datasetId, statuses);
+           datasetProcesses.forEach(process -> processControllerZuul.updateProcess(datasetId, command.getDataflowId(),
+                   ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, process.getProcessId(),
+                   SecurityContextHolder.getContext().getAuthentication().getName(), priority, true));
+        });
+        ValidationProcessForReleaseCanceledEvent event = new ValidationProcessForReleaseCanceledEvent();
+        BeanUtils.copyProperties(command, event);
+        apply(event, metaData);
+    }
+
+    @CommandHandler
+    public void handle(CancelValidationTasksForReleaseCommand command, MetaData metaData) {
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+        authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
+
+
+
+        ValidationTasksForReleaseCanceledEvent event = new ValidationTasksForReleaseCanceledEvent();
+        BeanUtils.copyProperties(command, event);
+        apply(event, metaData);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

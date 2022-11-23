@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.ws.rs.POST;
+import java.util.List;
 
 /**
  * The Interface ProcessController.
@@ -133,4 +134,14 @@ public interface ProcessController {
   @PostMapping(value = "/private/insertSagaInfo")
   void insertSagaTransactionIdAndAggregateId(@RequestParam("sagaTransactionId") String sagaTransactionId,
                                              @RequestParam("aggregateId") String aggregateId, @RequestParam("processId") String processId);
+
+  /**
+   * Finds processes by dataflow and dataset with specific status
+   * @param dataflowId
+   * @param datasetId
+   * @param status
+   * @return
+   */
+  @GetMapping(value = "/private/getProcessByDataflowAndDataset/{dataflowId}/{datasetId}")
+  List<ProcessVO> getProcessByDataflowAndDataset(@PathVariable("dataflowId") Long dataflowId, @PathVariable("datasetId") Long datasetId, @RequestParam("status") List<ProcessStatusEnum> status);
 }

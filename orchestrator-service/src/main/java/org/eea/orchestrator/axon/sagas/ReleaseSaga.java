@@ -52,7 +52,10 @@ public class ReleaseSaga {
             ReleaseFailureRemoveLocksCommand releaseFailureRemoveLocksCommand = ReleaseFailureRemoveLocksCommand.builder().datasetReleaseAggregateId(UUID.randomUUID().toString()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
                     .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
                     .releaseAggregateId(event.getReleaseAggregateId()).build();
-            commandGateway.send(releaseFailureRemoveLocksCommand);
+            commandGateway.send(GenericCommandMessage.asCommandMessage(releaseFailureRemoveLocksCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
+                LOG.error("Error while executing command ReleaseFailureRemoveLocksCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+                return e;
+            });
             return er;
         });
     }
@@ -67,6 +70,13 @@ public class ReleaseSaga {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(updateRepresentativeVisibilityCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command UpdateRepresentativeVisibilityCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+            ReleaseFailureRemoveLocksCommand releaseFailureRemoveLocksCommand = ReleaseFailureRemoveLocksCommand.builder().datasetReleaseAggregateId(UUID.randomUUID().toString()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
+                    .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                    .releaseAggregateId(event.getReleaseAggregateId()).build();
+            commandGateway.send(GenericCommandMessage.asCommandMessage(releaseFailureRemoveLocksCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
+                LOG.error("Error while executing command ReleaseFailureRemoveLocksCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+                return e;
+            });
             return er;
         });
     }
@@ -80,6 +90,20 @@ public class ReleaseSaga {
                     .datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
             commandGateway.send(GenericCommandMessage.asCommandMessage(executeValidationProcessCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
                 LOG.error("Error while executing command CreateValidationProcessForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+                CancelValidationProcessForReleaseCommand cancelValidationProcessForReleaseCommand = CancelValidationProcessForReleaseCommand.builder().validationReleaseAggregateId(event.getValidationReleaseAggregateId()).transactionId(event.getTransactionId())
+                        .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                        .datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
+                commandGateway.send(GenericCommandMessage.asCommandMessage(cancelValidationProcessForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
+                    LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), e.getCause().toString());
+                    RevertRepresentativeVisibilityCommand revertRepresentativeVisibilityCommand = RevertRepresentativeVisibilityCommand.builder().dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
+                            .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                            .releaseAggregateId(event.getReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).build();
+                    commandGateway.send(GenericCommandMessage.asCommandMessage(revertRepresentativeVisibilityCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(err -> {
+                        LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), err.getCause().toString());
+                        return err;
+                    });
+                    return e;
+                });
                 return er;
             });
         } else {
@@ -89,6 +113,13 @@ public class ReleaseSaga {
                     .releaseAggregateId(event.getReleaseAggregateId()).build();
             commandGateway.send(GenericCommandMessage.asCommandMessage(createReleaseSnapshotCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
                 LOG.error("Error while executing command CreateSnapshotRecordRorReleaseInMetabaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+                RevertRepresentativeVisibilityCommand revertRepresentativeVisibilityCommand = RevertRepresentativeVisibilityCommand.builder().dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
+                        .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                        .releaseAggregateId(event.getReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).build();
+                commandGateway.send(GenericCommandMessage.asCommandMessage(revertRepresentativeVisibilityCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
+                    LOG.error("Error while executing command RevertRepresentativeVisibilityCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+                    return e;
+                });
                 return er;
             });
         }
@@ -118,6 +149,20 @@ public class ReleaseSaga {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(createValidationTasksForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command CreateValidationTasksForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+            CancelValidationProcessForReleaseCommand cancelValidationProcessForReleaseCommand = CancelValidationProcessForReleaseCommand.builder().validationReleaseAggregateId(event.getValidationReleaseAggregateId()).transactionId(event.getTransactionId())
+                    .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                    .datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
+            commandGateway.send(GenericCommandMessage.asCommandMessage(cancelValidationProcessForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
+                LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), e.getCause().toString());
+                RevertRepresentativeVisibilityCommand revertRepresentativeVisibilityCommand = RevertRepresentativeVisibilityCommand.builder().dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
+                        .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                        .releaseAggregateId(event.getReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).build();
+                commandGateway.send(GenericCommandMessage.asCommandMessage(revertRepresentativeVisibilityCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(err -> {
+                    LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), err.getCause().toString());
+                    return err;
+                });
+                return e;
+            });
             return er;
         });
     }
@@ -137,6 +182,20 @@ public class ReleaseSaga {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(refreshMaterializedViewForReferenceDatasetCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command RefreshMaterializedViewForReferenceDatasetCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+            CancelValidationProcessForReleaseCommand cancelValidationProcessForReleaseCommand = CancelValidationProcessForReleaseCommand.builder().validationReleaseAggregateId(event.getValidationReleaseAggregateId()).transactionId(event.getTransactionId())
+                    .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                    .datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
+            commandGateway.send(GenericCommandMessage.asCommandMessage(cancelValidationProcessForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
+                LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), e.getCause().toString());
+                RevertRepresentativeVisibilityCommand revertRepresentativeVisibilityCommand = RevertRepresentativeVisibilityCommand.builder().dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
+                        .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                        .releaseAggregateId(event.getReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).build();
+                commandGateway.send(GenericCommandMessage.asCommandMessage(revertRepresentativeVisibilityCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(err -> {
+                    LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), err.getCause().toString());
+                    return err;
+                });
+                return e;
+            });
             return er;
         });
     }
@@ -151,6 +210,20 @@ public class ReleaseSaga {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(updateMaterializedViewCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command UpdateMaterializedViewCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+            CancelValidationProcessForReleaseCommand cancelValidationProcessForReleaseCommand = CancelValidationProcessForReleaseCommand.builder().validationReleaseAggregateId(event.getValidationReleaseAggregateId()).transactionId(event.getTransactionId())
+                    .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                    .datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
+            commandGateway.send(GenericCommandMessage.asCommandMessage(cancelValidationProcessForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
+                LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), e.getCause().toString());
+                RevertRepresentativeVisibilityCommand revertRepresentativeVisibilityCommand = RevertRepresentativeVisibilityCommand.builder().dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
+                        .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                        .releaseAggregateId(event.getReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).build();
+                commandGateway.send(GenericCommandMessage.asCommandMessage(revertRepresentativeVisibilityCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(err -> {
+                    LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), err.getCause().toString());
+                    return err;
+                });
+                return e;
+            });
             return er;
         });
     }
@@ -165,6 +238,20 @@ public class ReleaseSaga {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(updateMaterializedViewCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command UpdateMaterializedViewCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+            CancelValidationProcessForReleaseCommand cancelValidationProcessForReleaseCommand = CancelValidationProcessForReleaseCommand.builder().validationReleaseAggregateId(event.getValidationReleaseAggregateId()).transactionId(event.getTransactionId())
+                    .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                    .datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
+            commandGateway.send(GenericCommandMessage.asCommandMessage(cancelValidationProcessForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
+                LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), e.getCause().toString());
+                RevertRepresentativeVisibilityCommand revertRepresentativeVisibilityCommand = RevertRepresentativeVisibilityCommand.builder().dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
+                        .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                        .releaseAggregateId(event.getReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).build();
+                commandGateway.send(GenericCommandMessage.asCommandMessage(revertRepresentativeVisibilityCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(err -> {
+                    LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), err.getCause().toString());
+                    return err;
+                });
+                return e;
+            });
             return er;
         });
     }
@@ -179,6 +266,14 @@ public class ReleaseSaga {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(createValidationTasksForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command CreateValidationTasksForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+            CancelValidationTasksForReleaseCommand cancelValidationTasksForReleaseCommand = CancelValidationTasksForReleaseCommand.builder().validationReleaseAggregateId(event.getValidationReleaseAggregateId())
+                    .transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetProcessId(event.getDatasetProcessId())
+                    .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId())
+                    .datasetIForMaterializedViewEvent(event.getDatasetIForMaterializedViewEvent()).build();
+            commandGateway.send(GenericCommandMessage.asCommandMessage(cancelValidationTasksForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
+                LOG.error("Error while executing command CancelValidationTasksForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+                return e;
+            });
             return er;
         });
     }
@@ -418,9 +513,36 @@ public class ReleaseSaga {
     }
 
     @SagaEventHandler(associationProperty = "transactionId")
+    public void handle(ValidationProcessForReleaseCanceledEvent event, MetaData metaData) {
+        LOG.info("ValidationProcessForReleaseCanceledEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+        RevertRepresentativeVisibilityCommand revertRepresentativeVisibilityCommand = RevertRepresentativeVisibilityCommand.builder().dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
+                .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                .releaseAggregateId(event.getReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).build();
+        commandGateway.send(GenericCommandMessage.asCommandMessage(revertRepresentativeVisibilityCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(err -> {
+            LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), err.getCause().toString());
+            return err;
+        });
+    }
+
+    @SagaEventHandler(associationProperty = "transactionId")
+    public void handle(RepresentativeVisibilityRevertedEvent event, MetaData metaData) {
+        LOG.info("RepresentativeVisibilityRevertedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+        ReleaseFailureRemoveLocksCommand releaseFailureRemoveLocksCommand = ReleaseFailureRemoveLocksCommand.builder().datasetReleaseAggregateId(UUID.randomUUID().toString()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
+                .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
+                .releaseAggregateId(event.getReleaseAggregateId()).build();
+        commandGateway.send(GenericCommandMessage.asCommandMessage(releaseFailureRemoveLocksCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
+            LOG.error("Error while executing command ReleaseFailureRemoveLocksCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+            return er;
+        });
+    }
+
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(FailureReleaseLocksRemovedEvent event) {
         LOG.info("FailureReleaseLocksRemovedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
     }
+
 }
 
 

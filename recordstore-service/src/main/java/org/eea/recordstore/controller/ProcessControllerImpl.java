@@ -204,4 +204,17 @@ public class ProcessControllerImpl implements ProcessController {
     processService.insertSagaTransactionIdAndAggregateId(sagaTransactionId, aggregateId, processId);
   }
 
+  /**
+   * Finds processes by dataflow and dataset with specific status
+   * @param dataflowId
+   * @param datasetId
+   * @param status
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/getProcessByDataflowAndDataset/{dataflowId}/{datasetId}")
+  public List<ProcessVO> getProcessByDataflowAndDataset(@PathVariable("dataflowId") Long dataflowId, @PathVariable("datasetId") Long datasetId, @RequestParam("status") List<ProcessStatusEnum> status) {
+    return processService.getProcessByDataflowAndDataset(dataflowId, datasetId, status);
+  }
+
 }
