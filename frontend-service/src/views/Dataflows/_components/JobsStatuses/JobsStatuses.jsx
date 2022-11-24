@@ -54,7 +54,7 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                 sortOrder: sort.order,
                 sortField: sort.field,
                 jobId: filterBy.jobId,
-                jobType: filterBy.jobType,
+                jobType: filterBy.jobType?.join(),
                 processId: filterBy.processId,
                 creatorUsername: filterBy.creatorUsername,
                 jobStatus: filterBy.jobStatus?.join()
