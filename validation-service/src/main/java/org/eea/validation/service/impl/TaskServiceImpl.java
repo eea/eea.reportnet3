@@ -43,12 +43,22 @@ public class TaskServiceImpl implements TaskService {
         taskRepository.updateStatusAndFinishDate(taskVO.getId(), taskVO.getStatus().toString(), taskVO.getFinishDate());
     }
 
+    /**
+     *
+     * @param json
+     * @return
+     */
     @Override
-    public TaskVO findTaskBySplitFileName(String splitFileName) {
-        Task task = taskRepository.findBySplitFileNameContains(splitFileName);
+    public TaskVO findReleaseTaskByJson(String json) {
+        Task task = taskRepository.findByJsonContaining(json);
         return taskMapper.entityToClass(task);
     }
 
+    /**
+     * Finds tasks by processId
+     * @param processId
+     * @return
+     */
     @Override
     public List<TaskVO> findTaskByProcessId(String processId) {
         List<Task> tasks = taskRepository.findByProcessId(processId);

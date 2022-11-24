@@ -1,12 +1,9 @@
 package org.eea.validation.controller;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.UUID;
-import javax.servlet.http.HttpServletResponse;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -47,10 +44,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * The Class ValidationControllerImpl.
@@ -421,14 +422,14 @@ public class ValidationControllerImpl implements ValidationController {
   }
 
   /**
-   * Finds task by splitFileName
-   * @param splitFileName
+   * Finds task by json
+   * @param json
    * @return
    */
   @Override
-  @GetMapping(value = "/findTaskBySplitFileName/{splitFileName}")
-  public TaskVO findTaskBySplitFileName(@PathVariable("splitFileName") String splitFileName) {
-    return taskService.findTaskBySplitFileName(splitFileName);
+  @GetMapping(value = "/findReleaseTaskByJson")
+  public TaskVO findReleaseTaskByJson(@RequestParam("json") String json) {
+      return taskService.findReleaseTaskByJson(json);
   }
 
   /**

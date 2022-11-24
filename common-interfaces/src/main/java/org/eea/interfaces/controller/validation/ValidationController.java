@@ -1,7 +1,5 @@
 package org.eea.interfaces.controller.validation;
 
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -9,6 +7,9 @@ import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * The Interface ValidationController.
@@ -127,12 +128,12 @@ public interface ValidationController {
   void updateTask(@RequestBody TaskVO taskVO);
 
   /**
-   * Finds task by splitFileName
-   * @param splitFileName
+   * Finds task by json
+   * @param json
    * @return
    */
-  @GetMapping(value = "/findTaskBySplitFileName/{splitFileName}")
-  TaskVO findTaskBySplitFileName(@PathVariable("splitFileName") String splitFileName);
+  @GetMapping(value = "/findReleaseTaskByJson")
+  TaskVO findReleaseTaskByJson(@RequestParam("json") String json);
 
   /**
    * Finds task by splitFileName

@@ -867,7 +867,7 @@ public class ValidationHelper implements DisposableBean {
         LOG_ERROR.error("error processing json for processId {}", processId);
       }
       Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
-          json, 0, null, null, null);
+          json, 0, null);
       taskRepository.save(task);
       LOG.info("Added validation task {} for process {}",task.getId(), processId);
     }

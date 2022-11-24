@@ -29,8 +29,4 @@ public class TaskVO {
     private int version;
 
     private String pod;
-
-    private String splitFileName;
-
-    private Long snapshotId;
 }

@@ -1,6 +1,7 @@
 package org.eea.recordstore.service.impl;
 
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import java.io.File;
@@ -462,6 +463,7 @@ public class JdbcRecordStoreServiceImplTest {
     DataSetMetabaseVO datasetMetabase = new DataSetMetabaseVO();
     datasetMetabase.setDataflowId(1L);
     datasetMetabase.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(anyLong())).thenReturn(datasetMetabase);
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false,
         false);
     Mockito.verify(kafkaSender, Mockito.times(0)).releaseNotificableKafkaEvent(Mockito.any(),
