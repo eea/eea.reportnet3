@@ -53,10 +53,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import java.util.ArrayList;
 /**
  * The Class ValidationControllerImpl.
  */
@@ -467,14 +466,14 @@ public class ValidationControllerImpl implements ValidationController {
   }
 
   /**
-   * Finds task by splitFileName
-   * @param splitFileName
+   * Finds task by json
+   * @param json
    * @return
    */
   @Override
-  @GetMapping(value = "/findTaskBySplitFileName/{splitFileName}")
-  public TaskVO findTaskBySplitFileName(@PathVariable("splitFileName") String splitFileName) {
-    return taskService.findTaskBySplitFileName(splitFileName);
+  @GetMapping(value = "/findReleaseTaskByJson")
+  public TaskVO findReleaseTaskByJson(@RequestParam("json") String json) {
+      return taskService.findReleaseTaskByJson(json);
   }
 
   /**

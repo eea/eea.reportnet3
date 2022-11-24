@@ -146,12 +146,12 @@ public interface ValidationController {
   void updateTask(@RequestBody TaskVO taskVO);
 
   /**
-   * Finds task by splitFileName
-   * @param splitFileName
+   * Finds task by json
+   * @param json
    * @return
    */
-  @GetMapping(value = "/findTaskBySplitFileName/{splitFileName}")
-  TaskVO findTaskBySplitFileName(@PathVariable("splitFileName") String splitFileName);
+  @GetMapping(value = "/findReleaseTaskByJson")
+  TaskVO findReleaseTaskByJson(@RequestParam("json") String json);
 
   /**
    * Finds task by splitFileName

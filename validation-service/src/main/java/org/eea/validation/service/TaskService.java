@@ -20,11 +20,11 @@ public interface TaskService {
     void updateTask(TaskVO taskVO);
 
     /**
-     * Finds task by splitFileName
-     * @param splitFileName
+     * Finds release task by json
+     * @param json
      * @return
      */
-    TaskVO findTaskBySplitFileName(String splitFileName);
+    TaskVO findReleaseTaskByJson(String json);
 
     /**
      * Finds tasks by processId

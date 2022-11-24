@@ -1,19 +1,8 @@
 package org.eea.recordstore.service.impl;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.sql.DataSource;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
@@ -28,13 +17,7 @@ import org.eea.interfaces.controller.dataset.ReferenceDatasetController.Referenc
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
-import org.eea.interfaces.vo.dataset.DataCollectionVO;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.DesignDatasetVO;
-import org.eea.interfaces.vo.dataset.EUDatasetVO;
-import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
-import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.dataset.TestDatasetVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -46,6 +29,7 @@ import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.SplitSnapfile;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.ReleaseTaskVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -71,13 +55,27 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import feign.FeignException;
+
+import javax.sql.DataSource;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.*;
+import java.util.Date;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The Class JdbcRecordStoreServiceImpl.
  */
 @Service("jdbcRecordStoreServiceImpl")
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
+
+  /** The service instance id. */
+  @Value("${spring.cloud.consul.discovery.instanceId}")
+  private String serviceInstanceId;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -1699,9 +1697,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
           String splitFile = pathSnapshot + splitFileName;
           try {
-            TaskVO task = validationControllerZuul.findTaskBySplitFileName(splitFileName);
+            ReleaseTaskVO releaseTaskVO = ReleaseTaskVO.builder().splitFileName(splitFileName).snapshotId(idSnapshot).splitFileId(i).numberOfSplitFiles(snapFileForSplitting.getNumberOfFiles()).build();
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = objectMapper.writeValueAsString(releaseTaskVO);
+            TaskVO task = validationControllerZuul.findReleaseTaskByJson(json);
+
             task.setStartingDate(new Date());
             task.setStatus(ProcessStatusEnum.IN_PROGRESS);
+            task.setPod(serviceInstanceId);
             task = validationControllerZuul.saveTask(task);
 
             LOG.info("Copy file {}", splitFile);
@@ -2055,8 +2058,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           }
         }
         out.close();
+        ReleaseTaskVO releaseTaskVO = ReleaseTaskVO.builder().splitFileName(splitFileName).snapshotId(idSnapshot).splitFileId(j).numberOfSplitFiles(numberOfFiles).build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String json = "";
+        try {
+          json = objectMapper.writeValueAsString(releaseTaskVO);
+        } catch (JsonProcessingException e) {
+          LOG_ERROR.error("error processing json for snap file {}", splitFileName);
+          throw e;
+        }
         TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
-                null, 0, null, splitFileName, idSnapshot);
+                json, 0, null);
         validationControllerZuul.saveTask(task);
       }
 
