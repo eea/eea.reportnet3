@@ -482,7 +482,7 @@ public class ValidationControllerImpl implements ValidationController {
    * @return
    */
   @Override
-  @GetMapping(value = "/findTasksByProcessId/{processId}")
+  @GetMapping(value = "/private/findTasksByProcessId/{processId}")
   public List<TaskVO> findTasksByProcessId(@PathVariable("processId") String processId) {
     return taskService.findTaskByProcessId(processId);
   }
