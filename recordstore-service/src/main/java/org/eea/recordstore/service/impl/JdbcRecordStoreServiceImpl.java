@@ -27,6 +27,7 @@ import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetContro
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
+import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -41,12 +42,17 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.SplitSnapfile;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.eea.recordstore.service.ProcessService;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.utils.LiteralConstants;
 import org.postgresql.copy.CopyIn;
@@ -249,6 +255,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The reference dataset controller zuul. */
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
+
+  /** The validation controller zuul */
+  @Autowired
+  private ValidationControllerZuul validationControllerZuul;
+
+  /** The process service */
+  @Autowired
+  private ProcessService processService;
 
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
@@ -1488,8 +1502,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
 
       CopyManager cm = new CopyManager((BaseConnection) con);
+      DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
       LOG.info("Init restoring the snapshot files from Snapshot {} and datasetId {}", idSnapshot, datasetId);
-      copyProcess(datasetId, idSnapshot, datasetType, cm);
+      copyProcess(dataset.getDataflowId(), datasetId, idSnapshot, datasetType, cm);
       LOG.info("Finished restoring the snapshot files from Snapshot {} and datasetId {}", idSnapshot, datasetId);
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
@@ -1633,7 +1648,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
-  private void copyProcess(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType,
+  private void copyProcess(Long dataflowId, Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType,
       CopyManager cm) throws IOException, SQLException {
     try {
       if (DatasetTypeEnum.DESIGN.equals(datasetType)
@@ -1670,22 +1685,45 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       SplitSnapfile snapFileForSplitting = isSnapFileForSplitting(nameFileFieldValue);
 
       if (snapFileForSplitting.isForSplitting() == true) {
-        splitSnapFile(nameFileFieldValue, idSnapshot, snapFileForSplitting);
+        String processId = UUID.randomUUID().toString();
+        ProcessVO processVO = createProcessVOForRelease(dataflowId, datasetId, processId);
+        processVO = processService.saveProcess(processVO);
+
+        splitSnapFile(processId, nameFileFieldValue, idSnapshot, snapFileForSplitting);
+
+        processVO.setStatus(ProcessStatusEnum.IN_PROGRESS.toString());
+        processVO.setProcessStartingDate(new Date());
+        processService.saveProcess(processVO);
 
         for (int i = 1; i <= snapFileForSplitting.getNumberOfFiles(); i++) {
-          String splitFile = pathSnapshot + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i,
-              LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+          String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+          String splitFile = pathSnapshot + splitFileName;
           try {
+            TaskVO task = validationControllerZuul.findTaskBySplitFileName(splitFileName);
+            task.setStartingDate(new Date());
+            task.setStatus(ProcessStatusEnum.IN_PROGRESS);
+            task = validationControllerZuul.saveTask(task);
+
             LOG.info("Copy file {}", splitFile);
             copyFromFile(copyQueryField, splitFile, cm);
-            LOG.info("File {} copied and will be deleted", splitFile);
-            deleteFile(Arrays.asList(splitFile));
-            LOG.info("File {} has been deleted", splitFile);
+
+            task.setFinishDate(new Date());
+            task.setStatus(ProcessStatusEnum.FINISHED);
+            validationControllerZuul.updateTask(task);
+
+            try {
+              LOG.info("File {} copied and will be deleted", splitFile);
+              deleteFile(Arrays.asList(splitFile));
+              LOG.info("File {} has been deleted", splitFile);
+            } catch (Exception e) {
+              LOG.error("Error while trying to delete split snap file {} for dataflow {} and datasetId {}", splitFileName, dataflowId, datasetId);
+            }
           } catch (Exception e) {
             LOG_ERROR.error("Error in copy field process for snapshotId {} with error", idSnapshot, e);
             throw e;
           }
         }
+        processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), processId);
       } else {
         copyFromFile(copyQueryField, nameFileFieldValue, cm);
       }
@@ -1704,6 +1742,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+  private ProcessVO createProcessVOForRelease(Long dataflowId, Long datasetId, String processId) {
+    ProcessVO processVO = new ProcessVO();
+    processVO.setDataflowId(dataflowId);
+    processVO.setDatasetId(datasetId);
+    processVO.setStatus(ProcessStatusEnum.IN_QUEUE.toString());
+    processVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
+    processVO.setPriority(1);
+    processVO.setProcessType(ProcessTypeEnum.RELEASE_SNAPSHOT.toString());
+    processVO.setProcessId(processId);
+    processVO.setQueuedDate(new Date());
+    return processVO;
+  }
 
   /**
    * Copy process specific File snapshot
@@ -1978,7 +2028,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param idSnapshot
    * @param snapFileForSplitting
    */
-  private void splitSnapFile(String inputfile, Long idSnapshot, SplitSnapfile snapFileForSplitting) {
+  private void splitSnapFile(String processId, String inputfile, Long idSnapshot, SplitSnapfile snapFileForSplitting) {
 
     LOG.info("Method splitSnapFile starts for file {} with idSnapshot {} and snapFileForSplitting {}", inputfile, idSnapshot, snapFileForSplitting);
     int numberOfFiles = snapFileForSplitting.getNumberOfFiles();
@@ -1992,7 +2042,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       for (int j=1; j <= numberOfFiles; j++) {
         // Destination File Location
-        FileWriter fstream1 = new FileWriter(pathSnapshot + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX));
+        String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+        FileWriter fstream1 = new FileWriter(pathSnapshot + splitFileName);
         BufferedWriter out = new BufferedWriter(fstream1);
         for (int i=1; i <= maxLinesPerFile; i++) {
           strLine = br.readLine();
@@ -2004,6 +2055,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           }
         }
         out.close();
+        TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
+                null, 0, null, splitFileName, idSnapshot);
+        validationControllerZuul.saveTask(task);
       }
 
       in.close();

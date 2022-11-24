@@ -71,4 +71,12 @@ public class Task {
   /** The pod. */
   @Column(name = "pod")
   private String pod;
+
+  /** The splitFileName */
+  @Column(name = "split_file_name")
+  private String splitFileName;
+
+  /** The snapshotId */
+  @Column(name = "snapshot_id")
+  private Long snapshotId;
 }

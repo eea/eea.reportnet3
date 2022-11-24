@@ -25,9 +25,11 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.validation.service.TaskService;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.eea.validation.util.ValidationHelper;
@@ -43,13 +45,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.ApiOperation;
@@ -93,6 +89,10 @@ public class ValidationControllerImpl implements ValidationController {
   /** The process controller zuul. */
   @Autowired
   private ProcessControllerZuul processControllerZuul;
+
+  /** The task service */
+  @Autowired
+  private TaskService taskService;
 
 
   /**
@@ -396,5 +396,49 @@ public class ValidationControllerImpl implements ValidationController {
       LOG_ERROR.error("Unexpected error! Error downloading validations file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage());
       throw e;
     }
+  }
+
+  /**
+   * Saves task
+   * @param taskVO
+   * @return
+   */
+  @Override
+  @PutMapping(value = "/saveTask")
+  public TaskVO saveTask(@RequestBody TaskVO taskVO) {
+    return taskService.saveTask(taskVO);
+  }
+
+  /**
+   * Updates task
+   * @param taskVO
+   * @return
+   */
+  @Override
+  @PutMapping(value = "/updateTask")
+  public void updateTask(@RequestBody TaskVO taskVO) {
+    taskService.updateTask(taskVO);
+  }
+
+  /**
+   * Finds task by splitFileName
+   * @param splitFileName
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/findTaskBySplitFileName/{splitFileName}")
+  public TaskVO findTaskBySplitFileName(@PathVariable("splitFileName") String splitFileName) {
+    return taskService.findTaskBySplitFileName(splitFileName);
+  }
+
+  /**
+   * Finds task by processId
+   * @param processId
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/findTasksByProcessId/{processId}")
+  public List<TaskVO> findTasksByProcessId(@PathVariable("processId") String processId) {
+    return taskService.findTaskByProcessId(processId);
   }
 }

@@ -5,13 +5,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * The Interface ValidationController.
@@ -111,4 +108,37 @@ public interface ValidationController {
   @GetMapping("/downloadFile/{datasetId}")
   void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
       HttpServletResponse response);
+
+  /**
+   * Saves task
+   * @param taskVO
+   * @return
+   */
+  @PutMapping(value = "/saveTask")
+  TaskVO saveTask(@RequestBody TaskVO taskVO);
+
+
+  /**
+   * Updates task
+   * @param taskVO
+   * @return
+   */
+  @PutMapping(value = "/updateTask")
+  void updateTask(@RequestBody TaskVO taskVO);
+
+  /**
+   * Finds task by splitFileName
+   * @param splitFileName
+   * @return
+   */
+  @GetMapping(value = "/findTaskBySplitFileName/{splitFileName}")
+  TaskVO findTaskBySplitFileName(@PathVariable("splitFileName") String splitFileName);
+
+  /**
+   * Finds task by splitFileName
+   * @param processId
+   * @return
+   */
+  @GetMapping(value = "/findTasksByProcessId/{processId}")
+  List<TaskVO> findTasksByProcessId(@PathVariable("processId") String processId);
 }

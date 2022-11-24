@@ -95,6 +95,20 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   @Query(nativeQuery = true,
       value = "select case when (exists (select id from task where process_id=:processId and status ='IN_QUEUE' limit 1)) then FALSE else TRUE end")
   boolean isProcessEnding(@Param("processId") String processId);
+
+  /**
+   * Finds task by splitFileName
+   * @param splitFileName
+   * @return
+   */
+  Task findBySplitFileNameContains(String splitFileName);
+
+  /**
+   * Finds task by processId
+   * @param processId
+   * @return
+   */
+  List<Task> findByProcessId(String processId);
 }
 
 
