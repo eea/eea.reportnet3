@@ -1120,10 +1120,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 public void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId)
       throws EEAException {
     try {
-
       List<Long> datasets = reportingDatasetRepository.findByDataflowId(dataflowId).stream()
-          .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
-          .collect(Collectors.toList());
+              .filter(rd -> rd.getDataProviderId().equals(dataProviderId)).map(ReportingDataset::getId)
+              .collect(Collectors.toList());
 
       // We have to lock all the dataset operations (insert, delete, update...)
       for (Long datasetId : datasets) {
@@ -1146,7 +1145,7 @@ public void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId)
 
         Map<String, Object> deleteDatasetValues = new HashMap<>();
         deleteDatasetValues.put(LiteralConstants.SIGNATURE,
-            LockSignature.DELETE_DATASET_VALUES.getValue());
+                LockSignature.DELETE_DATASET_VALUES.getValue());
         deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
 
         Map<String, Object> importFileData = new HashMap<>();
@@ -1154,7 +1153,7 @@ public void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId)
         importFileData.put(LiteralConstants.DATASETID, datasetId);
         Map<String, Object> importBigFileData = new HashMap<>();
         importBigFileData.put(LiteralConstants.SIGNATURE,
-            LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+                LockSignature.IMPORT_BIG_FILE_DATA.getValue());
         importBigFileData.put(LiteralConstants.DATASETID, datasetId);
 
         Map<String, Object> restoreSnapshots = new HashMap<>();
@@ -1164,7 +1163,7 @@ public void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId)
 
         Map<String, Object> insertRecordsMultitable = new HashMap<>();
         insertRecordsMultitable.put(LiteralConstants.SIGNATURE,
-            LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
+                LockSignature.INSERT_RECORDS_MULTITABLE.getValue());
         insertRecordsMultitable.put(LiteralConstants.DATASETID, datasetId);
 
         lockService.removeLockByCriteria(insertRecords);
@@ -1182,7 +1181,7 @@ public void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId)
         for (TableSchemaVO table : schema.getTableSchemas()) {
           Map<String, Object> deleteImportTable = new HashMap<>();
           deleteImportTable.put(LiteralConstants.SIGNATURE,
-              LockSignature.DELETE_IMPORT_TABLE.getValue());
+                  LockSignature.DELETE_IMPORT_TABLE.getValue());
           deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
           deleteImportTable.put(LiteralConstants.TABLESCHEMAID, table.getIdTableSchema());
           lockService.removeLockByCriteria(deleteImportTable);

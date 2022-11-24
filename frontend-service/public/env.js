@@ -11,6 +11,13 @@ window.env = {
   // This option can be retrieved in "src/index.js" with "window.env.REACT_APP_BACKEND".
   //REACT_APP_BACKEND: 'http://localhost:3000',
 
+  /**
+   * DEV
+   */
+  REACT_APP_BACKEND: 'https://dev-api.reportnet.europa.eu',
+  EULOGIN_URL:
+      'https://dev-auth.reportnet.europa.eu/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=https%3A%2F%2Fdev.reportnet.europa.eu%2Feulogin%2F&response_mode=fragment&response_type=code&scope=openid',
+  WEBSOCKET_URL: 'wss://dev.reportnet.europa.eu/communication/reportnet-websocket',
 
     /**
      * DEV

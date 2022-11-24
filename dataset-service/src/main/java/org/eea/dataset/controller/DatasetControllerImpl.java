@@ -1099,6 +1099,7 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
+<<<<<<< HEAD
 
     try {
       LOG.info("Calling etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
@@ -1106,6 +1107,13 @@ public class DatasetControllerImpl implements DatasetController {
         outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
       LOG.info("Successfully called etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
 
+=======
+    try {
+      LOG.info("Calling etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
+          outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+      LOG.info("Successfully called etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
+>>>>>>> 157475_release_tasks
       return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error in etlExportDatasetV2 for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
@@ -1542,7 +1550,10 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("Deleting data before replacing for datasetId {} and integrationId {}", datasetId, integrationId);
       deleteHelper.executeDeleteImportDataAsyncBeforeReplacing(datasetId, integrationId, operation);
+<<<<<<< HEAD
       LOG.info("Successfully deleting data before replacing for datasetId {} and integrationId {}", datasetId, integrationId);
+=======
+>>>>>>> 157475_release_tasks
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error deleting data before replacing for datasetId {} and integrationId {} Message: {}", datasetId, integrationId, e.getMessage());
       throw e;
@@ -1698,6 +1709,9 @@ public class DatasetControllerImpl implements DatasetController {
         in.close();
         // delete the file after downloading it
         FileUtils.forceDelete(file);
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error in copying large file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage());
+        throw e;
       }
     } catch (IOException | EEAException e) {
       LOG_ERROR.error(

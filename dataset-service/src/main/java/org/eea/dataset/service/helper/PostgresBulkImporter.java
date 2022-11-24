@@ -18,11 +18,16 @@ import org.postgresql.core.BaseConnection;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.Shorts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Class PostgresBulkImporter.
  */
 public class PostgresBulkImporter implements Closeable {
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(PostgresBulkImporter.class);
 
   /** The url. */
   private final String url;
@@ -104,6 +109,9 @@ public class PostgresBulkImporter implements Closeable {
       String query = "copy " + schema + "." + tableName + " from stdin with binary";
       CopyManager copyManager = new CopyManager((BaseConnection) connection);
       copyManager.copyIn(query, inputStream);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in copy. Message: {}", e.getMessage());
+      throw e;
     }
   }
 

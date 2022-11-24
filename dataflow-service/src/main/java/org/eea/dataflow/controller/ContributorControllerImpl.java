@@ -380,6 +380,7 @@ public class ContributorControllerImpl implements ContributorController {
         message = e.getMessage();
         status = HttpStatus.INTERNAL_SERVER_ERROR;
       }
+
       if(contributorVO != null){
         LOG_ERROR.error("Error updating reporter {} for dataflowId {}", contributorVO.getAccount(), dataflowId);
       }

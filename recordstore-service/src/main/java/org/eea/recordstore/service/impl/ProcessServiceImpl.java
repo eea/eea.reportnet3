@@ -239,4 +239,29 @@ public class ProcessServiceImpl implements ProcessService {
         processToUpdate.getDataflowId(), dataset.getDataProviderId(), dataset.getId()));
   }
 
+  /**
+   * Saves process
+   * @param processVO
+   */
+  @Transactional
+  @Override
+  public ProcessVO saveProcess(ProcessVO processVO) {
+    EEAProcess process = processMapper.classToEntity(processVO);
+    processRepository.save(process);
+    processRepository.flush();
+    return processMapper.entityToClass(process);
+  }
+
+  /**
+   * Updates process
+   * @param status
+   * @param dateFinish
+   * @param processId
+   */
+  @Transactional
+  @Override
+  public void updateStatusAndFinishedDate(String status, Date dateFinish, String processId) {
+    processRepository.updateStatusAndFinishedDate(status, dateFinish, processId);
+  }
+
 }

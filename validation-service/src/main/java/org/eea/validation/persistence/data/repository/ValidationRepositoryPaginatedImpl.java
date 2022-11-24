@@ -18,6 +18,8 @@ import org.eea.multitenancy.TenantResolver;
 import org.eea.validation.persistence.data.domain.Validation;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,9 @@ import org.springframework.data.domain.Pageable;
  * The Class ValidationRepositoryPaginatedImpl.
  */
 public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPaginated {
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(ValidationRepositoryPaginatedImpl.class);
 
   private static final String TABLE = "table";
   private static final String FIELD = "field";
@@ -133,6 +138,9 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
             validation.setMessage(rs.getString("message"));
             groupsValidations.add(validation);
           }
+        } catch (Exception e) {
+          LOG.error("Unexpected error! Error in findGroupRecordsByFilter for datasetId {}. Message: {}", datasetId, e.getMessage());
+          throw e;
         }
         return groupsValidations;
       }

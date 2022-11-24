@@ -110,6 +110,20 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   @Query(nativeQuery = true,
       value = "select id from task where status='IN_PROGRESS' and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
   List<BigInteger> getTasksInProgress(@Param("timeInMinutes") long timeInMinutes);
+
+  /**
+   * Finds task by splitFileName
+   * @param splitFileName
+   * @return
+   */
+  Task findBySplitFileNameContains(String splitFileName);
+
+  /**
+   * Finds task by processId
+   * @param processId
+   * @return
+   */
+  List<Task> findByProcessId(String processId);
 }
 
 

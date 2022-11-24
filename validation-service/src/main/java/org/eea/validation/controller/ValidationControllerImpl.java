@@ -24,9 +24,11 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.validation.service.TaskService;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.eea.validation.util.ValidationHelper;
@@ -96,6 +98,10 @@ public class ValidationControllerImpl implements ValidationController {
   /** The job controller zuul. */
   @Autowired
   private JobControllerZuul jobControllerZuul;
+
+  /** The task service */
+  @Autowired
+  private TaskService taskService;
 
 
   /**
@@ -436,5 +442,49 @@ public class ValidationControllerImpl implements ValidationController {
       LOG.error("Error while finding in progress tasks that exceed " + timeInMinutes + " minutes " + e.getMessage());
       return new ArrayList<>();
     }
+  }
+
+  /**
+   * Saves task
+   * @param taskVO
+   * @return
+   */
+  @Override
+  @PutMapping(value = "/saveTask")
+  public TaskVO saveTask(@RequestBody TaskVO taskVO) {
+    return taskService.saveTask(taskVO);
+  }
+
+  /**
+   * Updates task
+   * @param taskVO
+   * @return
+   */
+  @Override
+  @PutMapping(value = "/updateTask")
+  public void updateTask(@RequestBody TaskVO taskVO) {
+    taskService.updateTask(taskVO);
+  }
+
+  /**
+   * Finds task by splitFileName
+   * @param splitFileName
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/findTaskBySplitFileName/{splitFileName}")
+  public TaskVO findTaskBySplitFileName(@PathVariable("splitFileName") String splitFileName) {
+    return taskService.findTaskBySplitFileName(splitFileName);
+  }
+
+  /**
+   * Finds task by processId
+   * @param processId
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/findTasksByProcessId/{processId}")
+  public List<TaskVO> findTasksByProcessId(@PathVariable("processId") String processId) {
+    return taskService.findTaskByProcessId(processId);
   }
 }

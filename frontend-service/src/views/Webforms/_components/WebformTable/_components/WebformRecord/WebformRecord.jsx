@@ -27,6 +27,38 @@ import {WebformsUtils} from 'views/Webforms/_functions/Utils/WebformsUtils';
 
 import {TextUtils} from 'repositories/_utils/TextUtils';
 
+const checkShowRequired = (element, elements) => {
+    if (element.required || element.showRequiredCharacter) return true;
+    if (element.showRequiredOnCondition) {
+        const dependantElement = elements.find(el => el.name === element.showRequiredOnCondition.field);
+
+        // Don't check for specific values
+        // We only want the dependant element's value to be not null
+        if (element.showRequiredOnCondition.valueNotNull) {
+            return (
+                (typeof dependantElement.value === "string" && !!dependantElement.value?.length) ||
+                (Array.isArray(dependantElement.value) && !!dependantElement.value?.length) ||
+                !!dependantElement.value
+            );
+        }
+
+        // Check for specific values in dependant element
+        if (Array.isArray(element.showRequiredOnCondition.value) && Array.isArray(dependantElement.value)) {
+            return element.showRequiredOnCondition.value.some(value => dependantElement.value.includes(value));
+        }
+        else if (Array.isArray(element.showRequiredOnCondition.value) && !Array.isArray(dependantElement.value)) {
+            return element.showRequiredOnCondition.value.includes(dependantElement.value);
+        }
+        else if (!Array.isArray(element.showRequiredOnCondition.value) && Array.isArray(dependantElement.value)) {
+            return dependantElement.value.includes(element.showRequiredOnCondition.value);
+        }
+        else if (!Array.isArray(element.showRequiredOnCondition.value) && !Array.isArray(dependantElement.value)) {
+            return element.showRequiredOnCondition.value === dependantElement.value;
+        }
+    }
+    return false;
+}
+
 export const WebformRecord = ({
                                   addingOnTableSchemaId,
                                   calculateSingle,
@@ -216,10 +248,6 @@ export const WebformRecord = ({
                     const elementWidth = (100 - elementGap) / elementCount;
                     fieldStyle.width = elementWidth;
                 }
-                let dependantElement = null;
-                if (element.showRequiredOnCondition) {
-                    dependantElement = elements.find(el => el.name === element.showRequiredOnCondition.field);
-                }
                 return (
                     checkLabelVisibility(element) &&
                     !isFieldVisible &&
@@ -230,12 +258,10 @@ export const WebformRecord = ({
                                     {element.title}
                                     {
                                         <span className={styles.requiredMark}>
-                      {element.required ||
-                      element.showRequiredCharacter ||
-                      (element.showRequiredOnCondition && dependantElement.value == element.showRequiredOnCondition.value)
-                          ? ' *'
-                          : ''}
-                    </span>
+                                            {
+                                                checkShowRequired(element, elements) ? ' *' : ''
+                                            }
+                                        </span>
                                     }
                                 </label>
                             )}
@@ -279,16 +305,16 @@ export const WebformRecord = ({
                                     )}
                                 </div>
                                 {element.validations &&
-                                    uniqBy(element.validations, element => {
-                                        return [element.message, element.errorLevel].join();
-                                    }).map(validation => (
-                                        <IconTooltip
-                                            className="webform-validationErrors"
-                                            key={validation.id}
-                                            levelError={validation.levelError}
-                                            message={validation.message}
-                                        />
-                                    ))}
+                                uniqBy(element.validations, element => {
+                                    return [element.message, element.errorLevel].join();
+                                }).map(validation => (
+                                    <IconTooltip
+                                        className="webform-validationErrors"
+                                        key={validation.id}
+                                        levelError={validation.levelError}
+                                        message={validation.message}
+                                    />
+                                ))}
                             </div>
                         </div>
                     )
@@ -298,11 +324,11 @@ export const WebformRecord = ({
                     checkLabelVisibility(element) && (
                         <div key={uniqueId(element.title)}>
                             {element.level === 2 &&
-                                <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
+                            <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
                             {element.level === 3 &&
-                                <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+                            <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
                             {element.level === 4 &&
-                                <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+                            <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
                             {<span style={{color: 'var(--errors)'}}>{element.showRequiredCharacter ? ' *' : ''}</span>}
                             {element.tooltip && isNil(element.customType) && (
                                 <Button

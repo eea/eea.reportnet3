@@ -563,6 +563,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
           example = "0") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(type = "Long", value = "Provider Id",
           example = "0") @PathVariable("dataProviderId") Long dataProviderId) {
+
     try {
       LOG.info("Creating receipt pdf for dataflowId {} and dataProviderId {}", dataflowId, dataProviderId);
       StreamingResponseBody stream =
@@ -724,7 +725,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    LOG.info("The user invoking DataSetSnapshotControllerImpl.createReleaseSnapshots for dataflowId {} and dataProviderId {} is {}",
+    LOG.info("The user invoking DataSetSnaphotControllerImpl.createReleaseSnapshots  for dataflowId {} and dataProviderId {} is {}",
         dataflowId, dataProviderId, SecurityContextHolder.getContext().getAuthentication().getName());
 
     DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);

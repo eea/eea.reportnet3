@@ -27,6 +27,7 @@ import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetContro
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
+import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -41,12 +42,17 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.SplitSnapfile;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.eea.recordstore.service.ProcessService;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.utils.LiteralConstants;
 import org.postgresql.copy.CopyIn;
@@ -250,6 +256,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
+  /** The validation controller zuul */
+  @Autowired
+  private ValidationControllerZuul validationControllerZuul;
+
+  /** The process service */
+  @Autowired
+  private ProcessService processService;
+
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
    * <p>
@@ -328,6 +342,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     } catch (InterruptedException e) {
       LOG_ERROR.error("Error sleeping thread before releasing notification kafka events", e);
       Thread.currentThread().interrupt();
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in createSchemas for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -363,8 +380,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       } catch (RecordStoreAccessException e1) {
         LOG.info(e1.getMessage(), e);
       }
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in distributeTables for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
-
   }
 
 
@@ -400,6 +419,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       } catch (RecordStoreAccessException e1) {
         LOG.info(e1.getMessage(), e);
       }
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in distributeTablesJob for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
 
   }
@@ -443,6 +465,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       throw new RecordStoreAccessException(
           String.format("Error reading commands file to create the dataset. %s", e.getMessage()),
           e);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in createEmptyDataSet for datasetSchemaId {}. Message: {}", idDatasetSchema, e.getMessage());
+      throw e;
     }
     for (String command : commands) {
       command = command.replace("%dataset_name%", datasetName);
@@ -785,6 +810,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG_ERROR.error("Error creating the data from the origin dataset {}", originDataset, e);
       deleteFile(Arrays.asList(nameFileTableValue, nameFileRecordValue, nameFileFieldValue,
           nameFileAttachmentValue));
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in createSnapshotToClone in print for originDataset {} and targetDataset {}. Message: {}", originDataset, targetDataset, e.getMessage());
+      throw e;
     }
 
     // Copy the data from the snapshot file into the target dataset
@@ -819,6 +847,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     } catch (SQLException | IOException e) {
       LOG_ERROR.error("Error restoring the data into the target dataset {}", targetDataset, e);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in createSnapshotToClone in copy for originDataset {} and targetDataset {}. Message: {}", originDataset, targetDataset, e.getMessage());
+      throw e;
     } finally {
       // Deleting the snapshot files after copy
       deleteFile(Arrays.asList(nameFileRecordValue, nameFileFieldValue, nameFileAttachmentValue));
@@ -1249,6 +1280,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           Files.write(pathFile, replaced);
         } catch (IOException e) {
           LOG_ERROR.error("Error modifying the file {} during the data copy in cloning process for datasetId {}", f, datasetId);
+        } catch (Exception e) {
+          LOG.error("Unexpected error! Error in modifySnapshotFile for datasetId {}. Message: {}", datasetId, e.getMessage());
+          throw e;
         }
       });
     }
@@ -1468,8 +1502,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
 
       CopyManager cm = new CopyManager((BaseConnection) con);
+      DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
       LOG.info("Init restoring the snapshot files from Snapshot {} and datasetId {}", idSnapshot, datasetId);
-      copyProcess(datasetId, idSnapshot, datasetType, cm);
+      copyProcess(dataset.getDataflowId(), datasetId, idSnapshot, datasetType, cm);
       LOG.info("Finished restoring the snapshot files from Snapshot {} and datasetId {}", idSnapshot, datasetId);
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
@@ -1613,69 +1648,112 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
- private void copyProcess(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType,
+  private void copyProcess(Long dataflowId, Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType,
       CopyManager cm) throws IOException, SQLException {
-    try{
-        if (DatasetTypeEnum.DESIGN.equals(datasetType)
-            || DatasetTypeEnum.REFERENCE.equals(datasetType)) {
-          // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
-          // not neccesary
-          String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-              LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+    try {
+      if (DatasetTypeEnum.DESIGN.equals(datasetType)
+              || DatasetTypeEnum.REFERENCE.equals(datasetType)) {
+        // If it is a design dataset (schema), we need to restore the table values. Otherwise it's
+        // not neccesary
+        String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+                LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
-          modifySnapshotFile(null, Arrays.asList(nameFileTableValue), datasetId);
-          LOG.info("Modified the file {} during the data copy in cloning process for datasetId {}", nameFileTableValue, datasetId);
+      modifySnapshotFile(null, Arrays.asList(nameFileTableValue), datasetId);
+      LOG.info("Modified the file {} during the data copy in cloning process for datasetId {}", nameFileTableValue, datasetId);
 
-          String copyQueryTable =
-              COPY_DATASET + datasetId + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
-          copyFromFile(copyQueryTable, nameFileTableValue, cm);
-          LOG.info("Executed copyFromFile for table_value with file {} and datasetId {}", nameFileTableValue, datasetId);
-        }
-        // Record value
-        String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-            LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
+      String copyQueryTable =
+          COPY_DATASET + datasetId + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
+      copyFromFile(copyQueryTable, nameFileTableValue, cm);
+      LOG.info("Executed copyFromFile for table_value with file {} and datasetId {}", nameFileTableValue, datasetId);
+    }
+    // Record value
+    String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+        LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
 
-        String copyQueryRecord = COPY_DATASET + datasetId
-            + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
-        copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
-        LOG.info("Executed copyFromFile for record_value with file {} and datasetId {}", nameFileRecordValue, datasetId);
+    String copyQueryRecord = COPY_DATASET + datasetId
+        + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
+    copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
+    LOG.info("Executed copyFromFile for record_value with file {} and datasetId {}", nameFileRecordValue, datasetId);
 
-        // Field value
-        String nameFileFieldValue = pathSnapshot
-            + String.format(FILE_PATTERN_NAME, idSnapshot, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+      // Field value
+      String nameFileFieldValue = pathSnapshot
+              + String.format(FILE_PATTERN_NAME, idSnapshot, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
 
         String copyQueryField = COPY_DATASET + datasetId
             + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
 
-        SplitSnapfile snapFileForSplitting = isSnapFileForSplitting(nameFileFieldValue);
+      SplitSnapfile snapFileForSplitting = isSnapFileForSplitting(nameFileFieldValue);
 
-        if (snapFileForSplitting.isForSplitting() == true) {
-          splitSnapFile(nameFileFieldValue, idSnapshot, snapFileForSplitting);
+      if (snapFileForSplitting.isForSplitting() == true) {
+        String processId = UUID.randomUUID().toString();
+        ProcessVO processVO = createProcessVOForRelease(dataflowId, datasetId, processId);
+        processVO = processService.saveProcess(processVO);
 
-          for (int i=1; i <= snapFileForSplitting.getNumberOfFiles(); i++) {
-            String splitFile = pathSnapshot
-            + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+        splitSnapFile(processId, nameFileFieldValue, idSnapshot, snapFileForSplitting);
+
+        processVO.setStatus(ProcessStatusEnum.IN_PROGRESS.toString());
+        processVO.setProcessStartingDate(new Date());
+        processService.saveProcess(processVO);
+
+        for (int i = 1; i <= snapFileForSplitting.getNumberOfFiles(); i++) {
+          String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+          String splitFile = pathSnapshot + splitFileName;
+          try {
+            TaskVO task = validationControllerZuul.findTaskBySplitFileName(splitFileName);
+            task.setStartingDate(new Date());
+            task.setStatus(ProcessStatusEnum.IN_PROGRESS);
+            task = validationControllerZuul.saveTask(task);
+
+            LOG.info("Copy file {}", splitFile);
             copyFromFile(copyQueryField, splitFile, cm);
-            deleteFile(Arrays.asList(splitFile));
-          }
-        } else {
-          copyFromFile(copyQueryField, nameFileFieldValue, cm);
-        }
-        
-        // Attachment value
-        String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-            LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
 
-        String copyQueryAttachment = COPY_DATASET + datasetId
-            + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
-        copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
-        LOG.info("Executed copyFromFile for attachment_value with file {} and datasetId {}", nameFileAttachmentValue, datasetId);
-     } catch (Exception e) {
+            task.setFinishDate(new Date());
+            task.setStatus(ProcessStatusEnum.FINISHED);
+            validationControllerZuul.updateTask(task);
+
+            try {
+              LOG.info("File {} copied and will be deleted", splitFile);
+              deleteFile(Arrays.asList(splitFile));
+              LOG.info("File {} has been deleted", splitFile);
+            } catch (Exception e) {
+              LOG.error("Error while trying to delete split snap file {} for dataflow {} and datasetId {}", splitFileName, dataflowId, datasetId);
+            }
+          } catch (Exception e) {
+            LOG_ERROR.error("Error in copy field process for snapshotId {} with error", idSnapshot, e);
+            throw e;
+          }
+        }
+        processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), processId);
+      } else {
+        copyFromFile(copyQueryField, nameFileFieldValue, cm);
+      }
+
+    // Attachment value
+    String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+        LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+
+    String copyQueryAttachment = COPY_DATASET + datasetId
+        + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
+    copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
+    LOG.info("Executed copyFromFile for attachment_value with file {} and datasetId {}", nameFileAttachmentValue, datasetId);
+    } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error in copyProcess for datasetId {} and snapshotId {}. Message: {}", datasetId, idSnapshot, e.getMessage());
       throw e;
     }
   }
-  
+
+  private ProcessVO createProcessVOForRelease(Long dataflowId, Long datasetId, String processId) {
+    ProcessVO processVO = new ProcessVO();
+    processVO.setDataflowId(dataflowId);
+    processVO.setDatasetId(datasetId);
+    processVO.setStatus(ProcessStatusEnum.IN_QUEUE.toString());
+    processVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
+    processVO.setPriority(1);
+    processVO.setProcessType(ProcessTypeEnum.RELEASE_SNAPSHOT.toString());
+    processVO.setProcessId(processId);
+    processVO.setQueuedDate(new Date());
+    return processVO;
+  }
 
   /**
    * Copy process specific File snapshot
@@ -1699,8 +1777,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         for (Long i = startingNumber; i <= endingNumber; i++) {
           String splitFile = pathSnapshot
               + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-          copyFromFile(copyQueryField, splitFile, cm);
-          deleteFile(Arrays.asList(splitFile));
+          try {
+            LOG.info("Recover copy file {}", splitFile);
+            copyFromFileRecovery(copyQueryField, splitFile, cm);
+            LOG.info("Recover file {} copied and will be deleted", splitFile);
+            deleteFile(Arrays.asList(splitFile));
+            LOG.info("Recover file {} has been deleted", splitFile);
+          } catch (Exception e) {
+            LOG_ERROR.error("Error in recover copy field process for snapshotId {} with error", idSnapshot, e);
+            throw e;
+          }
         }
         break;
       case ATTACHMENT_TYPE:
@@ -1861,6 +1947,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       while ((buffer = copyOut.readFromCopy()) != null) {
         to.write(buffer);
       }
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in printToFile for fileName {} and query {}. Message: {}", fileName, query, e.getMessage());
+      throw e;
     } finally {
       if (copyOut.isActive()) {
         copyOut.cancelCopy();
@@ -1902,17 +1991,48 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   /**
+   * Copy from file recovery.
+   *
+   * @param query the query
+   * @param fileName the file name
+   * @param copyManager the copy manager
+   */
+  private void copyFromFileRecovery(String query, String fileName, CopyManager copyManager)
+      throws SQLException, IOException {
+    try {
+      Path path = Paths.get(fileName);
+      // bufferFile it's a size in bytes defined in consul variable. It can be 65536
+      char[] cbuf = new char[bufferFile];
+      int len = 0;
+
+      // Copy the data from the file by chunks
+      CopyIn cp = copyManager.copyIn(query);
+      FileReader from = new FileReader(path.toString());
+      while ((len = from.read(cbuf)) > 0) {
+        byte[] buf = new String(cbuf, 0, len).getBytes();
+        cp.writeToCopy(buf, 0, buf.length);
+      }
+      cp.endCopy();
+      if (cp.isActive()) {
+        cp.cancelCopy();
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in recover copy field process for fileName {} with error", fileName, e);
+      throw e;
+    }
+  }
+  /**
    * Split the snapshot file
    *
    * @param inputfile
    * @param idSnapshot
    * @param snapFileForSplitting
    */
-  private void splitSnapFile(String inputfile, Long idSnapshot, SplitSnapfile snapFileForSplitting) {
+  private void splitSnapFile(String processId, String inputfile, Long idSnapshot, SplitSnapfile snapFileForSplitting) {
 
     LOG.info("Method splitSnapFile starts for file {} with idSnapshot {} and snapFileForSplitting {}", inputfile, idSnapshot, snapFileForSplitting);
     int numberOfFiles = snapFileForSplitting.getNumberOfFiles();
-    int numberOfLines = snapFileForSplitting.getNumberOfLines();
+    int maxLinesPerFile = 200000;
 
     try{
       // Actual splitting of file into smaller files
@@ -1922,23 +2042,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       for (int j=1; j <= numberOfFiles; j++) {
         // Destination File Location
-        FileWriter fstream1 = new FileWriter(pathSnapshot + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX));
+        String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+        FileWriter fstream1 = new FileWriter(pathSnapshot + splitFileName);
         BufferedWriter out = new BufferedWriter(fstream1);
-        for (int i=1; i <= numberOfLines; i++) {
+        for (int i=1; i <= maxLinesPerFile; i++) {
           strLine = br.readLine();
           if (strLine != null) {
             out.write(strLine);
-            if(i != numberOfLines) {
+            if(i != maxLinesPerFile) {
               out.newLine();
             }
           }
         }
         out.close();
+        TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
+                null, 0, null, splitFileName, idSnapshot);
+        validationControllerZuul.saveTask(task);
       }
 
       in.close();
     } catch (Exception e) {
-      LOG_ERROR.error("Error in file {} with error {}", inputfile,  e.getMessage());
+      LOG_ERROR.error("Error in file {} with error", inputfile,  e);
     }
 
     LOG.info("Method splitSnapFile ends for file {} ", inputfile);
@@ -1967,13 +2091,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       int numberOfFiles = (int) Math.ceil(numberOfLines / maxLinesPerFile);
 
-      splitSnapfile.setNumberOfLines(numberOfLines);
       splitSnapfile.setNumberOfFiles(numberOfFiles);
       splitSnapfile.setForSplitting(numberOfFiles >= 3 ? true : false);
 
       LOG.info("Method isSnapFileForSplitting ends for file {} with {} lines into {} files", inputfile, numberOfLines, numberOfFiles);
     } catch (Exception e) {
-      LOG_ERROR.error("Error in file {} with error {}", inputfile,  e.getMessage());
+      LOG_ERROR.error("Error in file {} with error", inputfile,  e);
     }
 
     return splitSnapfile;

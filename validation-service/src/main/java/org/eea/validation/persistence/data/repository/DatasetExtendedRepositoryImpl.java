@@ -119,7 +119,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       @Override
       public List<RecordValidation> execute(Connection conn) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();) {
+            ResultSet rs = stmt.executeQuery()) {
           List<RecordValidation> recordValidations = new ArrayList<>();
           while (rs.next()) {
             RecordValidation recordValidation = new RecordValidation();
@@ -153,6 +153,9 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             recordValidations.add(recordValidation);
           }
           return recordValidations;
+        } catch (Exception e) {
+          LOG.error("Unexpected error! Error in queryRecordValidationExecution for query {}. Message: {}", query, e.getMessage());
+          throw e;
         } finally {
           entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAll();
         }
@@ -174,7 +177,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
       @Override
       public List<FieldValidation> execute(Connection conn) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();) {
+            ResultSet rs = stmt.executeQuery()) {
 
           List<FieldValidation> fieldValidations = new ArrayList<>();
           while (rs.next()) {
@@ -209,6 +212,9 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             fieldValidations.add(fieldValidation);
           }
           return fieldValidations;
+        } catch (Exception e) {
+          LOG.error("Unexpected error! Error in queryFieldValidationExecution for query {}. Message: {}", query, e.getMessage());
+          throw e;
         } finally {
           entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAll();
           System.gc();
@@ -290,6 +296,9 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         }
       }
       stmt.setFetchSize(0);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in executeQuery for query {}, datasetId {}, tableId {} and entityName {}. Message: {}", query, datasetId, idTable, entityName, e.getMessage());
+      throw e;
     } finally {
       stmt.close();
       entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAll();
@@ -358,9 +367,12 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
         public ResultSet execute(Connection conn) throws SQLException {
           conn.setSchema("dataset_" + datasetId);
           try (PreparedStatement stmt = conn.prepareStatement(query);
-              ResultSet rs = stmt.executeQuery();) {
+              ResultSet rs = stmt.executeQuery()) {
             LOG.info("executing query: {}", query);
             return rs;
+          } catch (Exception e) {
+            LOG.error("Unexpected error! Error in validateQuery for query {} and datasetId {}. Message: {}", query, datasetId, e.getMessage());
+            throw e;
           }
         }
       });
@@ -394,7 +406,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
           conn.setReadOnly(true);
           conn.setSchema("dataset_" + datasetId);
           try (PreparedStatement stmt = conn.prepareStatement(sqlRule);
-              ResultSet rs = stmt.executeQuery();) {
+              ResultSet rs = stmt.executeQuery()) {
             ResultSetMetaData rsmt = rs.getMetaData();
             int index = 1;
             while (rs.next()) {
@@ -428,6 +440,9 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
             }
             LOG.info("executing query: {}", sqlRule);
             return tableRows;
+          } catch (Exception e) {
+            LOG.error("Unexpected error! Error in runSqlRule for sql rule {} and datasetId {}. Message: {}", sqlRule, datasetId, e.getMessage());
+            throw e;
           }
         }
       });
@@ -459,12 +474,15 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
           String resultObject = "";
           conn.setSchema("dataset_" + datasetId);
           try (PreparedStatement stmt = conn.prepareStatement(sqlRule);
-              ResultSet rs = stmt.executeQuery();) {
+              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
               resultObject = rs.getString(1);
             }
             LOG.info("executing query: {}", sqlRule);
             return resultObject;
+          } catch (Exception e) {
+            LOG.error("Unexpected error! Error in evaluateSqlRule for sql rule {} and datasetId {}. Message: {}", sqlRule, datasetId, e.getMessage());
+            throw e;
           }
         }
       });

@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.validation;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -126,4 +127,37 @@ public interface ValidationController {
    */
   @GetMapping(value = "/listTasksInProgress/{timeInMinutes}")
   List<BigInteger> listTasksInProgress(@PathVariable("timeInMinutes") long timeInMinutes);
+
+  /**
+   * Saves task
+   * @param taskVO
+   * @return
+   */
+  @PutMapping(value = "/saveTask")
+  TaskVO saveTask(@RequestBody TaskVO taskVO);
+
+
+  /**
+   * Updates task
+   * @param taskVO
+   * @return
+   */
+  @PutMapping(value = "/updateTask")
+  void updateTask(@RequestBody TaskVO taskVO);
+
+  /**
+   * Finds task by splitFileName
+   * @param splitFileName
+   * @return
+   */
+  @GetMapping(value = "/findTaskBySplitFileName/{splitFileName}")
+  TaskVO findTaskBySplitFileName(@PathVariable("splitFileName") String splitFileName);
+
+  /**
+   * Finds task by splitFileName
+   * @param processId
+   * @return
+   */
+  @GetMapping(value = "/findTasksByProcessId/{processId}")
+  List<TaskVO> findTasksByProcessId(@PathVariable("processId") String processId);
 }
