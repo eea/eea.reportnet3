@@ -140,6 +140,6 @@ public interface ValidationController {
    * @param processId
    * @return
    */
-  @GetMapping(value = "/findTasksByProcessId/{processId}")
+  @GetMapping(value = "/private/findTasksByProcessId/{processId}")
   List<TaskVO> findTasksByProcessId(@PathVariable("processId") String processId);
 }
