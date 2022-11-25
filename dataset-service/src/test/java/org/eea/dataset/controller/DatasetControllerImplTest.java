@@ -295,11 +295,11 @@ public class DatasetControllerImplTest {
     MultipartFile multipartFile =
         new MockMultipartFile("multipartFile", "multipartFile".getBytes());
 
-    doNothing().when(fileTreatmentHelper).importFileData(1L, "tableSchemaId", multipartFile, true,
+    doNothing().when(fileTreatmentHelper).importFileData(1L,2L, "tableSchemaId", multipartFile, true,
         1L, "delimiter");
     datasetControllerImpl.importBigFileData(1L, 1L, 1L, "tableSchemaId", multipartFile, true, 1L,
         "delimiter");
-    Mockito.verify(fileTreatmentHelper, times(1)).importFileData(1L, "tableSchemaId", multipartFile,
+    Mockito.verify(fileTreatmentHelper, times(1)).importFileData(1L,2L, "tableSchemaId", multipartFile,
         true, 1L, "delimiter");
   }
 
@@ -313,7 +313,7 @@ public class DatasetControllerImplTest {
     MultipartFile multipartFile =
         new MockMultipartFile("multipartFile", "multipartFile".getBytes());
 
-    doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(1L, "tableSchemaId",
+    doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(1L,2L, "tableSchemaId",
         multipartFile, true, 1L, "delimiter");
     try {
       datasetControllerImpl.importBigFileData(1L, 1L, 1L, "tableSchemaId", multipartFile, true, 1L,
@@ -1427,11 +1427,11 @@ public class DatasetControllerImplTest {
   @Test
   public void importFileDataTest() throws EEAException {
 
-    Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),
+    Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),Mockito.any(),
         Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
     datasetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", null, true, 1L,
         null);
-    Mockito.verify(fileTreatmentHelper, times(1)).importFileData(Mockito.anyLong(), Mockito.any(),
+    Mockito.verify(fileTreatmentHelper, times(1)).importFileData(Mockito.anyLong(), Mockito.any(),Mockito.any(),
         Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
   }
 
@@ -1443,11 +1443,11 @@ public class DatasetControllerImplTest {
   @Test
   public void importFileDataLegacyTest() throws EEAException {
 
-    Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),
+    Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),Mockito.any(),
         Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
     datasetControllerImpl.importFileDataLegacy(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", null, true,
         1L, null);
-    Mockito.verify(fileTreatmentHelper, times(1)).importFileData(Mockito.anyLong(), Mockito.any(),
+    Mockito.verify(fileTreatmentHelper, times(1)).importFileData(Mockito.anyLong(), Mockito.any(),Mockito.any(),
         Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
   }
 
@@ -1461,7 +1461,7 @@ public class DatasetControllerImplTest {
 
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(Mockito.anyLong(),
-        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
+        Mockito.any(),Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
     Mockito.when(file.getOriginalFilename()).thenReturn("fileName.csv");
     try {
       datasetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", file, true, 1L,

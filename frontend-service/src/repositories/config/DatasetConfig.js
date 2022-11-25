@@ -37,6 +37,8 @@ export const DatasetConfig = {
   exportTableSchema:
     '/dataschema/v1/{:datasetSchemaId}/exportFieldSchemas?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
   importFileDataset: '/dataset/v2/importFileData/{:datasetId}?delimiter={:delimiter}',
+  importFileDatasetUpd: '/dataset/v2/importFileData/{:datasetId}?delimiter={:delimiter}&dataflowId={:dataflowId}',
+
   importFileDatasetExternal: '/dataset/v2/importFileData/{:datasetId}?integrationId={:integrationId}',
   importFileTable: '/dataset/v2/importFileData/{:datasetId}?tableSchemaId={:tableSchemaId}&delimiter={:delimiter}',
   importTableSchema:

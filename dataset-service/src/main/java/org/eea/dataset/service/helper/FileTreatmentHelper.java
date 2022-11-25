@@ -3,22 +3,13 @@
  */
 package org.eea.dataset.service.helper;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -26,6 +17,9 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 import javax.annotation.PostConstruct;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -44,15 +38,19 @@ import org.eea.dataset.persistence.data.repository.TableRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.Task;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.TaskRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.file.CSVSegmentedReaderStrategy;
+import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
@@ -62,6 +60,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -81,7 +80,11 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -99,6 +102,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import feign.FeignException;
@@ -125,8 +129,11 @@ public class FileTreatmentHelper implements DisposableBean {
   private ExecutorService importExecutorService;
 
   /** The max running tasks. */
-  @Value("${dataset.task.parallelism}")
-  private int maxRunningTasks;
+ // @Value("${dataset.task.parallelism}")
+  private int maxRunningTasks =4;
+
+ private  int defaultImportProcessPriority = 20;
+
 
   /** The import path. */
   @Value("${importPath}")
@@ -189,6 +196,10 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  @Autowired
+  private ProcessController.ProcessControllerZuul processControllerZuul;
+
+
   /** The partition data set metabase repository. */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
@@ -217,13 +228,24 @@ public class FileTreatmentHelper implements DisposableBean {
   @Autowired
   private FieldRepository fieldRepository;
 
+  @Autowired
+  private TaskRepository taskRepository;
+
+
+  private Map<String, Object> processesMap;
+
+  @Autowired
+  private CSVSegmentedReaderStrategy csvSegmentedReaderStrategy;
   /**
    * Initialize the executor service.
    */
   @PostConstruct
   private void init() {
+    processesMap = new ConcurrentHashMap<>();
     importExecutorService = new EEADelegatingSecurityContextExecutorService(
         Executors.newFixedThreadPool(maxRunningTasks));
+    importExecutorService.submit(() -> LOG.info("initializer import executor service"));
+
   }
 
   /**
@@ -249,7 +271,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param delimiter the delimiter
    * @throws EEAException the EEA exception
    */
-  public void importFileData(Long datasetId, String tableSchemaId, MultipartFile file,
+  public void importFileData(Long datasetId,Long dataflowId, String tableSchemaId, MultipartFile file,
       boolean replace, Long integrationId, String delimiter) throws EEAException {
 
     if (delimiter != null && delimiter.length() > 1) {
@@ -258,8 +280,13 @@ public class FileTreatmentHelper implements DisposableBean {
           DatasetRunningStatusEnum.ERROR_IN_IMPORT);
       throw new EEAException("The size of the delimiter cannot be greater than 1");
     }
+    String processUUID = UUID.randomUUID().toString();
+    Boolean defaultReleaseStatusToBeChanged = null;
 
     DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
+    processControllerZuul.updateProcess(datasetId, dataflowId,
+            ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.IMPORT, processUUID,
+            SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, defaultReleaseStatusToBeChanged);
 
     if (null == schema) {
       Map<String, Object> importFileData = new HashMap<>();
@@ -292,7 +319,8 @@ public class FileTreatmentHelper implements DisposableBean {
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
     datasetService.deleteTempEtlExport(datasetId);
-    fileManagement(datasetId, tableSchemaId, schema, file, replace, integrationId, delimiter);
+
+    fileManagement(datasetId,dataflowId,processUUID,defaultReleaseStatusToBeChanged, tableSchemaId, schema, file, replace, integrationId, delimiter);
   }
 
   /**
@@ -762,7 +790,7 @@ public class FileTreatmentHelper implements DisposableBean {
    *
    * @param datasetId the dataset id
    */
-  private void releaseLock(Long datasetId) {
+  public void releaseLock(Long datasetId) {
     try {
       Map<String, Object> importFileData = new HashMap<>();
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
@@ -793,9 +821,23 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param delimiter the delimiter
    * @throws EEAException the EEA exception
    */
-  private void fileManagement(Long datasetId, String tableSchemaId, DataSetSchema schema,
+  private void fileManagement(Long datasetId,Long dataflowId,String processId,Boolean released, String tableSchemaId, DataSetSchema schema,
       MultipartFile multipartFile, boolean replace, Long integrationId, String delimiter)
       throws EEAException {
+    if (processControllerZuul.updateProcess(datasetId, dataflowId,
+            ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.IMPORT, processId,
+            SecurityContextHolder.getContext().getAuthentication().getName(), 0, released)) {
+      String originalFileName = multipartFile.getOriginalFilename();
+      String multipartFileMimeType = datasetService.getMimetype(originalFileName);
+      IntegrationVO integrationVO;
+      if (null == integrationId) {
+        integrationVO = null;
+      } else {
+        integrationVO = getIntegrationVO(integrationId);
+        if (null == integrationVO) {
+          LOG_ERROR.error("Error. Integration {} not found", integrationId);
+        }
+      }
 
     String originalFileName = multipartFile.getOriginalFilename();
     String multipartFileMimeType = datasetService.getMimetype(originalFileName);
@@ -809,25 +851,25 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     }
 
-    try (InputStream input = multipartFile.getInputStream()) {
+      try (InputStream input = multipartFile.getInputStream()) {
 
-      // Prepare the folder where files will be stored
-      File root = new File(importPath);
-      File folder = new File(root, datasetId.toString());
-      String saveLocationPath = folder.getCanonicalPath();
+        // Prepare the folder where files will be stored
+        File root = new File(importPath);
+        File folder = new File(root, datasetId.toString());
+        String saveLocationPath = folder.getCanonicalPath();
 
-      // Delete dataset temporary folder first in case that for any reason still exists before
-      // creating again
-      FileUtils.deleteQuietly(folder);
-      if (!folder.mkdirs()) {
-        releaseLock(datasetId);
-        datasetMetabaseService.updateDatasetRunningStatus(datasetId,
-            DatasetRunningStatusEnum.ERROR_IN_IMPORT);
-        throw new EEAException("Folder for dataset " + datasetId + " already exists");
-      }
+        // Delete dataset temporary folder first in case that for any reason still exists before
+        // creating again
+        FileUtils.deleteQuietly(folder);
+        if (!folder.mkdirs()) {
+          releaseLock(datasetId);
+          datasetMetabaseService.updateDatasetRunningStatus(datasetId,
+                  DatasetRunningStatusEnum.ERROR_IN_IMPORT);
+          throw new EEAException("Folder for dataset " + datasetId + " already exists");
+        }
 
-      List<File> files = new ArrayList<>();
-      if (null == integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
+        List<File> files = new ArrayList<>();
+        if (null == integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
 
         try (ZipInputStream zip = new ZipInputStream(input)) {
           files = unzipAndStore(folder, saveLocationPath, zip);
@@ -850,7 +892,7 @@ public class FileTreatmentHelper implements DisposableBean {
         }
       } else {
 
-        File file = new File(folder, originalFileName);
+          File file = new File(folder, originalFileName);
 
         // Store the file in the persistence volume
         try (FileOutputStream output = new FileOutputStream(file)) {
@@ -975,7 +1017,9 @@ public class FileTreatmentHelper implements DisposableBean {
     } else {
       importExecutorService.submit(() -> {
         try {
-          rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, replace,
+     //     rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, replace,
+     //             delimiter);
+          rn3FileProcessIntoTasks(datasetId,processId, tableSchemaId, schema, files, originalFileName, replace,
               delimiter);
         } catch (Exception e) {
           LOG_ERROR.error("RN3-Import: Unexpected error in queueImportProcess for datasetId {} and tableSchemaId {}. {}", datasetId, tableSchemaId, e.getMessage(), e);
@@ -1106,14 +1150,65 @@ public class FileTreatmentHelper implements DisposableBean {
     updateGeometry(datasetId, datasetSchema);
 
     if (files.size() == 1) {
-      finishImportProcess(datasetId, tableSchemaId, originalFileName, error, errorWrongFilename);
+      finishImportProcess(null,datasetId,null, tableSchemaId, originalFileName, error, errorWrongFilename);
     } else {
-      finishImportProcess(datasetId, null, originalFileName, error, errorWrongFilename);
+      finishImportProcess(null,datasetId,null, null, originalFileName, error, errorWrongFilename);
     }
     LOG.info("Finished import process for datasetId {} and file {}", datasetId, originalFileName);
 
   }
+  private void rn3FileProcessIntoTasks(Long datasetId,String processId, String tableSchemaId, DataSetSchema datasetSchema,
+                              List<File> files, String originalFileName, boolean replace, String delimiter)
+          throws InterruptedException {
+    LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
 
+    // delete precious data if necessary
+    wipeData(datasetId, tableSchemaId, replace);
+
+    // Wait a second before continue to avoid duplicated insertions
+    Thread.sleep(1000);
+
+    String error = null;
+    boolean guessTableName = null == tableSchemaId;
+    boolean errorWrongFilename = false;
+    int numberOfWrongFiles = 0;
+    for (File file : files) {
+      String fileName = file.getName();
+
+      try {
+
+        if (guessTableName) {
+          tableSchemaId = getTableSchemaIdFromFileName(datasetSchema, fileName);
+        }
+        if (!guessTableName || StringUtils.isNotBlank(tableSchemaId)) {
+          LOG.info("Start RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
+
+          processFileIntoTasks(datasetId,processId, fileName, file.getPath(), tableSchemaId, replace, datasetSchema,
+                  delimiter);
+
+          LOG.info("Finish RN3-Import file segmentation into import Tasks: fileName={}, tableSchemaId={}", fileName,
+                  tableSchemaId);
+        } else {
+          LOG_ERROR.error(
+                  "RN3-Import file failed: fileName={}. There's no table with that fileName", fileName);
+          datasetMetabaseService.updateDatasetRunningStatus(datasetId,
+                  DatasetRunningStatusEnum.ERROR_IN_IMPORT);
+          errorWrongFilename = true;
+          numberOfWrongFiles++;
+          if (numberOfWrongFiles == files.size()) {
+            errorWrongFilename = false;
+            throw new EEAException(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
+          }
+        }
+      } catch ( IOException | EEAException e) {
+        LOG_ERROR.error("RN3-Import file failed: fileName={}, tableSchemaId={}", fileName,
+                tableSchemaId, e);
+        error = e.getMessage();
+      }
+    }
+
+
+  }
   /**
    * Gets the table schema id from file name.
    *
@@ -1143,7 +1238,7 @@ public class FileTreatmentHelper implements DisposableBean {
    * @param error the error
    * @param errorWrongFilename the error wrong filename
    */
-  private void finishImportProcess(Long datasetId, String tableSchemaId, String originalFileName,
+  public void finishImportProcess(Long taskId,Long datasetId,String processId, String tableSchemaId, String originalFileName,
       String error, boolean errorWrongFilename) {
     try {
 
@@ -1176,9 +1271,20 @@ public class FileTreatmentHelper implements DisposableBean {
         }
         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
             DatasetRunningStatusEnum.ERROR_IN_IMPORT);
+        this.updateTask(taskId,ProcessStatusEnum.CANCELED,new Date());
+        processControllerZuul.updateProcess(datasetId, null,
+                ProcessStatusEnum.CANCELED, ProcessTypeEnum.IMPORT, processId,
+                SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
+
       } else {
         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
             DatasetRunningStatusEnum.IMPORTED);
+        this.updateTask(taskId,ProcessStatusEnum.FINISHED,new Date());
+
+        processControllerZuul.updateProcess(datasetId, null,
+                ProcessStatusEnum.FINISHED, ProcessTypeEnum.IMPORT, processId,
+                SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
+
 
         eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
             ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
@@ -1201,6 +1307,16 @@ public class FileTreatmentHelper implements DisposableBean {
     }
   }
 
+
+  public void reinitializeCsvSegmentedReaderStrategy(char delimiter, FileCommonUtils fileCommon, Long datasetId,
+                                                int fieldMaxLength, String providerCode, int batchRecordSave){
+    this.csvSegmentedReaderStrategy = new CSVSegmentedReaderStrategy(delimiter,fileCommon,datasetId,fieldMaxLength,providerCode,batchRecordSave);
+  }
+
+  @Transactional
+  public void updateTask(Long taskId, ProcessStatusEnum status, Date finishDate) {
+    taskRepository.updateStatusAndFinishDate(taskId, status.toString(), finishDate);
+  }
 
   /**
    * Gets the integration VO.
@@ -1289,18 +1405,15 @@ public class FileTreatmentHelper implements DisposableBean {
       throws EEAException, IOException {
     // obtains the file type from the extension
     if (fileName == null) {
-      LOG_ERROR.error("RN3 Import process: Filename is null. DatasetId {}", datasetId);
       throw new EEAException(EEAErrorMessage.FILE_NAME);
     }
     final String mimeType = datasetService.getMimetype(fileName).toLowerCase();
     // validates file types for the data load
     validateFileType(mimeType);
-    LOG.info("RN3 Import process: file type has been validated for file {} and datasetId {}",fileName, datasetId);
 
     try {
       // Get the partition for the partiton id
       final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
-      LOG.info("RN3 Import process: partition has been obtained for datasetId {}",fileName, datasetId);
 
       // Get the dataFlowId from the metabase
       final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -1312,6 +1425,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
       ConnectionDataVO connectionDataVO = recordStoreControllerZuul
           .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+//Here we will cut out Tasks, and Each task will call this method.
 
       context.parse(is, dataflowId, partition.getId(), idTableSchema, datasetId, fileName, replace,
           schema, connectionDataVO);
@@ -1325,6 +1439,217 @@ public class FileTreatmentHelper implements DisposableBean {
     }
   }
 
+  public void importCsvFileChunk(@DatasetId Long datasetId, String fileName, InputStream is,Long partitionId,
+                     String idTableSchema, boolean replace, DataSetSchema schema, String delimiter,Long startLine,Long endLine)  throws EEAException, IOException{
+    if (fileName == null) {
+      throw new EEAException(EEAErrorMessage.FILE_NAME);
+    }
+    final String mimeType = datasetService.getMimetype(fileName).toLowerCase();
+    // validates file types for the data load
+    validateFileType(mimeType);
+
+    try {
+      // Get the partition for the partiton id
+      final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
+
+      // Get the dataFlowId from the metabase
+      final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+
+
+      ConnectionDataVO connectionDataVO = recordStoreControllerZuul
+              .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+//Here we will cut out Tasks, and Each task will call this method.
+
+      this.csvSegmentedReaderStrategy.parseFile(is,startLine,endLine, partitionId, idTableSchema, datasetId,
+              fileName, replace, schema, connectionDataVO);
+    } catch (Exception e) {
+      LOG.error("error processing file", e);
+      throw e;
+    } finally {
+      is.close();
+    }
+  }
+
+  private void processFileIntoTasks(@DatasetId Long datasetId,String processId, String fileName, String filePath,
+                           String idTableSchema, boolean replace, DataSetSchema schema, String delimiter)
+          throws EEAException, IOException {
+    // obtains the file type from the extension
+    if (fileName == null) {
+      throw new EEAException(EEAErrorMessage.FILE_NAME);
+    }
+    final String mimeType = datasetService.getMimetype(fileName).toLowerCase();
+    // validates file types for the data load
+    validateFileType(mimeType);
+    final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+
+    ConnectionDataVO connectionDataVO = recordStoreControllerZuul
+            .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+
+    try {
+      // Get the partition for the partiton id
+      final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
+
+      if(FileTypeEnum.getEnum(mimeType.toLowerCase())==FileTypeEnum.CSV) {
+
+
+        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+        long lines = 0;
+        long startBatchLine = 0;
+        long batchCounter = 0;
+        while (reader.readLine() != null) {
+          if (batchCounter == 5000) {
+            this.addImportTaskToProcess(filePath, partition.getId(), idTableSchema, datasetId, fileName, replace,
+                    schema, connectionDataVO, startBatchLine, lines, processId, EventType.COMMAND_IMPORT_CSV_FILE_CHUNK_TO_DATASET, delimiter);
+            //reset start-end lines
+            startBatchLine = lines;
+            batchCounter = 0;
+          }
+          lines++;
+          batchCounter++;
+        }
+        if (batchCounter < 5000) {
+          this.addImportTaskToProcess(filePath, partition.getId(), idTableSchema, datasetId, fileName, replace,
+                  schema, connectionDataVO, startBatchLine, lines, processId, EventType.COMMAND_IMPORT_CSV_FILE_CHUNK_TO_DATASET, delimiter);
+          //THis is the last event, to signal the end of the process.
+          this.addImportTaskToProcess(filePath, partition.getId(), idTableSchema, datasetId, fileName, replace,
+                  schema, connectionDataVO, startBatchLine, lines, processId, EventType.COMMAND_FINALIZE_CSV_FILE_IMPORT_TO_DATASET, delimiter);
+        }
+        reader.close();
+      }
+      if(FileTypeEnum.getEnum(mimeType.toLowerCase())==FileTypeEnum.XLSX){
+        this.addImportTaskToProcess(filePath, partition.getId(), idTableSchema,dataflowId, datasetId, fileName, replace,
+                schema, connectionDataVO, "id", EventType.COMMAND_IMPORT_EXCEL_FILE_TO_DATASET, delimiter);
+      }
+
+    } catch (Exception e) {
+      LOG.error("error processing file", e);
+      throw e;
+    }
+  }
+
+  @Transactional
+   void addImportTaskToProcess(String filePath, Long partitionId,String idTableSchema,Long datasetId, String fileName,boolean replace,
+                               DataSetSchema schema, ConnectionDataVO connectionDataVO,Long startLine,Long endLine,
+                               final String processId, final EventType eventType,String delimiter) {
+   // if (checkStartedProcess(processId)) {
+    if(true){
+      EEAEventVO eeaEventVO = new EEAEventVO();
+      eeaEventVO.setEventType(eventType);
+
+      final Map<String, Object> value = new LinkedHashMap<>();
+      value.put("processId", processId);
+      value.put("user", SecurityContextHolder.getContext().getAuthentication().getName());
+      value.put("token",
+              String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
+      value.put("filePath",filePath);
+      value.put("partitionId",partitionId.toString());
+      value.put("idTableSchema",idTableSchema);
+      value.put("datasetId",datasetId);
+      value.put("fileName",fileName);
+      value.put("replace",replace);
+      value.put("DataSetSchema",schema);
+      value.put("ConnectionDataVO",connectionDataVO);
+      value.put("startLine",startLine.toString());
+      value.put("endLine",endLine.toString());
+      value.put("delimiter",delimiter);
+
+
+      eeaEventVO.setData(value);
+      ObjectMapper objectMapper = new ObjectMapper();
+      String json = "";
+      try {
+        json = objectMapper.writeValueAsString(eeaEventVO);
+        Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.IMPORT_TASK, new Date(), null, null,
+                json, 0);
+        taskRepository.save(task);
+      } catch (JsonProcessingException e) {
+
+        LOG_ERROR.error("error processing json");
+      }
+
+    }
+  }
+
+  @Transactional
+  void addImportTaskToProcess(String filePath, Long partitionId,String idTableSchema,Long dataflowId,Long datasetId, String fileName,boolean replace,
+                              DataSetSchema schema, ConnectionDataVO connectionDataVO,
+                              final String processId, final EventType eventType,String delimiter) {
+    // if (checkStartedProcess(processId)) {
+    if(true){
+      EEAEventVO eeaEventVO = new EEAEventVO();
+      eeaEventVO.setEventType(eventType);
+
+      final Map<String, Object> value = new LinkedHashMap<>();
+      value.put("processId", processId);
+      value.put("user", SecurityContextHolder.getContext().getAuthentication().getName());
+      value.put("token",
+              String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
+      value.put("filePath",filePath);
+      value.put("partitionId",partitionId);
+      value.put("idTableSchema",idTableSchema);
+      value.put("dataflowId",dataflowId);
+
+      value.put("datasetId",datasetId);
+      value.put("fileName",fileName);
+      value.put("replace",replace);
+      value.put("DataSetSchema",schema);
+      value.put("ConnectionDataVO",connectionDataVO);
+      value.put("delimiter",delimiter);
+
+
+      eeaEventVO.setData(value);
+      ObjectMapper objectMapper = new ObjectMapper();
+      String json = "";
+      try {
+        json = objectMapper.writeValueAsString(eeaEventVO);
+        Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.IMPORT_TASK, new Date(), null, null,
+                json, 0);
+        taskRepository.save(task);
+      } catch (JsonProcessingException e) {
+        LOG_ERROR.error("error processing json");
+      }
+    }
+  }
+
+  void addImportFInalizationTaskToProcess(String filePath,String dataflowId, String partitionId,String idTableSchema,
+                                          String datasetId, String fileName,boolean replace,
+                              DataSetSchema schema, ConnectionDataVO connectionDataVO,
+                              final String processId, final EventType eventType) {
+    if (checkStartedProcess(processId)) {
+      EEAEventVO eeaEventVO = new EEAEventVO();
+      eeaEventVO.setEventType(eventType);
+
+      final Map<String, Object> value = new LinkedHashMap<>();
+      value.put("processId", processId);
+      value.put("user", SecurityContextHolder.getContext().getAuthentication().getName());
+      value.put("token",
+              String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
+      value.put("filePath",filePath);
+      value.put("dataflowId",dataflowId);
+      value.put("partitionId",partitionId);
+      value.put("idTableSchema",idTableSchema);
+      value.put("datasetId",datasetId);
+      value.put("fileName",fileName);
+      value.put("replace",replace);
+      value.put("DataSetSchema",schema);
+      value.put("ConnectionDataVO",connectionDataVO);
+
+
+      eeaEventVO.setData(value);
+      ObjectMapper objectMapper = new ObjectMapper();
+      String json = "";
+      try {
+        json = objectMapper.writeValueAsString(eeaEventVO);
+        Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.IMPORT_TASK, new Date(), null, null,
+                json, 0);
+        taskRepository.save(task);
+      } catch (JsonProcessingException e) {
+
+        LOG_ERROR.error("error processing json");
+      }
+
+    }
+  }
   /**
    * Validate file type.
    *
@@ -1873,5 +2198,19 @@ public class FileTreatmentHelper implements DisposableBean {
       }
     }
     return includeCountryCode;
+  }
+
+  public int getUsedExecutionThreads() {
+    return ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) importExecutorService)
+            .getDelegateExecutorService()).getActiveCount();
+  }
+
+  private boolean checkStartedProcess(String processId) {
+    boolean isProcessStarted = processesMap.containsKey(processId);
+    if (!isProcessStarted) {
+      LOG.warn("Warning, proces {} has not been initialized or it has been already finished",
+              processId);
+    }
+    return isProcessStarted;
   }
 }

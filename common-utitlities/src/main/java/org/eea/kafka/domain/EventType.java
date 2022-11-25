@@ -228,6 +228,18 @@ public enum EventType {
   /** The command validated field completed. */
   COMMAND_VALIDATED_FIELD_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "field_validated_key", true),
 
+
+  /** The command to import a csv file chunk to a dataset. */
+  COMMAND_IMPORT_CSV_FILE_CHUNK_TO_DATASET(LiteralConstants.COMMAND_TOPIC, "execute_dataset_csv_file_chunk_import_key",
+          false),
+
+  /** The command to import a csv file chunk to a dataset. */
+  COMMAND_IMPORT_EXCEL_FILE_TO_DATASET(LiteralConstants.COMMAND_TOPIC, "execute_dataset_excel_file__import_key",
+          false),
+
+  /** The command to finalize importing a csv file to a dataset. */
+  COMMAND_FINALIZE_CSV_FILE_IMPORT_TO_DATASET(LiteralConstants.COMMAND_TOPIC, "execute_dataset_csv_file_import_finalization_key",
+          false),
   /** The WebSocket notification event. */
   WEBSOCKET_NOTIFICATION(LiteralConstants.DATA_REPORTING_TOPIC, "websocket_notification", true),
 
@@ -408,6 +420,7 @@ public enum EventType {
   /** The import dataset schema failed event. */
   IMPORT_DATASET_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_dataset_schema_completed_event", true),
+
 
 
   /** The sort field desing failed event. */

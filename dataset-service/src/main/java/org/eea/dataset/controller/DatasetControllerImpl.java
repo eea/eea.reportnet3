@@ -262,7 +262,7 @@ public class DatasetControllerImpl implements DatasetController {
 
     try {
       LOG.info("Importing big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
-      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId,
+      fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId,
           delimiter);
       LOG.info("Successfully imported big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
     } catch (EEAException e) {
@@ -325,9 +325,9 @@ public class DatasetControllerImpl implements DatasetController {
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
 
     try {
+      fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId,
       LOG.info("Importing file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
-      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId,
-          delimiter);
+
       LOG.info("Successfully imported file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
     } catch (EEAException e) {
       LOG_ERROR.error(

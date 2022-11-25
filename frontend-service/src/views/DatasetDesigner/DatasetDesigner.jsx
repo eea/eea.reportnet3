@@ -1881,8 +1881,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             replaceCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${
               isNil(selectedCustomImportIntegration.id)
-                ? getUrl(DatasetConfig.importFileDataset, {
+                ? getUrl(DatasetConfig.importFileDatasetUpd, {
                     datasetId: datasetId,
+                    dataflowId: dataflowId,
                     delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
                   })
                 : getUrl(DatasetConfig.importFileDatasetExternal, {

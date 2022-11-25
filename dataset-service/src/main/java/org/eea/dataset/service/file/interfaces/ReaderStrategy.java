@@ -28,4 +28,5 @@ public interface ReaderStrategy {
   void parseFile(InputStream inputStream, Long dataflowId, Long partitionId, String idTableSchema,
       Long datasetId, String fileName, boolean replace, DataSetSchema schema,
       ConnectionDataVO connectionDataVO) throws EEAException;
+
 }

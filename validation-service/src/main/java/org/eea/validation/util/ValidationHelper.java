@@ -22,6 +22,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
+import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
@@ -860,7 +861,7 @@ public class ValidationHelper implements DisposableBean {
       } catch (JsonProcessingException e) {
         LOG_ERROR.error("error processing json for processId {}", processId);
       }
-      Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
+      Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.VALIDATION_TASK, new Date(), null, null,
           json, 0, null);
       taskRepository.save(task);
       LOG.info("Added validation task {} for process {}",task.getId(), processId);
