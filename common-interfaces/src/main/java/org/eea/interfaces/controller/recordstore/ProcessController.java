@@ -143,5 +143,5 @@ public interface ProcessController {
    * @return
    */
   @GetMapping(value = "/private/getProcessByDataflowAndDataset/{dataflowId}/{datasetId}")
-  List<ProcessVO> getProcessByDataflowAndDataset(@PathVariable("dataflowId") Long dataflowId, @PathVariable("datasetId") Long datasetId, @RequestParam("status") List<ProcessStatusEnum> status);
+  List<ProcessVO> getProcessByDataflowAndDataset(@PathVariable("dataflowId") Long dataflowId, @PathVariable("datasetId") Long datasetId, @RequestParam("status") List<String> status);
 }

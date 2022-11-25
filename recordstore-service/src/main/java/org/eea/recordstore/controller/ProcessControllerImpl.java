@@ -213,7 +213,7 @@ public class ProcessControllerImpl implements ProcessController {
    */
   @Override
   @GetMapping(value = "/private/getProcessByDataflowAndDataset/{dataflowId}/{datasetId}")
-  public List<ProcessVO> getProcessByDataflowAndDataset(@PathVariable("dataflowId") Long dataflowId, @PathVariable("datasetId") Long datasetId, @RequestParam("status") List<ProcessStatusEnum> status) {
+  public List<ProcessVO> getProcessByDataflowAndDataset(@PathVariable("dataflowId") Long dataflowId, @PathVariable("datasetId") Long datasetId, @RequestParam("status") List<String> status) {
     return processService.getProcessByDataflowAndDataset(dataflowId, datasetId, status);
   }
 

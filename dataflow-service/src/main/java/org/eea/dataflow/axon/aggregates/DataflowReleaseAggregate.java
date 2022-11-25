@@ -5,9 +5,13 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.messaging.MetaData;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.eea.axon.release.commands.RevertInternalRepresentativeCommand;
+import org.eea.axon.release.commands.RevertRepresentativeVisibilityCommand;
 import org.eea.axon.release.commands.UpdateInternalRepresentativeCommand;
 import org.eea.axon.release.commands.UpdateRepresentativeVisibilityCommand;
+import org.eea.axon.release.events.InternalRepresentativeRevertedEvent;
 import org.eea.axon.release.events.InternalRepresentativeUpdatedEvent;
+import org.eea.axon.release.events.RepresentativeVisibilityRevertedEvent;
 import org.eea.axon.release.events.RepresentativeVisibilityUpdatedEvent;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAException;
@@ -79,4 +83,47 @@ public class DataflowReleaseAggregate {
             throw e;
         }
     }
+
+    @CommandHandler
+    public void handle(RevertRepresentativeVisibilityCommand command, MetaData metaData, RepresentativeService representativeService) {
+        try {
+            LOG.info("Reverting representative visibility for dataflowId: {} dataProvider: {}", command.getDataflowId(), command.getDataProviderId());
+            representativeService.updateRepresentativeVisibilityRestrictions(command.getDataflowId(), command.getDataProviderId(), false);
+            LOG.info("Reverted representative visibility for dataflowId: {} dataProvider: {}", command.getDataflowId(), command.getDataProviderId());
+            RepresentativeVisibilityRevertedEvent event = new RepresentativeVisibilityRevertedEvent();
+            BeanUtils.copyProperties(command, event);
+            apply(event, metaData);
+        } catch (Exception e) {
+            LOG.error("Error Reverting representative visibility for dataflowId: {} dataProvider: {}", command.getDataflowId(), command.getDataProviderId());
+        }
+    }
+
+    @CommandHandler
+    public void handle(RevertInternalRepresentativeCommand command, MetaData metaData, RepresentativeService representativeService) throws EEAException {
+        try {
+            // Mark the receipt button as outdated because a new release has been done, so it would be
+            // necessary to generate a new receipt
+            List<RepresentativeVO> representatives = null;
+            representatives = representativeService.getRepresetativesByIdDataFlow(command.getDataflowId()).stream()
+                    .filter(r -> r.getDataProviderId().equals(command.getDataProviderId())).collect(Collectors.toList());
+            if (!representatives.isEmpty()) {
+                RepresentativeVO representative = representatives.get(0);
+                representative.setReceiptOutdated(false);
+                LOG.info("Revert outdated receipt: dataflowId={}, providerId={}, representativeId={}", command.getDataflowId(), command.getDataProviderId(), representative.getId());
+                representativeService.updateDataflowRepresentative(representative);
+                LOG.info("Receipt outdated reverted: dataflowId={}, providerId={}, representativeId={}", command.getDataflowId(), command.getDataProviderId(), representative.getId());
+            }
+            InternalRepresentativeRevertedEvent event = new InternalRepresentativeRevertedEvent();
+            BeanUtils.copyProperties(command, event);
+            apply(event, metaData);
+        } catch (Exception e) {
+            LOG.error("Error while reverting outdated receipt: dataflowId={}, providerId={}: {}", command.getDataflowId(), command.getDataProviderId(), e.getMessage());
+            throw e;
+        }
+    }
+
 }
+
+
+
+

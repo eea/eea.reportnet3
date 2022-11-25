@@ -163,7 +163,7 @@ public class ValidationReleaseAggregate {
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while adding validation process for dataflowId: {} dataProvider: {}: {}", command.getDataflowId(), command.getDataProviderId(), e.getMessage());
+            LOG.error("Error while adding validation tasks for dataflowId: {} dataProvider: {}: {}", command.getDataflowId(), command.getDataProviderId(), e.getMessage());
             throw e;
         }
     }
@@ -229,9 +229,9 @@ public class ValidationReleaseAggregate {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                 EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
 
-        List<ProcessStatusEnum> statuses = new ArrayList<>();
-        statuses.add(ProcessStatusEnum.IN_QUEUE);
-        statuses.add(ProcessStatusEnum.IN_PROGRESS);
+        List<String> statuses = new ArrayList<>();
+        statuses.add(ProcessStatusEnum.IN_QUEUE.toString());
+        statuses.add(ProcessStatusEnum.IN_PROGRESS.toString());
         int priority = validationHelper.getPriority(command.getDataflowId());
         command.getDatasetIds().forEach(datasetId -> {
             List<ProcessVO> datasetProcesses =  processControllerZuul.getProcessByDataflowAndDataset(command.getDataflowId(), datasetId, statuses);
@@ -253,7 +253,8 @@ public class ValidationReleaseAggregate {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
                 EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
 
-
+        //find tasks
+        //validationHelper -> cancel task
 
         ValidationTasksForReleaseCanceledEvent event = new ValidationTasksForReleaseCanceledEvent();
         BeanUtils.copyProperties(command, event);

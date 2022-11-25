@@ -24,6 +24,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.PgStatActivityVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.InternalProcessTypeEnum;
 import org.eea.kafka.domain.EventType;
@@ -470,15 +471,40 @@ public class DatasetReleaseAggregate {
     }
 
     @CommandHandler
-    public void handle(ReleaseFailureRemoveLocksCommand command, DatasetSnapshotService datasetSnapshotService) throws EEAException {
+    public void handle(ReleaseFailureRemoveLocksCommand command, MetaData metaData, DatasetSnapshotService datasetSnapshotService) throws EEAException {
         try {
             datasetSnapshotService.releaseLocksRelatedToRelease(command.getDataflowId(), command.getDataProviderId());
             LOG.info("Release locks removed for dataflow {} and dataProvider {} ", command.getDataflowId(), command.getDataProviderId());
             FailureReleaseLocksRemovedEvent event = new FailureReleaseLocksRemovedEvent();
             BeanUtils.copyProperties(command, event);
-            apply(event);
+            apply(event, metaData);
         } catch (Exception e) {
             LOG.error("Error while releasing locks for dataflow {} and dataProvider {}: {}", command.getDataflowId(), command.getDataProviderId(), e.getMessage());
+            throw e;
+        }
+    }
+
+    @CommandHandler
+    public void handle(RevertDatasetStatusCommand command, MetaData metaData, DatasetSnapshotService datasetSnapshotService) {
+        try {
+            LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
+            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
+
+            command.getDatasetIds().stream().forEach(id -> {
+                LOG.info("Reverting dataset status to Pending for dataflowId: {} dataProvider: {} dataset {}", command.getDataflowId(), command.getDataProviderId(), id);
+                datasetSnapshotService.changeDatasetStatus(id, DatasetStatusEnum.PENDING);
+                LOG.info("Status reverted to Pending for dataflowId: {} dataProvider: {} dataset {}", command.getDataflowId(), command.getDataProviderId(), id);
+            });
+
+            DatasetStatusRevertedEvent event = new DatasetStatusRevertedEvent();
+            BeanUtils.copyProperties(command, event);
+            apply(event, metaData);
+        } catch (Exception e) {
+            LOG.error("Error while reverting dataset status to Pending for dataflowId: {} dataProvider: {}", command.getDataflowId(), command.getDataProviderId());
             throw e;
         }
     }

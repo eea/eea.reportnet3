@@ -239,7 +239,7 @@ public class ProcessServiceImpl implements ProcessService {
    * @return
    */
   @Override
-  public List<ProcessVO> getProcessByDataflowAndDataset(Long dataflowId, Long datasetId, List<ProcessStatusEnum> status) {
+  public List<ProcessVO> getProcessByDataflowAndDataset(Long dataflowId, Long datasetId, List<String> status) {
     List<EEAProcess> processes =  processRepository.findProcessByDataflowAndDataset(dataflowId,datasetId, status);
     return processMapper.entityListToClass(processes);
   }

@@ -92,6 +92,6 @@ public interface ProcessService {
    * @param status
    * @return
    */
-  List<ProcessVO> getProcessByDataflowAndDataset(Long dataflowId, Long datasetId, List<ProcessStatusEnum> status);
+  List<ProcessVO> getProcessByDataflowAndDataset(Long dataflowId, Long datasetId, List<String> status);
 
 }

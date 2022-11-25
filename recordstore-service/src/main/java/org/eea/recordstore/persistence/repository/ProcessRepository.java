@@ -79,6 +79,6 @@ public interface ProcessRepository
    * @return
    */
   @Query(nativeQuery = true,
-          value = "select p.* from process p where p.dataflow_id =:dataflowId and p.dataset_id = :datasetId and p.status in :status")
-  List<EEAProcess> findProcessByDataflowAndDataset(Long dataflowId, Long datasetId, List<ProcessStatusEnum> status);
+          value = "select p.* from process p where p.dataflow_id =:dataflowId and p.dataset_id = :datasetId and p.status in (:status)")
+  List<EEAProcess> findProcessByDataflowAndDataset(Long dataflowId, Long datasetId, List<String> status);
 }

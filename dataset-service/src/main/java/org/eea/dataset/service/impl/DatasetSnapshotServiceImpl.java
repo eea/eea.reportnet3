@@ -1326,4 +1326,13 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public Long findDataCollectionIdBySnapshotId(Long snapshotId) {
     return snapshotRepository.findDataCollectionIdBySnapshotId(snapshotId);
   }
+
+  @Override
+  public void changeDatasetStatus(Long datasetId, DatasetStatusEnum status) {
+    DataSetMetabase dataset = metabaseRepository.findById(datasetId).orElse(null);
+    if (dataset != null) {
+      dataset.setStatus(status);
+      metabaseRepository.save(dataset);
+    }
+  }
 }

@@ -7,6 +7,7 @@ import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
@@ -310,4 +311,11 @@ public interface DatasetSnapshotService {
    * @return
    */
   Long findDataCollectionIdBySnapshotId(Long snapshotId);
+
+  /**
+   * Changes dataset status
+   * @param datasetId
+   * @param status
+   */
+  void changeDatasetStatus(Long datasetId, DatasetStatusEnum status);
 }
