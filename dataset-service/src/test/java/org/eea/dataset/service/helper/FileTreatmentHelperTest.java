@@ -300,7 +300,7 @@ public class FileTreatmentHelperTest {
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
     when(fileParserFactory.createContext(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(context);
-    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, 1L, null);
+    fileTreatmentHelper.importFileData(1L, 2L,null, multipartFile, true, 1L, null);
 
     // Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
     // Mockito.any(), Mockito.any());
@@ -393,7 +393,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
 
-    fileTreatmentHelper.importFileData(1L, null, multipartFile, true, 1L, null);
+    fileTreatmentHelper.importFileData(1L,2L, null, multipartFile, true, 1L, null);
     final File downloadDirectory = new File("./");
     for (File f : downloadDirectory.listFiles()) {
       if (f.getName().equals("1")) {
@@ -459,7 +459,7 @@ public class FileTreatmentHelperTest {
     // Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
     // Mockito.any(), Mockito.anyLong(), Mockito.any())).thenReturn(executionResultVO);
 
-    fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", multipartFile, false, 1L,
+    fileTreatmentHelper.importFileData(1L,2L, "5cf0e9b3b793310e9ceca190", multipartFile, false, 1L,
         null);
     FileUtils
         .deleteDirectory(new File(this.getClass().getClassLoader().getResource("").getPath(), "1"));
@@ -479,7 +479,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetService.getSchemaIfReportable(Mockito.anyLong(), Mockito.any()))
         .thenReturn(null);
     try {
-      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true, 1L, null);
+      fileTreatmentHelper.importFileData(1L, 2L,"5cf0e9b3b793310e9ceca190", file, true, 1L, null);
     } catch (EEAException e) {
       Assert.assertEquals(
           "Dataset not reportable: datasetId=1, tableSchemaId=5cf0e9b3b793310e9ceca190",
@@ -492,7 +492,7 @@ public class FileTreatmentHelperTest {
   public void importFileDataDelimiterExceptionTest() throws EEAException {
     MultipartFile file = Mockito.mock(MultipartFile.class);
     try {
-      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true, 1L, "%%");
+      fileTreatmentHelper.importFileData(1L, 2L,"5cf0e9b3b793310e9ceca190", file, true, 1L, "%%");
     } catch (EEAException e) {
       Assert.assertEquals("The size of the delimiter cannot be greater than 1", e.getMessage());
       throw e;
@@ -529,7 +529,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong()))
         .thenReturn(new DataSetMetabaseVO());
     try {
-      fileTreatmentHelper.importFileData(1L, "5cf0e9b3b793310e9ceca190", file, true, 1L, null);
+      fileTreatmentHelper.importFileData(1L,2L, "5cf0e9b3b793310e9ceca190", file, true, 1L, null);
     } catch (EEAException e) {
       Assert.assertEquals("Controlled Error", e.getCause().getMessage());
       throw e;

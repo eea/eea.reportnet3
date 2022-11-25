@@ -262,7 +262,7 @@ public class DatasetControllerImpl implements DatasetController {
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
 
     try {
-      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId,
+      fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId,
           delimiter);
     } catch (EEAException e) {
       LOG_ERROR.error(
@@ -320,7 +320,7 @@ public class DatasetControllerImpl implements DatasetController {
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
 
     try {
-      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId,
+      fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId,
           delimiter);
     } catch (EEAException e) {
       LOG_ERROR.error(

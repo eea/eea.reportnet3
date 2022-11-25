@@ -37,7 +37,7 @@ public class Task {
   @Enumerated(EnumType.STRING)
   private ProcessStatusEnum status;
 
-  @Column(name = "status")
+  @Column(name = "task_type")
   @Enumerated(EnumType.STRING)
   private TaskType taskType;
 

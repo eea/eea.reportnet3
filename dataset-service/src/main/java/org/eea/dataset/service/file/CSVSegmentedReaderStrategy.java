@@ -15,13 +15,12 @@ import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
-import org.eea.dataset.service.file.interfaces.ReaderStrategy;
-import org.eea.dataset.service.file.interfaces.SegmentedReaderStrategy;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -32,8 +31,8 @@ import java.util.List;
 
 @NoArgsConstructor
 
-
-public class CSVSegmentedReaderStrategy implements SegmentedReaderStrategy {
+@Component
+public class CSVSegmentedReaderStrategy  {
     /** The Constant LOG_ERROR. */
     private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -483,8 +482,7 @@ public class CSVSegmentedReaderStrategy implements SegmentedReaderStrategy {
         });
     }
 
-    @Override
-    public void parseFile(InputStream inputStream, Long startLine, Long endLine, Long dataflowId, Long partitionId, String idTableSchema, Long datasetId, String fileName, boolean replace, DataSetSchema schema, ConnectionDataVO connectionDataVO) throws EEAException {
+    public void parseFile(InputStream inputStream, Long startLine, Long endLine,Long partitionId, String idTableSchema, Long datasetId, String fileName, boolean replace, DataSetSchema schema, ConnectionDataVO connectionDataVO) throws EEAException {
         readLines(inputStream,startLine,endLine, partitionId, idTableSchema, datasetId, fileName, replace, schema,
                 connectionDataVO);
 

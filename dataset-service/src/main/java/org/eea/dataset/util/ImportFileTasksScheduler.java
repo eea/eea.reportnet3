@@ -52,20 +52,20 @@ public class ImportFileTasksScheduler extends MessageReceiver {
   private JobScheduler scheduler;
 
   /** The delay. */
-  @Value("${validation.scheduled.consumer}")
-  private Long delay;
+  //@Value("${validation.scheduled.consumer}")
+  private Long delay=1000l;
 
   /** The max running tasks. */
-  @Value("${validation.tasks.parallelism}")
-  private int maxRunningTasks;
+  //@Value("${validation.tasks.parallelism}")
+  private int maxRunningTasks=4;
 
   /** The service instance id. */
   @Value("${spring.cloud.consul.discovery.instanceId}")
   private String serviceInstanceId;
 
   /** The instance priority. */
-  @Value("${validation.instance.priority}")
-  private String instancePriority;
+  //@Value("${validation.instance.priority}")
+  private String instancePriority="HIGH";
 
 
 
@@ -87,24 +87,30 @@ public class ImportFileTasksScheduler extends MessageReceiver {
     try {
       int freeThreads = checkFreeThreads();
       if (freeThreads > 0) {
-        for (Task task : taskRepository.findAllByTaskType(TaskType.IMPORT_TASK)) {
-          try {
-            task.setStartingDate(new Date());
-            task.setPod(serviceInstanceId);
-            task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-            taskRepository.save(task);
-            taskRepository.flush();
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            EEAEventVO event = objectMapper.readValue(task.getJson(), EEAEventVO.class);
-            Message<EEAEventVO> message = MessageBuilder.withPayload(event).build();
-            message.getPayload().getData().put("task_id", task.getId());
-            consumeMessage(message);
-          } catch (EEAException | JsonProcessingException e) {
-            LOG_ERROR.error("failed the validation task shedule because of {} ", e);
-          } catch (ObjectOptimisticLockingFailureException e) {
-            newDelay = 1L;
+        for (Task task : taskRepository.findAllByTaskTypeAndStatusOrderByIdAsc(TaskType.IMPORT_TASK,ProcessStatusEnum.IN_QUEUE)) {
+          if(freeThreads>0){
+            try {
+              task.setStartingDate(new Date());
+              task.setPod(serviceInstanceId);
+              task.setStatus(ProcessStatusEnum.IN_PROGRESS);
+              taskRepository.save(task);
+              taskRepository.flush();
+              ObjectMapper objectMapper = new ObjectMapper();
+              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+              EEAEventVO event = objectMapper.readValue(task.getJson(), EEAEventVO.class);
+              Message<EEAEventVO> message = MessageBuilder.withPayload(event).build();
+              message.getPayload().getData().put("task_id", task.getId());
+              consumeMessage(message);
+              freeThreads=  checkFreeThreads();
+            } catch (EEAException | JsonProcessingException e) {
+              LOG_ERROR.error("failed the validation task shedule because of {} ", e);
+            } catch (ObjectOptimisticLockingFailureException e) {
+              newDelay = 1L;
+            }
+          }else{
+            break;
           }
+
         }
       }
 

@@ -2,6 +2,7 @@ package org.eea.dataset.persistence.metabase.repository;
 
 import org.eea.dataset.persistence.metabase.domain.Task;
 import org.eea.interfaces.vo.metabase.TaskType;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -98,7 +99,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
       value = "select case when (exists (select id from task where process_id=:processId and status ='IN_QUEUE' limit 1)) then FALSE else TRUE end")
   boolean isProcessEnding(@Param("processId") String processId);
 
-  List<Task> findAllByTaskType(TaskType taskType);
+  List<Task> findAllByTaskTypeAndStatusOrderByIdAsc(TaskType taskType, ProcessStatusEnum status);
 }
 
 
