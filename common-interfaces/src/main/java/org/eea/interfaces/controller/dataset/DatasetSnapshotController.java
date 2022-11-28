@@ -265,4 +265,12 @@ public interface DatasetSnapshotController {
    */
   @DeleteMapping(value = "/private/deleteSnapshotByDatasetIdAndDateReleasedIsNull/{datasetId}")
   void deleteSnapshotByDatasetIdAndDateReleasedIsNull(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Finds reporting dataset id by snapshot id
+   * @param snapshotId
+   * @return
+   */
+  @GetMapping("/private/findReportingDatasetIdBySnapshotId/{snapshotId}")
+  Long findReportingDatasetIdBySnapshotId(@PathVariable("snapshotId") Long snapshotId);
 }
