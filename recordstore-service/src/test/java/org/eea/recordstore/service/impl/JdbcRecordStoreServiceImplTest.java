@@ -1,9 +1,10 @@
 package org.eea.recordstore.service.impl;
 
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -11,11 +12,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
@@ -42,9 +40,13 @@ import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.eea.recordstore.service.ProcessService;
 import org.eea.thread.ThreadPropertiesManager;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -120,6 +122,9 @@ public class JdbcRecordStoreServiceImplTest {
 
   @Mock
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
+
+  @Mock
+  private ProcessService processService;
 
 
   private TableSchemaVO table;
@@ -464,6 +469,18 @@ public class JdbcRecordStoreServiceImplTest {
     datasetMetabase.setDataflowId(1L);
     datasetMetabase.setDataProviderId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(anyLong())).thenReturn(datasetMetabase);
+    String processId = UUID.randomUUID().toString();
+    ProcessVO processVO = new ProcessVO();
+    processVO.setDataflowId(1L);
+    processVO.setDatasetId(1L);
+    processVO.setStatus(ProcessStatusEnum.IN_QUEUE.toString());
+    processVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
+    processVO.setPriority(1);
+    processVO.setProcessType(ProcessTypeEnum.RELEASE_SNAPSHOT.toString());
+    processVO.setProcessId(processId);
+    processVO.setQueuedDate(new Date());
+    Mockito.when(processService.saveProcess(any(ProcessVO.class))).thenReturn(processVO);
+    doNothing().when(processService).updateStatusAndFinishedDate(anyString(), any(Date.class), anyString());
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false,
         false);
     Mockito.verify(kafkaSender, Mockito.times(0)).releaseNotificableKafkaEvent(Mockito.any(),
