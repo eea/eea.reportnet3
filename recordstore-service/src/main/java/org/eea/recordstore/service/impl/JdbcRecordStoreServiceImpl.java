@@ -1639,7 +1639,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /**
    * Copy process.
    *
-   * @param dataCollectionId the dataset id
+   * @param dataCollectionId the dataset collection id
    * @param idSnapshot the id snapshot
    * @param datasetType the dataset type
    * @param cm the cm
@@ -1683,10 +1683,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       SplitSnapfile snapFileForSplitting = isSnapFileForSplitting(nameFileFieldValue);
       Long reportingDatasetId = dataSetSnapshotControllerZuul.findReportingDatasetIdBySnapshotId(idSnapshot);
 
+      String processId = UUID.randomUUID().toString();
+      ProcessVO processVO = createProcessVOForRelease(dataflowId, reportingDatasetId, processId);
+      processVO = processService.saveProcess(processVO);
+
       if (snapFileForSplitting.isForSplitting() == true) {
-        String processId = UUID.randomUUID().toString();
-        ProcessVO processVO = createProcessVOForRelease(dataflowId, reportingDatasetId, processId);
-        processVO = processService.saveProcess(processVO);
 
         splitSnapFile(processId, nameFileFieldValue, idSnapshot, snapFileForSplitting);
 
@@ -1729,7 +1730,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         }
         processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), processId);
       } else {
+        processVO.setStatus(ProcessStatusEnum.IN_PROGRESS.toString());
+        processVO.setProcessStartingDate(new Date());
+        processService.saveProcess(processVO);
+
         copyFromFile(copyQueryField, nameFileFieldValue, cm);
+
+        processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), processId);
       }
 
     // Attachment value
