@@ -249,4 +249,17 @@ public class ProcessServiceImpl implements ProcessService {
     processRepository.updateStatusAndFinishedDate(status, dateFinish, processId);
   }
 
+  /**
+   * Finds processId by datasetId and status
+   * @param datasetId
+   * @param status
+   * @return
+   */
+  @Override
+  public List<String> findProcessIdByDatasetAndStatus(Long datasetId, ProcessTypeEnum processType, ProcessStatusEnum status) {
+     List<EEAProcess> processes = processRepository.findByDatasetIdAndProcessTypeAndStatus(datasetId, processType, status);
+     List<String> processIds = new ArrayList<>();
+     processes.forEach(p -> processIds.add(p.getProcessId()));
+     return processIds;
+  }
 }

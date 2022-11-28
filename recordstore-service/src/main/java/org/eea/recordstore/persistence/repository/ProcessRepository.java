@@ -1,5 +1,7 @@
 package org.eea.recordstore.persistence.repository;
 
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.recordstore.persistence.domain.EEAProcess;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -8,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import javax.transaction.Transactional;
 import java.util.Date;
+import java.util.List;
 
 /**
  * The Interface ProcessRepository.
@@ -63,4 +66,6 @@ public interface ProcessRepository
   @Query(nativeQuery = true,
           value = "update process set status= :status, date_finish= :dateFinish where process_id= :processId ")
   void updateStatusAndFinishedDate(@Param("status") String status, @Param("dateFinish") Date dateFinish, @Param("processId") String processId);
+
+  List<EEAProcess> findByDatasetIdAndProcessTypeAndStatus(Long datasetId, ProcessTypeEnum processType, ProcessStatusEnum status);
 }

@@ -22,6 +22,7 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.ProcessTaskVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -50,6 +51,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -441,5 +443,25 @@ public class ValidationControllerImpl implements ValidationController {
   @GetMapping(value = "/private/findTasksByProcessId/{processId}")
   public List<TaskVO> findTasksByProcessId(@PathVariable("processId") String processId) {
     return taskService.findTaskByProcessId(processId);
+  }
+
+  /**
+   * Finds tasks by datasetId for in progress process
+   * @param datasetId
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/releaseTasksByDatasetId/{datasetId}")
+  public List<ProcessTaskVO> findReleaseTasksByDatasetId(@PathVariable("datasetId") Long datasetId) {
+      List<String> processIds = processControllerZuul.findProcessIdByDatasetAndStatus(datasetId, ProcessTypeEnum.RELEASE_SNAPSHOT, ProcessStatusEnum.IN_PROGRESS);
+      List<ProcessTaskVO> processTaskVOS = new ArrayList<>();
+      processIds.forEach(processId -> {
+        ProcessTaskVO processTaskVO = new ProcessTaskVO();
+        processTaskVO.setProcessId(processId);
+        List<TaskVO> taskVOS = findTasksByProcessId(processId);
+        processTaskVO.setTasks(taskVOS);
+        processTaskVOS.add(processTaskVO);
+      });
+      return processTaskVOS;
   }
 }

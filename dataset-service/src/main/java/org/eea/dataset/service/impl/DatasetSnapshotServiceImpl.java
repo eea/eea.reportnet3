@@ -1327,4 +1327,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       lockService.createLock(timestamp, userName, LockType.METHOD, populateEuDataset);
     }
   }
+
+  @Override
+  public Long findReportingDatasetIdBySnapshotId(Long snapshotId) {
+     return snapshotRepository.findReportingDatasetBySnapshotId(snapshotId);
+  }
 }

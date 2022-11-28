@@ -1,8 +1,9 @@
 package org.eea.recordstore.controller;
 
 
-import java.util.Arrays;
-import java.util.List;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.eea.interfaces.controller.recordstore.ProcessController;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
@@ -16,16 +17,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The Class ProcessControllerImpl.
@@ -209,6 +205,18 @@ public class ProcessControllerImpl implements ProcessController {
       LOG_ERROR.error("Unexpected error! Error finding next process with id {} Message: {}", processId, e.getMessage());
       throw e;
     }
+  }
+
+  /**
+   * Finds processId by datasetId and status
+   * @param datasetId
+   * @param status
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/findProcessIdByDatasetAndStatus")
+  public List<String> findProcessIdByDatasetAndStatus(@RequestParam("datasetId") Long datasetId, @RequestParam("processType") ProcessTypeEnum processType, @RequestParam("status") ProcessStatusEnum status) {
+    return processService.findProcessIdByDatasetAndStatus(datasetId, processType, status);
   }
 
 }
