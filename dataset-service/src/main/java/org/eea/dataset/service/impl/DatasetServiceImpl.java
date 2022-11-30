@@ -730,13 +730,17 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.RECORD_REQUIRED);
     }
 
+    LOG.info("Find database Metabase for datasetId {}", datasetId);
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+
+    LOG.info("Get table schema for datasetSchemaId {} and tableSchemaId {}", datasetMetabaseVO.getDatasetSchema(), tableSchemaId);
     TableSchema tableSchema = getTableSchema(tableSchemaId, datasetMetabaseVO.getDatasetSchema());
 
     if (null == tableSchema) {
       throw new EEAException(EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
 
+    LOG.info("Get data provider for dataProviderId {}", datasetMetabaseVO.getDataProviderId());
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
@@ -757,6 +761,7 @@ public class DatasetServiceImpl implements DatasetService {
       }
     }
 
+    LOG.info("Create records and save all for datasetId {}", datasetId);
     recordRepository
         .saveAll(createRecords(datasetId, dataProviderCode, recordVOs, datasetType, tableSchema));
   }
