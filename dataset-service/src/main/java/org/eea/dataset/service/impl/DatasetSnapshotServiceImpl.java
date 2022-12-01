@@ -537,7 +537,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     LOG.info("The user releasing kafka event on DatasetSnapshotServiceImpl.releaseSnapshot for snapshotId {} and datasetId {} is {}",
         idSnapshot, idDataset, SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
-    LOG.info("Successfully released snapshot with id {} for datasetId {}", idSnapshot, idDataset);
+    LOG.info("FME_Historic_Releases: Successfully released snapshot with id {} for datasetId {} and dateRelease {}", idSnapshot, idDataset, dateRelease);
   }
 
   /**
@@ -1040,21 +1040,25 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public List<ReleaseVO> getReleases(Long datasetId) throws EEAException {
     List<ReleaseVO> releases = new ArrayList<>();
+    DatasetTypeEnum datasetType = datasetMetabaseService.findDatasetMetabase(datasetId).getDatasetTypeEnum();
     if (DatasetTypeEnum.REPORTING
-        .equals(datasetMetabaseService.findDatasetMetabase(datasetId).getDatasetTypeEnum())) {
+        .equals(datasetType)) {
       // if dataset is reporting return released snapshots
       releases = getSnapshotsReleasedByIdDataset(datasetId);
     } else {
       // if the snapshot is a datacollection
       if (DatasetTypeEnum.COLLECTION
-          .equals(datasetMetabaseService.findDatasetMetabase(datasetId).getDatasetTypeEnum())) {
+          .equals(datasetType)) {
         releases = getSnapshotsReleasedByIdDataCollection(datasetId);
       } else
       // if the snapshot is an eudataset
       if (DatasetTypeEnum.EUDATASET
-          .equals(datasetMetabaseService.findDatasetMetabase(datasetId).getDatasetTypeEnum())) {
+          .equals(datasetType)) {
         releases = getSnapshotsReleasedByIdEUDataset(datasetId);
       }
+    }
+    for(ReleaseVO releaseVO: releases){
+      LOG.info("FME_Historic_Releases: Retrieved release snapshot with id {} and dateReleased {} for datasetType {} and datasetId {}", releaseVO.getId(), releaseVO.getDateReleased(), datasetType.getValue(), datasetId);
     }
     return releases;
   }
