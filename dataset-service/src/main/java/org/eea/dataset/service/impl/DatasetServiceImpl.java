@@ -3245,7 +3245,9 @@ public class DatasetServiceImpl implements DatasetService {
     if (recordToUpdate != null) {
       refillFields(oldRecord, recordToUpdate.getFields());
     }
-
+    else{
+      oldRecord.getFields().forEach(field -> field.setRecord(oldRecord));
+    }
   }
 
   /**
