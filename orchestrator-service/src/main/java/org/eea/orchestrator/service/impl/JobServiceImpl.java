@@ -159,8 +159,6 @@ public class JobServiceImpl implements JobService {
         Long dataProviderId = Long.valueOf((Integer) parameters.get("dataProviderId"));
         Boolean restrictFromPublic = (Boolean) parameters.get("restrictFromPublic");
         Boolean validate = (Boolean) parameters.get("validate");
-        jobVO.setJobStatus(JobStatusEnum.IN_PROGRESS);
-        save(jobVO);
         dataSetSnapshotControllerZuul.createReleaseSnapshots(dataflowId, dataProviderId, restrictFromPublic, validate, jobVO.getId());
     }
 

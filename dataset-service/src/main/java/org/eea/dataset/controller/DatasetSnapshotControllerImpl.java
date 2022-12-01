@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -708,6 +709,10 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
           name = "validate", required = false, defaultValue = "true") boolean validate,
       @ApiParam(type = "Long", value = "Job id", example = "1") @RequestParam(
               name = "jobId", required = false) Long jobId) {
+
+    if (jobId!=null) {
+      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
+    }
 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDataflowId(dataflowId);
