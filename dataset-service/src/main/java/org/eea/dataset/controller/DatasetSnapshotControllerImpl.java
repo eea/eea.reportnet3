@@ -351,7 +351,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      LOG.info("Releasing snapshot with id {} for datasetId {}", idSnapshot, datasetId);
+      LOG.info("FME_Historic_Releases: Releasing snapshot with id {} for datasetId {} and dateRelease {}", idSnapshot, datasetId, dateRelease);
       datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot, dateRelease);
     } catch (EEAException e) {
       LOG_ERROR.error("Error releasing a snapshot with id {} for datasetId {}. Error Message: {}",  idSnapshot, datasetId, e.getMessage(), e);
