@@ -70,7 +70,8 @@ public interface RecordStoreController {
       @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset,
       @RequestParam(value = "dateRelease", required = false) String dateRelease,
       @RequestParam(value = "prefillingReference", required = false,
-          defaultValue = "false") Boolean prefillingReference);
+          defaultValue = "false") Boolean prefillingReference,
+      @RequestParam(value = "processId", required = false) String processId);
 
 
 
@@ -93,7 +94,8 @@ public interface RecordStoreController {
       @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
       @RequestParam(value = "deleteData", defaultValue = "false") Boolean deleteData,
       @RequestParam(value = "prefillingReference", required = false,
-          defaultValue = "false") Boolean prefillingReference);
+          defaultValue = "false") Boolean prefillingReference,
+      @RequestParam(value = "processId", required = false) String processId);
 
   /**
    * Delete snapshot data.

@@ -8,9 +8,6 @@ import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
-import org.eea.interfaces.vo.recordstore.ProcessVO;
-import org.eea.interfaces.vo.recordstore.ProcessesVO;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.orchestrator.service.JobService;
 import org.eea.thread.ThreadPropertiesManager;
@@ -110,7 +107,7 @@ public class JobControllerImpl implements JobController {
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("datasetId", datasetId);
             parameters.put("released", released);
-            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION, parameters);
+            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), false, parameters);
             LOG.info("Adding validation job for datasetId {} and released {} for creator {} with status {}", datasetId, released, username, statusToInsert);
             jobService.addValidationJob(parameters, username, statusToInsert);
             LOG.info("Successfully added validation job for datasetId {}, released {} and creator {} with status {}", datasetId, released, username, statusToInsert);
@@ -146,7 +143,7 @@ public class JobControllerImpl implements JobController {
         parameters.put("dataProviderId", dataProviderId);
         parameters.put("restrictFromPublic", restrictFromPublic);
         parameters.put("validate", validate);
-        JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE, parameters);
+        JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), true, parameters);
 
         LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
         jobService.addReleaseJob(parameters, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
@@ -157,31 +154,45 @@ public class JobControllerImpl implements JobController {
     }
 
     /**
-     * Updates a job status by process id
+     * Updates job's status
      */
-    @PostMapping(value = "/updateStatus/{status}/{processId}")
-    public void updateStatusByProcessId(@PathVariable("status") JobStatusEnum status, @PathVariable("processId") String processId){
+    @PostMapping(value = "/updateJobStatus/{id}/{status}")
+    public void updateJobStatus(@PathVariable("id") Long jobId, @PathVariable("status") JobStatusEnum status){
         try {
-            LOG.info("Updating status of job with processId {} to status {}", processId, status);
-            jobService.updateJobStatusByProcessId(status, processId);
+            LOG.info("Updating job with id {} to status {}", jobId, status.getValue());
+            jobService.updateJobStatus(jobId, status);
         } catch (Exception e){
-            LOG.error("Unexpected error! Could not update status {} for processId {}. Message: {}", status, processId, e.getMessage());
+            LOG.error("Unexpected error! Could not update job to in progress for id {} and status {}. Message: {}", jobId, status.getValue(), e.getMessage());
             throw e;
         }
     }
 
     /**
-     * Updates job's status
+     * Saves job
+     * @param jobVO
+     * @return
      */
-    @PostMapping(value = "/updateJobStatus/{id}/{status}/{processId}")
-    public void updateJobStatus(@PathVariable("id") Long jobId, @PathVariable("status") JobStatusEnum status, @PathVariable("processId") String processId){
-        try {
-            LOG.info("Updating job with id {} and processId {} to status {}", jobId, processId, status.getValue());
-            jobService.updateJobStatus(jobId, status, processId);
-        } catch (Exception e){
-            LOG.error("Unexpected error! Could not update job to in progress for id {} processId {} and status {}. Message: {}", jobId, processId, status.getValue(), e.getMessage());
-            throw e;
-        }
+    @Override
+    @PostMapping(value = "/saveJob")
+    public JobVO save(@RequestBody JobVO jobVO) {
+       return jobService.save(jobVO);
+    }
+
+    /**
+     *
+     * @param jobType
+     * @param release
+     * @param dataflowId
+     * @param dataProviderId
+     * @return
+     */
+    @Override
+    @GetMapping(value = "/checkEligibility")
+    public JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release, @RequestParam("dataflowId") Long dataflowId, @RequestParam("dataProviderID") Long dataProviderId) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("dataflowId", dataflowId);
+        parameters.put("dataProviderId", dataProviderId);
+        return jobService.checkEligibilityOfJob(jobType, release, parameters);
     }
 
 }

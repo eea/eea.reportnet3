@@ -5,12 +5,11 @@ import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -136,4 +135,19 @@ public interface ProcessController {
   @GetMapping(value = "/private/findProcessIdByDatasetAndStatus")
   List<String> findProcessIdByDatasetAndStatus(@RequestParam("datasetId") Long datasetId, @RequestParam("processType") ProcessTypeEnum processType, @RequestParam("status") ProcessStatusEnum status);
 
+  /**
+   * Saves process
+   * @param processVO
+   */
+  @PostMapping(value = "/private/saveProcess")
+  ProcessVO saveProcess(@RequestBody ProcessVO processVO);
+
+  /**
+   * Updates process
+   * @param status
+   * @param dateFinish
+   * @param processId
+   */
+  @PutMapping(value = "/private/updateProcessStatus")
+  void updateStatusAndFinishedDate(@RequestParam("processId") String processId, @RequestParam("status") String status, @RequestParam("dateFinish") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date dateFinish);
 }

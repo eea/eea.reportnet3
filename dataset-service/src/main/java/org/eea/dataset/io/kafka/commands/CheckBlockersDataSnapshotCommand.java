@@ -1,18 +1,23 @@
 package org.eea.dataset.io.kafka.commands;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.utils.ProcessUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobHistoryController.JobHistoryControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.orchestrator.JobProcessVO;
+import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -26,6 +31,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.*;
 
 /**
  * The Class PropagateNewFieldCommand.
@@ -50,6 +60,26 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   /** The dataset snapshot service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
+
+  /** The process utils */
+  @Autowired
+  private ProcessUtils processUtils;
+
+  /** The process controller zuul */
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
+  /** The job controller zuul */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
+
+  /** The job history controller zuul */
+  @Autowired
+  private JobHistoryControllerZuul jobHistoryControllerZuul;
+
+  /** The job process controller zuul */
+  @Autowired
+  private JobProcessControllerZuul jobProcessControllerZuul;
 
   /**
    * The Constant LOG.
@@ -81,7 +111,6 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
 
     try {
-
       Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
 
       LOG.info("The user on CheckBlockersDataSnapshotCommand.execute is {} and datasetId {}",
@@ -93,6 +122,23 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       List<Long> datasets = dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
               dataset.getDataflowId(), dataset.getDataProviderId());
       Collections.sort(datasets);
+
+      Map<String, Object> parameters = new HashMap<>();
+      Timestamp ts = new Timestamp(System.currentTimeMillis());
+      JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(),true);
+      parameters.put("dataflowId", dataset.getDataflowId());
+      parameters.put("dataProviderId", dataset.getDataProviderId());
+      releaseJob.setParameters(parameters);
+
+      JobStatusEnum statusToInsert = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), true, dataset.getDataflowId(), dataset.getDataProviderId());
+      if (statusToInsert == JobStatusEnum.REFUSED) {
+        return;
+      }
+
+      LOG.info("Adding release job for dataflowId={}, dataProviderId={} and creator={} with status {}", dataset.getDataflowId(), dataset.getDataProviderId(), SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
+      releaseJob = jobControllerZuul.save(releaseJob);
+      jobHistoryControllerZuul.save(releaseJob);
+
       // we check if one or more dataset have error, if have we create a notification and abort
       // process of releasing
       boolean haveBlockers = false;
@@ -106,6 +152,10 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
           LOG_ERROR.error(
                   "Error in the releasing process of the dataflowId {} and dataProviderId {}, the datasets have blocker errors",
                   dataset.getDataflowId(), dataset.getDataProviderId());
+
+          releaseJob.setJobStatus(JobStatusEnum.FAILED);
+          jobControllerZuul.save(releaseJob);
+
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
                   NotificationVO.builder()
                           .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -120,6 +170,13 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         LOG.info(
                 "Releasing datasets process continues. At this point, the datasets from the dataflowId {} and dataProviderId {} have no blockers",
                 dataset.getDataflowId(), dataset.getDataProviderId());
+
+        jobControllerZuul.updateJobStatus(releaseJob.getId(), JobStatusEnum.IN_PROGRESS);
+
+        String processId = UUID.randomUUID().toString();
+        ProcessVO processVO = processUtils.createProcessVOForRelease(dataset.getDataflowId(), datasets.get(0), processId);
+        processVO = processControllerZuul.saveProcess(processVO);
+
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);
         createSnapshotVO.setAutomatic(Boolean.TRUE);
@@ -128,8 +185,16 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         createSnapshotVO.setDescription("Release " + formateador.format(ahora) + " CET");
         Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now());
+
+        JobProcessVO jobProcessVO = new JobProcessVO(null, releaseJob.getId(), processVO.getProcessId());
+        jobProcessControllerZuul.save(jobProcessVO);
+
+        processVO.setStatus(ProcessStatusEnum.IN_PROGRESS.toString());
+        processVO.setProcessStartingDate(new Date());
+        processControllerZuul.saveProcess(processVO);
+
         datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
-                dateRelease.toString(), false);
+                dateRelease.toString(), false, processId);
       }
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());

@@ -4,6 +4,7 @@ import lombok.*;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.utils.HashMapConverter;
+
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.Map;
@@ -43,6 +44,6 @@ public class Job {
     @Column(name = "CREATOR_USERNAME")
     private String creatorUsername;
 
-    @Column(name = "PROCESS_ID")
-    private String processId;
+    @Column(name = "RELEASE")
+    private boolean release;
 }

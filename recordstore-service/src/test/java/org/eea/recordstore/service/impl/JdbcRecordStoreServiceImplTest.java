@@ -271,7 +271,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false);
+    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false, null);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
@@ -305,7 +305,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false);
+    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false, null);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
@@ -348,7 +348,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false);
+    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false, null);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
@@ -388,7 +388,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false);
+    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false, null);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
@@ -431,7 +431,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
-    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false);
+    jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false, null);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
   }
@@ -482,7 +482,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(processService.saveProcess(any(ProcessVO.class))).thenReturn(processVO);
     doNothing().when(processService).updateStatusAndFinishedDate(anyString(), any(Date.class), anyString());
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false,
-        false);
+        false, null);
     Mockito.verify(kafkaSender, Mockito.times(0)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -518,7 +518,7 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.EUDATASET, false, true,
-        false);
+        false, null);
     Mockito.verify(lockService, Mockito.times(2)).removeLockByCriteria(Mockito.any());
   }
 

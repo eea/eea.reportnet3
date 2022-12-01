@@ -22,7 +22,7 @@ public interface JobService {
 
     Boolean canJobBeExecuted(JobVO job);
 
-    JobStatusEnum checkEligibilityOfJob(JobTypeEnum jobType, Map<String, Object> parameters);
+    JobStatusEnum checkEligibilityOfJob(String jobType, boolean release, Map<String, Object> parameters);
 
     void addValidationJob(Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert);
 
@@ -32,11 +32,11 @@ public interface JobService {
 
     void prepareAndExecuteReleaseJob(JobVO jobVO);
 
-    void updateJobStatusByProcessId(JobStatusEnum status, String processId);
-
     void deleteFinishedJobsBasedOnDuration();
 
-    void updateJobStatus(Long jobId, JobStatusEnum status, String processId);
+    void updateJobStatus(Long jobId, JobStatusEnum status);
 
     void deleteJob(JobVO jobVO);
+
+    JobVO save(JobVO jobVO);
 }

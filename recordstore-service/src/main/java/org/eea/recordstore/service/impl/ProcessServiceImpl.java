@@ -1,13 +1,8 @@
 package org.eea.recordstore.service.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import javax.transaction.Transactional;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -25,7 +20,11 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
-import com.fasterxml.jackson.core.JsonProcessingException;
+
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 
@@ -52,10 +51,6 @@ public class ProcessServiceImpl implements ProcessService {
   /** The dataset metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
-
-  /** The job controller zuul. */
-  @Autowired
-  private JobControllerZuul jobControllerZuul;
 
 
   /**
@@ -162,15 +157,6 @@ public class ProcessServiceImpl implements ProcessService {
         processRepository.flush();
       } catch (ObjectOptimisticLockingFailureException e) {
         updated = false;
-      }
-    }
-    //TODO this will be removed
-    if(updated){
-      if(status == ProcessStatusEnum.FINISHED){
-        jobControllerZuul.updateStatusByProcessId(JobStatusEnum.FINISHED, processId);
-      }
-      else if(status == ProcessStatusEnum.CANCELED){
-        jobControllerZuul.updateStatusByProcessId(JobStatusEnum.CANCELLED, processId);
       }
     }
     return updated;

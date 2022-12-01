@@ -2,6 +2,8 @@ package org.eea.recordstore.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import java.io.IOException;
@@ -185,19 +187,19 @@ public class RecordStoreControllerImplTest {
   public void testCreateSnapshot()
       throws SQLException, IOException, RecordStoreAccessException, EEAException {
     recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L,
-        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), false);
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), false, anyString());
 
     Mockito.verify(recordStoreService, times(1)).createDataSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), anyString());
   }
 
   @Test
   public void testCreateSnapshotIsBlankDate()
       throws SQLException, IOException, RecordStoreAccessException, EEAException {
-    recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L, "", false);
+    recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L, "", false, anyString());
 
     Mockito.verify(recordStoreService, times(1)).createDataSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), anyString());
   }
 
   @Test
@@ -206,9 +208,9 @@ public class RecordStoreControllerImplTest {
     Mockito.doNothing().when(dataSetMetabaseControllerZuul).updateDatasetRunningStatus(1L,
         DatasetRunningStatusEnum.RESTORING_SNAPSHOT);
     recordStoreControllerImpl.restoreSnapshotData(1L, 1L, 1L, DatasetTypeEnum.DESIGN, true, false,
-        false);
+        false, anyString());
     Mockito.verify(restoreSnapshotHelper, times(1)).processRestoration(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), anyString());
   }
 
   @Test
@@ -273,9 +275,9 @@ public class RecordStoreControllerImplTest {
     try {
       Mockito.doThrow(EEAException.class).when(restoreSnapshotHelper).processRestoration(
           Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any(),
-          Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean());
+          Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), anyString());
       recordStoreControllerImpl.restoreSnapshotData(1L, 1L, 1L, DatasetTypeEnum.COLLECTION, false,
-          false, false);
+          false, false, anyString());
     } catch (ResponseStatusException e) {
       Assert.assertNotNull(e);
       throw e;
@@ -288,9 +290,9 @@ public class RecordStoreControllerImplTest {
     try {
       Mockito.doThrow(SQLException.class).when(recordStoreService).createDataSnapshot(
           Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyString(),
-          Mockito.anyBoolean());
+          Mockito.anyBoolean(), anyString());
       recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L,
-          java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), false);
+          java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), false, anyString());
     } catch (ResponseStatusException e) {
       Assert.assertNotNull(e);
       throw e;

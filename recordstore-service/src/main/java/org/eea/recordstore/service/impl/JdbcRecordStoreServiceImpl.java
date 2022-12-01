@@ -547,7 +547,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Override
   @Async
   public void createDataSnapshot(Long idDataset, Long idSnapshot, Long idPartitionDataset,
-      String dateRelease, boolean prefillingReference)
+      String dateRelease, boolean prefillingReference, String processId)
       throws SQLException, IOException, EEAException {
 
     ConnectionDataVO connectionDataVO =
@@ -673,7 +673,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
 
       notificationCreateAndCheckRelease(idDataset, idSnapshot, type, dateRelease,
-          prefillingReference);
+          prefillingReference, processId);
 
       // release snapshot when the user press create+release
     } catch (Exception e) {
@@ -873,7 +873,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
-      boolean prefillingReference) throws SQLException, IOException {
+      boolean prefillingReference, String processId) throws SQLException, IOException {
 
     EventType successEventType = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot)
@@ -888,7 +888,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             : EventType.RELEASE_FAILED_EVENT;
 
     restoreSnapshot(idReportingDataset, idSnapshot, partitionId, datasetType, isSchemaSnapshot,
-        deleteData, successEventType, failEventType, prefillingReference);
+        deleteData, successEventType, failEventType, prefillingReference, processId);
 
   }
 
@@ -1394,7 +1394,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param prefillingReference the prefilling reference
    */
   private void notificationCreateAndCheckRelease(Long idDataset, Long idSnapshot, String type,
-      String dateRelease, boolean prefillingReference) {
+      String dateRelease, boolean prefillingReference, String processId) {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idDataset);
     LOG.info("The user on notificationCreateAndCheckRelease is {} and the datasetId {}",
@@ -1408,7 +1408,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
         if (Boolean.TRUE.equals(snapshot.getRelease())) {
-          dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot, dateRelease);
+          dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot, dateRelease, processId);
         } else {
           releaseNotificableKafkaEvent(EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, value,
               idDataset, null);
@@ -1456,7 +1456,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void restoreSnapshot(Long datasetId, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
-      EventType successEventType, EventType failEventType, boolean prefillingReference) {
+      EventType successEventType, EventType failEventType, boolean prefillingReference, String processId) {
 
     String signature = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot) ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
@@ -1502,7 +1502,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       CopyManager cm = new CopyManager((BaseConnection) con);
       DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
       LOG.info("Init restoring the snapshot files from Snapshot {} and datasetId {}", idSnapshot, datasetId);
-      copyProcess(dataset.getDataflowId(), datasetId, idSnapshot, datasetType, cm);
+      copyProcess(dataset.getDataflowId(), datasetId, idSnapshot, datasetType, cm, processId);
       LOG.info("Finished restoring the snapshot files from Snapshot {} and datasetId {}", idSnapshot, datasetId);
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
@@ -1647,7 +1647,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @throws SQLException the SQL exception
    */
   private void copyProcess(Long dataflowId, Long dataCollectionId, Long idSnapshot, DatasetTypeEnum datasetType,
-      CopyManager cm) throws IOException, SQLException {
+      CopyManager cm, String processId) throws IOException, SQLException {
     try {
       if (DatasetTypeEnum.DESIGN.equals(datasetType)
               || DatasetTypeEnum.REFERENCE.equals(datasetType)) {
@@ -1681,19 +1681,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
 
       SplitSnapfile snapFileForSplitting = isSnapFileForSplitting(nameFileFieldValue);
-      Long reportingDatasetId = dataSetSnapshotControllerZuul.findReportingDatasetIdBySnapshotId(idSnapshot);
-
-      String processId = UUID.randomUUID().toString();
-      ProcessVO processVO = createProcessVOForRelease(dataflowId, reportingDatasetId, processId);
-      processVO = processService.saveProcess(processVO);
 
       if (snapFileForSplitting.isForSplitting() == true) {
 
         splitSnapFile(processId, nameFileFieldValue, idSnapshot, snapFileForSplitting);
-
-        processVO.setStatus(ProcessStatusEnum.IN_PROGRESS.toString());
-        processVO.setProcessStartingDate(new Date());
-        processService.saveProcess(processVO);
 
         for (int i = 1; i <= snapFileForSplitting.getNumberOfFiles(); i++) {
           String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
@@ -1728,15 +1719,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             throw e;
           }
         }
-        processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), processId);
+
       } else {
-        processVO.setStatus(ProcessStatusEnum.IN_PROGRESS.toString());
-        processVO.setProcessStartingDate(new Date());
-        processService.saveProcess(processVO);
-
         copyFromFile(copyQueryField, nameFileFieldValue, cm);
-
-        processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), processId);
       }
 
     // Attachment value

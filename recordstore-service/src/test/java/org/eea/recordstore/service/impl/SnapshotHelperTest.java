@@ -1,6 +1,7 @@
 package org.eea.recordstore.service.impl;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -52,12 +53,12 @@ public class SnapshotHelperTest {
     ReflectionTestUtils.setField(snapshotHelper, "restorationExecutorService",
         new EEADelegatingSecurityContextExecutorService(Executors.newFixedThreadPool(2)));
     ReflectionTestUtils.setField(snapshotHelper, "maxRunningTasks", 2);
-    snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, true, true, false);
+    snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, true, true, false, null);
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(recordStoreService, Mockito.times(1)).restoreDataSnapshot(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), anyString());
     Thread.currentThread().interrupt();
   }
 
@@ -69,13 +70,13 @@ public class SnapshotHelperTest {
     ReflectionTestUtils.setField(snapshotHelper, "maxRunningTasks", 2);
     doThrow(new SQLException()).when(recordStoreService).restoreDataSnapshot(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.anyBoolean());
-    snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, true, true, false);
+        Mockito.anyBoolean(), anyString());
+    snapshotHelper.processRestoration(1L, 1L, 1L, DatasetTypeEnum.DESIGN, true, true, false, anyString());
     Thread.interrupted();
     TimeUnit.SECONDS.sleep(1);
     Mockito.verify(recordStoreService, Mockito.times(1)).restoreDataSnapshot(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.anyBoolean());
+        Mockito.anyBoolean(), anyString());
     Thread.currentThread().interrupt();
   }
 

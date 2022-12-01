@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -148,10 +149,10 @@ public class EUDatasetServiceImplTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.any(),
         Mockito.any())).thenReturn(Optional.of(partitionDataset));
     doNothing().when(datasetSnapshotService).addSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), anyString());
     euDatasetService.populateEUDatasetWithDataCollection(1L);
     Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.anyBoolean());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), anyString());
   }
 
   /**

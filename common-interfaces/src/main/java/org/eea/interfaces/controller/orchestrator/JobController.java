@@ -4,17 +4,17 @@ import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
-import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /** The Interface JobController. */
 public interface JobController {
 
-    @FeignClient(value = "orchestrator", path = "/jobs")
+    @FeignClient(value = "orchestrator", contextId = "jobs", path = "/jobs")
     interface JobControllerZuul extends JobController {
     }
 
@@ -80,22 +80,31 @@ public interface JobController {
 
 
     /**
-     * Update status by process id
-     *
-     * @param processId the process id
-     * @return
-     */
-    @PostMapping(value = "/updateStatus/{status}/{processId}")
-    void updateStatusByProcessId(@PathVariable("status") JobStatusEnum status, @PathVariable("processId") String processId);
-
-    /**
      * Update job's status
      *
      * @param jobId the job id
      * @param status the job's status
-     * @param processId the process id
      * @return
      */
-    @PostMapping(value = "/updateJobStatus/{id}/{status}/{processId}")
-    void updateJobStatus(@PathVariable("id") Long jobId, @PathVariable("status") JobStatusEnum status, @PathVariable("processId") String processId);
+    @PostMapping(value = "/updateJobStatus/{id}/{status}")
+    void updateJobStatus(@PathVariable("id") Long jobId, @PathVariable("status") JobStatusEnum status);
+
+    /**
+     * Saves job
+     * @param jobVO
+     * @return
+     */
+    @PostMapping(value = "/saveJob")
+    JobVO save(@RequestBody JobVO jobVO);
+
+    /**
+     *
+     * @param jobType
+     * @param release
+     * @param dataflowId
+     * @param dataProviderId
+     * @return
+     */
+    @GetMapping(value = "/checkEligibility")
+    JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release, @RequestParam("dataflowId") Long dataflowId, @RequestParam("dataProviderID") Long dataProviderId);
 }

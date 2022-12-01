@@ -1,10 +1,6 @@
 package org.eea.dataset.io.kafka.commands;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.TimeZone;
+import io.jsonwebtoken.lang.Collections;
 import org.eea.dataset.persistence.metabase.domain.ChangesEUDataset;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.repository.ChangesEUDatasetRepository;
@@ -12,11 +8,15 @@ import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
+import org.eea.dataset.utils.ProcessUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.communication.EmailVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -24,6 +24,10 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.orchestrator.JobProcessVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
@@ -37,7 +41,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import io.jsonwebtoken.lang.Collections;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * The Class PropagateNewFieldCommand.
@@ -89,6 +95,21 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
+  /** The process utils */
+  @Autowired
+  private ProcessUtils processUtils;
+
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
+  /** The job controller zuul */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
+
+  /** The job process controller zuul */
+  @Autowired
+  private JobProcessControllerZuul jobProcessControllerZuul;
+
   /**
    * The Constant LOG.
    */
@@ -120,6 +141,8 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
     try {
       Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
       String dateRelease = String.valueOf(eeaEventVO.getData().get("dateRelease"));
+      String processId = String.valueOf(eeaEventVO.getData().get("process_id"));
+      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
 
       Long nextData = datasetMetabaseService.getLastDatasetForRelease(datasetId);
       DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
@@ -136,6 +159,8 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       providerRelease.setProvider(provider.getCode());
       changesEUDatasetRepository.saveAndFlush(providerRelease);
 
+      processControllerZuul.updateStatusAndFinishedDate(processId, ProcessStatusEnum.FINISHED.toString(), new Date());
+
       if (null != nextData) {
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);
@@ -143,7 +168,20 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         createSnapshotVO.setDescription("Release " + dateRelease + " CET");
 
-        datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease, false);
+        String newProcessId = UUID.randomUUID().toString();
+        ProcessVO processVO = processUtils.createProcessVOForRelease(dataset.getDataflowId(), nextData, newProcessId);
+        processVO = processControllerZuul.saveProcess(processVO);
+
+        if (jobId!=null) {
+          JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, newProcessId);
+          jobProcessControllerZuul.save(jobProcessVO);
+        }
+
+        processVO.setStatus(ProcessStatusEnum.IN_PROGRESS.toString());
+        processVO.setProcessStartingDate(new Date());
+        processControllerZuul.saveProcess(processVO);
+
+        datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease, false, newProcessId);
       } else {
 
         // now when all finish we create the file to save the data to public export
@@ -204,6 +242,10 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO);
         LOG.info("Automatic feedback message created of dataflow {} and datasetId {}. Message: {}", dataflowVO.getId(), datasetId,
             messageVO.getContent());
+
+        if (jobId!=null) {
+          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+        }
       }
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());

@@ -1,41 +1,16 @@
 package org.eea.dataset.service.impl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TimeZone;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
-import org.eea.dataset.persistence.metabase.domain.DataCollection;
-import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.DesignDataset;
-import org.eea.dataset.persistence.metabase.domain.EUDataset;
-import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
-import org.eea.dataset.persistence.metabase.domain.Snapshot;
-import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
-import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
-import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
+import org.eea.dataset.persistence.metabase.domain.*;
+import org.eea.dataset.persistence.metabase.repository.*;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
@@ -88,10 +63,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The Class DatasetSnapshotServiceImpl.
@@ -298,7 +279,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   @Async
   public void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO,
-      Long partitionIdDestination, String dateRelease, boolean prefillingReference) {
+      Long partitionIdDestination, String dateRelease, boolean prefillingReference, String processId) {
 
 
     try {
@@ -326,8 +307,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       } else {
         snap.setDcReleased(false);
       }
-      snap.setEuReleased(false);
       snap.setEnabled(true);
+      snap.setEuReleased(false);
 
       Long dataflowId = metabaseRepository.findDataflowIdById(idDataset);
       if (snap.getReportingDataset() != null
@@ -363,7 +344,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
 
       recordStoreControllerZuul.createSnapshotData(idDataset, snap.getId(), idPartition,
-          dateRelease, prefillingReference);
+          dateRelease, prefillingReference, processId);
       LOG.info("Successfully added snapshot for datasetId {}", idDataset);
 
     } catch (Exception e) {
@@ -439,14 +420,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   @Async
-  public void restoreSnapshot(Long idDataset, Long idSnapshot, Boolean deleteData)
+  public void restoreSnapshot(Long idDataset, Long idSnapshot, Boolean deleteData, String processId)
       throws EEAException {
 
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(idDataset, "root").getId();
     recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, idPartition,
-        DatasetTypeEnum.REPORTING, false, deleteData, false);
+        DatasetTypeEnum.REPORTING, false, deleteData, false, processId);
     LOG.info("Successfully restored snapshot with id {} for datasetId {}", idSnapshot, idDataset);
   }
 
@@ -471,7 +452,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(datasetOrigin, "root").getId();
     recordStoreControllerZuul.restoreSnapshotData(idDatasetDestination, idSnapshot, idPartition,
-        datasetType, false, deleteData, prefillingReference);
+        datasetType, false, deleteData, prefillingReference, null);
   }
 
   /**
@@ -484,7 +465,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   @Async
-  public void releaseSnapshot(Long idDataset, Long idSnapshot, String dateRelease)
+  public void releaseSnapshot(Long idDataset, Long idSnapshot, String dateRelease, String processId)
       throws EEAException {
 
     Long providerId = 0L;
@@ -527,13 +508,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
     }
     deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection,
-        dateReleasing);
+        dateReleasing, processId);
 
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idDataset);
     value.put(LiteralConstants.USER,
         SecurityContextHolder.getContext().getAuthentication().getName());
     value.put("dateRelease", dateRelease);
+    value.put("process_id", processId);
     LOG.info("The user releasing kafka event on DatasetSnapshotServiceImpl.releaseSnapshot for snapshotId {} and datasetId {} is {}",
         idSnapshot, idDataset, SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
@@ -551,7 +533,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   private void deleteDataProvider(Long idDataset, Long idSnapshot, final Long idDataProvider,
-      DataProviderVO provider, Long idDataCollection, Date dateRelease) throws EEAException {
+      DataProviderVO provider, Long idDataCollection, Date dateRelease, String processId) throws EEAException {
     Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
     if (provider != null && idDataCollection != null) {
       TenantResolver
@@ -578,7 +560,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         }
 
         // This method will release the lock and the notification
-        restoreSnapshot(idDataCollection, idSnapshot, false);
+        restoreSnapshot(idDataCollection, idSnapshot, false, processId);
         // Mark the snapshot released
         snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
         // Add the date of the release
@@ -694,7 +676,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // 3. Create the data file of the snapshot, calling to recordstore-service
       // we need the partitionId. By now only consider the user root
       Long idPartition = obtainPartition(idDataset, "root").getId();
-      recordStoreControllerZuul.createSnapshotData(idDataset, idSnapshot, idPartition, null, false);
+      recordStoreControllerZuul.createSnapshotData(idDataset, idSnapshot, idPartition, null, false, null);
       LOG.info("Successfully added snapshot with snapshotId {} and datasetId {}", idSnapshot, idDataset);
     } catch (Exception e) {
       LOG_ERROR.error("Error creating snapshot for datasetId {}", idDataset, e);
@@ -1070,7 +1052,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   @Async
   public void createReleaseSnapshots(Long dataflowId, Long dataProviderId,
-      boolean restrictFromPublic, boolean validate) throws EEAException {
+      boolean restrictFromPublic, boolean validate, Long jobId) throws EEAException {
     try {
       LOG.info("Releasing datasets process begins. DataflowId: {} DataProviderId: {}", dataflowId,
               dataProviderId);
@@ -1091,7 +1073,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
       // if the user is admin can release without validations
       if (!isAdmin() || validate) {
-        validationControllerZuul.validateDataSetData(dataset.getId(), true, null);
+        validationControllerZuul.validateDataSetData(dataset.getId(), true, jobId);
       } else {
         String processId = UUID.randomUUID().toString();
         String notificationUser = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -1332,4 +1314,5 @@ public void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId)
   public Long findReportingDatasetIdBySnapshotId(Long snapshotId) {
      return snapshotRepository.findReportingDatasetBySnapshotId(snapshotId);
   }
+
 }
