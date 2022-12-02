@@ -130,7 +130,7 @@ public class JobServiceImpl implements JobService {
             Long dataflowId = (Long) parameters.get("dataflowId");
             Long dataProviderId = (Long) parameters.get("dataProviderId");
             List<Long> datasetIds = (List<Long>) parameters.get("datasetId");
-            List<Job> validationJobList = jobRepository.findByJobTypeAndJobStatusIn(JobTypeEnum.VALIDATION, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
+            List<Job> validationJobList = jobRepository.findByJobTypeAndJobStatusInAndRelease(JobTypeEnum.VALIDATION, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), false);
             for (Job job : validationJobList) {
                 Map<String, Object> insertedParameters = job.getParameters();
                 Long insertedDatasetId = Long.valueOf((Integer) insertedParameters.get("datasetId"));
@@ -140,8 +140,8 @@ public class JobServiceImpl implements JobService {
                     }
                 }
             }
-            List<Job> releaseJobList = jobRepository.findByJobTypeAndJobStatusIn(JobTypeEnum.RELEASE, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
-            for(Job job: releaseJobList){
+            List<Job> jobsRelatedToReleaseList = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), release);
+            for(Job job: jobsRelatedToReleaseList){
                 Map<String, Object> insertedParameters = job.getParameters();
                 Long insertedDataflowId = Long.valueOf((Integer) insertedParameters.get("dataflowId"));
                 Long insertedDataProviderId = Long.valueOf((Integer) insertedParameters.get("dataProviderId"));

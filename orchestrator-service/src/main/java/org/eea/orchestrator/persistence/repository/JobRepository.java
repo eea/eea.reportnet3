@@ -59,11 +59,11 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
     List<Job> findByJobTypeAndJobStatusInAndRelease(JobTypeEnum jobType, List<JobStatusEnum> jobStatus, boolean release);
 
     /**
-     * Retrieves jobs based on statuses and type
+     * Retrieves jobs based on statuses and types
      * @param jobType
      * @param jobStatus
      * @return
      */
-    List<Job> findByJobTypeAndJobStatusIn(JobTypeEnum jobType, List<JobStatusEnum> jobStatus);
+    List<Job> findByJobTypeInAndJobStatusInAndRelease(List<JobTypeEnum> jobType, List<JobStatusEnum> jobStatus, boolean release);
 }
 
