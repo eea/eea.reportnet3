@@ -126,25 +126,36 @@ public class JobServiceImpl implements JobService {
     @Override
     public JobStatusEnum checkEligibilityOfJob(String jobType, boolean release, Map<String, Object> parameters){
         //TODO implement check for all jobTypes
-        if (jobType == JobTypeEnum.RELEASE.toString()) {
+        if (jobType.equals(JobTypeEnum.RELEASE.toString())) {
             Long dataflowId = (Long) parameters.get("dataflowId");
             Long dataProviderId = (Long) parameters.get("dataProviderId");
-            List<Job> jobList = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), release);
-            for(Job job: jobList){
+            List<Long> datasetIds = (List<Long>) parameters.get("datasetId");
+            List<Job> validationJobList = jobRepository.findByJobTypeAndJobStatusIn(JobTypeEnum.VALIDATION, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
+            for (Job job : validationJobList) {
+                Map<String, Object> insertedParameters = job.getParameters();
+                Long insertedDatasetId = Long.valueOf((Integer) insertedParameters.get("datasetId"));
+                for (Long id : datasetIds) {
+                    if(id.equals(insertedDatasetId)){
+                        return JobStatusEnum.REFUSED;
+                    }
+                }
+            }
+            List<Job> releaseJobList = jobRepository.findByJobTypeAndJobStatusIn(JobTypeEnum.RELEASE, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
+            for(Job job: releaseJobList){
                 Map<String, Object> insertedParameters = job.getParameters();
                 Long insertedDataflowId = Long.valueOf((Integer) insertedParameters.get("dataflowId"));
                 Long insertedDataProviderId = Long.valueOf((Integer) insertedParameters.get("dataProviderId"));
-                if(dataflowId == insertedDataflowId && dataProviderId == insertedDataProviderId){
+                if(dataflowId.equals(insertedDataflowId) && dataProviderId.equals(insertedDataProviderId)){
                     return JobStatusEnum.REFUSED;
                 }
             }
-        } else if (jobType == JobTypeEnum.VALIDATION.toString()) {
+        } else if (jobType.equals(JobTypeEnum.VALIDATION.toString())) {
             Long datasetId =  (Long) parameters.get("datasetId");
-            List<Job> jobList = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), release);
+            List<Job> jobList = jobRepository.findByJobTypeAndJobStatusInAndRelease(JobTypeEnum.VALIDATION, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), release);
             for(Job job: jobList){
                 Map<String, Object> insertedParameters = job.getParameters();
                 Long insertedDatasetId = Long.valueOf((Integer) insertedParameters.get("datasetId"));
-                if(datasetId == insertedDatasetId){
+                if(datasetId.equals(insertedDatasetId)){
                     return JobStatusEnum.REFUSED;
                 }
             }

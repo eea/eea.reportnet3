@@ -3,6 +3,7 @@ package org.eea.orchestrator.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.*;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
@@ -41,6 +42,10 @@ public class JobControllerImpl implements JobController {
     /** The job service. */
     @Autowired
     private JobService jobService;
+
+    /** The dataset metabase controller zuul */
+    @Autowired
+    private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
     /** The valid columns. */
     List<String> validColumns = Arrays.asList("jobId", "processId", "creatorUsername", "jobType",
@@ -137,11 +142,13 @@ public class JobControllerImpl implements JobController {
         ThreadPropertiesManager.setVariable("user",
                 SecurityContextHolder.getContext().getAuthentication().getName());
 
+        List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("dataflowId", dataflowId);
         parameters.put("dataProviderId", dataProviderId);
         parameters.put("restrictFromPublic", restrictFromPublic);
         parameters.put("validate", validate);
+        parameters.put("datasetId", datasetIds);
         JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), true, parameters);
 
         LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
