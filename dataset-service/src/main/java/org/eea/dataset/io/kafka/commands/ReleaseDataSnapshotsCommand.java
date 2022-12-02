@@ -14,7 +14,6 @@ import org.eea.interfaces.controller.collaboration.CollaborationController.Colla
 import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -100,10 +99,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
   @Autowired
   private ProcessControllerZuul processControllerZuul;
-
-  /** The job controller zuul */
-  @Autowired
-  private JobControllerZuul jobControllerZuul;
 
   /** The job process controller zuul */
   @Autowired
