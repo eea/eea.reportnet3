@@ -159,7 +159,9 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       providerRelease.setProvider(provider.getCode());
       changesEUDatasetRepository.saveAndFlush(providerRelease);
 
+      LOG.info("Updating release process status of process with processId {} to FINISHED for dataflowId {}, dataProvider {}, dataset {}, jobId {}", processId, dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), jobId);
       processControllerZuul.updateStatusAndFinishedDate(processId, ProcessStatusEnum.FINISHED.toString(), new Date());
+      LOG.info("Updated release process status of process with processId {} to FINISHED for dataflowId {}, dataProvider {}, dataset {}, jobId {}", processId, dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), jobId);
 
       if (null != nextData) {
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
@@ -168,20 +170,26 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         createSnapshotVO.setDescription("Release " + dateRelease + " CET");
 
-        String newProcessId = UUID.randomUUID().toString();
-        ProcessVO processVO = processUtils.createProcessVOForRelease(dataset.getDataflowId(), nextData, newProcessId);
+        LOG.info("Creating release process for dataflowId {}, dataProviderId {} dataset {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
+        String nextProcessId = UUID.randomUUID().toString();
+        ProcessVO processVO = processUtils.createProcessVOForRelease(dataset.getDataflowId(), nextData, nextProcessId);
         processVO = processControllerZuul.saveProcess(processVO);
+        LOG.info("Created release process with processId {} for dataflowId {}, dataProviderId {} dataset {}, jobId {}", processVO.getProcessId(), dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
 
         if (jobId!=null) {
-          JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, newProcessId);
+          LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextProcessId);
+          JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, nextProcessId);
           jobProcessControllerZuul.save(jobProcessVO);
+          LOG.info("Created jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextProcessId);
         }
 
+        LOG.info("Updating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
         processVO.setStatus(ProcessStatusEnum.IN_PROGRESS.toString());
         processVO.setProcessStartingDate(new Date());
         processControllerZuul.saveProcess(processVO);
+        LOG.info("Updated release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
 
-        datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease, false, newProcessId);
+        datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease, false, nextProcessId);
       } else {
 
         // now when all finish we create the file to save the data to public export
@@ -206,8 +214,8 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         // Send email to requesters
         sendMail(dateRelease, dataset, dataflowVO);
 
-        LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {} DatasetId: {}",
-            dataset.getDataflowId(), dataset.getDataProviderId(), datasetId);
+        LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {} DatasetId: {}, JobId: {}",
+            dataset.getDataflowId(), dataset.getDataProviderId(), datasetId, jobId);
         List<Long> datasetMetabaseListIds =
             datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(dataflowVO.getId(),
                 dataset.getDataProviderId());
@@ -240,7 +248,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         messageVO.setContent(country + " released " + dataflowName + " successfully");
         messageVO.setAutomatic(true);
         collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO);
-        LOG.info("Automatic feedback message created of dataflow {} and datasetId {}. Message: {}", dataflowVO.getId(), datasetId,
+        LOG.info("Automatic feedback message created of dataflow {}, datasetId {} and jobId {}. Message: {}", dataflowVO.getId(), datasetId, jobId,
             messageVO.getContent());
 
         if (jobId!=null) {

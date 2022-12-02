@@ -135,9 +135,10 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         return;
       }
 
-      LOG.info("Adding release job for dataflowId={}, dataProviderId={} and creator={} with status {}", dataset.getDataflowId(), dataset.getDataProviderId(), SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
+      LOG.info("Adding release job for dataflowId {}, dataProviderId {} and creator {} with status {}", dataset.getDataflowId(), dataset.getDataProviderId(), SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
       releaseJob = jobControllerZuul.save(releaseJob);
       jobHistoryControllerZuul.save(releaseJob);
+      LOG.info("Added release job for dataflowId {}, dataProviderId {} and creator {} with status {} and jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert, releaseJob.getId());
 
       // we check if one or more dataset have error, if have we create a notification and abort
       // process of releasing
@@ -150,11 +151,11 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
           datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
                   dataset.getDataProviderId());
           LOG_ERROR.error(
-                  "Error in the releasing process of the dataflowId {} and dataProviderId {}, the datasets have blocker errors",
-                  dataset.getDataflowId(), dataset.getDataProviderId());
+                  "Error in the releasing process of the dataflowId {}, dataProviderId {} and jobId {}, the datasets have blocker errors",
+                  dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
 
           releaseJob.setJobStatus(JobStatusEnum.FAILED);
-          jobControllerZuul.save(releaseJob);
+          jobControllerZuul.updateJobStatus(releaseJob.getId(), JobStatusEnum.FAILED);
 
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
                   NotificationVO.builder()
@@ -168,14 +169,16 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       // If none blocker errors has found, we have to release datasets one by one
       if (!haveBlockers) {
         LOG.info(
-                "Releasing datasets process continues. At this point, the datasets from the dataflowId {} and dataProviderId {} have no blockers",
-                dataset.getDataflowId(), dataset.getDataProviderId());
+                "Releasing datasets process continues. At this point, the datasets from the dataflowId {}, dataProviderId {} and jobId {} have no blockers",
+                dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
 
         jobControllerZuul.updateJobStatus(releaseJob.getId(), JobStatusEnum.IN_PROGRESS);
 
+        LOG.info("Creating release process for dataflowId {}, dataProviderId {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
         String processId = UUID.randomUUID().toString();
         ProcessVO processVO = processUtils.createProcessVOForRelease(dataset.getDataflowId(), datasets.get(0), processId);
         processVO = processControllerZuul.saveProcess(processVO);
+        LOG.info("Created release process for dataflowId {}, dataProviderId {}, jobId {} and processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processVO.getProcessId());
 
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);
@@ -186,12 +189,16 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         createSnapshotVO.setDescription("Release " + formateador.format(ahora) + " CET");
         Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now());
 
+        LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processVO.getProcessId());
         JobProcessVO jobProcessVO = new JobProcessVO(null, releaseJob.getId(), processVO.getProcessId());
         jobProcessControllerZuul.save(jobProcessVO);
+        LOG.info("Created jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processVO.getProcessId());
 
+        LOG.info("Updating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), releaseJob.getId(), processVO.getProcessId());
         processVO.setStatus(ProcessStatusEnum.IN_PROGRESS.toString());
         processVO.setProcessStartingDate(new Date());
         processControllerZuul.saveProcess(processVO);
+        LOG.info("Created release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), releaseJob.getId(), processVO.getProcessId());
 
         datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
                 dateRelease.toString(), false, processId);

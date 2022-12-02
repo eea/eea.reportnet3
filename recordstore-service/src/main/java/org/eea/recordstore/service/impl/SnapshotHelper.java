@@ -170,15 +170,15 @@ public class SnapshotHelper implements DisposableBean {
               .getDelegateExecutorService()).getActiveCount();
 
       LOG.info(
-          "Executing restoration for snapshot {}. Working restoration threads {}, Available restoration threads {}",
-          restorationTask.idSnapshot, workingThreads, maxRunningTasks - workingThreads);
+          "Executing restoration for snapshot {} and release processId {}. Working restoration threads {}, Available restoration threads {}",
+          restorationTask.idSnapshot, restorationTask.processId, workingThreads, maxRunningTasks - workingThreads);
       try {
         recordStoreService.restoreDataSnapshot(restorationTask.datasetId,
             restorationTask.idSnapshot, restorationTask.idPartition, restorationTask.datasetType,
             restorationTask.isSchemaSnapshot, restorationTask.deleteData,
             restorationTask.prefillingReference, restorationTask.processId);
       } catch (SQLException | IOException | RecordStoreAccessException e) {
-        LOG_ERROR.error("Error restoring snapshot for dataset {}", restorationTask.datasetId, e);
+        LOG_ERROR.error("Error restoring snapshot for dataset {}, release processId {}", restorationTask.datasetId, restorationTask.processId, e);
       } finally {
         Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
         LOG.info("Restoration task for snapshot {} finished, it has taken taken {} seconds",

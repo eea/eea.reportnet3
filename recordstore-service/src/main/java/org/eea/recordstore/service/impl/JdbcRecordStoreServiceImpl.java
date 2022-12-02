@@ -25,10 +25,8 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.SplitSnapfile;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.validation.ReleaseTaskVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
@@ -36,7 +34,6 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.recordstore.exception.RecordStoreAccessException;
-import org.eea.recordstore.service.ProcessService;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.utils.LiteralConstants;
 import org.postgresql.copy.CopyIn;
@@ -257,10 +254,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The validation controller zuul */
   @Autowired
   private ValidationControllerZuul validationControllerZuul;
-
-  /** The process service */
-  @Autowired
-  private ProcessService processService;
 
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
@@ -638,7 +631,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       printToFile(nameFileAttachmentValue, copyQueryAttachment, cm);
 
-      LOG.info("Snapshot {} data files created for datasetId {}", idSnapshot, idDataset);
+      LOG.info("Snapshot {} data files created for datasetId {}, release processId {}", idSnapshot, idDataset, processId);
 
       // Check if the snapshot is completed. If it is an schema snapshot, check the rules file.
       // Otherwise check the attachment file
@@ -653,8 +646,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             break;
           } catch (FeignException e) {
             LOG.info(
-                "Document: {} still not created from dataset: {} and snapshot: {}, wait {} milliseconds",
-                nameFileRules, idDataset, idSnapshot, timeToWaitBeforeReleasingNotification);
+                "Document: {} still not created from dataset: {} and snapshot: {}, release processId {} wait {} milliseconds",
+                nameFileRules, idDataset, idSnapshot, processId, timeToWaitBeforeReleasingNotification);
             Thread.sleep(timeToWaitBeforeReleasingNotification);
           }
         }
@@ -665,8 +658,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             break;
           } catch (IOException e) {
             LOG.info(
-                "Waiting to finish the snapshot {} from dataset {} to complete before sending the notification",
-                idSnapshot, idDataset);
+                "Waiting to finish the snapshot {} from dataset {}, release processId {} to complete before sending the notification",
+                idSnapshot, idDataset, processId);
             Thread.sleep(timeToWaitBeforeReleasingNotification);
           }
         }
@@ -701,7 +694,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         default:
           break;
       }
-      LOG_ERROR.error("Error creating snapshot for dataset {}", idDataset, e);
+      LOG_ERROR.error("Error creating snapshot for dataset {}, release processId {}", idDataset, processId, e);
       Map<String, Object> value = new HashMap<>();
       value.put(LiteralConstants.DATASET_ID, idDataset);
       releaseNotificableKafkaEvent(eventType, value, idDataset, e.getMessage());
@@ -1397,8 +1390,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String dateRelease, boolean prefillingReference, String processId) {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idDataset);
-    LOG.info("The user on notificationCreateAndCheckRelease is {} and the datasetId {}",
-        SecurityContextHolder.getContext().getAuthentication().getName(), idDataset);
+    LOG.info("The user on notificationCreateAndCheckRelease is {} and the datasetId {} of release processId {}",
+        SecurityContextHolder.getContext().getAuthentication().getName(), idDataset, processId);
     LOG.info("The user set on threadPropertiesManager is {}",
         SecurityContextHolder.getContext().getAuthentication().getName());
     if (Boolean.TRUE.equals(prefillingReference)) {
@@ -1501,9 +1494,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       CopyManager cm = new CopyManager((BaseConnection) con);
       DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-      LOG.info("Init restoring the snapshot files from Snapshot {} and datasetId {}", idSnapshot, datasetId);
+      LOG.info("Init restoring the snapshot files from Snapshot {} and datasetId {} of release processId {}", idSnapshot, datasetId, processId);
       copyProcess(dataset.getDataflowId(), datasetId, idSnapshot, datasetType, cm, processId);
-      LOG.info("Finished restoring the snapshot files from Snapshot {} and datasetId {}", idSnapshot, datasetId);
+      LOG.info("Finished restoring the snapshot files from Snapshot {} and datasetId {} of release processId {}", idSnapshot, datasetId, processId);
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
           && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
@@ -1542,7 +1535,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         dataSetSnapshotControllerZuul.updateSnapshotEURelease(datasetIdFromSnapshot);
         dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
       }
-      LOG.info("Snapshot {} restored", idSnapshot);
+      LOG.info("Snapshot {} restored for release processId {}", idSnapshot, processId);
     } catch (Exception e) {
       if (!prefillingReference) {
         if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
@@ -1662,7 +1655,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String copyQueryTable =
           COPY_DATASET + dataCollectionId + ".table_value(id, id_table_schema, dataset_id) FROM STDIN";
       copyFromFile(copyQueryTable, nameFileTableValue, cm);
-      LOG.info("Executed copyFromFile for table_value with file {} and datasetId {}", nameFileTableValue, dataCollectionId);
+      LOG.info("Executed copyFromFile for table_value with file {} and datasetId {} for release processId {}", nameFileTableValue, dataCollectionId, processId);
     }
     // Record value
     String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
@@ -1671,7 +1664,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     String copyQueryRecord = COPY_DATASET + dataCollectionId
         + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
     copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
-    LOG.info("Executed copyFromFile for record_value with file {} and datasetId {}", nameFileRecordValue, dataCollectionId);
+    LOG.info("Executed copyFromFile for record_value with file {} and datasetId {} for release processId {}", nameFileRecordValue, dataCollectionId, processId);
 
       // Field value
       String nameFileFieldValue = pathSnapshot
@@ -1695,17 +1688,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             String json = objectMapper.writeValueAsString(releaseTaskVO);
             TaskVO task = validationControllerZuul.findReleaseTaskByJson(json);
 
+            LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
             task.setStartingDate(new Date());
             task.setStatus(ProcessStatusEnum.IN_PROGRESS);
             task.setPod(serviceInstanceId);
             task = validationControllerZuul.saveTask(task);
+            LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
 
             LOG.info("Copy file {}", splitFile);
             copyFromFile(copyQueryField, splitFile, cm);
 
+            LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
             task.setFinishDate(new Date());
             task.setStatus(ProcessStatusEnum.FINISHED);
             validationControllerZuul.updateTask(task);
+            LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
 
             try {
               LOG.info("File {} copied and will be deleted", splitFile);
@@ -1736,19 +1733,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG_ERROR.error("Unexpected error! Error in copyProcess for dataCollectionId {} and snapshotId {}. Message: {}", dataCollectionId, idSnapshot, e.getMessage());
       throw e;
     }
-  }
-
-  private ProcessVO createProcessVOForRelease(Long dataflowId, Long datasetId, String processId) {
-    ProcessVO processVO = new ProcessVO();
-    processVO.setDataflowId(dataflowId);
-    processVO.setDatasetId(datasetId);
-    processVO.setStatus(ProcessStatusEnum.IN_QUEUE.toString());
-    processVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
-    processVO.setPriority(1);
-    processVO.setProcessType(ProcessTypeEnum.RELEASE_SNAPSHOT.toString());
-    processVO.setProcessId(processId);
-    processVO.setQueuedDate(new Date());
-    return processVO;
   }
 
   /**
@@ -2026,7 +2010,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void splitSnapFile(String processId, String inputfile, Long idSnapshot, SplitSnapfile snapFileForSplitting) {
 
-    LOG.info("Method splitSnapFile starts for file {} with idSnapshot {} and snapFileForSplitting {}", inputfile, idSnapshot, snapFileForSplitting);
+    LOG.info("Method splitSnapFile starts for file {} with idSnapshot {}, snapFileForSplitting {} and release processId {}", inputfile, idSnapshot, snapFileForSplitting, processId);
     int numberOfFiles = snapFileForSplitting.getNumberOfFiles();
     int maxLinesPerFile = 200000;
 
@@ -2051,18 +2035,20 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           }
         }
         out.close();
+        LOG.info("Creating release task for file {} with idSnapshot {} and release processId {}", splitFileName, idSnapshot, processId);
         ReleaseTaskVO releaseTaskVO = ReleaseTaskVO.builder().splitFileName(splitFileName).snapshotId(idSnapshot).splitFileId(j).numberOfSplitFiles(numberOfFiles).build();
         ObjectMapper objectMapper = new ObjectMapper();
         String json = "";
         try {
           json = objectMapper.writeValueAsString(releaseTaskVO);
         } catch (JsonProcessingException e) {
-          LOG_ERROR.error("error processing json for snap file {}", splitFileName);
+          LOG_ERROR.error("error processing json for snap file {} of release processId {}", splitFileName, processId);
           throw e;
         }
         TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
                 json, 0, null);
         validationControllerZuul.saveTask(task);
+        LOG.info("Created release task with id {} for file {} with idSnapshot {} and release processId {}", task.getId(), splitFileName, idSnapshot, processId);
       }
 
       in.close();

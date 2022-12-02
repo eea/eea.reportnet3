@@ -337,7 +337,7 @@ public class DatasetSnapshotServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZuul).createSnapshotData(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), anyString());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L, new Date().toString(),
         false, null);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());

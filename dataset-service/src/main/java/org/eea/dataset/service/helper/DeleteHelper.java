@@ -205,11 +205,11 @@ public class DeleteHelper {
    * @param providerCode the provider code
    */
   @Transactional
-  public void deleteRecordValuesByProvider(Long datasetId, String providerCode) {
+  public void deleteRecordValuesByProvider(Long datasetId, String providerCode, String processId) {
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     RecordValue recordValue = recordRepository.findFirstByDataProviderCode(providerCode);
     if (recordValue!=null) {
-      LOG.info("Deleting data with providerCode: {} ", providerCode);
+      LOG.info("Deleting data with providerCode: {} for release processId {}", providerCode, processId);
       recordRepository.deleteByDataProviderCode(providerCode);
     }
     // now the view is not updated, update the check to false

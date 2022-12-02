@@ -1,21 +1,5 @@
 package org.eea.recordstore.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -43,6 +27,16 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 
 /**
  * The Class RecordStoreControllerImplTest.
@@ -187,19 +181,19 @@ public class RecordStoreControllerImplTest {
   public void testCreateSnapshot()
       throws SQLException, IOException, RecordStoreAccessException, EEAException {
     recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L,
-        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), false, anyString());
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), false, null);
 
     Mockito.verify(recordStoreService, times(1)).createDataSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), anyString());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any());
   }
 
   @Test
   public void testCreateSnapshotIsBlankDate()
       throws SQLException, IOException, RecordStoreAccessException, EEAException {
-    recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L, "", false, anyString());
+    recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L, "", false, null);
 
     Mockito.verify(recordStoreService, times(1)).createDataSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), anyString());
+        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any());
   }
 
   @Test
@@ -208,9 +202,9 @@ public class RecordStoreControllerImplTest {
     Mockito.doNothing().when(dataSetMetabaseControllerZuul).updateDatasetRunningStatus(1L,
         DatasetRunningStatusEnum.RESTORING_SNAPSHOT);
     recordStoreControllerImpl.restoreSnapshotData(1L, 1L, 1L, DatasetTypeEnum.DESIGN, true, false,
-        false, anyString());
+        false, null);
     Mockito.verify(restoreSnapshotHelper, times(1)).processRestoration(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), anyString());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any());
   }
 
   @Test
@@ -275,9 +269,9 @@ public class RecordStoreControllerImplTest {
     try {
       Mockito.doThrow(EEAException.class).when(restoreSnapshotHelper).processRestoration(
           Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any(),
-          Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), anyString());
+          Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.any());
       recordStoreControllerImpl.restoreSnapshotData(1L, 1L, 1L, DatasetTypeEnum.COLLECTION, false,
-          false, false, anyString());
+          false, false, null);
     } catch (ResponseStatusException e) {
       Assert.assertNotNull(e);
       throw e;
@@ -290,9 +284,9 @@ public class RecordStoreControllerImplTest {
     try {
       Mockito.doThrow(SQLException.class).when(recordStoreService).createDataSnapshot(
           Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyString(),
-          Mockito.anyBoolean(), anyString());
+          Mockito.anyBoolean(), Mockito.any());
       recordStoreControllerImpl.createSnapshotData(1L, 1L, 1L,
-          java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), false, anyString());
+          java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), false, null);
     } catch (ResponseStatusException e) {
       Assert.assertNotNull(e);
       throw e;

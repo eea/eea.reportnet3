@@ -133,7 +133,7 @@ public class ValidationControllerImpl implements ValidationController {
           required = false) @RequestParam(value = "released", required = false) boolean released,
           @ApiParam(value = "Job id", example = "15", required = false) @PathVariable("jobId") Long jobId) {
 
-    LOG.info("Called ValidationControllerImpl.validateDataSetData for datasetId {} and released {}", datasetId, released);
+    LOG.info("Called ValidationControllerImpl.validateDataSetData for datasetId {} and released {} with jobId {}", datasetId, released, jobId);
 
     if (jobId!=null) {
       jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
@@ -153,8 +153,10 @@ public class ValidationControllerImpl implements ValidationController {
       processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
           ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, uuid,
           SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
-      JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, uuid);
-      jobProcessControllerZuul.save(jobProcessVO);
+      if (jobId!=null) {
+        JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, uuid);
+        jobProcessControllerZuul.save(jobProcessVO);
+      }
 
     } else {
       // obtain datasets to be released
@@ -165,20 +167,26 @@ public class ValidationControllerImpl implements ValidationController {
       processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
           ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, uuid,
           SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
-      JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, uuid);
-      jobProcessControllerZuul.save(jobProcessVO);
+
+      if (jobId!=null) {
+        JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, uuid);
+        jobProcessControllerZuul.save(jobProcessVO);
+      }
       datasets.remove(datasetId);
       for (Long datasetToReleaseId : datasets) {
         String processId = UUID.randomUUID().toString();
         processControllerZuul.updateProcess(datasetToReleaseId, dataset.getDataflowId(),
             ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId,
             SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
-        JobProcessVO jobProcess = new JobProcessVO(null, jobId, processId);
-        jobProcessControllerZuul.save(jobProcess);
+
+        if (jobId!=null) {
+          JobProcessVO jobProcess = new JobProcessVO(null, jobId, processId);
+          jobProcessControllerZuul.save(jobProcess);
+        }
       }
     }
     try {
-      LOG.info("Executing validation for datasetId {}", datasetId);
+      LOG.info("Executing validation for datasetId {} with jobId {}", datasetId, jobId);
       validationHelper.executeValidation(datasetId, uuid, released, true);
 
       // Add lock to the release process if necessary
@@ -186,10 +194,10 @@ public class ValidationControllerImpl implements ValidationController {
     } catch (EEAException e) {
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
-      LOG_ERROR.error("Error validating datasetId {}. Message {}", datasetId, e.getMessage(), e);
+      LOG_ERROR.error("Error validating datasetId {} with jobId {}. Message {}", datasetId, jobId, e.getMessage(), e);
       validationHelper.deleteLockToReleaseProcess(datasetId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error validating dataset data for datasetId {}. Message: {}", datasetId, e.getMessage());
+      LOG_ERROR.error("Unexpected error! Error validating dataset data for datasetId {} with jobId {}. Message: {}", datasetId, jobId, e.getMessage());
       throw e;
     }
   }

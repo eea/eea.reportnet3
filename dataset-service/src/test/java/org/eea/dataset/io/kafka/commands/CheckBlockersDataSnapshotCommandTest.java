@@ -1,17 +1,21 @@
 package org.eea.dataset.io.kafka.commands;
 
-import static org.mockito.Mockito.times;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.utils.ProcessUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobHistoryController.JobHistoryControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.orchestrator.JobProcessVO;
+import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -26,6 +30,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.sql.Timestamp;
+import java.util.*;
+
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.times;
 
 /**
  * The Class RestoreDataCollectionSnapshotCommandTest.
@@ -53,6 +63,21 @@ public class CheckBlockersDataSnapshotCommandTest {
   @Mock
   private DatasetSnapshotService datasetSnapshotService;
 
+  @Mock
+  private JobControllerZuul jobControllerZuul;
+
+  @Mock
+  private JobHistoryControllerZuul jobHistoryControllerZuul;
+
+  @Mock
+  private ProcessControllerZuul processControllerZuul;
+
+  @Mock
+  private JobProcessControllerZuul jobProcessControllerZuul;
+
+  @Mock
+  private ProcessUtils processUtils;
+
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
 
@@ -64,6 +89,7 @@ public class CheckBlockersDataSnapshotCommandTest {
 
   /** The authentication. */
   private Authentication authentication;
+
 
   /**
    * Inits the mocks.
@@ -104,7 +130,18 @@ public class CheckBlockersDataSnapshotCommandTest {
         .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
             datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
         .thenReturn(datasetsId);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong())).thenReturn(JobStatusEnum.QUEUED);
+    JobVO jobVO = new JobVO(Long.valueOf(1), JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "test", true);
+    Mockito.when(jobControllerZuul.save(any(JobVO.class))).thenReturn(jobVO);
+    Mockito.doNothing().when(jobHistoryControllerZuul).save(any(JobVO.class));
     Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(false);
+    Mockito.doNothing().when(jobControllerZuul).updateJobStatus(anyLong(), any(JobStatusEnum.class));
+    ProcessVO processVO = new ProcessVO();
+    processVO.setProcessId("jkhiuh");
+    Mockito.when(processUtils.createProcessVOForRelease(anyLong(), anyLong(), anyString())).thenReturn(processVO);
+    JobProcessVO jobProcessVO = new JobProcessVO(Long.valueOf(1), Long.valueOf(1), "jkhiuh");
+    Mockito.when(jobProcessControllerZuul.save(any(JobProcessVO.class))).thenReturn(jobProcessVO);
+    Mockito.when(processControllerZuul.saveProcess(any(ProcessVO.class))).thenReturn(processVO);
 
     checkBlockersDataSnapshotCommand.execute(eeaEventVO);
     Mockito.verify(dataSetMetabaseRepository, times(1)).findById(1L);
@@ -136,6 +173,9 @@ public class CheckBlockersDataSnapshotCommandTest {
         .when(dataSetMetabaseRepository.getDatasetIdsByDataflowIdAndDataProviderId(
             datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
         .thenReturn(datasetsId);
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong())).thenReturn(JobStatusEnum.QUEUED);
+    JobVO jobVO = new JobVO(Long.valueOf(1), JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "test", true);
+    Mockito.when(jobControllerZuul.save(any(JobVO.class))).thenReturn(jobVO);
     Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(true);
     checkBlockersDataSnapshotCommand.execute(eeaEventVO);
     Mockito.verify(validationRepository, times(1)).existsByLevelError(ErrorTypeEnum.BLOCKER);

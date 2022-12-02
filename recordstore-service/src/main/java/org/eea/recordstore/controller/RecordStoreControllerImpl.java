@@ -189,8 +189,8 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
       LOG.info(
-          "The user invoking RecordStoreControllerImpl.createSnapshotData is {} and the datasetId {}",
-          SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+          "The user invoking RecordStoreControllerImpl.createSnapshotData is {} and the datasetId {} with release processId {}",
+          SecurityContextHolder.getContext().getAuthentication().getName(), datasetId, processId);
       LOG.info("The user set on threadPropertiesManager is {}",
           ThreadPropertiesManager.getVariable("user"));
       if (StringUtils.isNotBlank(dateRelease)) {
@@ -202,12 +202,12 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     } catch (SQLException | IOException | RecordStoreAccessException | EEAException
         | ParseException e) {
       LOG_ERROR.error(
-          "Error creating a snapshot for the dataset: DatasetId {}. idSnapshot {}. Message: {}",
-          datasetId, idSnapshot, e.getMessage(), e);
+          "Error creating a snapshot for the dataset: DatasetId {}. idSnapshot {}. Release processId {} Message: {}",
+          datasetId, idSnapshot, processId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_SNAPSHOT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error creating snapshot data with id {} for datasetId {}. Message: {}", idSnapshot, datasetId, e.getMessage());
+      LOG_ERROR.error("Unexpected error! Error creating snapshot data with id {} for datasetId {}, release processId {}. Message: {}", idSnapshot, datasetId, processId, e.getMessage());
       throw e;
     }
 
@@ -258,12 +258,12 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           isSchemaSnapshot, deleteData, prefillingReference, processId);
     } catch (EEAException e) {
       LOG_ERROR.error(
-          "Error restoring a snapshot for the dataset: DatasetId {}. idSnapshot {}. Message: {}",
-          datasetId, idSnapshot, e.getMessage(), e);
+          "Error restoring a snapshot for the dataset: DatasetId {}. idSnapshot {}. release processId {}. Message: {}",
+          datasetId, idSnapshot, processId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RESTORING_SNAPSHOT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error restoring snapshot data with id {} for datasetId {}. Message: {}", idSnapshot, datasetId, e.getMessage());
+      LOG_ERROR.error("Unexpected error! Error restoring snapshot data with id {} for datasetId {} and release processId {}. Message: {}", idSnapshot, datasetId, processId, e.getMessage());
       throw e;
     }
 
