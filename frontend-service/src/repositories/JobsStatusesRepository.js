@@ -10,7 +10,6 @@ export const JobsStatusesRepository = {
     sortField = '',
     jobId,
     jobType,
-    processId,
     creatorUsername,
     jobStatus}) =>
     await HTTPRequester.get({
@@ -21,7 +20,6 @@ export const JobsStatusesRepository = {
         sortField,
         jobId,
         jobType,
-        processId,
         creatorUsername,
         jobStatus
       })

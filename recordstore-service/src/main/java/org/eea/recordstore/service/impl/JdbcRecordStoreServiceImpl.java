@@ -16,6 +16,8 @@ import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetContro
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -24,6 +26,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.recordstore.SplitSnapfile;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -34,6 +37,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.eea.recordstore.service.ProcessService;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.utils.LiteralConstants;
 import org.postgresql.copy.CopyIn;
@@ -254,6 +258,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The validation controller zuul */
   @Autowired
   private ValidationControllerZuul validationControllerZuul;
+
+  /** The process service */
+  @Autowired
+  private ProcessService processService;
+
+  /** The job controller zuul */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
+
+  /** The job process controller zuul */
+  @Autowired
+  private JobProcessControllerZuul jobProcessControllerZuul;
 
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
@@ -1494,9 +1510,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       CopyManager cm = new CopyManager((BaseConnection) con);
       DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
       LOG.info("Init restoring the snapshot files from Snapshot {} and datasetId {} of release processId {}", idSnapshot, datasetId, processId);
-      copyProcess(dataset.getDataflowId(), datasetId, idSnapshot, datasetType, cm, processId);
+      copyProcess(dataset.getDataflowId(), datasetId, idSnapshot, datasetType, cm, processId, jobId);
       LOG.info("Finished restoring the snapshot files from Snapshot {} and datasetId {} of release processId {}", idSnapshot, datasetId, processId);
+
+      if (jobId!=null) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+      }
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
           && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
@@ -1640,7 +1661,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @throws SQLException the SQL exception
    */
   private void copyProcess(Long dataflowId, Long dataCollectionId, Long idSnapshot, DatasetTypeEnum datasetType,
-      CopyManager cm, String processId) throws IOException, SQLException {
+      CopyManager cm, String processId, Long jobId) throws IOException, SQLException {
     try {
       if (DatasetTypeEnum.DESIGN.equals(datasetType)
               || DatasetTypeEnum.REFERENCE.equals(datasetType)) {
@@ -1716,19 +1737,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             throw e;
           }
         }
-
       } else {
         copyFromFile(copyQueryField, nameFileFieldValue, cm);
       }
 
-    // Attachment value
-    String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+     // Attachment value
+     String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
         LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
 
-    String copyQueryAttachment = COPY_DATASET + dataCollectionId
+     String copyQueryAttachment = COPY_DATASET + dataCollectionId
         + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
-    copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
-    LOG.info("Executed copyFromFile for attachment_value with file {} and dataCollectionId {}", nameFileAttachmentValue, dataCollectionId);
+      copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
+      LOG.info("Executed copyFromFile for attachment_value with file {} and dataCollectionId {}", nameFileAttachmentValue, dataCollectionId);
+      LOG.info("Updating release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}, jobId {}", processId, dataCollectionId, jobId);
+      processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), processId);
+      LOG.info("Updated release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}, jobId {}", processId, dataCollectionId, jobId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error in copyProcess for dataCollectionId {} and snapshotId {}. Message: {}", dataCollectionId, idSnapshot, e.getMessage());
       throw e;

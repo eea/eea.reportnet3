@@ -16,12 +16,11 @@ public interface JobExtendedRepository {
      * @param jobId the jobId
      * @param jobTypes the jobTypes
      * @param creatorUsername the creatorUsername
-     * @param processId the processId
      * @param jobStatuses the jobStatuses
      * @return the list of job entries
      */
     List<Job> findJobsPaginated(Pageable pageable, boolean asc, String sortedColumn, Long jobId,
-                                String jobTypes, String processId, String creatorUsername, String jobStatuses);
+                                String jobTypes, String creatorUsername, String jobStatuses);
 
     /**
      * Count jobs paginated.
@@ -31,10 +30,9 @@ public interface JobExtendedRepository {
      * @param jobId the jobId
      * @param jobTypes the jobTypes
      * @param creatorUsername the creatorUsername
-     * @param processId the processId
      * @param jobStatuses the jobStatuses
      * @return the long
      */
     Long countJobsPaginated(boolean asc, String sortedColumn, Long jobId,
-                            String jobTypes, String processId, String creatorUsername, String jobStatuses);
+                            String jobTypes, String creatorUsername, String jobStatuses);
 }

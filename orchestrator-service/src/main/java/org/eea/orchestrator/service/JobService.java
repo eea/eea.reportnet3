@@ -16,7 +16,7 @@ import java.util.Map;
 
 public interface JobService {
     JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId,
-                   String jobTypes, String processId, String creatorUsername, String jobStatuses);
+                   String jobTypes, String creatorUsername, String jobStatuses);
 
     List<JobVO> getJobsByStatus(JobStatusEnum status);
 

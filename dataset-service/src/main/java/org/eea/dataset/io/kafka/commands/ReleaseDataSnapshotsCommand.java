@@ -25,7 +25,6 @@ import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
-import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -159,10 +158,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       providerRelease.setProvider(provider.getCode());
       changesEUDatasetRepository.saveAndFlush(providerRelease);
 
-      LOG.info("Updating release process status of process with processId {} to FINISHED for dataflowId {}, dataProvider {}, dataset {}, jobId {}", processId, dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), jobId);
-      processControllerZuul.updateStatusAndFinishedDate(processId, ProcessStatusEnum.FINISHED.toString(), new Date());
-      LOG.info("Updated release process status of process with processId {} to FINISHED for dataflowId {}, dataProvider {}, dataset {}, jobId {}", processId, dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), jobId);
-
       if (null != nextData) {
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);
@@ -250,10 +245,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO);
         LOG.info("Automatic feedback message created of dataflow {}, datasetId {} and jobId {}. Message: {}", dataflowVO.getId(), datasetId, jobId,
             messageVO.getContent());
-
-        if (jobId!=null) {
-          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
-        }
       }
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());

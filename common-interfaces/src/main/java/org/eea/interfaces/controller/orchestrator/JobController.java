@@ -27,7 +27,6 @@ public interface JobController {
      * @param jobId the jobId
      * @param jobTypes the jobTypes
      * @param creatorUsername the creatorUsername
-     * @param processId the processId
      * @param jobStatuses the jobStatuses
      * @return a list of job entries
      */
@@ -39,7 +38,6 @@ public interface JobController {
             @RequestParam(value = "sortedColumn", defaultValue = "jobId") String sortedColumn,
             @RequestParam(value = "jobId", required = false) Long jobId,
             @RequestParam(value = "jobType", required = false) String jobTypes,
-            @RequestParam(value = "processId", required = false) String processId,
             @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
             @RequestParam(value = "jobStatus", required = false) String jobStatuses);
 

@@ -55,7 +55,6 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                 sortField: sort.field,
                 jobId: filterBy.jobId,
                 jobType: filterBy.jobType?.join(),
-                processId: filterBy.processId,
                 creatorUsername: filterBy.creatorUsername,
                 jobStatus: filterBy.jobStatus?.join()
             });
@@ -82,7 +81,6 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
         {
             nestedOptions: [
                 {key: 'jobId', label: resourcesContext.messages['jobId'], keyfilter: 'pint'},
-                {key: 'processId', label: resourcesContext.messages['processId']},
                 {key: 'creatorUsername', label: resourcesContext.messages['creatorUsername']}
             ],
             type: 'INPUT'
@@ -156,12 +154,6 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                 header: resourcesContext.messages['jobId'],
                 template: getJobIdTemplate,
                 className: styles.middleColumn
-            },
-            {
-                key: 'processId',
-                header: resourcesContext.messages['processId'],
-                template: getJobProcessIdTemplate,
-                className: styles.largeColumn
             },
             {
                 key: 'creatorUsername',
@@ -238,12 +230,6 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
     const getJobCreatorUsernameTemplate = job => (
         <p>
             {job.creatorUsername} 
-        </p>
-    );
-
-    const getJobProcessIdTemplate = job => (
-        <p>
-            {job.processId} 
         </p>
     );
 
