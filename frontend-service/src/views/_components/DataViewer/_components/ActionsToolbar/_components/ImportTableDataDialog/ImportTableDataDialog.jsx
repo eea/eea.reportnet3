@@ -6,6 +6,7 @@ import { Button } from 'views/_components/Button';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { DatasetConfig } from 'repositories/config/DatasetConfig';
 
+import { ActionsContext } from 'views/_functions/Contexts/ActionsContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -24,6 +25,7 @@ export const ImportTableDataDialog = ({
   tableId,
   tableName
 }) => {
+  const actionsContext = useContext(ActionsContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -58,6 +60,8 @@ export const ImportTableDataDialog = ({
   };
 
   const onUpload = async () => {
+    const testCase = 'TABLE_IMPORT';
+    actionsContext.testProcess(datasetId, testCase);
     setImportTableDialogVisible(false);
     const {
       dataflow: { name: dataflowName },
@@ -109,9 +113,24 @@ export const ImportTableDataDialog = ({
           className={`p-button-rounded p-button-secondary datasetSchema-import-table-help-step ${
             !hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
-          disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
-          icon="import"
-          label={resourcesContext.messages['importTable']}
+          disabled={
+            !hasWritePermissions ||
+            isDataflowOpen ||
+            isDesignDatasetEditorRead ||
+            actionsContext.importDatasetProcessing ||
+            actionsContext.exportDatasetProcessing ||
+            actionsContext.deleteDatasetProcessing ||
+            actionsContext.importTableProcessing ||
+            actionsContext.exportTableProcessing ||
+            actionsContext.deleteTableProcessing ||
+            actionsContext.validateDatasetProcessing
+          }
+          icon={actionsContext.importTableProcessing ? 'spinnerAnimate' : 'import'}
+          label={
+            actionsContext.importTableProcessing
+              ? resourcesContext.messages['importInProgress']
+              : resourcesContext.messages['importTable']
+          }
           onClick={() => setImportTableDialogVisible(true)}
         />
       );
