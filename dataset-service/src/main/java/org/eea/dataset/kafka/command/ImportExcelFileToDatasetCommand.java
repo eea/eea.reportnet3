@@ -3,6 +3,8 @@ package org.eea.dataset.kafka.command;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eea.dataset.persistence.metabase.domain.Task;
+import org.eea.dataset.persistence.metabase.repository.TaskRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.file.ExcelReaderStrategy;
@@ -31,6 +33,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * The Class EventHandlerCommand. Event Handler Command where we are encapsulating both
@@ -62,6 +65,12 @@ public class ImportExcelFileToDatasetCommand extends AbstractEEAEventHandlerComm
 
   @Autowired
   private RecordStoreController.RecordStoreControllerZuul recordStoreControllerZuul;
+
+
+
+
+  @Autowired
+  private TaskRepository taskRepository;
   /**
    * Gets the event type.
    *
@@ -85,8 +94,10 @@ public class ImportExcelFileToDatasetCommand extends AbstractEEAEventHandlerComm
 
     ThreadPropertiesManager.setVariable("user", eeaEventVO.getData().get("user"));
     Object replace = eeaEventVO.getData().get("replace");
-    String processId = String.valueOf(eeaEventVO.getData().get("processId"));
     boolean replacebool = !(replace instanceof Boolean) || (boolean) replace;
+    String processId = String.valueOf(eeaEventVO.getData().get("processId"));
+
+    Long taskId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("task_id")));
 
     String filePath = String.valueOf(eeaEventVO.getData().get("filePath"));
 
@@ -95,11 +106,7 @@ public class ImportExcelFileToDatasetCommand extends AbstractEEAEventHandlerComm
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     DataSetSchema dataSetSchema =  mapper.convertValue(eeaEventVO.getData().get("DataSetSchema"), new TypeReference<DataSetSchema>() { });
     String idTableSchema = String.valueOf(eeaEventVO.getData().get("idTableSchema"));
-    String delimiter = String.valueOf(eeaEventVO.getData().get("delimiter"));
-    Long startLine = Long.parseLong((String) eeaEventVO.getData().get("startLine"));
-    Long endLine = Long.parseLong((String) eeaEventVO.getData().get("endLine"));
     Long partitionId = Long.parseLong((String) eeaEventVO.getData().get("partitionId"));
-    final Long taskId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("task_id")));
 
     try (InputStream inputStream = Files.newInputStream(Path.of(filePath))) {
       // Obtain the data provider code to insert into the record
@@ -113,6 +120,11 @@ public class ImportExcelFileToDatasetCommand extends AbstractEEAEventHandlerComm
               .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
     ExcelReaderStrategy excelReaderStrategy =  new ExcelReaderStrategy(fileCommon, datasetId, fieldMaxLength, provider.getCode());
     excelReaderStrategy.parseFile(inputStream,dataflowId,partitionId,idTableSchema,datasetId,fileName,replacebool,dataSetSchema,connectionDataVO);
+
+      fileTreatmentHelper.updateGeometry(datasetId, dataSetSchema);
+      fileTreatmentHelper.finishImportProcessV2(taskId, dataflowId, datasetId, processId, idTableSchema, fileName, null, false);
+
+      fileTreatmentHelper.updateTask(taskId, ProcessStatusEnum.FINISHED,new Date());
 
     } catch (IOException | EEAException e) {
       LOG_ERROR.error("RN3-Import file task failed: fileName={}, idTableSchema={},  taskId={}", fileName,

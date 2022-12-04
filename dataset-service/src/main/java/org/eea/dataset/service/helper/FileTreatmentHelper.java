@@ -1213,9 +1213,9 @@ public class FileTreatmentHelper implements DisposableBean {
             updateGeometry(datasetId, datasetSchema);
 
             if (files.size() == 1) {
-                finishImportProcess(null, datasetId, null, tableSchemaId, originalFileName, error, errorWrongFilename);
+                finishImportProcess( datasetId, null, tableSchemaId, originalFileName, error, errorWrongFilename);
             } else {
-                finishImportProcess(null, datasetId, null, null, originalFileName, error, errorWrongFilename);
+                finishImportProcess( datasetId, null, null, originalFileName, error, errorWrongFilename);
             }
             LOG.info("Finished import process for datasetId {} and file {}", datasetId, originalFileName);
 
@@ -1302,20 +1302,13 @@ public class FileTreatmentHelper implements DisposableBean {
          * @param error the error
          * @param errorWrongFilename the error wrong filename
          */
-        public void finishImportProcess (Long taskId, Long datasetId, String processId, String tableSchemaId, String
+        public void finishImportProcess ( Long datasetId, String processId, String tableSchemaId, String
         originalFileName,
                 String error,boolean errorWrongFilename){
-            Optional<Task> task =     taskRepository.findById(taskId);
-
             try {
-
-                LOG.info("About to Release Lock for TaskId:"+taskId + " ProcessId:"+processId);
                 releaseLockAndDeleteImportFileDirectory(datasetId);
 
-            if(task.isPresent()){
-                task.get().setStatus(ProcessStatusEnum.FINISHED);
-                taskRepository.save(task.get());
-            }
+
                 Map<String, Object> value = new HashMap<>();
                 value.put(LiteralConstants.DATASET_ID, datasetId);
                 value.put(LiteralConstants.USER,
@@ -1343,25 +1336,13 @@ public class FileTreatmentHelper implements DisposableBean {
                     }
                     datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                             DatasetRunningStatusEnum.ERROR_IN_IMPORT);
-                    this.updateTask(taskId, ProcessStatusEnum.CANCELED, new Date());
-                    processControllerZuul.updateProcess(datasetId, null,
-                            ProcessStatusEnum.CANCELED, ProcessTypeEnum.IMPORT, processId,
-                            SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
-
                 } else {
                     datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                             DatasetRunningStatusEnum.IMPORTED);
-                    this.updateTask(taskId, ProcessStatusEnum.FINISHED, new Date());
-
-                    processControllerZuul.updateProcess(datasetId, null,
-                            ProcessStatusEnum.FINISHED, ProcessTypeEnum.IMPORT, processId,
-                            SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
-
 
                     eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                             ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
                             : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
-
                 }
 
                 kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
@@ -1376,11 +1357,10 @@ public class FileTreatmentHelper implements DisposableBean {
                 }
             } catch (EEAException e) {
                 LOG_ERROR.error("RN3-Import file error for datasetId {}", datasetId, e);
-                if(task.isPresent()){
-                    task.get().setStatus(ProcessStatusEnum.CANCELED);
-                }
+
             }
         }
+
 
     public void finishImportProcessV2 (Long taskId,Long dataflowId, Long datasetId, String processId, String tableSchemaId, String
             originalFileName,
@@ -1458,6 +1438,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG_ERROR.error("RN3-Import file error for datasetId {}", datasetId, e);
             if(task.isPresent()){
                 task.get().setStatus(ProcessStatusEnum.CANCELED);
+                this.taskRepository.save(task.get());
             }
         }
     }
@@ -1656,7 +1637,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         //what will batchcounter be by now. It would become zero in the last if, then, now will be 2.
                         // So we got all the lines of the doc, and the counter of the final ones, so we can read
                         //finalLines - batchCounter to FinalLines. So we will read from 50-2 = 50 to 52
-                        if (batchCounter == 50) {
+                        if (batchCounter == 5000) {
                             this.addImportTaskToProcess(filePath, partition.getId(), idTableSchema,dataflowId, datasetId, fileName, replace,
                                     schema, connectionDataVO, startBatchLine, lines, processId, EventType.COMMAND_IMPORT_CSV_FILE_CHUNK_TO_DATASET, delimiter);
                             //reset start-end lines
@@ -1667,8 +1648,8 @@ public class FileTreatmentHelper implements DisposableBean {
                         lines++;
                         batchCounter++;
                     }
-                    if (batchCounter < 50 && batchCounter >0) {
-                        // left overs if the last batch is less than 50
+                    if (batchCounter < 5000 && batchCounter >0) {
+                        // left overs if the last batch is less than 5000
                         this.addImportTaskToProcess(filePath, partition.getId(), idTableSchema,dataflowId, datasetId, fileName, replace,
                                 schema, connectionDataVO, lines-batchCounter, lines, processId, EventType.COMMAND_IMPORT_CSV_FILE_CHUNK_TO_DATASET, delimiter);
                      }
@@ -1678,8 +1659,8 @@ public class FileTreatmentHelper implements DisposableBean {
                     reader.close();
                 }
                 if (FileTypeEnum.getEnum(mimeType.toLowerCase()) == FileTypeEnum.XLSX) {
-                    this.addImportTaskToProcess(filePath, partition.getId(), idTableSchema,dataflowId, datasetId, fileName, replace,
-                            schema, connectionDataVO, "id", EventType.COMMAND_IMPORT_EXCEL_FILE_TO_DATASET, delimiter);
+                    this.addExcelImportTaskToProcess(filePath, partition.getId(), idTableSchema,dataflowId, datasetId, fileName, replace,
+                            schema, connectionDataVO, processId, EventType.COMMAND_IMPORT_EXCEL_FILE_TO_DATASET, delimiter);
                 }
 
             } catch (Exception e) {
@@ -1733,7 +1714,7 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
     @Transactional
-    void addImportTaskToProcess(String filePath, Long partitionId,String idTableSchema,Long dataflowId,Long datasetId, String fileName,boolean replace,
+    void addExcelImportTaskToProcess(String filePath, Long partitionId,String idTableSchema,Long dataflowId,Long datasetId, String fileName,boolean replace,
                                 DataSetSchema schema, ConnectionDataVO connectionDataVO,
                                 final String processId, final EventType eventType,String delimiter) {
         // if (checkStartedProcess(processId)) {
@@ -1756,7 +1737,6 @@ public class FileTreatmentHelper implements DisposableBean {
             value.put("replace",replace);
             value.put("DataSetSchema",schema);
             value.put("ConnectionDataVO",connectionDataVO);
-            value.put("delimiter",delimiter);
 
 
             eeaEventVO.setData(value);
@@ -1773,46 +1753,6 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
-        void addImportFInalizationTaskToProcess (String filePath, String dataflowId, String partitionId, String
-        idTableSchema,
-                String datasetId, String fileName,boolean replace,
-        DataSetSchema schema, ConnectionDataVO connectionDataVO,
-        final String processId, final EventType eventType){
-            if (checkStartedProcess(processId)) {
-                EEAEventVO eeaEventVO = new EEAEventVO();
-                eeaEventVO.setEventType(eventType);
-
-                final Map<String, Object> value = new LinkedHashMap<>();
-                value.put("processId", processId);
-                value.put("user", SecurityContextHolder.getContext().getAuthentication().getName());
-                value.put("token",
-                        String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
-                value.put("filePath", filePath);
-                value.put("dataflowId", dataflowId);
-                value.put("partitionId", partitionId);
-                value.put("idTableSchema", idTableSchema);
-                value.put("datasetId", datasetId);
-                value.put("fileName", fileName);
-                value.put("replace", replace);
-                value.put("DataSetSchema", schema);
-                value.put("ConnectionDataVO", connectionDataVO);
-
-
-                eeaEventVO.setData(value);
-                ObjectMapper objectMapper = new ObjectMapper();
-                String json = "";
-                try {
-                    json = objectMapper.writeValueAsString(eeaEventVO);
-                    Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.IMPORT_TASK, new Date(), null, null,
-                            json, 0);
-                    taskRepository.save(task);
-                } catch (JsonProcessingException e) {
-
-                    LOG_ERROR.error("error processing json");
-                }
-
-            }
-        }
         /**
          * Validate file type.
          *
