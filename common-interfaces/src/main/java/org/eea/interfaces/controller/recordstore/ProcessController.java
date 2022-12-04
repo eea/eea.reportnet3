@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 /**
  * The Interface ProcessController.
  */
@@ -124,5 +126,14 @@ public interface ProcessController {
    */
   @GetMapping(value = "/private/next/{processId}")
   ProcessVO getNextProcess(@PathVariable("processId") String processId);
+
+  /**
+   * Finds processId by datasetId and status
+   * @param datasetId
+   * @param status
+   * @return
+   */
+  @GetMapping(value = "/private/findProcessIdByDatasetAndStatus")
+  List<String> findProcessIdByDatasetAndStatus(@RequestParam("datasetId") Long datasetId, @RequestParam("processType") ProcessTypeEnum processType, @RequestParam("status") ProcessStatusEnum status);
 
 }

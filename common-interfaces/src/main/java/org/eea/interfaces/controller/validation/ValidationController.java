@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.validation;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.validation.ProcessTaskVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -160,4 +161,12 @@ public interface ValidationController {
    */
   @GetMapping(value = "/private/findTasksByProcessId/{processId}")
   List<TaskVO> findTasksByProcessId(@PathVariable("processId") String processId);
+
+  /**
+   * Finds tasks by datasetId for in progress process
+   * @param datasetId
+   * @return
+   */
+  @GetMapping(value = "/private/releaseTasksByDatasetId/{datasetId}")
+  List<ProcessTaskVO> findReleaseTasksByDatasetId(@PathVariable("datasetId") Long datasetId);
 }
