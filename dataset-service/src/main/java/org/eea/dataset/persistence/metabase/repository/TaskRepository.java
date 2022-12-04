@@ -100,6 +100,9 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   boolean isProcessEnding(@Param("processId") String processId);
 
   List<Task> findAllByTaskTypeAndStatusOrderByIdAsc(TaskType taskType, ProcessStatusEnum status);
+
+  List<Task> findAllByProcessIdAndStatus(String processId,ProcessStatusEnum status);
+
 }
 
 

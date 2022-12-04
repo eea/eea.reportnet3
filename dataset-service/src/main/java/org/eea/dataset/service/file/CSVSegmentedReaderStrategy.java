@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
@@ -32,33 +33,49 @@ import java.util.List;
 @NoArgsConstructor
 
 @Component
-public class CSVSegmentedReaderStrategy  {
-    /** The Constant LOG_ERROR. */
+public class CSVSegmentedReaderStrategy {
+    /**
+     * The Constant LOG_ERROR.
+     */
     private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-    /** The Constant LOG. */
+    /**
+     * The Constant LOG.
+     */
     private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
 
-    /** The delimiter. */
+    /**
+     * The delimiter.
+     */
     private char delimiter;
 
-    /** The dataset id. */
+    /**
+     * The dataset id.
+     */
     private Long datasetId;
 
-    /** The file common. */
+    /**
+     * The file common.
+     */
     private FileCommonUtils fileCommon;
 
-    /** The field max length. */
+    /**
+     * The field max length.
+     */
     private int fieldMaxLength;
 
-    /** The provider code. */
+    /**
+     * The provider code.
+     */
     private String providerCode;
 
-    /** The batch record save. */
+    /**
+     * The batch record save.
+     */
     private int batchRecordSave;
 
     public CSVSegmentedReaderStrategy(char delimiter, FileCommonUtils fileCommon, Long datasetId,
-                             int fieldMaxLength, String providerCode, int batchRecordSave) {
+                                      int fieldMaxLength, String providerCode, int batchRecordSave) {
         this.delimiter = delimiter;
         this.fileCommon = fileCommon;
         this.datasetId = datasetId;
@@ -68,11 +85,9 @@ public class CSVSegmentedReaderStrategy  {
     }
 
 
-
-
-    public List<CsvFileSegment> cutFileIntoSegments(final InputStream inputStream,final Long partitionId,
-                                   final String idTableSchema, Long datasetId, String fileName, boolean replace,
-                                   DataSetSchema dataSetSchema, ConnectionDataVO connectionDataVO) throws EEAException {
+    public List<CsvFileSegment> cutFileIntoSegments(final InputStream inputStream, final Long partitionId,
+                                                    final String idTableSchema, Long datasetId, String fileName, boolean replace,
+                                                    DataSetSchema dataSetSchema, ConnectionDataVO connectionDataVO) throws EEAException {
         LOG.info("Processing entries at method readLines in dataset {}", datasetId);
 
         List<CsvFileSegment> segments = new ArrayList<>();
@@ -93,7 +108,6 @@ public class CSVSegmentedReaderStrategy  {
             lineEmpty(firstLine);
 
 
-
             // through the file
             int numLines = 0;
             //Read till those lines.
@@ -103,7 +117,7 @@ public class CSVSegmentedReaderStrategy  {
             }
 
 
-        } catch (final IOException  e) {
+        } catch (final IOException e) {
             LOG_ERROR.error(e.getMessage());
             throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
         }
@@ -114,19 +128,21 @@ public class CSVSegmentedReaderStrategy  {
     /**
      * Read lines.
      *
-     * @param inputStream the input stream
-     * @param partitionId the partition id
+     * @param inputStream   the input stream
+     * @param partitionId   the partition id
      * @param idTableSchema the id table schema
-     * @param datasetId the dataset id
-     * @param fileName the file name
-     * @param replace the replace
+     * @param datasetId     the dataset id
+     * @param fileName      the file name
+     * @param replace       the replace
      * @param dataSetSchema the data set schema
      * @return the data set VO
      * @throws EEAException the EEA exception
      */
-    private DatasetValue readLines(final InputStream inputStream,Long startLine, Long endLine, final Long partitionId,
-                                   final String idTableSchema, Long datasetId, String fileName, boolean replace,
-                                   DataSetSchema dataSetSchema, ConnectionDataVO connectionDataVO) throws EEAException {
+
+    @Transactional(rollbackOn = Exception.class)
+    protected DatasetValue readLines(final InputStream inputStream, Long startLine, Long endLine, final Long partitionId,
+                                     final String idTableSchema, Long datasetId, String fileName, boolean replace,
+                                     DataSetSchema dataSetSchema, ConnectionDataVO connectionDataVO) throws EEAException {
         LOG.info("Processing entries at method readLines in dataset {}", datasetId);
         // Init variables
         String[] line;
@@ -168,15 +184,13 @@ public class CSVSegmentedReaderStrategy  {
             boolean manageFixedRecords =
                     fileCommon.schemaContainsFixedRecords(datasetId, dataSetSchema, idTableSchema);
 
-            // through the file
             int numLines = 0;
-            //Read till those lines.
-            //So if we need to read between 10 and 20 lines, we need to call reader.readNext() 9 times.
-            while ((line = reader.readNext()) != null && numLines < startLine) {
 
+            while ( numLines < startLine) {
+                numLines++;
+               reader.readNext();
             }
-            //now we should have got to the correct line.
-                while ((line = reader.readNext()) != null && numLines < endLine) {
+            while ((line = reader.readNext()) != null && numLines < endLine) {
                 final List<String> values = Arrays.asList(line);
                 sanitizeAndCreateDataSet(partitionId, table, tables, values, headers, idTableSchema,
                         idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords);
@@ -211,7 +225,6 @@ public class CSVSegmentedReaderStrategy  {
      * Line empty.
      *
      * @param firstLine the first line
-     *
      * @throws InvalidFileException the invalid file exception
      */
     private void lineEmpty(List<String> firstLine) throws InvalidFileException {
@@ -226,15 +239,15 @@ public class CSVSegmentedReaderStrategy  {
     /**
      * Sanitize and create data set.
      *
-     * @param partitionId the partition id
-     * @param table the table
-     * @param tables the tables
-     * @param values the values
-     * @param headers the headers
-     * @param idTableSchema the id table schema
-     * @param idRecordSchema the id record schema
-     * @param fieldSchemas the field schemas
-     * @param isDesignDataset the is design dataset
+     * @param partitionId            the partition id
+     * @param table                  the table
+     * @param tables                 the tables
+     * @param values                 the values
+     * @param headers                the headers
+     * @param idTableSchema          the id table schema
+     * @param idRecordSchema         the id record schema
+     * @param fieldSchemas           the field schemas
+     * @param isDesignDataset        the is design dataset
      * @param isFixedNumberOfRecords the is fixed number of records
      */
     private void sanitizeAndCreateDataSet(final Long partitionId, TableValue table,
@@ -252,7 +265,6 @@ public class CSVSegmentedReaderStrategy  {
      * Inits the reader.
      *
      * @param buf the buf
-     *
      * @return the CSV reader
      */
     private CSVReader initReader(final Reader buf) {
@@ -264,7 +276,7 @@ public class CSVSegmentedReaderStrategy  {
     /**
      * Sets the headers.
      *
-     * @param values the values
+     * @param values        the values
      * @param idTableSchema the id table schema
      * @param dataSetSchema the data set schema
      * @return the list
@@ -330,15 +342,15 @@ public class CSVSegmentedReaderStrategy  {
     /**
      * Adds the record to table.
      *
-     * @param table the table
-     * @param tables the tables
-     * @param values the values
-     * @param partitionId the partition id
-     * @param headers the headers
-     * @param idTableSchema the id table schema
-     * @param idRecordSchema the id record schema
-     * @param fieldSchemas the field schemas
-     * @param isDesignDataset the is design dataset
+     * @param table                  the table
+     * @param tables                 the tables
+     * @param values                 the values
+     * @param partitionId            the partition id
+     * @param headers                the headers
+     * @param idTableSchema          the id table schema
+     * @param idRecordSchema         the id record schema
+     * @param fieldSchemas           the field schemas
+     * @param isDesignDataset        the is design dataset
      * @param isFixedNumberOfRecords the is fixed number of records
      */
     private void addRecordToTable(TableValue table, final List<TableValue> tables,
@@ -362,15 +374,15 @@ public class CSVSegmentedReaderStrategy  {
     /**
      * Creates the records.
      *
-     * @param values the values
-     * @param partitionId the partition id
-     * @param idTableSchema the id table schema
-     * @param headers the headers
-     * @param idRecordSchema the id record schema
-     * @param fieldSchemas the field schemas
-     * @param isDesignDataset the is design dataset
+     * @param values                 the values
+     * @param partitionId            the partition id
+     * @param idTableSchema          the id table schema
+     * @param headers                the headers
+     * @param idRecordSchema         the id record schema
+     * @param fieldSchemas           the field schemas
+     * @param isDesignDataset        the is design dataset
      * @param isFixedNumberOfRecords the is fixed number of records
-     * @param tableValue the table value
+     * @param tableValue             the table value
      * @return the list
      */
     private List<RecordValue> createRecords(final List<String> values, final Long partitionId,
@@ -394,12 +406,12 @@ public class CSVSegmentedReaderStrategy  {
     /**
      * Creates the fields VO.
      *
-     * @param values the values
-     * @param headers the headers
-     * @param headersSchema the headers schema
-     * @param isDesignDataset the is design dataset
+     * @param values                 the values
+     * @param headers                the headers
+     * @param headersSchema          the headers schema
+     * @param isDesignDataset        the is design dataset
      * @param isFixedNumberOfRecords the is fixed number of records
-     * @param record the record
+     * @param record                 the record
      * @return the list
      */
     private List<FieldValue> createFields(final List<String> values, List<FieldSchema> headers,
@@ -466,8 +478,8 @@ public class CSVSegmentedReaderStrategy  {
      * Sets the missing field.
      *
      * @param headersSchema the headers schema
-     * @param fields the fields
-     * @param idSchema the id schema
+     * @param fields        the fields
+     * @param idSchema      the id schema
      */
     private void setMissingField(List<FieldSchema> headersSchema, final List<FieldValue> fields,
                                  List<String> idSchema) {
@@ -482,8 +494,8 @@ public class CSVSegmentedReaderStrategy  {
         });
     }
 
-    public void parseFile(InputStream inputStream, Long startLine, Long endLine,Long partitionId, String idTableSchema, Long datasetId, String fileName, boolean replace, DataSetSchema schema, ConnectionDataVO connectionDataVO) throws EEAException {
-        readLines(inputStream,startLine,endLine, partitionId, idTableSchema, datasetId, fileName, replace, schema,
+    public void parseFile(InputStream inputStream, Long startLine, Long endLine, Long partitionId, String idTableSchema, Long datasetId, String fileName, boolean replace, DataSetSchema schema, ConnectionDataVO connectionDataVO) throws EEAException {
+        readLines(inputStream, startLine, endLine, partitionId, idTableSchema, datasetId, fileName, replace, schema,
                 connectionDataVO);
 
     }

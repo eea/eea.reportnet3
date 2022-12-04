@@ -23,7 +23,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
    * @return the list
    */
   @Query(nativeQuery = true, value = "with numberOfPendingTaks as (select count(id)\r\n"
-      + " as ntasks, process_id from task where status= 'IN_QUEUE' group by task.process_id),\r\n"
+      + " as ntasks, process_id from task where status= 'IN_QUEUE' and task_type='VALIDATION_TASK' group by task.process_id),\r\n"
       + " taskPriorityId as (\r\n"
       + "select  t.id, p.priority ,npt.ntasks from process p join numberOfPendingTaks npt on p.process_id=npt.process_id join task t on t.process_id= p.process_id where t.status= 'IN_QUEUE' order by p.priority, npt.ntasks asc \r\n"
       + ")\r\n" + "select t.id from taskPriorityId t limit :numberTasks ;")
@@ -36,7 +36,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
    * @return the list
    */
   @Query(nativeQuery = true, value = "with numberOfPendingTaks as (select count(id)\r\n"
-      + " as ntasks, process_id from task where status= 'IN_QUEUE' group by task.process_id),\r\n"
+      + " as ntasks, process_id from task where status= 'IN_QUEUE' and task_type='VALIDATION_TASK' group by task.process_id),\r\n"
       + " taskPriorityId as (\r\n"
       + "select  t.id, p.priority ,npt.ntasks from process p join numberOfPendingTaks npt on p.process_id=npt.process_id join task t on t.process_id= p.process_id where t.status= 'IN_QUEUE' and p.priority>50 order by p.priority, npt.ntasks asc \r\n"
       + ")\r\n" + "select t.id from taskPriorityId t limit :numberTasks ;")
@@ -49,7 +49,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
    * @return true, if is process finished
    */
   @Query(nativeQuery = true,
-      value = "select case when (exists (select id from task where process_id=:processId and (status !='FINISHED' and status !='CANCELED') limit 1)) then FALSE else TRUE end")
+      value = "select case when (exists (select id from task where process_id=:processId and task_type='VALIDATION_TASK' and (status !='FINISHED' and status !='CANCELED') limit 1)) then FALSE else TRUE end")
   boolean isProcessFinished(@Param("processId") String processId);
 
   /**
@@ -58,7 +58,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
    * @param ids the ids
    * @return the list
    */
-  @Query(nativeQuery = true, value = "select * from task WHERE id in(:ids)")
+  @Query(nativeQuery = true, value = "select * from task WHERE id in(:ids) and task_type='VALIDATION_TASK'")
   List<Task> findByIdIn(@Param("ids") List<Long> ids);
 
   /**
@@ -105,11 +105,11 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
    * @return true, if is process ending
    */
   @Query(nativeQuery = true,
-      value = "select case when (exists (select id from task where process_id=:processId and status ='IN_QUEUE' limit 1)) then FALSE else TRUE end")
+      value = "select case when (exists (select id from task where process_id=:processId and status ='IN_QUEUE' and task_type='VALIDATION_TASK' limit 1)) then FALSE else TRUE end")
   boolean isProcessEnding(@Param("processId") String processId);
 
   @Query(nativeQuery = true,
-      value = "select id from task where status='IN_PROGRESS' and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
+      value = "select id from task where status='IN_PROGRESS' and task_type='VALIDATION_TASK' and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
   List<BigInteger> getTasksInProgress(@Param("timeInMinutes") long timeInMinutes);
 
   /**

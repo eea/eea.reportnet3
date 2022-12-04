@@ -23,6 +23,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -53,7 +54,7 @@ public class ImportFileTasksScheduler extends MessageReceiver {
 
   /** The delay. */
   //@Value("${validation.scheduled.consumer}")
-  private Long delay=1000l;
+  private Long delay=10000l;
 
   /** The max running tasks. */
   //@Value("${validation.tasks.parallelism}")
@@ -82,10 +83,11 @@ public class ImportFileTasksScheduler extends MessageReceiver {
   /**
    * Scheduled consumer.
    */
+  @Transactional
   public void scheduledConsumer() {
     Long newDelay = delay;
     try {
-      int freeThreads = checkFreeThreads();
+     int freeThreads = checkFreeThreads();
       if (freeThreads > 0) {
         for (Task task : taskRepository.findAllByTaskTypeAndStatusOrderByIdAsc(TaskType.IMPORT_TASK,ProcessStatusEnum.IN_QUEUE)) {
           if(freeThreads>0){
@@ -95,17 +97,21 @@ public class ImportFileTasksScheduler extends MessageReceiver {
               task.setStatus(ProcessStatusEnum.IN_PROGRESS);
               taskRepository.save(task);
               taskRepository.flush();
+
               ObjectMapper objectMapper = new ObjectMapper();
               objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
               EEAEventVO event = objectMapper.readValue(task.getJson(), EEAEventVO.class);
               Message<EEAEventVO> message = MessageBuilder.withPayload(event).build();
               message.getPayload().getData().put("task_id", task.getId());
+              message.getPayload().getData().put("service_instance_id", serviceInstanceId);
+
               consumeMessage(message);
               freeThreads=  checkFreeThreads();
             } catch (EEAException | JsonProcessingException e) {
-              LOG_ERROR.error("failed the validation task shedule because of {} ", e);
+              LOG_ERROR.error("failed the import task shedule because of {} ", e);
             } catch (ObjectOptimisticLockingFailureException e) {
               newDelay = 1L;
+              LOG_ERROR.error(e.getMessage());
             }
           }else{
             break;

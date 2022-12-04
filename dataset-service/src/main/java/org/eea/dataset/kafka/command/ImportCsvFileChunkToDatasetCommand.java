@@ -3,24 +3,25 @@ package org.eea.dataset.kafka.command;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eea.dataset.persistence.metabase.domain.Task;
+import org.eea.dataset.persistence.metabase.repository.TaskRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.thread.ThreadPropertiesManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
+import java.util.Optional;
 
 /**
  * The Class EventHandlerCommand. Event Handler Command where we are encapsulating both
@@ -37,6 +38,9 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
 
   @Autowired
   private FileCommonUtils fileCommon;
+
+  @Autowired
+  private TaskRepository taskRepository;
 
   //@Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength=10000;
@@ -68,7 +72,10 @@ private char loadDataDelimiter=',';
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("datasetId")));
     ThreadPropertiesManager.setVariable("user", eeaEventVO.getData().get("user"));
     Object replace = eeaEventVO.getData().get("replace");
-    String processId = String.valueOf(eeaEventVO.getData().get("processId"));
+
+    Long taskId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("task_id")));
+    Optional<Task> task = taskRepository.findById(taskId);
+
     boolean replacebool = !(replace instanceof Boolean) || (boolean) replace;
 
     String filePath = String.valueOf(eeaEventVO.getData().get("filePath"));
@@ -88,8 +95,15 @@ private char loadDataDelimiter=',';
       fileTreatmentHelper.reinitializeCsvSegmentedReaderStrategy(delimiter != null ? delimiter.charAt(0) : loadDataDelimiter,fileCommon,datasetId,fieldMaxLength,null,batchRecordSave);
       fileTreatmentHelper.importCsvFileChunk(datasetId,  fileName, inputStream,partitionId,
                idTableSchema,  replacebool,  dataSetSchema,  delimiter, startLine, endLine);
+      if(task.isPresent()){
+        task.get().setStatus(ProcessStatusEnum.FINISHED);
+        taskRepository.save(task.get());
+      }
     } catch (IOException | EEAException e) {
-
+      if(task.isPresent()){
+        task.get().setStatus(ProcessStatusEnum.CANCELED);
+        taskRepository.save(task.get());
+      }
     }
 
   }
