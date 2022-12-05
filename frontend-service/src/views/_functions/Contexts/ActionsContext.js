@@ -8,7 +8,6 @@ export const ActionsContext = createContext({
   deleteDatasetProcessing: false,
   deleteTableProcessing: false,
   validateDatasetProcessing: false,
-  onLandTestProcess: false,
   changeExportDatasetState: isLoading => {},
   changeExportTableState: isTableLoading => {},
   testProcess: (datasetId, testCase) => {}
