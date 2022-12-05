@@ -20,15 +20,18 @@ public interface JobController {
 
     /**
      * Get jobs
-     * @param pageNum the page num
-     * @param pageSize the page size
-     * @param asc the asc
-     * @param sortedColumn the sortedColumn
-     * @param jobId the jobId
-     * @param jobTypes the jobTypes
-     * @param creatorUsername the creatorUsername
-     * @param jobStatuses the jobStatuses
-     * @return a list of job entries
+     * @param pageNum
+     * @param pageSize
+     * @param asc
+     * @param sortedColumn
+     * @param jobId
+     * @param jobTypes
+     * @param dataflowId
+     * @param providerId
+     * @param datasetId
+     * @param creatorUsername
+     * @param jobStatuses
+     * @return
      */
     @GetMapping()
     JobsVO getJobs(
@@ -38,6 +41,9 @@ public interface JobController {
             @RequestParam(value = "sortedColumn", defaultValue = "jobId") String sortedColumn,
             @RequestParam(value = "jobId", required = false) Long jobId,
             @RequestParam(value = "jobType", required = false) String jobTypes,
+            @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+            @RequestParam(value = "providerId", required = false) Long providerId,
+            @RequestParam(value = "datasetId", required = false) Long datasetId,
             @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
             @RequestParam(value = "jobStatus", required = false) String jobStatuses);
 
@@ -104,5 +110,6 @@ public interface JobController {
      * @return
      */
     @GetMapping(value = "/checkEligibility")
-    JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release, @RequestParam("dataflowId") Long dataflowId, @RequestParam("dataProviderID") Long dataProviderId);
+    JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release, @RequestParam("dataflowId") Long dataflowId,
+                                        @RequestParam("dataProviderID") Long dataProviderId, @RequestParam("datasets") List<Long> datasets);
 }

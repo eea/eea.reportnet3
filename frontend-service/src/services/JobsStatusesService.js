@@ -11,6 +11,9 @@ export const JobsStatusesService = {
     sortField,
     jobId,
     jobType,
+    dataflowId,
+    providerId,
+    datasetId,
     creatorUsername,
     jobStatus}) => {
       const parsedSortField = JobsStatusesUtils.parseSortField(sortField);
@@ -22,6 +25,9 @@ export const JobsStatusesService = {
         sortField: parsedSortField,
         jobId,
         jobType,
+        dataflowId,
+        providerId,
+        datasetId,
         creatorUsername,
         jobStatus
       });

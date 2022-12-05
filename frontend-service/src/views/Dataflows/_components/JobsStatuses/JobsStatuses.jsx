@@ -55,10 +55,13 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                 sortField: sort.field,
                 jobId: filterBy.jobId,
                 jobType: filterBy.jobType?.join(),
+                dataflowId: filterBy.dataflowId,
+                providerId: filterBy.providerId,
+                datasetId: filterBy.datasetId,
                 creatorUsername: filterBy.creatorUsername,
                 jobStatus: filterBy.jobStatus?.join()
             });
-            
+
             setTotalRecords(data.totalRecords);
             setJobsStatusesList(data.jobsList);
             setFilteredRecords(data.filteredRecords);
@@ -81,6 +84,9 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
         {
             nestedOptions: [
                 {key: 'jobId', label: resourcesContext.messages['jobId'], keyfilter: 'pint'},
+                {key: 'dataflowId', label: resourcesContext.messages['dataflowId']},
+                {key: 'providerId', label: resourcesContext.messages['providerId']},
+                {key: 'datasetId', label: resourcesContext.messages['datasetId']},
                 {key: 'creatorUsername', label: resourcesContext.messages['creatorUsername']}
             ],
             type: 'INPUT'
@@ -168,6 +174,24 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                 className: styles.middleColumn
             },
             {
+                key: 'dataflowId',
+                header: resourcesContext.messages['dataflowId'],
+                template: getDataflowIdTemplate,
+                className: styles.middleColumn
+            },
+            {
+                key: 'providerId',
+                header: resourcesContext.messages['providerId'],
+                template: getProviderIdTemplate,
+                className: styles.middleColumn
+            },
+            {
+                key: 'datasetId',
+                header: resourcesContext.messages['datasetId'],
+                template: getDatasetIdTemplate,
+                className: styles.middleColumn
+            },
+            {
                 key: 'jobStatus',
                 header: resourcesContext.messages['jobStatus'],
                 template: getJobStatusTemplate,
@@ -216,20 +240,38 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
     );
     const getJobTypeTemplate = job => (
         <p>
-            {job.jobType} 
+            {job.jobType}
         </p>
     );
-    
+
 
     const getDateAddedTemplate = (job, field) =>
-    isNil(job[field]) ? '-' : getDateTimeFormatByUserPreferences(job[field]);
+        isNil(job[field]) ? '-' : getDateTimeFormatByUserPreferences(job[field]);
 
     const getDateStatusChangedTemplate = (job, field) =>
-    isNil(job[field]) ? '-' : getDateTimeFormatByUserPreferences(job[field]);
+        isNil(job[field]) ? '-' : getDateTimeFormatByUserPreferences(job[field]);
 
     const getJobCreatorUsernameTemplate = job => (
         <p>
-            {job.creatorUsername} 
+            {job.creatorUsername}
+        </p>
+    );
+
+    const getDataflowIdTemplate = job => (
+        <p>
+            {job.dataflowId}
+        </p>
+    );
+
+    const getProviderIdTemplate = job => (
+        <p>
+            {job.providerId}
+        </p>
+    );
+
+    const getDatasetIdTemplate = job => (
+        <p>
+            {job.datasetId}
         </p>
     );
 
@@ -282,7 +324,7 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                     {renderFilters()}
                     <div className={styles.noDataContent}>
                         <p>{resourcesContext.messages
-                        ['jobsStatusesNotMatchingFilter']}</p>
+                            ['jobsStatusesNotMatchingFilter']}</p>
                     </div>
                 </div>
             );
@@ -293,7 +335,7 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
                 <div className={styles.noDataContent}>
                     <span>{resourcesContext.messages['noData']}</span>
                 </div>
-            );  
+            );
         }
 
         return (
@@ -335,15 +377,15 @@ export const JobsStatuses = ({onCloseDialog, isDialogVisible}) => {
     };
 
     return (
-            <Dialog
-                blockScroll={false}
-                className="responsiveBigDialog"
-                footer={dialogFooter}
-                header={resourcesContext.messages['jobsMonitoring']}
-                modal={true}
-                onHide={onCloseDialog}
-                visible={isDialogVisible}>
-                {renderDialogContent()}
-            </Dialog>
+        <Dialog
+            blockScroll={false}
+            className="responsiveBigDialog"
+            footer={dialogFooter}
+            header={resourcesContext.messages['jobsMonitoring']}
+            modal={true}
+            onHide={onCloseDialog}
+            visible={isDialogVisible}>
+            {renderDialogContent()}
+        </Dialog>
     );
 };

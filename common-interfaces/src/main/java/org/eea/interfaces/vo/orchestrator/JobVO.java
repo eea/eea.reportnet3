@@ -43,4 +43,13 @@ public class JobVO {
 
     /** The release */
     private boolean release;
+
+    /** The dataflow id */
+    private Long dataflowId;
+
+    /** The data provider id */
+    private Long providerId;
+
+    /** The dataset id */
+    private Long datasetId;
 }

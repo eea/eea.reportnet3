@@ -1106,6 +1106,7 @@
     "processName": "Workspace name",
     "processNamePlaceHolder": "Select a workspace",
     "processStartingDate": "Starting date",
+    "providerId": "Provider id",
     "projectedCoordinates": "Projected coordinates",
     "ProjectionsScenario": "Type",
     "properties": "Properties",

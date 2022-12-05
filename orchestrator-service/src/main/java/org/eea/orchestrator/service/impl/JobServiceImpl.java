@@ -64,14 +64,14 @@ public class JobServiceImpl implements JobService {
     private JobUtils jobUtils;
 
     @Override
-    public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId,
-                               String jobTypes, String creatorUsername, String jobStatuses){
+    public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, Long providerId,
+                          Long datasetId, String creatorUsername, String jobStatuses){
         String sortedTableColumn = jobUtils.getJobColumnNameByObjectName(sortedColumn);
-        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, creatorUsername, jobStatuses);
+        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, providerId, datasetId, creatorUsername, jobStatuses);
         List<JobVO> jobVOList = jobMapper.entityListToClass(jobs);
         JobsVO jobsVO = new JobsVO();
         jobsVO.setTotalRecords(jobRepository.count());
-        jobsVO.setFilteredRecords(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, creatorUsername, jobStatuses));
+        jobsVO.setFilteredRecords(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, providerId, datasetId, creatorUsername, jobStatuses));
         jobsVO.setJobsList(jobVOList);
 
         return jobsVO;
@@ -85,18 +85,18 @@ public class JobServiceImpl implements JobService {
 
     @Transactional
     @Override
-    public void addValidationJob(Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert){
+    public void addValidationJob(Long datasetId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert){
         Timestamp ts = new Timestamp(System.currentTimeMillis());
-        Job validationJob = new Job(null, JobTypeEnum.VALIDATION, statusToInsert, ts, ts, parameters, creator, false);
+        Job validationJob = new Job(null, JobTypeEnum.VALIDATION, statusToInsert, ts, ts, parameters, creator, false, null, null, datasetId);
         jobRepository.save(validationJob);
         jobHistoryService.saveJobHistory(validationJob);
     }
 
     @Transactional
     @Override
-    public void addReleaseJob(Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert){
+    public void addReleaseJob(Long dataflowId, Long dataProviderId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert){
         Timestamp ts = new Timestamp(System.currentTimeMillis());
-        Job releaseJob = new Job(null, JobTypeEnum.VALIDATION, statusToInsert, ts, ts, parameters, creator, true);
+        Job releaseJob = new Job(null, JobTypeEnum.VALIDATION, statusToInsert, ts, ts, parameters, creator, true, dataflowId, dataProviderId, null);
         jobRepository.save(releaseJob);
         jobHistoryService.saveJobHistory(releaseJob);
     }
@@ -124,12 +124,9 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public JobStatusEnum checkEligibilityOfJob(String jobType, boolean release, Map<String, Object> parameters){
+    public JobStatusEnum checkEligibilityOfJob(String jobType, Long dataflowId, Long dataProviderId, List<Long> datasetIds, boolean release){
         //TODO implement check for all jobTypes
         if (jobType.equals(JobTypeEnum.RELEASE.toString())) {
-            Long dataflowId = (Long) parameters.get("dataflowId");
-            Long dataProviderId = (Long) parameters.get("dataProviderId");
-            List<Long> datasetIds = (List<Long>) parameters.get("datasetId");
             List<Job> validationJobList = jobRepository.findByJobTypeAndJobStatusInAndRelease(JobTypeEnum.VALIDATION, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), false);
             for (Job job : validationJobList) {
                 Map<String, Object> insertedParameters = job.getParameters();
@@ -150,7 +147,7 @@ public class JobServiceImpl implements JobService {
                 }
             }
         } else if (jobType.equals(JobTypeEnum.VALIDATION.toString())) {
-            Long datasetId =  (Long) parameters.get("datasetId");
+            Long datasetId = datasetIds.get(0);
             List<Job> jobList = jobRepository.findByJobTypeAndJobStatusInAndRelease(JobTypeEnum.VALIDATION, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), release);
             for(Job job: jobList){
                 Map<String, Object> insertedParameters = job.getParameters();

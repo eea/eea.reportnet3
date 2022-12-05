@@ -46,4 +46,13 @@ public class Job {
 
     @Column(name = "RELEASE")
     private boolean release;
+
+    @Column(name = "DATAFLOW_ID")
+    private Long dataflowId;
+
+    @Column(name = "PROVIDER_ID")
+    private Long providerId;
+
+    @Column(name = "DATASET_ID")
+    private Long datasetId;
 }
