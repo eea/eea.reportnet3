@@ -31,22 +31,22 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * Retrieves paginated jobs
      */
     @Override
-    public List<Job> findJobsPaginated(Pageable pageable, boolean asc, String sortedColumn, Long jobId,
-                                       String jobTypes, String processId, String creatorUsername, String jobStatuses){
+    public List<Job> findJobsPaginated(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, Long providerId, Long datasetId,
+                                       String creatorUsername, String jobStatuses){
 
         StringBuilder stringQuery = new StringBuilder();
         List<Job> jobList = new ArrayList<>();
-        Query query = constructQuery(asc, sortedColumn, stringQuery, false, pageable, jobId, jobTypes, processId, creatorUsername, jobStatuses);
+        Query query = constructQuery(asc, sortedColumn, stringQuery, false, pageable, jobId, jobTypes, dataflowId, providerId, datasetId, creatorUsername, jobStatuses);
 
         try {
             jobList = (List<Job>) query.getResultList();
             LOG.info(String.format(
-                    "Retrieved job list with provided filters: jobId = %s, jobType = %s, processId = %s, creatorUsername = %s, jobStatus = %s",
-                    jobId, jobTypes, processId, creatorUsername, jobStatuses));
+                    "Retrieved job list with provided filters: jobId = %s, jobType = %s, dataflowId = %s, providerId = %s, datasetId = %s, creatorUsername = %s, jobStatus = %s",
+                    jobId, jobTypes, dataflowId, providerId, datasetId, creatorUsername, jobStatuses));
         } catch (NoResultException e) {
             LOG.info(String.format(
-                    "No processes found with provided filters: obId = %s, jobType = %s, processId = %s, creatorUsername = %s, jobStatus = %s. Error message: %s",
-                    jobId, jobTypes, processId, creatorUsername, jobStatuses, e.getMessage()));
+                    "No processes found with provided filters: obId = %s, jobType = %s, dataflowId = %s, providerId = %s, datasetId = %s, creatorUsername = %s, jobStatus = %s. Error message: %s",
+                    jobId, jobTypes, dataflowId, providerId, datasetId, creatorUsername, jobStatuses, e.getMessage()));
         }
         return jobList;
     }
@@ -55,32 +55,33 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * Count jobs paginated.
      */
     @Override
-    public Long countJobsPaginated(boolean asc, String sortedColumn, Long jobId,
-                                   String jobTypes, String processId, String creatorUsername, String jobStatuses) {
+    public Long countJobsPaginated(boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, Long providerId, Long datasetId, String creatorUsername, String jobStatuses) {
         StringBuilder stringQuery = new StringBuilder();
-        Query query = constructQuery(asc, sortedColumn, stringQuery, true, null, jobId, jobTypes, processId, creatorUsername, jobStatuses);
+        Query query = constructQuery(asc, sortedColumn, stringQuery, true, null, jobId, jobTypes, dataflowId, providerId, datasetId, creatorUsername, jobStatuses);
 
         return Long.valueOf(query.getSingleResult().toString());
     }
 
     /**
      * Construct query.
-     *
-     * @param asc the asc
-     * @param sortedColumn the filteredColumn
-     * @param stringQuery the string query
-     * @param pageable the pageable
-     * @param jobId the jobId
-     * @param jobTypes the jobTypes
-     * @param creatorUsername the creatorUsername
-     * @param processId the processId
-     * @param jobStatuses the jobStatuses
-     * @return the query
+     * @param asc
+     * @param sortedColumn
+     * @param stringQuery
+     * @param countQuery
+     * @param pageable
+     * @param jobId
+     * @param jobTypes
+     * @param dataflowId
+     * @param providerId
+     * @param datasetId
+     * @param creatorUsername
+     * @param jobStatuses
+     * @return
      */
-    private Query constructQuery(boolean asc, String sortedColumn, StringBuilder stringQuery, boolean countQuery, Pageable pageable, Long jobId,
-                                 String jobTypes, String processId, String creatorUsername, String jobStatuses) {
+    private Query constructQuery(boolean asc, String sortedColumn, StringBuilder stringQuery, boolean countQuery, Pageable pageable, Long jobId, String jobTypes, Long dataflowId,
+                                 Long providerId, Long datasetId, String creatorUsername, String jobStatuses) {
         stringQuery.append(countQuery ? COUNT_JOBS_QUERY : JOBS_QUERY);
-        addFilters(stringQuery, jobId, jobTypes, processId, creatorUsername, jobStatuses);
+        addFilters(stringQuery, jobId, jobTypes, dataflowId, providerId, datasetId, creatorUsername, jobStatuses);
         if (!countQuery) {
             stringQuery.append(" order by " + sortedColumn);
             stringQuery.append(asc ? " asc" : " desc");
@@ -98,7 +99,7 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
         }
 
 
-        addParameters(query, jobId, jobTypes, processId, creatorUsername, jobStatuses);
+        addParameters(query, jobId, jobTypes, dataflowId, providerId, datasetId, creatorUsername, jobStatuses);
         return query;
     }
 
@@ -109,14 +110,15 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * @param jobId the jobId
      * @param jobTypes the jobTypes
      * @param creatorUsername the creatorUsername
-     * @param processId the processId
      * @param jobStatuses the jobStatuses
      */
-    private void addFilters(StringBuilder query, Long jobId, String jobTypes, String processId, String creatorUsername, String jobStatuses) {
+    private void addFilters(StringBuilder query, Long jobId, String jobTypes, Long dataflowId, Long providerId, Long datasetId, String creatorUsername, String jobStatuses) {
         query.append(" where 1=1 ");
         query.append((jobId != null) ? " and jobs.id = :jobId " : "");
         query.append(StringUtils.isNotBlank(jobTypes) ? " and jobs.job_type in :jobType " : "");
-        query.append(StringUtils.isNotBlank(processId) ? " and jobs.process_id = :processId " : "");
+        query.append((dataflowId != null) ? " and jobs.dataflow_id= :dataflowId " : "");
+        query.append((providerId != null) ? " and jobs.provider_id= :providerId " : "");
+        query.append((datasetId != null) ? " and jobs.dataset_id= :datasetId " : "");
         query.append(StringUtils.isNotBlank(creatorUsername) ? " and jobs.creator_username = :creatorUsername " : "");
         query.append(StringUtils.isNotBlank(jobStatuses) ? " and jobs.job_status in :jobStatus " : "");
     }
@@ -128,18 +130,23 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
      * @param jobId the jobId
      * @param jobTypes the jobTypes
      * @param creatorUsername the creatorUsername
-     * @param processId the processId
      * @param jobStatuses the jobStatuses
      */
-    private void addParameters(Query query, Long jobId, String jobTypes, String processId, String creatorUsername, String jobStatuses) {
+    private void addParameters(Query query, Long jobId, String jobTypes, Long dataflowId, Long providerId, Long datasetId, String creatorUsername, String jobStatuses) {
         if(jobId != null){
             query.setParameter("jobId", jobId);
         }
         if(StringUtils.isNotBlank(jobTypes)){
             query.setParameter("jobType", Arrays.asList(jobTypes.split(",")));
         }
-        if (StringUtils.isNotBlank(processId)) {
-            query.setParameter("processId", processId);
+        if(dataflowId != null){
+            query.setParameter("dataflowId", dataflowId);
+        }
+        if(providerId != null){
+            query.setParameter("providerId", providerId);
+        }
+        if(datasetId != null){
+            query.setParameter("datasetId", datasetId);
         }
         if (StringUtils.isNotBlank(creatorUsername)) {
             query.setParameter("creatorUsername", creatorUsername);

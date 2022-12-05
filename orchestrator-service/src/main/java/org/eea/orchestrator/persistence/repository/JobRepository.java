@@ -28,15 +28,6 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
 
     /**
      *
-     * Retrieves job that has specific process id
-     *
-     * @param processId the process id
-     * @return a job
-     */
-    Job findOneByProcessId(String processId);
-
-    /**
-     *
      * Deletes jobs based on statuses and duration
      * @param statuses the statuses
      */
@@ -58,13 +49,21 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
 
     /**
      *
-     * Retrieves jobs based on statuses and type
+     * Retrieves jobs based on statuses, type and release
      *
      * @param jobType the job type
      * @param jobStatus the job status
+     * @param release the release
      * @return the entries
      */
+    List<Job> findByJobTypeAndJobStatusInAndRelease(JobTypeEnum jobType, List<JobStatusEnum> jobStatus, boolean release);
 
-    List<Job> findByJobTypeAndJobStatusIn(JobTypeEnum jobType, List<JobStatusEnum> jobStatus);
+    /**
+     * Retrieves jobs based on statuses and types
+     * @param jobType
+     * @param jobStatus
+     * @return
+     */
+    List<Job> findByJobTypeInAndJobStatusInAndRelease(List<JobTypeEnum> jobType, List<JobStatusEnum> jobStatus, boolean release);
 }
 

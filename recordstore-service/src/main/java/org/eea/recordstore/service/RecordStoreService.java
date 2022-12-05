@@ -72,7 +72,7 @@ public interface RecordStoreService {
    * @throws EEAException the EEA exception
    */
   void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset,
-      String dateRelease, boolean prefillingReference)
+      String dateRelease, boolean prefillingReference, String processId)
       throws SQLException, IOException, RecordStoreAccessException, EEAException;
 
 
@@ -92,7 +92,7 @@ public interface RecordStoreService {
    */
   void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum typeDataset, Boolean isSchemaSnapshot, Boolean deleteData,
-      boolean prefillingReference) throws SQLException, IOException, RecordStoreAccessException;
+      boolean prefillingReference, String processId) throws SQLException, IOException, RecordStoreAccessException;
 
   /**
    * Delete data snapshot.

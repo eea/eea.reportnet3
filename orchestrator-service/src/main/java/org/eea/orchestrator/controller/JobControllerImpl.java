@@ -3,14 +3,12 @@ package org.eea.orchestrator.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.*;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
-import org.eea.interfaces.vo.recordstore.ProcessVO;
-import org.eea.interfaces.vo.recordstore.ProcessesVO;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.orchestrator.service.JobService;
 import org.eea.thread.ThreadPropertiesManager;
@@ -45,8 +43,12 @@ public class JobControllerImpl implements JobController {
     @Autowired
     private JobService jobService;
 
+    /** The dataset metabase controller zuul */
+    @Autowired
+    private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
     /** The valid columns. */
-    List<String> validColumns = Arrays.asList("jobId", "processId", "creatorUsername", "jobType",
+    List<String> validColumns = Arrays.asList("jobId", "creatorUsername", "jobType", "dataflowId", "providerId", "datasetId",
             "jobStatus", "dateAdded", "dateStatusChanged");
 
     @Override
@@ -61,7 +63,9 @@ public class JobControllerImpl implements JobController {
             @RequestParam(value = "sortedColumn", defaultValue = "jobId") String sortedColumn,
             @RequestParam(value = "jobId", required = false) Long jobId,
             @RequestParam(value = "jobType", required = false) String jobTypes,
-            @RequestParam(value = "processId", required = false) String processId,
+            @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+            @RequestParam(value = "providerId", required = false) Long providerId,
+            @RequestParam(value = "datasetId", required = false) Long datasetId,
             @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
             @RequestParam(value = "jobStatus", required = false) String jobStatuses){
         try {
@@ -70,7 +74,7 @@ public class JobControllerImpl implements JobController {
             if (!validColumns.contains(sortedColumn)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong sorting header provided.");
             }
-            return jobService.getJobs(pageable, asc, sortedColumn, jobId, jobTypes, processId, creatorUsername, jobStatuses);
+            return jobService.getJobs(pageable, asc, sortedColumn, jobId, jobTypes, dataflowId, providerId, datasetId, creatorUsername, jobStatuses);
         } catch (Exception e){
             LOG.error("Unexpected error! Could not retrieve all jobs");
             throw e;
@@ -110,9 +114,9 @@ public class JobControllerImpl implements JobController {
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("datasetId", datasetId);
             parameters.put("released", released);
-            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION, parameters);
+            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), null, null, Arrays.asList(datasetId), false);
             LOG.info("Adding validation job for datasetId {} and released {} for creator {} with status {}", datasetId, released, username, statusToInsert);
-            jobService.addValidationJob(parameters, username, statusToInsert);
+            jobService.addValidationJob(datasetId, parameters, username, statusToInsert);
             LOG.info("Successfully added validation job for datasetId {}, released {} and creator {} with status {}", datasetId, released, username, statusToInsert);
         } catch (Exception e){
             LOG.error("Unexpected error! Could not add validation job for datasetId {}, released {} and creator {}. Message: {}", datasetId, released, username, e.getMessage());
@@ -141,15 +145,17 @@ public class JobControllerImpl implements JobController {
         ThreadPropertiesManager.setVariable("user",
                 SecurityContextHolder.getContext().getAuthentication().getName());
 
+        List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("dataflowId", dataflowId);
         parameters.put("dataProviderId", dataProviderId);
         parameters.put("restrictFromPublic", restrictFromPublic);
         parameters.put("validate", validate);
-        JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE, parameters);
+        parameters.put("datasetId", datasetIds);
+        JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), dataflowId, dataProviderId, datasetIds, true);
 
         LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
-        jobService.addReleaseJob(parameters, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
+        jobService.addReleaseJob(dataflowId, dataProviderId, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
         LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
         if (statusToInsert == JobStatusEnum.REFUSED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
@@ -157,31 +163,52 @@ public class JobControllerImpl implements JobController {
     }
 
     /**
-     * Updates a job status by process id
+     * Updates job's status
      */
-    @PostMapping(value = "/updateStatus/{status}/{processId}")
-    public void updateStatusByProcessId(@PathVariable("status") JobStatusEnum status, @PathVariable("processId") String processId){
+    @PostMapping(value = "/updateJobStatus/{id}/{status}")
+    public void updateJobStatus(@PathVariable("id") Long jobId, @PathVariable("status") JobStatusEnum status){
         try {
-            LOG.info("Updating status of job with processId {} to status {}", processId, status);
-            jobService.updateJobStatusByProcessId(status, processId);
+            LOG.info("Updating job with id {} to status {}", jobId, status.getValue());
+            jobService.updateJobStatus(jobId, status);
         } catch (Exception e){
-            LOG.error("Unexpected error! Could not update status {} for processId {}. Message: {}", status, processId, e.getMessage());
+            LOG.error("Unexpected error! Could not update job to in progress for id {} and status {}. Message: {}", jobId, status.getValue(), e.getMessage());
             throw e;
         }
     }
 
     /**
-     * Updates job's status
+     * Saves job
+     * @param jobVO
+     * @return
      */
-    @PostMapping(value = "/updateJobStatus/{id}/{status}/{processId}")
-    public void updateJobStatus(@PathVariable("id") Long jobId, @PathVariable("status") JobStatusEnum status, @PathVariable("processId") String processId){
-        try {
-            LOG.info("Updating job with id {} and processId {} to status {}", jobId, processId, status.getValue());
-            jobService.updateJobStatus(jobId, status, processId);
-        } catch (Exception e){
-            LOG.error("Unexpected error! Could not update job to in progress for id {} processId {} and status {}. Message: {}", jobId, processId, status.getValue(), e.getMessage());
-            throw e;
-        }
+    @Override
+    @PostMapping(value = "/saveJob")
+    public JobVO save(@RequestBody JobVO jobVO) {
+       return jobService.save(jobVO);
     }
 
+    /**
+     *
+     * @param jobType
+     * @param release
+     * @param dataflowId
+     * @param dataProviderId
+     * @param datasets
+     * @return
+     */
+    @Override
+    @GetMapping(value = "/checkEligibility")
+    public JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release, @RequestParam("dataflowId") Long dataflowId, @RequestParam("dataProviderID") Long dataProviderId, @RequestParam("datasets") List<Long> datasets) {
+        return jobService.checkEligibilityOfJob(jobType, dataflowId, dataProviderId, datasets, release);
+    }
+
+    /**
+     * Finds job by id
+     * @param jobId
+     * @return
+     */
+    @GetMapping(value = "/findJobById/{jobId}")
+    public JobVO findJobById(@PathVariable("jobId") Long jobId) {
+        return jobService.findById(jobId);
+    }
 }

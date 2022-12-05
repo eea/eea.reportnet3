@@ -40,8 +40,14 @@ public class JobUtils {
        else if(name.equals("creatorUsername")){
            columnName = "creator_username";
        }
-       else if(name.equals("processId")){
-           columnName = "processId";
+       else if(name.equals("dataflowId")){
+           columnName = "dataflow_id";
+       }
+       else if(name.equals("providerId")){
+           columnName = "provider_id";
+       }
+       else if(name.equals("datasetId")){
+           columnName = "dataset_id";
        }
        else{
            LOG.info("Could not match jobs header {} to a column in the table", name);
