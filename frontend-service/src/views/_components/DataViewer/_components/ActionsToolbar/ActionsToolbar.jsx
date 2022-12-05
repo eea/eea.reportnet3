@@ -23,6 +23,7 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { DatasetService } from 'services/DatasetService';
 
+import { ActionsContext } from 'views/_functions/Contexts/ActionsContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 
@@ -67,7 +68,6 @@ export const ActionsToolbar = ({
   tableName
 }) => {
   const [isFilteredByValue, setIsFilteredByValue] = useState(false);
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [filter, dispatchFilter] = useReducer(filterReducer, {
     groupedFilter: isGroupedValidationSelected,
     validationDropdown: [],
@@ -78,6 +78,7 @@ export const ActionsToolbar = ({
 
   const { groupedFilter, validationDropdown, valueFilter, visibilityDropdown, visibilityColumnIcon } = filter;
 
+  const actionsContext = useContext(ActionsContext);
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
@@ -101,11 +102,11 @@ export const ActionsToolbar = ({
 
   useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_TABLE_DATA_COMPLETED_EVENT')) {
-      setIsLoadingFile(false);
+      actionsContext.changeExportTableState(false);
     }
   }, [notificationContext.hidden]);
 
-  useCheckNotifications(['EXPORT_TABLE_DATA_FAILED_EVENT'], setIsLoadingFile, false);
+  useCheckNotifications(['EXPORT_TABLE_DATA_FAILED_EVENT'], actionsContext.changeExportTableState, false);
 
   const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
     command: () => onExportTableData(type),
@@ -114,7 +115,8 @@ export const ActionsToolbar = ({
   }));
 
   const onExportTableData = async type => {
-    setIsLoadingFile(true);
+    const testCase = 'TABLE_EXPORT';
+    actionsContext.testProcess(datasetId, testCase);
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
       const isExportFilteredCsv = TextUtils.areEquals(type.key, 'exportFilteredCsv');
@@ -130,7 +132,6 @@ export const ActionsToolbar = ({
       );
     } catch (error) {
       console.error('ActionsToolbar - onExportTableData.', error);
-      setIsLoadingFile(false);
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -212,10 +213,24 @@ export const ActionsToolbar = ({
           className={`p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step ${
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
-          disabled={isDataflowOpen || isDesignDatasetEditorRead}
-          icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
+          disabled={
+            isDataflowOpen ||
+            isDesignDatasetEditorRead ||
+            actionsContext.importDatasetProcessing ||
+            actionsContext.exportDatasetProcessing ||
+            actionsContext.deleteDatasetProcessing ||
+            actionsContext.importTableProcessing ||
+            actionsContext.exportTableProcessing ||
+            actionsContext.deleteTableProcessing ||
+            actionsContext.validateDatasetProcessing
+          }
+          icon={actionsContext.exportTableProcessing ? 'spinnerAnimate' : 'export'}
           id="buttonExportTable"
-          label={resourcesContext.messages['exportTable']}
+          label={
+            actionsContext.exportTableProcessing
+              ? resourcesContext.messages['exportInProgress']
+              : resourcesContext.messages['exportTable']
+          }
           onClick={event => {
             onUpdateData();
             exportMenuRef.current.show(event);
@@ -354,9 +369,25 @@ export const ActionsToolbar = ({
         />
         <DeleteDialog
           disabled={
-            !hasWritePermissions || isUndefined(records.totalRecords) || isDataflowOpen || isDesignDatasetEditorRead
+            !hasWritePermissions ||
+            isUndefined(records.totalRecords) ||
+            isDataflowOpen ||
+            isDesignDatasetEditorRead ||
+            actionsContext.importDatasetProcessing ||
+            actionsContext.exportDatasetProcessing ||
+            actionsContext.deleteDatasetProcessing ||
+            actionsContext.importTableProcessing ||
+            actionsContext.exportTableProcessing ||
+            actionsContext.deleteTableProcessing ||
+            actionsContext.validateDatasetProcessing
           }
           hasWritePermissions={hasWritePermissions}
+          icon={actionsContext.deleteTableProcessing ? 'spinnerAnimate' : 'trash'}
+          label={
+            actionsContext.deleteTableProcessing
+              ? resourcesContext.messages['deleteInProgress']
+              : resourcesContext.messages['deleteTable']
+          }
           onConfirmDeleteTable={onConfirmDeleteTable}
           showWriteButtons={showWriteButtons}
           tableName={tableName}

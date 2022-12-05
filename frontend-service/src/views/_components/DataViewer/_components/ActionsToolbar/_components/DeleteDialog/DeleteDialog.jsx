@@ -7,7 +7,15 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const DeleteDialog = ({ disabled, hasWritePermissions, onConfirmDeleteTable, showWriteButtons, tableName }) => {
+export const DeleteDialog = ({
+  disabled,
+  hasWritePermissions,
+  icon,
+  label,
+  onConfirmDeleteTable,
+  showWriteButtons,
+  tableName
+}) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [isDialogVisible, setIsDialogVisible] = useState(false);
@@ -27,8 +35,8 @@ export const DeleteDialog = ({ disabled, hasWritePermissions, onConfirmDeleteTab
             !disabled && 'p-button-animated-blink'
           }`}
           disabled={disabled}
-          icon="trash"
-          label={resourcesContext.messages['deleteTable']}
+          icon={icon}
+          label={label}
           onClick={() => setIsDialogVisible(true)}
         />
       );
