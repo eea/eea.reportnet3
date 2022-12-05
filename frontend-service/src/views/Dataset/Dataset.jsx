@@ -115,7 +115,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     name: ''
   });
 
-  const [exportProcessingMessage, setExportProcessingMessage] = useState(null);
+  // const [exportProcessingMessage, setExportProcessingMessage] = useState(null);
 
   const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -259,7 +259,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
       actionsContext.changeExportDatasetState(false);
-      setExportProcessingMessage(null);
     }
 
     if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_VALIDATIONS_FAILED_EVENT')) {
@@ -640,22 +639,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     ],
     actionsContext.changeExportDatasetState,
     false
-  );
-
-  useCheckNotifications(
-    [
-      'CALL_FME_PROCESS_FAILED_EVENT',
-      'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
-      'DOWNLOAD_FME_FILE_ERROR',
-      'EXPORT_DATA_BY_ID_ERROR',
-      'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD',
-      'EXPORT_DATASET_FILE_DOWNLOAD',
-      'EXPORT_TABLE_DATA_FILE_AUTOMATICALLY_DOWNLOAD',
-      'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT',
-      'DOWNLOAD_EXPORT_TABLE_DATA_FILE_ERROR'
-    ],
-    setExportProcessingMessage,
-    null
   );
 
   useCheckNotifications(
