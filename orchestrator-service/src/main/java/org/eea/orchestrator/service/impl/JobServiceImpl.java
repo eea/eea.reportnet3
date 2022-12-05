@@ -141,8 +141,7 @@ public class JobServiceImpl implements JobService {
             for(Job job: jobsRelatedToReleaseList){
                 Map<String, Object> insertedParameters = job.getParameters();
                 Long insertedDataflowId = Long.valueOf((Integer) insertedParameters.get("dataflowId"));
-                Long insertedDataProviderId = Long.valueOf((Integer) insertedParameters.get("dataProviderId"));
-                if(dataflowId.equals(insertedDataflowId) && dataProviderId.equals(insertedDataProviderId)){
+                if(dataflowId.equals(insertedDataflowId)){
                     return JobStatusEnum.REFUSED;
                 }
             }
