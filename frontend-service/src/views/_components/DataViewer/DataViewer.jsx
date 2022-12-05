@@ -37,6 +37,7 @@ import { Map } from 'views/_components/Map';
 
 import { DatasetService } from 'services/DatasetService';
 
+import { ActionsContext } from 'views/_functions/Contexts/ActionsContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { SnapshotContext } from 'views/_functions/Contexts/SnapshotContext';
@@ -91,6 +92,8 @@ export const DataViewer = ({
   const levelErrorAllTypes = ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'];
 
   const setSelectedLine = useSetRecoilState(geoJSONListStore);
+
+  const actionsContext = useContext(ActionsContext);
   const userContext = useContext(UserContext);
 
   const [addAnotherOne, setAddAnotherOne] = useState(false);
@@ -544,6 +547,8 @@ export const DataViewer = ({
   };
 
   const onConfirmDeleteTable = async () => {
+    const testCase = 'TABLE_DELETE';
+    actionsContext.testProcess(datasetId, testCase);
     try {
       notificationContext.add({ type: 'DELETE_TABLE_DATA_INIT' });
       await DatasetService.deleteTableData(datasetId, tableId);

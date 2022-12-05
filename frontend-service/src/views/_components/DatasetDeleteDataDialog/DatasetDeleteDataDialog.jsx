@@ -7,7 +7,7 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const DatasetDeleteDataDialog = ({ children, disabled = false, onConfirmDelete, onHideDelete = () => {} }) => {
+export const DatasetDeleteDataDialog = ({ children, disabled = false, icon, label, onConfirmDelete, onHideDelete = () => {} }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
@@ -32,8 +32,8 @@ export const DatasetDeleteDataDialog = ({ children, disabled = false, onConfirmD
         !disabled ? 'p-button-animated-blink' : ''
       } dataset-deleteDataset-help-step`}
       disabled={disabled}
-      icon="trash"
-      label={resourcesContext.messages['deleteDatasetData']}
+      icon={icon}
+      label={label}
       onClick={() => setIsDeleteDialogVisible(true)}
     />
   );
