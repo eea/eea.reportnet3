@@ -1631,12 +1631,6 @@ public class FileTreatmentHelper implements DisposableBean {
                     long startBatchLine = 0;
                     long batchCounter = 0;
                     while (reader.readLine() != null) {
-                        // say we are at line 52 , end line of the file.
-                        //we will not get into the if.
-                        //we will exit the loop, with lines being 52.
-                        //what will batchcounter be by now. It would become zero in the last if, then, now will be 2.
-                        // So we got all the lines of the doc, and the counter of the final ones, so we can read
-                        //finalLines - batchCounter to FinalLines. So we will read from 50-2 = 50 to 52
                         if (batchCounter == 5000) {
                             this.addImportTaskToProcess(filePath, partition.getId(), idTableSchema,dataflowId, datasetId, fileName, replace,
                                     schema, connectionDataVO, startBatchLine, lines, processId, EventType.COMMAND_IMPORT_CSV_FILE_CHUNK_TO_DATASET, delimiter);
