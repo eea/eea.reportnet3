@@ -133,7 +133,7 @@ public interface ProcessController {
    * @return
    */
   @GetMapping(value = "/private/findProcessIdByDatasetAndStatus")
-  List<String> findProcessIdByDatasetAndStatus(@RequestParam("datasetId") Long datasetId, @RequestParam("processType") ProcessTypeEnum processType, @RequestParam("status") ProcessStatusEnum status);
+  List<String> findProcessIdByDatasetAndStatus(@RequestParam("datasetId") Long datasetId, @RequestParam("processType") String processType, @RequestParam("status") List<String> status);
 
   /**
    * Saves process

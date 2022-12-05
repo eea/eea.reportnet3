@@ -112,4 +112,12 @@ public interface JobController {
     @GetMapping(value = "/checkEligibility")
     JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release, @RequestParam("dataflowId") Long dataflowId,
                                         @RequestParam("dataProviderID") Long dataProviderId, @RequestParam("datasets") List<Long> datasets);
+
+    /**
+     * Finds job by id
+     * @param jobId
+     * @return
+     */
+    @GetMapping(value = "/findJobById/{jobId}")
+    JobVO findJobById(@PathVariable("jobId") Long jobId);
 }

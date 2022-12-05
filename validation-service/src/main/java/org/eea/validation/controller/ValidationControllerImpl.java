@@ -58,6 +58,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 /**
@@ -135,7 +136,7 @@ public class ValidationControllerImpl implements ValidationController {
 
     LOG.info("Called ValidationControllerImpl.validateDataSetData for datasetId {} and released {} with jobId {}", datasetId, released, jobId);
 
-    if (jobId!=null) {
+    if (jobId!=null && !released) {
       jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
     }
 
@@ -517,7 +518,7 @@ public class ValidationControllerImpl implements ValidationController {
   @Override
   @GetMapping(value = "/private/releaseTasksByDatasetId/{datasetId}")
   public List<ProcessTaskVO> findReleaseTasksByDatasetId(@PathVariable("datasetId") Long datasetId) {
-      List<String> processIds = processControllerZuul.findProcessIdByDatasetAndStatus(datasetId, ProcessTypeEnum.RELEASE, ProcessStatusEnum.IN_PROGRESS);
+      List<String> processIds = processControllerZuul.findProcessIdByDatasetAndStatus(datasetId, ProcessTypeEnum.RELEASE.toString(), Arrays.asList(ProcessStatusEnum.IN_PROGRESS.toString()));
       List<ProcessTaskVO> processTaskVOS = new ArrayList<>();
       processIds.forEach(processId -> {
         ProcessTaskVO processTaskVO = new ProcessTaskVO();

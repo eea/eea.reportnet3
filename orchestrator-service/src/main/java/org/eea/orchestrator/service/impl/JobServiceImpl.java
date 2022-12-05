@@ -214,4 +214,13 @@ public class JobServiceImpl implements JobService {
         return jobMapper.entityToClass(jobRepository.save(job));
     }
 
+    @Override
+    public JobVO findById(Long jobId) {
+        Optional<Job> job = jobRepository.findById(jobId);
+        if (job.isPresent()){
+            return jobMapper.entityToClass(job.get());
+        }
+        return null;
+    }
+
 }

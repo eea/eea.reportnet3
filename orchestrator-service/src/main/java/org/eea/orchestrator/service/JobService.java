@@ -33,4 +33,6 @@ public interface JobService {
     void deleteJob(JobVO jobVO);
 
     JobVO save(JobVO jobVO);
+
+    JobVO findById(Long jobId);
 }

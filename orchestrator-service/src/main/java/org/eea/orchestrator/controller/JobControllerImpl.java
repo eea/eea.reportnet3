@@ -202,4 +202,13 @@ public class JobControllerImpl implements JobController {
         return jobService.checkEligibilityOfJob(jobType, dataflowId, dataProviderId, datasets, release);
     }
 
+    /**
+     * Finds job by id
+     * @param jobId
+     * @return
+     */
+    @GetMapping(value = "/findJobById/{jobId}")
+    public JobVO findJobById(@PathVariable("jobId") Long jobId) {
+        return jobService.findById(jobId);
+    }
 }

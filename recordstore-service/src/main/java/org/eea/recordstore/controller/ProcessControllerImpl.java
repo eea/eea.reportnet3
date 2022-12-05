@@ -217,7 +217,7 @@ public class ProcessControllerImpl implements ProcessController {
    */
   @Override
   @GetMapping(value = "/private/findProcessIdByDatasetAndStatus")
-  public List<String> findProcessIdByDatasetAndStatus(@RequestParam("datasetId") Long datasetId, @RequestParam("processType") ProcessTypeEnum processType, @RequestParam("status") ProcessStatusEnum status) {
+  public List<String> findProcessIdByDatasetAndStatus(@RequestParam("datasetId") Long datasetId, @RequestParam("processType") String processType, @RequestParam("status") List<String> status) {
     return processService.findProcessIdByDatasetAndStatus(datasetId, processType, status);
   }
 
