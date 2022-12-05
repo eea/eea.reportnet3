@@ -1,15 +1,13 @@
-import { Fragment, useContext, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import { config } from 'conf';
 
 import { Button } from 'views/_components/Button';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { DatasetConfig } from 'repositories/config/DatasetConfig';
-
-import { ActionsContext } from 'views/_functions/Contexts/ActionsContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-
+import { DatasetService } from 'services/DatasetService';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -25,11 +23,16 @@ export const ImportTableDataDialog = ({
   tableId,
   tableName
 }) => {
-  const actionsContext = useContext(ActionsContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [importTableDialogVisible, setImportTableDialogVisible] = useState(false);
+  const [importProcessing, setImportProcessing] = useState(false);
+  const [importProcessingMessage, setImportProcessingMessage] = useState(null);
+
+  useEffect(() => {
+    testImport();
+  }, [datasetId]);
 
   const readLines = async function* (blob, encoding = 'utf-8', delimiter = /\r?\n/g) {
     const reader = blob.stream().getReader();
@@ -59,9 +62,28 @@ export const ImportTableDataDialog = ({
     }
   };
 
+  const testImport = () => {
+    const timeout = ms => {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    };
+    const testImportTimer = async () => {
+      const importStatus = await DatasetService.testImportProcess(datasetId);
+
+      if (importStatus?.data && !importStatus?.data?.importInProgress) {
+        setImportProcessing(false);
+        setImportProcessingMessage(null);
+      } else {
+        setImportProcessingMessage(importStatus?.data?.message);
+        await timeout(5000);
+        testImportTimer();
+      }
+    };
+    setImportProcessing(true);
+    testImportTimer();
+  };
+
   const onUpload = async () => {
-    const testCase = 'TABLE_IMPORT';
-    actionsContext.testProcess(datasetId, testCase);
+    testImport();
     setImportTableDialogVisible(false);
     const {
       dataflow: { name: dataflowName },
@@ -113,24 +135,9 @@ export const ImportTableDataDialog = ({
           className={`p-button-rounded p-button-secondary datasetSchema-import-table-help-step ${
             !hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
-          disabled={
-            !hasWritePermissions ||
-            isDataflowOpen ||
-            isDesignDatasetEditorRead ||
-            actionsContext.importDatasetProcessing ||
-            actionsContext.exportDatasetProcessing ||
-            actionsContext.deleteDatasetProcessing ||
-            actionsContext.importTableProcessing ||
-            actionsContext.exportTableProcessing ||
-            actionsContext.deleteTableProcessing ||
-            actionsContext.validateDatasetProcessing
-          }
-          icon={actionsContext.importTableProcessing ? 'spinnerAnimate' : 'import'}
-          label={
-            actionsContext.importTableProcessing
-              ? resourcesContext.messages['importInProgress']
-              : resourcesContext.messages['importTable']
-          }
+          disabled={!hasWritePermissions || importProcessing}
+          icon={importProcessing ? 'spinnerAnimate' : 'import'}
+          label={importProcessingMessage ? importProcessingMessage : resourcesContext.messages['importTable']}
           onClick={() => setImportTableDialogVisible(true)}
         />
       );
