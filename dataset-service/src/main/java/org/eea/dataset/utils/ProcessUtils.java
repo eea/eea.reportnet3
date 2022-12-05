@@ -18,7 +18,7 @@ public class ProcessUtils {
         processVO.setStatus(ProcessStatusEnum.IN_QUEUE.toString());
         processVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
         processVO.setPriority(1);
-        processVO.setProcessType(ProcessTypeEnum.RELEASE_SNAPSHOT.toString());
+        processVO.setProcessType(ProcessTypeEnum.RELEASE.toString());
         processVO.setProcessId(processId);
         processVO.setQueuedDate(new Date());
         return processVO;

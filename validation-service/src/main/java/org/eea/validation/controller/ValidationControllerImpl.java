@@ -517,7 +517,7 @@ public class ValidationControllerImpl implements ValidationController {
   @Override
   @GetMapping(value = "/private/releaseTasksByDatasetId/{datasetId}")
   public List<ProcessTaskVO> findReleaseTasksByDatasetId(@PathVariable("datasetId") Long datasetId) {
-      List<String> processIds = processControllerZuul.findProcessIdByDatasetAndStatus(datasetId, ProcessTypeEnum.RELEASE_SNAPSHOT, ProcessStatusEnum.IN_PROGRESS);
+      List<String> processIds = processControllerZuul.findProcessIdByDatasetAndStatus(datasetId, ProcessTypeEnum.RELEASE, ProcessStatusEnum.IN_PROGRESS);
       List<ProcessTaskVO> processTaskVOS = new ArrayList<>();
       processIds.forEach(processId -> {
         ProcessTaskVO processTaskVO = new ProcessTaskVO();

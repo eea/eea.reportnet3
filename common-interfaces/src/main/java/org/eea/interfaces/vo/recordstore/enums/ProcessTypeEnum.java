@@ -14,7 +14,9 @@ public enum ProcessTypeEnum {
 
   IMPORT("IMPORT"),
 
-  RELEASE_SNAPSHOT("RELEASE_SNAPSHOT");
+  RELEASE_SNAPSHOT("RELEASE_SNAPSHOT"),
+
+  RELEASE("RELEASE");
 
   /** The value. */
   private final String value;
