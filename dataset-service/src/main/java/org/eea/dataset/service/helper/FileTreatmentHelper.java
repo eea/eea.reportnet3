@@ -1236,6 +1236,7 @@ public class FileTreatmentHelper implements DisposableBean {
             boolean guessTableName = null == tableSchemaId;
             boolean errorWrongFilename = false;
             int numberOfWrongFiles = 0;
+            boolean createCsvFinalizationCommand = true;
             for (File file : files) {
                 String fileName = file.getName();
 
@@ -1248,8 +1249,8 @@ public class FileTreatmentHelper implements DisposableBean {
                         LOG.info("Start RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
 
                         processFileIntoTasks(datasetId, processId, fileName, file.getPath(), tableSchemaId, replace, datasetSchema,
-                                delimiter);
-
+                                delimiter,createCsvFinalizationCommand);
+                        createCsvFinalizationCommand= false;
                         LOG.info("Finish RN3-Import file segmentation into import Tasks: fileName={}, tableSchemaId={}", fileName,
                                 tableSchemaId);
                     } else {
@@ -1616,7 +1617,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
         private void processFileIntoTasks (@DatasetId Long datasetId, String processId, String fileName, String
         filePath,
-                String idTableSchema,boolean replace, DataSetSchema schema, String delimiter)
+                String idTableSchema,boolean replace, DataSetSchema schema, String delimiter, Boolean createCsvFinalizationCommand)
           throws EEAException, IOException {
             // obtains the file type from the extension
             if (fileName == null) {
@@ -1658,9 +1659,11 @@ public class FileTreatmentHelper implements DisposableBean {
                         this.addImportTaskToProcess(filePath, partition.getId(), idTableSchema,dataflowId, datasetId, fileName, replace,
                                 schema, connectionDataVO, lines-batchCounter, lines, processId, EventType.COMMAND_IMPORT_CSV_FILE_CHUNK_TO_DATASET, delimiter);
                      }
-                    //THis is the last event, to signal the end of the process.
-                    this.addImportTaskToProcess(filePath, partition.getId(), idTableSchema,dataflowId, datasetId, fileName, replace,
-                            schema, connectionDataVO, 0l, 0l, processId, EventType.COMMAND_FINALIZE_CSV_FILE_IMPORT_TO_DATASET, delimiter);
+                    if(createCsvFinalizationCommand) {
+                        //THis is the last event, to signal the end of the process.
+                        this.addImportTaskToProcess(filePath, partition.getId(), idTableSchema, dataflowId, datasetId, fileName, replace,
+                                schema, connectionDataVO, 0l, 0l, processId, EventType.COMMAND_FINALIZE_CSV_FILE_IMPORT_TO_DATASET, delimiter);
+                    }
                     reader.close();
                 }
                 if (FileTypeEnum.getEnum(mimeType.toLowerCase()) == FileTypeEnum.XLSX) {
