@@ -18,7 +18,7 @@ public interface JobService {
 
     JobStatusEnum checkEligibilityOfJob(String jobType, Long dataflowId, Long dataProviderId, List<Long> datasetId, boolean release);
 
-    void addValidationJob(Long datasetId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert);
+    void addValidationJob(Long dataflowId, Long providerId, Long datasetId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert);
 
     void addReleaseJob(Long dataflowId, Long dataProviderId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert);
 
@@ -35,4 +35,6 @@ public interface JobService {
     JobVO save(JobVO jobVO);
 
     JobVO findById(Long jobId);
+
+    boolean canExecuteReleaseOnDataflow(Long dataflowId);
 }

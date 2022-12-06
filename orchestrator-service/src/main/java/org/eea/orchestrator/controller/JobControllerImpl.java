@@ -5,6 +5,7 @@ import io.swagger.annotations.*;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
@@ -111,12 +112,17 @@ public class JobControllerImpl implements JobController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_INCORRECT_ID);
         }
         try {
+            DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
             Map<String, Object> parameters = new HashMap<>();
+            parameters.put("dataflowId", dataset.getDataflowId());
+            if (dataset.getDataProviderId()!=null) {
+                parameters.put("dataProviderId", dataset.getDataProviderId());
+            }
             parameters.put("datasetId", datasetId);
             parameters.put("released", released);
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), null, null, Arrays.asList(datasetId), false);
             LOG.info("Adding validation job for datasetId {} and released {} for creator {} with status {}", datasetId, released, username, statusToInsert);
-            jobService.addValidationJob(datasetId, parameters, username, statusToInsert);
+            jobService.addValidationJob(dataset.getDataflowId(), dataset.getDataProviderId(), datasetId, parameters, username, statusToInsert);
             LOG.info("Successfully added validation job for datasetId {}, released {} and creator {} with status {}", datasetId, released, username, statusToInsert);
         } catch (Exception e){
             LOG.error("Unexpected error! Could not add validation job for datasetId {}, released {} and creator {}. Message: {}", datasetId, released, username, e.getMessage());
@@ -212,3 +218,9 @@ public class JobControllerImpl implements JobController {
         return jobService.findById(jobId);
     }
 }
+
+
+
+
+
+

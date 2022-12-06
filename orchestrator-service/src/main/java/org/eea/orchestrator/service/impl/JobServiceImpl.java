@@ -85,9 +85,9 @@ public class JobServiceImpl implements JobService {
 
     @Transactional
     @Override
-    public void addValidationJob(Long datasetId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert){
+    public void addValidationJob(Long dataflowId, Long providerId, Long datasetId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert){
         Timestamp ts = new Timestamp(System.currentTimeMillis());
-        Job validationJob = new Job(null, JobTypeEnum.VALIDATION, statusToInsert, ts, ts, parameters, creator, false, null, null, datasetId);
+        Job validationJob = new Job(null, JobTypeEnum.VALIDATION, statusToInsert, ts, ts, parameters, creator, false, dataflowId, providerId, datasetId);
         jobRepository.save(validationJob);
         jobHistoryService.saveJobHistory(validationJob);
     }
@@ -126,7 +126,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public JobStatusEnum checkEligibilityOfJob(String jobType, Long dataflowId, Long dataProviderId, List<Long> datasetIds, boolean release){
         //TODO implement check for all jobTypes
-        if (jobType.equals(JobTypeEnum.RELEASE.toString())) {
+        if (jobType.equals(JobTypeEnum.VALIDATION.toString()) && release || jobType.equals(JobTypeEnum.RELEASE.toString())) {
             List<Job> validationJobList = jobRepository.findByJobTypeAndJobStatusInAndRelease(JobTypeEnum.VALIDATION, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), false);
             for (Job job : validationJobList) {
                 Map<String, Object> insertedParameters = job.getParameters();
@@ -141,7 +141,8 @@ public class JobServiceImpl implements JobService {
             for(Job job: jobsRelatedToReleaseList){
                 Map<String, Object> insertedParameters = job.getParameters();
                 Long insertedDataflowId = Long.valueOf((Integer) insertedParameters.get("dataflowId"));
-                if(dataflowId.equals(insertedDataflowId)){
+                Long insertedDataProviderId = Long.valueOf((Integer) insertedParameters.get("dataProviderId"));
+                if(dataflowId.equals(insertedDataflowId) && dataProviderId.equals(insertedDataProviderId)){
                     return JobStatusEnum.REFUSED;
                 }
             }
@@ -220,6 +221,15 @@ public class JobServiceImpl implements JobService {
             return jobMapper.entityToClass(job.get());
         }
         return null;
+    }
+
+    @Override
+    public boolean canExecuteReleaseOnDataflow(Long dataflowId) {
+        List<Job> jobs = jobRepository.findByDataflowIdAndJobTypeInAndJobStatusAndRelease(dataflowId, Arrays.asList(JobTypeEnum.VALIDATION, JobTypeEnum.RELEASE), JobStatusEnum.IN_PROGRESS, true);
+        if (jobs.size()>0) {
+            return false;
+        }
+        return true;
     }
 
 }
