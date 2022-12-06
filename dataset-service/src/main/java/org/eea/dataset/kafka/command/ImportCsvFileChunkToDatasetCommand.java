@@ -14,6 +14,8 @@ import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.thread.ThreadPropertiesManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -51,6 +53,10 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
 
 //  @Value("${loadDataDelimiter}")
 private char loadDataDelimiter=',';
+
+
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /**
    * Gets the event type.
    *
@@ -100,6 +106,7 @@ private char loadDataDelimiter=',';
         taskRepository.save(task.get());
       }
     } catch (IOException | EEAException e) {
+      LOG_ERROR.error("Error Executing:"+ImportCsvFileChunkToDatasetCommand.class.getName() +" \n"+e.getMessage());
       if(task.isPresent()){
         task.get().setStatus(ProcessStatusEnum.CANCELED);
         taskRepository.save(task.get());

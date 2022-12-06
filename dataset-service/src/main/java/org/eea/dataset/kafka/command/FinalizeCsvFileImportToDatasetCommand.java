@@ -19,9 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * The Class EventHandlerCommand. Event Handler Command where we are encapsulating both
@@ -105,15 +103,16 @@ public class FinalizeCsvFileImportToDatasetCommand extends AbstractEEAEventHandl
     }
 
     protected Boolean shouldAbortCommandExecutionIfCSVImportTasksLeftInProgress(String processId, Long currentTaskId) {
-        List<Task> inProgressTasks = this.taskRepository.findAllByProcessIdAndStatus(processId, ProcessStatusEnum.IN_PROGRESS);
+        List<ProcessStatusEnum> statusesList = Arrays.asList(ProcessStatusEnum.IN_QUEUE,ProcessStatusEnum.IN_PROGRESS);
+        List<Task> inProgressOrInQueueTasks = this.taskRepository.findAllByProcessIdAndStatusIn(processId, statusesList);
 
-        if (inProgressTasks != null && inProgressTasks.size() > 1) {
+        if (inProgressOrInQueueTasks != null && inProgressOrInQueueTasks.size() > 1) {
             return true;
         }
-        if (inProgressTasks != null && inProgressTasks.size() == 1) {
-            //Case where, for one process ,only one task is left with IN_PROGRESS Status.
+        if (inProgressOrInQueueTasks != null && inProgressOrInQueueTasks.size() == 1) {
+            //Case where, for one process ,only one task is left with IN_QUEUE or  IN_PROGRESS Status.
             //We check then if this task is the finalization one.
-            if (inProgressTasks.get(0).getId().equals(currentTaskId)) {
+            if (inProgressOrInQueueTasks.get(0).getId().equals(currentTaskId)) {
                 return false;
             } else {
                 return true;

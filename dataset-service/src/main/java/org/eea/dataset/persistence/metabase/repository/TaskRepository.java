@@ -103,6 +103,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
   List<Task> findAllByProcessIdAndStatus(String processId,ProcessStatusEnum status);
 
+  List<Task> findAllByProcessIdAndStatusIn(String processId,List<ProcessStatusEnum> status);
+
 }
 
 
