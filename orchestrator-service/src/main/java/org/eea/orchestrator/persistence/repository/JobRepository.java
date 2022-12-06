@@ -39,13 +39,22 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
 
     /**
      *
+     * @param jobStatus
+     * @param jobType
+     * @return
+     */
+    Integer countByJobStatusAndJobType(JobStatusEnum jobStatus, JobTypeEnum jobType);
+
+    /**
+     *
      * Retrieves number of jobs based on status and type
      *
      * @param jobStatus the job status
      * @param jobType the job type
+     * @param release the release
      * @return the number of entries
      */
-    Integer countByJobStatusAndJobType(JobStatusEnum jobStatus, JobTypeEnum jobType);
+    Integer countByJobStatusAndJobTypeAndRelease(JobStatusEnum jobStatus, JobTypeEnum jobType, boolean release);
 
     /**
      *
