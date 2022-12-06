@@ -1715,11 +1715,11 @@ import java.util.stream.Stream;
      * @param endingNumber
      * @param processId
      */
-    @Async
-    @Override public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
+    @Async @Override public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
         int startingNumber, int endingNumber, String processId) throws SQLException, IOException {
 
-        LOG.info("Method restoreSpecificFileSnapshot starts with datasetId {}, idSnapshot {}, startingNumber {}, endingNumber {} and processId {}",
+        LOG.info(
+            "Method restoreSpecificFileSnapshot starts with datasetId {}, idSnapshot {}, startingNumber {}, endingNumber {} and processId {}",
             datasetId, idSnapshot, startingNumber, endingNumber, processId);
         try {
             ConnectionDataVO connection =
@@ -1746,29 +1746,32 @@ import java.util.stream.Stream;
     @Override
     public boolean recoverCheckForStuckFile(Long datasetId, Long firstFieldId, Long lastFieldId) {
         try {
-            LOG.info("Method recoverCheckForStuckFile called for datasetId {}, firstFieldId {} and lastFieldId {}", datasetId, firstFieldId, lastFieldId);
-            StringBuilder sql = new StringBuilder("SELECT count(ID) FROM dataset_").append(datasetId)
-                .append(".field_value fv where fv.ID in('").append(firstFieldId)
-                .append("','").append(lastFieldId).append("';");
+            LOG.info(
+                "Method recoverCheckForStuckFile called for datasetId {}, firstFieldId {} and lastFieldId {}",
+                datasetId, firstFieldId, lastFieldId);
+            StringBuilder sql =
+                new StringBuilder("SELECT count(ID) FROM dataset_").append(datasetId)
+                    .append(".field_value fv where fv.ID in('").append(firstFieldId).append("','")
+                    .append(lastFieldId).append("';");
 
             Integer result = jdbcTemplate.queryForObject(sql.toString(), Integer.class);
             LOG.info("Method recoverCheckForStuckFile query {} returned {} ", sql, result);
 
             return result == 2;
         } catch (Exception e) {
-            LOG_ERROR.error("Error in method recoverCheckForStuckFile for datasetId {} with error {}", datasetId, e);
+            LOG_ERROR.error(
+                "Error in method recoverCheckForStuckFile for datasetId {} with error {}",
+                datasetId, e);
             throw e;
         }
     }
 
 
-    @Transactional
-    public List<BigInteger> getReleaseTasksInProgress(long timeInMinutes) {
+    @Transactional public List<BigInteger> getReleaseTasksInProgress(long timeInMinutes) {
         return taskRepository.getTasksInProgress(timeInMinutes);
     }
 
-    @Override
-    public TaskVO findReleaseTaskByTaskId(Long taskId) {
+    @Override public TaskVO findReleaseTaskByTaskId(Long taskId) {
         Optional<Task> task = taskRepository.findById(taskId);
         if (task.isEmpty()) {
             return null;
@@ -1951,62 +1954,60 @@ import java.util.stream.Stream;
     private void copyProcessSpecificFileSnapshot(Long datasetId, Long idSnapshot, CopyManager cm,
         int startingNumber, int endingNumber, String processId) throws IOException, SQLException {
 
-            LOG.info("Method copyProcessSpecificSnapshot starts with datasetId: {}", datasetId);
+        LOG.info("Method copyProcessSpecificSnapshot starts with datasetId: {}", datasetId);
 
-            //FIELD
-            String copyQueryField = COPY_DATASET + datasetId
-                + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
+        //FIELD
+        String copyQueryField = COPY_DATASET + datasetId
+            + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
 
-            for (int i = startingNumber; i <= endingNumber; i++) {
-                String splitFile =
-                    pathSnapshot + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i,
-                        LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+        for (int i = startingNumber; i <= endingNumber; i++) {
+            String splitFile = pathSnapshot + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i,
+                LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+            try {
+                ReleaseTaskVO releaseTaskVO =
+                    ReleaseTaskVO.builder().splitFileName(splitFile).snapshotId(idSnapshot)
+                        .splitFileId(i).datasetId(datasetId).build();
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = objectMapper.writeValueAsString(releaseTaskVO);
+                TaskVO task = validationControllerZuul.findReleaseTaskByJson(json);
+
+                task.setStartingDate(new Date());
+                task.setStatus(ProcessStatusEnum.IN_PROGRESS);
+                validationControllerZuul.updateTask(task);
+
+                LOG.info("Recover copy file {}", splitFile);
+                copyFromFileRecovery(copyQueryField, splitFile, cm);
+
+                task.setFinishDate(new Date());
+                task.setStatus(ProcessStatusEnum.FINISHED);
+                validationControllerZuul.updateTask(task);
+
                 try {
-                    ReleaseTaskVO releaseTaskVO =
-                        ReleaseTaskVO.builder().splitFileName(splitFile)
-                            .snapshotId(idSnapshot).splitFileId(i).datasetId(datasetId).build();
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    String json = objectMapper.writeValueAsString(releaseTaskVO);
-                    TaskVO task = validationControllerZuul.findReleaseTaskByJson(json);
-
-                    task.setStartingDate(new Date());
-                    task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-                    validationControllerZuul.updateTask(task);
-
-                    LOG.info("Recover copy file {}", splitFile);
-                    copyFromFileRecovery(copyQueryField, splitFile, cm);
-
-                    task.setFinishDate(new Date());
-                    task.setStatus(ProcessStatusEnum.FINISHED);
-                    validationControllerZuul.updateTask(task);
-
-                    try {
-                        LOG.info("Recover file {} copied and will be deleted", splitFile);
-                        deleteFile(Arrays.asList(splitFile));
-                        LOG.info("Recover file {} has been deleted", splitFile);
-                    } catch (Exception e) {
-                        LOG.error(
-                            "Error while trying to delete split snap file {} for datasetId {}",
-                            splitFile, datasetId);
-                    }
+                    LOG.info("Recover file {} copied and will be deleted", splitFile);
+                    deleteFile(Arrays.asList(splitFile));
+                    LOG.info("Recover file {} has been deleted", splitFile);
                 } catch (Exception e) {
-                    LOG_ERROR.error("Error in copy field process for snapshotId {} with error",
-                        idSnapshot, e);
-                    throw e;
+                    LOG.error("Error while trying to delete split snap file {} for datasetId {}",
+                        splitFile, datasetId);
                 }
+            } catch (Exception e) {
+                LOG_ERROR.error("Error in copy field process for snapshotId {} with error",
+                    idSnapshot, e);
+                throw e;
             }
-            processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), processId);
+        }
+        processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(),
+            new Date(), processId);
 
-            //ATTACHMENT
-            String nameFileAttachmentValue =
-                pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-                    LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+        //ATTACHMENT
+        String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+            LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
 
-            String copyQueryAttachment = COPY_DATASET + datasetId
-                + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
-            copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
+        String copyQueryAttachment = COPY_DATASET + datasetId
+            + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
+        copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
 
-            LOG.info("Method copyProcessSpecificSnapshot ends with datasetId: {}", datasetId);
+        LOG.info("Method copyProcessSpecificSnapshot ends with datasetId: {}", datasetId);
     }
 
     /**
