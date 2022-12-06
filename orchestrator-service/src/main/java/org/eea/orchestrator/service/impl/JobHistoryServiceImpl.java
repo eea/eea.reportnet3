@@ -30,7 +30,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     @Transactional
     @Override
     public void saveJobHistory(Job job){
-        JobHistory entry = new JobHistory(null, job.getId(), job.getJobType(), job.getJobStatus(), job.getDateAdded(), job.getDateStatusChanged(), job.getParameters(), job.getCreatorUsername(), job.getProcessId());
+        JobHistory entry = new JobHistory(null, job.getId(), job.getJobType(), job.getJobStatus(), job.getDateAdded(), job.getDateStatusChanged(), job.getParameters(), job.getCreatorUsername(), job.isRelease(), job.getDataflowId(), job.getProviderId(), job.getDatasetId());
         jobHistoryRepository.save(entry);
     }
 

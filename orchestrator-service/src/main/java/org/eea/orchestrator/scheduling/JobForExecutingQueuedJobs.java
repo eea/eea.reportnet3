@@ -76,12 +76,16 @@ public class JobForExecutingQueuedJobs {
                         continue;
                     }
                     LOG.info("Job with id {} and of type {} will be executed.", job.getId(), job.getJobType().getValue());
-                    if (job.getJobType() == JobTypeEnum.VALIDATION) {
+                    if (job.getJobType() == JobTypeEnum.VALIDATION && !job.isRelease()) {
                         //call validation mechanism
                         jobService.prepareAndExecuteValidationJob(job);
                     } else if (job.getJobType() == JobTypeEnum.IMPORT) {
                         //call import mechanism
-                    } else if (job.getJobType() == JobTypeEnum.RELEASE) {
+                    } else if (job.getJobType() == JobTypeEnum.VALIDATION && job.isRelease() || job.getJobType() == JobTypeEnum.RELEASE) {
+                        //check if another release is already running for the dataflow, but for another provider
+                        if (!jobService.canExecuteReleaseOnDataflow(job.getDataflowId())) {
+                            continue;
+                        }
                         //call release mechanism
                         jobService.prepareAndExecuteReleaseJob(job);
                     } else if (job.getJobType() == JobTypeEnum.EXPORT) {

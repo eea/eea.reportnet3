@@ -15,12 +15,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -215,8 +217,30 @@ public class ProcessControllerImpl implements ProcessController {
    */
   @Override
   @GetMapping(value = "/private/findProcessIdByDatasetAndStatus")
-  public List<String> findProcessIdByDatasetAndStatus(@RequestParam("datasetId") Long datasetId, @RequestParam("processType") ProcessTypeEnum processType, @RequestParam("status") ProcessStatusEnum status) {
+  public List<String> findProcessIdByDatasetAndStatus(@RequestParam("datasetId") Long datasetId, @RequestParam("processType") String processType, @RequestParam("status") List<String> status) {
     return processService.findProcessIdByDatasetAndStatus(datasetId, processType, status);
+  }
+
+  /**
+  * Saves process
+  * @param processVO
+  */
+  @Override
+  @PostMapping(value = "/private/saveProcess")
+  public ProcessVO saveProcess(@RequestBody ProcessVO processVO) {
+      return processService.saveProcess(processVO);
+  }
+
+  /**
+   * Updates process
+   * @param status
+   * @param dateFinish
+   * @param processId
+   */
+  @Override
+  @PutMapping(value = "/private/updateProcessStatus")
+  public void updateStatusAndFinishedDate(@RequestParam("processId") String processId, @RequestParam("status") String status, @RequestParam("dateFinish") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date dateFinish) {
+    processService.updateStatusAndFinishedDate(status,dateFinish, processId);
   }
 
 }

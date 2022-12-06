@@ -11,18 +11,20 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.TaskType;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
@@ -166,6 +168,12 @@ public class ValidationHelper implements DisposableBean {
   /** The data flow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
+
+  @Autowired
+  private JobProcessControllerZuul jobProcessControllerZuul;
 
   /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
@@ -1099,12 +1107,18 @@ public class ValidationHelper implements DisposableBean {
           if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
               ProcessTypeEnum.VALIDATION, processId,
               SecurityContextHolder.getContext().getAuthentication().getName(), 0, null)) {
+
+            Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+
             if (datasetId.equals(process.getDatasetId()) && process.isReleased()) {
               ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
               if (null != nextProcess) {
                 executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
-                    false);
+                    true);
               } else if (processControllerZuul.isProcessFinished(processId)) {
+                if (jobId!=null) {
+                  jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+                }
                 kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
                     value);
               }
@@ -1113,6 +1127,9 @@ public class ValidationHelper implements DisposableBean {
               // Delete the lock to the Release process
               deleteLockToReleaseProcess(datasetId);
 
+              if (jobId!=null) {
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+              }
               kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
                   value,
                   NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());

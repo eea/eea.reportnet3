@@ -28,15 +28,6 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
 
     /**
      *
-     * Retrieves job that has specific process id
-     *
-     * @param processId the process id
-     * @return a job
-     */
-    Job findOneByProcessId(String processId);
-
-    /**
-     *
      * Deletes jobs based on statuses and duration
      * @param statuses the statuses
      */
@@ -48,23 +39,50 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
 
     /**
      *
-     * Retrieves number of jobs based on status and type
-     *
-     * @param jobStatus the job status
-     * @param jobType the job type
-     * @return the number of entries
+     * @param jobStatus
+     * @param jobType
+     * @return
      */
     Integer countByJobStatusAndJobType(JobStatusEnum jobStatus, JobTypeEnum jobType);
 
     /**
      *
-     * Retrieves jobs based on statuses and type
+     * Retrieves number of jobs based on status and type
+     *
+     * @param jobStatus the job status
+     * @param jobType the job type
+     * @param release the release
+     * @return the number of entries
+     */
+    Integer countByJobStatusAndJobTypeAndRelease(JobStatusEnum jobStatus, JobTypeEnum jobType, boolean release);
+
+    /**
+     *
+     * Retrieves jobs based on statuses, type and release
      *
      * @param jobType the job type
      * @param jobStatus the job status
+     * @param release the release
      * @return the entries
      */
+    List<Job> findByJobTypeAndJobStatusInAndRelease(JobTypeEnum jobType, List<JobStatusEnum> jobStatus, boolean release);
 
-    List<Job> findByJobTypeAndJobStatusIn(JobTypeEnum jobType, List<JobStatusEnum> jobStatus);
+    /**
+     * Retrieves jobs based on statuses and types
+     * @param jobType
+     * @param jobStatus
+     * @return
+     */
+    List<Job> findByJobTypeInAndJobStatusInAndRelease(List<JobTypeEnum> jobType, List<JobStatusEnum> jobStatus, boolean release);
+
+    /**
+     * Finds jobs by dataflowId, jobType, job status and release
+     * @param dataflowId
+     * @param jobType
+     * @param jobStatus
+     * @param release
+     * @return
+     */
+    List<Job> findByDataflowIdAndJobTypeInAndJobStatusAndRelease(Long dataflowId, List<JobTypeEnum> jobType, JobStatusEnum jobStatus, boolean release);
 }
 

@@ -3,6 +3,7 @@ package org.eea.recordstore.service.impl;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,10 +13,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.eea.recordstore.persistence.repository.TaskRepository;
 import org.eea.recordstore.service.DockerInterfaceService;
 import org.eea.recordstore.service.RecordStoreService;
 import org.slf4j.Logger;
@@ -64,7 +67,8 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private DockerInterfaceService dockerInterfaceService;
 
-
+  @Autowired
+  private TaskRepository taskRepository;
 
   /**
    * The container name.
@@ -286,7 +290,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset,
-      String dateRelease, boolean prefillingReference)
+      String dateRelease, boolean prefillingReference, String processId)
       throws SQLException, IOException, RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
@@ -308,7 +312,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
-      boolean prefillingReference) throws SQLException, IOException, RecordStoreAccessException {
+      boolean prefillingReference, String processId) throws SQLException, IOException, RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
@@ -511,8 +515,21 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param type
    */
   @Override
-  public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot, Long startingNumber,
-      Long endingNumber, String type) {
+  public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot, int startingNumber,
+      int endingNumber, String type) {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
+
+  @Override
+  public boolean recoverCheckForStuckFile(Long datasetId, Long firstFieldId, Long lastFieldId) {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
+
+  @Override public List<BigInteger> getReleaseTasksInProgress(long timeInMinutes) {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
+
+  @Override public TaskVO findReleaseTaskByTaskId(Long taskId) {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 }

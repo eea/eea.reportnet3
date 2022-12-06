@@ -98,7 +98,7 @@ public interface ProcessService {
    * @param status
    * @return
    */
-  List<String> findProcessIdByDatasetAndStatus(Long datasetId, ProcessTypeEnum processType, ProcessStatusEnum status);
+  List<String> findProcessIdByDatasetAndStatus(Long datasetId, String processType, List<String> status);
 }
 
 

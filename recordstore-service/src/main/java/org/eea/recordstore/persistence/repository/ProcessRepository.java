@@ -44,12 +44,12 @@ public interface ProcessRepository
    * @return true, if is process finished
    */
   @Query(nativeQuery = true,
-      value = "select case when (select count(p.id) from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.status not in ('FINISHED','CANCELED'))>1 then false else true end")
+      value = "select case when (select count(p.id) from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.process_type='VALIDATION' and p.status not in ('FINISHED','CANCELED'))>1 then false else true end")
   boolean isProcessFinished(@Param("dataflowId") Long dataflowId,
       @Param("dataProviderId") Long dataProviderId);
 
   /**
-   * Find next process.
+   * Find next validation process.
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
@@ -57,15 +57,30 @@ public interface ProcessRepository
    * @return the EEA process
    */
   @Query(nativeQuery = true,
-      value = "select p.* from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.status='IN_QUEUE' and d.id <> :datasetId limit 1")
-  EEAProcess findNextProcess(@Param("dataflowId") Long dataflowId,
-      @Param("dataProviderId") Long dataProviderId, @Param("datasetId") Long datasetId);
+      value = "select p.* from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.process_type='VALIDATION' and p.status='IN_QUEUE' and d.id <> :datasetId limit 1")
+  EEAProcess findNextValidationProcess(@Param("dataflowId") Long dataflowId,
+                                       @Param("dataProviderId") Long dataProviderId, @Param("datasetId") Long datasetId);
 
+  /**
+   * updatest status and finished date
+   * @param status
+   * @param dateFinish
+   * @param processId
+   */
   @Transactional
   @Modifying
   @Query(nativeQuery = true,
           value = "update process set status= :status, date_finish= :dateFinish where process_id= :processId ")
   void updateStatusAndFinishedDate(@Param("status") String status, @Param("dateFinish") Date dateFinish, @Param("processId") String processId);
 
-  List<EEAProcess> findByDatasetIdAndProcessTypeAndStatus(Long datasetId, ProcessTypeEnum processType, ProcessStatusEnum status);
+  /**
+   * Finds processes by dataset id and process type and status
+   * @param datasetId
+   * @param processType
+   * @param status
+   * @return
+   */
+  @Query(nativeQuery = true,
+          value = "select p.process_id from process p where p.dataset_id= :datasetId and p.process_type= :processType and p.status in (:status) ")
+  List<String> findByDatasetIdAndProcessTypeAndStatus(@Param("datasetId") Long datasetId, @Param("processType") String processType, @Param("status") List<String> status);
 }

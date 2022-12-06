@@ -8,33 +8,34 @@ import java.util.List;
 public interface JobExtendedRepository {
 
     /**
-     *
      * Retrieves paginated jobs
-     * @param pageable the pageable
-     * @param asc the asc
-     * @param sortedColumn the sortedColumn
-     * @param jobId the jobId
-     * @param jobTypes the jobTypes
-     * @param creatorUsername the creatorUsername
-     * @param processId the processId
-     * @param jobStatuses the jobStatuses
-     * @return the list of job entries
+     * @param pageable
+     * @param asc
+     * @param sortedColumn
+     * @param jobId
+     * @param jobTypes
+     * @param dataflowId
+     * @param providerId
+     * @param datasetId
+     * @param creatorUsername
+     * @param jobStatuses
+     * @return
      */
-    List<Job> findJobsPaginated(Pageable pageable, boolean asc, String sortedColumn, Long jobId,
-                                String jobTypes, String processId, String creatorUsername, String jobStatuses);
+    List<Job> findJobsPaginated(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, Long providerId,
+                                Long datasetId, String creatorUsername, String jobStatuses);
 
     /**
      * Count jobs paginated.
-     *
-     * @param asc the asc
-     * @param sortedColumn the sortedColumn
-     * @param jobId the jobId
-     * @param jobTypes the jobTypes
-     * @param creatorUsername the creatorUsername
-     * @param processId the processId
-     * @param jobStatuses the jobStatuses
-     * @return the long
+     * @param asc
+     * @param sortedColumn
+     * @param jobId
+     * @param jobTypes
+     * @param dataflowId
+     * @param providerId
+     * @param datasetId
+     * @param creatorUsername
+     * @param jobStatuses
+     * @return
      */
-    Long countJobsPaginated(boolean asc, String sortedColumn, Long jobId,
-                            String jobTypes, String processId, String creatorUsername, String jobStatuses);
+    Long countJobsPaginated(boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, Long providerId, Long datasetId, String creatorUsername, String jobStatuses);
 }

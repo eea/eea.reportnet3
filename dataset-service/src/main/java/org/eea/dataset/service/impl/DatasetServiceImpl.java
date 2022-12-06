@@ -3000,7 +3000,7 @@ public class DatasetServiceImpl implements DatasetService {
           createSnapshotVO.setDescription(originDatasetDesign.getDatasetSchema());
           createSnapshotVO.setReleased(false);
           datasetSnapshotService.addSnapshot(originDatasetDesign.getId(), createSnapshotVO,
-              datasetSnapshotService.obtainPartition(datasetId, "root").getId(), null, true);
+              datasetSnapshotService.obtainPartition(datasetId, "root").getId(), null, true, null);
         }
       }
     } catch (Exception e) {
