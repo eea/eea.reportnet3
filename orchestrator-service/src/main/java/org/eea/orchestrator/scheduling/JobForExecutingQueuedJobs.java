@@ -82,6 +82,10 @@ public class JobForExecutingQueuedJobs {
                     } else if (job.getJobType() == JobTypeEnum.IMPORT) {
                         //call import mechanism
                     } else if (job.getJobType() == JobTypeEnum.VALIDATION && job.isRelease() || job.getJobType() == JobTypeEnum.RELEASE) {
+                        //check if another release is already running for the dataflow, but for another provider
+                        if (!jobService.canExecuteReleaseOnDataflow(job.getDataflowId())) {
+                            continue;
+                        }
                         //call release mechanism
                         jobService.prepareAndExecuteReleaseJob(job);
                     } else if (job.getJobType() == JobTypeEnum.EXPORT) {

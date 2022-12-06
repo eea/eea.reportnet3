@@ -3,13 +3,11 @@ package org.eea.interfaces.controller.orchestrator;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
-import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /** The Interface JobController. */
 public interface JobController {
@@ -121,3 +119,13 @@ public interface JobController {
     @GetMapping(value = "/findJobById/{jobId}")
     JobVO findJobById(@PathVariable("jobId") Long jobId);
 }
+
+
+
+
+
+
+
+
+
+
