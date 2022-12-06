@@ -1079,7 +1079,7 @@ public class FileTreatmentHelper implements DisposableBean {
                             rn3FileProcessIntoTasks(datasetId, processId, tableSchemaId, schema, files, originalFileName, replace,
                                     delimiter);
                         }else{
-                                 rn3FileProcess(datasetId, tableSchemaId, schema, files, originalFileName, replace,
+                                 rn3FileProcess(datasetId,processId, tableSchemaId, schema, files, originalFileName, replace,
                                          delimiter);
                         }
 
@@ -1156,7 +1156,7 @@ public class FileTreatmentHelper implements DisposableBean {
          * @param delimiter the delimiter
          * @throws InterruptedException the interrupted exception
          */
-        private void rn3FileProcess (Long datasetId, String tableSchemaId, DataSetSchema datasetSchema,
+        private void rn3FileProcess (Long datasetId,String processId, String tableSchemaId, DataSetSchema datasetSchema,
                 List < File > files, String originalFileName,boolean replace, String delimiter)
       throws InterruptedException {
             LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
@@ -1213,9 +1213,9 @@ public class FileTreatmentHelper implements DisposableBean {
             updateGeometry(datasetId, datasetSchema);
 
             if (files.size() == 1) {
-                finishImportProcess( datasetId, null, tableSchemaId, originalFileName, error, errorWrongFilename);
+                finishImportProcess( datasetId, processId, tableSchemaId, originalFileName, error, errorWrongFilename);
             } else {
-                finishImportProcess( datasetId, null, null, originalFileName, error, errorWrongFilename);
+                finishImportProcess( datasetId, processId, null, originalFileName, error, errorWrongFilename);
             }
             LOG.info("Finished import process for datasetId {} and file {}", datasetId, originalFileName);
 
@@ -1308,6 +1308,7 @@ public class FileTreatmentHelper implements DisposableBean {
             try {
                 releaseLockAndDeleteImportFileDirectory(datasetId);
 
+                final Long dataflowId = datasetService.getDataFlowIdById(datasetId);
 
                 Map<String, Object> value = new HashMap<>();
                 value.put(LiteralConstants.DATASET_ID, datasetId);
@@ -1336,6 +1337,10 @@ public class FileTreatmentHelper implements DisposableBean {
                     }
                     datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                             DatasetRunningStatusEnum.ERROR_IN_IMPORT);
+                    processControllerZuul.updateProcess(datasetId, dataflowId,
+                            ProcessStatusEnum.CANCELED, ProcessTypeEnum.IMPORT, processId,
+                            SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
+
                 } else {
                     datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                             DatasetRunningStatusEnum.IMPORTED);
@@ -1343,7 +1348,13 @@ public class FileTreatmentHelper implements DisposableBean {
                     eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                             ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
                             : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
+
+                    processControllerZuul.updateProcess(datasetId, dataflowId,
+                            ProcessStatusEnum.FINISHED, ProcessTypeEnum.IMPORT, processId,
+                            SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
+
                 }
+
 
                 kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
                 // If importing a zip a file doesn't match with the table and the process ignores it, we send
