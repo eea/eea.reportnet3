@@ -2148,36 +2148,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             String firstFieldId = null;
             String lastFieldId = null;
 
-      for (int j=1; j <= numberOfFiles; j++) {
-        // Destination File Location
-        String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-        FileWriter fstream1 = new FileWriter(pathSnapshot + splitFileName);
-        BufferedWriter out = new BufferedWriter(fstream1);
-        for (int i=1; i <= maxLinesPerFile; i++) {
-          strLine = br.readLine();
-          if (strLine != null) {
-            out.write(strLine);
-            if(i != maxLinesPerFile) {
-              out.newLine();
-            }
-          }
-        }
-        out.close();
-        LOG.info("Creating release task for file {} with idSnapshot {} and release processId {}", splitFileName, idSnapshot, processId);
-        ReleaseTaskVO releaseTaskVO = ReleaseTaskVO.builder().splitFileName(splitFileName).snapshotId(idSnapshot).splitFileId(j).numberOfSplitFiles(numberOfFiles).build();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String json = "";
-        try {
-          json = objectMapper.writeValueAsString(releaseTaskVO);
-        } catch (JsonProcessingException e) {
-          LOG_ERROR.error("error processing json for snap file {} of release processId {}", splitFileName, processId);
-          throw e;
-        }
-        TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.RELEASE_TASK, new Date(), null, null,
-                json, 0, null);
-        task = validationControllerZuul.saveTask(task);
-        LOG.info("Created release task with id {} for file {} with idSnapshot {} and release processId {}", task.getId(), splitFileName, idSnapshot, processId);
-      }
             for (int j = 1; j <= numberOfFiles; j++) {
                 // Destination File Location
                 String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j,
@@ -2214,7 +2184,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 }
               TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.RELEASE_TASK, new Date(), null, null,
                       json, 0, null);
-                validationControllerZuul.saveTask(task);
+              task = validationControllerZuul.saveTask(task);
+              LOG.info("Created release task with id {} for file {} with idSnapshot {} and release processId {}", task.getId(), splitFileName, idSnapshot, processId);
             }
 
             in.close();
