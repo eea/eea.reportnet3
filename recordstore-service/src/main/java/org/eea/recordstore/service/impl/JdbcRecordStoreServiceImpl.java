@@ -1766,8 +1766,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       if (snapFileForSplitting.isForSplitting() == true) {
 
-                splitSnapFile(processId, nameFileFieldValue, idSnapshot, snapFileForSplitting,
-                    datasetId, dataflowId);
+        splitSnapFile(processId, nameFileFieldValue, idSnapshot, snapFileForSplitting,
+            dataCollectionId, dataflowId);
 
         for (int i = 1; i <= snapFileForSplitting.getNumberOfFiles(); i++) {
           String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
@@ -1777,7 +1777,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 ReleaseTaskVO.builder().splitFileName(splitFileName)
                     .snapshotId(idSnapshot).splitFileId(i)
                     .numberOfSplitFiles(snapFileForSplitting.getNumberOfFiles())
-                    .dataflowId(dataflowId).datasetId(datasetId).build();
+                    .dataflowId(dataflowId).datasetId(dataCollectionId).build();
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writeValueAsString(releaseTaskVO);
             TaskVO task = validationControllerZuul.findReleaseTaskByJson(json);
