@@ -11,4 +11,8 @@ public class ReleaseTaskVO {
     private Long snapshotId;
     private Integer splitFileId;
     private Integer numberOfSplitFiles;
+    private Long datasetId;
+    private Long dataflowId;
+    private String firstFieldId;
+    private String lastFieldId;
 }
