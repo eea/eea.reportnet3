@@ -27,12 +27,11 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.metabase.TaskType;
-import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.SplitSnapfile;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.validation.ReleaseTaskVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
@@ -1518,22 +1517,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       copyProcess(dataset.getDataflowId(), datasetId, idSnapshot, datasetType, cm, processId, jobId);
       LOG.info("Finished restoring the snapshot files from Snapshot {} and datasetId {} of release processId {}", idSnapshot, datasetId, processId);
 
-      if (jobId!=null) {
-        JobVO jobVO = jobControllerZuul.findJobById(jobId);
-        List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(jobVO.getDataflowId(), jobVO.getProviderId());
-        boolean release = true;
-        for (Long id : datasetIds) {
-          List<String> processes =  processService.findProcessIdByDatasetAndStatus(id, ProcessTypeEnum.RELEASE.toString(), Arrays.asList(ProcessStatusEnum.IN_QUEUE.toString(), ProcessStatusEnum.IN_PROGRESS.toString()));
-          if (processes.size()>0) {
-            release = false;
-            break;
-          }
-        }
-
-        if (release) {
-          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
-        }
-      }
+      updateJobStatusToFinished(jobId);
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
           && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
@@ -1605,6 +1589,25 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         lockCriteria.put(LiteralConstants.SIGNATURE, signature);
         lockCriteria.put(LiteralConstants.DATASETID, datasetIdFromSnapshot);
         lockService.removeLockByCriteria(lockCriteria);
+      }
+    }
+  }
+
+  private void updateJobStatusToFinished(Long jobId) {
+    if (jobId!=null) {
+      List<String> processes = jobProcessControllerZuul.findProcessesByJobId(jobId);
+
+      boolean release = true;
+      for (String id : processes) {
+        ProcessVO processVO = processService.getByProcessId(id);
+        if (!processVO.getStatus().equals(ProcessStatusEnum.FINISHED.toString())) {
+          release = false;
+          break;
+        }
+      }
+
+      if (release) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
       }
     }
   }
