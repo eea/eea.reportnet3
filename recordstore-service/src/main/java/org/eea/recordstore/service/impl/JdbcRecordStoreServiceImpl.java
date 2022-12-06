@@ -39,6 +39,9 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.eea.recordstore.mapper.TaskMapper;
+import org.eea.recordstore.persistence.domain.Task;
+import org.eea.recordstore.persistence.repository.TaskRepository;
 import org.eea.recordstore.service.ProcessService;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.utils.LiteralConstants;
@@ -60,7 +63,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.sql.DataSource;
+import javax.transaction.Transactional;
 import java.io.*;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -272,6 +277,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The job process controller zuul */
   @Autowired
   private JobProcessControllerZuul jobProcessControllerZuul;
+
+  /**
+   * The Task Repository
+   */
+  @Autowired private TaskRepository taskRepository;
+
+  /**
+   * The Task Mapper
+   */
+  @Autowired private TaskMapper taskMapper;
 
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
@@ -1048,8 +1063,81 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         });
   }
 
+    /**
+     * Restore specific file snapshot.
+     *
+     * @param datasetId      the dataset id
+     * @param idSnapshot     the id snapshot
+     * @param startingNumber
+     * @param endingNumber
+     * @param processId
+     */
+    @Async @Override public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
+        int startingNumber, int endingNumber, String processId) throws SQLException, IOException {
 
-  /**
+        LOG.info(
+            "Method restoreSpecificFileSnapshot starts with datasetId {}, idSnapshot {}, startingNumber {}, endingNumber {} and processId {}",
+            datasetId, idSnapshot, startingNumber, endingNumber, processId);
+        try {
+            ConnectionDataVO connection =
+                getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+            Connection con =
+                DriverManager.getConnection(connection.getConnectionString(), connection.getUser(),
+                    connection.getPassword());
+            con.setAutoCommit(true);
+
+            CopyManager cm = new CopyManager((BaseConnection) con);
+
+            copyProcessSpecificFileSnapshot(datasetId, idSnapshot, cm, startingNumber, endingNumber,
+                processId);
+
+            LOG.info("Method restoreSpecificFileSnapshot ends with datasetId: {}", datasetId);
+        } catch (Exception e) {
+            LOG_ERROR.error(
+                "Error in method restoreSpecificFileSnapshot for datasetId: {} with error {}",
+                datasetId, e);
+            throw e;
+        }
+    }
+
+
+    @Override
+    public boolean recoverCheckForStuckFile(Long datasetId, Long firstFieldId, Long lastFieldId) {
+        try {
+            LOG.info(
+                "Method recoverCheckForStuckFile called for datasetId {}, firstFieldId {} and lastFieldId {}",
+                datasetId, firstFieldId, lastFieldId);
+            StringBuilder sql =
+                new StringBuilder("SELECT count(ID) FROM dataset_").append(datasetId)
+                    .append(".field_value fv where fv.ID in('").append(firstFieldId).append("','")
+                    .append(lastFieldId).append("';");
+
+            Integer result = jdbcTemplate.queryForObject(sql.toString(), Integer.class);
+            LOG.info("Method recoverCheckForStuckFile query {} returned {} ", sql, result);
+
+            return result == 2;
+        } catch (Exception e) {
+            LOG_ERROR.error(
+                "Error in method recoverCheckForStuckFile for datasetId {} with error {}",
+                datasetId, e);
+            throw e;
+        }
+    }
+
+    @Transactional public List<BigInteger> getReleaseTasksInProgress(long timeInMinutes) {
+        return taskRepository.getTasksInProgress(timeInMinutes);
+    }
+
+    @Override public TaskVO findReleaseTaskByTaskId(Long taskId) {
+        Optional<Task> task = taskRepository.findById(taskId);
+        if (task.isEmpty()) {
+            return null;
+        }
+        return taskMapper.entityToClass(task.get());
+    }
+
+
+    /**
    * Update materialized query view.
    *
    * @param datasetId the dataset id
@@ -1609,41 +1697,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   /**
-   * Restore specific file snapshot.
-   *
-   * @param datasetId      the dataset id
-   * @param idSnapshot     the id snapshot
-   * @param startingNumber
-   * @param endingNumber
-   * @param type
-   */
-  @Async
-  @Override
-  public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
-      Long startingNumber, Long endingNumber, String type) {
-
-    LOG.info("Method restoreSpecificFileSnapshot starts with datasetId: {}", datasetId);
-    try {
-      ConnectionDataVO connection =
-          getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + datasetId);
-      Connection con =
-          DriverManager.getConnection(connection.getConnectionString(), connection.getUser(),
-              connection.getPassword());
-      con.setAutoCommit(true);
-
-      CopyManager cm = new CopyManager((BaseConnection) con);
-
-      copyProcessSpecificFileSnapshot(datasetId, idSnapshot, cm, startingNumber, endingNumber, type);
-
-      LOG.info("Method restoreSpecificFileSnapshot ends with datasetId: {}", datasetId);
-    } catch (Exception e) {
-      LOG_ERROR.error("Error in method restoreSpecificFileSnapshot for datasetId: {} with error {}",
-          datasetId, e);
-    }
-  }
-
-
-  /**
    * Gets the providers code.
    *
    * @param datasetId the dataset id
@@ -1713,13 +1766,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       if (snapFileForSplitting.isForSplitting() == true) {
 
-        splitSnapFile(processId, nameFileFieldValue, idSnapshot, snapFileForSplitting);
+                splitSnapFile(processId, nameFileFieldValue, idSnapshot, snapFileForSplitting,
+                    datasetId, dataflowId);
 
         for (int i = 1; i <= snapFileForSplitting.getNumberOfFiles(); i++) {
           String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
           String splitFile = pathSnapshot + splitFileName;
           try {
-            ReleaseTaskVO releaseTaskVO = ReleaseTaskVO.builder().splitFileName(splitFileName).snapshotId(idSnapshot).splitFileId(i).numberOfSplitFiles(snapFileForSplitting.getNumberOfFiles()).build();
+            ReleaseTaskVO releaseTaskVO =
+                ReleaseTaskVO.builder().splitFileName(splitFileName)
+                    .snapshotId(idSnapshot).splitFileId(i)
+                    .numberOfSplitFiles(snapFileForSplitting.getNumberOfFiles())
+                    .dataflowId(dataflowId).datasetId(datasetId).build();
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writeValueAsString(releaseTaskVO);
             TaskVO task = validationControllerZuul.findReleaseTaskByJson(json);
@@ -1783,41 +1841,64 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @throws SQLException the SQL exception
    */
   private void copyProcessSpecificFileSnapshot(Long datasetId, Long idSnapshot,
-    CopyManager cm, Long startingNumber, Long endingNumber, String type)
+    CopyManager cm, int startingNumber, int endingNumber, String processId)
     throws IOException, SQLException {
 
-    LOG.info("Method copyProcessSpecificSnapshot starts with datasetId: {}", datasetId);
-    switch (type) {
-      case FIELD_TYPE:
+        LOG.info("Method copyProcessSpecificSnapshot starts with datasetId: {}", datasetId);
+
+        //FIELD
         String copyQueryField = COPY_DATASET + datasetId
             + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
 
-        for (Long i = startingNumber; i <= endingNumber; i++) {
-          String splitFile = pathSnapshot
-              + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-          try {
-            LOG.info("Recover copy file {}", splitFile);
-            copyFromFileRecovery(copyQueryField, splitFile, cm);
-            LOG.info("Recover file {} copied and will be deleted", splitFile);
-            deleteFile(Arrays.asList(splitFile));
-            LOG.info("Recover file {} has been deleted", splitFile);
-          } catch (Exception e) {
-            LOG_ERROR.error("Error in recover copy field process for snapshotId {} with error", idSnapshot, e);
-            throw e;
-          }
+        for (int i = startingNumber; i <= endingNumber; i++) {
+            String splitFile = pathSnapshot + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i,
+                LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+            try {
+                ReleaseTaskVO releaseTaskVO =
+                    ReleaseTaskVO.builder().splitFileName(splitFile).snapshotId(idSnapshot)
+                        .splitFileId(i).datasetId(datasetId).build();
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = objectMapper.writeValueAsString(releaseTaskVO);
+                TaskVO task = validationControllerZuul.findReleaseTaskByJson(json);
+
+                task.setStartingDate(new Date());
+                task.setStatus(ProcessStatusEnum.IN_PROGRESS);
+                validationControllerZuul.updateTask(task);
+
+                LOG.info("Recover copy file {}", splitFile);
+                copyFromFileRecovery(copyQueryField, splitFile, cm);
+
+                task.setFinishDate(new Date());
+                task.setStatus(ProcessStatusEnum.FINISHED);
+                validationControllerZuul.updateTask(task);
+
+                try {
+                    LOG.info("Recover file {} copied and will be deleted", splitFile);
+                    deleteFile(Arrays.asList(splitFile));
+                    LOG.info("Recover file {} has been deleted", splitFile);
+                } catch (Exception e) {
+                    LOG.error("Error while trying to delete split snap file {} for datasetId {}",
+                        splitFile, datasetId);
+                }
+            } catch (Exception e) {
+                LOG_ERROR.error("Error in copy field process for snapshotId {} with error",
+                    idSnapshot, e);
+                throw e;
+            }
         }
-        break;
-      case ATTACHMENT_TYPE:
+        processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(),
+            new Date(), processId);
+
+        //ATTACHMENT
         String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
             LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
 
         String copyQueryAttachment = COPY_DATASET + datasetId
             + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
         copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
-        break;
+
+        LOG.info("Method copyProcessSpecificSnapshot ends with datasetId: {}", datasetId);
     }
-    LOG.info("Method copyProcessSpecificSnapshot ends with datasetId: {}", datasetId);
-  }
   
   /**
    * Compose delete sql.
@@ -2039,24 +2120,29 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       throw e;
     }
   }
-  /**
-   * Split the snapshot file
-   *
-   * @param inputfile
-   * @param idSnapshot
-   * @param snapFileForSplitting
-   */
-  private void splitSnapFile(String processId, String inputfile, Long idSnapshot, SplitSnapfile snapFileForSplitting) {
+
+    /**
+     * Split the snapshot file
+     *
+     * @param inputfile
+     * @param idSnapshot
+     * @param snapFileForSplitting
+     */
+    private void splitSnapFile(String processId, String inputfile, Long idSnapshot,
+        SplitSnapfile snapFileForSplitting, Long datasetId, Long dataflowId) {
 
     LOG.info("Method splitSnapFile starts for file {} with idSnapshot {}, snapFileForSplitting {} and release processId {}", inputfile, idSnapshot, snapFileForSplitting, processId);
     int numberOfFiles = snapFileForSplitting.getNumberOfFiles();
     int maxLinesPerFile = 200000;
 
-    try{
-      // Actual splitting of file into smaller files
-      FileInputStream fstream = new FileInputStream(inputfile); DataInputStream in = new DataInputStream(fstream);
-      BufferedReader br = new BufferedReader(new InputStreamReader(in));
-      String strLine;
+        try {
+            // Actual splitting of file into smaller files
+            FileInputStream fstream = new FileInputStream(inputfile);
+            DataInputStream in = new DataInputStream(fstream);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String strLine;
+            String firstFieldId = null;
+            String lastFieldId = null;
 
       for (int j=1; j <= numberOfFiles; j++) {
         // Destination File Location
@@ -2088,14 +2174,53 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         task = validationControllerZuul.saveTask(task);
         LOG.info("Created release task with id {} for file {} with idSnapshot {} and release processId {}", task.getId(), splitFileName, idSnapshot, processId);
       }
+            for (int j = 1; j <= numberOfFiles; j++) {
+                // Destination File Location
+                String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j,
+                    LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+                FileWriter fstream1 = new FileWriter(pathSnapshot + splitFileName);
+                BufferedWriter out = new BufferedWriter(fstream1);
+                for (int i = 1; i <= maxLinesPerFile; i++) {
+                    strLine = br.readLine();
+                    if (strLine != null) {
+                        if (i == 1) {
+                            firstFieldId = Arrays.stream(strLine.split("\t")).findFirst().get();
+                        } else if (i == maxLinesPerFile) {
+                            lastFieldId = Arrays.stream(strLine.split("\t")).findFirst().get();
+                        }
+                        out.write(strLine);
+                        if (i != maxLinesPerFile) {
+                            out.newLine();
+                        }
+                    }
+                }
+                out.close();
+                ReleaseTaskVO releaseTaskVO =
+                    ReleaseTaskVO.builder().splitFileName(splitFileName).snapshotId(idSnapshot)
+                        .splitFileId(j).numberOfSplitFiles(numberOfFiles).datasetId(datasetId)
+                        .dataflowId(dataflowId).firstFieldId(firstFieldId).lastFieldId(lastFieldId)
+                        .build();
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = "";
+                try {
+                    json = objectMapper.writeValueAsString(releaseTaskVO);
+                } catch (JsonProcessingException e) {
+                    LOG_ERROR.error("error processing json for snap file {}", splitFileName);
+                    throw e;
+                }
+                TaskVO task =
+                    new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
+                        json, 0, null);
+                validationControllerZuul.saveTask(task);
+            }
 
-      in.close();
-    } catch (Exception e) {
-      LOG_ERROR.error("Error in file {} with error", inputfile,  e);
+            in.close();
+        } catch (Exception e) {
+            LOG_ERROR.error("Error in file {} with error", inputfile, e);
+        }
+
+        LOG.info("Method splitSnapFile ends for file {} ", inputfile);
     }
-
-    LOG.info("Method splitSnapFile ends for file {} ", inputfile);
-  }
 
   /**
    * Check if the snapshot will be splitted and get the number of files and rows
