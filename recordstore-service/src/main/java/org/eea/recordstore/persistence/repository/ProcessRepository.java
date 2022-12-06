@@ -44,7 +44,7 @@ public interface ProcessRepository
    * @return true, if is process finished
    */
   @Query(nativeQuery = true,
-      value = "select case when (select count(p.id) from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.status not in ('FINISHED','CANCELED'))>1 then false else true end")
+      value = "select case when (select count(p.id) from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.process_type='VALIDATION' and p.status not in ('FINISHED','CANCELED'))>1 then false else true end")
   boolean isProcessFinished(@Param("dataflowId") Long dataflowId,
       @Param("dataProviderId") Long dataProviderId);
 

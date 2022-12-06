@@ -26,12 +26,12 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
-import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.SplitSnapfile;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.validation.ReleaseTaskVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
@@ -1605,22 +1605,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       copyProcess(dataset.getDataflowId(), datasetId, idSnapshot, datasetType, cm, processId, jobId);
       LOG.info("Finished restoring the snapshot files from Snapshot {} and datasetId {} of release processId {}", idSnapshot, datasetId, processId);
 
-      if (jobId!=null) {
-        JobVO jobVO = jobControllerZuul.findJobById(jobId);
-        List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(jobVO.getDataflowId(), jobVO.getProviderId());
-        boolean release = true;
-        for (Long id : datasetIds) {
-          List<String> processes =  processService.findProcessIdByDatasetAndStatus(id, ProcessTypeEnum.RELEASE.toString(), Arrays.asList(ProcessStatusEnum.IN_QUEUE.toString(), ProcessStatusEnum.IN_PROGRESS.toString()));
-          if (processes.size()>0) {
-            release = false;
-            break;
-          }
-        }
-
-        if (release) {
-          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
-        }
-      }
+      updateJobStatusToFinished(jobId);
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
           && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
@@ -1692,6 +1677,25 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         lockCriteria.put(LiteralConstants.SIGNATURE, signature);
         lockCriteria.put(LiteralConstants.DATASETID, datasetIdFromSnapshot);
         lockService.removeLockByCriteria(lockCriteria);
+      }
+    }
+  }
+
+  private void updateJobStatusToFinished(Long jobId) {
+    if (jobId!=null) {
+      List<String> processes = jobProcessControllerZuul.findProcessesByJobId(jobId);
+
+      boolean release = true;
+      for (String id : processes) {
+        ProcessVO processVO = processService.getByProcessId(id);
+        if (!processVO.getStatus().equals(ProcessStatusEnum.FINISHED.toString())) {
+          release = false;
+          break;
+        }
+      }
+
+      if (release) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
       }
     }
   }
@@ -2169,7 +2173,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           LOG_ERROR.error("error processing json for snap file {} of release processId {}", splitFileName, processId);
           throw e;
         }
-        TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
+        TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.RELEASE_TASK, new Date(), null, null,
                 json, 0, null);
         task = validationControllerZuul.saveTask(task);
         LOG.info("Created release task with id {} for file {} with idSnapshot {} and release processId {}", task.getId(), splitFileName, idSnapshot, processId);
@@ -2208,9 +2212,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     LOG_ERROR.error("error processing json for snap file {}", splitFileName);
                     throw e;
                 }
-                TaskVO task =
-                    new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
-                        json, 0, null);
+              TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.RELEASE_TASK, new Date(), null, null,
+                      json, 0, null);
                 validationControllerZuul.saveTask(task);
             }
 

@@ -8,6 +8,8 @@ import org.eea.orchestrator.service.JobProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class JobProcessServiceImpl implements JobProcessService {
 
@@ -39,5 +41,10 @@ public class JobProcessServiceImpl implements JobProcessService {
     @Override
     public Long findJobIdByProcessId(String processId) {
         return jobProcessRepository.findByProcessId(processId).getJobId();
+    }
+
+    @Override
+    public List<String> findProcessesByJobId(Long jobId) {
+        return jobProcessRepository.findProcessesByJobId(jobId);
     }
 }
