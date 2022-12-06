@@ -22,6 +22,8 @@ public interface JobService {
 
     void addReleaseJob(Long dataflowId, Long dataProviderId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert);
 
+    Long addImportJob(Long dataflowId, Long providerId, Long datasetId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert);
+
     void prepareAndExecuteValidationJob(JobVO jobVO);
 
     void prepareAndExecuteReleaseJob(JobVO jobVO);

@@ -101,6 +101,17 @@ public class JobServiceImpl implements JobService {
         jobHistoryService.saveJobHistory(releaseJob);
     }
 
+    @Transactional
+    @Override
+    public Long addImportJob(Long dataflowId, Long providerId, Long datasetId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert){
+        Timestamp ts = new Timestamp(System.currentTimeMillis());
+        Job importJob = new Job(null, JobTypeEnum.IMPORT, statusToInsert, ts, ts, parameters, creator, false, dataflowId, providerId, datasetId);
+        jobRepository.save(importJob);
+        jobHistoryService.saveJobHistory(importJob);
+        return importJob.getId();
+    }
+
+
     @Override
     public Boolean canJobBeExecuted(JobVO job){
         JobTypeEnum jobType = job.getJobType();
