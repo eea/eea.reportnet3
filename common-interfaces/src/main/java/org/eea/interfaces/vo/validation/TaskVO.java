@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.validation;
 
 import lombok.*;
+import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 
 import java.util.Date;
@@ -17,6 +18,8 @@ public class TaskVO {
     private String processId;
 
     private ProcessStatusEnum status;
+
+    private TaskType taskType;
 
     private Date createDate;
 

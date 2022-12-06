@@ -4,7 +4,8 @@ public enum TaskType {
 
 
     VALIDATION_TASK("VALIDATION_TASK"),
-    IMPORT_TASK("IMPORT_TASK");
+    IMPORT_TASK("IMPORT_TASK"),
+    RELEASE_TASK("RELEASE_TASK");
 
     private final String value;
 
