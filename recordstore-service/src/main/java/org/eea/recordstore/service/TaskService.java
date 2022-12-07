@@ -1,4 +1,4 @@
-package org.eea.validation.service;
+package org.eea.recordstore.service;
 
 import org.eea.interfaces.vo.validation.TaskVO;
 
@@ -21,10 +21,10 @@ public interface TaskService {
 
     /**
      * Finds release task by json
-     * @param json
+     * @param splitFileName
      * @return
      */
-    TaskVO findReleaseTaskByJson(String json);
+    TaskVO findReleaseTaskBySplitFileName(String splitFileName);
 
     /**
      * Finds tasks by processId

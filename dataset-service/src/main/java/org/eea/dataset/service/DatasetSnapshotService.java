@@ -260,11 +260,4 @@ public interface DatasetSnapshotService {
    */
   public void deleteSnapshotByDatasetIdAndDateReleasedIsNull(Long datasetId);
 
-  /**
-   * Finds reporting dataset id by snapshot id
-   * @param snapshotId
-   * @return
-   */
-  Long findReportingDatasetIdBySnapshotId(Long snapshotId);
-
 }

@@ -1,10 +1,10 @@
-package org.eea.validation.service.impl;
+package org.eea.recordstore.service.impl;
 
 import org.eea.interfaces.vo.validation.TaskVO;
-import org.eea.validation.mapper.TaskMapper;
-import org.eea.validation.persistence.data.metabase.domain.Task;
-import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
-import org.eea.validation.service.TaskService;
+import org.eea.recordstore.mapper.TaskMapper;
+import org.eea.recordstore.persistence.domain.Task;
+import org.eea.recordstore.persistence.repository.TaskRepository;
+import org.eea.recordstore.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,8 +49,8 @@ public class TaskServiceImpl implements TaskService {
      * @return
      */
     @Override
-    public TaskVO findReleaseTaskByJson(String json) {
-        Task task = taskRepository.findByJsonContaining(json);
+    public TaskVO findReleaseTaskBySplitFileName(String json) {
+        Task task = taskRepository.findByJsonSplitFileName(json);
         return taskMapper.entityToClass(task);
     }
 

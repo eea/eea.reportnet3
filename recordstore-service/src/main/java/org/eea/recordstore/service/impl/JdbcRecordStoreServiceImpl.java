@@ -18,7 +18,6 @@ import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetCo
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
-import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -44,6 +43,7 @@ import org.eea.recordstore.persistence.domain.Task;
 import org.eea.recordstore.persistence.repository.TaskRepository;
 import org.eea.recordstore.service.ProcessService;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.recordstore.service.TaskService;
 import org.eea.utils.LiteralConstants;
 import org.postgresql.copy.CopyIn;
 import org.postgresql.copy.CopyManager;
@@ -262,10 +262,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Autowired
   private ReferenceDatasetControllerZuul referenceDatasetControllerZuul;
 
-  /** The validation controller zuul */
-  @Autowired
-  private ValidationControllerZuul validationControllerZuul;
-
   /** The process service */
   @Autowired
   private ProcessService processService;
@@ -277,6 +273,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The job process controller zuul */
   @Autowired
   private JobProcessControllerZuul jobProcessControllerZuul;
+
+  @Autowired
+  private TaskService taskService;
 
   /**
    * The Task Repository
@@ -1777,20 +1776,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
           String splitFile = pathSnapshot + splitFileName;
           try {
-            ReleaseTaskVO releaseTaskVO =
-                ReleaseTaskVO.builder().splitFileName(splitFileName)
-                    .snapshotId(idSnapshot).splitFileId(i)
-                    .numberOfSplitFiles(snapFileForSplitting.getNumberOfFiles())
-                    .dataflowId(dataflowId).datasetId(dataCollectionId).build();
-            ObjectMapper objectMapper = new ObjectMapper();
-            String json = objectMapper.writeValueAsString(releaseTaskVO);
-            TaskVO task = validationControllerZuul.findReleaseTaskByJson(json);
+            TaskVO task = taskService.findReleaseTaskBySplitFileName(splitFileName);
 
             LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
             task.setStartingDate(new Date());
             task.setStatus(ProcessStatusEnum.IN_PROGRESS);
             task.setPod(serviceInstanceId);
-            task = validationControllerZuul.saveTask(task);
+            task = taskService.saveTask(task);
             LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
 
             LOG.info("Copy file {}", splitFile);
@@ -1799,7 +1791,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
             task.setFinishDate(new Date());
             task.setStatus(ProcessStatusEnum.FINISHED);
-            validationControllerZuul.updateTask(task);
+            taskService.updateTask(task);
             LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
 
             try {
@@ -1858,23 +1850,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             String splitFile = pathSnapshot + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i,
                 LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
             try {
-                ReleaseTaskVO releaseTaskVO =
-                    ReleaseTaskVO.builder().splitFileName(splitFile).snapshotId(idSnapshot)
-                        .splitFileId(i).datasetId(datasetId).build();
-                ObjectMapper objectMapper = new ObjectMapper();
-                String json = objectMapper.writeValueAsString(releaseTaskVO);
-                TaskVO task = validationControllerZuul.findReleaseTaskByJson(json);
+                TaskVO task = taskService.findReleaseTaskBySplitFileName(splitFile);
 
                 task.setStartingDate(new Date());
                 task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-                validationControllerZuul.updateTask(task);
+                taskService.updateTask(task);
 
                 LOG.info("Recover copy file {}", splitFile);
                 copyFromFileRecovery(copyQueryField, splitFile, cm);
 
                 task.setFinishDate(new Date());
                 task.setStatus(ProcessStatusEnum.FINISHED);
-                validationControllerZuul.updateTask(task);
+                taskService.updateTask(task);
 
                 try {
                     LOG.info("Recover file {} copied and will be deleted", splitFile);
@@ -2184,7 +2171,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 }
               TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.RELEASE_TASK, new Date(), null, null,
                       json, 0, null);
-              task = validationControllerZuul.saveTask(task);
+              task = taskService.saveTask(task);
               LOG.info("Created release task with id {} for file {} with idSnapshot {} and release processId {}", task.getId(), splitFileName, idSnapshot, processId);
             }
 

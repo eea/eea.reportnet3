@@ -719,6 +719,9 @@ public final class EEAErrorMessage {
   /** The Constant DUPLICATE_RELEASE_JOB: {@value}. */
   public static final String DUPLICATE_RELEASE_JOB = "There is already a duplicate release job to be executed";
 
+  /** The Constant DUPLICATE_JOB */
+  public static final String DUPLICATE_JOB = "There is already a job running on this dataset";
+
   /**
    * Instantiates a new EEA error message.
    */

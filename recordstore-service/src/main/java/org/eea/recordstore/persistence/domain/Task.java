@@ -1,6 +1,7 @@
 package org.eea.recordstore.persistence.domain;
 
 import lombok.*;
+import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 
 import javax.persistence.*;
@@ -35,6 +36,10 @@ public class Task {
   @Column(name = "status")
   @Enumerated(EnumType.STRING)
   private ProcessStatusEnum status;
+
+  @Column(name = "task_type")
+  @Enumerated(EnumType.STRING)
+  private TaskType taskType;
 
   /** The create date. */
   @Column(name = "create_date")

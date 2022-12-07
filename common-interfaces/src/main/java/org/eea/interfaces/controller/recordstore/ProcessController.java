@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * The Interface ProcessController.
@@ -125,15 +124,6 @@ public interface ProcessController {
    */
   @GetMapping(value = "/private/next/{processId}")
   ProcessVO getNextProcess(@PathVariable("processId") String processId);
-
-  /**
-   * Finds processId by datasetId and status
-   * @param datasetId
-   * @param status
-   * @return
-   */
-  @GetMapping(value = "/private/findProcessIdByDatasetAndStatus")
-  List<String> findProcessIdByDatasetAndStatus(@RequestParam("datasetId") Long datasetId, @RequestParam("processType") String processType, @RequestParam("status") List<String> status);
 
   /**
    * Saves process

@@ -23,16 +23,12 @@ import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
-import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
-import org.eea.interfaces.vo.validation.ProcessTaskVO;
-import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
-import org.eea.validation.service.TaskService;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.eea.validation.util.ValidationHelper;
@@ -58,7 +54,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 /**
@@ -102,10 +97,6 @@ public class ValidationControllerImpl implements ValidationController {
   /** The job controller zuul. */
   @Autowired
   private JobControllerZuul jobControllerZuul;
-
-  /** The task service */
-  @Autowired
-  private TaskService taskService;
 
   /** The job process controller */
   @Autowired
@@ -466,67 +457,4 @@ public class ValidationControllerImpl implements ValidationController {
     }
   }
 
-  /**
-   * Saves task
-   * @param taskVO
-   * @return
-   */
-  @Override
-  @PutMapping(value = "/saveTask")
-  public TaskVO saveTask(@RequestBody TaskVO taskVO) {
-    return taskService.saveTask(taskVO);
-  }
-
-  /**
-   * Updates task
-   * @param taskVO
-   * @return
-   */
-  @Override
-  @PutMapping(value = "/updateTask")
-  public void updateTask(@RequestBody TaskVO taskVO) {
-    taskService.updateTask(taskVO);
-  }
-
-  /**
-   * Finds task by json
-   * @param json
-   * @return
-   */
-  @Override
-  @GetMapping(value = "/findReleaseTaskByJson")
-  public TaskVO findReleaseTaskByJson(@RequestParam("json") String json) {
-      return taskService.findReleaseTaskByJson(json);
-  }
-
-  /**
-   * Finds task by processId
-   * @param processId
-   * @return
-   */
-  @Override
-  @GetMapping(value = "/private/findTasksByProcessId/{processId}")
-  public List<TaskVO> findTasksByProcessId(@PathVariable("processId") String processId) {
-    return taskService.findTaskByProcessId(processId);
-  }
-
-  /**
-   * Finds tasks by datasetId for in progress process
-   * @param datasetId
-   * @return
-   */
-  @Override
-  @GetMapping(value = "/private/releaseTasksByDatasetId/{datasetId}")
-  public List<ProcessTaskVO> findReleaseTasksByDatasetId(@PathVariable("datasetId") Long datasetId) {
-      List<String> processIds = processControllerZuul.findProcessIdByDatasetAndStatus(datasetId, ProcessTypeEnum.RELEASE.toString(), Arrays.asList(ProcessStatusEnum.IN_PROGRESS.toString()));
-      List<ProcessTaskVO> processTaskVOS = new ArrayList<>();
-      processIds.forEach(processId -> {
-        ProcessTaskVO processTaskVO = new ProcessTaskVO();
-        processTaskVO.setProcessId(processId);
-        List<TaskVO> taskVOS = findTasksByProcessId(processId);
-        processTaskVO.setTasks(taskVOS);
-        processTaskVOS.add(processTaskVO);
-      });
-      return processTaskVOS;
-  }
 }

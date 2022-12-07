@@ -165,6 +165,15 @@ public class JobServiceImpl implements JobService {
                     return JobStatusEnum.REFUSED;
                 }
             }
+            List<Job> jobsRelatedToReleaseList = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), true);
+            for (Job job : jobsRelatedToReleaseList) {
+                Map<String, Object> insertedParameters = job.getParameters();
+                Long insertedDataflowId = Long.valueOf((Integer) insertedParameters.get("dataflowId"));
+                Long insertedDataProviderId = Long.valueOf((Integer) insertedParameters.get("dataProviderId"));
+                if(dataflowId.equals(insertedDataflowId) && dataProviderId!=null && dataProviderId.equals(insertedDataProviderId)){
+                    return JobStatusEnum.REFUSED;
+                }
+            }
         }
         return JobStatusEnum.QUEUED;
     }

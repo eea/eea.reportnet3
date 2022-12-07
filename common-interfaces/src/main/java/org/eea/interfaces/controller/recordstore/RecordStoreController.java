@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.validation.ProcessTaskVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -239,4 +240,12 @@ public interface RecordStoreController {
       @RequestParam("datasetId") Long datasetId,
       @RequestParam("firstFieldId") Long firstFieldId,
       @RequestParam("lastFieldId") Long lastFieldId);
+
+  /**
+   * Finds tasks by datasetId for in progress process
+   * @param datasetId
+   * @return
+   */
+  @GetMapping(value = "/private/releaseTasksByDatasetId/{datasetId}")
+  List<ProcessTaskVO> findReleaseTasksForInProgressProcessByDatasetId(@PathVariable("datasetId") Long datasetId);
 }
