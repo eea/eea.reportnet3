@@ -41,6 +41,7 @@ export const DatasetConfig = {
 
   importFileDatasetExternal: '/dataset/v2/importFileData/{:datasetId}?integrationId={:integrationId}',
   importFileTable: '/dataset/v2/importFileData/{:datasetId}?tableSchemaId={:tableSchemaId}&delimiter={:delimiter}',
+  importFileTableUpd: '/dataset/v2/importFileData/{:datasetId}?tableSchemaId={:tableSchemaId}&delimiter={:delimiter}&dataflowId={:dataflowId}',
   importTableSchema:
     '/dataschema/v1/{:datasetSchemaId}/importFieldSchemas?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}',
   getShowValidationErrors:

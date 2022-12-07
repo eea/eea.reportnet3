@@ -154,8 +154,9 @@ export const ImportTableDataDialog = ({
           onUpload={onUpload}
           onValidateFile={onValidateFile}
           replaceCheck={true}
-          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTable, {
+          url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTableUpd, {
             datasetId: datasetId,
+            dataflowId: dataflowId,
             tableSchemaId: tableId,
             delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
           })}`}
