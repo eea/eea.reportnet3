@@ -135,7 +135,6 @@ public class CheckBlockersDataSnapshotCommandTest {
     Mockito.when(jobControllerZuul.save(any(JobVO.class))).thenReturn(jobVO);
     Mockito.doNothing().when(jobHistoryControllerZuul).save(any(JobVO.class));
     Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(false);
-    Mockito.doNothing().when(jobControllerZuul).updateJobStatus(anyLong(), any(JobStatusEnum.class));
     ProcessVO processVO = new ProcessVO();
     processVO.setProcessId("jkhiuh");
     Mockito.when(processUtils.createProcessVOForRelease(anyLong(), anyLong(), anyString())).thenReturn(processVO);

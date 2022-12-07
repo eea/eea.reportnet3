@@ -127,7 +127,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       Map<String, Object> parameters = new HashMap<>();
       parameters.put("dataflowId", dataset.getDataflowId());
       parameters.put("dataProviderId", dataset.getDataProviderId());
-      JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(),true, dataset.getDataflowId(), dataset.getDataProviderId(), null);
+      JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(),true, dataset.getDataflowId(), dataset.getDataProviderId(), null);
 
       JobStatusEnum statusToInsert = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), true, dataset.getDataflowId(), dataset.getDataProviderId(), datasets);
       if (statusToInsert == JobStatusEnum.REFUSED) {
@@ -170,8 +170,6 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         LOG.info(
                 "Releasing datasets process continues. At this point, the datasets from the dataflowId {}, dataProviderId {} and jobId {} have no blockers",
                 dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
-
-        jobControllerZuul.updateJobStatus(releaseJob.getId(), JobStatusEnum.IN_PROGRESS);
 
         LOG.info("Creating release process for dataflowId {}, dataProviderId {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
         String processId = UUID.randomUUID().toString();
