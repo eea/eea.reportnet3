@@ -14,7 +14,7 @@ import java.util.List;
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
     @Query(nativeQuery = true,
-        value = "select t.id from task t, procces p where t.procces_id = p.procces_id and p.process_type= 'RELEASE' and t.status='IN_PROGRESS' and (extract(epoch from LOCALTIMESTAMP - t.date_start) / 60) > :timeInMinutes")
+    value = "select id from task where status='IN_PROGRESS' and task_type='RELEASE_TASK' and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
     List<BigInteger> getTasksInProgress(@Param("timeInMinutes") long timeInMinutes);
 
     /**

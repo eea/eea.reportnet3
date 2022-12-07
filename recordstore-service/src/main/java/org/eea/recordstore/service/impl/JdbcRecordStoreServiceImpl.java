@@ -1090,6 +1090,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             copyProcessSpecificFileSnapshot(datasetId, idSnapshot, cm, startingNumber, endingNumber,
                 processId);
 
+            Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+            updateJobStatusToFinished(jobId);
+
             LOG.info("Method restoreSpecificFileSnapshot ends with datasetId: {}", datasetId);
         } catch (Exception e) {
             LOG_ERROR.error(
@@ -1683,6 +1686,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private void updateJobStatusToFinished(Long jobId) {
     if (jobId!=null) {
       List<String> processes = jobProcessControllerZuul.findProcessesByJobId(jobId);
+      LOG.info("Method updateJobStatusToFinished with jobId: {} and processes: {}", jobId, processes);
 
       boolean release = true;
       for (String id : processes) {
@@ -1695,6 +1699,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       if (release) {
         jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+        LOG.info("Method updateJobStatusToFinished updated jobId: {} with status {}", jobId, JobStatusEnum.FINISHED);
       }
     }
   }
@@ -1852,16 +1857,20 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             try {
                 TaskVO task = taskService.findReleaseTaskBySplitFileName(splitFile);
 
+                LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFile, idSnapshot, processId);
                 task.setStartingDate(new Date());
                 task.setStatus(ProcessStatusEnum.IN_PROGRESS);
                 taskService.updateTask(task);
+                LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFile, idSnapshot, processId);
 
                 LOG.info("Recover copy file {}", splitFile);
                 copyFromFileRecovery(copyQueryField, splitFile, cm);
 
+                LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFile, idSnapshot, processId);
                 task.setFinishDate(new Date());
                 task.setStatus(ProcessStatusEnum.FINISHED);
                 taskService.updateTask(task);
+                LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFile, idSnapshot, processId);
 
                 try {
                     LOG.info("Recover file {} copied and will be deleted", splitFile);
@@ -1877,8 +1886,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 throw e;
             }
         }
-        processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(),
-            new Date(), processId);
 
         //ATTACHMENT
         String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
@@ -1888,7 +1895,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
         copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
 
-        LOG.info("Method copyProcessSpecificSnapshot ends with datasetId: {}", datasetId);
+        LOG.info("Executed copyProcessSpecificSnapshot for attachment_value with file {} and dataCollectionId {}", nameFileAttachmentValue, datasetId);
+        LOG.info("Updating copyProcessSpecificSnapshot release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}", processId, datasetId);
+        processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), processId);
+        LOG.info("Updated copyProcessSpecificSnapshot release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}", processId, datasetId);
     }
   
   /**
