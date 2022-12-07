@@ -80,6 +80,29 @@ public interface JobController {
                                defaultValue = "false") boolean restrictFromPublic,
                        @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate);
 
+    /**
+     * Adds an import job
+     *
+     * @param datasetId the id of the dataset
+     * @param dataflowId the id of the dataflow
+     * @param providerId the id of the provider
+     * @param tableSchemaId the schema id of the table
+     * @param fileName the imported file name
+     * @param replace the replace
+     * @param integrationId the id of the integration
+     * @param delimiter the delimiter
+     * @return the job id
+     */
+    @PostMapping(value = "/addImport/{datasetId}")
+    Long addImportJob(@PathVariable("datasetId") Long datasetId,
+                      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                       @RequestParam(value = "providerId", required = false) Long providerId,
+                       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                       @RequestParam("fileName") String fileName,
+                       @RequestParam(value = "replace", required = false) boolean replace,
+                       @RequestParam(value = "integrationId", required = false) Long integrationId,
+                       @RequestParam(value = "delimiter", required = false) String delimiter);
+
 
     /**
      * Update job's status

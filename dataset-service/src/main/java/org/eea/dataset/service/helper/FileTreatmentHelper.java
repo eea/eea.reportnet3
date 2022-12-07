@@ -60,6 +60,8 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -81,6 +83,8 @@ import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.TaskType;
+import org.eea.interfaces.vo.orchestrator.JobProcessVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
@@ -295,6 +299,15 @@ public class FileTreatmentHelper implements DisposableBean {
     @Autowired
     private CSVSegmentedReaderStrategy csvSegmentedReaderStrategy;
 
+    /** The job process controller */
+    @Autowired
+    private JobProcessControllerZuul jobProcessControllerZuul;
+
+    /** The job controller zuul */
+    @Autowired
+    private JobControllerZuul jobControllerZuul;
+
+
     /**
      * Initialize the executor service.
      */
@@ -328,10 +341,11 @@ public class FileTreatmentHelper implements DisposableBean {
      * @param replace       the replace
      * @param integrationId the integration id
      * @param delimiter     the delimiter
+     * @param jobId         the job id
      * @throws EEAException the EEA exception
      */
     public void importFileData(Long datasetId, Long dataflowId, String tableSchemaId, MultipartFile file,
-                               boolean replace, Long integrationId, String delimiter) throws EEAException {
+                               boolean replace, Long integrationId, String delimiter, Long jobId) throws EEAException {
 
         if (delimiter != null && delimiter.length() > 1) {
             LOG_ERROR.error("Error when importing file data for datasetId {} and tableSchemaId {}. ReplaceData is {}. The size of the delimiter cannot be greater than 1", datasetId, tableSchemaId, replace);
@@ -346,6 +360,12 @@ public class FileTreatmentHelper implements DisposableBean {
         processControllerZuul.updateProcess(datasetId, dataflowId,
                 ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.IMPORT, processUUID,
                 SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, defaultReleaseStatusToBeChanged);
+
+        if(jobId != null){
+            JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
+            jobProcessControllerZuul.save(jobProcessVO);
+        }
+
 
         if (null == schema) {
             Map<String, Object> importFileData = new HashMap<>();
@@ -1322,6 +1342,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
                 EventType eventType;
                 DatasetTypeEnum type = datasetService.getDatasetType(datasetId);
+                Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+                JobStatusEnum jobStatus;
                 if (null != error) {
                     if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(error)) {
                         eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
@@ -1342,6 +1364,8 @@ public class FileTreatmentHelper implements DisposableBean {
                             ProcessStatusEnum.CANCELED, ProcessTypeEnum.IMPORT, processId,
                             SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
 
+
+                    jobStatus = JobStatusEnum.CANCELLED;
                 } else {
                     datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                             DatasetRunningStatusEnum.IMPORTED);
@@ -1354,8 +1378,13 @@ public class FileTreatmentHelper implements DisposableBean {
                             ProcessStatusEnum.FINISHED, ProcessTypeEnum.IMPORT, processId,
                             SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
 
+
+                    jobStatus = JobStatusEnum.FINISHED;
                 }
 
+                if (jobId!=null) {
+                    jobControllerZuul.updateJobStatus(jobId, jobStatus);
+                }
 
                 kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
                 // If importing a zip a file doesn't match with the table and the process ignores it, we send
@@ -1399,6 +1428,9 @@ public class FileTreatmentHelper implements DisposableBean {
 
             EventType eventType;
             DatasetTypeEnum type = datasetService.getDatasetType(datasetId);
+
+            Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+            JobStatusEnum jobStatus;
             if (null != error) {
                 if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(error)) {
                     eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
@@ -1420,6 +1452,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         ProcessStatusEnum.CANCELED, ProcessTypeEnum.IMPORT, processId,
                         SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
 
+                jobStatus = JobStatusEnum.CANCELLED;
             } else {
                 datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                         DatasetRunningStatusEnum.IMPORTED);
@@ -1429,11 +1462,15 @@ public class FileTreatmentHelper implements DisposableBean {
                         ProcessStatusEnum.FINISHED, ProcessTypeEnum.IMPORT, processId,
                         SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
 
-
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                         ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
                         : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
 
+                jobStatus = JobStatusEnum.FINISHED;
+            }
+
+            if (jobId!=null) {
+                jobControllerZuul.updateJobStatus(jobId, jobStatus);
             }
 
             kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);

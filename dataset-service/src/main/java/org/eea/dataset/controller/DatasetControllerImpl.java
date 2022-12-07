@@ -21,6 +21,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.*;
@@ -30,6 +31,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -114,6 +116,10 @@ public class DatasetControllerImpl implements DatasetController {
   /** The notification controller zuul. */
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
+
+  /** The job controller zuul */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
 
   /**
    * Gets the data tables values.
@@ -260,15 +266,19 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "File delimiter",
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
 
+    Long jobId = null;
     try {
+      jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter);
       LOG.info("Importing big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
-      fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId,
-          delimiter);
+      fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId, delimiter, jobId);
       LOG.info("Successfully imported big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
     } catch (EEAException e) {
       LOG_ERROR.error(
           "File import failed: dataflowId={} datasetId={}, tableSchemaId={}, fileName={}. Message: {}", dataflowId, datasetId,
           tableSchemaId, file.getOriginalFilename(), e.getMessage(), e);
+      if (jobId!=null) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      }
       Map<String, Object> importFileData = new HashMap<>();
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
@@ -278,6 +288,9 @@ public class DatasetControllerImpl implements DatasetController {
     } catch (Exception e) {
       String fileName = (file != null) ? file.getName() : null;
       LOG_ERROR.error("Unexpected error! Error importing big file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
+      if (jobId!=null) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      }
       throw e;
     }
   }
@@ -325,7 +338,7 @@ public class DatasetControllerImpl implements DatasetController {
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
 
     try {
-      fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId,delimiter);
+      fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId,delimiter, null);
       LOG.info("Importing file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
 
       LOG.info("Successfully imported file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);

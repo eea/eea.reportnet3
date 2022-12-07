@@ -1,6 +1,7 @@
 package org.eea.orchestrator.controller;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -166,6 +167,53 @@ public class JobControllerImpl implements JobController {
         if (statusToInsert == JobStatusEnum.REFUSED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
         }
+    }
+
+    @Override
+    @HystrixCommand(commandProperties = {@HystrixProperty(
+            name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
+    @PostMapping(value = "/addImport/{datasetId}")
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER') OR hasAnyRole('ADMIN')")
+    @ApiOperation(value = "Import file", hidden = true)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create"),
+            @ApiResponse(code = 400, message = "Execution error"),
+            @ApiResponse(code = 412, message = "Dataflow not releasable")})
+    public Long addImportJob (@ApiParam(type = "Long", value = "Dataset id", example = "0")
+            @PathVariable("datasetId") Long datasetId,
+            @ApiParam(type = "Long", value = "Dataflow id",
+                    example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+            @ApiParam(type = "Long", value = "Provider id",
+                    example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+            @ApiParam(type = "String", value = "Table schema id",
+                    example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+                    required = false) String tableSchemaId,
+            @ApiParam(value = "File to upload") @RequestParam("fileName") String fileName,
+            @ApiParam(type = "boolean", value = "Replace current data",
+                    example = "true") @RequestParam(value = "replace", required = false) boolean replace,
+            @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
+                    value = "integrationId", required = false) Long integrationId,
+            @ApiParam(type = "String", value = "File delimiter",
+            example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
+
+        ThreadPropertiesManager.setVariable("user",
+                SecurityContextHolder.getContext().getAuthentication().getName());
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("dataflowId", dataflowId);
+        parameters.put("datasetId", datasetId);
+        parameters.put("dataProviderId", providerId);
+        parameters.put("tableSchemaId", tableSchemaId);
+        parameters.put("fileName", fileName);
+        parameters.put("dataProviderId", providerId);
+        parameters.put("replace", replace);
+        parameters.put("integrationId", integrationId);
+        parameters.put("delimiter", delimiter);
+        JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
+
+        LOG.info("Adding import job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={}, replace={}, integrationId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, replace, integrationId, SecurityContextHolder.getContext().getAuthentication().getName());
+        Long jobId = jobService.addImportJob(dataflowId, providerId, datasetId, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
+        LOG.info("Successfully added import job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={}, replace={}, integrationId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, replace, integrationId, SecurityContextHolder.getContext().getAuthentication().getName());
+        return jobId;
     }
 
     /**
