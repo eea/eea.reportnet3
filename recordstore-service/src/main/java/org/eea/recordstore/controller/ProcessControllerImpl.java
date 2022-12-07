@@ -210,22 +210,11 @@ public class ProcessControllerImpl implements ProcessController {
   }
 
   /**
-   * Finds processId by datasetId and status
-   * @param datasetId
-   * @param status
-   * @return
-   */
-  @Override
-  @GetMapping(value = "/private/findProcessIdByDatasetAndStatus")
-  public List<String> findProcessIdByDatasetAndStatus(@RequestParam("datasetId") Long datasetId, @RequestParam("processType") String processType, @RequestParam("status") List<String> status) {
-    return processService.findProcessIdByDatasetAndStatus(datasetId, processType, status);
-  }
-
-  /**
   * Saves process
   * @param processVO
   */
   @Override
+  @HystrixCommand
   @PostMapping(value = "/private/saveProcess")
   public ProcessVO saveProcess(@RequestBody ProcessVO processVO) {
       return processService.saveProcess(processVO);
@@ -238,6 +227,7 @@ public class ProcessControllerImpl implements ProcessController {
    * @param processId
    */
   @Override
+  @HystrixCommand
   @PutMapping(value = "/private/updateProcessStatus")
   public void updateStatusAndFinishedDate(@RequestParam("processId") String processId, @RequestParam("status") String status, @RequestParam("dateFinish") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date dateFinish) {
     processService.updateStatusAndFinishedDate(status,dateFinish, processId);

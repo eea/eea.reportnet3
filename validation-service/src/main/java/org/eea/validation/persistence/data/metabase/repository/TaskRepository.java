@@ -112,19 +112,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
       value = "select id from task where status='IN_PROGRESS' and task_type='VALIDATION_TASK' and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
   List<BigInteger> getTasksInProgress(@Param("timeInMinutes") long timeInMinutes);
 
-  /**
-   * Finds tasks by processId
-   * @param processId
-   * @return
-   */
-  List<Task> findByProcessId(String processId);
-
-  /**
-   * Finds task by json
-   * @param json
-   * @return
-   */
-  Task findByJsonContaining(String json);
 }
 
 

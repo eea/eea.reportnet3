@@ -3,9 +3,6 @@ package org.eea.interfaces.controller.validation;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
-import org.eea.interfaces.vo.orchestrator.JobVO;
-import org.eea.interfaces.vo.validation.ProcessTaskVO;
-import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -130,44 +127,4 @@ public interface ValidationController {
   @GetMapping(value = "/listTasksInProgress/{timeInMinutes}")
   List<BigInteger> listTasksInProgress(@PathVariable("timeInMinutes") long timeInMinutes);
 
-  /**
-   * Saves task
-   * @param taskVO
-   * @return
-   */
-  @PutMapping(value = "/saveTask")
-  TaskVO saveTask(@RequestBody TaskVO taskVO);
-
-
-  /**
-   * Updates task
-   * @param taskVO
-   * @return
-   */
-  @PutMapping(value = "/updateTask")
-  void updateTask(@RequestBody TaskVO taskVO);
-
-  /**
-   * Finds task by json
-   * @param json
-   * @return
-   */
-  @GetMapping(value = "/findReleaseTaskByJson")
-  TaskVO findReleaseTaskByJson(@RequestParam("json") String json);
-
-  /**
-   * Finds task by splitFileName
-   * @param processId
-   * @return
-   */
-  @GetMapping(value = "/private/findTasksByProcessId/{processId}")
-  List<TaskVO> findTasksByProcessId(@PathVariable("processId") String processId);
-
-  /**
-   * Finds tasks by datasetId for in progress process
-   * @param datasetId
-   * @return
-   */
-  @GetMapping(value = "/private/releaseTasksByDatasetId/{datasetId}")
-  List<ProcessTaskVO> findReleaseTasksByDatasetId(@PathVariable("datasetId") Long datasetId);
 }

@@ -820,14 +820,4 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     datasetSnapshotService.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
   }
 
-  /**
-   * Finds reporting dataset id by snapshot id
-   * @param snapshotId
-   * @return
-   */
-  @GetMapping("/private/findReportingDatasetIdBySnapshotId/{snapshotId}")
-  public Long findReportingDatasetIdBySnapshotId(@PathVariable("snapshotId") Long snapshotId) {
-    return datasetSnapshotService.findReportingDatasetIdBySnapshotId(snapshotId);
-  }
-
 }

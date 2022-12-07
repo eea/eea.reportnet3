@@ -1310,9 +1310,4 @@ public void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId)
     }
   }
 
-  @Override
-  public Long findReportingDatasetIdBySnapshotId(Long snapshotId) {
-     return snapshotRepository.findReportingDatasetBySnapshotId(snapshotId);
-  }
-
 }

@@ -18,9 +18,14 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.ProcessTaskVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.eea.recordstore.service.ProcessService;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.recordstore.service.TaskService;
 import org.eea.recordstore.service.impl.SnapshotHelper;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
@@ -58,6 +63,18 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Autowired
   private RecordStoreService recordStoreService;
+
+  /**
+   * The process service
+   */
+  @Autowired
+  private ProcessService processService;
+
+  /**
+   * The task service
+   */
+  @Autowired
+  private TaskService taskService;
 
   /**
    * The restore snapshot helper.
@@ -591,4 +608,24 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     }
   }
 
+  /**
+   * Finds tasks by datasetId for in progress process
+   * @param datasetId
+   * @return
+   */
+  @HystrixCommand
+  @GetMapping(value = "/private/releaseTasksByDatasetId/{datasetId}")
+  @ApiOperation(value = "Find the release tasks for in progress process by datasetId", hidden = true)
+  public List<ProcessTaskVO> findReleaseTasksForInProgressProcessByDatasetId(@ApiParam(value = "Dataset Id") @PathVariable("datasetId") Long datasetId) {
+    List<String> processIds = processService.findProcessIdByDatasetAndStatus(datasetId, ProcessTypeEnum.RELEASE.toString(), Arrays.asList(ProcessStatusEnum.IN_PROGRESS.toString()));
+    List<ProcessTaskVO> processTaskVOS = new ArrayList<>();
+    processIds.forEach(processId -> {
+      ProcessTaskVO processTaskVO = new ProcessTaskVO();
+      processTaskVO.setProcessId(processId);
+      List<TaskVO> taskVOS = taskService.findTaskByProcessId(processId);
+      processTaskVO.setTasks(taskVOS);
+      processTaskVOS.add(processTaskVO);
+    });
+    return processTaskVOS;
+  }
 }

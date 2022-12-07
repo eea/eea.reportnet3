@@ -116,15 +116,20 @@ public class JobControllerImpl implements JobController {
             DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("dataflowId", dataset.getDataflowId());
+            Long dataProvider = null;
             if (dataset.getDataProviderId()!=null) {
-                parameters.put("dataProviderId", dataset.getDataProviderId());
+                dataProvider = dataset.getDataProviderId();
+                parameters.put("dataProviderId", dataProvider);
             }
             parameters.put("datasetId", datasetId);
             parameters.put("released", released);
-            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), null, null, Arrays.asList(datasetId), false);
+            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);
             LOG.info("Adding validation job for datasetId {} and released {} for creator {} with status {}", datasetId, released, username, statusToInsert);
-            jobService.addValidationJob(dataset.getDataflowId(), dataset.getDataProviderId(), datasetId, parameters, username, statusToInsert);
+            jobService.addValidationJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, username, statusToInsert);
             LOG.info("Successfully added validation job for datasetId {}, released {} and creator {} with status {}", datasetId, released, username, statusToInsert);
+            if (statusToInsert == JobStatusEnum.REFUSED) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_JOB);
+            }
         } catch (Exception e){
             LOG.error("Unexpected error! Could not add validation job for datasetId {}, released {} and creator {}. Message: {}", datasetId, released, username, e.getMessage());
             throw e;
