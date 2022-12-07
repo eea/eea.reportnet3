@@ -123,7 +123,8 @@ public class ValidationControllerImpl implements ValidationController {
           example = "15") @PathVariable("id") Long datasetId,
           @ApiParam(value = "Is the dataset released?", example = "true",
           required = false) @RequestParam(value = "released", required = false) boolean released,
-          @ApiParam(value = "Job id", example = "15", required = false) @PathVariable("jobId") Long jobId) {
+          @ApiParam(type = "Long", value = "Job id", example = "1") @RequestParam(
+                  name = "jobId", required = false) Long jobId) {
 
     LOG.info("Called ValidationControllerImpl.validateDataSetData for datasetId {} and released {} with jobId {}", datasetId, released, jobId);
 
