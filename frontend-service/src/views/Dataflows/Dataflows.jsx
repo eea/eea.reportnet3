@@ -83,8 +83,10 @@ export const Dataflows = () => {
         isAdmin: null,
         isBusinessDataflowDialogVisible: false,
         isCitizenScienceDataflowDialogVisible: false,
+        isControlStatusDialogVisible: false,
         isCustodian: null,
         isFiltered: false,
+        isJobStatusDialogVisible:false,
         isManageNationalCoordinatorsVisible: false,
         isManageWebformsDialogVisible: false,
         isNationalCoordinator: false,
@@ -95,7 +97,6 @@ export const Dataflows = () => {
         isUserListVisible: false,
         isValidatingAllDataflowsUsers: false,
         isValidationStatusDialogVisible: false,
-        isJobStatusDialogVisible:false,
         loadingStatus: {reporting: true, business: true, citizenScience: true, reference: true},
         pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
         pagination: {firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0},
@@ -167,6 +168,8 @@ export const Dataflows = () => {
     const {resetFiltersState: resetUserListFiltersState} = useFilters('userList');
     const {resetFiltersState: resetReportingObligationsFiltersState} = useFilters('reportingObligations');
     const {resetFilterState: resetValidationsStatusesFilterState} = useApplyFilters('validationsStatuses');
+    const {resetFilterState: resetJobsStatusesFilterState} = useApplyFilters('jobsStatuses');
+    const {resetFilterState: resetControlStatusesFilterState} = useApplyFilters('controlStatuses');
     const {resetFilterState: resetObligationsFilterState} = useApplyFilters('reportingObligations');
 
     useBreadCrumbs({currentPage: CurrentPage.DATAFLOWS});
@@ -265,6 +268,15 @@ export const Dataflows = () => {
             title: 'jobsMonitoring'
         };
 
+        const adminControlStatusBtn = {
+            className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+            icon: 'tools',
+            isVisible: isAdmin || isCustodian,
+            label: 'controlStatus',
+            onClick: () => manageDialogs('isControlStatusDialogVisible', true),
+            title: 'controlStatus'
+        };
+
         const adminManageNationalCoordinatorsBtn = {
             className: 'dataflowList-left-side-bar-create-dataflow-help-step',
             icon: 'userTie',
@@ -278,6 +290,7 @@ export const Dataflows = () => {
             [
                 adminCreateNewPermissionsBtn,
                 adminManageNationalCoordinatorsBtn,
+                adminControlStatusBtn,
                 adminManageWebformsBtn,
                 adminValidationStatusBtn,
                 adminJobsStatusBtn,
@@ -843,7 +856,12 @@ export const Dataflows = () => {
 
     const onCloseJobStatusDialog = () => {
         manageDialogs('isJobStatusDialogVisible', false);
-        resetValidationsStatusesFilterState();
+        resetJobsStatusesFilterState();
+    };
+
+    const onCloseControlStatusDialog = () => {
+        manageDialogs('isControlStatusDialogVisible', false);
+        resetControlStatusesFilterState();
     };
 
     const onChangePagination = pagination => dataflowsDispatch({type: 'ON_PAGINATE', payload: {pagination}});
@@ -1016,10 +1034,17 @@ export const Dataflows = () => {
                 />
             )}
 
-{dataflowsState.isJobStatusDialogVisible && (
+            {dataflowsState.isJobStatusDialogVisible && (
                 <JobsStatuses
                     isDialogVisible={dataflowsState.isJobStatusDialogVisible}
                     onCloseDialog={onCloseJobStatusDialog}
+                />
+            )}
+
+            {dataflowsState.isControlStatusDialogVisible && (
+                <JobsStatuses
+                    isDialogVisible={dataflowsState.isControlStatusDialogVisible}
+                    onCloseDialog={onCloseControlStatusDialog}
                 />
             )}
 
