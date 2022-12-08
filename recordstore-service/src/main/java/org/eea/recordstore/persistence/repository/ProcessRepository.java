@@ -1,15 +1,10 @@
 package org.eea.recordstore.persistence.repository;
 
-import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.recordstore.persistence.domain.EEAProcess;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
-import javax.transaction.Transactional;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -60,18 +55,6 @@ public interface ProcessRepository
       value = "select p.* from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.process_type='VALIDATION' and p.status='IN_QUEUE' and d.id <> :datasetId limit 1")
   EEAProcess findNextValidationProcess(@Param("dataflowId") Long dataflowId,
                                        @Param("dataProviderId") Long dataProviderId, @Param("datasetId") Long datasetId);
-
-  /**
-   * updatest status and finished date
-   * @param status
-   * @param dateFinish
-   * @param processId
-   */
-  @Transactional
-  @Modifying
-  @Query(nativeQuery = true,
-          value = "update process set status= :status, date_finish= :dateFinish where process_id= :processId ")
-  void updateStatusAndFinishedDate(@Param("status") String status, @Param("dateFinish") Date dateFinish, @Param("processId") String processId);
 
   /**
    * Finds processes by dataset id and process type and status

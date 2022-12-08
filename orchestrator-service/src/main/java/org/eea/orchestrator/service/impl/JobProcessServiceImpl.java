@@ -40,7 +40,11 @@ public class JobProcessServiceImpl implements JobProcessService {
      */
     @Override
     public Long findJobIdByProcessId(String processId) {
-        return jobProcessRepository.findByProcessId(processId).getJobId();
+        JobProcess jobProcess = jobProcessRepository.findByProcessId(processId);
+        if (jobProcess!=null) {
+            return jobProcess.getJobId();
+        }
+        return null;
     }
 
     @Override

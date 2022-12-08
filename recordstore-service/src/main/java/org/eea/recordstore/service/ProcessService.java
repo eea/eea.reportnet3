@@ -6,7 +6,6 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Date;
 import java.util.List;
 
 
@@ -85,14 +84,6 @@ public interface ProcessService {
    * @return
    */
   List<String> findProcessIdByDatasetAndStatus(Long datasetId, String processType, List<String> status);
-
-  /**
-   * Updates process
-   * @param status
-   * @param dateFinish
-   * @param processId
-   */
-  void updateStatusAndFinishedDate(String status, Date dateFinish, String processId);
 }
 
 

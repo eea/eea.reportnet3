@@ -1,12 +1,13 @@
 package org.eea.dataset.persistence.metabase.repository;
 
-import java.util.List;
-import javax.transaction.Transactional;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+
+import javax.transaction.Transactional;
+import java.util.List;
 
 /**
  * The Interface SnapshotRepository.
@@ -120,7 +121,4 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
       value = "DELETE FROM snapshot WHERE reporting_dataset_id=:idDataset AND date_released is null ")
   void deleteSnapshotByDatasetIdAndDateReleasedIsNull(@Param("idDataset") Long idDataset);
 
-  @Query(nativeQuery = true,
-          value = "SELECT s.reporting_dataset_id FROM snapshot s WHERE id=:snapshotId")
-  Long findReportingDatasetBySnapshotId(Long snapshotId);
 }

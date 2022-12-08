@@ -236,15 +236,4 @@ public class ProcessServiceImpl implements ProcessService {
      return processRepository.findByDatasetIdAndProcessTypeAndStatus(datasetId, processType, status);
   }
 
-  /**
-   * Updates process
-   * @param status
-   * @param dateFinish
-   * @param processId
-   */
-  @Transactional
-  @Override
-  public void updateStatusAndFinishedDate(String status, Date dateFinish, String processId) {
-    processRepository.updateStatusAndFinishedDate(status, dateFinish, processId);
-  }
 }
