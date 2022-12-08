@@ -268,6 +268,9 @@ public class DatasetControllerImpl implements DatasetController {
 
     Long jobId = null;
     try {
+      if (dataflowId == null){
+        dataflowId = datasetService.getDataFlowIdById(datasetId);
+      }
       jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter);
       LOG.info("Importing big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
       fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId, delimiter, jobId);
