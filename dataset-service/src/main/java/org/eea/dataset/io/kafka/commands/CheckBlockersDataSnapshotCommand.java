@@ -4,7 +4,6 @@ import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetSnapshotService;
-import org.eea.dataset.utils.ProcessUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobHistoryController.JobHistoryControllerZuul;
@@ -16,8 +15,8 @@ import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
-import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -61,10 +60,6 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
-  /** The process utils */
-  @Autowired
-  private ProcessUtils processUtils;
-
   /** The process controller zuul */
   @Autowired
   private ProcessControllerZuul processControllerZuul;
@@ -90,6 +85,11 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
+  /**
+   * The default release process priority
+   */
+  private int defaultReleaseProcessPriority = 20;
 
   /**
    * Gets the event type.
@@ -173,9 +173,10 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
         LOG.info("Creating release process for dataflowId {}, dataProviderId {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
         String processId = UUID.randomUUID().toString();
-        ProcessVO processVO = processUtils.createProcessVOForRelease(dataset.getDataflowId(), datasets.get(0), processId);
-        processVO = processControllerZuul.saveProcess(processVO);
-        LOG.info("Created release process for dataflowId {}, dataProviderId {}, jobId {} and processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processVO.getProcessId());
+        processControllerZuul.updateProcess(datasets.get(0), dataset.getDataflowId(),
+                ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, processId,
+                SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
+        LOG.info("Created release process for dataflowId {}, dataProviderId {}, jobId {} and processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
 
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);
@@ -186,16 +187,16 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         createSnapshotVO.setDescription("Release " + formateador.format(ahora) + " CET");
         Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now());
 
-        LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processVO.getProcessId());
-        JobProcessVO jobProcessVO = new JobProcessVO(null, releaseJob.getId(), processVO.getProcessId());
+        LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
+        JobProcessVO jobProcessVO = new JobProcessVO(null, releaseJob.getId(), processId);
         jobProcessControllerZuul.save(jobProcessVO);
-        LOG.info("Created jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processVO.getProcessId());
+        LOG.info("Created jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
 
-        LOG.info("Updating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), releaseJob.getId(), processVO.getProcessId());
-        processVO.setStatus(ProcessStatusEnum.IN_PROGRESS.toString());
-        processVO.setProcessStartingDate(new Date());
-        processControllerZuul.saveProcess(processVO);
-        LOG.info("Created release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), releaseJob.getId(), processVO.getProcessId());
+        LOG.info("Updating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), releaseJob.getId(), processId);
+        processControllerZuul.updateProcess(datasets.get(0), dataset.getDataflowId(),
+                ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, processId,
+                SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
+        LOG.info("Updated release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), releaseJob.getId(), processId);
 
         datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
                 dateRelease.toString(), false, processId);

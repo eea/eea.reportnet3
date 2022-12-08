@@ -79,10 +79,12 @@ public interface ProcessService {
   ProcessVO findNextProcess(String processId);
 
   /**
-   * Saves process
-   * @param processVO
+   * Finds processId by datasetId and status
+   * @param datasetId
+   * @param status
+   * @return
    */
-  ProcessVO saveProcess(ProcessVO processVO);
+  List<String> findProcessIdByDatasetAndStatus(Long datasetId, String processType, List<String> status);
 
   /**
    * Updates process
@@ -91,14 +93,6 @@ public interface ProcessService {
    * @param processId
    */
   void updateStatusAndFinishedDate(String status, Date dateFinish, String processId);
-
-  /**
-   * Finds processId by datasetId and status
-   * @param datasetId
-   * @param status
-   * @return
-   */
-  List<String> findProcessIdByDatasetAndStatus(Long datasetId, String processType, List<String> status);
 }
 
 
