@@ -8,7 +8,6 @@ import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
-import org.eea.dataset.utils.ProcessUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
@@ -24,8 +23,8 @@ import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
-import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
@@ -93,10 +92,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
-  /** The process utils */
-  @Autowired
-  private ProcessUtils processUtils;
-
   @Autowired
   private ProcessControllerZuul processControllerZuul;
 
@@ -112,6 +107,11 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR =
       LoggerFactory.getLogger(ReleaseDataSnapshotsCommand.class);
+
+  /**
+   * The default release process priority
+   */
+  private int defaultReleaseProcessPriority = 20;
 
   /**
    * Gets the event type.
@@ -162,9 +162,10 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
         LOG.info("Creating release process for dataflowId {}, dataProviderId {} dataset {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
         String nextProcessId = UUID.randomUUID().toString();
-        ProcessVO processVO = processUtils.createProcessVOForRelease(dataset.getDataflowId(), nextData, nextProcessId);
-        processVO = processControllerZuul.saveProcess(processVO);
-        LOG.info("Created release process with processId {} for dataflowId {}, dataProviderId {} dataset {}, jobId {}", processVO.getProcessId(), dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
+        processControllerZuul.updateProcess(nextData, dataset.getDataflowId(),
+                ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, nextProcessId,
+                SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
+        LOG.info("Created release process with processId {} for dataflowId {}, dataProviderId {} dataset {}, jobId {}", nextProcessId, dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
 
         if (jobId!=null) {
           LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextProcessId);
@@ -174,9 +175,9 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         }
 
         LOG.info("Updating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
-        processVO.setStatus(ProcessStatusEnum.IN_PROGRESS.toString());
-        processVO.setProcessStartingDate(new Date());
-        processControllerZuul.saveProcess(processVO);
+        processControllerZuul.updateProcess(nextData, dataset.getDataflowId(),
+                ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, nextProcessId,
+                SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
         LOG.info("Updated release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
 
         datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease, false, nextProcessId);

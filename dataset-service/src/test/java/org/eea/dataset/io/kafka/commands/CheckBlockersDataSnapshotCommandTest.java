@@ -4,7 +4,6 @@ import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetSnapshotService;
-import org.eea.dataset.utils.ProcessUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobHistoryController.JobHistoryControllerZuul;
@@ -16,6 +15,8 @@ import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -74,9 +75,6 @@ public class CheckBlockersDataSnapshotCommandTest {
 
   @Mock
   private JobProcessControllerZuul jobProcessControllerZuul;
-
-  @Mock
-  private ProcessUtils processUtils;
 
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
@@ -137,10 +135,9 @@ public class CheckBlockersDataSnapshotCommandTest {
     Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(false);
     ProcessVO processVO = new ProcessVO();
     processVO.setProcessId("jkhiuh");
-    Mockito.when(processUtils.createProcessVOForRelease(anyLong(), anyLong(), anyString())).thenReturn(processVO);
+    Mockito.when(processControllerZuul.updateProcess(anyLong(), anyLong(), any(ProcessStatusEnum.class), any(ProcessTypeEnum.class), anyString(), anyString(), anyInt(), anyBoolean())).thenReturn(true);
     JobProcessVO jobProcessVO = new JobProcessVO(Long.valueOf(1), Long.valueOf(1), "jkhiuh");
     Mockito.when(jobProcessControllerZuul.save(any(JobProcessVO.class))).thenReturn(jobProcessVO);
-    Mockito.when(processControllerZuul.saveProcess(any(ProcessVO.class))).thenReturn(processVO);
 
     checkBlockersDataSnapshotCommand.execute(eeaEventVO);
     Mockito.verify(dataSetMetabaseRepository, times(1)).findById(1L);

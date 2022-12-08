@@ -460,7 +460,11 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(anyLong())).thenReturn(datasetMetabase);
     String processId = UUID.randomUUID().toString();
     when(jobProcessControllerZuul.findJobIdByProcessId(anyString())).thenReturn(null);
-    doNothing().when(processService).updateStatusAndFinishedDate(anyString(), any(Date.class), anyString());
+    ProcessVO processVO = new ProcessVO();
+    processVO.setProcessId(processId);
+    processVO.setDatasetId(1L);
+    Mockito.when(processService.updateProcess(anyLong(), anyLong(), any(ProcessStatusEnum.class), any(ProcessTypeEnum.class), anyString(), anyString(), anyInt(), anyBoolean())).thenReturn(true);
+    Mockito.when(processService.getByProcessId(anyString())).thenReturn(processVO);
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false,
         false, processId);
     Mockito.verify(kafkaSender, Mockito.times(0)).releaseNotificableKafkaEvent(Mockito.any(),

@@ -31,6 +31,7 @@ import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.SplitSnapfile;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.validation.ReleaseTaskVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
@@ -286,6 +287,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * The Task Mapper
    */
   @Autowired private TaskMapper taskMapper;
+
+  /**
+   * The default release process priority
+   */
+  private int defaultReleaseProcessPriority = 20;
 
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
@@ -1783,21 +1789,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           try {
             TaskVO task = taskService.findReleaseTaskBySplitFileName(splitFileName);
 
-            LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
+            LOG.info("Updating release task status of task with id {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
             task.setStartingDate(new Date());
             task.setStatus(ProcessStatusEnum.IN_PROGRESS);
             task.setPod(serviceInstanceId);
             task = taskService.saveTask(task);
-            LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
+            LOG.info("Updated release task status of task with id {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
 
             LOG.info("Copy file {}", splitFile);
             copyFromFile(copyQueryField, splitFile, cm);
 
-            LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
+            LOG.info("Updating release task status of task with id {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
             task.setFinishDate(new Date());
             task.setStatus(ProcessStatusEnum.FINISHED);
             taskService.updateTask(task);
-            LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
+            LOG.info("Updated release task status of task with id {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
 
             try {
               LOG.info("File {} copied and will be deleted", splitFile);
@@ -1824,7 +1830,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
       LOG.info("Executed copyFromFile for attachment_value with file {} and dataCollectionId {}", nameFileAttachmentValue, dataCollectionId);
       LOG.info("Updating release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}, jobId {}", processId, dataCollectionId, jobId);
-      processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), processId);
+      ProcessVO processVO = processService.getByProcessId(processId);
+      processService.updateProcess(processVO.getDatasetId(), dataflowId,
+              ProcessStatusEnum.FINISHED, ProcessTypeEnum.RELEASE, processId,
+              SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
       LOG.info("Updated release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}, jobId {}", processId, dataCollectionId, jobId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error in copyProcess for dataCollectionId {} and snapshotId {}. Message: {}", dataCollectionId, idSnapshot, e.getMessage());
@@ -1897,7 +1906,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
         LOG.info("Executed copyProcessSpecificSnapshot for attachment_value with file {} and dataCollectionId {}", nameFileAttachmentValue, datasetId);
         LOG.info("Updating copyProcessSpecificSnapshot release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}", processId, datasetId);
-        processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), processId);
+        ProcessVO processVO = processService.getByProcessId(processId);
+        processService.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(),
+            ProcessStatusEnum.FINISHED, ProcessTypeEnum.RELEASE, processId,
+            SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
         LOG.info("Updated copyProcessSpecificSnapshot release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}", processId, datasetId);
     }
   
