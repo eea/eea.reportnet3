@@ -1112,7 +1112,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             StringBuilder sql =
                 new StringBuilder("SELECT count(ID) FROM dataset_").append(datasetId)
                     .append(".field_value fv where fv.ID in('").append(firstFieldId).append("','")
-                    .append(lastFieldId).append("';");
+                    .append(lastFieldId).append("');");
 
             Integer result = jdbcTemplate.queryForObject(sql.toString(), Integer.class);
             LOG.info("Method recoverCheckForStuckFile query {} returned {} ", sql, result);
@@ -2217,7 +2217,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       int numberOfFiles = (int) Math.ceil(numberOfLines / maxLinesPerFile);
 
       splitSnapfile.setNumberOfFiles(numberOfFiles);
-      splitSnapfile.setForSplitting(numberOfFiles >= 3 ? true : false);
+      splitSnapfile.setForSplitting(true);
 
       LOG.info("Method isSnapFileForSplitting ends for file {} with {} lines into {} files", inputfile, numberOfLines, numberOfFiles);
     } catch (Exception e) {
