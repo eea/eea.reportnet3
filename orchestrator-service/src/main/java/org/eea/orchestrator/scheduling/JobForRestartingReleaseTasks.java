@@ -56,7 +56,7 @@ public class JobForRestartingReleaseTasks {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> restartReleaseTasks(),
-            new CronTrigger("0 0 * * * *"));
+            new CronTrigger("*/30 * * * *"));
     }
 
     /**
