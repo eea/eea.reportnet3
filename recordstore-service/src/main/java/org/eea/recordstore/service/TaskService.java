@@ -32,4 +32,11 @@ public interface TaskService {
      * @return
      */
     List<TaskVO> findTaskByProcessId(String processId);
+
+    /**
+     * Updates starting date of task
+     * @param taskVO
+     * @return
+     */
+    void updateTaskStartingDate(TaskVO taskVO);
 }
