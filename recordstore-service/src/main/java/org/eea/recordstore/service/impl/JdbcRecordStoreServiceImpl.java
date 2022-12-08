@@ -1102,7 +1102,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             LOG.info("Method restoreSpecificFileSnapshot ends with datasetId: {}", datasetId);
         } catch (Exception e) {
             LOG_ERROR.error(
-                "Error in method restoreSpecificFileSnapshot for datasetId: {} with error {}",
+                "Error in method restoreSpecificFileSnapshot for datasetId: {} with error",
                 datasetId, e);
             throw e;
         }
@@ -1865,6 +1865,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
             try {
                 TaskVO task = taskService.findReleaseTaskBySplitFileName(splitFile);
+                LOG.info("Method copyProcessSpecificSnapshot for file {} found task {}", splitFile, task);
 
                 LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFile, idSnapshot, processId);
                 task.setStartingDate(new Date());
@@ -1887,7 +1888,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     LOG.info("Recover file {} has been deleted", splitFile);
                 } catch (Exception e) {
                     LOG.error("Error while trying to delete split snap file {} for datasetId {}",
-                        splitFile, datasetId);
+                        splitFile, datasetId, e);
                 }
             } catch (Exception e) {
                 LOG_ERROR.error("Error in copy field process for snapshotId {} with error",

@@ -101,7 +101,7 @@ public class JobForRestartingReleaseTasks {
                 });
             }
         } catch (Exception e) {
-            LOG.error("Error while restarting release task {}", e.getMessage());
+            LOG.error("Error while restarting release task", e.getMessage());
         }
     }
 }
