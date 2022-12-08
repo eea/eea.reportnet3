@@ -37,8 +37,11 @@ export const DatasetConfig = {
   exportTableSchema:
     '/dataschema/v1/{:datasetSchemaId}/exportFieldSchemas?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
   importFileDataset: '/dataset/v2/importFileData/{:datasetId}?delimiter={:delimiter}',
+  importFileDatasetUpd: '/dataset/v2/importFileData/{:datasetId}?delimiter={:delimiter}&dataflowId={:dataflowId}',
+
   importFileDatasetExternal: '/dataset/v2/importFileData/{:datasetId}?integrationId={:integrationId}',
   importFileTable: '/dataset/v2/importFileData/{:datasetId}?tableSchemaId={:tableSchemaId}&delimiter={:delimiter}',
+  importFileTableUpd: '/dataset/v2/importFileData/{:datasetId}?tableSchemaId={:tableSchemaId}&delimiter={:delimiter}&dataflowId={:dataflowId}',
   importTableSchema:
     '/dataschema/v1/{:datasetSchemaId}/importFieldSchemas?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}',
   getShowValidationErrors:
@@ -56,7 +59,8 @@ export const DatasetConfig = {
   updateField: '/dataset/{:datasetId}/updateField?updateCascadePK={:updateInCascade}',
   updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}',
   updateTableDesign: '/dataschema/{:datasetId}/tableSchema',
-  validate: '/validation/dataset/{:datasetId}',
+  validate: '/orchestrator/jobs/addValidationJob/{:datasetId}',
   validateSql: '/rules/validateSqlRules?datasetId={:datasetId}&datasetSchemaId={:datasetSchemaId}',
-  validationViewer: '/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}'
+  validationViewer: '/dataset/findPositionFromAnyObject/{:objectId}?datasetId={:datasetId}&type={:entityType}',
+  testImportProcess: '/dataset/checkImportProcess/{:datasetId}'
 };

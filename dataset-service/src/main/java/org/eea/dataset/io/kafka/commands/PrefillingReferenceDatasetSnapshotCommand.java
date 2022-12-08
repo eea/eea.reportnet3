@@ -80,6 +80,9 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
         LOG_ERROR.error(
             "Error creating the reference dataset {} files during the creation. Error: {}",
             datasetId, e.getMessage(), e);
+      } catch (Exception e) {
+        LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+        throw e;
       }
     }
 

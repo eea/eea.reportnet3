@@ -106,7 +106,7 @@ public class ValidationControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
-      validationController.validateDataSetData(null, false);
+      validationController.validateDataSetData(null, false, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getReason());
@@ -125,7 +125,7 @@ public class ValidationControllerImplTest {
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
     Mockito.when(validationHelper.getPriority(Mockito.any())).thenReturn(60);
-    validationController.validateDataSetData(1L, false);
+    validationController.validateDataSetData(1L, false, null);
     Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
@@ -143,7 +143,7 @@ public class ValidationControllerImplTest {
         .thenReturn(new DataSetMetabaseVO());
     Mockito.when(validationHelper.getPriority(Mockito.any())).thenReturn(60);
     try {
-      validationController.validateDataSetData(1L, false);
+      validationController.validateDataSetData(1L, false, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.LOCKED, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.METHOD_LOCKED, e.getReason());
@@ -159,7 +159,7 @@ public class ValidationControllerImplTest {
         .thenReturn(new DataSetMetabaseVO());
     doThrow(new EEAException("e")).when(validationHelper).executeValidation(Mockito.anyLong(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean());
-    validationController.validateDataSetData(1L, false);
+    validationController.validateDataSetData(1L, false, null);
 
     Mockito.verify(validationHelper, times(1)).deleteLockToReleaseProcess(Mockito.any());
   }

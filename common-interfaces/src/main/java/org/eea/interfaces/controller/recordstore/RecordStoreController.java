@@ -2,9 +2,14 @@ package org.eea.interfaces.controller.recordstore;
 
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.validation.ProcessTaskVO;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +70,8 @@ public interface RecordStoreController {
       @RequestParam(value = "idPartitionDataset", required = true) Long idPartitionDataset,
       @RequestParam(value = "dateRelease", required = false) String dateRelease,
       @RequestParam(value = "prefillingReference", required = false,
-          defaultValue = "false") Boolean prefillingReference);
+          defaultValue = "false") Boolean prefillingReference,
+      @RequestParam(value = "processId", required = false) String processId);
 
 
 
@@ -88,7 +94,8 @@ public interface RecordStoreController {
       @RequestParam(value = "isSchemaSnapshot", required = true) Boolean isSchemaSnapshot,
       @RequestParam(value = "deleteData", defaultValue = "false") Boolean deleteData,
       @RequestParam(value = "prefillingReference", required = false,
-          defaultValue = "false") Boolean prefillingReference);
+          defaultValue = "false") Boolean prefillingReference,
+      @RequestParam(value = "processId", required = false) String processId);
 
   /**
    * Delete snapshot data.
@@ -181,6 +188,61 @@ public interface RecordStoreController {
    */
   @PutMapping("/private/dataset/create/dataCollection/finish/{datasetId}")
   void distributeTables(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Lists the release task ids that are in progress for more than the specified period of time
+   *
+   * @param timeInMinutes
+   * @return
+   */
+  @GetMapping(value = "/findReleaseTasksInProgress/{timeInMinutes}")
+  List<BigInteger> findReleaseTasksInProgress(@PathVariable("timeInMinutes") long timeInMinutes);
+
+
+  /**
+   * Gets release task by task id
+   *
+   * @param taskId
+   * @return
+   */
+  @GetMapping(value = "/findReleaseTaskByTaskId/{taskId}")
+  TaskVO findReleaseTaskByTaskId(@PathVariable("taskId") long taskId);
+
+  /**
+   * Restore release process
+   *
+   * @param
+   * @return
+   */
+  @PostMapping(value = "/restoreSpecificFileSnapshotData")
+  void restoreSpecificFileSnapshotData(
+      @RequestParam("datasetId") Long datasetId,
+      @RequestParam("idSnapshot") Long idSnapshot,
+      @RequestParam("startingNumber") int startingNumber,
+      @RequestParam("endingNumber") int endingNumber,
+      @RequestParam("processId") String processId) throws SQLException, IOException;
+
+  /**
+   * Check if data of file has been imported to dataset
+   *
+   * @param datasetId
+   * @param firstFieldId
+   * @param lastFieldId
+   * @return
+   */
+  @GetMapping(value = "/recoverCheck")
+  boolean recoverCheck(
+      @RequestParam("datasetId") Long datasetId,
+      @RequestParam("firstFieldId") Long firstFieldId,
+      @RequestParam("lastFieldId") Long lastFieldId);
+
+  /**
+   * Finds tasks by datasetId for in progress process
+   * @param datasetId
+   * @return
+   */
+  @GetMapping(value = "/private/releaseTasksByDatasetId/{datasetId}")
+  List<ProcessTaskVO> findReleaseTasksForInProgressProcessByDatasetId(@PathVariable("datasetId") Long datasetId);
 
   /**
    * Updates materialized view

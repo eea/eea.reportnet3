@@ -91,6 +91,9 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
           .getExecutionResultParams().get("id") == 0) {
         error = true;
       }
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      throw e;
     } finally {
       try {
         FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
@@ -102,6 +105,9 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
             "Error processing the call to FME executing integration: datasetId={}, fileName={}, IntegrationVO={}",
             datasetId, file.getName(), integrationVO);
         manageLock(datasetId);
+      } catch (Exception e) {
+        LOG_ERROR.error("Unexpected error! Error deleting directory for datasetId {}. Message: {}", datasetId, e.getMessage());
+        throw e;
       }
     }
     if (error) {
@@ -121,16 +127,21 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
    * @param datasetId the dataset id
    */
   private void manageLock(Long datasetId) {
-    Map<String, Object> importFileData = new HashMap<>();
-    importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
-    importFileData.put(LiteralConstants.DATASETID, datasetId);
-    lockService.removeLockByCriteria(importFileData);
-    Map<String, Object> importBigFileData = new HashMap<>();
-    importBigFileData.put(LiteralConstants.SIGNATURE,
-        LockSignature.IMPORT_BIG_FILE_DATA.getValue());
-    importBigFileData.put(LiteralConstants.DATASETID, datasetId);
-    lockService.removeLockByCriteria(importBigFileData);
-    fileTreatmentHelper.releaseLockReleasingProcess(datasetId);
+    try {
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(importFileData);
+      Map<String, Object> importBigFileData = new HashMap<>();
+      importBigFileData.put(LiteralConstants.SIGNATURE,
+              LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+      importBigFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(importBigFileData);
+      fileTreatmentHelper.releaseLockReleasingProcess(datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error managing lock for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
   }
 
 

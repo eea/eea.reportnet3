@@ -267,7 +267,7 @@ public class DatasetReleaseAggregate {
             LOG.info("Deleting provider for dataflowId: {} dataProvider: {} dataCollection {}", command.getDataflowId(), command.getDataProviderId(), dataCollectionId);
 
             TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, dataCollectionId));
-            datasetSnapshotService.deleteProvider(dataCollectionId, command.getDataProviderId());
+            datasetSnapshotService.deleteProvider(dataCollectionId, command.getDataProviderId(), null);
             LOG.info("Provider deleted for dataflowId: {} dataProvider: {} dataCollection {}", command.getDataflowId(), command.getDataProviderId(), dataCollectionId);
             ProviderDeletedEvent event = new ProviderDeletedEvent();
             BeanUtils.copyProperties(command, event);

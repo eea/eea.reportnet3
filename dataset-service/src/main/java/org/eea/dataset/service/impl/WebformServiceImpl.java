@@ -103,13 +103,13 @@ public class WebformServiceImpl implements WebformService {
         webformRepository.save(webformMetabase);
         webform.setIdReferenced(webformMetabase.getId());
         webformConfigRepository.save(webform);
-        LOG.info("A new webform configuration has been inserted");
+        LOG.info("A new webform configuration has been inserted with name {}", name);
       } catch (JsonProcessingException e) {
-        LOG_ERROR.error("Error processing the json to insert");
+        LOG_ERROR.error("Error processing the json to insert webform configuration with name {}", name);
         throw new EEAException(EEAErrorMessage.ERROR_JSON);
       }
     } else {
-      LOG_ERROR.error("Error inserting new webform config. The name already exists");
+      LOG_ERROR.error("Error inserting new webform config. The name {} already exists", name);
       throw new EEAException(EEAErrorMessage.NAME_DUPLICATED);
     }
   }
@@ -137,7 +137,7 @@ public class WebformServiceImpl implements WebformService {
       if (StringUtils.isNotBlank(name) && existingWebforms.stream()
           .filter(w -> w.getLabel().equals(name) && !w.getId().equals(webformMetabase.getId()))
           .count() > 0) {
-        LOG_ERROR.error("Error updating new webform config. The name already exists");
+        LOG_ERROR.error("Error updating new webform config. The name {} already exists", name);
         throw new EEAException(EEAErrorMessage.NAME_DUPLICATED);
       }
 
@@ -183,7 +183,7 @@ public class WebformServiceImpl implements WebformService {
           LOG.info("The webform configuration with id {} has been updated", id);
         }
       } catch (JsonProcessingException e) {
-        LOG_ERROR.error("Error processing the json to update");
+        LOG_ERROR.error("Error processing the json to update webform config with name {}", name);
         throw new EEAException(EEAErrorMessage.ERROR_JSON);
       }
     }

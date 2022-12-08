@@ -25,6 +25,9 @@ public class ProcessVO {
   /** The dataflow name. */
   private String dataflowName;
 
+  /** The process type */
+  private String processType;
+
   /** The dataset name. */
   private String datasetName;
 

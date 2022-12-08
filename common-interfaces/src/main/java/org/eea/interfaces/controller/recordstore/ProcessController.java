@@ -5,10 +5,11 @@ import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import javax.ws.rs.POST;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -125,6 +126,21 @@ public interface ProcessController {
   @GetMapping(value = "/private/next/{processId}")
   ProcessVO getNextProcess(@PathVariable("processId") String processId);
 
+  /**
+   * Saves process
+   * @param processVO
+   */
+  @PostMapping(value = "/private/saveProcess")
+  ProcessVO saveProcess(@RequestBody ProcessVO processVO);
+
+  /**
+   * Updates process
+   * @param status
+   * @param dateFinish
+   * @param processId
+   */
+  @PutMapping(value = "/private/updateProcessStatus")
+  void updateStatusAndFinishedDate(@RequestParam("processId") String processId, @RequestParam("status") String status, @RequestParam("dateFinish") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date dateFinish);
   /**
    * Inserts sagaTransactionId and aggregateId
    * @param sagaTransactionId

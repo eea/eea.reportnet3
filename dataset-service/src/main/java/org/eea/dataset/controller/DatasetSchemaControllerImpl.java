@@ -164,30 +164,33 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
     if (!TypeStatusEnum.DESIGN
         .equals(dataflowControllerZuul.getMetabaseById(dataflowId).getStatus())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status for dataflowId " + dataflowId);
     }
 
     if (0 != datasetMetabaseService.countDatasetNameByDataflowId(dataflowId, datasetSchemaName)) {
-      LOG.error("Error creating duplicated dataset : {}", datasetSchemaName);
+      LOG.error("Error creating duplicated dataset with datasetSchemaName {} for dataflowId {}", datasetSchemaName, dataflowId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_NAME_DUPLICATED);
     }
     try {
+      LOG.info("Creating dataset schema {} for dataflowId {} ", nameTrimmed, dataflowId);
       String datasetSchemaId = dataschemaService.createEmptyDataSetSchema(dataflowId).toString();
       Future<Long> futureDatasetId = datasetMetabaseService.createEmptyDataset(
           DatasetTypeEnum.DESIGN, datasetSchemaName, datasetSchemaId, dataflowId, null, null, 0);
 
       // we find if the dataflow has any permission to give the permission to this new datasetschema
       contributorControllerZuul.createAssociatedPermissions(dataflowId, futureDatasetId.get());
-
       integrationControllerZuul.createDefaultIntegration(dataflowId, datasetSchemaId);
+      LOG.info("Successfully created dataset schema {} with datasetSchemaId {} for dataflowId {} ", nameTrimmed, datasetSchemaId, dataflowId);
     } catch (InterruptedException | ExecutionException | EEAException e) {
-      LOG.error("Aborted DataSetSchema creation: {}", e.getMessage(), e);
+      LOG.error("Aborted DataSetSchema creation for schema {} and dataflowId {}. Error is: {}", nameTrimmed, dataflowId, e.getMessage(), e);
       if (e instanceof InterruptedException) {
         Thread.currentThread().interrupt();
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          "Error creating design dataset");
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating design dataset for dataflowId " + dataflowId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating empty dataset schema {} for dataflowId {} Message: {}", datasetSchemaName, dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -230,6 +233,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       LOG.error("Error while retrieving dataset schema by id: {}", datasetId, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_DATASET_SCHEMA);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving data schema for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -270,6 +276,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       return dataschemaService.getDataSchemaByDatasetId(true, datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error privately retrieving data schema for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -289,6 +298,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       return dataschemaService.getDatasetSchemaId(datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving data schema id for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -314,6 +326,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       LOG.error("Error while retrieving dataset schema by id: {}", datasetId, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_DATASET_SCHEMA);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving data schema with no rules for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -355,13 +370,13 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
     // Check if the dataflow its on the correct state to allow delete design datasets
     try {
+      LOG.info("Deleting dataset schema with datasetId {}", datasetId);
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
       DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
 
       if (TypeStatusEnum.DESIGN == dataflow.getStatus()) {
         // delete the schema snapshots too
         datasetSnapshotService.deleteAllSchemaSnapshots(datasetId);
-
         // delete from the CataloguePK the entries if the schema has FK
         dataschemaService.updatePkCatalogueDeletingSchema(datasetSchemaId, datasetId);
 
@@ -382,15 +397,18 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         recordStoreControllerZuul.deleteDataset("dataset_" + datasetId);
 
         dataschemaService.deleteGroup(datasetId, ResourceTypeEnum.DATA_SCHEMA);
-        LOG.info("The Design Dataset {} has been deleted", datasetId);
       } else {
+        LOG_ERROR.error("Not enough permissions to delete dataset schema with datasetId {}", datasetId);
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             EEAErrorMessage.NOT_ENOUGH_PERMISSION);
       }
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting a design dataset. Message: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error deleting dataset schema with datasetId {}. Message: {}", datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DELETING_DESIGN_DATASET);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting dataset schema for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -426,6 +444,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     }
 
     try {
+      LOG.info("Creating table schema for datasetId {}", datasetId);
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
       tableSchemaVO = dataschemaService.createTableSchema(
@@ -434,12 +453,17 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       // recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
       dataschemaService.releaseCreateUpdateView(datasetId,
           SecurityContextHolder.getContext().getAuthentication().getName(), false);
+      LOG.info("Successfully created table schema for datasetId {}", datasetId);
       return tableSchemaVO;
     } catch (EEAException e) {
       LOG_ERROR.error("Error creating a table schema. DatasetId: {}. Message: {}", datasetId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
+    } catch (Exception e) {
+      String tableSchemaId = (tableSchemaVO != null) ? tableSchemaVO.getIdTableSchema() : null;
+      LOG_ERROR.error("Unexpected error! Error creating table schema {} for datasetId {} Message: {}", tableSchemaId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -483,7 +507,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       dataschemaService.releaseCreateUpdateView(datasetId,
           SecurityContextHolder.getContext().getAuthentication().getName(), false);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error updating table schema. Message: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error updating table schema for datasetId {}. Message: {}", datasetId, e.getMessage(), e);
       if (e.getMessage() != null
           && e.getMessage().equals(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA,
               tableSchemaVO.getIdTableSchema(), datasetId))) {
@@ -499,6 +523,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             EEAErrorMessage.DATASET_INCORRECT_ID);
       }
+    } catch (Exception e) {
+      String tableSchemaId = (tableSchemaVO != null) ? tableSchemaVO.getIdTableSchema() : null;
+      LOG_ERROR.error("Unexpected error! Error updating table schema {} for datasetId {} Message: {}", tableSchemaId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -530,6 +558,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       final String datasetSchemaId = dataschemaService.getDatasetSchemaId(datasetId);
 
+      LOG.info("Deleting table schema with id {} for datasetId {}",tableSchemaId, datasetId);
       // Delete the Pk if needed from the catalogue, for all the fields of the table
       dataschemaService.deleteFromPkCatalogue(datasetSchemaId, tableSchemaId, datasetId);
 
@@ -544,11 +573,14 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       datasetService.deleteTableValue(datasetId, tableSchemaId);
 
       recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
-      LOG.info("A table has been deleted in the datasetId {}", datasetId);
+      LOG.info("Successfully deleted table schema with id {} for datasetId {}",tableSchemaId, datasetId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting table schema. Message: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error deleting table schema with id {} for datasetId {} Message: {}", tableSchemaId, datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_TABLE_SCHEMA);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting table schema {} for datasetId {} Message: {}", tableSchemaId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -587,6 +619,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       LOG_ERROR.error("Error ordering table schema. DatasetId: {}. Message: {}", datasetId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.SCHEMA_NOT_FOUND);
+    } catch (Exception e) {
+      String orderId = (orderVO != null) ? orderVO.getId() : null;
+      LOG_ERROR.error("Unexpected error! Error ordering table schema with orderId {} for datasetId {} Message: {}", orderId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -663,6 +699,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.CREATING_FIELD_SCHEMA);
+    } catch (Exception e) {
+      String fieldSchemaId = (fieldSchemaVO != null) ? fieldSchemaVO.getId() : null;
+      LOG_ERROR.error("Unexpected error! Error creating field schema {} for datasetId {} Message: {}", fieldSchemaId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -741,6 +781,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.UPDATING_FIELD_SCHEMA);
+    } catch (Exception e) {
+      String fieldSchemaId = (fieldSchemaVO != null) ? fieldSchemaVO.getId() : null;
+      LOG_ERROR.error("Unexpected error! Error updating field schema {} for datasetId {} Message: {}", fieldSchemaId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -811,6 +855,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DELETING_FIELD_SCHEMA);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting field schema {} for datasetId {} Message: {}", fieldSchemaId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -849,6 +896,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       LOG_ERROR.error("Error ordering field schema. DatasetId: {}. Message: {}", datasetId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND);
+    } catch (Exception e) {
+      String orderId = (orderVO != null) ? orderVO.getId() : null;
+      LOG_ERROR.error("Unexpected error! Error ordering field schema with orderId {} for datasetId {} Message: {}", orderId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -896,6 +947,10 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     } catch (EEAException e) {
       LOG_ERROR.error("updateDatasetSchema - DatasetSchema not found: datasetId={}", datasetId, e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND);
+    } catch (Exception e) {
+      String datasetSchemaId = (datasetSchemaVO != null) ? datasetSchemaVO.getIdDataSetSchema() : null;
+      LOG_ERROR.error("Unexpected error! Error updating dataset schema {} for datasetId {} Message: {}", datasetSchemaId, datasetId, e.getMessage());
+      throw e;
     }
   }
 
@@ -912,7 +967,13 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @ApiOperation(value = "validate schema", hidden = true)
   public Boolean validateSchema(@ApiParam(type = "String", value = "Dataset Schema Id",
       example = "5cf0e9b3b793310e9ceca190") @PathVariable("schemaId") String datasetSchemaId) {
-    return dataschemaService.validateSchema(datasetSchemaId, null);
+    try {
+      LOG.info("Validating schema with datasetSchemaId {}", datasetSchemaId);
+      return dataschemaService.validateSchema(datasetSchemaId, null);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error validating dataset schema {} Message: {}", datasetSchemaId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -929,18 +990,25 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @ApiOperation(value = "validate schemas", hidden = true)
   public Boolean validateSchemas(@ApiParam(type = "Long", value = "Dataflow Id",
       example = "0") @PathVariable("dataflowId") Long dataflowId) {
-    // Recover the designs datasets of the dataflowId given. And then, for each design dataset
-    // executes a validation.
-    // At the first wrong design dataset, it stops and returns false. Otherwise it returns true
-    DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId, null);
-    Boolean isValid = false;
-    if (dataflow.getDesignDatasets() != null && !dataflow.getDesignDatasets().isEmpty()) {
-      Set<Boolean> results = dataflow.getDesignDatasets().parallelStream()
+    try {
+      // Recover the designs datasets of the dataflowId given. And then, for each design dataset
+      // executes a validation.
+      // At the first wrong design dataset, it stops and returns false. Otherwise it returns true
+      LOG.info("Validating schemas for dataflowId {}", dataflowId);
+      DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId, null);
+      Boolean isValid = false;
+      if (dataflow.getDesignDatasets() != null && !dataflow.getDesignDatasets().isEmpty()) {
+        Set<Boolean> results = dataflow.getDesignDatasets().parallelStream()
           .map(ds -> dataschemaService.validateSchema(ds.getDatasetSchema(), dataflow.getType()))
           .collect(Collectors.toSet());
-      isValid = results.contains(true) && !results.contains(false);
+        isValid = results.contains(true) && !results.contains(false);
+      }
+      LOG.info("Successfully validated schemas for dataflowId {}. Result is {}", dataflowId, isValid);
+      return isValid;
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error validating dataset schemas for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
-    return isValid;
   }
 
   /**
@@ -960,20 +1028,28 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       @ApiResponse(code = 400, message = "schema not found")})
   public List<DataSetSchemaVO> findDataSchemasByIdDataflow(@ApiParam(type = "Long",
       value = "Dataflow Id", example = "0") @PathVariable("idDataflow") Long idDataflow) {
+    try {
+      List<DataSetSchemaVO> schemas = new ArrayList<>();
 
-    List<DataSetSchemaVO> schemas = new ArrayList<>();
-
-    List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(idDataflow);
-    designs.stream().forEach(design -> {
-      try {
-        schemas.add(dataschemaService.getDataSchemaByDatasetId(false, design.getId()));
-      } catch (EEAException e) {
-        LOG_ERROR.error("Error finding dataset schema by dataflow id. DatasetId: {}. Message: {}",
-            idDataflow, e.getMessage(), e);
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND);
-      }
-    });
-    return schemas;
+      List<DesignDatasetVO> designs = designDatasetService.getDesignDataSetIdByDataflowId(idDataflow);
+      designs.stream().forEach(design -> {
+        try {
+          schemas.add(dataschemaService.getDataSchemaByDatasetId(false, design.getId()));
+        } catch (EEAException e) {
+          LOG_ERROR.error("Error finding dataset schema by dataflowId {}. Message: {}",
+              idDataflow, e.getMessage(), e);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND);
+        } catch (Exception e) {
+          Long datasetId = (design != null) ? design.getId() : null;
+          LOG_ERROR.error("Unexpected error! Error retrieving dataset schema with id {} for dataflowId {} Message: {}", datasetId, idDataflow, e.getMessage());
+          throw e;
+        }
+      });
+      return schemas;
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving dataset schemas for dataflowId {} Message: {}", idDataflow, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -1048,6 +1124,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving unique constraint {} Message: {}", uniqueId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1078,9 +1157,18 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
             EEAErrorMessage.UNREPORTED_FIELDSCHEMAS);
       }
     } else {
+      LOG_ERROR.error("Error when creating unique constraint because uniqueConstraint object is null");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UNREPORTED_DATA);
     }
-    dataschemaService.createUniqueConstraint(uniqueConstraint);
+    try {
+      dataschemaService.createUniqueConstraint(uniqueConstraint);
+    } catch (Exception e) {
+      String uniqueId = (uniqueConstraint != null) ? uniqueConstraint.getUniqueId() : null;
+      String datasetSchemaId = (uniqueConstraint != null) ? uniqueConstraint.getDatasetSchemaId() : null;
+      String tableSchemaId = (uniqueConstraint != null) ? uniqueConstraint.getTableSchemaId() : null;
+      LOG_ERROR.error("Unexpected error! Error creating unique constraint {} for datasetSchemaId {} and tableSchemaId {}. Message: {}", uniqueId, datasetSchemaId, tableSchemaId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -1103,8 +1191,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     try {
       dataschemaService.deleteUniqueConstraint(uniqueConstraintId);
     } catch (EEAException e) {
+      LOG_ERROR.error("Error when deleting unique constraint with uid {} for dataflowId {}", uniqueConstraintId, dataflowId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.IDDATASETSCHEMA_INCORRECT);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting unique constraint {} for dataflowId {} Message: {}", uniqueConstraintId, dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1140,7 +1232,15 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           EEAErrorMessage.UNREPORTED_FIELDSCHEMAS);
     }
 
-    dataschemaService.updateUniqueConstraint(uniqueConstraint);
+    try {
+      dataschemaService.updateUniqueConstraint(uniqueConstraint);
+    } catch (Exception e) {
+      String uniqueId = (uniqueConstraint != null) ? uniqueConstraint.getUniqueId() : null;
+      String datasetSchemaId = (uniqueConstraint != null) ? uniqueConstraint.getDatasetSchemaId() : null;
+      String tableSchemaId = (uniqueConstraint != null) ? uniqueConstraint.getTableSchemaId() : null;
+      LOG_ERROR.error("Unexpected error! Error updating unique constraint {} for datasetSchemaId {} and tableSchemaId {}. Message: {}", uniqueId, datasetSchemaId, tableSchemaId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -1176,6 +1276,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           dataflowIdOrigin, dataflowIdDestination, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.COPYING_DESIGN_DATAFLOW);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error copying designs from dataflow for dataflowIdOrigin {} and dataflowIdDestination {}. Message: {}", dataflowIdOrigin, dataflowIdDestination, e.getMessage());
+      throw e;
     }
   }
 
@@ -1216,6 +1319,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           dataflowId, datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_DATASET_SIMPLE_SCHEMA);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving simple schema for dataflowId {} datasetId {} and providerId {}. Message: {}", dataflowId, datasetId, providerId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1283,6 +1389,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           dataflowId, datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_TABLE_SCHEMAS);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving table schema ids for dataflowId {} datasetId {} and providerId {}. Message: {}", dataflowId, datasetId, providerId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1332,14 +1441,15 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
+      LOG.info("Exporting schemas from the dataflowId {}", dataflowId);
       byte[] fileZip = dataschemaService.exportSchemas(dataflowId);
       String fileName = "dataflow_export_" + dataflowId + ".zip";
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-      LOG.info("Schemas from the dataflowId {} exported", dataflowId);
+      LOG.info("Successfully exported schemas from the dataflowId {}", dataflowId);
       return new ResponseEntity<>(fileZip, httpHeaders, HttpStatus.OK);
     } catch (Exception e) {
-      LOG_ERROR.error("Error exporting schemas from the dataflowId {}. Message: {}", dataflowId,
+      LOG_ERROR.error("Unexpected error! Error exporting schemas from the dataflowId {}. Message: {}", dataflowId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXPORTING_SCHEMAS);
@@ -1378,10 +1488,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
+      LOG.info("Importing schemas from the dataflowId {}", dataflowId);
       dataschemaService.importSchemas(dataflowId, file.getInputStream(),
           file.getOriginalFilename());
+      LOG.info("Successfully imported schemas from the dataflowId {}", dataflowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Error importing schemas on the dataflowId {}. Message: {}", dataflowId,
+      LOG_ERROR.error("Unexpected error! Error importing schemas on the dataflowId {}. Message: {}", dataflowId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.IMPORTING_SCHEMAS);
@@ -1416,15 +1528,20 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
               required = false) final String tableSchemaId) {
 
     try {
+      LOG.info("Exporting field schemas for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       String fileName = "fieldschemas_export_dataset_" + datasetId + ".csv";
       byte[] file = dataschemaService.exportFieldsSchema(datasetId, datasetSchemaId, tableSchemaId);
+      LOG.info("Successfully exported field schemas for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error exporting field schemas in dataset {}", datasetId, e);
+      LOG_ERROR.error("Error exporting field schemas for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXPORTING_FIELD_SCHEMAS);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error exporting field schemas for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1493,12 +1610,18 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
+      LOG.info("Importing field Schemas for datasetId {}", datasetId);
       dataschemaService.importFieldsSchema(tableSchemaId, datasetSchemaId, datasetId,
           file.getInputStream(), replace);
+      LOG.info("Successfully imported field Schemas for datasetId {}", datasetId);
     } catch (IOException e) {
-      LOG_ERROR.error("File importing field schemas into dataset {} failed. fileName={}", datasetId,
+      LOG_ERROR.error("File importing field schemas for datasetId {} failed. fileName={}", datasetId,
           file.getOriginalFilename(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error importing file");
+    } catch (Exception e) {
+      String fileName = (file != null) ? file.getName() : null;
+      LOG_ERROR.error("Unexpected error! Error importing field schemas from file {} for datasetId {} and tableSchemaId {}. Message: {}", fileName, datasetId, tableSchemaId, e.getMessage());
+      throw e;
     }
   }
 
@@ -1547,16 +1670,20 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   public ResponseEntity<byte[]> exportFieldSchemasFromDataset(@ApiParam(type = "Long",
       value = "Dataset id", example = "0") @PathVariable("datasetId") Long datasetId) {
     try {
+      LOG.info("Exporting field Schemas for datasetId {}", datasetId);
       byte[] fileZip = dataschemaService.exportZipFieldSchemas(datasetId);
       String fileName = "fieldschemas_export_dataset_" + datasetId + ".zip";
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-      LOG.info("Dataset {} fieldSchemas exported", datasetId);
+      LOG.info("Successfully exported field Schemas for datasetId {}", datasetId);
       return new ResponseEntity<>(fileZip, httpHeaders, HttpStatus.OK);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error exporting the zip field schemas in dataset {}", datasetId, e);
+      LOG_ERROR.error("Error exporting the zip field schemas for datasetId {}", datasetId, e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.EXPORTING_DATASET_DEFINITION);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error importing field schemas from datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 

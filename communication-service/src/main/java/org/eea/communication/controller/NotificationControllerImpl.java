@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +47,9 @@ public class NotificationControllerImpl implements NotificationController {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(NotificationControllerImpl.class);
 
+  /** The Constant LOG_ERROR. */
+  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
   /**
    * Creates the user notification.
    *
@@ -63,6 +67,11 @@ public class NotificationControllerImpl implements NotificationController {
       LOG.error("Creating user notification produced an error: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.CREATING_NOTIFICATION);
+    } catch (Exception e) {
+      String eventType = (userNotificationVO != null) ? userNotificationVO.getEventType() : null;
+      Long dataflowId = (userNotificationVO != null && userNotificationVO.getContent() != null) ? userNotificationVO.getContent().getDataflowId() : null;
+      LOG_ERROR.error("Unexpected error! Error creating user notification of type {} for dataflowId {} Message: {}", eventType, dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -86,6 +95,10 @@ public class NotificationControllerImpl implements NotificationController {
       LOG.error("Creating user notification produced an error: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.CREATING_NOTIFICATION);
+    } catch (Exception e) {
+      Long dataflowId = (content != null) ? content.getDataflowId() : null;
+      LOG_ERROR.error("Unexpected error! Error creating private user notification of type {} for dataflowId {} Message: {}", eventType, dataflowId, e.getMessage());
+      throw e;
     }
   }
 
@@ -106,6 +119,11 @@ public class NotificationControllerImpl implements NotificationController {
       LOG.error("Creating system notification produced an error: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.CREATING_SYSTEM_NOTIFICATION);
+    } catch (Exception e) {
+      String notificationId = (systemNotificationVO != null) ? systemNotificationVO.getId() : null;
+      String message = (systemNotificationVO != null) ? systemNotificationVO.getMessage() : null;
+      LOG_ERROR.error("Unexpected error! Error creating system notification with id {} and message {}. Error Message: {}", notificationId, message, e.getMessage());
+      throw e;
     }
   }
 
@@ -127,6 +145,9 @@ public class NotificationControllerImpl implements NotificationController {
       LOG.error("Deleting system notification produced an error: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DELETING_SYSTEM_NOTIFICATION);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting system notification with id {} Message: {}", systemNotificationId, e.getMessage());
+      throw e;
     }
   }
 
@@ -147,6 +168,11 @@ public class NotificationControllerImpl implements NotificationController {
       LOG.error("Updating system notification produced an error: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.UPDATING_SYSTEM_NOTIFICATION);
+    } catch (Exception e) {
+      String notificationId = (systemNotificationVO != null) ? systemNotificationVO.getId() : null;
+      String message = (systemNotificationVO != null) ? systemNotificationVO.getMessage() : null;
+      LOG_ERROR.error("Unexpected error! Error updating system notification with id {} and message {}. Error Message: {}", notificationId, message, e.getMessage());
+      throw e;
     }
   }
 
@@ -166,8 +192,13 @@ public class NotificationControllerImpl implements NotificationController {
           value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @ApiParam(type = "Integer", value = "page size",
           example = "0") @RequestParam(value = "pageSize", required = false) Integer pageSize) {
-
-    return notificationService.findUserNotificationsByUserPaginated(pageNum, pageSize);
+    try {
+      return notificationService.findUserNotificationsByUserPaginated(pageNum, pageSize);
+    } catch (Exception e) {
+      String user = SecurityContextHolder.getContext().getAuthentication().getName();
+      LOG_ERROR.error("Unexpected error! Error retrieving notifications for user {}. Message: {}", user, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -180,8 +211,12 @@ public class NotificationControllerImpl implements NotificationController {
   @GetMapping(value = "/findSystemNotifications")
   @ApiOperation(value = "Retrieves all system notifications", hidden = true)
   public List<SystemNotificationVO> findSystemNotifications() {
-
-    return notificationService.findSystemNotifications();
+    try{
+      return notificationService.findSystemNotifications();
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving system notifications. Message: {}", e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -194,7 +229,6 @@ public class NotificationControllerImpl implements NotificationController {
   @GetMapping(value = "/checkAnySystemNotificationEnabled")
   @ApiOperation(value = "Check any system notifications is enabled", hidden = true)
   public boolean checkAnySystemNotificationEnabled() {
-
     return notificationService.checkAnySystemNotificationEnabled();
   }
 }

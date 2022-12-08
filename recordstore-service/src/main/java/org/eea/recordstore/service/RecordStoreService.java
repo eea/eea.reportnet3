@@ -3,16 +3,18 @@
  */
 package org.eea.recordstore.service;
 
+import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.recordstore.exception.RecordStoreAccessException;
+
 import java.io.IOException;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.recordstore.exception.RecordStoreAccessException;
-import org.postgresql.core.BaseConnection;
 
 /**
  * The Interface RecordStoreService.
@@ -23,7 +25,7 @@ public interface RecordStoreService {
   /**
    * Creates the empty data set.
    *
-   * @param datasetName the dataset name
+   * @param datasetName     the dataset name
    * @param idDatasetSchema the id dataset schema
    * @throws RecordStoreAccessException the record store access exception
    */
@@ -33,7 +35,7 @@ public interface RecordStoreService {
   /**
    * Creates the data set from other.
    *
-   * @param sourceDatasetName the source dataset name
+   * @param sourceDatasetName      the source dataset name
    * @param destinationDataSetName the destination data set name
    */
   void createDataSetFromOther(String sourceDatasetName, String destinationDataSetName);
@@ -42,9 +44,7 @@ public interface RecordStoreService {
    * Gets connection data for dataset.
    *
    * @param datasetName the dataset name
-   *
    * @return the connection data for dataset
-   *
    * @throws RecordStoreAccessException the docker access exception
    */
   ConnectionDataVO getConnectionDataForDataset(String datasetName)
@@ -54,7 +54,6 @@ public interface RecordStoreService {
    * Gets connection data for dataset.
    *
    * @return the connection data for dataset
-   *
    * @throws RecordStoreAccessException the docker access exception
    */
   List<ConnectionDataVO> getConnectionDataForDataset() throws RecordStoreAccessException;
@@ -62,45 +61,42 @@ public interface RecordStoreService {
 
   /**
    * Creates the data snapshot.
-   *
-   * @param idReportingDataset the id reporting dataset
-   * @param idSnapshot the id snapshot
-   * @param idPartitionDataset the id partition dataset
-   * @param dateRelease the date release
-   * @param prefillingReference the prefilling reference
-   * @throws SQLException the SQL exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   * @throws RecordStoreAccessException the record store access exception
-   * @throws EEAException the EEA exception
+   * @param idReportingDataset
+   * @param idSnapshot
+   * @param idPartitionDataset
+   * @param dateRelease
+   * @param prefillingReference
+   * @param processId
+   * @throws SQLException
+   * @throws IOException
+   * @throws RecordStoreAccessException
+   * @throws EEAException
    */
   void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset,
-      String dateRelease, boolean prefillingReference)
+      String dateRelease, boolean prefillingReference, String processId)
       throws SQLException, IOException, RecordStoreAccessException, EEAException;
 
 
   /**
    * Restore data snapshot.
-   *
-   * @param idReportingDataset the id reporting dataset
-   * @param idSnapshot the id snapshot
-   * @param partitionId the partition id
-   * @param typeDataset the type dataset
-   * @param isSchemaSnapshot the is schema snapshot
-   * @param deleteData the delete data
-   * @param prefillingReference the prefilling reference
-   * @throws SQLException the SQL exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   * @throws RecordStoreAccessException the record store access exception
+   * @param idReportingDataset
+   * @param idSnapshot
+   * @param partitionId
+   * @param typeDataset
+   * @param isSchemaSnapshot
+   * @param deleteData
+   * @param prefillingReference
+   * @param processId
    */
   void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum typeDataset, Boolean isSchemaSnapshot, Boolean deleteData,
-      boolean prefillingReference) throws SQLException, IOException, RecordStoreAccessException;
+      boolean prefillingReference, String processId);
 
   /**
    * Delete data snapshot.
    *
    * @param idReportingDataset the id reporting dataset
-   * @param idSnapshot the id snapshot
+   * @param idSnapshot         the id snapshot
    * @throws IOException Signals that an I/O exception has occurred.
    */
   void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException;
@@ -119,9 +115,9 @@ public interface RecordStoreService {
    * </p>
    *
    * @param datasetIdAndSchemaId the dataset id and schema id
-   * @param dataflowId The DataCollection's dataflow.
-   * @param isCreation the is creation
-   * @param isMaterialized the is materialized
+   * @param dataflowId           The DataCollection's dataflow.
+   * @param isCreation           the is creation
+   * @param isMaterialized       the is materialized
    */
   void createSchemas(Map<Long, String> datasetIdAndSchemaId, Long dataflowId, boolean isCreation,
       boolean isMaterialized);
@@ -139,7 +135,7 @@ public interface RecordStoreService {
   /**
    * Creates the update query view.
    *
-   * @param datasetId the dataset id
+   * @param datasetId      the dataset id
    * @param isMaterialized the is materialized
    */
   void createUpdateQueryView(Long datasetId, boolean isMaterialized);
@@ -148,8 +144,8 @@ public interface RecordStoreService {
    * Update materialized query view.
    *
    * @param datasetId the dataset id
-   * @param user the user
-   * @param released the released
+   * @param user      the user
+   * @param released  the released
    * @param processId the process id
    */
   void updateMaterializedQueryView(Long datasetId, String user, Boolean released, String processId);
@@ -165,11 +161,11 @@ public interface RecordStoreService {
   /**
    * Refresh materialized query.
    *
-   * @param datasetIds the dataset ids
+   * @param datasetIds         the dataset ids
    * @param continueValidation the continue validation
-   * @param released the released
-   * @param datasetId the dataset id
-   * @param processId the process id
+   * @param released           the released
+   * @param datasetId          the dataset id
+   * @param processId          the process id
    */
   void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation, boolean released,
       Long datasetId, String processId);
@@ -184,11 +180,11 @@ public interface RecordStoreService {
   /**
    * Creates the snapshot to clone.
    *
-   * @param originDataset the origin dataset
-   * @param targetDataset the target dataset
+   * @param originDataset                  the origin dataset
+   * @param targetDataset                  the target dataset
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
-   * @param partitionDatasetTarget the partition dataset target
-   * @param tableSchemasIdPrefill the table schemas id prefill
+   * @param partitionDatasetTarget         the partition dataset target
+   * @param tableSchemasIdPrefill          the table schemas id prefill
    */
   void createSnapshotToClone(Long originDataset, Long targetDataset,
       Map<String, String> dictionaryOriginTargetObjectId, Long partitionDatasetTarget,
@@ -218,10 +214,46 @@ public interface RecordStoreService {
   /**
    * Creates the update query view async.
    *
-   * @param datasetId the dataset id
+   * @param datasetId      the dataset id
    * @param isMaterialized the is materialized
    */
   void createUpdateQueryViewAsync(Long datasetId, boolean isMaterialized);
+
+  /**
+   * Restore specific file snapshot
+   *
+   * @param datasetId
+   * @param idSnapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param type
+   */
+  void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot, int startingNumber,
+      int endingNumber, String type) throws SQLException, IOException;
+
+
+  /**
+   * Check if data of file has been imported to dataset
+   *
+   * @param datasetId
+   * @param firstFieldId
+   * @param lastFieldId
+   * @return
+   */
+  boolean recoverCheckForStuckFile(Long datasetId, Long firstFieldId, Long lastFieldId);
+
+
+  /**
+   * Gets release tasks in progress
+   * @param timeInMinutes
+   */
+  List<BigInteger> getReleaseTasksInProgress(long timeInMinutes);
+
+  /**
+   * Finds release task by task id
+   * @param taskId
+   */
+  TaskVO findReleaseTaskByTaskId(Long taskId);
 
   /**
    *
@@ -230,18 +262,21 @@ public interface RecordStoreService {
    * @param idPartitionDataset
    * @param prefillingReference
    */
-  void createDataSnapshotForRelease(Long idDataset, Long idSnapshot, Long idPartitionDataset, boolean prefillingReference) throws SQLException, IOException, InterruptedException;
+  void createDataSnapshotForRelease(Long idDataset, Long idSnapshot, Long idPartitionDataset, boolean prefillingReference, String processId) throws InterruptedException, SQLException, IOException;
 
   /**
    * Restores from snapshot
+   * @param dataflowId
    * @param datasetId
    * @param idSnapshot
    * @param datasetType
    * @param con
+   * @param processId
+   * @param jobId
    * @throws SQLException
    * @throws IOException
    */
-  void restoreFromSnapshot(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType, Connection con) throws SQLException, IOException;
+  void restoreFromSnapshot(Long dataflowId, Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType, Connection con, String processId, Long jobId) throws SQLException, IOException;
 
   /**
    * Updates materialized view

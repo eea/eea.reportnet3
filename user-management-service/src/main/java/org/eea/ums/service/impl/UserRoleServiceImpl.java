@@ -52,6 +52,10 @@ import com.opencsv.CSVWriter;
 
 public class UserRoleServiceImpl implements UserRoleService {
 
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(UserRoleServiceImpl.class);
 
   /** The keycloak connector service. */
   @Autowired
@@ -410,6 +414,9 @@ public class UserRoleServiceImpl implements UserRoleService {
           null, notificationVO);
       LOG_ERROR.info(String.format(EEAErrorMessage.CSV_FILE_ERROR, e, "DataflowId: " + dataflowId));
       return;
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in exportUsersByCountry in csvWriter.writeNext for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
 
     String csv = stringWriter.getBuffer().toString();
@@ -421,6 +428,9 @@ public class UserRoleServiceImpl implements UserRoleService {
       out.write(file);
       kafkaSenderUtils.releaseNotificableKafkaEvent(
           EventType.EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT, null, notificationVO);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in exportUsersByCountry when releasing notification (EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT) for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
     }
   }
 

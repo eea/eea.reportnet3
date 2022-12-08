@@ -107,7 +107,8 @@ import {
   faUserTie,
   faUserTimes,
   faVectorSquare,
-  faVolumeUp
+  faVolumeUp,
+  faLaptop
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -453,6 +454,8 @@ export const AwesomeIcons = icon => {
       return faBullhorn;
     case 'circleCheck':
       return faCheckCircle;
+    case 'laptop':
+      return faLaptop;
     default:
       return faFileAlt;
   }

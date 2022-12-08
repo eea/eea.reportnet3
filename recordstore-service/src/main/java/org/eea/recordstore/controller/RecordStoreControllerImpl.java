@@ -13,8 +13,14 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.ProcessTaskVO;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.eea.recordstore.service.ProcessService;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.recordstore.service.TaskService;
 import org.eea.recordstore.service.impl.SnapshotHelper;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
@@ -28,9 +34,11 @@ import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +56,18 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Autowired
   private RecordStoreService recordStoreService;
+
+  /**
+   * The process service
+   */
+  @Autowired
+  private ProcessService processService;
+
+  /**
+   * The task service
+   */
+  @Autowired
+  private TaskService taskService;
 
   /**
    * The restore snapshot helper.
@@ -94,6 +114,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           datasetName, idDatasetSchema, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_EMPTY_DATASET);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating empty dataset {} with dataSchemaId {}. Message: {}", datasetName, idDatasetSchema, e.getMessage());
+      throw e;
     }
   }
 
@@ -117,6 +140,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       vo = recordStoreService.getConnectionDataForDataset(datasetName);
     } catch (final RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving connection to dataset {}. Message: {}", datasetName, e.getMessage());
+      throw e;
     }
     return vo;
   }
@@ -137,6 +163,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       vo = recordStoreService.getConnectionDataForDataset();
     } catch (final RecordStoreAccessException e) {
       LOG_ERROR.error(e.getMessage(), e);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving dataset connection. Message: {}", e.getMessage());
+      throw e;
     }
     return vo;
   }
@@ -166,28 +195,33 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           value = "dateRelease", required = false) String dateRelease,
       @ApiParam(value = "Prefilling reference", example = "false", required = false) @RequestParam(
           value = "prefillingReference", required = false,
-          defaultValue = "false") Boolean prefillingReference) {
+          defaultValue = "false") Boolean prefillingReference,
+      @ApiParam(value = "ProcessId", example = "5eb5a2a9-c53f-4192", required = false) @RequestParam(
+              value = "processId", required = false) String processId) {
     try {
       ThreadPropertiesManager.setVariable("user",
           SecurityContextHolder.getContext().getAuthentication().getName());
       LOG.info(
-          "The user invoking RecordStoreControllerImpl.createSnapshotData is {} and the datasetId {}",
-          SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+          "The user invoking RecordStoreControllerImpl.createSnapshotData is {} and the datasetId {} with release processId {}",
+          SecurityContextHolder.getContext().getAuthentication().getName(), datasetId, processId);
       LOG.info("The user set on threadPropertiesManager is {}",
           ThreadPropertiesManager.getVariable("user"));
       if (StringUtils.isNotBlank(dateRelease)) {
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateRelease);
       }
       recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset, dateRelease,
-          prefillingReference);
+          prefillingReference, processId);
       LOG.info("Snapshot created");
     } catch (SQLException | IOException | RecordStoreAccessException | EEAException
         | ParseException e) {
       LOG_ERROR.error(
-          "Error creating a snapshot for the dataset: DatasetId {}. idSnapshot {}. Message: {}",
-          datasetId, idSnapshot, e.getMessage(), e);
+          "Error creating a snapshot for the dataset: DatasetId {}. idSnapshot {}. Release processId {} Message: {}",
+          datasetId, idSnapshot, processId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_SNAPSHOT);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating snapshot data with id {} for datasetId {}, release processId {}. Message: {}", idSnapshot, datasetId, processId, e.getMessage());
+      throw e;
     }
 
   }
@@ -224,7 +258,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
               defaultValue = "true") Boolean deleteData,
       @ApiParam(value = "Prefilling reference", example = "false", required = false) @RequestParam(
           value = "prefillingReference", required = false,
-          defaultValue = "false") Boolean prefillingReference) {
+          defaultValue = "false") Boolean prefillingReference,
+      @ApiParam(value = "Process Id", example = "5eb5a2a9-c53f-4192", required = false) @RequestParam(
+              value = "processId", required = false) String processId) {
 
     try {
       // TO DO Status will be updated based on the running process in the dataset, this call will be
@@ -232,13 +268,16 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.RESTORING_SNAPSHOT);
       restoreSnapshotHelper.processRestoration(datasetId, idSnapshot, idPartition, datasetType,
-          isSchemaSnapshot, deleteData, prefillingReference);
+          isSchemaSnapshot, deleteData, prefillingReference, processId);
     } catch (EEAException e) {
       LOG_ERROR.error(
-          "Error restoring a snapshot for the dataset: DatasetId {}. idSnapshot {}. Message: {}",
-          datasetId, idSnapshot, e.getMessage(), e);
+          "Error restoring a snapshot for the dataset: DatasetId {}. idSnapshot {}. release processId {}. Message: {}",
+          datasetId, idSnapshot, processId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RESTORING_SNAPSHOT);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error restoring snapshot data with id {} for datasetId {} and release processId {}. Message: {}", idSnapshot, datasetId, processId, e.getMessage());
+      throw e;
     }
 
   }
@@ -268,7 +307,10 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_SNAPSHOT);
     }
-
+    catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error removing snapshot data with id {} for datasetId {}. Message: {}", idSnapshot, datasetId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -282,7 +324,13 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @ApiOperation(value = "Delete dataset data for a given dataset schema name", hidden = true)
   public void deleteDataset(@ApiParam(value = "Dataset schema name",
       example = "Dataset schema displayed name") @PathVariable("datasetSchemaName") String datasetSchemaName) {
-    recordStoreService.deleteDataset(datasetSchemaName);
+    try {
+      recordStoreService.deleteDataset(datasetSchemaName);
+      LOG.info("Deleted dataset with name {}", datasetSchemaName);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting dataset {}. Message: {}", datasetSchemaName, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -312,9 +360,14 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
-    // This method will release the lock
-    recordStoreService.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation,
-        isMaterialized);
+    try {
+      // This method will release the lock
+      recordStoreService.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation,
+              isMaterialized);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating schemas for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -328,12 +381,15 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @ApiOperation(value = "Distribute into reference tables", hidden = true)
   public void distributeTables(
       @ApiParam(value = "Dataset Id", example = "0") @PathVariable("datasetId") Long datasetId) {
-
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
-        SecurityContextHolder.getContext().getAuthentication().getName());
-
-    recordStoreService.distributeTables(datasetId);
+            SecurityContextHolder.getContext().getAuthentication().getName());
+    try {
+      recordStoreService.distributeTables(datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error distributing tables for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -349,7 +405,12 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @ApiParam(value = "Dataset Id", example = "0") @RequestParam("datasetId") Long datasetId,
       @ApiParam(value = "Is the schema going to be materialized?",
           example = "true") @RequestParam("isMaterialized") boolean isMaterialized) {
-    recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
+    try {
+      recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating update query view for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -368,8 +429,13 @@ public class RecordStoreControllerImpl implements RecordStoreController {
 
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
-    recordStoreService.refreshMaterializedQuery(Arrays.asList(datasetId), false, false, datasetId,
-        processId);
+    try {
+      recordStoreService.refreshMaterializedQuery(Arrays.asList(datasetId), false, false, datasetId,
+              processId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error refreshing materialized view for datasetId {} and processId {}. Message: {}", datasetId, processId, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -392,8 +458,13 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @RequestParam("tableSchemasId") List<String> tableSchemasIdPrefill) {
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
-    recordStoreService.createSnapshotToClone(originDataset, targetDataset,
-        dictionaryOriginTargetObjectId, partitionDatasetTarget, tableSchemasIdPrefill);
+    try {
+      recordStoreService.createSnapshotToClone(originDataset, targetDataset,
+              dictionaryOriginTargetObjectId, partitionDatasetTarget, tableSchemasIdPrefill);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error cloning data from datasetId {} to datasetId {}. Message: {}", originDataset, targetDataset, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -407,7 +478,106 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @ApiOperation(value = "Private operation to update snapshot, disable and move the files",
       hidden = true)
   public void updateSnapshotDisabled(@PathVariable("datasetId") Long datasetId) {
-    recordStoreService.updateSnapshotDisabled(datasetId);
+    try {
+      recordStoreService.updateSnapshotDisabled(datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error updating snapshot disabled for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
+  }
+
+
+  /**
+   /**
+   * Restore specific file snapshot data.
+   *
+   * @param datasetId
+   * @param idSnapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param processId
+   * @throws SQLException
+   * @throws IOException
+   */
+  @HystrixCommand
+  @PostMapping(value = "/restoreSpecificFileSnapshotData")
+  @ApiOperation(value = "Restore specific snapshot data", hidden = true)
+  @ApiResponse(code = 500, message = "Could not restore the specific snapshot data")
+  public void restoreSpecificFileSnapshotData(
+      @ApiParam(value = "Dataset Id", example = "0", required = true)
+      @RequestParam("datasetId") Long datasetId,
+      @ApiParam(value = "Snapshot Id", example = "0", required = true)
+      @RequestParam("idSnapshot") Long idSnapshot,
+      @ApiParam(value = "Starting number", example = "0", required = true)
+      @RequestParam("startingNumber") int startingNumber,
+      @ApiParam(value = "Ending number", example = "0", required = true)
+      @RequestParam("endingNumber") int endingNumber,
+      @ApiParam(value = "Process Id", example = "0", required = true)
+      @RequestParam("processId") String processId) throws SQLException, IOException {
+
+    try {
+      LOG.info("Method restoreSpecificSnapshotData starts for datasetId: {}, idSnapshot: {}, startingNumber: {}, endingNumber: {}, processId: {}",
+          datasetId, idSnapshot, startingNumber, endingNumber, processId);
+
+      recordStoreService.restoreSpecificFileSnapshot(datasetId, idSnapshot, startingNumber, endingNumber, processId);
+
+      LOG.info("Method restoreSpecificFileSnapshot ends");
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in method restoreSpecificSnapshotData for datasetId: {} with error {}", datasetId, e);
+      throw e;
+    }
+
+  }
+
+  /**
+   * Check if data of file has been imported to dataset
+   *
+   * @param datasetId
+   * @param firstFieldId
+   * @param lastFieldId
+   * @return
+   */
+  @HystrixCommand
+  @GetMapping(value = "/recoverCheck")
+  @ApiOperation(value = "Check if data of file has been imported to dataset", hidden = true)
+  public boolean recoverCheck(
+      @ApiParam(value = "Dataset Id", example = "0", required = true)
+      @RequestParam("datasetId") Long datasetId,
+      @ApiParam(value = "First FieldId", example = "0", required = true)
+      @RequestParam("firstFieldId") Long firstFieldId,
+      @ApiParam(value = "Last FieldId", example = "0", required = true)
+      @RequestParam("lastFieldId") Long lastFieldId) {
+    try {
+      LOG.info("Method recoverCheck starts for datasetId: {}, firstFieldId: {}, lastFieldId: {}",
+          datasetId, firstFieldId, lastFieldId);
+
+      return recordStoreService.recoverCheckForStuckFile(datasetId, firstFieldId, lastFieldId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in method recoverCheck for datasetId: {} with error {}", datasetId, e);
+      throw e;
+    }
+  }
+
+  /**
+   * Lists the tasks that are in progress for more than the specified period of time
+   *
+   * @param timeInMinutes
+   * @return
+   */
+  @HystrixCommand
+  @Override
+  @GetMapping(value = "/findReleaseTasksInProgress/{timeInMinutes}")
+  @ApiOperation(value = "Lists the tasks that are in progress for more than the specified period of time", hidden = true)
+  public List<BigInteger> findReleaseTasksInProgress(@ApiParam(
+      value = "Time limit in minutes that in progress release tasks exceed",
+      example = "15") @PathVariable("timeInMinutes") long timeInMinutes) {
+    LOG.info("Method findReleaseTasksInProgress finding in progress tasks that exceed {} minutes", timeInMinutes);
+    try {
+      return recordStoreService.getReleaseTasksInProgress(timeInMinutes);
+    } catch (Exception e) {
+      LOG.error("Error in method findReleaseTasksInProgress while finding in progress tasks that exceed {} minutes with error {}", timeInMinutes, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -444,4 +614,44 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     recordStoreService.launchUpdateMaterializedQueryView(datasetId);
   }
 
+  /**
+   * Find the release task by task id
+   *
+   * @param taskId
+   * @return
+   */
+  @HystrixCommand
+  @GetMapping(value = "/findReleaseTaskByTaskId/{taskId}")
+  @ApiOperation(value = "Find the release task by task id", hidden = true)
+  public TaskVO findReleaseTaskByTaskId(
+      @ApiParam(value = "Task Id") @PathVariable("taskId") long taskId) {
+    LOG.info("Method findReleaseTaskByTaskId finding release task by task id {}", taskId);
+    try {
+      return recordStoreService.findReleaseTaskByTaskId(taskId);
+    } catch (Exception e) {
+      LOG.error("Error in method findReleaseTaskByTaskId while finding task with task id {} and error {}", taskId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Finds tasks by datasetId for in progress process
+   * @param datasetId
+   * @return
+   */
+  @HystrixCommand
+  @GetMapping(value = "/private/releaseTasksByDatasetId/{datasetId}")
+  @ApiOperation(value = "Find the release tasks for in progress process by datasetId", hidden = true)
+  public List<ProcessTaskVO> findReleaseTasksForInProgressProcessByDatasetId(@ApiParam(value = "Dataset Id") @PathVariable("datasetId") Long datasetId) {
+    List<String> processIds = processService.findProcessIdByDatasetAndStatus(datasetId, ProcessTypeEnum.RELEASE.toString(), Arrays.asList(ProcessStatusEnum.IN_PROGRESS.toString()));
+    List<ProcessTaskVO> processTaskVOS = new ArrayList<>();
+    processIds.forEach(processId -> {
+      ProcessTaskVO processTaskVO = new ProcessTaskVO();
+      processTaskVO.setProcessId(processId);
+      List<TaskVO> taskVOS = taskService.findTaskByProcessId(processId);
+      processTaskVO.setTasks(taskVOS);
+      processTaskVOS.add(processTaskVO);
+    });
+    return processTaskVOS;
+  }
 }

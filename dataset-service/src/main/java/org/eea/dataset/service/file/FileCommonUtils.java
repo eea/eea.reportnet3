@@ -526,7 +526,7 @@ public class FileCommonUtils {
       boolean replace, DataSetSchema schema, DatasetValue dataset, boolean manageFixedRecords,
       ConnectionDataVO connectionDataVO) throws EEAException, IOException, SQLException {
     if (dataset == null || CollectionUtils.isEmpty(dataset.getTableValues())) {
-      throw new EEAException("Error processing file " + fileName);
+      throw new EEAException("Error processing file " + fileName + " when persisting imported dataset " + datasetId);
     }
 
     // Check if the table with idTableSchema has been populated already
@@ -556,6 +556,7 @@ public class FileCommonUtils {
       datasetService.storeRecords(datasetId, dataset.getTableValues().get(0).getRecords(),
           connectionDataVO);
     }
+    LOG.info("Persisted imported dataset with datasetId {}, tableSchemaId {}. Filename is {}", datasetId, idTableSchema, fileName);
   }
 
   /**

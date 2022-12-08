@@ -1,6 +1,5 @@
 package org.eea.interfaces.controller.validation;
 
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -26,16 +25,17 @@ public interface ValidationController {
 
   }
 
-
   /**
-   * Validate data set data.
+   * Executes the validation job
    *
    * @param datasetId the dataset id
    * @param released the released
+   * @param jobId the jobId
+   * @return
    */
   @PutMapping(value = "/dataset/{id}")
   void validateDataSetData(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "released", required = false) boolean released);
+                           @RequestParam(value = "released", required = false) boolean released, @RequestParam(value = "jobId") Long jobId);
 
   /**
    * Gets the failed validations by id dataset.

@@ -13,12 +13,16 @@ import org.axonframework.eventsourcing.eventstore.EmbeddedEventStore;
 import org.axonframework.messaging.MetaData;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
-import org.eea.axon.release.events.*;
+import org.eea.axon.release.events.MaterializedViewShouldBeRefreshedEvent;
+import org.eea.axon.release.events.MaterializedViewShouldBeUpdatedEvent;
+import org.eea.axon.release.events.ValidationForReleaseFinishedEvent;
+import org.eea.axon.release.events.ValidationProcessForReleaseCreatedEvent;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -29,6 +33,8 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
+import org.eea.interfaces.vo.metabase.TaskType;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
@@ -175,7 +181,10 @@ public class ValidationHelper implements DisposableBean {
   private DataFlowControllerZuul dataFlowControllerZuul;
 
   @Autowired
-  private DataSetControllerZuul dataSetControllerZuul;
+  private JobControllerZuul jobControllerZuul;
+
+  @Autowired
+  private JobProcessControllerZuul jobProcessControllerZuul;
 
   @Autowired
   private EventGateway eventGateway;
@@ -287,7 +296,7 @@ public class ValidationHelper implements DisposableBean {
     // ValidationControlleriImpl)
     if (StringUtils.isBlank(processId) || "null".equals(processId)) {
       processId = UUID.randomUUID().toString();
-      LOG.info("processId is empty. Generating one: {}", processId);
+      LOG.info("processId is empty. Generating one: {} for validating datasetId {}", processId, datasetId);
     }
     if (processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId,
@@ -304,6 +313,7 @@ public class ValidationHelper implements DisposableBean {
         hasSqlEnabled = false;
       }
 
+      LOG.info("In executeValidation for datasetId {} and processId {} updateViews is {} and hasSqlEnabled is {}", datasetId, processId, updateViews, hasSqlEnabled);
       if (Boolean.FALSE.equals(updateViews) || Boolean.FALSE.equals(hasSqlEnabled)) {
         executeValidationProcess(dataset, processId);
       } else {
@@ -350,6 +360,7 @@ public class ValidationHelper implements DisposableBean {
 
       }
     }
+    LOG.info("Successfully executed validation for datasetId {}", datasetId);
     dataset = null;
   }
 
@@ -490,8 +501,8 @@ public class ValidationHelper implements DisposableBean {
 
   /**
    * Execute validation process.
-   * @param dataset
-   * @param processId
+   * @param dataset the dataset metabase object
+   * @param processId the process id
    */
   public void executeValidationProcess(final DataSetMetabaseVO dataset, String processId) {
     // Initialize process as coordinator
@@ -499,20 +510,21 @@ public class ValidationHelper implements DisposableBean {
         rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getDatasetSchema()));
     initializeProcess(processId, SecurityContextHolder.getContext().getAuthentication().getName());
     TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + dataset.getId());
-    LOG.info("Deleting all Validations");
+    LOG.info("Deleting all Validations for processId {} and datasetId {}", processId, dataset.getId());
     validationService.deleteAllValidation(dataset.getId());
-    LOG.info("Collecting Dataset Validation tasks");
+    LOG.info("Collecting Dataset Validation tasks for processId {} and datasetId {}", processId, dataset.getId());
     releaseDatasetValidation(dataset, processId);
-    LOG.info("Collecting Record Validation tasks");
+    LOG.info("Collecting Record Validation tasks for processId {} and datasetId {}", processId, dataset.getId());
     if (rules.getRules().stream().anyMatch(rule -> EntityTypeEnum.RECORD.equals(rule.getType()))) {
       releaseRecordsValidation(dataset, processId);
     }
-    LOG.info("Collecting Field Validation tasks");
+    LOG.info("Collecting Field Validation tasks for processId {} and datasetId {}", processId, dataset.getId());
     releaseFieldsValidation(dataset, processId, !filterEmptyFields(rules.getRules()));
-    LOG.info("Collecting Table Validation tasks");
+    LOG.info("Collecting Table Validation tasks for processId {} and datasetId {}", processId, dataset.getId());
     releaseTableValidation(dataset, processId);
     datasetMetabaseControllerZuul.updateDatasetRunningStatus(dataset.getId(),
         DatasetRunningStatusEnum.VALIDATING);
+    LOG.info("Validation process has been executed for datasetId {} and processId {}", dataset.getId(), processId);
   }
 
 
@@ -890,6 +902,7 @@ public class ValidationHelper implements DisposableBean {
   public void addValidationTaskToProcess(final String processId, final EventType eventType,
       final Map<String, Object> value) {
     if (checkStartedProcess(processId)) {
+      LOG.info("Adding validation task for process {}", processId);
       EEAEventVO eeaEventVO = new EEAEventVO();
       eeaEventVO.setEventType(eventType);
       value.put("processId", processId);
@@ -902,11 +915,12 @@ public class ValidationHelper implements DisposableBean {
       try {
         json = objectMapper.writeValueAsString(eeaEventVO);
       } catch (JsonProcessingException e) {
-        LOG_ERROR.error("error processing json");
+        LOG_ERROR.error("error processing json for processId {}", processId);
       }
-      Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
+      Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.VALIDATION_TASK, new Date(), null, null,
           json, 0, null);
       taskRepository.save(task);
+      LOG.info("Added validation task {} for process {}",task.getId(), processId);
     }
   }
 
@@ -1006,13 +1020,6 @@ public class ValidationHelper implements DisposableBean {
 
   /**
    * Instantiates a new validation task.
-   *
-   * @param taskId the task id
-   * @param eeaEventVO the eea event VO
-   * @param validator the validator
-   * @param datasetId the dataset id
-   * @param kieBase the kie base
-   * @param processId the process id
    */
   @AllArgsConstructor
   private static class ValidationTask {
@@ -1148,6 +1155,9 @@ public class ValidationHelper implements DisposableBean {
           if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
               ProcessTypeEnum.VALIDATION, processId,
               SecurityContextHolder.getContext().getAuthentication().getName(), 0, null)) {
+
+            Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+
             if (datasetId.equals(process.getDatasetId()) && process.isReleased()) {
               ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
               if (null != nextProcess) {
@@ -1165,6 +1175,9 @@ public class ValidationHelper implements DisposableBean {
                   BeanUtils.copyProperties(processForReleaseCreatedEvent, event);
                   eventGateway.publish(GenericDomainEventMessage.asEventMessage(event).withMetaData(metadata));
                 } else {
+                  if (jobId!=null) {
+                    jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+                  }
                   kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
                 }
               }
@@ -1173,6 +1186,9 @@ public class ValidationHelper implements DisposableBean {
               // Delete the lock to the Release process
               deleteLockToReleaseProcess(datasetId);
 
+              if (jobId!=null) {
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+              }
               kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
                   value,
                   NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());

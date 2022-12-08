@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.springframework.boot</groupId>
@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.6-sagaBranch</api-gateway.version>
-    <communication.version>v3.1.6-sagaBranch</communication.version>
-    <collaboration.version>v3.1.6-sagaBranch</collaboration.version>
-    <dataflow.version>v3.1.6-sagaBranch</dataflow.version>
-    <dataset.version>v3.1.6-sagaBranch</dataset.version>
-    <document.version>v3.1.6-sagaBranch</document.version>
-    <frontend.version>v3.1.6-sagaBranch</frontend.version>
-    <indexsearch.version>v3.1.6-sagaBranch</indexsearch.version>
-    <inspire.version>v3.1.6-sagaBranch</inspire.version>
-    <recordstore.version>v3.1.6-sagaBranch</recordstore.version>
-    <ums.version>v3.1.6-sagaBranch</ums.version>
-    <validation.version>v3.1.6-sagaBranch</validation.version>
-    <common-interfaces.version>v3.1.6-sagaBranch</common-interfaces.version>
-    <common-utitlities.version>v3.1.6-sagaBranch</common-utitlities.version>
-    <rod.version>v3.1.6-sagaBranch</rod.version>
-    <orchestrator.version>v3.1.6-sagaBranch</orchestrator.version>
+    <api-gateway.version>v3.1.6-saga</api-gateway.version>
+    <communication.version>v3.1.6-saga</communication.version>
+    <collaboration.version>v3.1.6-saga</collaboration.version>
+    <dataflow.version>v3.1.6-saga</dataflow.version>
+    <dataset.version>v3.1.6-saga</dataset.version>
+    <document.version>v3.1.6-saga</document.version>
+    <frontend.version>v3.1.6-saga</frontend.version>
+    <indexsearch.version>vv3.1.6-saga</indexsearch.version>
+    <inspire.version>v3.1.6-saga</inspire.version>
+    <recordstore.version>v3.1.6-saga</recordstore.version>
+    <ums.version>v3.1.6-saga</ums.version>
+    <validation.version>v3.1.6-saga</validation.version>
+    <common-interfaces.version>v3.1.6-saga</common-interfaces.version>
+    <common-utitlities.version>v3.1.6-saga</common-utitlities.version>
+    <rod.version>v3.1.6-saga</rod.version>
+    <orchestrator.version>v3.1.6-saga</orchestrator.version>
   </properties>
 </project>

@@ -2,6 +2,7 @@ package org.eea.dataset.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -9,10 +10,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
@@ -27,19 +25,18 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.ETLDatasetVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.lock.LockVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.lock.service.LockService;
+import org.eea.utils.LiteralConstants;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -113,6 +110,10 @@ public class DatasetControllerImplTest {
   /** The data set metabase controller zuul. */
   @Mock
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  /** The data set metabase controller zuul. */
+  @Mock
+  private JobControllerZuul jobControllerZuul;
 
   /** The records. */
   private List<RecordVO> records;
@@ -299,12 +300,12 @@ public class DatasetControllerImplTest {
     MultipartFile multipartFile =
         new MockMultipartFile("multipartFile", "multipartFile".getBytes());
 
-    doNothing().when(fileTreatmentHelper).importFileData(1L, "tableSchemaId", multipartFile, true,
-        1L, "delimiter");
-    datasetControllerImpl.importBigFileData(1L, 1L, 1L, "tableSchemaId", multipartFile, true, 1L,
+    doNothing().when(fileTreatmentHelper).importFileData(1L,2L, "tableSchemaId", multipartFile, true,
+        1L, "delimiter", 0L);
+    datasetControllerImpl.importBigFileData(1L, 2L, 1L, "tableSchemaId", multipartFile, true, 1L,
         "delimiter");
-    Mockito.verify(fileTreatmentHelper, times(1)).importFileData(1L, "tableSchemaId", multipartFile,
-        true, 1L, "delimiter");
+    Mockito.verify(fileTreatmentHelper, times(1)).importFileData(1L,2L, "tableSchemaId", multipartFile,
+        true, 1L, "delimiter", 0L);
   }
 
   /**
@@ -317,10 +318,10 @@ public class DatasetControllerImplTest {
     MultipartFile multipartFile =
         new MockMultipartFile("multipartFile", "multipartFile".getBytes());
 
-    doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(1L, "tableSchemaId",
-        multipartFile, true, 1L, "delimiter");
+    doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(1L,2L, "tableSchemaId",
+        multipartFile, true, 1L, "delimiter", 0L);
     try {
-      datasetControllerImpl.importBigFileData(1L, 1L, 1L, "tableSchemaId", multipartFile, true, 1L,
+      datasetControllerImpl.importBigFileData(1L, 2L, 1L, "tableSchemaId", multipartFile, true, 1L,
           "delimiter");
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -1431,12 +1432,12 @@ public class DatasetControllerImplTest {
   @Test
   public void importFileDataTest() throws EEAException {
 
-    Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),
-        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),Mockito.any(),
+        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any());
     datasetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", null, true, 1L,
         null);
-    Mockito.verify(fileTreatmentHelper, times(1)).importFileData(Mockito.anyLong(), Mockito.any(),
-        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
+    Mockito.verify(fileTreatmentHelper, times(1)).importFileData(Mockito.anyLong(), Mockito.any(),Mockito.any(),
+        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -1447,12 +1448,12 @@ public class DatasetControllerImplTest {
   @Test
   public void importFileDataLegacyTest() throws EEAException {
 
-    Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),
-        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(),Mockito.any(),
+        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any());
     datasetControllerImpl.importFileDataLegacy(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", null, true,
         1L, null);
-    Mockito.verify(fileTreatmentHelper, times(1)).importFileData(Mockito.anyLong(), Mockito.any(),
-        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
+    Mockito.verify(fileTreatmentHelper, times(1)).importFileData(Mockito.anyLong(), Mockito.any(),Mockito.any(),
+        Mockito.nullable(MultipartFile.class), Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -1465,7 +1466,7 @@ public class DatasetControllerImplTest {
 
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(Mockito.anyLong(),
-        Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any());
+        Mockito.any(),Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any());
     Mockito.when(file.getOriginalFilename()).thenReturn("fileName.csv");
     try {
       datasetControllerImpl.importFileData(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", file, true, 1L,
@@ -1747,4 +1748,92 @@ public class DatasetControllerImplTest {
     Mockito.verify(datasetService, times(1)).getCheckView(Mockito.anyLong());
   }
 
+  @Test
+  public void checkImportProcessNoImportFileInProgressTest() {
+
+    ResponseEntity<CheckLockVO> checkLockVOResponseEntity = checkImportProcessInit(null, null);
+
+    assertEquals(Boolean.FALSE, checkLockVOResponseEntity.getBody().isImportInProgress());
+    assertEquals(LiteralConstants.NO_IMPORT_IN_PROGRESS, checkLockVOResponseEntity.getBody().getMessage());
+
+    Mockito.verify(lockService, times(2)).findByCriteria(Mockito.anyMap());
+  }
+
+  @Test
+  public void checkImportProcessImportInProgressTest() {
+
+    ResponseEntity<CheckLockVO> checkLockVOResponseEntity = checkImportProcessInit(null, new LockVO());
+
+    assertEquals(Boolean.TRUE, checkLockVOResponseEntity.getBody().isImportInProgress());
+    assertEquals(LiteralConstants.IMPORT_LOCKED, checkLockVOResponseEntity.getBody().getMessage());
+
+    Mockito.verify(lockService, times(2)).findByCriteria(Mockito.anyMap());
+  }
+
+  @Test
+  public void checkImportProcessNoImportBigFileInProgressTest() {
+
+    ResponseEntity<CheckLockVO> checkLockVOResponseEntity = checkImportProcessInit(new LockVO(), null);
+
+    assertEquals(Boolean.TRUE, checkLockVOResponseEntity.getBody().isImportInProgress());
+    assertEquals(LiteralConstants.IMPORT_LOCKED, checkLockVOResponseEntity.getBody().getMessage());
+
+    Mockito.verify(lockService, times(2)).findByCriteria(Mockito.anyMap());
+  }
+
+
+  @Test
+  public void checkImportProcessBothImportsInProgressTest() {
+
+    ResponseEntity<CheckLockVO> checkLockVOResponseEntity = checkImportProcessInit(new LockVO(), new LockVO());
+
+    assertEquals(Boolean.TRUE, checkLockVOResponseEntity.getBody().isImportInProgress());
+    assertEquals(LiteralConstants.IMPORT_LOCKED, checkLockVOResponseEntity.getBody().getMessage());
+
+    Mockito.verify(lockService, times(2)).findByCriteria(Mockito.anyMap());
+  }
+
+  private ResponseEntity<CheckLockVO> checkImportProcessInit(LockVO fileData, LockVO bigFileData) {
+    Map<String, Object> importData = new HashMap<>();
+    importData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+    importData.put(LiteralConstants.DATASETID, 1L);
+
+    Mockito.when(lockService.findByCriteria(Mockito.anyMap())).thenReturn(fileData);
+
+    importData.clear();
+    importData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+    importData.put(LiteralConstants.DATASETID, 1L);
+
+    Mockito.when(lockService.findByCriteria(importData)).thenReturn(bigFileData);
+
+    return datasetControllerImpl.checkImportProcess(1L);
+  }
+
+  @Test
+  public void checkImportProcessExceptionTest() {
+
+    Mockito.when(lockService.findByCriteria(Mockito.anyMap())).thenThrow(new RuntimeException());
+
+    ResponseEntity<CheckLockVO> checkLockVOResponseEntity = datasetControllerImpl.checkImportProcess(1L);
+
+    assertEquals(HttpStatus.NOT_FOUND, checkLockVOResponseEntity.getStatusCode());
+  }
+
+  @Test
+  public void checkLocksTest() {
+    Map<String, Object> lockCriteria = new HashMap<>();
+    List<LockVO> results = new ArrayList<>();
+    LockVO lockVO = new LockVO();
+
+    lockCriteria.put("key", 1L);
+    lockVO.setLockCriteria(lockCriteria);
+    results.add(lockVO);
+
+    Mockito.when(lockService.findAll()).thenReturn(results);
+    Mockito.when(lockService.findAllByCriteria(results, 1L)).thenReturn(results);
+
+    datasetControllerImpl.checkLocks(1L, 1L, 1L);
+
+    Mockito.verify(lockService, times(3)).findAllByCriteria(Mockito.anyList(), Mockito.anyLong());
+  }
 }

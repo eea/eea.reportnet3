@@ -108,7 +108,8 @@ public interface DatasetSnapshotController {
   @PutMapping(value = "/private/{idSnapshot}/dataset/{idDataset}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
   void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
-      @PathVariable("idSnapshot") Long idSnapshot, @RequestParam("dateRelease") String dateRelease);
+      @PathVariable("idSnapshot") Long idSnapshot, @RequestParam("dateRelease") String dateRelease,
+                       @RequestParam("processId") String processId);
 
 
 
@@ -227,12 +228,13 @@ public interface DatasetSnapshotController {
    * @param validate the validate
    */
   @PostMapping(value = "/dataflow/{dataflowId}/dataProvider/{dataProviderId}/release",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+          produces = MediaType.APPLICATION_JSON_VALUE)
   void createReleaseSnapshots(@PathVariable(value = "dataflowId", required = true) Long dataflowId,
-      @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,
-      @RequestParam(name = "restrictFromPublic", required = true,
-          defaultValue = "false") boolean restrictFromPublic,
-      @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate);
+                              @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,
+                              @RequestParam(name = "restrictFromPublic", required = true,
+                                      defaultValue = "false") boolean restrictFromPublic,
+                              @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate,
+                              @RequestParam(name = "jobId", required = false) Long jobId);
 
 
   /**

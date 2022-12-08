@@ -58,6 +58,7 @@ import {CurrentPage, ErrorUtils} from 'views/_functions/Utils';
 import {DataflowsUtils} from './_functions/Utils/DataflowsUtils';
 import {PaginatorRecordsCount} from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import {TextUtils} from 'repositories/_utils/TextUtils';
+import {JobsStatuses} from './_components/JobsStatuses';
 
 const {permissions} = config;
 
@@ -94,6 +95,7 @@ export const Dataflows = () => {
         isUserListVisible: false,
         isValidatingAllDataflowsUsers: false,
         isValidationStatusDialogVisible: false,
+        isJobStatusDialogVisible:false,
         loadingStatus: {reporting: true, business: true, citizenScience: true, reference: true},
         pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
         pagination: {firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0},
@@ -254,6 +256,14 @@ export const Dataflows = () => {
             onClick: () => manageDialogs('isValidationStatusDialogVisible', true),
             title: 'validationsStatus'
         };
+        const adminJobsStatusBtn = {
+            className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+            icon: 'laptop',
+            isVisible: isAdmin || isCustodian,
+            label: 'jobsStatus',
+            onClick: () => manageDialogs('isJobStatusDialogVisible', true),
+            title: 'jobsMonitoring'
+        };
 
         const adminManageNationalCoordinatorsBtn = {
             className: 'dataflowList-left-side-bar-create-dataflow-help-step',
@@ -270,6 +280,7 @@ export const Dataflows = () => {
                 adminManageNationalCoordinatorsBtn,
                 adminManageWebformsBtn,
                 adminValidationStatusBtn,
+                adminJobsStatusBtn,
                 createBusinessDataflowBtn,
                 createCitizenScienceDataflowBtn,
                 createReferenceDataflowBtn,
@@ -830,6 +841,11 @@ export const Dataflows = () => {
         resetValidationsStatusesFilterState();
     };
 
+    const onCloseJobStatusDialog = () => {
+        manageDialogs('isJobStatusDialogVisible', false);
+        resetValidationsStatusesFilterState();
+    };
+
     const onChangePagination = pagination => dataflowsDispatch({type: 'ON_PAGINATE', payload: {pagination}});
 
     const onPaginate = event => {
@@ -997,6 +1013,13 @@ export const Dataflows = () => {
                 <ValidationsStatuses
                     isDialogVisible={dataflowsState.isValidationStatusDialogVisible}
                     onCloseDialog={onCloseValidationStatusDialog}
+                />
+            )}
+
+{dataflowsState.isJobStatusDialogVisible && (
+                <JobsStatuses
+                    isDialogVisible={dataflowsState.isJobStatusDialogVisible}
+                    onCloseDialog={onCloseJobStatusDialog}
                 />
             )}
 

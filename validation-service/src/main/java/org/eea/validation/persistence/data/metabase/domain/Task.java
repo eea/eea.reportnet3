@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.interfaces.vo.metabase.TaskType;
 
 
 /**
@@ -47,6 +48,10 @@ public class Task {
   @Column(name = "status")
   @Enumerated(EnumType.STRING)
   private ProcessStatusEnum status;
+
+  @Column(name = "task_type")
+  @Enumerated(EnumType.STRING)
+  private TaskType taskType;
 
   /** The create date. */
   @Column(name = "create_date")

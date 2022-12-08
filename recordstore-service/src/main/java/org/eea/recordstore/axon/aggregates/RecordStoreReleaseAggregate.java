@@ -48,7 +48,7 @@ public class RecordStoreReleaseAggregate {
                 Long snapshotId = entry.getValue();
                 LOG.info("Creating snapshot file for dataflowId: {} dataProvider: {} dataset: {}", command.getDataflowId(), command.getDataProviderId(), datasetId);
                 Long partitionId = dataSetSnapshotControllerZuul.obtainPartition(entry.getKey(), "root");
-                jdbcRecordStoreService.createDataSnapshotForRelease(datasetId, snapshotId, partitionId, false);
+                jdbcRecordStoreService.createDataSnapshotForRelease(datasetId, snapshotId, partitionId, false, null);
                 LOG.info("Created snapshot file for snapshot for dataflowId: {} dataProvider: {} dataset: {}", snapshotId, command.getDataflowId(), command.getDataProviderId(), datasetId);
             }
             SnapshotFileForReleaseCreatedEvent event = new SnapshotFileForReleaseCreatedEvent();
@@ -76,7 +76,7 @@ public class RecordStoreReleaseAggregate {
                 try (Connection con = DriverManager.getConnection(datasetConnection.getConnectionString(),
                         datasetConnection.getUser(), datasetConnection.getPassword())) {
                     con.setAutoCommit(true);
-                    jdbcRecordStoreService.restoreFromSnapshot(dataCollectionId, snapshotId, DatasetTypeEnum.REPORTING, con);
+                    jdbcRecordStoreService.restoreFromSnapshot(null, dataCollectionId, snapshotId, DatasetTypeEnum.REPORTING, con, null, null);
                     LOG.info("Snapshot {} restored for dataCollection {} of dataflow {}", snapshotId, dataCollectionId, command.getDataflowId());
                 } catch (Exception e) {
                     throw e;

@@ -1,8 +1,9 @@
 package org.eea.recordstore.controller;
 
 
-import java.util.Arrays;
-import java.util.List;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.eea.interfaces.controller.recordstore.ProcessController;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
@@ -14,18 +15,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * The Class ProcessControllerImpl.
@@ -104,8 +102,13 @@ public class ProcessControllerImpl implements ProcessController {
       @RequestParam("processId") String processId, @RequestParam("user") String user,
       @RequestParam("priority") int priority,
       @RequestParam(required = false, value = "released") Boolean released) {
-    return processService.updateProcess(datasetId, dataflowId, status, type, processId, user,
-        priority, released);
+    try {
+      return processService.updateProcess(datasetId, dataflowId, status, type, processId, user,
+              priority, released);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error updating process with id {} for datasetId {} to status {} Message: {}", processId, datasetId, status.toString(), e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -123,7 +126,12 @@ public class ProcessControllerImpl implements ProcessController {
     if (priority > 100 || priority < 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong priority range.");
     }
-    processService.updatePriority(processId, priority);
+    try {
+      processService.updatePriority(processId, priority);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error updating priority of process with id {} to value {} Message: {}", processId, priority, e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -174,7 +182,12 @@ public class ProcessControllerImpl implements ProcessController {
   @HystrixCommand
   @GetMapping(value = "/private/finished/{processId}")
   public boolean isProcessFinished(String processId) {
-    return processService.isProcessFinished(processId);
+    try {
+      return processService.isProcessFinished(processId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error checking if process with id {} is finished. Message: {}", processId, e.getMessage());
+      throw e;
+    }
   }
 
 
@@ -188,7 +201,36 @@ public class ProcessControllerImpl implements ProcessController {
   @HystrixCommand
   @GetMapping(value = "/private/next/{processId}")
   public ProcessVO getNextProcess(String processId) {
-    return processService.findNextProcess(processId);
+    try {
+      return processService.findNextProcess(processId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error finding next process with id {} Message: {}", processId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+  * Saves process
+  * @param processVO
+  */
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/private/saveProcess")
+  public ProcessVO saveProcess(@RequestBody ProcessVO processVO) {
+      return processService.saveProcess(processVO);
+  }
+
+  /**
+   * Updates process
+   * @param status
+   * @param dateFinish
+   * @param processId
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping(value = "/private/updateProcessStatus")
+  public void updateStatusAndFinishedDate(@RequestParam("processId") String processId, @RequestParam("status") String status, @RequestParam("dateFinish") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") Date dateFinish) {
+    processService.updateStatusAndFinishedDate(status,dateFinish, processId);
   }
 
   /**

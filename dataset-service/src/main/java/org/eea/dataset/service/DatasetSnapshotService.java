@@ -1,8 +1,5 @@
 package org.eea.dataset.service;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.exception.EEAException;
@@ -11,6 +8,10 @@ import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
 
 /**
  * The Interface DatasetSnapshotService.
@@ -64,7 +65,7 @@ public interface DatasetSnapshotService {
    * @param prefillingReference the prefilling reference
    */
   void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO, Long partitionIdDestination,
-      String dateRelease, boolean prefillingReference);
+      String dateRelease, boolean prefillingReference, String processId);
 
   /**
    * Removes the snapshot.
@@ -83,7 +84,7 @@ public interface DatasetSnapshotService {
    * @param deleteData the delete data
    * @throws EEAException the EEA exception
    */
-  void restoreSnapshot(Long idDataset, Long idSnapshot, Boolean deleteData) throws EEAException;
+  void restoreSnapshot(Long idDataset, Long idSnapshot, Boolean deleteData, String processId) throws EEAException;
 
 
   /**
@@ -109,7 +110,7 @@ public interface DatasetSnapshotService {
    * @param dateRelease the date release
    * @throws EEAException the EEA exception
    */
-  void releaseSnapshot(Long idDataset, Long idSnapshot, String dateRelease) throws EEAException;
+  void releaseSnapshot(Long idDataset, Long idSnapshot, String dateRelease, String processId) throws EEAException;
 
 
   /**
@@ -224,7 +225,7 @@ public interface DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   void createReleaseSnapshots(Long dataflowId, Long dataProviderId, boolean restrictFromPublic,
-      boolean validate) throws EEAException;
+      boolean validate, Long jobId) throws EEAException;
 
 
   /**
@@ -303,7 +304,7 @@ public interface DatasetSnapshotService {
    * @param idDataset
    * @param providerId
    */
-  void deleteProvider(Long idDataset, Long providerId);
+  void deleteProvider(Long idDataset, Long providerId, String processId);
 
   /**
    *

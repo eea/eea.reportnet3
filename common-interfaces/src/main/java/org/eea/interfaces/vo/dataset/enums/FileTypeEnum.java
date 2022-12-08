@@ -12,6 +12,8 @@ public enum FileTypeEnum {
   /** The csv. */
   CSV("csv"),
 
+  CSV_CHUNK("csv_chunk"),
+
   /** The xml. */
   XML("xml"),
 

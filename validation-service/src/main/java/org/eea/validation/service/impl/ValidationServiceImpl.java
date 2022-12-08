@@ -92,6 +92,9 @@ import com.opencsv.CSVWriter;
 @Service("validationService")
 public class ValidationServiceImpl implements ValidationService {
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
+
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -778,12 +781,14 @@ public class ValidationServiceImpl implements ValidationService {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, creatingFileError);
 
     }
-
     catch (IOException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT,
           null, notificationVO);
       LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
       return;
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in exportValidationFile for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
 
     // Convert the writer data to a bytes array to write it into a file
@@ -798,6 +803,9 @@ public class ValidationServiceImpl implements ValidationService {
       out.write(file);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_COMPLETED_EVENT,
           null, notificationVO);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in exportValidationFile when releasing notification (DOWNLOAD_VALIDATIONS_COMPLETED_EVENT) for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
     }
   }
 

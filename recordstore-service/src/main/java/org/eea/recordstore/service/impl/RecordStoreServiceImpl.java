@@ -1,18 +1,9 @@
 package org.eea.recordstore.service.impl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.github.dockerjava.api.model.Container;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.io.KafkaSender;
@@ -23,7 +14,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import com.github.dockerjava.api.model.Container;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The Class RecordStoreServiceImpl.
@@ -64,8 +67,6 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Autowired
   private DockerInterfaceService dockerInterfaceService;
-
-
 
   /**
    * The container name.
@@ -140,6 +141,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       throw new RecordStoreAccessException(
           String.format("Error reading commands file to create the dataset. %s", e.getMessage()),
           e);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in createEmptyDataSet for datasetSchemaId {}. Message: {}", idDatasetSchema, e.getMessage());
+      throw e;
     }
 
     for (String command : commands) {
@@ -278,13 +282,14 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param idPartitionDataset the id partition dataset
    * @param dateRelease the date release
    * @param prefillingReference the prefilling reference
+   * @param processId the process id
    * @throws SQLException the SQL exception
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws RecordStoreAccessException the record store access exception
    */
   @Override
   public void createDataSnapshot(Long idReportingDataset, Long idSnapshot, Long idPartitionDataset,
-      String dateRelease, boolean prefillingReference)
+      String dateRelease, boolean prefillingReference, String processId)
       throws SQLException, IOException, RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
@@ -299,14 +304,12 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    * @param isSchemaSnapshot the is schema snapshot
    * @param deleteData the delete data
    * @param prefillingReference the prefilling reference
-   * @throws SQLException the SQL exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   * @throws RecordStoreAccessException the record store access exception
+   * @param processId the process id
    */
   @Override
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
-      boolean prefillingReference) throws SQLException, IOException, RecordStoreAccessException {
+      boolean prefillingReference, String processId) {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
@@ -499,13 +502,41 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     LOG.info("Create or Update Query-Materialized View");
   }
 
+  /**
+   * Restore specific file snapshot
+   *
+   * @param datasetId
+   * @param idSnapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param type
+   */
   @Override
-  public void createDataSnapshotForRelease(Long idDataset, Long idSnapshot, Long idPartitionDataset, boolean prefillingReference) throws SQLException, IOException, InterruptedException {
+  public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot, int startingNumber,
+      int endingNumber, String type) {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
   @Override
-  public void restoreFromSnapshot(Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType, Connection con) throws SQLException, IOException {
+  public boolean recoverCheckForStuckFile(Long datasetId, Long firstFieldId, Long lastFieldId) {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
+
+  @Override public List<BigInteger> getReleaseTasksInProgress(long timeInMinutes) {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
+
+  @Override public TaskVO findReleaseTaskByTaskId(Long taskId) {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
+
+  @Override
+  public void createDataSnapshotForRelease(Long idDataset, Long idSnapshot, Long idPartitionDataset, boolean prefillingReference, String processId) throws SQLException, IOException, InterruptedException {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
+
+  @Override
+  public void restoreFromSnapshot(Long dataflowId, Long datasetId, Long idSnapshot, DatasetTypeEnum datasetType, Connection con, String processId, Long jobId) throws SQLException, IOException {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 

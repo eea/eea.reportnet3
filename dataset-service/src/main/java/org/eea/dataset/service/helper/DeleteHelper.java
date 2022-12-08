@@ -114,8 +114,9 @@ public class DeleteHelper {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing notification: {}", e.getMessage(), e);
+      LOG_ERROR.error("Error releasing notification for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
     }
+    LOG.info("Successfully deleted table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
   }
 
   /**
@@ -163,9 +164,10 @@ public class DeleteHelper {
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
       } catch (EEAException e) {
-        LOG_ERROR.error("Error releasing notification: {}", e.getMessage());
+        LOG_ERROR.error("Error releasing notification for datasetId {} Message: {}", datasetId, e.getMessage());
       }
     }
+    LOG.info("Successfully deleted dataset data for datasetId {}", datasetId);
   }
 
 
@@ -192,6 +194,7 @@ public class DeleteHelper {
     value.put(LiteralConstants.INTEGRATION_ID, integrationId);
     value.put(LiteralConstants.OPERATION, operation);
     kafkaSenderUtils.releaseKafkaEvent(EventType.DATA_DELETE_TO_REPLACE_COMPLETED_EVENT, value);
+    LOG.info("Successfully deleted data before replacing for datasetId {} and integrationId {}", datasetId, integrationId);
   }
 
 
@@ -202,16 +205,17 @@ public class DeleteHelper {
    * @param providerCode the provider code
    */
   @Transactional
-  public void deleteRecordValuesByProvider(Long datasetId, String providerCode) {
+  public void deleteRecordValuesByProvider(Long datasetId, String providerCode, String processId) {
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     RecordValue recordValue = recordRepository.findFirstByDataProviderCode(providerCode);
     if (recordValue!=null) {
-      LOG.info("Deleting data with providerCode: {} ", providerCode);
+      LOG.info("Deleting data with providerCode: {} for release processId {}", providerCode, processId);
       recordRepository.deleteByDataProviderCode(providerCode);
     }
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
+    LOG.info("Deleting table tempEtlExport for dataset ", datasetId);
     datasetService.deleteTempEtlExport(datasetId);
   }
 

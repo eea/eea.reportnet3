@@ -5,8 +5,8 @@ import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -77,6 +77,28 @@ public interface ProcessService {
    * @return the process VO
    */
   ProcessVO findNextProcess(String processId);
+
+  /**
+   * Saves process
+   * @param processVO
+   */
+  ProcessVO saveProcess(ProcessVO processVO);
+
+  /**
+   * Updates process
+   * @param status
+   * @param dateFinish
+   * @param processId
+   */
+  void updateStatusAndFinishedDate(String status, Date dateFinish, String processId);
+
+  /**
+   * Finds processId by datasetId and status
+   * @param datasetId
+   * @param status
+   * @return
+   */
+  List<String> findProcessIdByDatasetAndStatus(Long datasetId, String processType, List<String> status);
 
   /**
    * Inserts sagaTransactionId and valReleaseAggregateId
