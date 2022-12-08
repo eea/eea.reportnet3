@@ -1111,6 +1111,8 @@
     "processNamePlaceHolder": "Select a workspace",
     "processStartingDate": "Starting date",
     "providerId": "Provider id",
+    "providerDatasetDataRemoveDialogHeader": "Remove dataset data",
+    "providerDatasetDataRemoveDialogContent": "Are you sure you want to remove data from this dataset?",
     "projectedCoordinates": "Projected coordinates",
     "ProjectionsScenario": "Type",
     "properties": "Properties",
