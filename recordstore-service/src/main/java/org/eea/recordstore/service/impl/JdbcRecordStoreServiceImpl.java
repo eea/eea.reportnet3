@@ -1861,7 +1861,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
 
         for (int i = startingNumber; i <= endingNumber; i++) {
-            String splitFile = pathSnapshot + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i,
+            String splitFile = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i,
                 LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
             try {
                 TaskVO task = taskService.findReleaseTaskBySplitFileName(splitFile);
