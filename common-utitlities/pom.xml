@@ -8,7 +8,7 @@
 		<artifactId>library-pom</artifactId>
 		<groupId>org.eea</groupId>
 		<version>3.0-SNAPSHOT</version>
-		<relativePath>../parent-poms/lib</relativePath>
+		<relativePath>../build-version/lib</relativePath>
 	</parent>
 	<groupId>org.eea.utils</groupId>
 	<artifactId>common-utitlities</artifactId>

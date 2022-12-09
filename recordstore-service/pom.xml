@@ -6,7 +6,7 @@
     <artifactId>microservice-pom</artifactId>
     <groupId>org.eea</groupId>
     <version>3.0-SNAPSHOT</version>
-    <relativePath>../parent-poms/microservice</relativePath>
+    <relativePath>../build-version/microservice</relativePath>
   </parent>
   <properties>
     <sonar.moduleKey>org.eea:reportnet:recordstore-service:${sonar.jenkins.branch}</sonar.moduleKey>
