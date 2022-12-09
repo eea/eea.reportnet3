@@ -18,7 +18,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 @Component
-public class JobForRestartingDelayedTasks {
+public class JobForRestartingDelayedValidationTasks {
 
     @Value(value = "${scheduling.inProgress.task.max.time}")
     private long maxTimeInMinutesForInProgressTasks;
@@ -41,7 +41,7 @@ public class JobForRestartingDelayedTasks {
     /**
      * The Constant LOG.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(JobForRestartingDelayedTasks.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JobForRestartingDelayedValidationTasks.class);
 
     @Autowired
     private ValidationControllerZuul validationControllerZuul;
