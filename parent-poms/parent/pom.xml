@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.6-DEV</api-gateway.version>
-    <communication.version>v3.1.6-DEV</communication.version>
-    <collaboration.version>v3.1.6-DEV</collaboration.version>
-    <dataflow.version>v3.1.6-DEV</dataflow.version>
-    <dataset.version>v3.1.6-DEV</dataset.version>
-    <document.version>v3.1.6-DEV</document.version>
-    <frontend.version>v3.1.6-DEV</frontend.version>
-    <indexsearch.version>v3.1.6-DEV</indexsearch.version>
-    <inspire.version>v3.1.6-DEV</inspire.version>
-    <recordstore.version>v3.1.6-DEV</recordstore.version>
-    <ums.version>v3.1.6-DEV</ums.version>
-    <validation.version>v3.1.6-DEV</validation.version>
-    <common-interfaces.version>v3.1.6-DEV</common-interfaces.version>
-    <common-utitlities.version>v3.1.6-DEV</common-utitlities.version>
-    <rod.version>v3.1.6-DEV</rod.version>
-    <orchestrator.version>v3.1.6-DEV</orchestrator.version>
+    <api-gateway.version>${Global_Version}</api-gateway.version>
+    <communication.version>${Global_Version}</communication.version>
+    <collaboration.version>${Global_Version}</collaboration.version>
+    <dataflow.version>${Global_Version}</dataflow.version>
+    <dataset.version>${Global_Version}</dataset.version>
+    <document.version>${Global_Version}</document.version>
+    <frontend.version>${Global_Version}</frontend.version>
+    <indexsearch.version>${Global_Version}</indexsearch.version>
+    <inspire.version>${Global_Version}</inspire.version>
+    <recordstore.version>${Global_Version}</recordstore.version>
+    <ums.version>${Global_Version}</ums.version>
+    <validation.version>${Global_Version}</validation.version>
+    <common-interfaces.version>${Global_Version}</common-interfaces.version>
+    <common-utitlities.version>${Global_Version}</common-utitlities.version>
+    <rod.version>${Global_Version}</rod.version>
+    <orchestrator.version>${Global_Version}</orchestrator.version>
   </properties>
 </project>

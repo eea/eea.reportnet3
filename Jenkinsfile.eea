@@ -17,19 +17,7 @@ pipeline {
 			gitParameter branchFilter: 'origin/(.*)', defaultValue: 'dev', name: 'Branch', type: 'PT_BRANCH'
 			//string(defaultValue: 'dev', description: 'Set the branch', name: 'Brn', trim: true)
 			string(defaultValue: 'v3.1.10-SOTAV-TEST', description: 'Set the images GLOBAL version to be build (TAG) ', name: 'Global_Version', trim: true)
-            //string(defaultValue: '', description: 'Set the images dataflow version to be build (TAG)', name: 'DATAFLOW_VERSION', trim: true)
-            //string(defaultValue: '', description: 'Set the images collaboration version to be build (TAG)', name: 'COLLABORATION_VERSION', trim: true)
-            //string(defaultValue: '', description: 'Set the images dataset version to be build (TAG)', name: 'DATASET_VERSION', trim: true)
 
-
-			//string(defaultValue: 'v3.1.6-demoArchV2', description: 'Set the version to be deployed', name: 'Ver', trim: true)
-			//string(defaultValue: 'api-gateway communication dataflow dataset document frontend recordstore rod ums validation orchestrator collaboration', description: 'Set the service to down scale before deployment (api-gateway communication dataflow dataset document frontend recordstore rod ums validation orchestrator collaboration)', name: 'Reset_Services', trim: true)
-			//string(defaultValue: '1', description: 'Dataflow Replicas to be deployed (dev=1,test=1,staging=1,hotfix=1,production=2)', name: 'Dataflow_replicas', trim: true)
-			//string(defaultValue: '1', description: 'DataSet Replicas to be deployed (dev=1,test=1,staging=1,hotfix=1,production=2)', name: 'DataSet_replicas', trim: true)
-			//string(defaultValue: '1', description: 'Recordstore Replicas to be deployed (dev=1,test=1,staging=1,hotfix=1,production=4)', name: 'Recordstore_replicas', trim: true)
-			//string(defaultValue: '1', description: 'Orchestrator service Replicas to be deployed (dev=1,test=1,staging=1,hotfix=1,production=4)', name: 'Orchestrator_replicas', trim: true)
-			//string(defaultValue: '1', description: 'Validation Replicas to be deployed (dev=1,test=1,staging=1,hotfix=1,production=4)', name: 'Validation_replicas', trim: true)
-			//string(defaultValue: '1', description: 'User Management Replicas to be deployed (dev=1,test=1,staging=1,hotfix=1,production=1)', name: 'User_management_replicas', trim: true)
 	}
     stages {
         //Project Build
