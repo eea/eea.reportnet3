@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>${env.GLOBAL_VERSION}</api-gateway.version>
-    <communication.version>${env.GLOBAL_VERSION}</communication.version>
-    <collaboration.version>${env.GLOBAL_VERSION}</collaboration.version>
-    <dataflow.version>${env.GLOBAL_VERSION}</dataflow.version>
-    <dataset.version>${env.GLOBAL_VERSION}</dataset.version>
-    <document.version>${env.GLOBAL_VERSION}</document.version>
-    <frontend.version>${env.GLOBAL_VERSION}</frontend.version>
-    <indexsearch.version>${env.GLOBAL_VERSION}</indexsearch.version>
-    <inspire.version>${env.GLOBAL_VERSION}</inspire.version>
-    <recordstore.version>${env.GLOBAL_VERSION}</recordstore.version>
-    <ums.version>${env.GLOBAL_VERSION}</ums.version>
-    <validation.version>${env.GLOBAL_VERSION}</validation.version>
-    <common-interfaces.version>${env.GLOBAL_VERSION}</common-interfaces.version>
-    <common-utitlities.version>${env.GLOBAL_VERSION}</common-utitlities.version>
-    <rod.version>${env.GLOBAL_VERSION}</rod.version>
-    <orchestrator.version>${env.GLOBAL_VERSION}</orchestrator.version>
+    <api-gateway.version>"${params.Global_Version}"</api-gateway.version>
+    <communication.version>"${params.Global_Version}"</communication.version>
+    <collaboration.version>"${params.Global_Version}"</collaboration.version>
+    <dataflow.version>"${params.Global_Version}"</dataflow.version>
+    <dataset.version>"${params.Global_Version}"</dataset.version>
+    <document.version>"${params.Global_Version}"</document.version>
+    <frontend.version>"${params.Global_Version}"</frontend.version>
+    <indexsearch.version>"${params.Global_Version}"</indexsearch.version>
+    <inspire.version>"${params.Global_Version}"</inspire.version>
+    <recordstore.version>"${params.Global_Version}"</recordstore.version>
+    <ums.version>"${params.Global_Version}"</ums.version>
+    <validation.version>"${params.Global_Version}"</validation.version>
+    <common-interfaces.version>"${params.Global_Version}"</common-interfaces.version>
+    <common-utitlities.version>"${params.Global_Version}"</common-utitlities.version>
+    <rod.version>"${params.Global_Version}"</rod.version>
+    <orchestrator.version>"${params.Global_Version}"</orchestrator.version>
   </properties>
 </project>
