@@ -64,7 +64,6 @@ pipeline {
         stage('Setup sandbox docker images build') {
             steps{
                 script {
-
                     env.DATAFLOW_VERSION = sh script: 'mvn -f $WORKSPACE/build-version/parent/pom.xml  help:evaluate -Dexpression=dataflow.$params.Version -q -DforceStdout', returnStdout: true
                     env.DATASET_VERSION = sh script: 'mvn -f $WORKSPACE/build-version/parent/pom.xml  help:evaluate -Dexpression=dataset.$params.Version -q -DforceStdout', returnStdout: true
                     env.RECORDSTORE_VERSION = sh script: 'mvn -f $WORKSPACE/build-version/parent/pom.xml  help:evaluate -Dexpression=recordstore.$params.Version -q -DforceStdout', returnStdout: true
