@@ -12,7 +12,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.eea.dataset</groupId>
 	<artifactId>dataset-service</artifactId>
-	<version>${dataset.version}</version>
+	<version>${params.Global_Version}</version>
 	<properties>
 		<sonar.moduleKey>org.eea:reportnet:dataset-service:${sonar.jenkins.branch}</sonar.moduleKey>
 	</properties>
