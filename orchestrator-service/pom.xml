@@ -15,7 +15,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.eea.orchestrator</groupId>
   <artifactId>orchestrator-service</artifactId>
-  <version>${params.Global_Version}</version>
+  <version>${orchestrator.version}</version>
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
