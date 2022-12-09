@@ -108,7 +108,8 @@ import {
   faUserTimes,
   faVectorSquare,
   faVolumeUp,
-  faLaptop
+  faLaptop,
+  faTools
 } from '@fortawesome/free-solid-svg-icons';
 
 import {
@@ -128,7 +129,12 @@ import {
   faFilePdf as farFilePdf,
   faTimesCircle as farTimesCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { faBuffer, faConnectdevelop, faStaylinked } from '@fortawesome/free-brands-svg-icons';
+
+import { 
+  faBuffer,
+  faConnectdevelop,
+  faStaylinked
+ } from '@fortawesome/free-brands-svg-icons';
 
 export const AwesomeIcons = icon => {
   switch (icon) {
@@ -456,6 +462,8 @@ export const AwesomeIcons = icon => {
       return faCheckCircle;
     case 'laptop':
       return faLaptop;
+    case 'tools':
+      return faTools;
     default:
       return faFileAlt;
   }

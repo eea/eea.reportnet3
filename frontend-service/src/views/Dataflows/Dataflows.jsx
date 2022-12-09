@@ -15,21 +15,27 @@ import {DataflowsRequesterHelpConfig} from 'conf/help/dataflows/requester';
 
 import {Button} from 'views/_components/Button';
 import {ConfirmDialog} from 'views/_components/ConfirmDialog';
-import {DataflowsList} from './_components/DataflowsList';
 import {Dialog} from 'views/_components/Dialog';
-import {Filters} from 'views/_components/Filters';
 import {GoTopButton} from 'views/_components/GoTopButton';
 import {InputText} from 'views/_components/InputText';
 import {MainLayout} from 'views/_components/Layout';
 import {ManageBusinessDataflow} from 'views/_components/ManageBusinessDataflow';
 import {ManageDataflow} from 'views/_components/ManageDataflow';
 import {ManageReferenceDataflow} from 'views/_components/ManageReferenceDataflow';
-import {ManageWebforms} from './_components/ManageWebforms';
-import {ManageNationalCoordinators} from './_components/ManageNationalCoordinators';
 import {Paginator} from 'views/_components/DataTable/_components/Paginator';
+import {dialogsStore} from 'views/_components/Dialog/_functions/Stores/dialogsStore';
 import {ReportingObligations} from 'views/_components/ReportingObligations';
-import {TabMenu} from './_components/TabMenu';
 import {UserList} from 'views/_components/UserList';
+
+import {Filters} from 'views/_components/Filters';
+import {filterByCustomFilterStore} from 'views/_components/Filters/_functions/Stores/filterStore';
+
+import {ControlStatuses} from './_components/ControlStatuses';
+import {DataflowsList} from './_components/DataflowsList';
+import {JobsStatuses} from './_components/JobsStatuses';
+import {ManageNationalCoordinators} from './_components/ManageNationalCoordinators';
+import {ManageWebforms} from './_components/ManageWebforms';
+import {TabMenu} from './_components/TabMenu';
 import {ValidationsStatuses} from './_components/ValidationsStatuses';
 
 import {BusinessDataflowService} from 'services/BusinessDataflowService';
@@ -38,15 +44,10 @@ import {DataflowService} from 'services/DataflowService';
 import {ReferenceDataflowService} from 'services/ReferenceDataflowService';
 import {UserService} from 'services/UserService';
 
-import {dialogsStore} from 'views/_components/Dialog/_functions/Stores/dialogsStore';
-import {filterByCustomFilterStore} from 'views/_components/Filters/_functions/Stores/filterStore';
-
 import {LeftSideBarContext} from 'views/_functions/Contexts/LeftSideBarContext';
 import {NotificationContext} from 'views/_functions/Contexts/NotificationContext';
 import {ResourcesContext} from 'views/_functions/Contexts/ResourcesContext';
 import {UserContext} from 'views/_functions/Contexts/UserContext';
-
-import {dataflowsReducer} from './_functions/Reducers/dataflowsReducer';
 
 import {useApplyFilters} from 'views/_functions/Hooks/useApplyFilters';
 import {useBreadCrumbs} from 'views/_functions/Hooks/useBreadCrumbs';
@@ -54,11 +55,12 @@ import {useCheckNotifications} from 'views/_functions/Hooks/useCheckNotification
 import {useFilters} from 'views/_functions/Hooks/useFilters';
 import {useReportingObligations} from 'views/_components/ReportingObligations/_functions/Hooks/useReportingObligations';
 
+import {dataflowsReducer} from './_functions/Reducers/dataflowsReducer';
+
 import {CurrentPage, ErrorUtils} from 'views/_functions/Utils';
 import {DataflowsUtils} from './_functions/Utils/DataflowsUtils';
 import {PaginatorRecordsCount} from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import {TextUtils} from 'repositories/_utils/TextUtils';
-import {JobsStatuses} from './_components/JobsStatuses';
 
 const {permissions} = config;
 
@@ -83,8 +85,10 @@ export const Dataflows = () => {
         isAdmin: null,
         isBusinessDataflowDialogVisible: false,
         isCitizenScienceDataflowDialogVisible: false,
+        isControlStatusDialogVisible: false,
         isCustodian: null,
         isFiltered: false,
+        isJobStatusDialogVisible:false,
         isManageNationalCoordinatorsVisible: false,
         isManageWebformsDialogVisible: false,
         isNationalCoordinator: false,
@@ -95,7 +99,6 @@ export const Dataflows = () => {
         isUserListVisible: false,
         isValidatingAllDataflowsUsers: false,
         isValidationStatusDialogVisible: false,
-        isJobStatusDialogVisible:false,
         loadingStatus: {reporting: true, business: true, citizenScience: true, reference: true},
         pageInputTooltip: resourcesContext.messages['currentPageInfoMessage'],
         pagination: {firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0},
@@ -167,6 +170,8 @@ export const Dataflows = () => {
     const {resetFiltersState: resetUserListFiltersState} = useFilters('userList');
     const {resetFiltersState: resetReportingObligationsFiltersState} = useFilters('reportingObligations');
     const {resetFilterState: resetValidationsStatusesFilterState} = useApplyFilters('validationsStatuses');
+    const {resetFilterState: resetJobsStatusesFilterState} = useApplyFilters('jobsStatuses');
+    const {resetFilterState: resetControlStatusesFilterState} = useApplyFilters('controlStatuses');
     const {resetFilterState: resetObligationsFilterState} = useApplyFilters('reportingObligations');
 
     useBreadCrumbs({currentPage: CurrentPage.DATAFLOWS});
@@ -265,6 +270,15 @@ export const Dataflows = () => {
             title: 'jobsMonitoring'
         };
 
+        const adminControlStatusBtn = {
+            className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+            icon: 'tools',
+            isVisible: isAdmin || isCustodian,
+            label: 'controlStatus',
+            onClick: () => manageDialogs('isControlStatusDialogVisible', true),
+            title: 'controlStatus'
+        };
+
         const adminManageNationalCoordinatorsBtn = {
             className: 'dataflowList-left-side-bar-create-dataflow-help-step',
             icon: 'userTie',
@@ -278,6 +292,7 @@ export const Dataflows = () => {
             [
                 adminCreateNewPermissionsBtn,
                 adminManageNationalCoordinatorsBtn,
+                adminControlStatusBtn,
                 adminManageWebformsBtn,
                 adminValidationStatusBtn,
                 adminJobsStatusBtn,
@@ -843,7 +858,12 @@ export const Dataflows = () => {
 
     const onCloseJobStatusDialog = () => {
         manageDialogs('isJobStatusDialogVisible', false);
-        resetValidationsStatusesFilterState();
+        resetJobsStatusesFilterState();
+    };
+
+    const onCloseControlStatusDialog = () => {
+        manageDialogs('isControlStatusDialogVisible', false);
+        resetControlStatusesFilterState();
     };
 
     const onChangePagination = pagination => dataflowsDispatch({type: 'ON_PAGINATE', payload: {pagination}});
@@ -1016,10 +1036,17 @@ export const Dataflows = () => {
                 />
             )}
 
-{dataflowsState.isJobStatusDialogVisible && (
+            {dataflowsState.isJobStatusDialogVisible && (
                 <JobsStatuses
                     isDialogVisible={dataflowsState.isJobStatusDialogVisible}
                     onCloseDialog={onCloseJobStatusDialog}
+                />
+            )}
+
+            {dataflowsState.isControlStatusDialogVisible && (
+                <ControlStatuses
+                    isDialogVisible={dataflowsState.isControlStatusDialogVisible}
+                    onCloseDialog={onCloseControlStatusDialog}
                 />
             )}
 
