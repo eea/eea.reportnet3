@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.1.3.RELEASE</version>
+  </parent>
+  <groupId>org.eea</groupId>
+  <artifactId>eea-pom</artifactId>
+  <packaging>pom</packaging>
+  <version>3.0.0</version>
+  <properties>
+    <api-gateway.version>${Global_Version}</api-gateway.version>
+    <communication.version>${Global_Version}</communication.version>
+    <collaboration.version>${Global_Version}</collaboration.version>
+    <dataflow.version>${Global_Version}</dataflow.version>
+    <dataset.version>${Global_Version}</dataset.version>
+    <document.version>${Global_Version}</document.version>
+    <frontend.version>${Global_Version}</frontend.version>
+    <indexsearch.version>${Global_Version}</indexsearch.version>
+    <inspire.version>${Global_Version}</inspire.version>
+    <recordstore.version>${Global_Version}</recordstore.version>
+    <ums.version>${Global_Version}</ums.version>
+    <validation.version>${Global_Version}</validation.version>
+    <common-interfaces.version>${Global_Version}</common-interfaces.version>
+    <common-utitlities.version>${Global_Version}</common-utitlities.version>
+    <rod.version>${Global_Version}</rod.version>
+    <orchestrator.version>${Global_Version}</orchestrator.version>
+  </properties>
+</project>
