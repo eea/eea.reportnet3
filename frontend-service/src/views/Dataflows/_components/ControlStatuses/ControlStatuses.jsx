@@ -1,10 +1,16 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
+
+import { Column } from 'primereact/column';
+
 import { useRecoilValue } from 'recoil';
+
+import styles from './ControlStatuses.module.scss';
+
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
+
 import { config } from 'conf';
-import styles from './ControlStatuses.module.scss';
-import { Column } from 'primereact/column';
+
 import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
@@ -12,22 +18,26 @@ import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Filters } from 'views/_components/Filters';
 import { LevelError } from 'views/_components/LevelError';
-import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { Spinner } from 'views/_components/Spinner';
+
 import { ControlStatusesService } from 'services/ControlStatusesService';
+
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { UserContext } from "../../../_functions/Contexts/UserContext";
-import { filterByCustomFilterStore } from 'views/_components/Filters/_functions/Stores/filterStore';
-import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
-import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
-import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
+import { UserContext } from '../../../_functions/Contexts/UserContext';
 
-const {permissions} = config;
+import { filterByCustomFilterStore } from 'views/_components/Filters/_functions/Stores/filterStore';
+import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
+import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
+import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
+
+import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
+
+const { permissions } = config;
 
 export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const filterBy = useRecoilValue(filterByCustomFilterStore('controlStatuses'));
-  
+
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -101,7 +111,7 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
         { key: 'datasetId', label: resourcesContext.messages['datasetId'] }
       ],
       type: 'INPUT'
-    },
+    }
     // {
     //   key: 'jobType',
     //   label: resourcesContext.messages['jobType'],
@@ -201,7 +211,7 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
         header: resourcesContext.messages['datasetId'],
         template: getDatasetIdTemplate,
         className: styles.middleColumn
-      },
+      }
       // {
       //   key: 'jobStatus',
       //   header: resourcesContext.messages['jobStatus'],
@@ -224,12 +234,12 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
     if (isAdmin) {
       columns.push({
-          key: 'buttonsUniqueId',
-          header: resourcesContext.messages['actions'],
-          template: getDeleteButton,
-          className: styles.smallColumn
-      })
-  }
+        key: 'buttonsUniqueId',
+        header: resourcesContext.messages['actions'],
+        template: getDeleteButton,
+        className: styles.smallColumn
+      });
+    }
 
     return columns.map(column => (
       <Column
@@ -246,14 +256,14 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getDeleteButton = rowData => (
     <ActionsColumn
-        isDeletingDatasetData={isDeletingDatasetData}
-        onDeleteClick={() => {
-            setIsDeleteDialogVisible(true);
-            setControlStatus(rowData);
-        }}
-        rowDataId={rowData.id}
+      isDeletingDatasetData={isDeletingDatasetData}
+      onDeleteClick={() => {
+        setIsDeleteDialogVisible(true);
+        setControlStatus(rowData);
+      }}
+      rowDataId={rowData.id}
     />
-);
+  );
 
   const getJobStatusTemplate = job => (
     <div>
@@ -290,19 +300,19 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
       setIsDeletingDatasetData(true);
       getControlStatuses();
     } catch (error) {
-        console.error('ControlStatus - onConfirmDeleteDialog.', error);
-        setLoadingStatus('failed');
+      console.error('ControlStatus - onConfirmDeleteDialog.', error);
+      setLoadingStatus('failed');
 
-        notificationContext.add({status: 'DELETE_PROVIDER_DATASET_DATA_ERROR'}, true);
+      notificationContext.add({ status: 'DELETE_PROVIDER_DATASET_DATA_ERROR' }, true);
     } finally {
-        setIsDeletingDatasetData(false);
-        setControlStatus(null);
+      setIsDeletingDatasetData(false);
+      setControlStatus(null);
     }
   };
 
   const onHideDeleteDialog = () => {
-      setIsDeleteDialogVisible(false);
-      setControlStatus(null);
+    setIsDeleteDialogVisible(false);
+    setControlStatus(null);
   };
 
   const onRefresh = () => {
@@ -421,17 +431,17 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
       </Dialog>
 
       {isDeleteDialogVisible && (
-                <ConfirmDialog
-                    classNameConfirm="p-button-danger"
-                    header={resourcesContext.messages['providerDatasetDataRemoveDialogHeader']}
-                    labelCancel={resourcesContext.messages['cancel']}
-                    labelConfirm={resourcesContext.messages['yes']}
-                    onConfirm={onConfirmDeleteDialog}
-                    onHide={onHideDeleteDialog}
-                    visible={isDeleteDialogVisible}>
-                    {resourcesContext.messages['providerDatasetDataRemoveDialogContent']}
-                </ConfirmDialog>
-            )}
+        <ConfirmDialog
+          classNameConfirm="p-button-danger"
+          header={resourcesContext.messages['providerDatasetDataRemoveDialogHeader']}
+          labelCancel={resourcesContext.messages['cancel']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onConfirmDeleteDialog}
+          onHide={onHideDeleteDialog}
+          visible={isDeleteDialogVisible}>
+          {resourcesContext.messages['providerDatasetDataRemoveDialogContent']}
+        </ConfirmDialog>
+      )}
     </Fragment>
   );
 };
