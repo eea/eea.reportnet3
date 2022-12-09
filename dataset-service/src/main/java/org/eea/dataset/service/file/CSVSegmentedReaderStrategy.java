@@ -195,17 +195,6 @@ public class CSVSegmentedReaderStrategy {
                 sanitizeAndCreateDataSet(partitionId, table, tables, values, headers, idTableSchema,
                         idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords);
                 numLines++;
-                if (numLines == batchRecordSave) {
-                    dataset.setTableValues(tables);
-                    // Set the dataSetSchemaId of MongoDB
-                    dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
-                    fileCommon.persistImportedDataset(idTableSchema, datasetId, fileName, replace,
-                            dataSetSchema, dataset, manageFixedRecords, connectionDataVO);
-                    numLines = 0;
-                    tables.remove(table);
-                    table.setRecords(new ArrayList<>());
-                    tables.add(table);
-                }
             }
             dataset.setTableValues(tables);
             // Set the dataSetSchemaId of MongoDB
