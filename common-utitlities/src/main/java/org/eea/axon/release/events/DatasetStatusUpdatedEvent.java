@@ -28,6 +28,4 @@ public class DatasetStatusUpdatedEvent {
     private Map<Long, Long> datasetSnapshots;
     private Map<Long, Long> datasetDataCollection;
     private List<Long> dataCollectionForDeletion;
-    private boolean canDelete;
-    private String internalProcessType;
 }

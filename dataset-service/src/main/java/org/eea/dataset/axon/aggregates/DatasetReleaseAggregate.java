@@ -14,7 +14,6 @@ import org.eea.dataset.persistence.metabase.domain.*;
 import org.eea.dataset.persistence.metabase.repository.*;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSnapshotService;
-import org.eea.dataset.service.InternalProcessService;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -22,11 +21,9 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
-import org.eea.interfaces.vo.dataset.PgStatActivityVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
-import org.eea.interfaces.vo.dataset.enums.InternalProcessTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -47,7 +44,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static org.axonframework.modelling.command.AggregateLifecycle.apply;
@@ -62,9 +58,6 @@ public class DatasetReleaseAggregate {
     private Map<Long, Long> datasetDataCollection;
     private List<Long> dataCollectionForDeletion;
     private Map<Long, Date> datasetDateRelease;
-    private boolean canDelete;
-    private boolean canRelease;
-    private String internalProcessType;
 
     /**
      * The Constant LOG.
@@ -172,7 +165,7 @@ public class DatasetReleaseAggregate {
 
     @CommandHandler
     public void handle(UpdateDatasetStatusCommand command, DatasetSnapshotService datasetSnapshotService, MetaData metaData, DataSetMetabaseRepository metabaseRepository,
-                       DataCollectionRepository dataCollectionRepository, @Qualifier("datasetExtendedRepositoryImpl") DatasetExtendedRepository datasetExtendedRepository) {
+                       DataCollectionRepository dataCollectionRepository) {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
             List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
@@ -196,21 +189,10 @@ public class DatasetReleaseAggregate {
                 dataCollectionForDeletion.add(idDataCollection);
             });
 
-            AtomicBoolean canDelete = new AtomicBoolean(true);
-            datasetDataCollection.values().forEach(dc -> {
-                List<PgStatActivityVO> results = datasetExtendedRepository.getPgStatActivityResults();
-                for (PgStatActivityVO pgStatActivity : results) {
-                    if (pgStatActivity.getQuery().contains(COPY + " " + String.format(LiteralConstants.DATASET_FORMAT_NAME, dc))) {
-                        canDelete.set(false);
-                    }
-                }
-            });
             DatasetStatusUpdatedEvent event = new DatasetStatusUpdatedEvent();
             BeanUtils.copyProperties(command, event);
             event.setDatasetDataCollection(datasetDataCollection);
             event.setDataCollectionForDeletion(dataCollectionForDeletion);
-            event.setCanDelete(canDelete.get());
-            event.setInternalProcessType(InternalProcessTypeEnum.DELETE.getValue());
             apply(event, metaData);
         } catch (Exception e) {
             LOG.error("Error while updating dataset status for dataflowId: {} dataProvider: {}", command.getDataflowId(), command.getDataProviderId());
@@ -222,35 +204,6 @@ public class DatasetReleaseAggregate {
     public void on(DatasetStatusUpdatedEvent event) {
         this.datasetDataCollection = event.getDatasetDataCollection();
         this.dataCollectionForDeletion = event.getDataCollectionForDeletion();
-        this.canDelete = event.isCanDelete();
-        this.internalProcessType = event.getInternalProcessType();
-    }
-
-    @CommandHandler
-    public void handle(CreateInternalProcessCommand command, MetaData metaData, InternalProcessService internalProcessService) {
-        try {
-            LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
-            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
-            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
-            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
-
-            command.getDatasetDataCollection().values().forEach(dc -> {
-                LOG.info("Creating internal process for {} for dataflowId: {} dataProvider: {} dataCollection {}", command.getInternalProcessType(), command.getDataflowId(), command.getDataProviderId(), dc);
-                InternalProcess internalProcess = new InternalProcess(command.getInternalProcessType(), command.getDataflowId(), command.getDataProviderId(), dc,
-                        command.getTransactionId(), command.getDatasetReleaseAggregateId());
-                internalProcessService.save(internalProcess);
-                LOG.info("Created internal process for {} for dataflowId: {} dataProvider: {} dataCollection {}", command.getInternalProcessType(), command.getDataflowId(), command.getDataProviderId(), dc);
-            });
-
-            InternalProcessCreatedEvent event = new InternalProcessCreatedEvent();
-            BeanUtils.copyProperties(command, event);
-            apply(event, metaData);
-        } catch (Exception e) {
-            LOG.info("Error while creating internal process for {} for dataflowId: {} dataProvider: {}", command.getInternalProcessType(), command.getDataflowId(), command.getDataProviderId());
-            throw e;
-        }
     }
 
     @CommandHandler
@@ -301,21 +254,9 @@ public class DatasetReleaseAggregate {
                 }
             });
 
-            AtomicBoolean canRelease = new AtomicBoolean(true);
-            command.getDatasetDataCollection().values().forEach(dc -> {
-                List<PgStatActivityVO> results = datasetExtendedRepository.getPgStatActivityResults();
-                for (PgStatActivityVO pgStatActivity : results) {
-                    if (pgStatActivity.getQuery().contains(COPY + " " + String.format(LiteralConstants.DATASET_FORMAT_NAME, dc))) {
-                        canRelease.set(false);
-                    }
-                }
-            });
-
             DatasetRunningStatusUpdatedEvent event = new DatasetRunningStatusUpdatedEvent();
             BeanUtils.copyProperties(command, event);
             event.setDatasetDataCollection(datasetDataCollection);
-            event.setCanRelease(canRelease.get());
-            event.setInternalProcessType(InternalProcessTypeEnum.RESTORE.getValue());
             apply(event, metaData);
         } catch (Exception e) {
             LOG.error("Error while updating dataset running status to {} for dataset of dataflow {} and dataProvider {}: {]", DatasetRunningStatusEnum.RESTORING_SNAPSHOT,
@@ -327,8 +268,6 @@ public class DatasetReleaseAggregate {
     @EventSourcingHandler
     public void on(DatasetRunningStatusUpdatedEvent event) {
         this.datasetDataCollection = event.getDatasetDataCollection();
-        this.canRelease = event.isCanRelease();
-        this.internalProcessType = event.getInternalProcessType();
     }
 
     @CommandHandler

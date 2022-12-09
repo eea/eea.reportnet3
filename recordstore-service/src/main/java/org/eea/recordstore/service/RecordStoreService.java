@@ -90,7 +90,7 @@ public interface RecordStoreService {
    */
   void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum typeDataset, Boolean isSchemaSnapshot, Boolean deleteData,
-      boolean prefillingReference, String processId);
+      boolean prefillingReference, String processId) throws SQLException, IOException, RecordStoreAccessException;
 
   /**
    * Delete data snapshot.

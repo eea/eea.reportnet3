@@ -618,25 +618,4 @@ public interface DatasetController {
    */
   @DeleteMapping("/private/deleteTempEtlExport/{datasetId}")
   void deleteTempEtlExport(@PathVariable("datasetId") Long datasetId);
-
-  /**
-   * Gets internal processes
-   * @return
-   */
-  @GetMapping("/private/internalProcess")
-  List<InternalProcessVO> getInternalProcesses();
-
-  /**
-   * Removes internal process with id
-   * @param id
-   */
-  @PutMapping("/private/internalProcess/{id}")
-  void removeInternalProcess(@PathVariable("id") Long id);
-
-  /**
-   * Gets pg_stat_activity results
-   * @return
-   */
-  @GetMapping("/private/pgStatActivity")
-  List<PgStatActivityVO> getPgStatActivityResults();
 }

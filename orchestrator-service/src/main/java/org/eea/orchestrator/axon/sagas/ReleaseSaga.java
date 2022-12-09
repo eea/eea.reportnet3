@@ -340,42 +340,23 @@ public class ReleaseSaga {
     public void handle(DatasetStatusUpdatedEvent event, MetaData metaData) {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         LOG.info("DatasetStatusUpdatedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
-        if (event.isCanDelete()) {
-            DeleteProviderCommand deleteProviderCommand = DeleteProviderCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
-                    .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots())
-                    .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId())
-                    .validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).dataCollectionForDeletion(event.getDataCollectionForDeletion()).datasetDataCollection(event.getDatasetDataCollection()).build();
+        DeleteProviderCommand deleteProviderCommand = DeleteProviderCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
+                .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots())
+                .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId())
+                .validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).dataCollectionForDeletion(event.getDataCollectionForDeletion()).datasetDataCollection(event.getDatasetDataCollection()).build();
 
-            commandGateway.send(GenericCommandMessage.asCommandMessage(deleteProviderCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-                LOG.error("Error while executing command DeleteProviderCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
-                RevertDatasetStatusCommand revertDatasetStatusCommand = RevertDatasetStatusCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
-                        .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots())
-                        .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId())
-                        .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).datasetIds(event.getDatasetIds()).build();
-                commandGateway.send(GenericCommandMessage.asCommandMessage(revertDatasetStatusCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
-                    LOG.error("Error while executing command RevertDatasetStatusCommand for dataflow {},dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
-                    return e;
-                });
-                return er;
+        commandGateway.send(GenericCommandMessage.asCommandMessage(deleteProviderCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
+            LOG.error("Error while executing command DeleteProviderCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+            RevertDatasetStatusCommand revertDatasetStatusCommand = RevertDatasetStatusCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
+                    .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots())
+                    .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId())
+                    .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).datasetIds(event.getDatasetIds()).build();
+            commandGateway.send(GenericCommandMessage.asCommandMessage(revertDatasetStatusCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
+                LOG.error("Error while executing command RevertDatasetStatusCommand for dataflow {},dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+                return e;
             });
-        } else {
-            CreateInternalProcessCommand createInternalProcessCommand = CreateInternalProcessCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
-                    .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots()).internalProcessType(event.getInternalProcessType())
-                    .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId())
-                    .validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).dataCollectionForDeletion(event.getDataCollectionForDeletion()).datasetDataCollection(event.getDatasetDataCollection()).build();
-            commandGateway.send(GenericCommandMessage.asCommandMessage(createInternalProcessCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-                LOG.error("Error while executing command CreateInternalProcessForDeletionCommand for {}, for dataflow {}, dataProvider {},{}", event.getInternalProcessType(), event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
-                RevertDatasetStatusCommand revertDatasetStatusCommand = RevertDatasetStatusCommand.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
-                        .dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots())
-                        .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId())
-                        .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).datasetIds(event.getDatasetIds()).build();
-                commandGateway.send(GenericCommandMessage.asCommandMessage(revertDatasetStatusCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
-                    LOG.error("Error while executing command RevertDatasetStatusCommand for dataflow {},dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
-                    return e;
-                });
-                return er;
-            });
-        }
+            return er;
+        });
     }
 
     @SagaEventHandler(associationProperty = "transactionId")
@@ -421,11 +402,6 @@ public class ReleaseSaga {
     }
 
     @SagaEventHandler(associationProperty = "transactionId")
-    public void handle(InternalProcessCreatedEvent event) {
-        LOG.info("InternalProcessForDeletionCreatedEvent event for {} received for dataflowId {}, dataProviderId {}", event.getInternalProcessType(), event.getDataflowId(), event.getDataProviderId());
-    }
-
-    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(InternalRepresentativeUpdatedEvent event, MetaData metaData) {
         LOG.info("InternalRepresentativeUpdatedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
@@ -435,7 +411,7 @@ public class ReleaseSaga {
                 .recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).datasetDataCollection(event.getDatasetDataCollection()).build();
         commandGateway.send(GenericCommandMessage.asCommandMessage(updateDatasetRunningStatusCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command UpdateDatasetRunningStatusCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
-             RevertInternalRepresentativeCommand revertInternalRepresentativeCommand = RevertInternalRepresentativeCommand.builder().dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId())
+            RevertInternalRepresentativeCommand revertInternalRepresentativeCommand = RevertInternalRepresentativeCommand.builder().dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId())
                     .restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId())
                     .validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).datasetIds(event.getDatasetIds()).datasetDataCollection(event.getDatasetDataCollection()).build();
             commandGateway.send(GenericCommandMessage.asCommandMessage(revertInternalRepresentativeCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(err -> {
@@ -450,25 +426,14 @@ public class ReleaseSaga {
     public void handle(DatasetRunningStatusUpdatedEvent event, MetaData metaData) {
         LOG.info("DatasetRunningStatusUpdatedEvent event received for dataflowId {}, dataProviderId {}", event.getDataflowId(), event.getDataProviderId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
-        if (event.isCanRelease()) {
-            RestoreDataFromSnapshotCommand restoreDataFromSnapshotCommand = RestoreDataFromSnapshotCommand.builder().recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
-                    .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots()).datasetDataCollection(event.getDatasetDataCollection())
-                    .releaseAggregateId(event.getReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId())
-                    .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).build();
-            commandGateway.send(GenericCommandMessage.asCommandMessage(restoreDataFromSnapshotCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-                LOG.error("Error while executing command RestoreDataFromSnapshotCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
-                return er;
-            });
-        } else {
-            CreateInternalProcessCommand createInternalProcessForRestoreCommand = CreateInternalProcessCommand.builder().recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
-                    .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots()).datasetDataCollection(event.getDatasetDataCollection())
-                    .releaseAggregateId(event.getReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).internalProcessType(event.getInternalProcessType())
-                    .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).build();
-            commandGateway.send(GenericCommandMessage.asCommandMessage(createInternalProcessForRestoreCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-                LOG.error("Error while executing command CreateInternalProcessCommand for {} for dataflow {}, dataProvider {},{}", event.getInternalProcessType(), event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
-                return er;
-            });
-        }
+        RestoreDataFromSnapshotCommand restoreDataFromSnapshotCommand = RestoreDataFromSnapshotCommand.builder().recordStoreReleaseAggregateId(event.getRecordStoreReleaseAggregateId()).transactionId(event.getTransactionId()).dataflowId(event.getDataflowId())
+                .dataProviderId(event.getDataProviderId()).restrictFromPublic(event.isRestrictFromPublic()).validate(event.isValidate()).datasetIds(event.getDatasetIds()).datasetSnapshots(event.getDatasetSnapshots()).datasetDataCollection(event.getDatasetDataCollection())
+                .releaseAggregateId(event.getReleaseAggregateId()).communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).datasetReleaseAggregateId(event.getDatasetReleaseAggregateId())
+                .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).build();
+        commandGateway.send(GenericCommandMessage.asCommandMessage(restoreDataFromSnapshotCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
+            LOG.error("Error while executing command RestoreDataFromSnapshotCommand for dataflow {}, dataProvider {},{}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
+            return er;
+        });
     }
 
     @SagaEventHandler(associationProperty = "transactionId")

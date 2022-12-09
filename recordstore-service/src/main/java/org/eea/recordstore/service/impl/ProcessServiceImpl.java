@@ -226,31 +226,6 @@ public class ProcessServiceImpl implements ProcessService {
   }
 
   /**
-   * Saves process
-   * @param processVO
-   */
-  @Transactional
-  @Override
-  public ProcessVO saveProcess(ProcessVO processVO) {
-    EEAProcess process = processMapper.classToEntity(processVO);
-    processRepository.save(process);
-    processRepository.flush();
-    return processMapper.entityToClass(process);
-  }
-
-  /**
-   * Updates process
-   * @param status
-   * @param dateFinish
-   * @param processId
-   */
-  @Transactional
-  @Override
-  public void updateStatusAndFinishedDate(String status, Date dateFinish, String processId) {
-    processRepository.updateStatusAndFinishedDate(status, dateFinish, processId);
-  }
-
-  /**
    * Finds processId by datasetId and status
    * @param datasetId
    * @param status
@@ -260,6 +235,7 @@ public class ProcessServiceImpl implements ProcessService {
   public List<String> findProcessIdByDatasetAndStatus(Long datasetId, String processType, List<String> status) {
      return processRepository.findByDatasetIdAndProcessTypeAndStatus(datasetId, processType, status);
   }
+
   @Transactional
   @Override
   public void insertSagaTransactionIdAndAggregateId(String sagaTransactionId, String aggregateId, String processId) {
@@ -278,4 +254,5 @@ public class ProcessServiceImpl implements ProcessService {
     List<EEAProcess> processes =  processRepository.findProcessByDataflowAndDataset(dataflowId,datasetId, status);
     return processMapper.entityListToClass(processes);
   }
+
 }

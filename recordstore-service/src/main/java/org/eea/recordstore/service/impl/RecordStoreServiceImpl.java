@@ -309,7 +309,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void restoreDataSnapshot(Long idReportingDataset, Long idSnapshot, Long partitionId,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
-      boolean prefillingReference, String processId) {
+      boolean prefillingReference, String processId) throws SQLException, IOException, RecordStoreAccessException {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 

@@ -12,7 +12,6 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.InternalProcessService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
@@ -107,10 +106,6 @@ public class DatasetControllerImpl implements DatasetController {
 
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
-
-  /** The internal process service */
-  @Autowired
-  private InternalProcessService internalProcessService;
 
   /** The dataset extended repository */
   @Qualifier("datasetExtendedRepositoryImpl")
@@ -268,6 +263,9 @@ public class DatasetControllerImpl implements DatasetController {
 
     Long jobId = null;
     try {
+      if (dataflowId == null){
+        dataflowId = datasetService.getDataFlowIdById(datasetId);
+      }
       jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter);
       LOG.info("Importing big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
       fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId, delimiter, jobId);
@@ -1938,23 +1936,5 @@ public class DatasetControllerImpl implements DatasetController {
     }
     LOG.info("Successfully validated attachment for datasetId {}, fieldId {} and fileName {} Result: {}", datasetId, idField, originalFilename, result);
     return result;
-  }
-
-  @Override
-  @GetMapping("/private/internalProcess")
-  public List<InternalProcessVO> getInternalProcesses() {
-    return internalProcessService.findAll();
-  }
-
-  @Override
-  @PutMapping("/private/internalProcess/{id}")
-  public void removeInternalProcess(@PathVariable("id") Long id) {
-      internalProcessService.delete(id);
-  }
-
-  @Override
-  @GetMapping("/private/pgStatActivity")
-  public List<PgStatActivityVO> getPgStatActivityResults() {
-      return datasetExtendedRepository.getPgStatActivityResults();
   }
 }
