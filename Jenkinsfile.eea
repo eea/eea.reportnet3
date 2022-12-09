@@ -17,9 +17,9 @@ pipeline {
 			gitParameter branchFilter: 'origin/(.*)', defaultValue: 'dev', name: 'Branch', type: 'PT_BRANCH'
 			//string(defaultValue: 'dev', description: 'Set the branch', name: 'Brn', trim: true)
 			string(defaultValue: 'v3.1.10-SOTAV-TEST', description: 'Set the images GLOBAL version to be build (TAG) ', name: 'Global_Version', trim: true)
-            string(defaultValue: ${Global_Version}, description: 'Set the images dataFlow version to be build (TAG)', name: 'DATAFLOW_VERSION', trim: true)
-            string(defaultValue: ${Global_Version}, description: 'Set the images collaboration version to be build (TAG)', name: 'COLLABORATION_VERSION', trim: true)
-            string(defaultValue: ${Global_Version}, description: 'Set the images dataset version to be build (TAG)', name: 'DATASET_VERSION', trim: true)
+            string(defaultValue: '${Global_Version}', description: 'Set the images dataFlow version to be build (TAG)', name: 'DATAFLOW_VERSION', trim: true)
+            string(defaultValue: '${Global_Version}', description: 'Set the images collaboration version to be build (TAG)', name: 'COLLABORATION_VERSION', trim: true)
+            string(defaultValue: '${Global_Version}', description: 'Set the images dataset version to be build (TAG)', name: 'DATASET_VERSION', trim: true)
 
 
 			//string(defaultValue: 'v3.1.6-demoArchV2', description: 'Set the version to be deployed', name: 'Ver', trim: true)
