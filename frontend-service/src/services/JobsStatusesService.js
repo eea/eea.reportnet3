@@ -15,24 +15,24 @@ export const JobsStatusesService = {
     providerId,
     datasetId,
     creatorUsername,
-    jobStatus}) => {
-      const parsedSortField = JobsStatusesUtils.parseSortField(sortField);
+    jobStatus
+  }) => {
+    const parsedSortField = JobsStatusesUtils.parseSortField(sortField);
 
-      const response = await JobsStatusesRepository.getJobsStatuses({
-        pageNum,
-        numberRows,
-        sortOrder: ServiceUtils.getSortOrder(sortOrder),
-        sortField: parsedSortField,
-        jobId,
-        jobType,
-        dataflowId,
-        providerId,
-        datasetId,
-        creatorUsername,
-        jobStatus
-      });
+    const response = await JobsStatusesRepository.getJobsStatuses({
+      pageNum,
+      numberRows,
+      sortOrder: ServiceUtils.getSortOrder(sortOrder),
+      sortField: parsedSortField,
+      jobId,
+      jobType,
+      dataflowId,
+      providerId,
+      datasetId,
+      creatorUsername,
+      jobStatus
+    });
 
-      return response.data;
-    }
-
+    return response.data;
+  }
 };
