@@ -1881,9 +1881,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             copyFromFile(copyQueryField, splitFile, cm);
 
             LOG.info("Updating release task status of task with id {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
-            task.setFinishDate(new Date());
-            task.setStatus(ProcessStatusEnum.FINISHED);
-            taskService.updateTask(task);
+            taskService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), task.getId());
             LOG.info("Updated release task status of task with id {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
 
             try {
@@ -1960,9 +1958,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 copyFromFileRecovery(copyQueryField, splitFile, cm);
 
                 LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
-                task.setFinishDate(new Date());
-                task.setStatus(ProcessStatusEnum.FINISHED);
-                taskService.updateTask(task);
+                taskService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), task.getId());
                 LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
 
                 try {

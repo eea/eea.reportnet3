@@ -57,7 +57,7 @@ public interface ProcessRepository
                                        @Param("dataProviderId") Long dataProviderId, @Param("datasetId") Long datasetId);
 
   /**
-   * Finds processes by dataset id and process type and status
+   * Finds process ids by dataset id and process type and status
    * @param datasetId
    * @param processType
    * @param status
@@ -65,7 +65,17 @@ public interface ProcessRepository
    */
   @Query(nativeQuery = true,
           value = "select p.process_id from process p where p.dataset_id= :datasetId and p.process_type= :processType and p.status in (:status) ")
-  List<String> findByDatasetIdAndProcessTypeAndStatus(@Param("datasetId") Long datasetId, @Param("processType") String processType, @Param("status") List<String> status);
+  List<String> findProcessIdsByDatasetIdAndProcessTypeAndStatusIn(@Param("datasetId") Long datasetId, @Param("processType") String processType, @Param("status") List<String> status);
+
+  /**
+   * Finds processes that exceed the specified period of time by process type and status
+   * @param processType
+   * @param status
+   * @return
+   */
+  @Query(nativeQuery = true,
+          value = "select * from process where process_type= :processType and status= :status and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
+  List<EEAProcess> findProcessIdsByProcessTypeAndStatus(@Param("processType") String processType, @Param("status") String status, @Param("timeInMinutes") long timeInMinutes);
 
   /**
    * Finds processes by dataflow and dataset with specific status

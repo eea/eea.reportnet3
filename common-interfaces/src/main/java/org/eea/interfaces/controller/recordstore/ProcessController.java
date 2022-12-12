@@ -128,6 +128,14 @@ public interface ProcessController {
   ProcessVO getNextProcess(@PathVariable("processId") String processId);
 
   /**
+   * Lists the process ids of validation processes that are in progress for more than the specified period of time
+   * @param timeInMinutes
+   * @return
+   */
+  @GetMapping(value = "/private/listValidationProcessesInProgress/{timeInMinutes}")
+  List<ProcessVO> listInProgressValidationProcessesThatExceedTime(@PathVariable("timeInMinutes") long timeInMinutes);
+
+  /**
    * Finds processes by dataflow and dataset with specific status
    * @param dataflowId
    * @param datasetId

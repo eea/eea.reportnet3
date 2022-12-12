@@ -4,6 +4,7 @@ package org.eea.recordstore.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.eea.interfaces.controller.recordstore.ProcessController;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
@@ -20,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -204,6 +206,26 @@ public class ProcessControllerImpl implements ProcessController {
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error finding next process with id {} Message: {}", processId, e.getMessage());
       throw e;
+    }
+  }
+
+  /**
+   * Lists the process ids of validation processes that are in progress for more than the specified period of time
+   * @param timeInMinutes
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/listValidationProcessesInProgress/{timeInMinutes}")
+  @ApiOperation(value = "Lists the validation processes that are in progress for more than the specified period of time", hidden = true)
+  public List<ProcessVO> listInProgressValidationProcessesThatExceedTime(@ApiParam(
+          value = "Time limit in minutes that in progress validation processes exceed",
+          example = "15") @PathVariable("timeInMinutes") long timeInMinutes) {
+    LOG.info("Finding in progress validation processes that exceed {}", timeInMinutes);
+    try {
+      return processService.findProcessIdByTypeAndStatusThatExceedTime(ProcessTypeEnum.VALIDATION.toString(), ProcessStatusEnum.IN_PROGRESS.toString(), timeInMinutes);
+    } catch (Exception e) {
+      LOG.error("Error while finding in progress tasks that exceed " + timeInMinutes + " minutes " + e.getMessage());
+      return new ArrayList<>();
     }
   }
 

@@ -444,14 +444,14 @@ public class ValidationControllerImpl implements ValidationController {
   }
 
   @Override
-  @GetMapping(value = "/listTasksInProgress/{timeInMinutes}")
+  @GetMapping(value = "/listInProgressValidationTasks/{timeInMinutes}")
   @ApiOperation(value = "Lists the validation tasks that are in progress for more than the specified period of time", hidden = true)
-  public List<BigInteger> listTasksInProgress(@ApiParam(
-          value = "Time limit in minutes that in progress tasks exceed",
+  public List<BigInteger> listInProgressValidationTasksThatExceedTime(@ApiParam(
+          value = "Time limit in minutes that in progress validation tasks exceed",
           example = "15") @PathVariable("timeInMinutes") long timeInMinutes) {
     LOG.info("Finding in progress validation tasks that exceed " + timeInMinutes + " minutes");
     try {
-      return validationHelper.getTasksInProgress(timeInMinutes);
+      return validationHelper.getInProgressValidationTasksThatExceedTime(timeInMinutes);
     } catch (Exception e) {
       LOG.error("Error while finding in progress validation tasks that exceed " + timeInMinutes + " minutes " + e.getMessage());
       return new ArrayList<>();

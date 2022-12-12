@@ -6,9 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eea.dataset.persistence.metabase.domain.Task;
 import org.eea.dataset.persistence.metabase.repository.TaskRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
@@ -44,6 +48,12 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
 
   @Autowired
   private TaskRepository taskRepository;
+
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   //@Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength=10000;
@@ -98,8 +108,15 @@ private char loadDataDelimiter=',';
     Long partitionId = Long.parseLong((String) eeaEventVO.getData().get("partitionId"));
 
     try (InputStream inputStream = Files.newInputStream(Path.of(filePath))) {
+      // Obtain the data provider code to insert into the record
+      Long providerId = 0L;
+      DataSetMetabaseVO metabase = datasetMetabaseService.findDatasetMetabase(datasetId);
+      if (metabase.getDataProviderId() != null) {
+        providerId = metabase.getDataProviderId();
+      }
+      DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
-      fileTreatmentHelper.reinitializeCsvSegmentedReaderStrategy(delimiter != null ? delimiter.charAt(0) : loadDataDelimiter,fileCommon,datasetId,fieldMaxLength,null,batchRecordSave);
+      fileTreatmentHelper.reinitializeCsvSegmentedReaderStrategy(delimiter != null ? delimiter.charAt(0) : loadDataDelimiter,fileCommon,datasetId,fieldMaxLength,provider.getCode(),batchRecordSave);
       fileTreatmentHelper.importCsvFileChunk(datasetId,  fileName, inputStream,partitionId,
                idTableSchema,  replacebool,  dataSetSchema,  delimiter, startLine, endLine);
       if(task.isPresent()){

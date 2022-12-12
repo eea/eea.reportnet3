@@ -110,7 +110,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
   @Query(nativeQuery = true,
       value = "select id from task where status='IN_PROGRESS' and task_type='VALIDATION_TASK' and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
-  List<BigInteger> getTasksInProgress(@Param("timeInMinutes") long timeInMinutes);
+  List<BigInteger> getInProgressValidationTasksThatExceedTime(@Param("timeInMinutes") long timeInMinutes);
 
 }
 

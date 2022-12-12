@@ -18,9 +18,9 @@ import java.math.BigInteger;
 import java.util.List;
 
 @Component
-public class JobForRestartingDelayedTasks {
+public class JobForRestartingDelayedValidationTasks {
 
-    @Value(value = "${scheduling.inProgress.task.max.time}")
+    @Value(value = "${scheduling.inProgress.validation.task.max.time}")
     private long maxTimeInMinutesForInProgressTasks;
 
     /**
@@ -41,7 +41,7 @@ public class JobForRestartingDelayedTasks {
     /**
      * The Constant LOG.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(JobForRestartingDelayedTasks.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JobForRestartingDelayedValidationTasks.class);
 
     @Autowired
     private ValidationControllerZuul validationControllerZuul;
@@ -63,7 +63,7 @@ public class JobForRestartingDelayedTasks {
      */
     public void restartDelayedTasks() {
         try {
-            List<BigInteger> tasksInProgress = validationControllerZuul.listTasksInProgress(maxTimeInMinutesForInProgressTasks);
+            List<BigInteger> tasksInProgress = validationControllerZuul.listInProgressValidationTasksThatExceedTime(maxTimeInMinutesForInProgressTasks);
             if (tasksInProgress.size() > 0) {
                 LOG.info("Restarting tasks " + tasksInProgress);
                 TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);

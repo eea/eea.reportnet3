@@ -643,7 +643,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @GetMapping(value = "/private/releaseTasksByDatasetId/{datasetId}")
   @ApiOperation(value = "Find the release tasks for in progress process by datasetId", hidden = true)
   public List<ProcessTaskVO> findReleaseTasksForInProgressProcessByDatasetId(@ApiParam(value = "Dataset Id") @PathVariable("datasetId") Long datasetId) {
-    List<String> processIds = processService.findProcessIdByDatasetAndStatus(datasetId, ProcessTypeEnum.RELEASE.toString(), Arrays.asList(ProcessStatusEnum.IN_PROGRESS.toString()));
+    List<String> processIds = processService.findProcessIdByDatasetAndStatusIn(datasetId, ProcessTypeEnum.RELEASE.toString(), Arrays.asList(ProcessStatusEnum.IN_PROGRESS.toString()));
     List<ProcessTaskVO> processTaskVOS = new ArrayList<>();
     processIds.forEach(processId -> {
       ProcessTaskVO processTaskVO = new ProcessTaskVO();

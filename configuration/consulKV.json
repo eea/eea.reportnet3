@@ -1832,8 +1832,8 @@
     "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
   },
   {
-    "key": "config/orchestrator/scheduling.inProgress.task.max.time",
-    "value": "JHtJTl9QUk9HUkVTU19UQVNLX01BWF9USU1FOjEyMH0="
+    "key": "config/orchestrator/scheduling.inProgress.validation.task.max.time",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
   },
   {
     "key": "config/orchestrator/scheduling.inProgress.import.maximum.jobs",
@@ -1842,6 +1842,10 @@
   {
     "key": "config/orchestrator/scheduling.inProgress.validation.maximum.jobs",
     "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX01BWElNVU1fSk9CUzoyfQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.validation.process.without.task.max.time",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1dJVEhPVVRfVEFTS19NQVhfVElNRTo2MH0="
   },
   {
     "key": "config/orchestrator/scheduling.inProgress.release.maximum.jobs",

@@ -232,8 +232,20 @@ public class ProcessServiceImpl implements ProcessService {
    * @return
    */
   @Override
-  public List<String> findProcessIdByDatasetAndStatus(Long datasetId, String processType, List<String> status) {
-     return processRepository.findByDatasetIdAndProcessTypeAndStatus(datasetId, processType, status);
+  public List<String> findProcessIdByDatasetAndStatusIn(Long datasetId, String processType, List<String> status) {
+     return processRepository.findProcessIdsByDatasetIdAndProcessTypeAndStatusIn(datasetId, processType, status);
+  }
+
+  /**
+   * Finds processId by type and status
+   * @param type
+   * @param status
+   * @return
+   */
+  @Override
+  public List<ProcessVO> findProcessIdByTypeAndStatusThatExceedTime(String type, String status, long timeInMinutes) {
+    List<EEAProcess> eeaProcesses = processRepository.findProcessIdsByProcessTypeAndStatus(type, status, timeInMinutes);
+    return processMapper.entityListToClass(eeaProcesses);
   }
 
   /**

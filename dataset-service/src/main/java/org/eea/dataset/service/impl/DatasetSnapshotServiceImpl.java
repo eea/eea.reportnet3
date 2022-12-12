@@ -28,6 +28,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -49,6 +50,7 @@ import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
@@ -206,6 +208,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The validation controller zuul. */
   @Autowired
   private ValidationControllerZuul validationControllerZuul;
+
+  /** The job controller zuul */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
 
   /**
    * Gets the by id.
@@ -1105,6 +1111,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       if (!isAdmin() || validate) {
         validationControllerZuul.validateDataSetData(dataset.getId(), true, jobId);
       } else {
+        if (jobId!=null) {
+          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+        }
         String processId = UUID.randomUUID().toString();
         String notificationUser = SecurityContextHolder.getContext().getAuthentication().getName();
         Map<String, Object> value = new HashMap<>();

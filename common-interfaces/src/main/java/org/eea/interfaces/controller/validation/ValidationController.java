@@ -124,8 +124,8 @@ public interface ValidationController {
    * @param timeInMinutes
    * @return
    */
-  @GetMapping(value = "/listTasksInProgress/{timeInMinutes}")
-  List<BigInteger> listTasksInProgress(@PathVariable("timeInMinutes") long timeInMinutes);
+  @GetMapping(value = "/listInProgressValidationTasks/{timeInMinutes}")
+  List<BigInteger> listInProgressValidationTasksThatExceedTime(@PathVariable("timeInMinutes") long timeInMinutes);
 
   /**
    *
