@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @Getter
 @Setter
-public class ReleaseJobSetInProgressEvent {
+public class JobSetInProgressEvent {
     private String communicationReleaseAggregateId;
     private String datasetReleaseAggregateId;
     private String releaseAggregateId;

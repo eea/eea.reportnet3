@@ -11,7 +11,7 @@ import java.util.Map;
 @Builder
 @Getter
 @Setter
-public class ReleaseJobFinishedEvent {
+public class JobFailedEvent {
 
    private String datasetReleaseAggregateId;
    private String releaseAggregateId;

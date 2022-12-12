@@ -12,7 +12,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SetReleaseJobFinishedCommand {
+public class SetJobFinishedCommand {
 
     @TargetAggregateIdentifier
     private String releaseAggregateId;

@@ -6,11 +6,11 @@ import org.axonframework.messaging.MetaData;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.eea.axon.release.commands.CreateReleaseStartNotificationCommand;
-import org.eea.axon.release.commands.SetReleaseJobFailedCommand;
-import org.eea.axon.release.commands.SetReleaseJobFinishedCommand;
-import org.eea.axon.release.commands.SetReleaseJobInProgressCommand;
-import org.eea.axon.release.events.ReleaseJobFinishedEvent;
-import org.eea.axon.release.events.ReleaseJobSetInProgressEvent;
+import org.eea.axon.release.commands.SetJobFailedCommand;
+import org.eea.axon.release.commands.SetJobFinishedCommand;
+import org.eea.axon.release.commands.SetJobInProgressCommand;
+import org.eea.axon.release.events.JobFinishedEvent;
+import org.eea.axon.release.events.JobSetInProgressEvent;
 import org.eea.axon.release.events.ReleaseStartNotificationCreatedEvent;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.orchestrator.service.JobService;
@@ -57,11 +57,11 @@ public class ReleaseAggregate {
     }
 
     @CommandHandler
-    public void handle(SetReleaseJobInProgressCommand command, MetaData metaData, JobService jobService) {
+    public void handle(SetJobInProgressCommand command, MetaData metaData, JobService jobService) {
         try {
             jobService.updateJobStatus(command.getJobId(), JobStatusEnum.IN_PROGRESS);
 
-            ReleaseJobSetInProgressEvent event = new ReleaseJobSetInProgressEvent();
+            JobSetInProgressEvent event = new JobSetInProgressEvent();
             BeanUtils.copyProperties(command, event);
             apply(event, metaData);
         } catch (Exception e) {
@@ -70,11 +70,11 @@ public class ReleaseAggregate {
     }
 
     @CommandHandler
-    public void handle(SetReleaseJobFinishedCommand command, MetaData metaData, JobService jobService) {
+    public void handle(SetJobFinishedCommand command, MetaData metaData, JobService jobService) {
         try {
             jobService.updateJobStatus(command.getJobId(), JobStatusEnum.FINISHED);
 
-            ReleaseJobFinishedEvent event = new ReleaseJobFinishedEvent();
+            JobFinishedEvent event = new JobFinishedEvent();
             BeanUtils.copyProperties(command, event);
             apply(event, metaData);
         } catch (Exception e) {
@@ -83,11 +83,11 @@ public class ReleaseAggregate {
     }
 
     @CommandHandler
-    public void handle(SetReleaseJobFailedCommand command, JobService jobService) {
+    public void handle(SetJobFailedCommand command, JobService jobService) {
         try {
             jobService.updateJobStatus(command.getJobId(), JobStatusEnum.FAILED);
 
-            ReleaseJobFinishedEvent event = new ReleaseJobFinishedEvent();
+            JobFinishedEvent event = new JobFinishedEvent();
             BeanUtils.copyProperties(command, event);
             apply(event);
         } catch (Exception e) {
