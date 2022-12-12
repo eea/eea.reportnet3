@@ -12,7 +12,6 @@ import org.axonframework.spring.stereotype.Saga;
 import org.eea.axon.release.commands.*;
 import org.eea.axon.release.events.*;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
-import org.eea.orchestrator.service.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -34,18 +33,17 @@ public class ReleaseSaga {
     private transient CommandGateway commandGateway;
     @Autowired
     private EventGateway eventGateway;
-    @Autowired
-    private JobService jobService;
 
     @StartSaga
     @SagaEventHandler(associationProperty = "transactionId")
-    public void handle(ReleaseStartNotificationCreatedEvent event) {
+    public void handle(ReleaseStartNotificationCreatedEvent event, MetaData metaData) {
         LOG.info("ReleaseStartNotificationCreatedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         SetReleaseJobInProgressCommand setReleaseJobInProgressCommand = new SetReleaseJobInProgressCommand();
         BeanUtils.copyProperties(event, setReleaseJobInProgressCommand);
         setReleaseJobInProgressCommand.setCommunicationReleaseAggregateId(UUID.randomUUID().toString());
 
-        commandGateway.send(setReleaseJobInProgressCommand).exceptionally(er -> {
+        commandGateway.send(GenericCommandMessage.asCommandMessage(setReleaseJobInProgressCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command SetReleaseJobInProgressCommand for dataflowId {}, dataProviderId {}, jobId {},{}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
             return er;
         });
@@ -54,11 +52,12 @@ public class ReleaseSaga {
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ReleaseJobSetInProgressEvent event, MetaData metaData) {
         LOG.info("ReleaseJobSetInProgressEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         SendUserNotificationForReleaseStartedCommand sendUserNotificationForReleaseStartedCommand = new SendUserNotificationForReleaseStartedCommand();
         BeanUtils.copyProperties(event, sendUserNotificationForReleaseStartedCommand);
         sendUserNotificationForReleaseStartedCommand.setCommunicationReleaseAggregateId(UUID.randomUUID().toString());
 
-        commandGateway.send(sendUserNotificationForReleaseStartedCommand).exceptionally(er -> {
+        commandGateway.send(GenericCommandMessage.asCommandMessage(sendUserNotificationForReleaseStartedCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command SendUserNotificationForReleaseStartedCommand for dataflowId {}, dataProviderId {}, jobId {},{}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
             return er;
         });
