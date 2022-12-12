@@ -51,7 +51,7 @@ public class ReleaseSaga {
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(JobSetInProgressEvent event, MetaData metaData) {
-        LOG.info("ReleaseJobSetInProgressEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
+        LOG.info("JobSetInProgressEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         SendUserNotificationForReleaseStartedCommand sendUserNotificationForReleaseStartedCommand = new SendUserNotificationForReleaseStartedCommand();
         BeanUtils.copyProperties(event, sendUserNotificationForReleaseStartedCommand);
@@ -471,7 +471,7 @@ public class ReleaseSaga {
             BeanUtils.copyProperties(event, setJobFailedCommand);
 
             commandGateway.send(setJobFailedCommand).exceptionally(e -> {
-                LOG.error("Error while executing command SetReleaseJobFailedCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
+                LOG.error("Error while executing command SetJobFailedCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
                 return e;
             });
             return er;
@@ -486,13 +486,14 @@ public class ReleaseSaga {
         BeanUtils.copyProperties(event, setJobFinishedCommand);
 
         commandGateway.send(GenericCommandMessage.asCommandMessage(setJobFinishedCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
-            LOG.error("Error while executing command SetReleaseJobFinishedCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
+            LOG.error("Error while executing command SetJobFinishedCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
             return er;
         });
     }
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(JobFinishedEvent event, MetaData metaData) {
+        LOG.info("JobFinishedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         SendEmailForSuccessfulReleaseCommand sendEmailForSuccessfulReleaseCommand = new SendEmailForSuccessfulReleaseCommand();
         BeanUtils.copyProperties(event, sendEmailForSuccessfulReleaseCommand);
@@ -833,14 +834,14 @@ public class ReleaseSaga {
         BeanUtils.copyProperties(event, setJobFailedCommand);
 
         commandGateway.send(setJobFailedCommand).exceptionally(er -> {
-            LOG.error("Error while executing command SetReleaseJobFailedCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
+            LOG.error("Error while executing command SetJobFailedCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
             return er;
         });
     }
 
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(JobFailedEvent event) {
-        LOG.info("ReleaseJobFailedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
+        LOG.info("JobFailedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
     }
 
 }
