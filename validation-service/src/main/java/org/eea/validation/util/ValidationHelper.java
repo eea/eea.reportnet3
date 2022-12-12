@@ -966,8 +966,8 @@ public class ValidationHelper implements DisposableBean {
   }
 
   @Transactional
-  public List<BigInteger> getTasksInProgress(long timeInMinutes) {
-     return taskRepository.getTasksInProgress(timeInMinutes);
+  public List<BigInteger> getInProgressValidationTasksThatExceedTime(long timeInMinutes) {
+     return taskRepository.getInProgressValidationTasksThatExceedTime(timeInMinutes);
   }
 
   /**

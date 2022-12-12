@@ -63,7 +63,7 @@ public class JobForRestartingDelayedValidationTasks {
      */
     public void restartDelayedTasks() {
         try {
-            List<BigInteger> tasksInProgress = validationControllerZuul.listTasksInProgress(maxTimeInMinutesForInProgressTasks);
+            List<BigInteger> tasksInProgress = validationControllerZuul.listInProgressValidationTasksThatExceedTime(maxTimeInMinutesForInProgressTasks);
             if (tasksInProgress.size() > 0) {
                 LOG.info("Restarting tasks " + tasksInProgress);
                 TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);

@@ -43,8 +43,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @Transactional
     @Query(nativeQuery = true,
             value = "update task set status= :status ,date_finish= :dateFinish where id=:taskId ")
-    void updateStatusAndFinishDate(@Param("taskId") Long taskId, @Param("status") String status,
-                                   @Param("dateFinish") Date dateFinish);
+    void updateStatusAndFinishDate(@Param("status") String status, @Param("dateFinish") Date dateFinish, @Param("taskId") Long taskId);
 
     /**
      * Update status and starting date.

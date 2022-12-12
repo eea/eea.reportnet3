@@ -83,7 +83,15 @@ public interface ProcessService {
    * @param status
    * @return
    */
-  List<String> findProcessIdByDatasetAndStatus(Long datasetId, String processType, List<String> status);
+  List<String> findProcessIdByDatasetAndStatusIn(Long datasetId, String processType, List<String> status);
+
+  /**
+   * Finds processId by type and status
+   * @param type
+   * @param status
+   * @return
+   */
+  List<ProcessVO> findProcessIdByTypeAndStatusThatExceedTime(String type, String status, long timeInMinutes);
 }
 
 

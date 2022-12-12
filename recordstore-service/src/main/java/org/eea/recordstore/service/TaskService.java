@@ -2,6 +2,7 @@ package org.eea.recordstore.service;
 
 import org.eea.interfaces.vo.validation.TaskVO;
 
+import java.util.Date;
 import java.util.List;
 
 public interface TaskService {
@@ -13,11 +14,12 @@ public interface TaskService {
     TaskVO saveTask(TaskVO taskVO);
 
     /**
-     * Updates task
-     * @param taskVO
-     * @return
+     * Updates task status and dateFinish
+     * @param status
+     * @param dateFinish
+     * @param taskId
      */
-    void updateTask(TaskVO taskVO);
+    void updateStatusAndFinishedDate(String status, Date dateFinish, Long taskId);
 
     /**
      * Finds release task by json

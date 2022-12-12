@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -33,14 +34,15 @@ public class TaskServiceImpl implements TaskService {
     }
 
     /**
-     * Updates task
-     * @param taskVO
-     * @return
+     * Updates task status and finished date
+     * @param status
+     * @param dateFinish
+     * @param taskId
      */
     @Transactional
     @Override
-    public void updateTask(TaskVO taskVO) {
-        taskRepository.updateStatusAndFinishDate(taskVO.getId(), taskVO.getStatus().toString(), taskVO.getFinishDate());
+    public void updateStatusAndFinishedDate(String status, Date dateFinish, Long taskId) {
+        taskRepository.updateStatusAndFinishDate(status, dateFinish, taskId);
     }
 
     /**
