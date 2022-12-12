@@ -13,11 +13,11 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>${env.GLOBAL_VERSION}</api-gateway.version>
-    <communication.version>${env.GLOBAL_VERSION}</communication.version>
-    <collaboration.version>${env.GLOBAL_VERSION}</collaboration.version>
-    <dataflow.version>${env.GLOBAL_VERSION}</dataflow.version>
-    <dataset.version>${env.GLOBAL_VERSION}</dataset.version>
+    <api-gateway.version>${GLOBAL_VERSION}</api-gateway.version>
+    <communication.version>${params.Version}</communication.version>
+    <!-- <collaboration.version>${GLOBAL_VERSION}</collaboration.version>
+    <dataflow.version>${GLOBAL_VERSION}</dataflow.version>
+    <dataset.version>${GLOBAL_VERSION}</dataset.version>
     <document.version>${GLOBAL_VERSION}</document.version>
     <frontend.version>${GLOBAL_VERSION}</frontend.version>
     <indexsearch.version>${GLOBAL_VERSION}</indexsearch.version>
@@ -28,6 +28,6 @@
     <common-interfaces.version>${GLOBAL_VERSION}</common-interfaces.version>
     <common-utitlities.version>${GLOBAL_VERSION}</common-utitlities.version>
     <rod.version>${GLOBAL_VERSION}</rod.version>
-    <orchestrator.version>${GLOBAL_VERSION}</orchestrator.version>
+    <orchestrator.version>${GLOBAL_VERSION}</orchestrator.version> -->
   </properties>
 </project>
