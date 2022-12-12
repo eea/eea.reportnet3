@@ -1,9 +1,9 @@
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
-import { JobsStatusesConfig } from './config/JobStatusesConfig';
+import { ControlStatusesConfig } from './config/ControlStatusesConfig';
 
-export const JobsStatusesRepository = {
-  getJobsStatuses: async ({
+export const ControlStatusesRepository = {
+  getControlStatuses: async ({
     pageNum,
     numberRows,
     sortOrder,
@@ -17,7 +17,7 @@ export const JobsStatusesRepository = {
     jobStatus
   }) =>
     await HTTPRequester.get({
-      url: getUrl(JobsStatusesConfig.getJobsStatuses, {
+      url: getUrl(ControlStatusesConfig.getControlStatuses, {
         pageNum,
         numberRows,
         sortOrder,

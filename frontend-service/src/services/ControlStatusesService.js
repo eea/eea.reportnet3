@@ -1,10 +1,10 @@
-import { JobsStatusesRepository } from 'repositories/JobsStatusesRepository';
+import { ControlStatusesRepository } from 'repositories/ControlStatusesRepository';
 
-import { JobsStatusesUtils } from './_utils/JobsStatusesUtils';
+// import { JobsStatusesUtils } from './_utils/JobsStatusesUtils';
 import { ServiceUtils } from 'services/_utils/ServiceUtils';
 
-export const JobsStatusesService = {
-  getJobsStatuses: async ({
+export const ControlStatusesService = {
+  getControlStatuses: async ({
     pageNum,
     numberRows,
     sortOrder,
@@ -17,13 +17,13 @@ export const JobsStatusesService = {
     creatorUsername,
     jobStatus
   }) => {
-    const parsedSortField = JobsStatusesUtils.parseSortField(sortField);
+    // const parsedSortField = JobsStatusesUtils.parseSortField(sortField);
 
-    const response = await JobsStatusesRepository.getJobsStatuses({
+    const response = await ControlStatusesRepository.getControlStatuses({
       pageNum,
       numberRows,
       sortOrder: ServiceUtils.getSortOrder(sortOrder),
-      sortField: parsedSortField,
+      // sortField: parsedSortField,
       jobId,
       jobType,
       dataflowId,

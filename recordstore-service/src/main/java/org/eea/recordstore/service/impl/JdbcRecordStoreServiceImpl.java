@@ -1152,7 +1152,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             LOG.info("Method restoreSpecificFileSnapshot ends with datasetId: {}", datasetId);
         } catch (Exception e) {
             LOG_ERROR.error(
-                "Error in method restoreSpecificFileSnapshot for datasetId: {} with error {}",
+                "Error in method restoreSpecificFileSnapshot for datasetId: {} with error",
                 datasetId, e);
             throw e;
         }
@@ -1944,25 +1944,26 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
 
         for (int i = startingNumber; i <= endingNumber; i++) {
-            String splitFile = pathSnapshot + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i,
-                LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+          String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+          String splitFile = pathSnapshot + splitFileName;
             try {
-                TaskVO task = taskService.findReleaseTaskBySplitFileName(splitFile);
+                TaskVO task = taskService.findReleaseTaskBySplitFileName(splitFileName);
+                LOG.info("Method copyProcessSpecificSnapshot for file {} found task {}", splitFileName, task);
 
-                LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFile, idSnapshot, processId);
+                LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
                 task.setStartingDate(new Date());
                 task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-                taskService.updateTask(task);
-                LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFile, idSnapshot, processId);
+                taskService.updateTaskStartingDate(task);
+                LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and release processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
 
                 LOG.info("Recover copy file {}", splitFile);
                 copyFromFileRecovery(copyQueryField, splitFile, cm);
 
-                LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFile, idSnapshot, processId);
+                LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
                 task.setFinishDate(new Date());
                 task.setStatus(ProcessStatusEnum.FINISHED);
                 taskService.updateTask(task);
-                LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFile, idSnapshot, processId);
+                LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and release processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
 
                 try {
                     LOG.info("Recover file {} copied and will be deleted", splitFile);
@@ -1970,7 +1971,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     LOG.info("Recover file {} has been deleted", splitFile);
                 } catch (Exception e) {
                     LOG.error("Error while trying to delete split snap file {} for datasetId {}",
-                        splitFile, datasetId);
+                        splitFile, datasetId, e);
                 }
             } catch (Exception e) {
                 LOG_ERROR.error("Error in copy field process for snapshotId {} with error",

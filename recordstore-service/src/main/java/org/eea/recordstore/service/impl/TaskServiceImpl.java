@@ -45,12 +45,12 @@ public class TaskServiceImpl implements TaskService {
 
     /**
      *
-     * @param json
+     * @param splitFileName
      * @return
      */
     @Override
-    public TaskVO findReleaseTaskBySplitFileName(String json) {
-        Task task = taskRepository.findByJsonSplitFileName(json);
+    public TaskVO findReleaseTaskBySplitFileName(String splitFileName) {
+        Task task = taskRepository.findByJsonSplitFileName(splitFileName);
         return taskMapper.entityToClass(task);
     }
 
@@ -63,5 +63,16 @@ public class TaskServiceImpl implements TaskService {
     public List<TaskVO> findTaskByProcessId(String processId) {
         List<Task> tasks = taskRepository.findByProcessId(processId);
         return taskMapper.entityListToClass(tasks);
+    }
+
+    /**
+     * Updates start date of task
+     * @param taskVO
+     * @return
+     */
+    @Transactional
+    @Override
+    public void updateTaskStartingDate(TaskVO taskVO) {
+        taskRepository.updateStatusAndSAndStartingDate(taskVO.getId(), taskVO.getStatus().toString(), taskVO.getStartingDate());
     }
 }

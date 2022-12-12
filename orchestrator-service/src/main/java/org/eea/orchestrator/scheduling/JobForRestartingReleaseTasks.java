@@ -56,7 +56,7 @@ public class JobForRestartingReleaseTasks {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> restartReleaseTasks(),
-            new CronTrigger("0 0 * * * *"));
+            new CronTrigger("0 */30 * * * *"));
     }
 
     /**
@@ -101,7 +101,7 @@ public class JobForRestartingReleaseTasks {
                 });
             }
         } catch (Exception e) {
-            LOG.error("Error while restarting release task {}", e.getMessage());
+            LOG.error("Error while restarting release task", e.getMessage());
         }
     }
 }

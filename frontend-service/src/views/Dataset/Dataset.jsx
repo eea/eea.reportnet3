@@ -585,7 +585,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       }
     }
   };
-  
+
   useEffect(() => {
     const isNotification = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
@@ -609,7 +609,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     const isImportDataCompleted = notificationContext.toShow.find(
       notification => notification.key === 'IMPORT_REPORTING_COMPLETED_EVENT'
     );
-    
+
     const isRestoreSnapshotDataCompleted = notificationContext.toShow.some(
       notification => notification.key === 'RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT'
     );
@@ -621,11 +621,12 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     const isDeletedTableDataCompleted = notificationContext.toShow.find(
       notification => notification.key === 'DELETE_TABLE_COMPLETED_EVENT'
     );
-          
+
     if (
-      (isImportDataCompleted && (isImportDataCompleted.content?.datasetId.toString() === datasetId.toString())) ||
-      (isDeletedDataCompleted && (isDeletedDataCompleted.content?.datasetId.toString() === datasetId.toString())) ||
-      (isDeletedTableDataCompleted && (isDeletedTableDataCompleted.content?.datasetId.toString() === datasetId.toString()))
+      (isImportDataCompleted && isImportDataCompleted.content?.datasetId.toString() === datasetId.toString()) ||
+      (isDeletedDataCompleted && isDeletedDataCompleted.content?.datasetId.toString() === datasetId.toString()) ||
+      (isDeletedTableDataCompleted &&
+        isDeletedTableDataCompleted.content?.datasetId.toString() === datasetId.toString())
     ) {
       onHighlightRefresh(true);
     }
