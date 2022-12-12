@@ -598,7 +598,7 @@ public class ReleaseSaga {
         });
     }
 
-    @SagaEventHandler(associationProperty = "transationId")
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(UpdateMaterializedViewFailedEvent event, MetaData metaData) {
         LOG.info("UpdateMaterializedViewFailedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
