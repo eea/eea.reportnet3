@@ -13,7 +13,7 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <common-interfaces.version>"${params.Version}"</common-interfaces.version>
-    <common-utitlities.version>"${params.Version}"</common-utitlities.version>
-  </properties> 
+    <common-interfaces.version>v3.1.6-DEV</common-interfaces.version>
+    <common-utitlities.version>v3.1.6-DEV</common-utitlities.version>
+  </properties>
 </project>

@@ -80,7 +80,7 @@ pipeline {
                     env.FRONTEND_VERSION = "${params.Version}"
                     env.ROD_VERSION = "${params.Version}"
                     env.COLLABORATION_VERSION = "${params.Version}"
-                    // env.DATAFLOW_VERSION = sh script: 'mvn -f $WORKSPACE/build-version/parent/pom.xml  help:evaluate -Dexpression=dataflow.version -q -DforceStdout', returnStdout: true
+                    //env.DATAFLOW_VERSION = sh script: 'mvn -f $WORKSPACE/build-version/parent/pom.xml  help:evaluate -Dexpression=dataflow.version -q -DforceStdout', returnStdout: true
                     //env.DATASET_VERSION = sh script: 'mvn -f $WORKSPACE/build-version/parent/pom.xml  help:evaluate -Dexpression=dataset.version -q -DforceStdout', returnStdout: true
                     //env.RECORDSTORE_VERSION = sh script: 'mvn -f $WORKSPACE/build-version/parent/pom.xml  help:evaluate -Dexpression=recordstore.version -q -DforceStdout', returnStdout: true
                     //env.VALIDATION_VERSION = sh script: 'mvn -f $WORKSPACE/build-version/parent/pom.xml  help:evaluate -Dexpression=validation.version -q -DforceStdout', returnStdout: true
