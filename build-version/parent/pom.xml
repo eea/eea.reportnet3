@@ -12,10 +12,10 @@
   <artifactId>eea-pom</artifactId>
   <packaging>pom</packaging>
   <version>3.0.0</version>
-  <properties>
+<!--   <properties>
     <api-gateway.version>${GLOBAL_VERSION}</api-gateway.version>
     <communication.version>${params.Version}</communication.version>
-    <!-- <collaboration.version>${GLOBAL_VERSION}</collaboration.version>
+    <collaboration.version>${GLOBAL_VERSION}</collaboration.version>
     <dataflow.version>${GLOBAL_VERSION}</dataflow.version>
     <dataset.version>${GLOBAL_VERSION}</dataset.version>
     <document.version>${GLOBAL_VERSION}</document.version>
@@ -28,6 +28,6 @@
     <common-interfaces.version>${GLOBAL_VERSION}</common-interfaces.version>
     <common-utitlities.version>${GLOBAL_VERSION}</common-utitlities.version>
     <rod.version>${GLOBAL_VERSION}</rod.version>
-    <orchestrator.version>${GLOBAL_VERSION}</orchestrator.version> -->
-  </properties>
+    <orchestrator.version>${GLOBAL_VERSION}</orchestrator.version>
+  </properties> -->
 </project>
