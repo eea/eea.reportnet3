@@ -65,6 +65,7 @@ pipeline {
             steps{
                 script {
 
+                    env.GLOBAL_VERSION = "${params.Version}"
                     env.DATAFLOW_VERSION = sh script: 'mvn -f $WORKSPACE/build-version/parent/pom.xml  help:evaluate -Dexpression=dataflow.version -q -DforceStdout', returnStdout: true
                     env.DATASET_VERSION = sh script: 'mvn -f $WORKSPACE/build-version/parent/pom.xml  help:evaluate -Dexpression=dataset.version -q -DforceStdout', returnStdout: true
                     env.RECORDSTORE_VERSION = sh script: 'mvn -f $WORKSPACE/build-version/parent/pom.xml  help:evaluate -Dexpression=recordstore.version -q -DforceStdout', returnStdout: true

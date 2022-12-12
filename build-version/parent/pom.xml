@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.6-DEV</api-gateway.version>
-    <communication.version>v3.1.6-DEV</communication.version>
-    <collaboration.version>v3.1.6-DEV</collaboration.version>
-    <dataflow.version>v3.1.6-DEV</dataflow.version>
-    <dataset.version>v3.1.6-DEV</dataset.version>
-    <document.version>v3.1.6-DEV</document.version>
-    <frontend.version>v3.1.6-DEV</frontend.version>
-    <indexsearch.version>v3.1.6-DEV</indexsearch.version>
-    <inspire.version>v3.1.6-DEV</inspire.version>
-    <recordstore.version>v3.1.6-DEV</recordstore.version>
-    <ums.version>v3.1.6-DEV</ums.version>
-    <validation.version>v3.1.6-DEV</validation.version>
-    <common-interfaces.version>v3.1.6-DEV</common-interfaces.version>
-    <common-utitlities.version>v3.1.6-DEV</common-utitlities.version>
-    <rod.version>v3.1.6-DEV</rod.version>
-    <orchestrator.version>v3.1.6-DEV</orchestrator.version>
+    <api-gateway.version>${env.GLOBAL_VERSION}</api-gateway.version>
+    <communication.version>${env.GLOBAL_VERSION}</communication.version>
+    <collaboration.version>${env.GLOBAL_VERSION}</collaboration.version>
+    <dataflow.version>${env.GLOBAL_VERSION}</dataflow.version>
+    <dataset.version>${env.GLOBAL_VERSION}</dataset.version>
+    <document.version>${GLOBAL_VERSION}</document.version>
+    <frontend.version>${GLOBAL_VERSION}</frontend.version>
+    <indexsearch.version>${GLOBAL_VERSION}</indexsearch.version>
+    <inspire.version>${GLOBAL_VERSION}</inspire.version>
+    <recordstore.version>${GLOBAL_VERSION}</recordstore.version>
+    <ums.version>${GLOBAL_VERSION}</ums.version>
+    <validation.version>${GLOBAL_VERSION}</validation.version>
+    <common-interfaces.version>${GLOBAL_VERSION}</common-interfaces.version>
+    <common-utitlities.version>${GLOBAL_VERSION}</common-utitlities.version>
+    <rod.version>${GLOBAL_VERSION}</rod.version>
+    <orchestrator.version>${GLOBAL_VERSION}</orchestrator.version>
   </properties>
 </project>
