@@ -320,9 +320,9 @@ public class ValidationHelper implements DisposableBean {
       } else {
         deleteLockToReleaseProcess(datasetId);
 
-        ProcessVO process = processControllerZuul.findById(processId);
-        if (process.getAggregateId()!=null) {
-          DomainEventStream events = embeddedEventStore.readEvents(process.getAggregateId());
+        JobProcessVO jobProcessVO = jobProcessControllerZuul.findJobProcessByProcessId(processId);
+        if (jobProcessVO.getAggregateId()!=null) {
+          DomainEventStream events = embeddedEventStore.readEvents(jobProcessVO.getAggregateId());
           Optional<? extends DomainEventMessage<?>> domainEventMessage = events.asStream().findFirst();
           if (domainEventMessage.isPresent()) {
               MetaData metadata = domainEventMessage.get().getMetaData();
