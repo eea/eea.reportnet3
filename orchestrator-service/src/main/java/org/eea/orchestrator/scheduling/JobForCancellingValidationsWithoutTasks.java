@@ -52,7 +52,7 @@ public class JobForCancellingValidationsWithoutTasks {
                         LOG.info("Updating validation process to status CANCELLED for processId", processVO.getProcessId());
                         processControllerZuul.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(),
                                 ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, processVO.getProcessId(),
-                                SecurityContextHolder.getContext().getAuthentication().getName(), processVO.getPriority(), processVO.isReleased());
+                                processVO.getUser(), processVO.getPriority(), processVO.isReleased());
                         LOG.info("Updated validation process to status CANCELLED for processId", processVO.getProcessId());
 
                     } catch (Exception e) {

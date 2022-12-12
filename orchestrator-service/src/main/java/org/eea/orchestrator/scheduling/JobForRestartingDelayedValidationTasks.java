@@ -20,7 +20,7 @@ import java.util.List;
 @Component
 public class JobForRestartingDelayedValidationTasks {
 
-    @Value(value = "${scheduling.inProgress.task.max.time}")
+    @Value(value = "${scheduling.inProgress.validation.task.max.time}")
     private long maxTimeInMinutesForInProgressTasks;
 
     /**
