@@ -215,7 +215,7 @@ public class ProcessControllerImpl implements ProcessController {
    * @return
    */
   @Override
-  @GetMapping(value = "/listValidationProcessesInProgress/{timeInMinutes}")
+  @GetMapping(value = "/private/listValidationProcessesInProgress/{timeInMinutes}")
   @ApiOperation(value = "Lists the validation processes that are in progress for more than the specified period of time", hidden = true)
   public List<ProcessVO> listInProgressValidationProcessesThatExceedTime(@ApiParam(
           value = "Time limit in minutes that in progress validation processes exceed",

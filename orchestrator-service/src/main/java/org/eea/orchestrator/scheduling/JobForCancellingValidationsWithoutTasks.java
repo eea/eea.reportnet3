@@ -1,18 +1,15 @@
 package org.eea.orchestrator.scheduling;
 
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
-import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
-import org.eea.interfaces.vo.ums.TokenVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -26,21 +23,6 @@ public class JobForCancellingValidationsWithoutTasks {
     private long maxTimeInMinutesForInProgressValidationWithoutTasks;
 
     /**
-     * The admin user.
-     */
-    @Value("${eea.keycloak.admin.user}")
-    private String adminUser;
-
-    /**
-     * The admin pass.
-     */
-    @Value("${eea.keycloak.admin.password}")
-    private String adminPass;
-
-
-    private static final String BEARER = "Bearer ";
-
-    /**
      * The Constant LOG.
      */
     private static final Logger LOG = LoggerFactory.getLogger(JobForCancellingValidationsWithoutTasks.class);
@@ -48,15 +30,12 @@ public class JobForCancellingValidationsWithoutTasks {
     @Autowired
     private ProcessControllerZuul processControllerZuul;
 
-    @Autowired
-    private UserManagementControllerZull userManagementControllerZull;
-
     @PostConstruct
     private void init() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> cancelInProgressValidationsWithoutTasks(),
-                new CronTrigger("0 */5 * * * *"));
+                new CronTrigger("0 0 * * * *"));
     }
 
     /**
@@ -68,10 +47,6 @@ public class JobForCancellingValidationsWithoutTasks {
             List<ProcessVO> processesInProgress = processControllerZuul.listInProgressValidationProcessesThatExceedTime(maxTimeInMinutesForInProgressValidationWithoutTasks);
             if (processesInProgress.size() > 0) {
                 LOG.info("Cancelling processes " + processesInProgress);
-                TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
                 processesInProgress.stream().forEach(processVO -> {
                     try {
                         LOG.info("Updating validation process to status CANCELLED for processId", processVO.getProcessId());

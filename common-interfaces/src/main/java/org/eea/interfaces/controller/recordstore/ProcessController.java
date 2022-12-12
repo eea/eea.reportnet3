@@ -132,6 +132,6 @@ public interface ProcessController {
    * @param timeInMinutes
    * @return
    */
-  @GetMapping(value = "/listValidationProcessesInProgress/{timeInMinutes}")
+  @GetMapping(value = "/private/listValidationProcessesInProgress/{timeInMinutes}")
   List<ProcessVO> listInProgressValidationProcessesThatExceedTime(@PathVariable("timeInMinutes") long timeInMinutes);
 }
