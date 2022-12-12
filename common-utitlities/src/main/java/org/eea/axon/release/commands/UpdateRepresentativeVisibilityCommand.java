@@ -1,15 +1,13 @@
 package org.eea.axon.release.commands;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 import java.util.List;
 
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class UpdateRepresentativeVisibilityCommand {
@@ -28,4 +26,5 @@ public class UpdateRepresentativeVisibilityCommand {
     private boolean restrictFromPublic;
     private boolean validate;
     private List<Long> datasetIds;
+    private Long jobId;
 }

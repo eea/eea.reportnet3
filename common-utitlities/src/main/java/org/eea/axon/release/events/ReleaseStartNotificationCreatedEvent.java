@@ -21,5 +21,5 @@ public class ReleaseStartNotificationCreatedEvent {
    private Long dataflowId;
    private boolean restrictFromPublic;
    private boolean validate;
-
+   private Long jobId;
 }

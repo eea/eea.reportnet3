@@ -3,38 +3,16 @@
  */
 package org.eea.dataset.service.helper;
 
-import java.io.*;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
-import javax.annotation.PostConstruct;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
-import org.eea.dataset.persistence.data.domain.AttachmentValue;
-import org.eea.dataset.persistence.data.domain.DatasetValue;
-import org.eea.dataset.persistence.data.domain.FieldValue;
-import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.data.repository.AttachmentRepository;
-import org.eea.dataset.persistence.data.repository.DatasetRepository;
-import org.eea.dataset.persistence.data.repository.FieldRepository;
-import org.eea.dataset.persistence.data.repository.RecordRepository;
-import org.eea.dataset.persistence.data.repository.TableRepository;
+import org.eea.dataset.persistence.data.domain.*;
+import org.eea.dataset.persistence.data.repository.*;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
@@ -70,12 +48,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.ETLDatasetVO;
-import org.eea.interfaces.vo.dataset.ETLFieldVO;
-import org.eea.interfaces.vo.dataset.ETLRecordVO;
-import org.eea.interfaces.vo.dataset.ETLTableVO;
-import org.eea.interfaces.vo.dataset.ExportFilterVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -109,7 +82,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
-import feign.FeignException;
+
+import javax.annotation.PostConstruct;
+import java.io.*;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
+import java.util.zip.*;
 
 /**
  * The Class FileTreatmentHelper.
@@ -362,7 +345,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, defaultReleaseStatusToBeChanged);
 
         if(jobId != null){
-            JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
+            JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID, datasetId, null, null);
             jobProcessControllerZuul.save(jobProcessVO);
         }
 

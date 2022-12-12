@@ -47,8 +47,24 @@ public class JobProcessServiceImpl implements JobProcessService {
         return null;
     }
 
+    /**
+     * Finds processes by job id
+     * @param jobId
+     * @return
+     */
     @Override
     public List<String> findProcessesByJobId(Long jobId) {
         return jobProcessRepository.findProcessesByJobId(jobId);
+    }
+
+    /**
+     * Finds jobProcess by processId
+     * @param processId
+     * @return
+     */
+    @Override
+    public JobProcessVO findJobProcessByProcessId(String processId) {
+        JobProcess jobProcess = jobProcessRepository.findByProcessId(processId);
+        return jobProcessMapper.entityToClass(jobProcess);
     }
 }

@@ -34,6 +34,7 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.TaskType;
+import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -329,18 +330,14 @@ public class ValidationHelper implements DisposableBean {
               List<Long> referencesToRefresh = List.copyOf(updateMaterializedViewsOfReferenceDatasetsInSQL(datasetId,
                       dataset.getDataflowId(), dataset.getDatasetSchema()));
               if (referencesToRefresh.size() > 0) {
-                  MaterializedViewShouldBeRefreshedEvent materializedViewShouldBeRefreshedEvent = MaterializedViewShouldBeRefreshedEvent.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
-                          .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).restrictFromPublic(event.isRestrictFromPublic()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).datasetIds(event.getDatasetIds())
-                          .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).datasetProcessId(event.getDatasetProcessId()).build();
-
+                MaterializedViewShouldBeRefreshedEvent materializedViewShouldBeRefreshedEvent = new MaterializedViewShouldBeRefreshedEvent();
+                BeanUtils.copyProperties(event, materializedViewShouldBeRefreshedEvent);
                 materializedViewShouldBeRefreshedEvent.setDatasetIForMaterializedViewEvent(datasetId);
                 materializedViewShouldBeRefreshedEvent.setReferencesToRefresh(referencesToRefresh);
                 eventGateway.publish(GenericDomainEventMessage.asEventMessage(materializedViewShouldBeRefreshedEvent).withMetaData(metadata));
               } else {
-                MaterializedViewShouldBeUpdatedEvent materializedViewShouldBeUpdatedEvent = MaterializedViewShouldBeUpdatedEvent.builder().datasetReleaseAggregateId(event.getDatasetReleaseAggregateId()).transactionId(event.getTransactionId())
-                          .dataflowReleaseAggregateId(event.getDataflowReleaseAggregateId()).restrictFromPublic(event.isRestrictFromPublic()).dataflowId(event.getDataflowId()).dataProviderId(event.getDataProviderId()).datasetIds(event.getDatasetIds())
-                          .communicationReleaseAggregateId(event.getCommunicationReleaseAggregateId()).validationReleaseAggregateId(event.getValidationReleaseAggregateId()).releaseAggregateId(event.getReleaseAggregateId()).build();
-
+                MaterializedViewShouldBeUpdatedEvent materializedViewShouldBeUpdatedEvent = new MaterializedViewShouldBeUpdatedEvent();
+                BeanUtils.copyProperties(event, materializedViewShouldBeUpdatedEvent);
                 materializedViewShouldBeUpdatedEvent.setDatasetIForMaterializedViewEvent(datasetId);
                 materializedViewShouldBeUpdatedEvent.setReferencesToRefresh(referencesToRefresh);
                 eventGateway.publish(GenericDomainEventMessage.asEventMessage(materializedViewShouldBeUpdatedEvent).withMetaData(metadata));
@@ -1156,7 +1153,8 @@ public class ValidationHelper implements DisposableBean {
               ProcessTypeEnum.VALIDATION, processId,
               SecurityContextHolder.getContext().getAuthentication().getName(), 0, null)) {
 
-            Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+            JobProcessVO jobProcessVO = jobProcessControllerZuul.findJobProcessByProcessId(processId);
+            Long jobId = jobProcessVO!=null ? jobProcessVO.getJobId() : null;
 
             if (datasetId.equals(process.getDatasetId()) && process.isReleased()) {
               ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
@@ -1164,15 +1162,15 @@ public class ValidationHelper implements DisposableBean {
                 executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
                     true);
               } else if (processControllerZuul.isProcessFinished(processId)) {
-                ProcessVO processVO = processControllerZuul.findById(processId);
-
-                DomainEventStream events = embeddedEventStore.readEvents(processVO.getAggregateId());
-                Optional<? extends DomainEventMessage<?>> domainEventMessage = events.asStream().findFirst();
-                if (domainEventMessage.isPresent()) {
+                if (jobProcessVO!=null && jobProcessVO.getAggregateId()!=null) {
+                  DomainEventStream events = embeddedEventStore.readEvents(jobProcessVO.getAggregateId());
+                  Optional<? extends DomainEventMessage<?>> domainEventMessage = events.asStream().findFirst();
                   MetaData metadata = domainEventMessage.get().getMetaData();
                   ValidationProcessForReleaseCreatedEvent processForReleaseCreatedEvent = (ValidationProcessForReleaseCreatedEvent) domainEventMessage.get().getPayload();
                   ValidationForReleaseFinishedEvent event = new ValidationForReleaseFinishedEvent();
                   BeanUtils.copyProperties(processForReleaseCreatedEvent, event);
+
+                  jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
                   eventGateway.publish(GenericDomainEventMessage.asEventMessage(event).withMetaData(metadata));
                 } else {
                   if (jobId!=null) {

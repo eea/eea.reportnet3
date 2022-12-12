@@ -26,5 +26,8 @@ public class DataRestoredFromSnapshotEvent {
     private boolean validate;
     private List<Long> datasetIds;
     private Map<Long, Long> datasetSnapshots;
+    private Map<Long, String> datasetReleaseProcessId;
     private Map<Long, Long> datasetDataCollection;
+    private List<Long> datasetsReleased;
+    private Long jobId;
 }

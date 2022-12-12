@@ -36,4 +36,12 @@ public interface JobProcessController {
      */
     @GetMapping(value = "/findProcessesByJobId/{jobId}")
     List<String> findProcessesByJobId(@PathVariable("jobId") Long jobId);
+
+    /**
+     * Finds jobProcess by process id
+     * @param processId
+     * @return
+     */
+    @GetMapping(value = "/findJobProcessByProcessId/{processId}")
+    JobProcessVO findJobProcessByProcessId(@PathVariable("processId") String processId);
 }

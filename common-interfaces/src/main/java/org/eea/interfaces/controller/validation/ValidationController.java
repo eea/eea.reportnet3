@@ -120,7 +120,7 @@ public interface ValidationController {
   void restartTask(@PathVariable("taskId") Long taskId);
 
   /**
-   * Lists the task ids of tasks that are in progress for more than the specified period of time
+   * Lists the task ids of validation tasks that are in progress for more than the specified period of time
    * @param timeInMinutes
    * @return
    */

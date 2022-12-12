@@ -59,7 +59,7 @@ public class CollaborationReleaseAggregate {
             BeanUtils.copyProperties(command, event);
             apply(event);
         } catch(Exception e) {
-            LOG.error("Error while creating message for successful release of dataset {}, dataflowId {}, dataProviderId {}: {}", command.getDatasetName(), command.getDataflowId(), command.getDataProviderId(), e.getMessage());
+            LOG.error("Error while creating message for successful release of dataset {}, dataflowId {}, dataProviderId {}, jobId {}, {}", command.getDatasetName(), command.getDataflowId(), command.getDataProviderId(), command.getJobId(), e.getMessage());
             throw e;
         }
     }

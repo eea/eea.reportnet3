@@ -23,4 +23,13 @@ public class JobProcessVO {
 
     /** The process id. */
     private String processId;
+
+    /** The dataset id */
+    private Long datasetId;
+
+    /** The saga transaction id */
+    private String sagaTransactionId;
+
+    /** The aggregate id */
+    private String aggregateId;
 }

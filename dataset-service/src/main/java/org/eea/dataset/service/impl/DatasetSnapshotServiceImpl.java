@@ -523,12 +523,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
   @Override
-  public void deleteProvider(Long dataCollectionId, Long providerId, String processId) {
+  public void deleteProvider(Long dataCollectionId, Long providerId) {
     DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
     if (provider != null && dataCollectionId != null) {
       TenantResolver
               .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, dataCollectionId));
-      deleteHelper.deleteRecordValuesByProvider(dataCollectionId, provider.getCode(), processId);
+      deleteHelper.deleteRecordValuesByProvider(dataCollectionId, provider.getCode());
     }
   }
 
@@ -563,7 +563,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     if (provider != null && idDataCollection != null) {
       TenantResolver
           .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataCollection));
-      deleteHelper.deleteRecordValuesByProvider(idDataCollection, provider.getCode(), processId);
+      deleteHelper.deleteRecordValuesByProvider(idDataCollection, provider.getCode());
 
       // Restore data from snapshot
       try {
@@ -1339,11 +1339,6 @@ public void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId)
     if (lockVO == null) {
       lockService.createLock(timestamp, userName, LockType.METHOD, populateEuDataset);
     }
-  }
-
-  @Override
-  public Long findDataCollectionIdBySnapshotId(Long snapshotId) {
-    return snapshotRepository.findDataCollectionIdBySnapshotId(snapshotId);
   }
 
   @Override

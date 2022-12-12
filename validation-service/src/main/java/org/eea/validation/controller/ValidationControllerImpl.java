@@ -147,7 +147,7 @@ public class ValidationControllerImpl implements ValidationController {
           ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, uuid,
           SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
       if (jobId!=null) {
-        JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, uuid);
+        JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, uuid, datasetId, null, null);
         jobProcessControllerZuul.save(jobProcessVO);
       }
 
@@ -162,7 +162,7 @@ public class ValidationControllerImpl implements ValidationController {
           SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
 
       if (jobId!=null) {
-        JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, uuid);
+        JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, uuid, datasetId, null, null);
         jobProcessControllerZuul.save(jobProcessVO);
       }
       datasets.remove(datasetId);
@@ -173,7 +173,7 @@ public class ValidationControllerImpl implements ValidationController {
             SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
 
         if (jobId!=null) {
-          JobProcessVO jobProcess = new JobProcessVO(null, jobId, processId);
+          JobProcessVO jobProcess = new JobProcessVO(null, jobId, processId, datasetToReleaseId, null, null);
           jobProcessControllerZuul.save(jobProcess);
         }
       }
@@ -445,15 +445,15 @@ public class ValidationControllerImpl implements ValidationController {
 
   @Override
   @GetMapping(value = "/listTasksInProgress/{timeInMinutes}")
-  @ApiOperation(value = "Lists the tasks that are in progress for more than the specified period of time", hidden = true)
+  @ApiOperation(value = "Lists the validation tasks that are in progress for more than the specified period of time", hidden = true)
   public List<BigInteger> listTasksInProgress(@ApiParam(
           value = "Time limit in minutes that in progress tasks exceed",
           example = "15") @PathVariable("timeInMinutes") long timeInMinutes) {
-    LOG.info("Finding in progress tasks that exceed " + timeInMinutes + " minutes");
+    LOG.info("Finding in progress validation tasks that exceed " + timeInMinutes + " minutes");
     try {
       return validationHelper.getTasksInProgress(timeInMinutes);
     } catch (Exception e) {
-      LOG.error("Error while finding in progress tasks that exceed " + timeInMinutes + " minutes " + e.getMessage());
+      LOG.error("Error while finding in progress validation tasks that exceed " + timeInMinutes + " minutes " + e.getMessage());
       return new ArrayList<>();
     }
   }

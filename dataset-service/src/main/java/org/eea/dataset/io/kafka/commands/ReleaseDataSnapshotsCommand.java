@@ -169,7 +169,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
         if (jobId!=null) {
           LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextProcessId);
-          JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, nextProcessId);
+          JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, nextProcessId, nextData, null, null);
           jobProcessControllerZuul.save(jobProcessVO);
           LOG.info("Created jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextProcessId);
         }

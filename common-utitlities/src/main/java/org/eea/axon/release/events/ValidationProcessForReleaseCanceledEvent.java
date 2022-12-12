@@ -25,4 +25,5 @@ public class ValidationProcessForReleaseCanceledEvent {
     private boolean restrictFromPublic;
     private boolean validate;
     private List<Long> datasetIds;
+    private Long jobId;
 }

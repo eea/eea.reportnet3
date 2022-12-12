@@ -304,14 +304,7 @@ public interface DatasetSnapshotService {
    * @param idDataset
    * @param providerId
    */
-  void deleteProvider(Long idDataset, Long providerId, String processId);
-
-  /**
-   *
-   * @param snapshotId
-   * @return
-   */
-  Long findDataCollectionIdBySnapshotId(Long snapshotId);
+  void deleteProvider(Long idDataset, Long providerId);
 
   /**
    * Changes dataset status

@@ -24,4 +24,5 @@ public class FailureReleaseLocksRemovedEvent {
    private boolean restrictFromPublic;
    private boolean validate;
    private List<Long> datasetIds;
+   private Long jobId;
 }

@@ -1,5 +1,9 @@
 package org.eea.orchestrator.service.impl;
 
+import org.axonframework.commandhandling.GenericCommandMessage;
+import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.messaging.MetaData;
+import org.eea.axon.release.commands.CreateReleaseStartNotificationCommand;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.orchestrator.JobVO;
@@ -17,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -62,6 +68,14 @@ public class JobServiceImpl implements JobService {
     /** The job utils. */
     @Autowired
     private JobUtils jobUtils;
+
+    @Autowired
+    private transient CommandGateway commandGateway;
+
+    /**
+     * enable release with saga implementation
+     */
+    private boolean enableReleaseSaga = true;
 
     @Override
     public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, Long providerId,
@@ -206,7 +220,15 @@ public class JobServiceImpl implements JobService {
         Long dataProviderId = Long.valueOf((Integer) parameters.get("dataProviderId"));
         Boolean restrictFromPublic = (Boolean) parameters.get("restrictFromPublic");
         Boolean validate = (Boolean) parameters.get("validate");
-        dataSetSnapshotControllerZuul.createReleaseSnapshots(dataflowId, dataProviderId, restrictFromPublic, validate, jobVO.getId());
+        if (this.enableReleaseSaga) {
+            LOG.info("Starting release process for dataflow {}, dataProvider {}", dataflowId, dataProviderId);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            CreateReleaseStartNotificationCommand command = CreateReleaseStartNotificationCommand.builder().transactionId(UUID.randomUUID().toString()).releaseAggregateId(UUID.randomUUID().toString())
+                    .dataflowId(dataflowId).dataProviderId(dataProviderId).restrictFromPublic(restrictFromPublic).validate(validate).jobId(jobVO.getId()).build();
+            commandGateway.send(GenericCommandMessage.asCommandMessage(command).withMetaData(MetaData.with("auth", authentication)));
+        } else {
+            dataSetSnapshotControllerZuul.createReleaseSnapshots(dataflowId, dataProviderId, restrictFromPublic, validate, jobVO.getId());
+        }
     }
 
     @Transactional

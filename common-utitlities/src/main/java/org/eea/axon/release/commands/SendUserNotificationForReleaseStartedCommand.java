@@ -12,7 +12,8 @@ import java.util.Map;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SendUserNotificationForReleaseStartedCommand   {
+public class SendUserNotificationForReleaseStartedCommand {
+
     @TargetAggregateIdentifier
     private String communicationReleaseAggregateId;
     private String datasetReleaseAggregateId;
@@ -26,6 +27,5 @@ public class SendUserNotificationForReleaseStartedCommand   {
     private Long dataProviderId;
     private boolean restrictFromPublic;
     private boolean validate;
-
-
+    private Long jobId;
 }

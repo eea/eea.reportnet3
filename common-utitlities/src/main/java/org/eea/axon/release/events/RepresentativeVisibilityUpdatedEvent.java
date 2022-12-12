@@ -24,4 +24,5 @@ public class RepresentativeVisibilityUpdatedEvent {
     private boolean restrictFromPublic;
     private boolean validate;
     private List<Long> datasetIds;
+    private Long jobId;
 }

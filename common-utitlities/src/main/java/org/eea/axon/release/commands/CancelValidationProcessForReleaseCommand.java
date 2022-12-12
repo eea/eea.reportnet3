@@ -1,14 +1,13 @@
 package org.eea.axon.release.commands;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 import java.util.List;
+import java.util.Map;
 
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
@@ -28,4 +27,6 @@ public class CancelValidationProcessForReleaseCommand {
     private boolean restrictFromPublic;
     private boolean validate;
     private List<Long> datasetIds;
+    private Map<Long, String> datasetValidationProcessId;
+    private Long jobId;
 }

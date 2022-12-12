@@ -1,9 +1,10 @@
 package org.eea.interfaces.vo.recordstore;
 
-import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import java.util.Date;
 
 /**
  * The Class ProcessVO.
@@ -54,11 +55,5 @@ public class ProcessVO {
 
   /** The process id. */
   private String processId;
-
-  /** the sagaTransactionId*/
-  private String sagaTransactionId;
-
-  /** the aggregateId*/
-  private String aggregateId;
 
 }

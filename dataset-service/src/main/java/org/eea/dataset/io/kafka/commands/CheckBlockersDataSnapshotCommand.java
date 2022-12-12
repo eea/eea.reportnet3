@@ -188,7 +188,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now());
 
         LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
-        JobProcessVO jobProcessVO = new JobProcessVO(null, releaseJob.getId(), processId);
+        JobProcessVO jobProcessVO = new JobProcessVO(null, releaseJob.getId(), processId, datasets.get(0), null, null);
         jobProcessControllerZuul.save(jobProcessVO);
         LOG.info("Created jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
 

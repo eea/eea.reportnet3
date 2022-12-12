@@ -1,16 +1,15 @@
 package org.eea.axon.release.commands;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class RestoreDataFromSnapshotCommand {
@@ -30,5 +29,9 @@ public class RestoreDataFromSnapshotCommand {
     private boolean validate;
     private List<Long> datasetIds;
     private Map<Long, Long> datasetSnapshots;
+    private Map<Long, String> datasetReleaseProcessId;
     private Map<Long, Long> datasetDataCollection;
+    private List<Long> datasetsReleased;
+    private Long datasetToRelease;
+    private Long jobId;
 }

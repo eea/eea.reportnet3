@@ -164,6 +164,7 @@ public class JobControllerImpl implements JobController {
         parameters.put("restrictFromPublic", restrictFromPublic);
         parameters.put("validate", validate);
         parameters.put("datasetId", datasetIds);
+        parameters.put("authorities", SecurityContextHolder.getContext().getAuthentication().getAuthorities());
         JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), dataflowId, dataProviderId, datasetIds, true);
 
         LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);

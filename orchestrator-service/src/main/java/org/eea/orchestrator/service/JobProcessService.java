@@ -11,4 +11,6 @@ public interface JobProcessService {
     Long findJobIdByProcessId(String processId);
 
     List<String> findProcessesByJobId(Long jobId);
+
+    JobProcessVO findJobProcessByProcessId(String processId);
 }

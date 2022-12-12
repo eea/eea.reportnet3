@@ -40,14 +40,14 @@ public class DataflowReleaseAggregate {
     @CommandHandler
     public DataflowReleaseAggregate(UpdateRepresentativeVisibilityCommand command, RepresentativeService representativeService, MetaData metadata) {
         try {
-            LOG.info("Updating representative visibility for dataflowId: {} dataProvider: {}", command.getDataflowId(), command.getDataProviderId());
+            LOG.info("Updating representative visibility for dataflowId {}, dataProvider {}, jobId {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId());
             representativeService.updateRepresentativeVisibilityRestrictions(command.getDataflowId(), command.getDataProviderId(), command.isRestrictFromPublic());
-            LOG.info("Updated representative visibility for dataflowId: {} dataProvider: {}", command.getDataflowId(), command.getDataProviderId());
+            LOG.info("Updated representative visibility for dataflowId {}, dataProvider {}, jobId {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId());
             RepresentativeVisibilityUpdatedEvent event = new RepresentativeVisibilityUpdatedEvent();
             BeanUtils.copyProperties(command, event);
             apply(event, metadata);
         } catch (Exception e) {
-            LOG.error("Error while updating representative visibility for dataflowId: {} dataProvider: {}: {}", command.getDataflowId(), command.getDataProviderId(), e.getMessage());
+            LOG.error("Error while updating representative visibility for dataflowId {}, dataProvider {}, jobId {}, {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId(), e.getMessage());
             throw e;
         }
     }
@@ -70,16 +70,16 @@ public class DataflowReleaseAggregate {
                 // We only update the representative if the receipt is not outdated
                 if (Boolean.FALSE.equals(representative.getReceiptOutdated())) {
                     representative.setReceiptOutdated(true);
-                    LOG.info("Mark receipt as outdated: dataflowId={}, providerId={}, representativeId={}", command.getDataflowId(), command.getDataProviderId(), representative.getId());
+                    LOG.info("Mark receipt as outdated: dataflowId {}, dataProviderId {}, representativeId {}, jobId {}", command.getDataflowId(), command.getDataProviderId(), representative.getId(), command.getJobId());
                     representativeService.updateDataflowRepresentative(representative);
-                    LOG.info("Receipt marked as outdated: dataflowId={}, providerId={}, representativeId={}", command.getDataflowId(), command.getDataProviderId(), representative.getId());
+                    LOG.info("Receipt marked as outdated: dataflowId {}, dataProviderId {}, representativeId {}, jobId {}", command.getDataflowId(), command.getDataProviderId(), representative.getId(), command.getJobId());
                 }
             }
             InternalRepresentativeUpdatedEvent event = new InternalRepresentativeUpdatedEvent();
             BeanUtils.copyProperties(command, event);
             apply(event, metaData);
         } catch (Exception e) {
-            LOG.error("Error while marking receipt as outdated: dataflowId={}, providerId={}: {}", command.getDataflowId(), command.getDataProviderId(), e.getMessage());
+            LOG.error("Error while marking receipt as outdated: dataflowId {}, dataProviderId {}, jobId {}, {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId(), e.getMessage());
             throw e;
         }
     }
@@ -87,14 +87,14 @@ public class DataflowReleaseAggregate {
     @CommandHandler
     public void handle(RevertRepresentativeVisibilityCommand command, MetaData metaData, RepresentativeService representativeService) {
         try {
-            LOG.info("Reverting representative visibility for dataflowId: {} dataProvider: {}", command.getDataflowId(), command.getDataProviderId());
+            LOG.info("Reverting representative visibility for dataflowId {}, dataProviderId {}, jobId {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId());
             representativeService.updateRepresentativeVisibilityRestrictions(command.getDataflowId(), command.getDataProviderId(), false);
-            LOG.info("Reverted representative visibility for dataflowId: {} dataProvider: {}", command.getDataflowId(), command.getDataProviderId());
+            LOG.info("Reverted representative visibility for dataflowId {}, dataProviderId {}, jobId {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId());
             RepresentativeVisibilityRevertedEvent event = new RepresentativeVisibilityRevertedEvent();
             BeanUtils.copyProperties(command, event);
             apply(event, metaData);
         } catch (Exception e) {
-            LOG.error("Error Reverting representative visibility for dataflowId: {} dataProvider: {}", command.getDataflowId(), command.getDataProviderId());
+            LOG.error("Error Reverting representative visibility for dataflowId {}, dataProviderId {}, jobId {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId());
         }
     }
 

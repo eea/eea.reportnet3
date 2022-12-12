@@ -36,6 +36,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -832,11 +833,5 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       LOG.error("Error retrieving partition id for dataset " + datasetId);
     }
     return null;
-  }
-
-  @GetMapping("/private/findDataCollection/{snapshotId}")
-  @Override
-  public Long findDataCollectionIdBySnapshotId(Long snapshotId) {
-    return datasetSnapshotService.findDataCollectionIdBySnapshotId(snapshotId);
   }
 }

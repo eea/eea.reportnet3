@@ -32,7 +32,10 @@ public enum DatasetRunningStatusEnum {
   VALIDATED("VALIDATED"),
 
   /** The snapshot restoring is in process. */
-  RESTORING_SNAPSHOT("RESTORING_SNAPSHOT");
+  RESTORING_SNAPSHOT("RESTORING_SNAPSHOT"),
+
+  /** There was error in the release process */
+  ERROR_IN_RELEASE("ERROR_IN_RELEASE");
 
   /** The value. */
   private final String value;

@@ -1,23 +1,14 @@
 package org.eea.recordstore.persistence.domain;
 
-import java.util.Date;
-import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.Version;
-import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+
+import javax.persistence.*;
+import java.util.Date;
+import java.util.Objects;
 
 
 @Entity
@@ -92,12 +83,6 @@ public class EEAProcess {
   /** The version. */
   @Version
   private int version;
-
-  @Column(name = "saga_transaction_id")
-  private String sagaTransactionId;
-
-  @Column(name = "aggregate_id")
-  private String aggregateId;
 
   /**
    * Equals.

@@ -5,6 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.axonframework.eventhandling.DomainEventMessage;
+import org.axonframework.eventhandling.GenericDomainEventMessage;
+import org.axonframework.eventhandling.gateway.EventGateway;
+import org.axonframework.eventsourcing.eventstore.DomainEventStream;
+import org.axonframework.eventsourcing.eventstore.EmbeddedEventStore;
+import org.axonframework.messaging.MetaData;
+import org.eea.axon.release.events.DataRestoredFromSnapshotEvent;
+import org.eea.axon.release.events.DatasetRunningStatusUpdatedEvent;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
@@ -26,6 +34,7 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.metabase.TaskType;
+import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
@@ -52,6 +61,7 @@ import org.postgresql.copy.CopyOut;
 import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -287,6 +297,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * The Task Mapper
    */
   @Autowired private TaskMapper taskMapper;
+
+  /** The embedded event store */
+  @Autowired
+  private EmbeddedEventStore embeddedEventStore;
+
+  /** The event gateway */
+  @Autowired
+  private EventGateway eventGateway;
 
   /**
    * The default release process priority
@@ -1094,8 +1112,42 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             copyProcessSpecificFileSnapshot(datasetId, idSnapshot, cm, startingNumber, endingNumber,
                 processId);
 
-            Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
-            updateJobStatusToFinished(jobId);
+            JobProcessVO jobProcessVO = jobProcessControllerZuul.findJobProcessByProcessId(processId);
+
+            if (jobProcessVO!=null && jobProcessVO.getAggregateId()!=null) {
+              DomainEventStream datasetAggregateEvents = embeddedEventStore.readEvents(jobProcessVO.getAggregateId());
+              List<? extends DomainEventMessage<?>> datasetAggregateEventMessages = datasetAggregateEvents.asStream().collect(Collectors.toList());
+              DomainEventMessage<?> domainEventMessage = datasetAggregateEventMessages.get(datasetAggregateEventMessages.size() - 1);
+              MetaData metadata = domainEventMessage.getMetaData();
+              DatasetRunningStatusUpdatedEvent datasetRunningStatusUpdatedEvent = (DatasetRunningStatusUpdatedEvent) domainEventMessage.getPayload();
+              DataRestoredFromSnapshotEvent dataRestoredFromSnapshotEvent = null;
+              if (datasetRunningStatusUpdatedEvent!=null) {
+                DomainEventStream recordStoreAggregateEvents = embeddedEventStore.readEvents(datasetRunningStatusUpdatedEvent.getRecordStoreReleaseAggregateId());
+                List<? extends DomainEventMessage<?>> recordStoreAggregateEventMessages = recordStoreAggregateEvents.asStream().collect(Collectors.toList());
+                for (DomainEventMessage message : recordStoreAggregateEventMessages) {
+                  if (message.getPayload() instanceof DataRestoredFromSnapshotEvent) {
+                    dataRestoredFromSnapshotEvent = (DataRestoredFromSnapshotEvent) message.getPayload();
+                    continue;
+                  }
+                }
+                if (dataRestoredFromSnapshotEvent!=null) {
+                  dataRestoredFromSnapshotEvent.getDatasetsReleased().add(jobProcessVO.getDatasetId());
+                  eventGateway.publish(GenericDomainEventMessage.asEventMessage(dataRestoredFromSnapshotEvent).withMetaData(metadata));
+                } else {
+                  DataRestoredFromSnapshotEvent event = new DataRestoredFromSnapshotEvent();
+                  BeanUtils.copyProperties(datasetRunningStatusUpdatedEvent, event);
+                  List<Long> datasetsReleased = new ArrayList<>();
+                  datasetsReleased.add(jobProcessVO.getDatasetId());
+                  event.setDatasetsReleased(datasetsReleased);
+                  eventGateway.publish(GenericDomainEventMessage.asEventMessage(event).withMetaData(metadata));
+                }
+              }
+            } else {
+              Long jobId = jobProcessVO!=null ? jobProcessVO.getJobId() : null;
+              if (jobId!=null) {
+                updateJobStatusToFinished(jobId);
+              }
+            }
 
             LOG.info("Method restoreSpecificFileSnapshot ends with datasetId: {}", datasetId);
         } catch (Exception e) {

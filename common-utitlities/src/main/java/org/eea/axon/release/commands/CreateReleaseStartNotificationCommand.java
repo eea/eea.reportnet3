@@ -25,4 +25,5 @@ public class CreateReleaseStartNotificationCommand {
     private Long dataProviderId;
     private boolean restrictFromPublic;
     private boolean validate;
+    private Long jobId;
 }

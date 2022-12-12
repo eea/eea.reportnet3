@@ -31,4 +31,5 @@ public class EmailForSuccessfulReleaseSentEvent {
    private Map<Long, Date> datasetDateRelease;
    private String dataflowName;
    private String datasetName;
+   private Long jobId;
 }

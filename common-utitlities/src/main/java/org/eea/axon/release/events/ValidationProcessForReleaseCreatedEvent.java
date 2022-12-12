@@ -25,5 +25,6 @@ public class ValidationProcessForReleaseCreatedEvent {
     private boolean restrictFromPublic;
     private boolean validate;
     private List<Long> datasetIds;
-    private Map<Long, String> datasetProcessId;
+    private Map<Long, String> datasetValidationProcessId;
+    private Long jobId;
 }

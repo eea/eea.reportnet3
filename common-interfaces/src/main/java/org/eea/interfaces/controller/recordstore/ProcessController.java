@@ -128,22 +128,12 @@ public interface ProcessController {
   ProcessVO getNextProcess(@PathVariable("processId") String processId);
 
   /**
-   * Inserts sagaTransactionId and aggregateId
-   * @param sagaTransactionId
-   * @param aggregateId
-   * @param processId
-   */
-  @PostMapping(value = "/private/insertSagaInfo")
-  void insertSagaTransactionIdAndAggregateId(@RequestParam("sagaTransactionId") String sagaTransactionId,
-                                             @RequestParam("aggregateId") String aggregateId, @RequestParam("processId") String processId);
-
-  /**
    * Finds processes by dataflow and dataset with specific status
    * @param dataflowId
    * @param datasetId
    * @param status
    * @return
    */
-  @GetMapping(value = "/private/getProcessByDataflowAndDataset/{dataflowId}/{datasetId}")
-  List<ProcessVO> getProcessByDataflowAndDataset(@PathVariable("dataflowId") Long dataflowId, @PathVariable("datasetId") Long datasetId, @RequestParam("status") List<String> status);
+  @GetMapping(value = "/private/getProcessByDataflowDatasetStatus/{dataflowId}/{datasetId}")
+  List<ProcessVO> getProcessByDataflowAndDatasetAndStatus(@PathVariable("dataflowId") Long dataflowId, @PathVariable("datasetId") Long datasetId, @RequestParam("status") List<String> status);
 }

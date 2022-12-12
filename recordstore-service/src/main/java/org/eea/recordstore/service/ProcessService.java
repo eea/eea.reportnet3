@@ -86,19 +86,12 @@ public interface ProcessService {
   List<String> findProcessIdByDatasetAndStatus(Long datasetId, String processType, List<String> status);
 
   /**
-   * Inserts sagaTransactionId and valReleaseAggregateId
-   * @param sagaTransactionId
-   * @param aggregateId
-   */
-  void insertSagaTransactionIdAndAggregateId(String sagaTransactionId, String aggregateId, String processId);
-
-  /**
    * Finds processes by dataflow and dataset with specific status
    * @param dataflowId
    * @param datasetId
    * @param status
    * @return
    */
-  List<ProcessVO> getProcessByDataflowAndDataset(Long dataflowId, Long datasetId, List<String> status);
+  List<ProcessVO> getProcessByDataflowAndDatasetAndStatus(Long dataflowId, Long datasetId, List<String> status);
 
 }

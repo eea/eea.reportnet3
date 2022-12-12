@@ -33,7 +33,7 @@ public class JobProcessControllerImpl implements JobProcessController {
     }
 
     /**
-     * Finds jobId by process id
+     * Finds jobId by processId
      * @param processId
      * @return
      */
@@ -51,5 +51,16 @@ public class JobProcessControllerImpl implements JobProcessController {
     @GetMapping(value = "/findProcessesByJobId/{jobId}")
     public List<String> findProcessesByJobId(@PathVariable("jobId") Long jobId) {
         return jobProcessService.findProcessesByJobId(jobId);
+    }
+
+    /**
+     * Finds jobProcess by process id
+     * @param processId
+     * @return
+     */
+    @Override
+    @GetMapping(value = "/findJobProcessByProcessId/{processId}")
+    public JobProcessVO findJobProcessByProcessId(@PathVariable("processId") String processId) {
+        return jobProcessService.findJobProcessByProcessId(processId);
     }
 }

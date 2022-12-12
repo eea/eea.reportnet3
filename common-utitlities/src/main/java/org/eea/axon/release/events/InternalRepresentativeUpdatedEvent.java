@@ -26,5 +26,7 @@ public class InternalRepresentativeUpdatedEvent {
     private boolean validate;
     private List<Long> datasetIds;
     private Map<Long, Long> datasetSnapshots;
+    private Map<Long, String> datasetReleaseProcessId;
     private Map<Long, Long> datasetDataCollection;
+    private Long jobId;
 }

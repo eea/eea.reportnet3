@@ -208,19 +208,6 @@ public class ProcessControllerImpl implements ProcessController {
   }
 
   /**
-   * Inserts sagaTransactionId and aggregateId
-   * @param sagaTransactionId
-   * @param aggregateId
-   * @param processId
-   */
-  @Override
-  @PostMapping(value = "/private/insertSagaInfo")
-  public void insertSagaTransactionIdAndAggregateId(@RequestParam("sagaTransactionId") String sagaTransactionId,
-                                                    @RequestParam("aggregateId") String aggregateId, @RequestParam("processId") String processId) {
-    processService.insertSagaTransactionIdAndAggregateId(sagaTransactionId, aggregateId, processId);
-  }
-
-  /**
    * Finds processes by dataflow and dataset with specific status
    * @param dataflowId
    * @param datasetId
@@ -228,8 +215,8 @@ public class ProcessControllerImpl implements ProcessController {
    * @return
    */
   @Override
-  @GetMapping(value = "/private/getProcessByDataflowAndDataset/{dataflowId}/{datasetId}")
-  public List<ProcessVO> getProcessByDataflowAndDataset(@PathVariable("dataflowId") Long dataflowId, @PathVariable("datasetId") Long datasetId, @RequestParam("status") List<String> status) {
-    return processService.getProcessByDataflowAndDataset(dataflowId, datasetId, status);
+  @GetMapping(value = "/private/getProcessByDataflowDatasetStatus/{dataflowId}/{datasetId}")
+  public List<ProcessVO> getProcessByDataflowAndDatasetAndStatus(@PathVariable("dataflowId") Long dataflowId, @PathVariable("datasetId") Long datasetId, @RequestParam("status") List<String> status) {
+    return processService.getProcessByDataflowAndDatasetAndStatus(dataflowId, datasetId, status);
   }
 }

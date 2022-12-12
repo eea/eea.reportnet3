@@ -58,17 +58,15 @@ public class CommunicationReleaseAggregate {
     }
 
     @CommandHandler
-    public CommunicationReleaseAggregate(SendUserNotificationForReleaseStartedCommand command, MetaData metaData, NotificationService notificationService, DataFlowControllerZuul dataflowControllerZull) throws EEAException {
+    public CommunicationReleaseAggregate(SendUserNotificationForReleaseStartedCommand command, MetaData metaData, NotificationService notificationService,
+                                         DataFlowControllerZuul dataflowControllerZull) throws EEAException {
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
-            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
-            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
-            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
+            setAuthorities(auth);
+
             DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(command.getDataflowId());
             if (dataflow!=null && dataflow.isReleasable()) {
-                LOG.info("Creating release notification for dataflowId " + command.getDataflowId() + " and dataProviderId " + command.getDataProviderId());
+                LOG.info("Creating release notification for dataflowId {}, dataProviderId {}, jobId {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId());
                 UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
                 userNotificationContentVO.setDataflowId(command.getDataflowId());
                 userNotificationContentVO.setProviderId(command.getDataProviderId());
@@ -76,13 +74,13 @@ public class CommunicationReleaseAggregate {
                 userNotificationVO.setEventType("RELEASE_START_EVENT");
                 userNotificationVO.setContent(userNotificationContentVO);
                 notificationService.createUserNotification(userNotificationVO);
-                LOG.info("Created release notification for dataflowId " + command.getDataflowId() + " and dataProviderId " + command.getDataProviderId());
+                LOG.info("Created release notification for dataflowId {}, dataProviderId {}, jobId {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId());
                 UserNotifationForReleaseSentEvent event = new UserNotifationForReleaseSentEvent();
                 BeanUtils.copyProperties(command, event);
                 apply(event, metaData);
             }
         } catch (Exception e) {
-            LOG.error("Error while creating release notification for dataflowId " + command.getDataflowId() + " and dataProviderId " + command.getDataProviderId() + ": " + e.getMessage());
+            LOG.error("Error while creating release notification for dataflowId {}, dataProviderId {}, jobId {}: {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId(), e.getMessage());
             throw e;
         }
     }
@@ -98,11 +96,7 @@ public class CommunicationReleaseAggregate {
         DataSetMetabaseVO dataset = null;
         try {
             LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
-            List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-            List<LinkedHashMap<String,String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
-            authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
-            SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-                    EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
+            setAuthorities(auth);
 
             dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(command.getDatasetIds().get(0));
             // get custodian and stewards emails
@@ -137,7 +131,7 @@ public class CommunicationReleaseAggregate {
             String dateRelease = dateFormat.format(command.getDatasetDateRelease().values().stream().findFirst().get());
             emailVO.setText(String.format(LiteralConstants.RELEASEMESSAGE, dataset.getDataSetName(), dataflowVO.getName(), dateRelease));
             emailService.sendMessage(emailVO);
-            LOG.info("Email for successful release sent for dataset {}, dataProvider {}, dataflow {}", dataset.getDataSetName(), command.getDataProviderId(), command.getDataflowId());
+            LOG.info("Email for successful release sent for dataset {}, dataProviderId {}, dataflowId {}, jobId {}", dataset.getDataSetName(), command.getDataProviderId(), command.getDataflowId(), command.getJobId());
 
             EmailForSuccessfulReleaseSentEvent event = new EmailForSuccessfulReleaseSentEvent();
             BeanUtils.copyProperties(command, event);
@@ -145,9 +139,17 @@ public class CommunicationReleaseAggregate {
             event.setDatasetName(dataset.getDataSetName());
             apply(event, metaData);
         } catch (Exception e) {
-            LOG.error("Error while sending email for successful release for datasetd {}, dataProvider {}, dataflow {}: {}", dataset.getDataSetName(), command.getDataProviderId(), command.getDataflowId(), e.getMessage());
+            LOG.error("Error while sending email for successful release for datasetd {}, dataProviderId {}, dataflowId {}, jobId {}, {}", dataset.getDataSetName(), command.getDataProviderId(), command.getDataflowId(), command.getJobId(), e.getMessage());
             throw e;
         }
+    }
+
+    private void setAuthorities(LinkedHashMap auth) {
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
+        authorities.forEach((k -> k.values().forEach(grantedAuthority -> grantedAuthorities.add(new SimpleGrantedAuthority(grantedAuthority)))));
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+                EeaUserDetails.create(auth.get("name").toString(), new HashSet<>()), auth.get("credentials"), grantedAuthorities));
     }
 
     @EventSourcingHandler

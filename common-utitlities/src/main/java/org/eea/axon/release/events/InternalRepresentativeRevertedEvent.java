@@ -27,4 +27,5 @@ public class InternalRepresentativeRevertedEvent {
     private List<Long> datasetIds;
     private Map<Long, Long> datasetSnapshots;
     private Map<Long, Long> datasetDataCollection;
+    private Long jobId;
 }

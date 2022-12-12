@@ -272,11 +272,4 @@ public interface DatasetSnapshotController {
   @GetMapping("/private/obtainPartition/{datasetId}/{user}")
   Long obtainPartition(@PathVariable("datasetId") Long datasetId, @PathVariable("user") String user);
 
-  /**
-   *
-   * @param snapshotId
-   * @return
-   */
-  @GetMapping("/private/findDataCollection/{snapshotId}")
-  Long findDataCollectionIdBySnapshotId(@PathVariable("snapshotId") Long snapshotId);
 }

@@ -136,7 +136,7 @@ public class CheckBlockersDataSnapshotCommandTest {
     ProcessVO processVO = new ProcessVO();
     processVO.setProcessId("jkhiuh");
     Mockito.when(processControllerZuul.updateProcess(anyLong(), anyLong(), any(ProcessStatusEnum.class), any(ProcessTypeEnum.class), anyString(), anyString(), anyInt(), anyBoolean())).thenReturn(true);
-    JobProcessVO jobProcessVO = new JobProcessVO(Long.valueOf(1), Long.valueOf(1), "jkhiuh");
+    JobProcessVO jobProcessVO = new JobProcessVO(1L, 1L, "jkhiuh", 1L, null, null);
     Mockito.when(jobProcessControllerZuul.save(any(JobProcessVO.class))).thenReturn(jobProcessVO);
 
     checkBlockersDataSnapshotCommand.execute(eeaEventVO);

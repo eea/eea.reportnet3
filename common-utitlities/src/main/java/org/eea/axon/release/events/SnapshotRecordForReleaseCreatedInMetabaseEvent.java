@@ -26,4 +26,6 @@ public class SnapshotRecordForReleaseCreatedInMetabaseEvent {
     private boolean validate;
     private List<Long> datasetIds;
     private Map<Long, Long> datasetSnapshots;
+    private Map<Long, String> datasetReleaseProcessId;
+    private Long jobId;
 }

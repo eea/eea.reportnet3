@@ -1,9 +1,6 @@
 package org.eea.axon.release.commands;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 import java.util.Date;
@@ -12,6 +9,7 @@ import java.util.Map;
 
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class SendNotificationForSuccessfulReleaseCommand {
@@ -35,4 +33,5 @@ public class SendNotificationForSuccessfulReleaseCommand {
     private Map<Long, Date> datasetDateRelease;
     private String dataflowName;
     private String datasetName;
+    private Long jobId;
 }
