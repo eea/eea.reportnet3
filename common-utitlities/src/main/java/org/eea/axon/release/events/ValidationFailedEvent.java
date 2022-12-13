@@ -10,7 +10,7 @@ import java.util.Map;
 @Builder
 @Getter
 @Setter
-public class RefreshMaterializedViewForReferencedDatasetFailedEvent {
+public class ValidationFailedEvent {
 
     private String validationReleaseAggregateId;
     private String datasetReleaseAggregateId;

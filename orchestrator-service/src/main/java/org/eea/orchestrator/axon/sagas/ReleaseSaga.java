@@ -197,10 +197,10 @@ public class ReleaseSaga {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(refreshMaterializedViewForReferenceDatasetCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command RefreshMaterializedViewForReferenceDatasetCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
-            RefreshMaterializedViewForReferencedDatasetFailedEvent refreshMaterializedViewForReferencedDatasetFailedEvent = new RefreshMaterializedViewForReferencedDatasetFailedEvent();
-            BeanUtils.copyProperties(event, refreshMaterializedViewForReferencedDatasetFailedEvent);
+            ValidationFailedEvent validationFailedEvent = new ValidationFailedEvent();
+            BeanUtils.copyProperties(event, validationFailedEvent);
             Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getValidationReleaseAggregateId()).get();
-            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(VALIDATION_RELEASE_AGGREGATE, event.getValidationReleaseAggregateId(), lastSequenceNumber+1, refreshMaterializedViewForReferencedDatasetFailedEvent, metaData);
+            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(VALIDATION_RELEASE_AGGREGATE, event.getValidationReleaseAggregateId(), lastSequenceNumber+1, validationFailedEvent, metaData);
             eventGateway.publish(genericDomainEventMessage);
             return er;
         });
@@ -215,10 +215,10 @@ public class ReleaseSaga {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(updateMaterializedViewCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command UpdateMaterializedViewCommand for dataflowId {}, dataProviderID {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
-            UpdateMaterializedViewFailedEvent updateMaterializedViewFailedEvent = new UpdateMaterializedViewFailedEvent();
-            BeanUtils.copyProperties(event, updateMaterializedViewFailedEvent);
+            ValidationFailedEvent validationFailedEvent = new ValidationFailedEvent();
+            BeanUtils.copyProperties(event, validationFailedEvent);
             Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getValidationReleaseAggregateId()).get();
-            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(VALIDATION_RELEASE_AGGREGATE, event.getValidationReleaseAggregateId(), lastSequenceNumber+1, updateMaterializedViewFailedEvent, metaData);
+            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(VALIDATION_RELEASE_AGGREGATE, event.getValidationReleaseAggregateId(), lastSequenceNumber+1, validationFailedEvent, metaData);
             eventGateway.publish(genericDomainEventMessage);
             return er;
         });
@@ -233,10 +233,10 @@ public class ReleaseSaga {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(updateMaterializedViewCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command UpdateMaterializedViewCommand for dataflowId {}, dataProviderID {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
-            UpdateMaterializedViewFailedEvent updateMaterializedViewFailedEvent = new UpdateMaterializedViewFailedEvent();
-            BeanUtils.copyProperties(event, updateMaterializedViewFailedEvent);
+            ValidationFailedEvent validationFailedEvent = new ValidationFailedEvent();
+            BeanUtils.copyProperties(event, validationFailedEvent);
             Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getValidationReleaseAggregateId()).get();
-            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(VALIDATION_RELEASE_AGGREGATE, event.getValidationReleaseAggregateId(), lastSequenceNumber+1, updateMaterializedViewFailedEvent, metaData);
+            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(VALIDATION_RELEASE_AGGREGATE, event.getValidationReleaseAggregateId(), lastSequenceNumber+1, validationFailedEvent, metaData);
             eventGateway.publish(genericDomainEventMessage);
             return er;
         });
@@ -284,12 +284,12 @@ public class ReleaseSaga {
         BeanUtils.copyProperties(event, createSnapshotFileForReleaseCommand);
         createSnapshotFileForReleaseCommand.setRecordStoreReleaseAggregateId(UUID.randomUUID().toString());
 
-        commandGateway.send(createSnapshotFileForReleaseCommand).exceptionally(e -> {
+        commandGateway.send(GenericCommandMessage.asCommandMessage(createSnapshotFileForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
             LOG.error("Error while executing command CreateSnapshotFileForReleaseCommand for dataflow {}, dataProvider {}, jobId {},{}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), e.getCause().toString());
-            CreateSnapshotFIleForReleaseFailedEvent createSnapshotFIleForReleaseFailedEvent = new CreateSnapshotFIleForReleaseFailedEvent();
-            BeanUtils.copyProperties(event, createSnapshotFIleForReleaseFailedEvent);
+            ReleaseProcessFailedEvent releaseProcessFailedEvent = new ReleaseProcessFailedEvent();
+            BeanUtils.copyProperties(event, releaseProcessFailedEvent);
             Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getRecordStoreReleaseAggregateId()).get();
-            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(RECORD_STORE_RELEASE_AGGREGATE, event.getRecordStoreReleaseAggregateId(), lastSequenceNumber+1, createSnapshotFIleForReleaseFailedEvent, metaData);
+            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(RECORD_STORE_RELEASE_AGGREGATE, event.getRecordStoreReleaseAggregateId(), lastSequenceNumber+1, releaseProcessFailedEvent, metaData);
             eventGateway.publish(genericDomainEventMessage);
             return e;
         });
@@ -304,10 +304,10 @@ public class ReleaseSaga {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         commandGateway.send(GenericCommandMessage.asCommandMessage(updateDatasetStatusCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
             LOG.error("Error while executing command UpdateDatasetStatusCommand for dataflow {},dataProvider {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), e.getCause().toString());
-            UpdateDatasetStatusFailedEvent updateDatasetStatusFailedEvent = new UpdateDatasetStatusFailedEvent();
-            BeanUtils.copyProperties(event, updateDatasetStatusFailedEvent);
-            Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getDatasetReleaseAggregateId()).get();
-            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(DATASET_RELEASE_AGGREGATE, event.getDatasetReleaseAggregateId(), lastSequenceNumber+1, updateDatasetStatusFailedEvent, metaData);
+            ReleaseProcessFailedEvent releaseProcessFailedEvent = new ReleaseProcessFailedEvent();
+            BeanUtils.copyProperties(event, releaseProcessFailedEvent);
+            Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getRecordStoreReleaseAggregateId()).get();
+            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(RECORD_STORE_RELEASE_AGGREGATE, event.getRecordStoreReleaseAggregateId(), lastSequenceNumber+1, releaseProcessFailedEvent, metaData);
             eventGateway.publish(genericDomainEventMessage);
             return e;
         });
@@ -536,6 +536,24 @@ public class ReleaseSaga {
     }
 
     @SagaEventHandler(associationProperty = "transactionId")
+    public void handle(ValidationTasksForReleaseCreationFailedEvent event, MetaData metaData) {
+        LOG.info("ValidationTasksForReleaseCreationFailedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
+        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
+        CancelValidationTasksForReleaseCommand cancelValidationTasksForReleaseCommand = new CancelValidationTasksForReleaseCommand();
+        BeanUtils.copyProperties(event, cancelValidationTasksForReleaseCommand);
+
+        commandGateway.send(GenericCommandMessage.asCommandMessage(cancelValidationTasksForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
+            LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), e.getCause().toString());
+            ValidationFailedEvent validationFailedEvent = new ValidationFailedEvent();
+            BeanUtils.copyProperties(event, validationFailedEvent);
+            Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getValidationReleaseAggregateId()).get();
+            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(VALIDATION_RELEASE_AGGREGATE, event.getValidationReleaseAggregateId(), lastSequenceNumber+1, validationFailedEvent, metaData);
+            eventGateway.publish(genericDomainEventMessage);
+            return e;
+        });
+    }
+
+    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(ValidationTasksForReleaseCanceledEvent event, MetaData metaData) {
         LOG.info("ValidationTasksForReleaseCanceledEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
@@ -554,56 +572,7 @@ public class ReleaseSaga {
     }
 
     @SagaEventHandler(associationProperty = "transactionId")
-    public void handle(ValidationTasksForReleaseCreationFailedEvent event, MetaData metaData) {
-        LOG.info("ValidationTasksForReleaseCreationFailedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
-        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
-        CancelValidationTasksForReleaseCommand cancelValidationTasksForReleaseCommand = new CancelValidationTasksForReleaseCommand();
-        BeanUtils.copyProperties(event, cancelValidationTasksForReleaseCommand);
-
-        commandGateway.send(GenericCommandMessage.asCommandMessage(cancelValidationTasksForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
-            LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), e.getCause().toString());
-            CancelValidationTasksForReleaseFailedEvent cancelValidationTasksForReleaseFailedEvent = new CancelValidationTasksForReleaseFailedEvent();
-            BeanUtils.copyProperties(event, cancelValidationTasksForReleaseFailedEvent);
-            Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getValidationReleaseAggregateId()).get();
-            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(VALIDATION_RELEASE_AGGREGATE, event.getValidationReleaseAggregateId(), lastSequenceNumber+1, cancelValidationTasksForReleaseFailedEvent, metaData);
-            eventGateway.publish(genericDomainEventMessage);
-            return e;
-        });
-    }
-
-    @SagaEventHandler(associationProperty = "transactionId")
-    public void handle(CancelValidationTasksForReleaseFailedEvent event, MetaData metaData) {
-        LOG.info("CancelValidationTasksForReleaseFailedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
-        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
-        RevertRepresentativeVisibilityCommand revertRepresentativeVisibilityCommand = new RevertRepresentativeVisibilityCommand();
-        BeanUtils.copyProperties(event, revertRepresentativeVisibilityCommand);
-
-        commandGateway.send(GenericCommandMessage.asCommandMessage(revertRepresentativeVisibilityCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(err -> {
-            LOG.error("Error while executing command RevertRepresentativeVisibilityCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), err.getCause().toString());
-            return err;
-        });
-    }
-
-    @SagaEventHandler(associationProperty = "transactionId")
-    public void handle(UpdateMaterializedViewFailedEvent event, MetaData metaData) {
-        LOG.info("UpdateMaterializedViewFailedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
-        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
-        CancelValidationProcessForReleaseCommand cancelValidationProcessForReleaseCommand = new CancelValidationProcessForReleaseCommand();
-        BeanUtils.copyProperties(event, cancelValidationProcessForReleaseCommand);
-
-        commandGateway.send(GenericCommandMessage.asCommandMessage(cancelValidationProcessForReleaseCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(e -> {
-            LOG.error("Error while executing command CancelValidationProcessForReleaseCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), e.getCause().toString());
-            CancelValidationProcessForReleaseFailedEvent cancelValidationProcessForReleaseFailedEvent = new CancelValidationProcessForReleaseFailedEvent();
-            BeanUtils.copyProperties(event, cancelValidationProcessForReleaseFailedEvent);
-            Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getValidationReleaseAggregateId()).get();
-            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(VALIDATION_RELEASE_AGGREGATE, event.getValidationReleaseAggregateId(), lastSequenceNumber+1, cancelValidationProcessForReleaseFailedEvent, metaData);
-            eventGateway.publish(genericDomainEventMessage);
-            return e;
-        });
-    }
-
-    @SagaEventHandler(associationProperty = "transactionId")
-    public void handle(RefreshMaterializedViewForReferencedDatasetFailedEvent event, MetaData metaData) {
+    public void handle(ValidationFailedEvent event, MetaData metaData) {
         LOG.info("RefreshMaterializedViewForReferencedDatasetFailedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         CancelValidationProcessForReleaseCommand cancelValidationProcessForReleaseCommand = new CancelValidationProcessForReleaseCommand();
@@ -673,24 +642,6 @@ public class ReleaseSaga {
     }
 
     @SagaEventHandler(associationProperty = "transactionId")
-    public void handle(UpdateDatasetStatusFailedEvent event, MetaData metaData) {
-        LOG.info("UpdateDatasetStatusFailedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
-        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
-        CancelReleaseProcessCommand cancelReleaseProcessCommand = new CancelReleaseProcessCommand();
-        BeanUtils.copyProperties(event, cancelReleaseProcessCommand);
-
-        commandGateway.send(GenericCommandMessage.asCommandMessage(cancelReleaseProcessCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(err -> {
-            LOG.error("Error while executing command CancelReleaseProcessCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), err.getCause().toString());
-            CancelReleaseProcessFailedEvent cancelReleaseProcessFailedEvent = new CancelReleaseProcessFailedEvent();
-            BeanUtils.copyProperties(event, cancelReleaseProcessFailedEvent);
-            Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getRecordStoreReleaseAggregateId()).get();
-            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(RECORD_STORE_RELEASE_AGGREGATE, event.getRecordStoreReleaseAggregateId(), lastSequenceNumber+1, cancelReleaseProcessFailedEvent, metaData);
-            eventGateway.publish(genericDomainEventMessage);
-            return err;
-        });
-    }
-
-    @SagaEventHandler(associationProperty = "transactionId")
     public void handle(DeleteProviderFailedEvent event, MetaData metaData) {
         LOG.info("DeleteProviderFailedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
@@ -699,30 +650,12 @@ public class ReleaseSaga {
 
         commandGateway.send(GenericCommandMessage.asCommandMessage(revertDatasetStatusCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command RevertDatasetStatusCommand for dataflow {}, dataProvider {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), er.getCause().toString());
-            RevertDatasetStatusFailedEvent revertDatasetStatusFailedEvent = new RevertDatasetStatusFailedEvent();
-            BeanUtils.copyProperties(event, revertDatasetStatusFailedEvent);
-            Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getDatasetReleaseAggregateId()).get();
-            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(DATASET_RELEASE_AGGREGATE, event.getDatasetReleaseAggregateId(), lastSequenceNumber+1, revertDatasetStatusFailedEvent, metaData);
+            ReleaseProcessFailedEvent releaseProcessFailedEvent = new ReleaseProcessFailedEvent();
+            BeanUtils.copyProperties(event, releaseProcessFailedEvent);
+            Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getRecordStoreReleaseAggregateId()).get();
+            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(RECORD_STORE_RELEASE_AGGREGATE, event.getRecordStoreReleaseAggregateId(), lastSequenceNumber+1, releaseProcessFailedEvent, metaData);
             eventGateway.publish(genericDomainEventMessage);
             return er;
-        });
-    }
-
-    @SagaEventHandler(associationProperty = "transactionId")
-    public void handle(RevertDatasetStatusFailedEvent event, MetaData metaData) {
-        LOG.info("RevertDatasetStatusFailedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
-        LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
-        CancelReleaseProcessCommand cancelReleaseProcessCommand = new CancelReleaseProcessCommand();
-        BeanUtils.copyProperties(event, cancelReleaseProcessCommand);
-
-        commandGateway.send(GenericCommandMessage.asCommandMessage(cancelReleaseProcessCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(err -> {
-            LOG.error("Error while executing command CancelReleaseProcessCommand for dataflow {}, dataProvider {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), err.getCause().toString());
-            CancelReleaseProcessFailedEvent cancelReleaseProcessFailedEvent = new CancelReleaseProcessFailedEvent();
-            BeanUtils.copyProperties(event, cancelReleaseProcessFailedEvent);
-            Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getValidationReleaseAggregateId()).get();
-            GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(VALIDATION_RELEASE_AGGREGATE, event.getValidationReleaseAggregateId(), lastSequenceNumber+1, cancelReleaseProcessFailedEvent, metaData);
-            eventGateway.publish(genericDomainEventMessage);
-            return err;
         });
     }
 
@@ -745,7 +678,7 @@ public class ReleaseSaga {
     }
 
     @SagaEventHandler(associationProperty = "transactionId")
-    public void handle(CreateSnapshotFIleForReleaseFailedEvent event, MetaData metaData) {
+    public void handle(ReleaseProcessFailedEvent event, MetaData metaData) {
         LOG.info("CreateSnapshotFIleForReleaseFailedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         CancelReleaseProcessCommand cancelReleaseProcessCommand = new CancelReleaseProcessCommand();

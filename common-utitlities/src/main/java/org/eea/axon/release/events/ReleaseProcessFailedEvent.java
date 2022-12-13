@@ -10,15 +10,15 @@ import java.util.Map;
 @Builder
 @Getter
 @Setter
-public class UpdateDatasetStatusFailedEvent {
+public class ReleaseProcessFailedEvent {
 
-    private String recordStoreReleaseAggregateId;
     private String datasetReleaseAggregateId;
     private String releaseAggregateId;
     private String communicationReleaseAggregateId;
     private String dataflowReleaseAggregateId;
     private String validationReleaseAggregateId;
     private String collaborationReleaseAggregateId;
+    private String recordStoreReleaseAggregateId;
     private String transactionId;
     private Long dataProviderId;
     private Long dataflowId;
