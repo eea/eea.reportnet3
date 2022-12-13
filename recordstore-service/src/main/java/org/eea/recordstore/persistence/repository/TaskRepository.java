@@ -29,7 +29,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
      * @param splitFileName
      * @return
      */
-    @Query(nativeQuery = true, value = "select * from task t where t.\"json\"\\:\\:json->>'splitFileName' like :splitFileName")
+    @Query(nativeQuery = true, value = "select * from task t where t.json\\:\\:json->>'splitFileName' like :splitFileName")
     Task findByJsonSplitFileName(@Param("splitFileName") String splitFileName);
 
     /**
