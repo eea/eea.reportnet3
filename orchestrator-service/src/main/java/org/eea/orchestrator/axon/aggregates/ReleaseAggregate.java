@@ -66,6 +66,7 @@ public class ReleaseAggregate {
             apply(event, metaData);
         } catch (Exception e) {
             LOG.error("Error while setting release job status to IN_PROGRESS for dataflowId {}, dataProviderId {}, jobId {}, {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId(), e.getMessage());
+            throw e;
         }
     }
 
@@ -79,6 +80,7 @@ public class ReleaseAggregate {
             apply(event, metaData);
         } catch (Exception e) {
             LOG.error("Error while setting release job status to FINISHED for dataflowId {}, dataProviderId {}, jobId {}, {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId(), e.getMessage());
+            throw e;
         }
     }
 
@@ -92,6 +94,7 @@ public class ReleaseAggregate {
             apply(event);
         } catch (Exception e) {
             LOG.error("Error while setting release job status to FAILED for dataflowId {}, dataProviderId {}, jobId {}, {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId(), e.getMessage());
+            throw e;
         }
     }
 
