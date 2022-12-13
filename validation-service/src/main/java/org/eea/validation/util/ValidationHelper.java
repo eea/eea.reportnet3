@@ -196,6 +196,8 @@ public class ValidationHelper implements DisposableBean {
   /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
 
+  private String VALIDATION_RELEASE_AGGREGATE = "ValidationReleaseAggregate";
+
 
   /**
    * Instantiates a new validation helper.
@@ -335,7 +337,7 @@ public class ValidationHelper implements DisposableBean {
                 materializedViewShouldBeRefreshedEvent.setDatasetIForMaterializedViewEvent(datasetId);
                 materializedViewShouldBeRefreshedEvent.setReferencesToRefresh(referencesToRefresh);
                 Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getValidationReleaseAggregateId()).get();
-                GenericDomainEventMessage materializedShouldBeRefreshedGenericEventMessage = new GenericDomainEventMessage("ValidationReleaseAggregate", event.getValidationReleaseAggregateId(), lastSequenceNumber+1, materializedViewShouldBeRefreshedEvent, metadata);
+                GenericDomainEventMessage materializedShouldBeRefreshedGenericEventMessage = new GenericDomainEventMessage(VALIDATION_RELEASE_AGGREGATE, event.getValidationReleaseAggregateId(), lastSequenceNumber+1, materializedViewShouldBeRefreshedEvent, metadata);
                 eventGateway.publish(materializedShouldBeRefreshedGenericEventMessage);
               } else {
                 MaterializedViewShouldBeUpdatedEvent materializedViewShouldBeUpdatedEvent = new MaterializedViewShouldBeUpdatedEvent();
@@ -343,7 +345,7 @@ public class ValidationHelper implements DisposableBean {
                 materializedViewShouldBeUpdatedEvent.setDatasetIForMaterializedViewEvent(datasetId);
                 materializedViewShouldBeUpdatedEvent.setReferencesToRefresh(referencesToRefresh);
                 Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getValidationReleaseAggregateId()).get();
-                GenericDomainEventMessage materializedShouldBeUpdatedGenericEventMessage = new GenericDomainEventMessage("ValidationReleaseAggregate", event.getValidationReleaseAggregateId(), lastSequenceNumber+1, materializedViewShouldBeUpdatedEvent, metadata);
+                GenericDomainEventMessage materializedShouldBeUpdatedGenericEventMessage = new GenericDomainEventMessage(VALIDATION_RELEASE_AGGREGATE, event.getValidationReleaseAggregateId(), lastSequenceNumber+1, materializedViewShouldBeUpdatedEvent, metadata);
                 eventGateway.publish(materializedShouldBeUpdatedGenericEventMessage);
               }
           }
@@ -1019,6 +1021,10 @@ public class ValidationHelper implements DisposableBean {
      return taskRepository.getInProgressValidationTasksThatExceedTime(timeInMinutes);
   }
 
+  public List<Long> getTaskIdsByProcessId(String processId) {
+    return taskRepository.getTaskIdsByProcessId(processId);
+  }
+
   /**
    * Instantiates a new validation task.
    */
@@ -1174,7 +1180,7 @@ public class ValidationHelper implements DisposableBean {
                   ValidationForReleaseFinishedEvent event = new ValidationForReleaseFinishedEvent();
                   BeanUtils.copyProperties(processForReleaseCreatedEvent, event);
                   Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(event.getValidationReleaseAggregateId()).get();
-                  GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage("ValidationReleaseAggregate", event.getValidationReleaseAggregateId(), lastSequenceNumber+1, event, metadata);
+                  GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage(VALIDATION_RELEASE_AGGREGATE, event.getValidationReleaseAggregateId(), lastSequenceNumber+1, event, metadata);
 
                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
                   eventGateway.publish(genericDomainEventMessage);

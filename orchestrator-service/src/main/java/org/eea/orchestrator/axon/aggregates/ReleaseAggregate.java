@@ -9,6 +9,7 @@ import org.eea.axon.release.commands.CreateReleaseStartNotificationCommand;
 import org.eea.axon.release.commands.SetJobFailedCommand;
 import org.eea.axon.release.commands.SetJobFinishedCommand;
 import org.eea.axon.release.commands.SetJobInProgressCommand;
+import org.eea.axon.release.events.JobFailedEvent;
 import org.eea.axon.release.events.JobFinishedEvent;
 import org.eea.axon.release.events.JobSetInProgressEvent;
 import org.eea.axon.release.events.ReleaseStartNotificationCreatedEvent;
@@ -89,7 +90,7 @@ public class ReleaseAggregate {
         try {
             jobService.updateJobStatus(command.getJobId(), JobStatusEnum.FAILED);
 
-            JobFinishedEvent event = new JobFinishedEvent();
+            JobFailedEvent event = new JobFailedEvent();
             BeanUtils.copyProperties(command, event);
             apply(event);
         } catch (Exception e) {

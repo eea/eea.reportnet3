@@ -214,12 +214,14 @@ public class ValidationReleaseAggregate {
         command.getDatasetIds().forEach(datasetId -> {
            List<ProcessVO> datasetProcesses =  processControllerZuul.getProcessByDataflowAndDatasetAndStatus(command.getDataflowId(), datasetId, statuses);
            datasetProcesses.forEach(process -> {
-                LOG.info("Cancelling validation process for dataflowId {}, dataProviderId {}, datasetId {}, jobId {}, processId {}", command.getDataflowId(), command.getDataProviderId(), datasetId, command.getJobId(), process.getProcessId());
-                if (processControllerZuul.updateProcess(datasetId, command.getDataflowId(),
-                       ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, process.getProcessId(),
-                       SecurityContextHolder.getContext().getAuthentication().getName(), priority, true)) {
-                   LOG.info("Canceled validation process for dataflowId {}, dataProviderId {}, datasetId {}, jobId {}, processId {}", command.getDataflowId(), command.getDataProviderId(), datasetId, command.getJobId(), process.getProcessId());
-               }
+                if (!process.getStatus().equals(ProcessStatusEnum.FINISHED) && !process.getStatus().equals(ProcessStatusEnum.CANCELED)) {
+                    LOG.info("Cancelling validation process for dataflowId {}, dataProviderId {}, datasetId {}, jobId {}, processId {}", command.getDataflowId(), command.getDataProviderId(), datasetId, command.getJobId(), process.getProcessId());
+                    if (processControllerZuul.updateProcess(datasetId, command.getDataflowId(),
+                            ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, process.getProcessId(),
+                            SecurityContextHolder.getContext().getAuthentication().getName(), priority, true)) {
+                        LOG.info("Canceled validation process for dataflowId {}, dataProviderId {}, datasetId {}, jobId {}, processId {}", command.getDataflowId(), command.getDataProviderId(), datasetId, command.getJobId(), process.getProcessId());
+                    }
+                }
            });
         });
         ValidationProcessForReleaseCanceledEvent event = new ValidationProcessForReleaseCanceledEvent();
@@ -228,12 +230,18 @@ public class ValidationReleaseAggregate {
     }
 
     @CommandHandler
-    public void handle(CancelValidationTasksForReleaseCommand command, MetaData metaData) {
+    public void handle(CancelValidationTasksForReleaseCommand command, MetaData metaData, @Autowired ValidationHelper validationHelper) {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         setAuthorities(auth);
 
-        //find tasks
-        //validationHelper -> cancel task
+        command.getDatasetValidationProcessId().values().forEach(processId -> {
+            List<Long> taskIds = validationHelper.getTaskIdsByProcessId(processId);
+            taskIds.forEach(taskId -> {
+                LOG.info("Cancelling validation task for dataflowId {}, dataProviderId {}, jobId {}, processId {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId(), processId);
+                validationHelper.cancelTask(taskId, new Date());
+                LOG.info("Cancelled validation task for dataflowId {}, dataProviderId {}, jobId {}, processId {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId(), processId);
+            });
+        });
 
         ValidationTasksForReleaseCanceledEvent event = new ValidationTasksForReleaseCanceledEvent();
         BeanUtils.copyProperties(command, event);
