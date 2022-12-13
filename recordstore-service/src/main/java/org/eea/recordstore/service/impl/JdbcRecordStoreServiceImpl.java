@@ -1132,7 +1132,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 }
                 if (dataRestoredFromSnapshotEvent!=null) {
                   dataRestoredFromSnapshotEvent.getDatasetsReleased().add(jobProcessVO.getDatasetId());
-                  eventGateway.publish(GenericDomainEventMessage.asEventMessage(dataRestoredFromSnapshotEvent).withMetaData(metadata));
+                  Long lastSequenceNumber = embeddedEventStore.lastSequenceNumberFor(dataRestoredFromSnapshotEvent.getRecordStoreReleaseAggregateId()).get();
+                  GenericDomainEventMessage genericDomainEventMessage = new GenericDomainEventMessage("RecordStoreReleaseAggregate", dataRestoredFromSnapshotEvent.getRecordStoreReleaseAggregateId(), lastSequenceNumber+1, dataRestoredFromSnapshotEvent, metadata);
+                  eventGateway.publish(genericDomainEventMessage);
                 } else {
                   DataRestoredFromSnapshotEvent event = new DataRestoredFromSnapshotEvent();
                   BeanUtils.copyProperties(datasetRunningStatusUpdatedEvent, event);
