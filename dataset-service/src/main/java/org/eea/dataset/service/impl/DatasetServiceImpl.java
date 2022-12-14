@@ -78,6 +78,7 @@ import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.PostgresBulkImporter;
+import org.eea.dataset.service.model.TruncateDataset;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -3396,4 +3397,66 @@ public class DatasetServiceImpl implements DatasetService {
     return dictionary;
   }
 
+  /**
+   * Find dataset data for dataset id and data provider id if can be deleted.
+   *
+   * @param datasetId
+   * @param dataProviderId
+   * @return
+   */
+  @Override
+  public TruncateDataset getDatasetDataToBeDeleted(Long datasetId, Long dataProviderId) {
+
+    LOG.info("Method getDatasetDataToBeDeleted called for datasetId {} and dataProviderId {}", datasetId, dataProviderId);
+    TruncateDataset truncateDataset = new TruncateDataset();
+    boolean canBeDeleted;
+
+    try {
+      DataSetMetabase dataSetMetabase = dataSetMetabaseRepository.findByIdAndDataProviderId(datasetId, dataProviderId);
+      LOG.info("Dataset retrieved {} for datasetId {} and dataProviderId {}", dataSetMetabase, datasetId, dataProviderId);
+
+      if (dataSetMetabase != null) {
+        DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabase.getDatasetSchema()));
+        DataFlowVO dataFlowVO =dataflowControllerZuul.getMetabaseById(dataSetMetabase.getDataflowId());
+
+        canBeDeleted = dataSetSchema.getTableSchemas().stream()
+            .allMatch(table -> table.getReadOnly() && table.getFixedNumber() == Boolean.FALSE);
+
+        LOG.info("Method getDatasetDataToBeDeleted canBeDeleted: {} for datasetId {} and dataProviderId {} ",
+            canBeDeleted, datasetId, dataProviderId);
+
+        truncateDataset.setDatasetId(datasetId);
+        truncateDataset.setDatasetName(dataSetMetabase.getDataSetName());
+        truncateDataset.setDataProviderId(dataProviderId);
+        truncateDataset.setDataflowName(dataFlowVO.getName());
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in getDatasetDataToBeDeleted. Error message: {}", e.getMessage(), e);
+    }
+
+    return truncateDataset;
+  }
+
+
+  /**
+   * Truncate dataset by dataset id
+   * @param datasetId
+   * @return
+   */
+  @Override
+  public boolean truncateDataset(Long datasetId) {
+    LOG.info("Method truncateDataset called for datasetId {}", datasetId);
+    boolean deleted = false;
+
+    try {
+      deleted = recordRepository.truncateDataset(datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error(
+          "Error in getDatasetDataToBeDeleted. Error message: {}",
+          e.getMessage(), e);
+    }
+
+    LOG.info("Dataset {} has been truncated", datasetId);
+    return deleted;
+  }
 }
