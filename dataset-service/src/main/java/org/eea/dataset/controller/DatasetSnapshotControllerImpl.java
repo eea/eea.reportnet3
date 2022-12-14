@@ -338,7 +338,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       @ApiParam(type = "String",
               value = "Process Id") @RequestParam("processId") String processId) {
 
-    LOG.info("The user invoking DataSetSnaphotControllerImpl.releaseSnapshot is {} for datasetId {} and snapshotId {} of release processId {}",
+    LOG.info("The user invoking DataSetSnaphotControllerImpl.releaseSnapshot is {} for datasetId {} and snapshotId {} of processId {}",
         SecurityContextHolder.getContext().getAuthentication().getName(), datasetId, idSnapshot, processId);
 
     // Set the user name on the thread
@@ -350,14 +350,14 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
-      LOG.info("Releasing snapshot with id {} for datasetId {} of release processId {}", idSnapshot, datasetId, processId);
+      LOG.info("Releasing snapshot with id {} for datasetId {} of processId {}", idSnapshot, datasetId, processId);
       datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot, dateRelease, processId);
-      LOG.info("Successfully released snapshot with id {} for datasetId {} release processId {}", idSnapshot, datasetId, processId);
+      LOG.info("Successfully released snapshot with id {} for datasetId {} processId {}", idSnapshot, datasetId, processId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing a snapshot with id {} for datasetId {} release processId {}. Error Message: {}",  idSnapshot, datasetId, processId, e.getMessage(), e);
+      LOG_ERROR.error("Error releasing a snapshot with id {} for datasetId {} processId {}. Error Message: {}",  idSnapshot, datasetId, processId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error releasing snapshot with id {} for datasetId {} release processId {} Message: {}", idSnapshot, datasetId, processId, e.getMessage());
+      LOG_ERROR.error("Unexpected error! Error releasing snapshot with id {} for datasetId {} processId {} Message: {}", idSnapshot, datasetId, processId, e.getMessage());
       throw e;
     }
   }

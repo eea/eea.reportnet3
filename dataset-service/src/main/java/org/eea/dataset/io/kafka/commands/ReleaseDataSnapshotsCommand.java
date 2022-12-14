@@ -136,7 +136,10 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
       String dateRelease = String.valueOf(eeaEventVO.getData().get("dateRelease"));
       String processId = String.valueOf(eeaEventVO.getData().get("process_id"));
-      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      Long jobId = null;
+      if (processId!=null) {
+        jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      }
 
       Long nextData = datasetMetabaseService.getLastDatasetForRelease(datasetId);
       DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
