@@ -1830,12 +1830,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
       copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
       LOG.info("Executed copyFromFile for attachment_value with file {} and dataCollectionId {}", nameFileAttachmentValue, dataCollectionId);
-      LOG.info("Updating release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}, jobId {}", processId, dataCollectionId, jobId);
+      LOG.info("Updating process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}, jobId {}", processId, dataCollectionId, jobId);
       ProcessVO processVO = processService.getByProcessId(processId);
       processService.updateProcess(processVO.getDatasetId(), dataflowId,
               ProcessStatusEnum.FINISHED, ProcessTypeEnum.RELEASE, processId,
               SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
-      LOG.info("Updated release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}, jobId {}", processId, dataCollectionId, jobId);
+      LOG.info("Updated process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}, jobId {}", processId, dataCollectionId, jobId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error in copyProcess for dataCollectionId {} and snapshotId {}. Message: {}", dataCollectionId, idSnapshot, e.getMessage());
       throw e;
@@ -2144,7 +2144,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     private void splitSnapFile(String processId, String inputfile, Long idSnapshot,
         SplitSnapfile snapFileForSplitting, Long datasetId, Long dataflowId) {
 
-    LOG.info("Method splitSnapFile starts for file {} with idSnapshot {}, snapFileForSplitting {} and release processId {}", inputfile, idSnapshot, snapFileForSplitting, processId);
+    LOG.info("Method splitSnapFile starts for file {} with idSnapshot {}, snapFileForSplitting {} and processId {}", inputfile, idSnapshot, snapFileForSplitting, processId);
     int numberOfFiles = snapFileForSplitting.getNumberOfFiles();
     int maxLinesPerFile = 200000;
 
@@ -2194,7 +2194,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.RELEASE_TASK, new Date(), null, null,
                       json, 0, null);
               task = taskService.saveTask(task);
-              LOG.info("Created release task with id {} for file {} with idSnapshot {} and release processId {}", task.getId(), splitFileName, idSnapshot, processId);
+              LOG.info("Created release task with id {} for file {} with idSnapshot {} and processId {}", task.getId(), splitFileName, idSnapshot, processId);
             }
 
             in.close();
