@@ -47,6 +47,11 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(ReferenceDatasetControllerImpl.class);
+
 
   /**
    * Find reference dataset by dataflow id.
@@ -78,6 +83,7 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   @ApiOperation(value = "Find reference dataset public by dataflow Id", hidden = true)
   public List<ReferenceDatasetPublicVO> findReferenceDataSetPublicByDataflowId(@ApiParam(
       type = "Long", value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
+    LOG.info("Retrieving reference dataset information for dataflowId {}", dataflowId);
     return referenceDatasetService.getReferenceDatasetPublicByDataflow(dataflowId);
   }
 

@@ -74,6 +74,11 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
+   * The Constant LOG.
+   */
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseControllerImpl.class);
+
+  /**
    * Find reporting data set id by dataflow id.
    *
    * @param dataflowId the dataflow id
@@ -533,6 +538,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   public List<ReportingDatasetPublicVO> findReportingDataSetPublicByDataflowId(@ApiParam(
       type = "Long", value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
     try {
+      LOG.info("Retrieving reporting dataset information for dataflowId {}", dataflowId);
       return reportingDatasetService.getDataSetPublicByDataflow(dataflowId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error retrieving reporting dataset public for dataflowId {} Message: {}", dataflowId, e.getMessage());

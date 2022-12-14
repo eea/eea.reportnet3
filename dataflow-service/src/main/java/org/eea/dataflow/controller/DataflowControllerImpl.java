@@ -744,6 +744,7 @@ public class DataflowControllerImpl implements DataFlowController {
   public DataflowPublicVO getPublicDataflow(
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     try {
+      LOG.info("Retrieving public information for dataflowId {}", dataflowId);
       return dataflowService.getPublicDataflowById(dataflowId);
     } catch (EEAException e) {
       if (EEAErrorMessage.DATAFLOW_NOTFOUND.equals(e.getMessage())) {
