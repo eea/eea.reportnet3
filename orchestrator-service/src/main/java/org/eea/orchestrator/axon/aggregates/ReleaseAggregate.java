@@ -6,13 +6,10 @@ import org.axonframework.messaging.MetaData;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.eea.axon.release.commands.CreateReleaseStartNotificationCommand;
-import org.eea.axon.release.commands.SetJobFailedCommand;
+import org.eea.axon.release.commands.SetJobCancelledCommand;
 import org.eea.axon.release.commands.SetJobFinishedCommand;
 import org.eea.axon.release.commands.SetJobInProgressCommand;
-import org.eea.axon.release.events.JobFailedEvent;
-import org.eea.axon.release.events.JobFinishedEvent;
-import org.eea.axon.release.events.JobSetInProgressEvent;
-import org.eea.axon.release.events.ReleaseStartNotificationCreatedEvent;
+import org.eea.axon.release.events.*;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.orchestrator.service.JobService;
 import org.slf4j.Logger;
@@ -86,15 +83,15 @@ public class ReleaseAggregate {
     }
 
     @CommandHandler
-    public void handle(SetJobFailedCommand command, JobService jobService) {
+    public void handle(SetJobCancelledCommand command, JobService jobService) {
         try {
-            jobService.updateJobStatus(command.getJobId(), JobStatusEnum.FAILED);
+            jobService.updateJobStatus(command.getJobId(), JobStatusEnum.CANCELLED);
 
-            JobFailedEvent event = new JobFailedEvent();
+            JobCancelledEvent event = new JobCancelledEvent();
             BeanUtils.copyProperties(command, event);
             apply(event);
         } catch (Exception e) {
-            LOG.error("Error while setting release job status to FAILED for dataflowId {}, dataProviderId {}, jobId {}, {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId(), e.getMessage());
+            LOG.error("Error while setting release job status to CANCELLED for dataflowId {}, dataProviderId {}, jobId {}, {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId(), e.getMessage());
             throw e;
         }
     }

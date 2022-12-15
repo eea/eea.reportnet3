@@ -66,9 +66,9 @@ public class ReleaseSaga {
 
         commandGateway.send(GenericCommandMessage.asCommandMessage(sendUserNotificationForReleaseStartedCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command SendUserNotificationForReleaseStartedCommand for dataflowId {}, dataProviderId {}, jobId {},{}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
-            SetJobFailedCommand setJobFailedCommand = new SetJobFailedCommand();
-            BeanUtils.copyProperties(event, setJobFailedCommand);
-            commandGateway.send(GenericCommandMessage.asCommandMessage(setJobFailedCommand).withMetaData(MetaData.with("auth", auth)));
+            SetJobCancelledCommand setJobCancelledCommand = new SetJobCancelledCommand();
+            BeanUtils.copyProperties(event, setJobCancelledCommand);
+            commandGateway.send(GenericCommandMessage.asCommandMessage(setJobCancelledCommand).withMetaData(MetaData.with("auth", auth)));
             return er;
         });
     }
@@ -83,9 +83,9 @@ public class ReleaseSaga {
 
         commandGateway.send(GenericCommandMessage.asCommandMessage(addReleaseLocksCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command AddReleaseLocksCommand for dataflowId {}, dataProvider {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
-            SetJobFailedCommand setJobFailedCommand = new SetJobFailedCommand();
-            BeanUtils.copyProperties(event, setJobFailedCommand);
-            commandGateway.send(GenericCommandMessage.asCommandMessage(setJobFailedCommand).withMetaData(MetaData.with("auth", auth)));
+            SetJobCancelledCommand setJobCancelledCommand = new SetJobCancelledCommand();
+            BeanUtils.copyProperties(event, setJobCancelledCommand);
+            commandGateway.send(GenericCommandMessage.asCommandMessage(setJobCancelledCommand).withMetaData(MetaData.with("auth", auth)));
             return er;
         });
     }
@@ -469,9 +469,9 @@ public class ReleaseSaga {
 
         commandGateway.send(GenericCommandMessage.asCommandMessage(removeReleaseLocksCommand).withMetaData(MetaData.with("auth", auth))).exceptionally(er -> {
             LOG.error("Error while executing command RemoveReleaseLocksCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
-            SetJobFailedCommand setJobFailedCommand = new SetJobFailedCommand();
-            BeanUtils.copyProperties(event, setJobFailedCommand);
-            commandGateway.send(setJobFailedCommand);
+            SetJobCancelledCommand setJobCancelledCommand = new SetJobCancelledCommand();
+            BeanUtils.copyProperties(event, setJobCancelledCommand);
+            commandGateway.send(setJobCancelledCommand);
             return er;
         });
     }
@@ -737,13 +737,18 @@ public class ReleaseSaga {
     @SagaEventHandler(associationProperty = "transactionId")
     public void handle(FailureReleaseLocksRemovedEvent event) {
         LOG.info("FailureReleaseLocksRemovedEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
-        SetJobFailedCommand setJobFailedCommand = new SetJobFailedCommand();
-        BeanUtils.copyProperties(event, setJobFailedCommand);
+        SetJobCancelledCommand setJobCancelledCommand = new SetJobCancelledCommand();
+        BeanUtils.copyProperties(event, setJobCancelledCommand);
 
-        commandGateway.send(setJobFailedCommand).exceptionally(er -> {
-            LOG.error("Error while executing command SetJobFailedCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
+        commandGateway.send(setJobCancelledCommand).exceptionally(er -> {
+            LOG.error("Error while executing command SetJobCancelledCommand for dataflowId {}, dataProviderId {}, jobId {}, {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId(), er.getCause().toString());
             return er;
         });
+    }
+
+    @SagaEventHandler(associationProperty = "transactionId")
+    public void handle(JobCancelledEvent event) {
+        LOG.info("JobCancelledEvent event received for dataflowId {}, dataProviderId {}, jobId {}", event.getDataflowId(), event.getDataProviderId(), event.getJobId());
     }
 
     @SagaEventHandler(associationProperty = "transactionId")

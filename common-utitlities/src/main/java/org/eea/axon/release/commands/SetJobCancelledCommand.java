@@ -12,7 +12,7 @@ import java.util.Map;
 @NoArgsConstructor
 @Getter
 @Setter
-public class SetJobFailedCommand {
+public class SetJobCancelledCommand {
 
     @TargetAggregateIdentifier
     private String releaseAggregateId;
