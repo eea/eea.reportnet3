@@ -3,38 +3,16 @@
  */
 package org.eea.dataset.service.helper;
 
-import java.io.*;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
-import javax.annotation.PostConstruct;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.exception.InvalidFileException;
-import org.eea.dataset.persistence.data.domain.AttachmentValue;
-import org.eea.dataset.persistence.data.domain.DatasetValue;
-import org.eea.dataset.persistence.data.domain.FieldValue;
-import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.data.repository.AttachmentRepository;
-import org.eea.dataset.persistence.data.repository.DatasetRepository;
-import org.eea.dataset.persistence.data.repository.FieldRepository;
-import org.eea.dataset.persistence.data.repository.RecordRepository;
-import org.eea.dataset.persistence.data.repository.TableRepository;
+import org.eea.dataset.persistence.data.domain.*;
+import org.eea.dataset.persistence.data.repository.*;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
@@ -70,12 +48,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.ETLDatasetVO;
-import org.eea.interfaces.vo.dataset.ETLFieldVO;
-import org.eea.interfaces.vo.dataset.ETLRecordVO;
-import org.eea.interfaces.vo.dataset.ETLTableVO;
-import org.eea.interfaces.vo.dataset.ExportFilterVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -109,7 +82,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
-import feign.FeignException;
+
+import javax.annotation.PostConstruct;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
+import java.util.zip.*;
 
 /**
  * The Class FileTreatmentHelper.
@@ -164,6 +149,9 @@ public class FileTreatmentHelper implements DisposableBean {
      */
     @Value("${dataset.fieldMaxLength}")
     private int fieldMaxLength;
+
+    @Value("${importStorePath}")
+    private String importStorePath;
 
     /**
      * The dataset service.
@@ -934,6 +922,9 @@ public class FileTreatmentHelper implements DisposableBean {
                 File folder = new File(root, datasetId.toString());
                 String saveLocationPath = folder.getCanonicalPath();
 
+                File fileStoreRoot = new File(importStorePath, datasetId.toString());
+                File fileStoreZip = new File(fileStoreRoot, multipartFile.getOriginalFilename());
+
                 // Delete dataset temporary folder first in case that for any reason still exists before
                 // creating again
                 FileUtils.deleteQuietly(folder);
@@ -947,8 +938,11 @@ public class FileTreatmentHelper implements DisposableBean {
                 List<File> files = new ArrayList<>();
                 if (null == integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
 
+                    FileUtils.deleteQuietly(fileStoreZip);
+                    fileStoreRoot.mkdirs();
+
                     try (ZipInputStream zip = new ZipInputStream(input)) {
-                        files = unzipAndStore(folder, saveLocationPath, zip);
+                        files = unzipAndStore(folder, saveLocationPath, fileStoreZip, zip);
                     } catch (Exception e) {
                         LOG.error("Unexpected error! Error in unzipAndStore for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
                         throw e;
@@ -969,6 +963,10 @@ public class FileTreatmentHelper implements DisposableBean {
                 } else {
 
                     File file = new File(folder, originalFileName);
+                    File fileStore = new File(fileStoreRoot, originalFileName);
+                    File fileStoreDir = new File(fileStoreRoot, "/");
+                    Files.deleteIfExists(Paths.get(fileStore.getCanonicalPath()));
+                    fileStoreDir.mkdirs();
 
                     // Store the file in the persistence volume
                     try (FileOutputStream output = new FileOutputStream(file)) {
@@ -979,6 +977,8 @@ public class FileTreatmentHelper implements DisposableBean {
                         LOG.error("Unexpected error! Error in copyLarge for fileName {} datasetId {} and tableSchemaId {}. Message: {}", originalFileName, datasetId, tableSchemaId, e.getMessage());
                         throw e;
                     }
+
+                    FileUtils.copyDirectory(folder, fileStoreDir);
 
                     // if the import goes it's a zip file, check if the zip is not empty to show
                     // error and avoid the call to FME
@@ -1032,12 +1032,14 @@ public class FileTreatmentHelper implements DisposableBean {
          * @throws EEAException the EEA exception
          * @throws IOException Signals that an I/O exception has occurred.
          */
-        private List<File> unzipAndStore (File folder, String saveLocationPath, ZipInputStream zip)
+        private List<File> unzipAndStore (File folder, String saveLocationPath, File fileStoreZip, ZipInputStream zip)
       throws EEAException, IOException {
 
             List<File> files = new ArrayList<>();
             ZipEntry entry = zip.getNextEntry();
 
+          try (ZipOutputStream out =
+                         new ZipOutputStream(new FileOutputStream(fileStoreZip.toString()))) {
             while (null != entry) {
                 String entryName = entry.getName();
                 String mimeType = datasetService.getMimetype(entryName);
@@ -1062,11 +1064,22 @@ public class FileTreatmentHelper implements DisposableBean {
                     throw e;
                 }
 
-                files.add(file);
-                entry = zip.getNextEntry();
-            }
+                byte[] buf = new byte[1024];
+                int len;
+                out.putNextEntry(entry);
+                FileInputStream in = new FileInputStream(file);
+                while ((len = in.read(buf)) > 0) {
+                  out.write(buf, 0, len);
+                }
 
-            return files;
+                entry = zip.getNextEntry();
+                files.add(file);
+            }
+          } catch (Exception e) {
+              LOG.error("Unexpected error! Message: {}", fileStoreZip.getCanonicalPath(), e.getMessage());
+              throw e;
+          }
+          return files;
         }
 
         /**
