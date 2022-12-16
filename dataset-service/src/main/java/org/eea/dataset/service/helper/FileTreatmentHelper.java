@@ -922,7 +922,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 File folder = new File(root, datasetId.toString());
                 String saveLocationPath = folder.getCanonicalPath();
 
-                File fileStoreRoot = new File(importStorePath, datasetId.toString());
+                File fileStoreRoot = new File(importStorePath, "dataset-"+datasetId.toString());
                 File fileStoreZip = new File(fileStoreRoot, multipartFile.getOriginalFilename());
 
                 // Delete dataset temporary folder first in case that for any reason still exists before
