@@ -422,7 +422,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     try {
-      LOG.info("Adding snapshot for datasetId {}", datasetId);
+      LOG.info("Adding schema snapshot for datasetId {}", datasetId);
       // This method will release the lock
       datasetSnapshotService.addSchemaSnapshot(datasetId, idDatasetSchema, description);
     } catch (Exception e) {

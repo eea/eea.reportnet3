@@ -2,6 +2,7 @@ package org.eea.dataset.io.kafka.commands;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -123,11 +124,11 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);
         createSnapshotVO.setAutomatic(Boolean.TRUE);
-        TimeZone.setDefault(TimeZone.getTimeZone("CET"));
-        Date ahora = new Date();
-        SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        createSnapshotVO.setDescription("Release " + formateador.format(ahora) + " CET");
-        Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now());
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        //force date to CET
+        Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now(ZoneId.of("CET")));
+        createSnapshotVO.setDescription("Release " + dateFormatter.format(dateRelease) + " CET");
         datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
                 dateRelease.toString(), false);
       }
