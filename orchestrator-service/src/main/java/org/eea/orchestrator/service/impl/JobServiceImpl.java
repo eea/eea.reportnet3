@@ -166,7 +166,7 @@ public class JobServiceImpl implements JobService {
                     return JobStatusEnum.REFUSED;
                 }
             }
-        } else if (jobType.equals(JobTypeEnum.VALIDATION.toString())) {
+        } else if (jobType.equals(JobTypeEnum.VALIDATION.toString()) && !release) {
             Long datasetId = datasetIds.get(0);
             List<Job> jobList = jobRepository.findByJobTypeAndJobStatusInAndRelease(JobTypeEnum.VALIDATION, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), release);
             for(Job job: jobList){
