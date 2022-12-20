@@ -150,7 +150,7 @@ public class EUDatasetServiceImplTest {
         Mockito.any())).thenReturn(Optional.of(partitionDataset));
     doNothing().when(datasetSnapshotService).addSnapshot(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any());
-    euDatasetService.populateEUDatasetWithDataCollection(1L);
+    euDatasetService.populateEUDatasetWithDataCollection(1L, null);
     Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any());
   }
@@ -173,7 +173,7 @@ public class EUDatasetServiceImplTest {
     when(dataCollectionRepository.findByDataflowId(Mockito.any())).thenReturn(dataCollectionList);
     when(euDatasetRepository.findByDataflowId(Mockito.any())).thenReturn(euDatasetList);
     try {
-      euDatasetService.populateEUDatasetWithDataCollection(1L);
+      euDatasetService.populateEUDatasetWithDataCollection(1L, null);
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot combine lists with dissimilar sizes", e.getMessage());
       throw e;
@@ -197,7 +197,7 @@ public class EUDatasetServiceImplTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.any(),
         Mockito.any())).thenReturn(Optional.empty());
     try {
-      euDatasetService.populateEUDatasetWithDataCollection(1L);
+      euDatasetService.populateEUDatasetWithDataCollection(1L, null);
     } catch (EEAException e) {
       assertEquals(EEAErrorMessage.PARTITION_ID_NOTFOUND, e.getMessage());
       throw e;

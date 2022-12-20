@@ -1,6 +1,7 @@
 package org.eea.orchestrator.service.impl;
 
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
+import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -48,6 +50,9 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     private ValidationControllerZuul validationControllerZuul;
+
+    @Autowired
+    private EUDatasetControllerZuul euDatasetControllerZuul;
 
     @Autowired
     private JobRepository jobRepository;
@@ -85,32 +90,13 @@ public class JobServiceImpl implements JobService {
 
     @Transactional
     @Override
-    public void addValidationJob(Long dataflowId, Long providerId, Long datasetId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert){
+    public Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release) {
         Timestamp ts = new Timestamp(System.currentTimeMillis());
-        Job validationJob = new Job(null, JobTypeEnum.VALIDATION, statusToInsert, ts, ts, parameters, creator, false, dataflowId, providerId, datasetId);
-        jobRepository.save(validationJob);
-        jobHistoryService.saveJobHistory(validationJob);
+        Job job = new Job(null, jobType, jobStatus, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), release, dataflowId, dataProviderId, datasetId);
+        job = jobRepository.save(job);
+        jobHistoryService.saveJobHistory(job);
+        return job.getId();
     }
-
-    @Transactional
-    @Override
-    public void addReleaseJob(Long dataflowId, Long dataProviderId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert){
-        Timestamp ts = new Timestamp(System.currentTimeMillis());
-        Job releaseJob = new Job(null, JobTypeEnum.VALIDATION, statusToInsert, ts, ts, parameters, creator, true, dataflowId, dataProviderId, null);
-        jobRepository.save(releaseJob);
-        jobHistoryService.saveJobHistory(releaseJob);
-    }
-
-    @Transactional
-    @Override
-    public Long addImportJob(Long dataflowId, Long providerId, Long datasetId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert){
-        Timestamp ts = new Timestamp(System.currentTimeMillis());
-        Job importJob = new Job(null, JobTypeEnum.IMPORT, statusToInsert, ts, ts, parameters, creator, false, dataflowId, providerId, datasetId);
-        jobRepository.save(importJob);
-        jobHistoryService.saveJobHistory(importJob);
-        return importJob.getId();
-    }
-
 
     @Override
     public Boolean canJobBeExecuted(JobVO job){
@@ -185,6 +171,15 @@ public class JobServiceImpl implements JobService {
                     return JobStatusEnum.REFUSED;
                 }
             }
+        } else if (jobType.equals(JobTypeEnum.COPY_TO_EU_DATASET.toString())) {
+            List<Job> jobList = jobRepository.findByJobTypeAndJobStatusInAndRelease(JobTypeEnum.COPY_TO_EU_DATASET, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), release);
+            for (Job job : jobList) {
+                Map<String, Object> insertedParameters = job.getParameters();
+                Long insertedDataflowId = Long.valueOf((Integer) insertedParameters.get("dataflowId"));
+                if (dataflowId.equals(insertedDataflowId)) {
+                    return JobStatusEnum.REFUSED;
+                }
+            }
         }
         return JobStatusEnum.QUEUED;
     }
@@ -207,6 +202,14 @@ public class JobServiceImpl implements JobService {
         Boolean restrictFromPublic = (Boolean) parameters.get("restrictFromPublic");
         Boolean validate = (Boolean) parameters.get("validate");
         dataSetSnapshotControllerZuul.createReleaseSnapshots(dataflowId, dataProviderId, restrictFromPublic, validate, jobVO.getId());
+    }
+
+    @Override
+    public void prepareAndExecuteCopyToEUDatasetJob(JobVO jobVO) {
+        Job job = jobMapper.classToEntity(jobVO);
+        Map<String, Object> parameters = job.getParameters();
+        Long dataflowId = Long.valueOf((Integer) parameters.get("dataflowId"));
+        euDatasetControllerZuul.populateDataFromDataCollection(dataflowId, job.getId());
     }
 
     @Transactional

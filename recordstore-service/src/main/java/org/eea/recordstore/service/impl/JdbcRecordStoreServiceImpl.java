@@ -1517,6 +1517,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         if (Boolean.TRUE.equals(snapshot.getRelease())) {
           dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot, dateRelease, processId);
         } else {
+          Map<String, Object> createSnapshot = new HashMap<>();
+          createSnapshot.put(LiteralConstants.SIGNATURE, LockSignature.CREATE_SNAPSHOT.getValue());
+          createSnapshot.put(LiteralConstants.DATASETID, idDataset);
+          createSnapshot.put(LiteralConstants.RELEASED, null);
+          lockService.removeLockByCriteria(createSnapshot);
           releaseNotificableKafkaEvent(EventType.ADD_DATASET_SNAPSHOT_COMPLETED_EVENT, value,
               idDataset, null);
         }
@@ -1526,6 +1531,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         valueEU.put("user", SecurityContextHolder.getContext().getAuthentication().getName());
         valueEU.put("dataset_id", idDataset);
         valueEU.put("snapshot_id", idSnapshot);
+        valueEU.put("processId", processId);
         kafkaSenderUtils.releaseKafkaEvent(EventType.ADD_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT,
             valueEU);
         break;
@@ -1535,10 +1541,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             SecurityContextHolder.getContext().getAuthentication().getName());
         valueReference.put("dataset_id", idDataset);
         valueReference.put("snapshot_id", idSnapshot);
+        valueReference.put("processId", processId);
         kafkaSenderUtils.releaseKafkaEvent(
             EventType.COPY_REFERENCE_DATASET_SNAPSHOT_COMPLETED_EVENT, valueReference);
         break;
       case SCHEMA:
+        Map<String, Object> createSnapshot = new HashMap<>();
+        createSnapshot.put(LiteralConstants.SIGNATURE, LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
+        createSnapshot.put(LiteralConstants.DATASETID, idDataset);
+        lockService.removeLockByCriteria(createSnapshot);
         releaseNotificableKafkaEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT, value,
             idDataset, null);
         break;
@@ -1780,31 +1791,32 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
 
       SplitSnapfile snapFileForSplitting = isSnapFileForSplitting(nameFileFieldValue);
+      ProcessVO processVO = processService.getByProcessId(processId);
 
       if (snapFileForSplitting.isForSplitting() == true) {
 
-        splitSnapFile(processId, nameFileFieldValue, idSnapshot, snapFileForSplitting,
+        splitSnapFile(processId, processVO.getProcessType(), nameFileFieldValue, idSnapshot, snapFileForSplitting,
             dataCollectionId, dataflowId);
 
         for (int i = 1; i <= snapFileForSplitting.getNumberOfFiles(); i++) {
           String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
           String splitFile = pathSnapshot + splitFileName;
           try {
-            TaskVO task = taskService.findReleaseTaskBySplitFileName(splitFileName);
+            TaskVO task = taskService.findReleaseTaskBySplitFileNameAndProcessId(splitFileName, processId);
 
-            LOG.info("Updating release task status of task with id {} for file {} with idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
+            LOG.info("Updating task status of task with id {} for file {} with idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
             task.setStartingDate(new Date());
             task.setStatus(ProcessStatusEnum.IN_PROGRESS);
             task.setPod(serviceInstanceId);
             task = taskService.saveTask(task);
-            LOG.info("Updated release task status of task with id {} for file {} with idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
+            LOG.info("Updated task status of task with id {} for file {} with idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
 
             LOG.info("Copy file {}", splitFile);
             copyFromFile(copyQueryField, splitFile, cm);
 
-            LOG.info("Updating release task status of task with id {} for file {} with idSnapshot {} and processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
+            LOG.info("Updating task status of task with id {} for file {} with idSnapshot {} and processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
             taskService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), task.getId());
-            LOG.info("Updated release task status of task with id {} for file {} with idSnapshot {} and processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
+            LOG.info("Updated task status of task with id {} for file {} with idSnapshot {} and processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
 
             try {
               LOG.info("File {} copied and will be deleted", splitFile);
@@ -1831,10 +1843,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
       LOG.info("Executed copyFromFile for attachment_value with file {} and dataCollectionId {}", nameFileAttachmentValue, dataCollectionId);
       LOG.info("Updating process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}, jobId {}", processId, dataCollectionId, jobId);
-      ProcessVO processVO = processService.getByProcessId(processId);
       processService.updateProcess(processVO.getDatasetId(), dataflowId,
-              ProcessStatusEnum.FINISHED, ProcessTypeEnum.RELEASE, processId,
-              SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
+              ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(processVO.getProcessType()), processId,
+              processVO.getUser(), processVO.getPriority(), processVO.isReleased());
       LOG.info("Updated process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}, jobId {}", processId, dataCollectionId, jobId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error in copyProcess for dataCollectionId {} and snapshotId {}. Message: {}", dataCollectionId, idSnapshot, e.getMessage());
@@ -1865,7 +1876,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
           String splitFile = pathSnapshot + splitFileName;
             try {
-                TaskVO task = taskService.findReleaseTaskBySplitFileName(splitFileName);
+                TaskVO task = taskService.findReleaseTaskBySplitFileNameAndProcessId(splitFileName, processId);
                 LOG.info("Method copyProcessSpecificSnapshot for file {} found task {}", splitFileName, task);
 
                 LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
@@ -1908,8 +1919,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         LOG.info("Updating copyProcessSpecificSnapshot release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}", processId, datasetId);
         ProcessVO processVO = processService.getByProcessId(processId);
         processService.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(),
-            ProcessStatusEnum.FINISHED, ProcessTypeEnum.RELEASE, processId,
-            SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
+            ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(processVO.getProcessType()), processId,
+            processVO.getUser(), processVO.getPriority(), processVO.isReleased());
         LOG.info("Updated copyProcessSpecificSnapshot release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}", processId, datasetId);
     }
   
@@ -2141,7 +2152,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
      * @param idSnapshot
      * @param snapFileForSplitting
      */
-    private void splitSnapFile(String processId, String inputfile, Long idSnapshot,
+    private void splitSnapFile(String processId, String processTypeEnum, String inputfile, Long idSnapshot,
         SplitSnapfile snapFileForSplitting, Long datasetId, Long dataflowId) {
 
     LOG.info("Method splitSnapFile starts for file {} with idSnapshot {}, snapFileForSplitting {} and processId {}", inputfile, idSnapshot, snapFileForSplitting, processId);
@@ -2191,10 +2202,20 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     LOG_ERROR.error("error processing json for snap file {}", splitFileName);
                     throw e;
                 }
-              TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.RELEASE_TASK, new Date(), null, null,
+              TaskType taskType = null;
+              if (processTypeEnum.equals(ProcessTypeEnum.RELEASE.toString())){
+                taskType = TaskType.RELEASE_TASK;
+              } else if (processTypeEnum.equals(ProcessTypeEnum.COPY_TO_EU_DATASET.toString())) {
+                taskType = TaskType.COPY_TO_EU_DATASET_TASK;
+              } else if (processTypeEnum.equals(ProcessTypeEnum.RESTORE_DESIGN_DATASET.toString())) {
+                taskType = TaskType.RESTORE_DESIGN_DATASET_TASK;
+              } else if (processTypeEnum.equals(ProcessTypeEnum.RESTORE_REPORTING_DATASET.toString())) {
+                taskType = TaskType.RESTORE_REPORTING_DATASET_TASK;
+              }
+              TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, taskType, new Date(), null, null,
                       json, 0, null);
               task = taskService.saveTask(task);
-              LOG.info("Created release task with id {} for file {} with idSnapshot {} and processId {}", task.getId(), splitFileName, idSnapshot, processId);
+              LOG.info("Created task with id {} for file {} with idSnapshot {} and processId {}", task.getId(), splitFileName, idSnapshot, processId);
             }
 
             in.close();

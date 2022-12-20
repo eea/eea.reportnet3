@@ -9,16 +9,21 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -38,10 +43,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -81,6 +83,19 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   /** The lock service. */
   @Autowired
   private LockService lockService;
+
+  /** The process controller zuul */
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
+  /** The dataset metabase controller zuul */
+  @Autowired
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  /**
+   * The default release process priority
+   */
+  private int defaultRestoreProcessPriority = 20;
 
   /**
    * Gets the by id.
@@ -278,6 +293,14 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     notificationControllerZuul.createUserNotificationPrivate("RESTORE_DATASET_SNAPSHOT_INIT_INFO",
         userNotificationContentVO);
 
+    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    String processId = UUID.randomUUID().toString();
+    LOG.info("Updating process for dataflowId {}, dataProviderId {}, dataset {}, processId {} to status IN_QUEUE", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), processId);
+    processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+            ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RESTORE_REPORTING_DATASET, processId,
+            SecurityContextHolder.getContext().getAuthentication().getName(), defaultRestoreProcessPriority, false);
+    LOG.info("Updated process for dataflowId {}, dataProviderId {}, dataset {}, processId {} to status IN_QUEUE", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), processId);
+
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -295,12 +318,25 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       LockVO importLockVO = lockService.findByCriteria(createSchemaSnapshot);
       if (importLockVO != null) {
         LOG_ERROR.error("Snapshot restoration is locked because creation is in progress. DatasetId is {} and snapshotId is {}", datasetId, idSnapshot);
+        LOG.info("Updating process for dataflowId {}, dataProviderId {}, dataset {}, processId {} to status CANCELED", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), processId);
+        processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+                ProcessStatusEnum.CANCELED, ProcessTypeEnum.RESTORE_REPORTING_DATASET, processId,
+                SecurityContextHolder.getContext().getAuthentication().getName(), defaultRestoreProcessPriority, false);
+        LOG.info("Updated process for dataflowId {}, dataProviderId {}, dataset {}, processId {} to status CANCELED", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), processId);
+
         throw new ResponseStatusException(HttpStatus.LOCKED,
             "Snapshot restoration is locked because creation is in progress.");
       } else {
         LOG.info("Restoring snapshot with id {} for datasetId {}", idSnapshot, datasetId);
         // This method will release the lock
-        datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, true, null);
+
+        LOG.info("Updating process for dataflowId {}, dataProviderId {}, dataset {}, processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), processId);
+        processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+                ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RESTORE_REPORTING_DATASET, processId,
+                SecurityContextHolder.getContext().getAuthentication().getName(), defaultRestoreProcessPriority, false);
+        LOG.info("Updated process for dataflowId {}, dataProviderId {}, dataset {}, processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), processId);
+
+        datasetSnapshotService.restoreSnapshot(datasetId, idSnapshot, true, processId);
         LOG.info("Successfully restored snapshot with id {} for datasetId {}", idSnapshot, datasetId);
       }
     } catch (EEAException e) {
@@ -458,18 +494,39 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     notificationControllerZuul.createUserNotificationPrivate("RESTORE_DATASET_SNAPSHOT_INIT_INFO",
         userNotificationContentVO);
 
+    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    String processId = UUID.randomUUID().toString();
+    LOG.info("Updating process for dataflowId {}, dataset {}, processId {} to status IN_QUEUE", dataset.getDataflowId(), dataset.getId(), processId);
+    processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+            ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RESTORE_DESIGN_DATASET, processId,
+            SecurityContextHolder.getContext().getAuthentication().getName(), defaultRestoreProcessPriority, false);
+    LOG.info("Updating process for dataflowId {}, dataset {}, processId {} to status IN_QUEUE", dataset.getDataflowId(), dataset.getId(), processId);
+
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     if (datasetId == null) {
+      LOG.info("Updating process for dataflowId {}, dataset {}, processId {} to status CANCELED", dataset.getDataflowId(), dataset.getId(), processId);
+      processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+              ProcessStatusEnum.CANCELED, ProcessTypeEnum.RESTORE_DESIGN_DATASET, processId,
+              SecurityContextHolder.getContext().getAuthentication().getName(), defaultRestoreProcessPriority, false);
+      LOG.info("Updating process for dataflowId {}, dataset {}, processId {} to status CANCELED", dataset.getDataflowId(), dataset.getId(), processId);
+
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
       LOG.info("Restoring snapshot with id {} for datasetId {}", idSnapshot, datasetId);
+
+      LOG.info("Updating process for dataflowId {}, dataset {}, processId {} to status IN_PROGRESS", dataset.getDataflowId(), datasetId, processId);
+      processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+              ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RESTORE_DESIGN_DATASET, processId,
+              SecurityContextHolder.getContext().getAuthentication().getName(), defaultRestoreProcessPriority, false);
+      LOG.info("Updated process for dataflowId {}, dataset {}, processId {} to status IN_PROGRESS", dataset.getDataflowId(), datasetId, processId);
+
       // This method will release the lock
-      datasetSnapshotService.restoreSchemaSnapshot(datasetId, idSnapshot);
+      datasetSnapshotService.restoreSchemaSnapshot(datasetId, idSnapshot, processId);
       LOG.info("Successfully restored snapshot with id {} for datasetId {}", idSnapshot, datasetId);
     } catch (EEAException | IOException e) {
       LOG_ERROR.error("Error restoring a schema snapshot with id {} and datasetId {}. Error Message {}", idSnapshot, datasetId, e.getMessage(), e);

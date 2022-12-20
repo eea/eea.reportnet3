@@ -451,14 +451,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   @Async
   public void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination,
-      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType, boolean prefillingReference)
+      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType, boolean prefillingReference, String processId)
       throws EEAException {
 
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(datasetOrigin, "root").getId();
     recordStoreControllerZuul.restoreSnapshotData(idDatasetDestination, idSnapshot, idPartition,
-        datasetType, false, deleteData, prefillingReference, null);
+        datasetType, false, deleteData, prefillingReference, processId);
   }
 
   /**
@@ -706,7 +706,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   @Async
-  public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot)
+  public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot, String processId)
       throws EEAException, IOException {
 
     try {
@@ -770,7 +770,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // Replace the schema: delete the older and save the new we have already recovered on step
       // Also in the service we call the recordstore to do the restore of the dataset_X data
       schemaService.replaceSchema(schema.getIdDataSetSchema().toString(), schema, idDataset,
-          idSnapshot);
+          idSnapshot, processId);
       // fill the PK catalogue with the new schema
       // also the table foreign_relations
       schemaService.updatePKCatalogueAndForeignsAfterSnapshot(

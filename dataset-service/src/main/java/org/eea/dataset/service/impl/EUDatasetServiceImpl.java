@@ -1,11 +1,5 @@
 package org.eea.dataset.service.impl;
 
-import java.sql.Timestamp;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import org.eea.dataset.mapper.EUDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
@@ -18,11 +12,16 @@ import org.eea.dataset.service.EUDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
+import org.eea.interfaces.vo.orchestrator.JobProcessVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.service.LockService;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -31,6 +30,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The Class EUDatasetServiceImpl.
@@ -46,6 +49,11 @@ public class EUDatasetServiceImpl implements EUDatasetService {
 
   /** The Constant SIGNATURE: {@value}. */
   private static final String SIGNATURE = "signature";
+
+  /**
+   * The default release process priority
+   */
+  private int defaultCopyToEUDatasetProcessPriority = 20;
 
   /** The eu dataset repository. */
   @Autowired
@@ -75,6 +83,14 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
 
+  /** The process controller zuul */
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
+  /** The job process controller zuul */
+  @Autowired
+  private JobProcessControllerZuul jobProcessControllerZuul;
+
 
   /**
    * Gets the EU dataset by dataflow id.
@@ -96,7 +112,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
    */
   @Override
   @Async
-  public void populateEUDatasetWithDataCollection(Long dataflowId) throws EEAException {
+  public void populateEUDatasetWithDataCollection(Long dataflowId, Long jobId) throws EEAException {
     // First we lock some operations
     List<ReportingDatasetVO> reportings =
         reportingDatasetService.getDataSetIdByDataflowId(dataflowId);
@@ -112,12 +128,31 @@ public class EUDatasetServiceImpl implements EUDatasetService {
 
     // Store the data in snapshots for quick import
     for (DataCollection dataCollection : dataCollectionList) {
+      LOG.info("Creating copy to eudataset process for dataflowId {}, dataset {}, jobId {}", dataflowId, dataCollection.getId(), jobId);
+      String processId = UUID.randomUUID().toString();
+      processControllerZuul.updateProcess(dataCollection.getId(), dataflowId,
+              ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.COPY_TO_EU_DATASET, processId,
+              SecurityContextHolder.getContext().getAuthentication().getName(), defaultCopyToEUDatasetProcessPriority, false);
+      LOG.info("Created copy to eudataset process for dataflowId {}, dataset {}, jobId {}", dataflowId, dataCollection.getId(), jobId);
+
       CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
       createSnapshotVO.setDescription(dataCollection.getDatasetSchema());
       createSnapshotVO.setReleased(false);
+
+      LOG.info("Creating jobProcess for dataflowId {}, jobId {} and copy to eudataset processId {}", dataflowId, jobId, processId);
+      JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processId);
+      jobProcessControllerZuul.save(jobProcessVO);
+      LOG.info("Creating jobProcess for dataflowId {}, jobId {} and copy to eudataset processId {}", dataflowId, jobId, processId);
+
+      LOG.info("Updating copy to eudataset process for dataflowId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataflowId, dataCollection.getId(), jobId, processId);
+      processControllerZuul.updateProcess(dataCollection.getId(), dataflowId,
+              ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.COPY_TO_EU_DATASET, processId,
+              SecurityContextHolder.getContext().getAuthentication().getName(), defaultCopyToEUDatasetProcessPriority, false);
+      LOG.info("Updating copy to eudataset process for dataflowId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataflowId, dataCollection.getId(), jobId, processId);
+
       datasetSnapshotService.addSnapshot(dataCollection.getId(), createSnapshotVO,
           obtainPartition(relatedDatasetsByIds.get(dataCollection.getId()), "root").getId(), null,
-          false, null);
+          false, processId);
     }
     LOG.info("EU dataset populated for dataflowId {}", dataflowId);
 

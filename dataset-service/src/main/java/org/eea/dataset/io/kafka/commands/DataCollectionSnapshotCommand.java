@@ -1,6 +1,5 @@
 package org.eea.dataset.io.kafka.commands;
 
-import java.util.List;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
@@ -16,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * The Class PropagateNewFieldCommand.
@@ -59,6 +60,7 @@ public class DataCollectionSnapshotCommand extends AbstractEEAEventHandlerComman
     try {
       Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
       Long snapshotId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("snapshot_id")));
+      String processId = (String) eeaEventVO.getData().get("processId");
       ThreadPropertiesManager.setVariable("user", String.valueOf(eeaEventVO.getData().get("user")));
 
       DataCollection dataCollection = dataCollectionRepository.findById(datasetId).orElse(null);
@@ -67,7 +69,7 @@ public class DataCollectionSnapshotCommand extends AbstractEEAEventHandlerComman
                 dataCollection.getDataflowId(), dataCollection.getDatasetSchema());
         if (!euDatasetList.isEmpty()) {
           datasetSnapshotService.restoreSnapshotToCloneData(dataCollection.getId(),
-                  euDatasetList.get(0).getId(), snapshotId, true, DatasetTypeEnum.EUDATASET, false);
+                  euDatasetList.get(0).getId(), snapshotId, true, DatasetTypeEnum.EUDATASET, false, processId);
         }
       }
     } catch (Exception e) {

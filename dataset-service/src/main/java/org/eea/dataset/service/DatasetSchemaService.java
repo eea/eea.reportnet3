@@ -1,9 +1,5 @@
 package org.eea.dataset.service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
 import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
@@ -11,14 +7,14 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.WebformVO;
+import org.eea.interfaces.vo.dataset.schemas.*;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The Interface DataschemaService.
@@ -81,7 +77,7 @@ public interface DatasetSchemaService {
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
    */
-  void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset, Long idSnapshot);
+  void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset, Long idSnapshot, String processId);
 
 
   /**
