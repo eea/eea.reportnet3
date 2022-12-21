@@ -241,7 +241,7 @@ public interface RecordStoreService {
    * @param lastFieldId
    * @return
    */
-  boolean recoverCheckForStuckFile(Long datasetId, Long firstFieldId, Long lastFieldId);
+  boolean recoverCheckForStuckFile(Long datasetId, String firstFieldId, String lastFieldId);
 
 
   /**

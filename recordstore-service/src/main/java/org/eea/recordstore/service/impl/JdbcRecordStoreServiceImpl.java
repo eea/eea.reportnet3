@@ -1110,7 +1110,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
 
     @Override
-    public boolean recoverCheckForStuckFile(Long datasetId, Long firstFieldId, Long lastFieldId) {
+    public boolean recoverCheckForStuckFile(Long datasetId, String firstFieldId, String lastFieldId) {
         try {
             LOG.info(
                 "Method recoverCheckForStuckFile called for datasetId {}, firstFieldId {} and lastFieldId {}",

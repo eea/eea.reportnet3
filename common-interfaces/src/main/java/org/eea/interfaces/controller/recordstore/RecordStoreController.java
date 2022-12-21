@@ -238,8 +238,8 @@ public interface RecordStoreController {
   @GetMapping(value = "/recoverCheck")
   boolean recoverCheck(
       @RequestParam("datasetId") Long datasetId,
-      @RequestParam("firstFieldId") Long firstFieldId,
-      @RequestParam("lastFieldId") Long lastFieldId);
+      @RequestParam("firstFieldId") String firstFieldId,
+      @RequestParam("lastFieldId") String lastFieldId);
 
   /**
    * Finds tasks by datasetId for in progress process

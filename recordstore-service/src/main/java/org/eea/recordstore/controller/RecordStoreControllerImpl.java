@@ -552,9 +552,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @ApiParam(value = "Dataset Id", example = "0", required = true)
       @RequestParam("datasetId") Long datasetId,
       @ApiParam(value = "First FieldId", example = "0", required = true)
-      @RequestParam("firstFieldId") Long firstFieldId,
+      @RequestParam("firstFieldId") String firstFieldId,
       @ApiParam(value = "Last FieldId", example = "0", required = true)
-      @RequestParam("lastFieldId") Long lastFieldId) {
+      @RequestParam("lastFieldId") String lastFieldId) {
     try {
       LOG.info("Method recoverCheck starts for datasetId: {}, firstFieldId: {}, lastFieldId: {}",
           datasetId, firstFieldId, lastFieldId);

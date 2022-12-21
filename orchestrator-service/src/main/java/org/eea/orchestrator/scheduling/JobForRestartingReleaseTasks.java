@@ -85,8 +85,8 @@ public class JobForRestartingReleaseTasks {
                         long snapshotId = jsonNode.get("snapshotId").asLong();
                         int splitFileId = jsonNode.get("splitFileId").asInt();
                         int numberOfSplitFiles = jsonNode.get("numberOfSplitFiles").asInt();
-                        long firstFieldId = jsonNode.get("firstFieldId").asLong();
-                        long lastFieldId = jsonNode.get("lastFieldId").asLong();
+                        String firstFieldId = jsonNode.get("firstFieldId").asText();
+                        String lastFieldId = jsonNode.get("lastFieldId").asText();
 
                         boolean currentFileHasBeenCopied = recordStoreControllerZuul.recoverCheck(datasetId, firstFieldId, lastFieldId);
                         if (currentFileHasBeenCopied) {
