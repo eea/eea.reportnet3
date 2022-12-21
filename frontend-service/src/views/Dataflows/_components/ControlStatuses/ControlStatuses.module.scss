@@ -1,7 +1,7 @@
 @import '_styles/mixins';
 
 .dialogContent {
-  min-height: 50vh;
+  min-height: 30vh;
 }
 
 .noDataContent {
@@ -59,6 +59,7 @@
 .dialogContent {
   > div:first-child {
     margin-top: 0 !important;
+    margin-bottom: 0.55rem !important;
   }
   > div:first-child > div {
     width: 25% !important;

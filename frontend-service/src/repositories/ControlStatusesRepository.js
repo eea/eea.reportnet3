@@ -3,32 +3,18 @@ import { HTTPRequester } from './_utils/HTTPRequester';
 import { ControlStatusesConfig } from './config/ControlStatusesConfig';
 
 export const ControlStatusesRepository = {
-  getControlStatuses: async ({
-    pageNum,
-    numberRows,
-    sortOrder,
-    sortField = '',
-    jobId,
-    jobType,
-    dataflowId,
-    providerId,
-    datasetId,
-    creatorUsername,
-    jobStatus
-  }) =>
-    await HTTPRequester.get({
-      url: getUrl(ControlStatusesConfig.getControlStatuses, {
-        pageNum,
-        numberRows,
-        sortOrder,
-        sortField,
-        jobId,
-        jobType,
-        dataflowId,
-        providerId,
+  getDatasetData: async (datasetId, dataProviderId) =>
+    await HTTPRequester.post({
+      url: getUrl(ControlStatusesConfig.getDatasetData, {
         datasetId,
-        creatorUsername,
-        jobStatus
+        dataProviderId
+      })
+    }),
+
+  deleteDatasetData: async datasetId =>
+    await HTTPRequester.delete({
+      url: getUrl(ControlStatusesConfig.deleteDatasetData, {
+        datasetId
       })
     })
 };

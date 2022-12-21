@@ -1,8 +1,6 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
-
+import { Fragment, useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Column } from 'primereact/column';
-
-import { useRecoilValue } from 'recoil';
 
 import styles from './ControlStatuses.module.scss';
 
@@ -10,33 +8,29 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
+import { routes } from 'conf/routes';
 
 import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Button } from 'views/_components/Button';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
+import { DatasetsForm } from 'views/_components/DatasetsForm';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Filters } from 'views/_components/Filters';
-import { LevelError } from 'views/_components/LevelError';
 import { Spinner } from 'views/_components/Spinner';
 
 import { ControlStatusesService } from 'services/ControlStatusesService';
+
+import { getUrl } from 'repositories/_utils/UrlUtils';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from '../../../_functions/Contexts/UserContext';
 
-import { filterByCustomFilterStore } from 'views/_components/Filters/_functions/Stores/filterStore';
-import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
-import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
-import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
-
-import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
-
 const { permissions } = config;
 
 export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
-  const filterBy = useRecoilValue(filterByCustomFilterStore('controlStatuses'));
+  const navigate = useNavigate();
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -44,165 +38,60 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
 
   const [controlStatus, setControlStatus] = useState(null);
-  const [controlStatuses, setControlStatusesList] = useState([]);
-  const [filteredRecords, setFilteredRecords] = useState(0);
+  const [dataflowId, setDataflowId] = useState(8116);
+  const [dataProviderId, setDataProviderId] = useState(null);
+  const [datasetForDataDeletion, setDatasetForDataDeletion] = useState([]);
+  const [datasetId, setDatasetId] = useState(null);
+  const [datasetName, setDatasetName] = useState('');
+  const [isDatasetDataDeleteSuccessfull, setIsDatasetDataDeleteSuccessfull] = useState(false);
+  const [isDeleteDatasetDataResultDialogVisible, setIsDeleteDatasetDataResultDialogVisible] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isFiltered, setIsFiltered] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDeletingDatasetData, setIsDeletingDatasetData] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isParametersWrongDialogVisible, setIsParametersWrongDialogVisible] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('idle');
-  const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
-  const [sort, setSort] = useState({ field: 'dateAdded', order: -1 });
-  const [totalRecords, setTotalRecords] = useState(0);
 
-  const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
-  const { setData } = useApplyFilters('controlStatuses');
-
-  const { firstRow, numberRows, pageNum } = pagination;
-
-  useEffect(() => {
-    getControlStatuses();
-  }, [pagination, sort]);
-
-  const getControlStatuses = async () => {
+  const getDatasetData = async (forwardedDatasetId, forwardedProviderId) => {
     setLoadingStatus('pending');
 
     try {
-      const data = await ControlStatusesService.getControlStatuses({
-        pageNum,
-        numberRows,
-        sortOrder: sort.order,
-        sortField: sort.field,
-        jobId: filterBy.jobId,
-        jobType: filterBy.jobType?.join(),
-        dataflowId: filterBy.dataflowId,
-        providerId: filterBy.providerId,
-        datasetId: filterBy.datasetId,
-        creatorUsername: filterBy.creatorUsername,
-        jobStatus: filterBy.jobStatus?.join()
-      });
+      const data = await ControlStatusesService.getDatasetData(forwardedDatasetId, forwardedProviderId);
 
-      setTotalRecords(data.totalRecords);
-      setControlStatusesList(data.jobsList);
-      setFilteredRecords(data.filteredRecords);
-      setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
-      setData(data.jobsList);
+      setDatasetForDataDeletion([...[], data]);
+      setDatasetId(data.datasetId);
+      setDatasetName(data.datasetName);
+      setDataProviderId(data.dataProviderId);
+
+      if (
+        data.datasetId === null ||
+        data.dataProviderId === null ||
+        data.datasetId === undefined ||
+        data.dataProviderId === undefined
+      ) {
+        setIsParametersWrongDialogVisible(true);
+      }
+
       setLoadingStatus('success');
     } catch (error) {
-      console.error('ControlStatus - getControlStatuses.', error);
+      console.error('ControlStatus - getDatasetData.', error);
       setLoadingStatus('error');
       notificationContext.add({ type: 'GET_CONTROL_STATUSES_ERROR' }, true);
     } finally {
       setIsLoading(false);
-      setIsRefreshing(false);
     }
   };
 
-  const onSort = event => setSort({ field: event.sortField, order: event.sortOrder });
-
-  const filterOptions = [
-    {
-      nestedOptions: [
-        // { key: 'jobId', label: resourcesContext.messages['jobId'], keyfilter: 'pint' },
-        { key: 'creatorUsername', label: resourcesContext.messages['creatorUsername'] },
-        { key: 'providerId', label: resourcesContext.messages['providerId'] },
-        { key: 'dataflowId', label: resourcesContext.messages['dataflowId'] },
-        { key: 'datasetId', label: resourcesContext.messages['datasetId'] }
-      ],
-      type: 'INPUT'
-    }
-    // {
-    //   key: 'jobType',
-    //   label: resourcesContext.messages['jobType'],
-    //   multiSelectOptions: [
-    //     {
-    //       type: resourcesContext.messages[config.jobType.IMPORT.label].toUpperCase(),
-    //       value: config.jobType.IMPORT.key
-    //     },
-    //     {
-    //       type: resourcesContext.messages[config.jobType.VALIDATION.label].toUpperCase(),
-    //       value: config.jobType.VALIDATION.key
-    //     },
-    //     {
-    //       type: resourcesContext.messages[config.jobType.RELEASE.label].toUpperCase(),
-    //       value: config.jobType.RELEASE.key
-    //     },
-    //     {
-    //       type: resourcesContext.messages[config.jobType.EXPORT.label].toUpperCase(),
-    //       value: config.jobType.EXPORT.key
-    //     },
-    //     {
-    //       type: resourcesContext.messages[config.jobType.COPY_TO_EU_DATASET.label].toUpperCase(),
-    //       value: config.jobType.COPY_TO_EU_DATASET.key
-    //     }
-    //   ],
-    //   template: 'jobType',
-    //   type: 'MULTI_SELECT'
-    // },
-    // {
-    //   key: 'jobStatus',
-    //   label: resourcesContext.messages['jobStatus'],
-    //   multiSelectOptions: [
-    //     {
-    //       type: resourcesContext.messages[config.jobRunningStatus.FAILED.label].toUpperCase(),
-    //       value: config.jobRunningStatus.FAILED.key
-    //     },
-    //     {
-    //       type: resourcesContext.messages[config.jobRunningStatus.QUEUED.label].toUpperCase(),
-    //       value: config.jobRunningStatus.QUEUED.key
-    //     },
-    //     {
-    //       type: resourcesContext.messages[config.jobRunningStatus.REFUSED.label].toUpperCase(),
-    //       value: config.jobRunningStatus.REFUSED.key
-    //     },
-    //     {
-    //       type: resourcesContext.messages[config.jobRunningStatus.FINISHED.label].toUpperCase(),
-    //       value: config.jobRunningStatus.FINISHED.key
-    //     },
-    //     {
-    //       type: resourcesContext.messages[config.jobRunningStatus.CANCELLED.label].toUpperCase(),
-    //       value: config.jobRunningStatus.CANCELLED.key
-    //     },
-    //     {
-    //       type: resourcesContext.messages[config.jobRunningStatus.IN_PROGRESS.label].toUpperCase(),
-    //       value: config.jobRunningStatus.IN_PROGRESS.key
-    //     }
-    //   ],
-    //   template: 'JobsStatus',
-    //   type: 'MULTI_SELECT'
-    // }
-  ];
-
   const getTableColumns = () => {
     const columns = [
-      // {
-      //   key: 'jobId',
-      //   header: resourcesContext.messages['jobId'],
-      //   template: getJobIdTemplate,
-      //   className: styles.middleColumn
-      // },
       {
-        key: 'creatorUsername',
-        header: resourcesContext.messages['creatorUsername'],
-        template: getJobCreatorUsernameTemplate,
-        className: styles.middleColumn
-      },
-      {
-        key: 'providerId',
+        key: 'dataProviderId',
         header: resourcesContext.messages['providerId'],
         template: getProviderIdTemplate,
         className: styles.middleColumn
       },
-      // {
-      //   key: 'jobType',
-      //   header: resourcesContext.messages['jobType'],
-      //   template: getJobTypeTemplate,
-      //   className: styles.middleColumn
-      // },
       {
-        key: 'dataflowId',
-        header: resourcesContext.messages['dataflowId'],
+        key: 'dataflowName',
+        header: resourcesContext.messages['dataflowName'],
         template: getDataflowIdTemplate,
         className: styles.middleColumn
       },
@@ -211,25 +100,13 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
         header: resourcesContext.messages['datasetId'],
         template: getDatasetIdTemplate,
         className: styles.middleColumn
+      },
+      {
+        key: 'datasetName',
+        header: resourcesContext.messages['datasetName'],
+        template: getDatasetNameTemplate,
+        className: styles.middleColumn
       }
-      // {
-      //   key: 'jobStatus',
-      //   header: resourcesContext.messages['jobStatus'],
-      //   template: getJobStatusTemplate,
-      //   className: styles.middleColumn
-      // },
-      // {
-      //   key: 'dateAdded',
-      //   header: resourcesContext.messages['dateAdded'],
-      //   template: job => getDateAddedTemplate(job, 'dateAdded'),
-      //   className: styles.smallColumn
-      // },
-      // {
-      //   key: 'dateStatusChanged',
-      //   header: resourcesContext.messages['dateStatusChanged'],
-      //   template: job => getDateStatusChangedTemplate(job, 'dateStatusChanged'),
-      //   className: styles.smallColumn
-      // }
     ];
 
     if (isAdmin) {
@@ -261,36 +138,17 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
         setIsDeleteDialogVisible(true);
         setControlStatus(rowData);
       }}
-      rowDataId={rowData.id}
+      rowDataId={rowData.datasetId}
     />
   );
 
-  const getJobStatusTemplate = job => (
-    <div>
-      <LevelError
-        className={config.jobRunningStatus[job.jobStatus].label}
-        type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
-      />
-    </div>
-  );
+  const getProviderIdTemplate = datasetData => <p>{datasetData.dataProviderId}</p>;
 
-  const getJobIdTemplate = job => <p>{job.id}</p>;
+  const getDataflowIdTemplate = datasetData => <p>{datasetData.dataflowName}</p>;
 
-  const getJobTypeTemplate = job => <p>{job.jobType}</p>;
+  const getDatasetIdTemplate = datasetData => <p>{datasetData.datasetId}</p>;
 
-  const getDateAddedTemplate = (job, field) =>
-    isNil(job[field]) ? '-' : getDateTimeFormatByUserPreferences(job[field]);
-
-  const getDateStatusChangedTemplate = (job, field) =>
-    isNil(job[field]) ? '-' : getDateTimeFormatByUserPreferences(job[field]);
-
-  const getJobCreatorUsernameTemplate = job => <p>{job.creatorUsername}</p>;
-
-  const getDataflowIdTemplate = job => <p>{job.dataflowId}</p>;
-
-  const getProviderIdTemplate = job => <p>{job.providerId}</p>;
-
-  const getDatasetIdTemplate = job => <p>{job.datasetId}</p>;
+  const getDatasetNameTemplate = datasetData => <p>{datasetData.datasetName}</p>;
 
   const onConfirmDeleteDialog = async () => {
     setLoadingStatus('pending');
@@ -298,7 +156,17 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
     try {
       setIsDeletingDatasetData(true);
-      getControlStatuses();
+      const isDeleteSuccessfull = await ControlStatusesService.deleteDatasetData(datasetId);
+
+      if (isDeleteSuccessfull) {
+        setIsDatasetDataDeleteSuccessfull(true);
+        setIsDeleteDatasetDataResultDialogVisible(true);
+      } else {
+        setIsDatasetDataDeleteSuccessfull(false);
+        setIsDeleteDatasetDataResultDialogVisible(true);
+      }
+
+      console.log('Is delete successfull: ' + isDeleteSuccessfull);
     } catch (error) {
       console.error('ControlStatus - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');
@@ -315,20 +183,20 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
     setControlStatus(null);
   };
 
-  const onRefresh = () => {
-    setIsRefreshing(true);
-    getControlStatuses();
+  const onHideIsParametersWrongDialog = () => {
+    setIsParametersWrongDialogVisible(false);
+    setControlStatus(null);
+    setDatasetForDataDeletion(null);
+  };
+
+  const onSearchAgain = () => {
+    setIsDeleteDatasetDataResultDialogVisible(false);
+    setControlStatus(null);
+    setDatasetForDataDeletion(null);
   };
 
   const dialogFooter = (
     <div className={styles.footer}>
-      <Button
-        className="p-button-secondary"
-        disabled={loadingStatus === 'pending'}
-        icon={isRefreshing ? 'spinnerAnimate' : 'refresh'}
-        label={resourcesContext.messages['refresh']}
-        onClick={onRefresh}
-      />
       <Button
         className={`p-button-secondary ${styles.buttonPushRight}`}
         icon="cancel"
@@ -338,14 +206,12 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
-  const renderFilters = () => (
-    <Filters
-      className="lineItems"
-      isLoading={loadingStatus === 'pending'}
-      onFilter={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
-      onReset={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
-      options={filterOptions}
-      recoilId="controlStatuses"
+  const renderSearchAgainButton = () => (
+    <Button
+      className="p-button-secondary"
+      icon="search"
+      label={resourcesContext.messages['searchAgain']}
+      onClick={onSearchAgain}
     />
   );
 
@@ -358,59 +224,26 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
       );
     }
 
-    if (isFiltered && isEmpty(controlStatuses)) {
-      return (
-        <div className={styles.dialogContent}>
-          {renderFilters()}
-          <div className={styles.noDataContent}>
-            <p>{resourcesContext.messages['noDatasetsWithSelectedParameters']}</p>
-          </div>
-        </div>
-      );
-    }
-
-    if (isEmpty(controlStatuses)) {
-      return (
-        <div className={styles.noDataContent}>
-          <span>{resourcesContext.messages['noData']}</span>
-        </div>
-      );
+    if (
+      isEmpty(datasetForDataDeletion) ||
+      datasetId === null ||
+      dataProviderId === null ||
+      datasetId === undefined ||
+      dataProviderId === undefined
+    ) {
+      return <DatasetsForm getDatasetData={getDatasetData} />;
     }
 
     return (
       <div className={styles.dialogContent}>
-        {renderFilters()}
+        <div>{renderSearchAgainButton()}</div>
         <DataTable
           autoLayout={true}
-          className={styles.jobStatusesTable}
-          first={firstRow}
+          className={styles.controlStatusesTable}
           hasDefaultCurrentPage={true}
           lazy={true}
           loading={loadingStatus === 'pending' && isNil(controlStatus)}
-          onPage={event =>
-            setPagination({
-              firstRow: event.first,
-              numberRows: event.rows,
-              pageNum: event.page
-            })
-          }
-          onSort={onSort}
-          paginator={true}
-          paginatorRight={
-            <PaginatorRecordsCount
-              dataLength={totalRecords}
-              filteredDataLength={filteredRecords}
-              isFiltered={isFiltered}
-            />
-          }
-          reorderableColumns={true}
-          resizableColumns={true}
-          rows={numberRows}
-          rowsPerPageOptions={[5, 10, 15]}
-          sortField={sort.field}
-          sortOrder={sort.order}
-          totalRecords={isFiltered ? filteredRecords : totalRecords}
-          value={controlStatuses}>
+          value={datasetForDataDeletion}>
           {getTableColumns()}
         </DataTable>
       </div>
@@ -430,6 +263,55 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
         {renderDialogContent()}
       </Dialog>
 
+      {isDeleteDatasetDataResultDialogVisible && (
+        <ConfirmDialog
+          header={
+            isDatasetDataDeleteSuccessfull
+              ? resourcesContext.messages['datasetDataDeletedSuccessfullyHeader']
+              : resourcesContext.messages['datasetDataFailedToDeleteHeader']
+          }
+          icon="search"
+          labelCancel={resourcesContext.messages['close']}
+          labelConfirm={resourcesContext.messages['searchAgain']}
+          onConfirm={onSearchAgain}
+          onHide={onCloseDialog}
+          visible={isDeleteDatasetDataResultDialogVisible}>
+          {isDatasetDataDeleteSuccessfull ? (
+            <p>
+              <a
+                href=""
+                onClick={() => {
+                  navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
+                }}>
+                {datasetName} - {datasetId}
+              </a>
+              {resourcesContext.messages['datasetDataDeletedSuccessfullyContent']}
+            </p>
+          ) : (
+            <p>
+              <a
+                href=""
+                onClick={() => {
+                  navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
+                }}>
+                {datasetName} - {datasetId}
+              </a>
+              {resourcesContext.messages['datasetDataFailedToDeleteContent']}
+            </p>
+          )}
+        </ConfirmDialog>
+      )}
+
+      {isParametersWrongDialogVisible && (
+        <Dialog
+          className="p-button-danger"
+          header={resourcesContext.messages['falseParameters']}
+          onHide={onHideIsParametersWrongDialog}
+          visible={isParametersWrongDialogVisible}>
+          {resourcesContext.messages['noDatasetsWithSelectedParameters']}
+        </Dialog>
+      )}
+
       {isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm="p-button-danger"
@@ -439,7 +321,19 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
           onConfirm={onConfirmDeleteDialog}
           onHide={onHideDeleteDialog}
           visible={isDeleteDialogVisible}>
-          {resourcesContext.messages['providerDatasetDataRemoveDialogContent']}
+          {
+            <p>
+              {resourcesContext.messages['providerDatasetDataRemoveDialogContent']}
+              <a
+                href=""
+                onClick={() => {
+                  navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
+                }}>
+                {datasetName} - {datasetId}
+              </a>
+              {resourcesContext.messages['?']}
+            </p>
+          }
         </ConfirmDialog>
       )}
     </Fragment>
