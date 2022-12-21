@@ -521,7 +521,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   }
 
   @Override
-  public boolean recoverCheckForStuckFile(Long datasetId, Long firstFieldId, Long lastFieldId) {
+  public boolean recoverCheckForStuckFile(Long datasetId, String firstFieldId, String lastFieldId) {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
