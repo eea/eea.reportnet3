@@ -1882,7 +1882,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
                 task.setStartingDate(new Date());
                 task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-                taskService.updateTaskStartingDate(task);
+                task.setPod(serviceInstanceId);
+                task = taskService.saveTask(task);
                 LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
 
                 LOG.info("Recover copy file {}", splitFile);
