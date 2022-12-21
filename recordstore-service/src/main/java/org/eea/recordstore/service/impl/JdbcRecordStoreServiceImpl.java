@@ -2211,6 +2211,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 taskType = TaskType.RESTORE_DESIGN_DATASET_TASK;
               } else if (processTypeEnum.equals(ProcessTypeEnum.RESTORE_REPORTING_DATASET.toString())) {
                 taskType = TaskType.RESTORE_REPORTING_DATASET_TASK;
+              } else if (processTypeEnum.equals(ProcessTypeEnum.COPY_REFERENCE_DATASET.toString())) {
+                taskType = TaskType.COPY_REFERENCE_DATASET_TASK;
               }
               TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, taskType, new Date(), null, null,
                       json, 0, null);

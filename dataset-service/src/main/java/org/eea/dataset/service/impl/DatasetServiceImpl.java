@@ -7,16 +7,7 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.beanutils.BeanUtils;
@@ -84,6 +75,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -113,6 +105,8 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -314,9 +308,18 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
 
+  /** The process controller zuul */
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
   /** The import path. */
   @Value("${importPath}")
   private String importPath;
+
+  /**
+   * The default process priority
+   */
+  private int defaultProcessPriority = 20;
 
   /**
    * Save all records.
@@ -2996,12 +2999,26 @@ public class DatasetServiceImpl implements DatasetService {
         DesignDataset originDatasetDesign =
             designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
         if (null != originDatasetDesign) {
+          String processId = UUID.randomUUID().toString();
+          LOG.info("Updating process for dataflowId {}, dataset {}, processId {} to status IN_QUEUE", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
+          processControllerZuul.updateProcess(datasetId, originDatasetDesign.getDataflowId(),
+                  ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.COPY_REFERENCE_DATASET, processId,
+                  SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, false);
+          LOG.info("Updated process for dataflowId {}, dataset {}, processId {} to status IN_QUEUE", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
+
           LOG.info("Prefilling data into the reference datasetId {}.", datasetId);
+
+          LOG.info("Updating process for dataflowId {}, dataset {}, processId {} to status IN_PROGRESS", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
+          processControllerZuul.updateProcess(datasetId, originDatasetDesign.getDataflowId(),
+                  ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.COPY_REFERENCE_DATASET, processId,
+                  SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, false);
+          LOG.info("Updated process for dataflowId {}, dataset {}, processId {} to status IN_PROGRESS", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
+
           CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
           createSnapshotVO.setDescription(originDatasetDesign.getDatasetSchema());
           createSnapshotVO.setReleased(false);
           datasetSnapshotService.addSnapshot(originDatasetDesign.getId(), createSnapshotVO,
-              datasetSnapshotService.obtainPartition(datasetId, "root").getId(), null, true, null);
+              datasetSnapshotService.obtainPartition(datasetId, "root").getId(), null, true, processId);
         }
       }
     } catch (Exception e) {
