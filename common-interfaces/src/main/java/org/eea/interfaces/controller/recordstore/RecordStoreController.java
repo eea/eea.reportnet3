@@ -221,7 +221,7 @@ public interface RecordStoreController {
       @RequestParam("startingNumber") int startingNumber,
       @RequestParam("endingNumber") int endingNumber,
       @RequestParam("processId") String processId,
-      @RequestParam("currentSplitFileName") String currentSplitFileName) throws SQLException, IOException;
+      @RequestParam(name = "currentSplitFileName", required = false) String currentSplitFileName) throws SQLException, IOException;
 
   /**
    * Check if data of file has been imported to dataset

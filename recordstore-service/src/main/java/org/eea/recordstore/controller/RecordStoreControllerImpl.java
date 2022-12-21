@@ -515,7 +515,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @RequestParam("endingNumber") int endingNumber,
       @ApiParam(value = "Process Id", example = "0", required = true)
       @RequestParam("processId") String processId,
-      @RequestParam("currentSplitFileName") String currentSplitFileName) throws SQLException, IOException {
+      @RequestParam(name = "currentSplitFileName", required = false) String currentSplitFileName) throws SQLException, IOException {
 
     try {
       LOG.info("Method restoreSpecificSnapshotData starts for datasetId: {}, idSnapshot: {}, startingNumber: {}, endingNumber: {}, processId: {}",
