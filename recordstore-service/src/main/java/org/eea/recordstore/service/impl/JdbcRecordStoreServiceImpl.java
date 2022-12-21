@@ -1078,12 +1078,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
      * @param processId
      */
     @Async @Override public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
-        int startingNumber, int endingNumber, String processId) throws SQLException, IOException {
+        int startingNumber, int endingNumber, String processId, String currentSplitFileName) throws SQLException, IOException {
 
         LOG.info(
             "Method restoreSpecificFileSnapshot starts with datasetId {}, idSnapshot {}, startingNumber {}, endingNumber {} and processId {}",
             datasetId, idSnapshot, startingNumber, endingNumber, processId);
         try {
+            if (currentSplitFileName!=null) {
+              String currentSplitFile = pathSnapshot + currentSplitFileName;
+              TaskVO task = taskService.findReleaseTaskBySplitFileNameAndProcessId(currentSplitFileName, processId);
+              LOG.info("Updating task status of task with id {} for file {} with idSnapshot {} and processId {} to FINISHED", task.getId(), currentSplitFileName, idSnapshot, processId);
+              taskService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), task.getId());
+              LOG.info("Updated task status of task with id {} for file {} with idSnapshot {} and processId {} to FINISHED", task.getId(), currentSplitFileName, idSnapshot, processId);
+
+              try {
+                LOG.info("File {} copied and will be deleted", currentSplitFile);
+                deleteFile(Arrays.asList(currentSplitFile));
+                LOG.info("File {} has been deleted", currentSplitFile);
+              } catch (Exception e) {
+                LOG.error("Error while trying to delete split snap file {}", currentSplitFile);
+              }
+            }
             ConnectionDataVO connection =
                 getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + datasetId);
             Connection con =

@@ -1,16 +1,6 @@
 package org.eea.recordstore.service.impl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.math.BigInteger;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.github.dockerjava.api.model.Container;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.validation.TaskVO;
@@ -25,7 +15,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import com.github.dockerjava.api.model.Container;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.math.BigInteger;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The Class RecordStoreServiceImpl.
@@ -516,7 +517,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot, int startingNumber,
-      int endingNumber, String type) {
+      int endingNumber, String type, String currentSplitFileName) {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 

@@ -1,15 +1,10 @@
 package org.eea.recordstore.controller;
 
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -34,21 +29,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The Class RecordStoreControllerImpl.
@@ -521,13 +514,14 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @ApiParam(value = "Ending number", example = "0", required = true)
       @RequestParam("endingNumber") int endingNumber,
       @ApiParam(value = "Process Id", example = "0", required = true)
-      @RequestParam("processId") String processId) throws SQLException, IOException {
+      @RequestParam("processId") String processId,
+      @RequestParam("currentSplitFileName") String currentSplitFileName) throws SQLException, IOException {
 
     try {
       LOG.info("Method restoreSpecificSnapshotData starts for datasetId: {}, idSnapshot: {}, startingNumber: {}, endingNumber: {}, processId: {}",
           datasetId, idSnapshot, startingNumber, endingNumber, processId);
 
-      recordStoreService.restoreSpecificFileSnapshot(datasetId, idSnapshot, startingNumber, endingNumber, processId);
+      recordStoreService.restoreSpecificFileSnapshot(datasetId, idSnapshot, startingNumber, endingNumber, processId, currentSplitFileName);
 
       LOG.info("Method restoreSpecificFileSnapshot ends");
     } catch (Exception e) {

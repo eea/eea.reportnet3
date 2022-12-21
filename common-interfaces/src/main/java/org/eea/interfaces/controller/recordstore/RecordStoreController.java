@@ -1,22 +1,17 @@
 package org.eea.interfaces.controller.recordstore;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.validation.ProcessTaskVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The Interface RecordStoreController.
@@ -225,7 +220,8 @@ public interface RecordStoreController {
       @RequestParam("idSnapshot") Long idSnapshot,
       @RequestParam("startingNumber") int startingNumber,
       @RequestParam("endingNumber") int endingNumber,
-      @RequestParam("processId") String processId) throws SQLException, IOException;
+      @RequestParam("processId") String processId,
+      @RequestParam("currentSplitFileName") String currentSplitFileName) throws SQLException, IOException;
 
   /**
    * Check if data of file has been imported to dataset
