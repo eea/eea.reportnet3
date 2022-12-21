@@ -126,7 +126,6 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
         field={column.key}
         header={column.header}
         key={column.key}
-        sortable={column.key !== 'buttonsUniqueId'}
       />
     ));
   };
@@ -166,6 +165,7 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
         setIsDeleteDatasetDataResultDialogVisible(true);
       }
 
+      setLoadingStatus('success');
       console.log('Is delete successfull: ' + isDeleteSuccessfull);
     } catch (error) {
       console.error('ControlStatus - onConfirmDeleteDialog.', error);
@@ -197,6 +197,20 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const dialogFooter = (
     <div className={styles.footer}>
+      {!(
+        isEmpty(datasetForDataDeletion) ||
+        datasetId === null ||
+        dataProviderId === null ||
+        datasetId === undefined ||
+        dataProviderId === undefined
+      ) && (
+        <Button
+          className={`p-button-secondary ${styles.buttonPushLeft}`}
+          icon="arrowRight"
+          label={resourcesContext.messages['back']}
+          onClick={onSearchAgain}
+        />
+      )}
       <Button
         className={`p-button-secondary ${styles.buttonPushRight}`}
         icon="cancel"
@@ -270,7 +284,7 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
               ? resourcesContext.messages['datasetDataDeletedSuccessfullyHeader']
               : resourcesContext.messages['datasetDataFailedToDeleteHeader']
           }
-          icon="search"
+          iconConfirm="search"
           labelCancel={resourcesContext.messages['close']}
           labelConfirm={resourcesContext.messages['searchAgain']}
           onConfirm={onSearchAgain}

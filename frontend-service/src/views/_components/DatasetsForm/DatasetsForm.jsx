@@ -166,9 +166,8 @@ export const DatasetsForm = ({ getDatasetData }) => {
             <Button
               className="rp-btn primary"
               disabled={isSubmitting || errors['dataProviderId'] !== '' || errors['datasetId'] !== ''}
-              id="kc-login"
+              id="buttonDatasetForm"
               label={resourcesContext.messages['findDataset']}
-              layout="simple"
               onClick={onGetDatasetData}
               type={isFirefox ? 'button' : 'submit'}
             />

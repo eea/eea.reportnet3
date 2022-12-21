@@ -73,6 +73,7 @@
     "automaticReportingDeletionMessage": "This action will automatically delete reporter data and snapshots",
     "availableInPublic": "Available in public",
     "availableInPublicView": "Available in public view",
+    "back": "Back",
     "basemapLayer": "Basemap layer",
     "blocker": "Blocker",
     "bulkDeleteCheckTooltip": "Delete multiple fields",

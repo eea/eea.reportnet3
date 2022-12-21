@@ -4,13 +4,10 @@
   justify-content: left;
   align-items: left;
   width: 400px;
-  // height: 50vh;
-  background-color: var(--c-blue-120);
+  font-weight: 400;
 }
 .boxContainer .box {
   background-color: var(--c-white-color);
-  // padding: 1rem;
-  // border-radius: 5px;
   width: 400px;
 }
 .boxContainer .box .header {
@@ -33,6 +30,7 @@
   display: block;
   font-size: 1rem;
   margin-bottom: 1rem;
+  opacity: 0.8;
 }
 .boxContainer .box form fieldset input {
   width: 70%;

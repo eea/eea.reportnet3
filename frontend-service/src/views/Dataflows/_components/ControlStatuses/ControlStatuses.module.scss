@@ -1,7 +1,7 @@
 @import '_styles/mixins';
 
 .dialogContent {
-  min-height: 30vh;
+  min-height: 35vh;
 }
 
 .noDataContent {
@@ -44,6 +44,14 @@
 
 .buttonPushRight {
   margin-left: auto !important;
+  border-radius: 5px !important;
+}
+
+.buttonPushLeft {
+  margin-right: auto !important;
+  background-color: var(--c-corporate-blue) !important;
+  color: white !important;
+  border-radius: 5px !important;
 }
 
 .deleteRowButton {
