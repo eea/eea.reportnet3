@@ -451,7 +451,7 @@ public class JdbcRecordStoreServiceImplTest {
     ProcessVO processVO = new ProcessVO();
     processVO.setProcessId(processId);
     processVO.setDatasetId(1L);
-    Mockito.when(processService.updateProcess(anyLong(), anyLong(), any(ProcessStatusEnum.class), any(ProcessTypeEnum.class), anyString(), anyString(), anyInt(), anyBoolean())).thenReturn(true);
+    processVO.setProcessType(ProcessTypeEnum.RESTORE_REPORTING_DATASET.toString());
     Mockito.when(processService.getByProcessId(anyString())).thenReturn(processVO);
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.DESIGN, false, false,
         false, processId);

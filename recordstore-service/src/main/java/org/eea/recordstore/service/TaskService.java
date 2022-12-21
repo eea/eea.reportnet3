@@ -26,7 +26,7 @@ public interface TaskService {
      * @param splitFileName
      * @return
      */
-    TaskVO findReleaseTaskBySplitFileName(String splitFileName);
+    TaskVO findReleaseTaskBySplitFileNameAndProcessId(String splitFileName, String processId);
 
     /**
      * Finds tasks by processId

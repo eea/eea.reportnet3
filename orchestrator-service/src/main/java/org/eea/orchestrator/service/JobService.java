@@ -3,6 +3,7 @@ package org.eea.orchestrator.service;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -18,15 +19,13 @@ public interface JobService {
 
     JobStatusEnum checkEligibilityOfJob(String jobType, Long dataflowId, Long dataProviderId, List<Long> datasetId, boolean release);
 
-    void addValidationJob(Long dataflowId, Long providerId, Long datasetId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert);
-
-    void addReleaseJob(Long dataflowId, Long dataProviderId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert);
-
-    Long addImportJob(Long dataflowId, Long providerId, Long datasetId, Map<String, Object> parameters, String creator, JobStatusEnum statusToInsert);
+    Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release);
 
     void prepareAndExecuteValidationJob(JobVO jobVO);
 
     void prepareAndExecuteReleaseJob(JobVO jobVO);
+
+    void prepareAndExecuteCopyToEUDatasetJob(JobVO jobVO);
 
     void deleteFinishedJobsBasedOnDuration();
 

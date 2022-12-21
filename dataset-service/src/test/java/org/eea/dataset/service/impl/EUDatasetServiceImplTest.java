@@ -1,14 +1,5 @@
 package org.eea.dataset.service.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import org.eea.dataset.mapper.EUDatasetMapper;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.domain.EUDataset;
@@ -20,8 +11,13 @@ import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.lock.LockVO;
+import org.eea.interfaces.vo.orchestrator.JobProcessVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.service.LockService;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +30,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * The Class EUDatasetServiceImplTest.
@@ -73,6 +78,12 @@ public class EUDatasetServiceImplTest {
   /** The dataset snapshot service. */
   @Mock
   private DatasetSnapshotService datasetSnapshotService;
+
+  @Mock
+  private ProcessControllerZuul processControllerZuul;
+
+  @Mock
+  private JobProcessControllerZuul jobProcessControllerZuul;
 
   /** The reportings. */
   private List<ReportingDatasetVO> reportings;
@@ -150,7 +161,10 @@ public class EUDatasetServiceImplTest {
         Mockito.any())).thenReturn(Optional.of(partitionDataset));
     doNothing().when(datasetSnapshotService).addSnapshot(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any());
-    euDatasetService.populateEUDatasetWithDataCollection(1L);
+    Mockito.when(processControllerZuul.updateProcess(anyLong(), anyLong(), any(ProcessStatusEnum.class), any(ProcessTypeEnum.class), anyString(), anyString(), anyInt(), anyBoolean())).thenReturn(true);
+    JobProcessVO jobProcessVO = new JobProcessVO(1L, 1L, "fdsakljl");
+    Mockito.when(jobProcessControllerZuul.save(any(JobProcessVO.class))).thenReturn(jobProcessVO);
+    euDatasetService.populateEUDatasetWithDataCollection(1L, null);
     Mockito.verify(datasetSnapshotService, times(1)).addSnapshot(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.anyBoolean(), Mockito.any());
   }
@@ -173,7 +187,7 @@ public class EUDatasetServiceImplTest {
     when(dataCollectionRepository.findByDataflowId(Mockito.any())).thenReturn(dataCollectionList);
     when(euDatasetRepository.findByDataflowId(Mockito.any())).thenReturn(euDatasetList);
     try {
-      euDatasetService.populateEUDatasetWithDataCollection(1L);
+      euDatasetService.populateEUDatasetWithDataCollection(1L, null);
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot combine lists with dissimilar sizes", e.getMessage());
       throw e;
@@ -196,8 +210,11 @@ public class EUDatasetServiceImplTest {
     when(euDatasetRepository.findByDataflowId(Mockito.any())).thenReturn(euDatasetList);
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.any(),
         Mockito.any())).thenReturn(Optional.empty());
+    Mockito.when(processControllerZuul.updateProcess(anyLong(), anyLong(), any(ProcessStatusEnum.class), any(ProcessTypeEnum.class), anyString(), anyString(), anyInt(), anyBoolean())).thenReturn(true);
+    JobProcessVO jobProcessVO = new JobProcessVO(1L, 1L, "fdsakljl");
+    Mockito.when(jobProcessControllerZuul.save(any(JobProcessVO.class))).thenReturn(jobProcessVO);
     try {
-      euDatasetService.populateEUDatasetWithDataCollection(1L);
+      euDatasetService.populateEUDatasetWithDataCollection(1L, null);
     } catch (EEAException e) {
       assertEquals(EEAErrorMessage.PARTITION_ID_NOTFOUND, e.getMessage());
       throw e;

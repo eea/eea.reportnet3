@@ -7,6 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
@@ -39,7 +40,7 @@ public interface EUDatasetController {
    * @param idDataflow the id dataflow
    */
   @PostMapping("/v1/populateData/dataflow/{dataflowId}")
-  void populateDataFromDataCollection(@PathVariable("dataflowId") Long idDataflow);
+  void populateDataFromDataCollection(@PathVariable("dataflowId") Long idDataflow, @RequestParam(name = "jobId", required = false) Long jobId);
 
   /**
    * Populate data from data collection legacy.

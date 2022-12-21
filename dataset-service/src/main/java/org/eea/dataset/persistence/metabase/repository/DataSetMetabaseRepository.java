@@ -130,4 +130,12 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
    */
   List<DataSetMetabase> findByDataProviderIdIn(List<Long> providerIdList);
 
+  /**
+   * Find by data provider id and dataset id.
+   *
+   * @param datasetId the dataset id
+   * @param dataProviderId the data provider id
+   * @return
+   */
+  DataSetMetabase findByIdAndDataProviderId(Long datasetId, Long dataProviderId);
 }

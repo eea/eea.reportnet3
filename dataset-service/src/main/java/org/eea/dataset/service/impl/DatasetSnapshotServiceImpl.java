@@ -446,7 +446,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     Long idPartition = obtainPartition(idDataset, "root").getId();
     recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, idPartition,
         DatasetTypeEnum.REPORTING, false, deleteData, false, processId);
-    LOG.info("Successfully restored snapshot with id {} for datasetId {} and release processId {}", idSnapshot, idDataset, processId);
+    LOG.info("Successfully restored snapshot with id {} for datasetId {} and processId {}", idSnapshot, idDataset, processId);
   }
 
   /**
@@ -463,14 +463,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   @Async
   public void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination,
-      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType, boolean prefillingReference)
+      Long idSnapshot, Boolean deleteData, DatasetTypeEnum datasetType, boolean prefillingReference, String processId)
       throws EEAException {
 
     // 1. Delete the dataset values implied
     // we need the partitionId. By now only consider the user root
     Long idPartition = obtainPartition(datasetOrigin, "root").getId();
     recordStoreControllerZuul.restoreSnapshotData(idDatasetDestination, idSnapshot, idPartition,
-        datasetType, false, deleteData, prefillingReference, null);
+        datasetType, false, deleteData, prefillingReference, processId);
   }
 
   /**
@@ -522,10 +522,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         SecurityContextHolder.getContext().getAuthentication().getName());
     value.put("dateRelease", dateRelease);
     value.put("process_id", processId);
-    LOG.info("The user releasing kafka event on DatasetSnapshotServiceImpl.releaseSnapshot for snapshotId {} and datasetId {} of release processId {} is {}",
+    LOG.info("The user releasing kafka event on DatasetSnapshotServiceImpl.releaseSnapshot for snapshotId {} and datasetId {} of processId {} is {}",
         idSnapshot, idDataset, processId, SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
-    LOG.info("Successfully released snapshot with id {} for datasetId {} release processId {}", idSnapshot, idDataset, processId);
+    LOG.info("Successfully released snapshot with id {} for datasetId {} processId {}", idSnapshot, idDataset, processId);
   }
 
   @Override
@@ -587,15 +587,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           snapshotRepository.save(snapshot.get());
         }
 
-        LOG.info("Snapshot {} of release processId {} released", idSnapshot, processId);
+        LOG.info("Snapshot {} of processId {} released", idSnapshot, processId);
       } catch (EEAException e) {
-        LOG_ERROR.error("Error releasing snapshot {} of release processId {},", idSnapshot, processId, e);
+        LOG_ERROR.error("Error releasing snapshot {} of processId {},", idSnapshot, processId, e);
         releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, e.getMessage());
         removeLockRelatedToCopyDataToEUDataset(idDataflow);
         releaseLocksRelatedToRelease(idDataflow, idDataProvider);
       }
     } else {
-      LOG_ERROR.error("Error in release snapshot {} of release processId {}", idSnapshot, processId);
+      LOG_ERROR.error("Error in release snapshot {} of processId {}", idSnapshot, processId);
       releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot");
       removeLockRelatedToCopyDataToEUDataset(idDataflow);
       releaseLocksRelatedToRelease(idDataflow, idDataProvider);
@@ -736,7 +736,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Override
   @Async
-  public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot)
+  public void restoreSchemaSnapshot(Long idDataset, Long idSnapshot, String processId)
       throws EEAException, IOException {
 
     try {
@@ -800,7 +800,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // Replace the schema: delete the older and save the new we have already recovered on step
       // Also in the service we call the recordstore to do the restore of the dataset_X data
       schemaService.replaceSchema(schema.getIdDataSetSchema().toString(), schema, idDataset,
-          idSnapshot);
+          idSnapshot, processId);
       // fill the PK catalogue with the new schema
       // also the table foreign_relations
       schemaService.updatePKCatalogueAndForeignsAfterSnapshot(

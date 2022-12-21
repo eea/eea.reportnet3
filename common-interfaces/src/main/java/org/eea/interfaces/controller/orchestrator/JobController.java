@@ -105,6 +105,13 @@ public interface JobController {
 
 
     /**
+     * Adds a copy to eu dataset job
+     * @param dataflowId
+     */
+    @PostMapping(value = "/addCopyToEUDataset/populateData/dataflow/{dataflowId}")
+    void addCopyToEUDatasetJob(@PathVariable("dataflowId") Long dataflowId);
+
+    /**
      * Update job's status
      *
      * @param jobId the job id

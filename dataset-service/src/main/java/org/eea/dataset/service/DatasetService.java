@@ -12,6 +12,7 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.service.model.TruncateDataset;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
@@ -606,4 +607,20 @@ public interface DatasetService {
    * @param datasetId the dataset id
    */
   void deleteTempEtlExport(@DatasetId Long datasetId);
+
+  /**
+   * Find dataset data for dataset id and data provider id if can be deleted.
+   *
+   * @param datasetId
+   * @param dataProviderId
+   * @return
+   */
+  TruncateDataset getDatasetDataToBeDeleted(Long datasetId, Long dataProviderId);
+
+  /**
+   * Truncate dataset by dataset id
+   * @param datasetId
+   * @return
+   */
+  boolean truncateDataset(Long datasetId);
 }

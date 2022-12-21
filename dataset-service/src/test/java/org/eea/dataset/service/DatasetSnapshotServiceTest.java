@@ -424,7 +424,7 @@ public class DatasetSnapshotServiceTest {
     when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(Mockito.anyLong(),
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     datasetSnapshotService.restoreSnapshotToCloneData(1L, 1L, 1L, true, DatasetTypeEnum.EUDATASET,
-        false);
+        false, "fdafda-jhkji");
     Mockito.verify(recordStoreControllerZuul, times(1)).restoreSnapshotData(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
@@ -698,9 +698,9 @@ public class DatasetSnapshotServiceTest {
     when(uniqueConstraintRepository.deleteByDatasetSchemaId(Mockito.any())).thenReturn(0L);
     when(uniqueConstraintRepository.saveAll(Mockito.any())).thenReturn(new ArrayList<>());
 
-    datasetSnapshotService.restoreSchemaSnapshot(1L, 1L);
+    datasetSnapshotService.restoreSchemaSnapshot(1L, 1L, "fafda-kjlkjkl");
     Mockito.verify(schemaService, times(1)).replaceSchema(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -744,7 +744,7 @@ public class DatasetSnapshotServiceTest {
       when(uniqueConstraintRepository.saveAll(Mockito.any())).thenReturn(new ArrayList<>());
       doThrow(new EEAException("failed")).when(schemaService)
           .updatePKCatalogueAndForeignsAfterSnapshot(Mockito.any(), Mockito.any());
-      datasetSnapshotService.restoreSchemaSnapshot(1L, 1L);
+      datasetSnapshotService.restoreSchemaSnapshot(1L, 1L, "fdafda-jdjafi");
     } catch (EEAException e) {
       Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
     }

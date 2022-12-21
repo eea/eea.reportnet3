@@ -134,4 +134,12 @@ public interface ValidationController {
    */
   @GetMapping(value = "/getPriority/{dataflowId}")
   int getPriority(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Deletes the locks related to release
+   * @param datasetId
+   * @return
+   */
+  @DeleteMapping(value = "/deleteLocksToReleaseProcess/{datasetId}")
+  void deleteLocksToReleaseProcess(@PathVariable("datasetId") Long datasetId);
 }

@@ -61,6 +61,7 @@ public class ReferenceDatasetSnapshotCommand extends AbstractEEAEventHandlerComm
     try {
       Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
       Long snapshotId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("snapshot_id")));
+      String processId = (String) eeaEventVO.getData().get("processId");
       ThreadPropertiesManager.setVariable("user", String.valueOf(eeaEventVO.getData().get("user")));
 
       DesignDataset designDataset = designDatasetRepository.findById(datasetId).orElse(null);
@@ -71,7 +72,7 @@ public class ReferenceDatasetSnapshotCommand extends AbstractEEAEventHandlerComm
                         designDataset.getDatasetSchema());
         if (!referenceDatasets.isEmpty()) {
           datasetSnapshotService.restoreSnapshotToCloneData(designDataset.getId(),
-                  referenceDatasets.get(0).getId(), snapshotId, true, DatasetTypeEnum.REFERENCE, true);
+                  referenceDatasets.get(0).getId(), snapshotId, true, DatasetTypeEnum.REFERENCE, true, processId);
         }
       }
     } catch (Exception e) {

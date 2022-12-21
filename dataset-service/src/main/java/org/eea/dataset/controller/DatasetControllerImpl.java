@@ -15,6 +15,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
+import org.eea.dataset.service.model.TruncateDataset;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
@@ -1869,11 +1870,51 @@ public class DatasetControllerImpl implements DatasetController {
 
       LOG.info("Method checkLocks results: {},", results);
     } catch (Exception e) {
-      LOG_ERROR.error("Error while executing method checkLocks ffor datasetId: {}, dataflowId: {}, dataProviderId: {}", datasetId, dataflowId, dataProviderId, e);
+      LOG_ERROR.error("Error while executing method checkLocks for datasetId: {}, dataflowId: {}, dataProviderId: {}", datasetId, dataflowId, dataProviderId, e);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     return new ResponseEntity<>(results, HttpStatus.OK);
+  }
+
+
+  /**
+   * Gets dataset Data to be truncated
+   *
+   * @param datasetId
+   * @param dataProviderId
+   * @return
+   */
+  @PostMapping("/private/getDatasetData")
+  @ApiOperation(value = "Get dataset data to be truncated", hidden = true)
+  public TruncateDataset getDatasetData(
+      @RequestParam(value = "datasetId") Long datasetId,
+      @RequestParam(value = "dataProviderId") Long dataProviderId) {
+    LOG.info("Method getDatasetData called for datasetId: {} and dataProviderId {}", datasetId, dataProviderId);
+    if (datasetId == null || dataProviderId == null) {
+      return null;
+    }
+
+    TruncateDataset datasetDataToBeDeleted = new TruncateDataset();
+    try {
+      datasetDataToBeDeleted = datasetService.getDatasetDataToBeDeleted(datasetId, dataProviderId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error while executing method getDatasetData for datasetId: {}, dataProviderId: {}", datasetId, dataProviderId, e);
+    }
+
+    LOG.info("Method getDatasetData returns truncateDataset: {}", datasetDataToBeDeleted);
+    return datasetDataToBeDeleted;
+  }
+
+
+  @DeleteMapping("/private/truncateDataset")
+  @ApiOperation(value = "Truncate dataset by dataset id", hidden = true)
+  public Boolean truncateDataset(@RequestParam("datasetId") Long datasetId) {
+    LOG.info("Method truncateDataset called for datasetId: {}", datasetId);
+    if (datasetId == null) {
+      return null;
+    }
+    return datasetService.truncateDataset(datasetId);
   }
 
   /**

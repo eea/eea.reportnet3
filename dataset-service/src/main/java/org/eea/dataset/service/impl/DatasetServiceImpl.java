@@ -7,16 +7,7 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.apache.commons.beanutils.BeanUtils;
@@ -78,11 +69,13 @@ import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.PostgresBulkImporter;
+import org.eea.dataset.service.model.TruncateDataset;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -112,6 +105,8 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -313,9 +308,18 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
 
+  /** The process controller zuul */
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
   /** The import path. */
   @Value("${importPath}")
   private String importPath;
+
+  /**
+   * The default process priority
+   */
+  private int defaultProcessPriority = 20;
 
   /**
    * Save all records.
@@ -2995,12 +2999,26 @@ public class DatasetServiceImpl implements DatasetService {
         DesignDataset originDatasetDesign =
             designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
         if (null != originDatasetDesign) {
+          String processId = UUID.randomUUID().toString();
+          LOG.info("Updating process for dataflowId {}, dataset {}, processId {} to status IN_QUEUE", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
+          processControllerZuul.updateProcess(datasetId, originDatasetDesign.getDataflowId(),
+                  ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.COPY_REFERENCE_DATASET, processId,
+                  SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, false);
+          LOG.info("Updated process for dataflowId {}, dataset {}, processId {} to status IN_QUEUE", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
+
           LOG.info("Prefilling data into the reference datasetId {}.", datasetId);
+
+          LOG.info("Updating process for dataflowId {}, dataset {}, processId {} to status IN_PROGRESS", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
+          processControllerZuul.updateProcess(datasetId, originDatasetDesign.getDataflowId(),
+                  ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.COPY_REFERENCE_DATASET, processId,
+                  SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, false);
+          LOG.info("Updated process for dataflowId {}, dataset {}, processId {} to status IN_PROGRESS", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
+
           CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
           createSnapshotVO.setDescription(originDatasetDesign.getDatasetSchema());
           createSnapshotVO.setReleased(false);
           datasetSnapshotService.addSnapshot(originDatasetDesign.getId(), createSnapshotVO,
-              datasetSnapshotService.obtainPartition(datasetId, "root").getId(), null, true, null);
+              datasetSnapshotService.obtainPartition(datasetId, "root").getId(), null, true, processId);
         }
       }
     } catch (Exception e) {
@@ -3396,4 +3414,66 @@ public class DatasetServiceImpl implements DatasetService {
     return dictionary;
   }
 
+  /**
+   * Find dataset data for dataset id and data provider id if can be deleted.
+   *
+   * @param datasetId
+   * @param dataProviderId
+   * @return
+   */
+  @Override
+  public TruncateDataset getDatasetDataToBeDeleted(Long datasetId, Long dataProviderId) {
+
+    LOG.info("Method getDatasetDataToBeDeleted called for datasetId {} and dataProviderId {}", datasetId, dataProviderId);
+    TruncateDataset truncateDataset = new TruncateDataset();
+    boolean canBeDeleted;
+
+    try {
+      DataSetMetabase dataSetMetabase = dataSetMetabaseRepository.findByIdAndDataProviderId(datasetId, dataProviderId);
+      LOG.info("Dataset retrieved {} for datasetId {} and dataProviderId {}", dataSetMetabase, datasetId, dataProviderId);
+
+      if (dataSetMetabase != null) {
+        DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabase.getDatasetSchema()));
+        DataFlowVO dataFlowVO =dataflowControllerZuul.getMetabaseById(dataSetMetabase.getDataflowId());
+
+        canBeDeleted = dataSetSchema.getTableSchemas().stream()
+            .allMatch(table -> table.getReadOnly() && table.getFixedNumber() == Boolean.FALSE);
+
+        LOG.info("Method getDatasetDataToBeDeleted canBeDeleted: {} for datasetId {} and dataProviderId {} ",
+            canBeDeleted, datasetId, dataProviderId);
+
+        truncateDataset.setDatasetId(datasetId);
+        truncateDataset.setDatasetName(dataSetMetabase.getDataSetName());
+        truncateDataset.setDataProviderId(dataProviderId);
+        truncateDataset.setDataflowName(dataFlowVO.getName());
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in getDatasetDataToBeDeleted. Error message: {}", e.getMessage(), e);
+    }
+
+    return truncateDataset;
+  }
+
+
+  /**
+   * Truncate dataset by dataset id
+   * @param datasetId
+   * @return
+   */
+  @Override
+  public boolean truncateDataset(Long datasetId) {
+    LOG.info("Method truncateDataset called for datasetId {}", datasetId);
+    boolean deleted = false;
+
+    try {
+      deleted = recordRepository.truncateDataset(datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error(
+          "Error in getDatasetDataToBeDeleted. Error message: {}",
+          e.getMessage(), e);
+    }
+
+    LOG.info("Dataset {} has been truncated", datasetId);
+    return deleted;
+  }
 }

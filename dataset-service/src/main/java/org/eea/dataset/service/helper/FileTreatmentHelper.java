@@ -85,6 +85,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -147,6 +149,9 @@ public class FileTreatmentHelper implements DisposableBean {
      */
     @Value("${dataset.fieldMaxLength}")
     private int fieldMaxLength;
+
+    @Value("${importStorePath}")
+    private String importStorePath;
 
     /**
      * The dataset service.
@@ -917,6 +922,9 @@ public class FileTreatmentHelper implements DisposableBean {
                 File folder = new File(root, datasetId.toString());
                 String saveLocationPath = folder.getCanonicalPath();
 
+                File fileStoreRoot = new File(importStorePath, "dataset-"+datasetId.toString());
+                File fileStoreZip = new File(fileStoreRoot, multipartFile.getOriginalFilename());
+
                 // Delete dataset temporary folder first in case that for any reason still exists before
                 // creating again
                 FileUtils.deleteQuietly(folder);
@@ -930,8 +938,11 @@ public class FileTreatmentHelper implements DisposableBean {
                 List<File> files = new ArrayList<>();
                 if (null == integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
 
+                    FileUtils.deleteQuietly(fileStoreZip);
+                    fileStoreRoot.mkdirs();
+
                     try (ZipInputStream zip = new ZipInputStream(input)) {
-                        files = unzipAndStore(folder, saveLocationPath, zip);
+                        files = unzipAndStore(folder, saveLocationPath, fileStoreZip, zip);
                     } catch (Exception e) {
                         LOG.error("Unexpected error! Error in unzipAndStore for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
                         throw e;
@@ -952,6 +963,10 @@ public class FileTreatmentHelper implements DisposableBean {
                 } else {
 
                     File file = new File(folder, originalFileName);
+                    File fileStore = new File(fileStoreRoot, originalFileName);
+                    File fileStoreDir = new File(fileStoreRoot, "/");
+                    Files.deleteIfExists(Paths.get(fileStore.getCanonicalPath()));
+                    fileStoreDir.mkdirs();
 
                     // Store the file in the persistence volume
                     try (FileOutputStream output = new FileOutputStream(file)) {
@@ -962,6 +977,8 @@ public class FileTreatmentHelper implements DisposableBean {
                         LOG.error("Unexpected error! Error in copyLarge for fileName {} datasetId {} and tableSchemaId {}. Message: {}", originalFileName, datasetId, tableSchemaId, e.getMessage());
                         throw e;
                     }
+
+                    FileUtils.copyDirectory(folder, fileStoreDir);
 
                     // if the import goes it's a zip file, check if the zip is not empty to show
                     // error and avoid the call to FME
@@ -1015,12 +1032,14 @@ public class FileTreatmentHelper implements DisposableBean {
          * @throws EEAException the EEA exception
          * @throws IOException Signals that an I/O exception has occurred.
          */
-        private List<File> unzipAndStore (File folder, String saveLocationPath, ZipInputStream zip)
+        private List<File> unzipAndStore (File folder, String saveLocationPath, File fileStoreZip, ZipInputStream zip)
       throws EEAException, IOException {
 
             List<File> files = new ArrayList<>();
             ZipEntry entry = zip.getNextEntry();
 
+          try (ZipOutputStream out =
+                         new ZipOutputStream(new FileOutputStream(fileStoreZip.toString()))) {
             while (null != entry) {
                 String entryName = entry.getName();
                 String mimeType = datasetService.getMimetype(entryName);
@@ -1045,11 +1064,22 @@ public class FileTreatmentHelper implements DisposableBean {
                     throw e;
                 }
 
-                files.add(file);
-                entry = zip.getNextEntry();
-            }
+                byte[] buf = new byte[1024];
+                int len;
+                out.putNextEntry(entry);
+                FileInputStream in = new FileInputStream(file);
+                while ((len = in.read(buf)) > 0) {
+                  out.write(buf, 0, len);
+                }
 
-            return files;
+                entry = zip.getNextEntry();
+                files.add(file);
+            }
+          } catch (Exception e) {
+              LOG.error("Unexpected error! Message: {}", fileStoreZip.getCanonicalPath(), e.getMessage());
+              throw e;
+          }
+          return files;
         }
 
         /**

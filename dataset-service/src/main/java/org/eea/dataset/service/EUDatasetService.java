@@ -25,7 +25,7 @@ public interface EUDatasetService {
    * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  void populateEUDatasetWithDataCollection(Long dataflowId) throws EEAException;
+  void populateEUDatasetWithDataCollection(Long dataflowId, Long jobId) throws EEAException;
 
   /**
    * Removes the locks related to populate EU.

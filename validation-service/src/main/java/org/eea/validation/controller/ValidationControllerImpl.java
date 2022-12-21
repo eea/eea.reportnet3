@@ -464,4 +464,18 @@ public class ValidationControllerImpl implements ValidationController {
   public int getPriority(@ApiParam(value = "The dataflowId", example = "15") @PathVariable("dataflowId") Long dataflowId) {
      return validationHelper.getPriority(dataflowId);
   }
+
+  /**
+   * Deletes the locks related to release
+   * @param datasetId
+   * @return
+   */
+  @Override
+  @DeleteMapping(value = "/deleteLocksToReleaseProcess/{datasetId}")
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Deletes the locks related to release", hidden = true)
+  public void deleteLocksToReleaseProcess(@ApiParam(value = "Dataset id from which locks should be removed",
+          example = "15") @PathVariable("datasetId") Long datasetId) {
+    validationHelper.deleteLockToReleaseProcess(datasetId);
+  }
 }

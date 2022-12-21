@@ -98,7 +98,7 @@ public class JobForExecutingQueuedJobs {
                     } else if (job.getJobType() == JobTypeEnum.EXPORT) {
                         //call export mechanism
                     } else if (job.getJobType() == JobTypeEnum.COPY_TO_EU_DATASET) {
-                        //call COPY_TO_EU_DATASET mechanism
+                        jobService.prepareAndExecuteCopyToEUDatasetJob(job);
                     } else {
                         LOG.error("Error trying to execute queued job with id {}. Job type is {}", job.getId(), job.getJobType().getValue());
                         jobService.deleteJob(job);

@@ -125,7 +125,7 @@ public class JobControllerImpl implements JobController {
             parameters.put("released", released);
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);
             LOG.info("Adding validation job for datasetId {} and released {} for creator {} with status {}", datasetId, released, username, statusToInsert);
-            jobService.addValidationJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, username, statusToInsert);
+            jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released);
             LOG.info("Successfully added validation job for datasetId {}, released {} and creator {} with status {}", datasetId, released, username, statusToInsert);
             if (statusToInsert == JobStatusEnum.REFUSED) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_JOB);
@@ -168,7 +168,7 @@ public class JobControllerImpl implements JobController {
         JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), dataflowId, dataProviderId, datasetIds, true);
 
         LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
-        jobService.addReleaseJob(dataflowId, dataProviderId, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
+        jobService.addJob(dataflowId, dataProviderId, null, parameters, JobTypeEnum.VALIDATION, statusToInsert, true);
         LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
         if (statusToInsert == JobStatusEnum.REFUSED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
@@ -217,9 +217,33 @@ public class JobControllerImpl implements JobController {
         JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
 
         LOG.info("Adding import job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={}, replace={}, integrationId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, replace, integrationId, SecurityContextHolder.getContext().getAuthentication().getName());
-        Long jobId = jobService.addImportJob(dataflowId, providerId, datasetId, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
+        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.IMPORT, statusToInsert, false);
         LOG.info("Successfully added import job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={}, replace={}, integrationId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, replace, integrationId, SecurityContextHolder.getContext().getAuthentication().getName());
         return jobId;
+    }
+
+    /**
+     * Adds a release job.
+     */
+    @Override
+    @HystrixCommand
+    @PostMapping(value = "/addCopyToEUDataset/populateData/dataflow/{dataflowId}")
+    @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')  OR (checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN'))")
+    @ApiOperation(value = "Copy data collections data to EU datasets by dataflow id",
+            notes = "Allowed roles: CUSTODIAN, STEWARD")
+    public void addCopyToEUDatasetJob(@ApiParam(type = "Long", value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+        ThreadPropertiesManager.setVariable("user",
+                SecurityContextHolder.getContext().getAuthentication().getName());
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("dataflowId", dataflowId);
+        JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.COPY_TO_EU_DATASET.toString(), dataflowId, null, null, false);
+        LOG.info("Adding copy to eudataset job for dataflowId={}", dataflowId);
+        Long jobId = jobService.addJob(dataflowId, null, null, parameters, JobTypeEnum.COPY_TO_EU_DATASET, statusToInsert, false);
+        LOG.info("Successfully added copy to eudataset job with id {} for dataflowId={}", jobId, dataflowId);
+        if (statusToInsert == JobStatusEnum.REFUSED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_COPY_TO_EU_DATASET_JOB);
+        }
     }
 
     /**

@@ -93,4 +93,12 @@ public interface RecordExtendedQueriesRepository {
    */
   List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable,
       ExportFilterVO filters);
+
+  /**
+   * Truncate dataset by dataset id
+   *
+   * @param datasetId
+   * @return
+   */
+  boolean truncateDataset(Long datasetId);
 }

@@ -14,7 +14,7 @@ import java.util.List;
 public interface TaskRepository extends JpaRepository<Task, Long> {
 
     @Query(nativeQuery = true,
-    value = "select id from task where status='IN_PROGRESS' and task_type='RELEASE_TASK' and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
+            value = "select id from task where status='IN_PROGRESS' and task_type in ('RELEASE_TASK','COPY_TO_EU_DATASET_TASK','RESTORE_REPORTING_DATASET_TASK','RESTORE_DESIGN_DATASET_TASK','COPY_REFERENCE_DATASET_TASK') and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
     List<BigInteger> getTasksInProgress(@Param("timeInMinutes") long timeInMinutes);
 
     /**
@@ -29,8 +29,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
      * @param splitFileName
      * @return
      */
-    @Query(nativeQuery = true, value = "select * from task t where t.json\\:\\:json->>'splitFileName' like :splitFileName")
-    Task findByJsonSplitFileName(@Param("splitFileName") String splitFileName);
+    @Query(nativeQuery = true, value = "select * from task t where t.json\\:\\:json->>'splitFileName' like :splitFileName and t.process_id= :processId")
+    Task findByJsonSplitFileNameAndProcessId(@Param("splitFileName") String splitFileName, @Param("processId") String processId);
 
     /**
      * Update status and finish date.

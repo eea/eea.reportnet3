@@ -1,16 +1,5 @@
 package org.eea.dataset.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.service.DataCollectionService;
@@ -20,10 +9,15 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.service.LockService;
 import org.junit.Before;
 import org.junit.Test;
@@ -97,6 +91,12 @@ public class DatasetSnapshotControllerImplTest {
 
   @Mock
   LockService lockService;
+
+  @Mock
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  @Mock
+  private ProcessControllerZuul processControllerZuul;
 
   /**
    * Inits the mocks.
@@ -235,6 +235,11 @@ public class DatasetSnapshotControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(lockService.findByCriteria(Mockito.any())).thenReturn(null);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setId(1L);
+    dataset.setDataflowId(1L);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any())).thenReturn(dataset);
+    Mockito.when(processControllerZuul.updateProcess(anyLong(), anyLong(), any(ProcessStatusEnum.class), any(ProcessTypeEnum.class), anyString(), anyString(), anyInt(), anyBoolean())).thenReturn(true);
     datasetSnapshotControllerImpl.restoreSnapshot(1L, 1L);
     Mockito.verify(datasetSnapshotService, times(1)).restoreSnapshot(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -252,6 +257,10 @@ public class DatasetSnapshotControllerImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setId(1L);
+    dataset.setDataflowId(1L);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any())).thenReturn(dataset);
     try {
       datasetSnapshotControllerImpl.restoreSnapshot(null, 1L);
     } catch (ResponseStatusException e) {
@@ -274,6 +283,11 @@ public class DatasetSnapshotControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(lockService.findByCriteria(Mockito.any())).thenReturn(null);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setId(1L);
+    dataset.setDataflowId(1L);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any())).thenReturn(dataset);
+    Mockito.when(processControllerZuul.updateProcess(anyLong(), anyLong(), any(ProcessStatusEnum.class), any(ProcessTypeEnum.class), anyString(), anyString(), anyInt(), anyBoolean())).thenReturn(true);
     doThrow(new EEAException()).when(datasetSnapshotService).restoreSnapshot(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.any());
     try {
@@ -377,9 +391,14 @@ public class DatasetSnapshotControllerImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setId(1L);
+    dataset.setDataflowId(1L);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any())).thenReturn(dataset);
+    Mockito.when(processControllerZuul.updateProcess(anyLong(), anyLong(), any(ProcessStatusEnum.class), any(ProcessTypeEnum.class), anyString(), anyString(), anyInt(), anyBoolean())).thenReturn(true);
     datasetSnapshotControllerImpl.restoreSchemaSnapshot(1L, 1L);
     Mockito.verify(datasetSnapshotService, times(1)).restoreSchemaSnapshot(Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
   }
 
   /**
@@ -478,6 +497,10 @@ public class DatasetSnapshotControllerImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setId(1L);
+    dataset.setDataflowId(1L);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any())).thenReturn(dataset);
     datasetSnapshotControllerImpl.restoreSnapshot(null, 1L);
   }
 
@@ -496,6 +519,11 @@ public class DatasetSnapshotControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(lockService.findByCriteria(Mockito.any())).thenReturn(importLockVO);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setId(1L);
+    dataset.setDataflowId(1L);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any())).thenReturn(dataset);
+    Mockito.when(processControllerZuul.updateProcess(anyLong(), anyLong(), any(ProcessStatusEnum.class), any(ProcessTypeEnum.class), anyString(), anyString(), anyInt(), anyBoolean())).thenReturn(true);
     try {
       datasetSnapshotControllerImpl.restoreSnapshot(1L, 1L);
     } catch (ResponseStatusException e) {
@@ -516,8 +544,13 @@ public class DatasetSnapshotControllerImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setId(1L);
+    dataset.setDataflowId(1L);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any())).thenReturn(dataset);
+    Mockito.when(processControllerZuul.updateProcess(anyLong(), anyLong(), any(ProcessStatusEnum.class), any(ProcessTypeEnum.class), anyString(), anyString(), anyInt(), anyBoolean())).thenReturn(true);
     doThrow(new EEAException()).when(datasetSnapshotService).restoreSchemaSnapshot(Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
     datasetSnapshotControllerImpl.restoreSchemaSnapshot(1L, 1L);
   }
 
@@ -535,6 +568,10 @@ public class DatasetSnapshotControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
 
     try {
+      DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+      dataset.setId(1L);
+      dataset.setDataflowId(1L);
+      Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any())).thenReturn(dataset);
       datasetSnapshotControllerImpl.restoreSchemaSnapshot(null, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());

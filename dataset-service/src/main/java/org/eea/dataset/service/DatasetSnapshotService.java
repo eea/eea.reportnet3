@@ -99,7 +99,7 @@ public interface DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   void restoreSnapshotToCloneData(Long datasetOrigin, Long idDatasetDestination, Long idSnapshot,
-      Boolean deleteData, DatasetTypeEnum datasetType, boolean prefillingReference)
+      Boolean deleteData, DatasetTypeEnum datasetType, boolean prefillingReference, String processId)
       throws EEAException;
 
   /**
@@ -139,7 +139,7 @@ public interface DatasetSnapshotService {
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void restoreSchemaSnapshot(Long idDataset, Long idSnapshot) throws EEAException, IOException;
+  void restoreSchemaSnapshot(Long idDataset, Long idSnapshot, String processId) throws EEAException, IOException;
 
 
 

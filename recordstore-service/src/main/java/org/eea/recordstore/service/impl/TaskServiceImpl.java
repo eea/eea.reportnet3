@@ -51,8 +51,8 @@ public class TaskServiceImpl implements TaskService {
      * @return
      */
     @Override
-    public TaskVO findReleaseTaskBySplitFileName(String splitFileName) {
-        Task task = taskRepository.findByJsonSplitFileName(splitFileName);
+    public TaskVO findReleaseTaskBySplitFileNameAndProcessId(String splitFileName, String processId) {
+        Task task = taskRepository.findByJsonSplitFileNameAndProcessId(splitFileName, processId);
         return taskMapper.entityToClass(task);
     }
 
