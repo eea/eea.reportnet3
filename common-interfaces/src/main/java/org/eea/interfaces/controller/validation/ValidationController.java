@@ -126,4 +126,12 @@ public interface ValidationController {
    */
   @GetMapping(value = "/listInProgressValidationTasks/{timeInMinutes}")
   List<BigInteger> listInProgressValidationTasksThatExceedTime(@PathVariable("timeInMinutes") long timeInMinutes);
+
+  /**
+   * Deletes the locks related to release
+   * @param datasetId
+   * @return
+   */
+  @DeleteMapping(value = "/deleteLocksToReleaseProcess/{datasetId}")
+  void deleteLocksToReleaseProcess(@PathVariable("datasetId") Long datasetId);
 }
