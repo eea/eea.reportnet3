@@ -1655,10 +1655,11 @@ public class FileTreatmentHelper implements DisposableBean {
                 ConnectionDataVO connectionDataVO = recordStoreControllerZuul
                         .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
 
+                LOG.info("CSV Import File Chunk start: startLine:{} ,endLine:{} ,datasetId:{}, filename:{}",startLine,endLine,datasetId,fileName);
                 this.csvSegmentedReaderStrategy.parseFile(is, startLine, endLine, partitionId, idTableSchema, datasetId,
                         fileName, replace, schema, connectionDataVO);
             } catch (Exception e) {
-                LOG.error("error processing file", e);
+                LOG.error("CSV Import File Chunk Error:{}",e);
                 throw e;
             } finally {
                 is.close();
