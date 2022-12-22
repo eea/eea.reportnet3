@@ -21,7 +21,9 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
@@ -374,12 +376,17 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       @ApiParam(type = "String",
               value = "Process Id") @RequestParam("processId") String processId) {
 
+    ProcessVO processVO = null;
+    if (processId!=null) {
+      processVO = processControllerZuul.findById(processId);
+    }
+    String user = processVO!=null ? processVO.getUser() : SecurityContextHolder.getContext().getAuthentication().getName();
+
     LOG.info("The user invoking DataSetSnaphotControllerImpl.releaseSnapshot is {} for datasetId {} and snapshotId {} of processId {}",
-        SecurityContextHolder.getContext().getAuthentication().getName(), datasetId, idSnapshot, processId);
+       user, datasetId, idSnapshot, processId);
 
     // Set the user name on the thread
-    ThreadPropertiesManager.setVariable("user",
-        SecurityContextHolder.getContext().getAuthentication().getName());
+    ThreadPropertiesManager.setVariable("user", user);
 
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -767,9 +774,13 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       @ApiParam(type = "Long", value = "Job id", example = "1") @RequestParam(
               name = "jobId", required = false) Long jobId) {
 
+    JobVO jobVO = null;
     if (jobId!=null) {
       jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
+      jobVO = jobControllerZuul.findJobById(jobId);
     }
+
+    String user = jobVO!=null ? jobVO.getCreatorUsername() : SecurityContextHolder.getContext().getAuthentication().getName();
 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDataflowId(dataflowId);
@@ -777,11 +788,10 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     notificationControllerZuul.createUserNotificationPrivate("RELEASE_START_EVENT",
         userNotificationContentVO);
 
-    ThreadPropertiesManager.setVariable("user",
-        SecurityContextHolder.getContext().getAuthentication().getName());
+    ThreadPropertiesManager.setVariable("user", user);
 
     LOG.info("The user invoking DataSetSnaphotControllerImpl.createReleaseSnapshots for dataflowId {} and dataProviderId {} with jobId {} is {}",
-        dataflowId, dataProviderId, jobId, SecurityContextHolder.getContext().getAuthentication().getName());
+        dataflowId, dataProviderId, jobId, user);
 
     DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);
     if (null != dataflow && dataflow.isReleasable()) {

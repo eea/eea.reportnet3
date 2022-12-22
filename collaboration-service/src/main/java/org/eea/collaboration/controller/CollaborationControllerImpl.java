@@ -83,10 +83,10 @@ public class CollaborationControllerImpl implements CollaborationController {
       @ApiResponse(code = 403, message = "Error creating message")})
   public MessageVO createMessage(
       @ApiParam(value = "Dataflow Id you're assigning the message to",
-          example = "0") @PathVariable("dataflowId") Long dataflowId,
+          example = "0") @PathVariable("dataflowId") Long dataflowId, @ApiParam(value = "user") @RequestParam String user,
       @ApiParam(value = "Message Object") @RequestBody MessageVO messageVO) {
     try {
-      return collaborationService.createMessage(dataflowId, messageVO);
+      return collaborationService.createMessage(dataflowId, user, messageVO);
     } catch (EEAIllegalArgumentException e) {
       LOG_ERROR.error("Error creating message because of missing data: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

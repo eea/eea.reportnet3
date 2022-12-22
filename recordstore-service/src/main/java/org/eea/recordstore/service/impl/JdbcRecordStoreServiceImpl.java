@@ -1526,6 +1526,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     if (Boolean.TRUE.equals(prefillingReference)) {
       type = REFERENCE;
     }
+    ProcessVO processVO = null;
+    if (processId!=null) {
+      processVO = processService.getByProcessId(processId);
+    }
+    String user = processVO!=null ? processVO.getUser() : SecurityContextHolder.getContext().getAuthentication().getName();
+
     switch (type) {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
@@ -1543,7 +1549,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         break;
       case COLLECTION:
         Map<String, Object> valueEU = new HashMap<>();
-        valueEU.put("user", SecurityContextHolder.getContext().getAuthentication().getName());
+        valueEU.put("user", user);
         valueEU.put("dataset_id", idDataset);
         valueEU.put("snapshot_id", idSnapshot);
         valueEU.put("processId", processId);
@@ -1552,8 +1558,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         break;
       case REFERENCE:
         Map<String, Object> valueReference = new HashMap<>();
-        valueReference.put("user",
-            SecurityContextHolder.getContext().getAuthentication().getName());
+        valueReference.put("user", user);
         valueReference.put("dataset_id", idDataset);
         valueReference.put("snapshot_id", idSnapshot);
         valueReference.put("processId", processId);

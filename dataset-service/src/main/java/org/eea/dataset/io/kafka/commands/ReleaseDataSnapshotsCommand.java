@@ -23,6 +23,7 @@ import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -137,9 +138,13 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       String dateRelease = String.valueOf(eeaEventVO.getData().get("dateRelease"));
       String processId = String.valueOf(eeaEventVO.getData().get("process_id"));
       Long jobId = null;
+      ProcessVO processVO = null;
       if (processId!=null) {
         jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+        processVO = processControllerZuul.findById(processId);
       }
+
+      String user = processVO!=null ? processVO.getUser() : SecurityContextHolder.getContext().getAuthentication().getName();
 
       Long nextData = datasetMetabaseService.getLastDatasetForRelease(datasetId);
       DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
@@ -167,7 +172,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         String nextProcessId = UUID.randomUUID().toString();
         processControllerZuul.updateProcess(nextData, dataset.getDataflowId(),
                 ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, nextProcessId,
-                SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
+                user, defaultReleaseProcessPriority, true);
         LOG.info("Created release process with processId {} for dataflowId {}, dataProviderId {} dataset {}, jobId {}", nextProcessId, dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
 
         if (jobId!=null) {
@@ -180,7 +185,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         LOG.info("Updating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
         processControllerZuul.updateProcess(nextData, dataset.getDataflowId(),
                 ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, nextProcessId,
-                SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
+                user, defaultReleaseProcessPriority, true);
         LOG.info("Updated release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
 
         datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease, false, nextProcessId);
@@ -220,7 +225,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_PROVIDER_COMPLETED_EVENT,
               null,
               NotificationVO.builder()
-                  .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                  .user(user)
                   .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
                   .providerId(dataset.getDataProviderId()).build());
 
@@ -228,7 +233,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         } else {
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
               NotificationVO.builder()
-                  .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                  .user(user)
                   .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
                   .providerId(dataset.getDataProviderId()).build());
         }
@@ -241,7 +246,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         messageVO.setProviderId(dataset.getDataProviderId());
         messageVO.setContent(country + " released " + dataflowName + " successfully");
         messageVO.setAutomatic(true);
-        collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO);
+        collaborationControllerZuul.createMessage(dataflowVO.getId(), user, messageVO);
         LOG.info("Automatic feedback message created of dataflow {}, datasetId {} and jobId {}. Message: {}", dataflowVO.getId(), datasetId, jobId,
             messageVO.getContent());
       }

@@ -281,9 +281,10 @@ public class ValidationHelper implements DisposableBean {
       processId = UUID.randomUUID().toString();
       LOG.info("processId is empty. Generating one: {} for validating datasetId {}", processId, datasetId);
     }
+    ProcessVO processVO = processControllerZuul.findById(processId);
     if (processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), 0, released)) {
+        processVO.getUser(), 0, released)) {
 
 
       // If there's no SQL rules enabled, no need to refresh the views, so directly start the
@@ -1106,9 +1107,10 @@ public class ValidationHelper implements DisposableBean {
           kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
           if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
               ProcessTypeEnum.VALIDATION, processId,
-              SecurityContextHolder.getContext().getAuthentication().getName(), 0, null)) {
+              process.getUser(), 0, null)) {
 
             Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+            value.put("validation_job_id", jobId);
 
             if (datasetId.equals(process.getDatasetId()) && process.isReleased()) {
               ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);

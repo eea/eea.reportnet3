@@ -83,13 +83,14 @@ public class CollaborationServiceImpl implements CollaborationService {
    * Creates the message.
    *
    * @param dataflowId the dataflow id
+   * @param user the user
    * @param messageVO the message VO
    * @return the message VO
    * @throws EEAForbiddenException the EEA forbidden exception
    * @throws EEAIllegalArgumentException the EEA illegal argument exception
    */
   @Override
-  public MessageVO createMessage(Long dataflowId, MessageVO messageVO)
+  public MessageVO createMessage(Long dataflowId, String user, MessageVO messageVO)
       throws EEAForbiddenException, EEAIllegalArgumentException {
 
     Long providerId = messageVO.getProviderId();
@@ -99,7 +100,6 @@ public class CollaborationServiceImpl implements CollaborationService {
       throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGING_BAD_REQUEST);
     }
 
-    String userName = SecurityContextHolder.getContext().getAuthentication().getName();
     boolean direction = authorizeAndGetDirection(dataflowId, providerId);
 
     if (content.length() > maxMessageLength) {
@@ -112,7 +112,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setProviderId(providerId);
     message.setDate(new Date());
     message.setRead(false);
-    message.setUserName(userName);
+    message.setUserName(user);
     message.setDirection(direction);
     message.setType(MessageTypeEnum.TEXT);
     message.setAutomatic(messageVO.isAutomatic());

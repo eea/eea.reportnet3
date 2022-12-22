@@ -1378,7 +1378,7 @@ public class FileTreatmentHelper implements DisposableBean {
                             SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
 
 
-                    jobStatus = JobStatusEnum.CANCELLED;
+                    jobStatus = JobStatusEnum.CANCELED;
                 } else {
                     datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                             DatasetRunningStatusEnum.IMPORTED);
@@ -1465,7 +1465,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         ProcessStatusEnum.CANCELED, ProcessTypeEnum.IMPORT, processId,
                         SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
 
-                jobStatus = JobStatusEnum.CANCELLED;
+                jobStatus = JobStatusEnum.CANCELED;
             } else {
                 datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                         DatasetRunningStatusEnum.IMPORTED);

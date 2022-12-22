@@ -123,6 +123,7 @@ public class JobControllerImpl implements JobController {
             }
             parameters.put("datasetId", datasetId);
             parameters.put("released", released);
+            parameters.put("authorities", SecurityContextHolder.getContext().getAuthentication().getAuthorities());
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);
             LOG.info("Adding validation job for datasetId {} and released {} for creator {} with status {}", datasetId, released, username, statusToInsert);
             jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released);
@@ -164,6 +165,7 @@ public class JobControllerImpl implements JobController {
         parameters.put("restrictFromPublic", restrictFromPublic);
         parameters.put("validate", validate);
         parameters.put("datasetId", datasetIds);
+        parameters.put("authorities", SecurityContextHolder.getContext().getAuthentication().getAuthorities());
         JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), dataflowId, dataProviderId, datasetIds, true);
 
         LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
@@ -236,6 +238,7 @@ public class JobControllerImpl implements JobController {
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("dataflowId", dataflowId);
+        parameters.put("authorities", SecurityContextHolder.getContext().getAuthentication().getAuthorities());
         JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.COPY_TO_EU_DATASET.toString(), dataflowId, null, null, false);
         LOG.info("Adding copy to eudataset job for dataflowId={}", dataflowId);
         Long jobId = jobService.addJob(dataflowId, null, null, parameters, JobTypeEnum.COPY_TO_EU_DATASET, statusToInsert, false);

@@ -42,7 +42,6 @@ import java.util.*;
 @Component
 public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCommand {
 
-
   /** The data set metabase repository. */
   @Autowired
   private DataSetMetabaseRepository dataSetMetabaseRepository;
@@ -112,9 +111,15 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
     try {
       Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-
-      LOG.info("The user on CheckBlockersDataSnapshotCommand.execute is {} and datasetId {}",
-              SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
+      Long validationJobId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("validation_job_id")));
+      JobVO valJobVo = null;
+      List<LinkedHashMap<String, String>> authorities = new ArrayList<>();
+      if (validationJobId!=null) {
+        valJobVo = jobControllerZuul.findJobById(validationJobId);
+        authorities = (List<LinkedHashMap<String, String>>) valJobVo.getParameters().get("authorities");
+      }
+      String user = valJobVo!=null ? valJobVo.getCreatorUsername() : SecurityContextHolder.getContext().getAuthentication().getName();
+      LOG.info("The user on CheckBlockersDataSnapshotCommand.execute is {} and datasetId {}", user, datasetId);
 
       // with one id we take all the datasets with the same dataProviderId and dataflowId
       DataSetMetabase dataset =
@@ -127,17 +132,18 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       Map<String, Object> parameters = new HashMap<>();
       parameters.put("dataflowId", dataset.getDataflowId());
       parameters.put("dataProviderId", dataset.getDataProviderId());
-      JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(),true, dataset.getDataflowId(), dataset.getDataProviderId(), null);
+      parameters.put("authorities", authorities);
+      JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, user,true, dataset.getDataflowId(), dataset.getDataProviderId(), null);
 
       JobStatusEnum statusToInsert = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), true, dataset.getDataflowId(), dataset.getDataProviderId(), datasets);
       if (statusToInsert == JobStatusEnum.REFUSED) {
         return;
       }
 
-      LOG.info("Adding release job for dataflowId {}, dataProviderId {} and creator {} with status {}", dataset.getDataflowId(), dataset.getDataProviderId(), SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
+      LOG.info("Adding release job for dataflowId {}, dataProviderId {} and creator {} with status {}", dataset.getDataflowId(), dataset.getDataProviderId(), user, statusToInsert);
       releaseJob = jobControllerZuul.save(releaseJob);
       jobHistoryControllerZuul.save(releaseJob);
-      LOG.info("Added release job for dataflowId {}, dataProviderId {} and creator {} with status {} and jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert, releaseJob.getId());
+      LOG.info("Added release job for dataflowId {}, dataProviderId {} and creator {} with status {} and jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), user, statusToInsert, releaseJob.getId());
 
       // we check if one or more dataset have error, if have we create a notification and abort
       // process of releasing
@@ -158,7 +164,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
                   NotificationVO.builder()
-                          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                          .user(user)
                           .datasetId(datasetId)
                           .error("One or more datasets have blockers errors, Release aborted")
                           .providerId(dataset.getDataProviderId()).build());
@@ -174,8 +180,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         LOG.info("Creating release process for dataflowId {}, dataProviderId {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
         String processId = UUID.randomUUID().toString();
         processControllerZuul.updateProcess(datasets.get(0), dataset.getDataflowId(),
-                ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, processId,
-                SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
+                ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, processId, user, defaultReleaseProcessPriority, true);
         LOG.info("Created release process for dataflowId {}, dataProviderId {}, jobId {} and processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
 
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
@@ -194,8 +199,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
         LOG.info("Updating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), releaseJob.getId(), processId);
         processControllerZuul.updateProcess(datasets.get(0), dataset.getDataflowId(),
-                ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, processId,
-                SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
+                ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, processId, user, defaultReleaseProcessPriority, true);
         LOG.info("Updated release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), releaseJob.getId(), processId);
 
         datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
