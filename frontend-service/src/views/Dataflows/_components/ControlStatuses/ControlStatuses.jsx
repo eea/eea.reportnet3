@@ -38,7 +38,7 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
 
   const [controlStatus, setControlStatus] = useState(null);
-  const [dataflowId, setDataflowId] = useState(8116);
+  const [dataflowId, setDataflowId] = useState(null);
   const [dataProviderId, setDataProviderId] = useState(null);
   const [datasetForDataDeletion, setDatasetForDataDeletion] = useState([]);
   const [datasetId, setDatasetId] = useState(null);
@@ -61,6 +61,12 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
       setDatasetId(data.datasetId);
       setDatasetName(data.datasetName);
       setDataProviderId(data.dataProviderId);
+      setDataflowId(data.dataflowId);
+
+      console.log('data.datasetId: ' + data.datasetId);
+      console.log('data.datasetName: ' + data.datasetName);
+      console.log('data.dataProviderId: ' + data.dataProviderId);
+      console.log('data.dataflowId: ' + data.dataflowId);
 
       if (
         data.datasetId === null ||
@@ -92,7 +98,7 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
       {
         key: 'dataflowName',
         header: resourcesContext.messages['dataflowName'],
-        template: getDataflowIdTemplate,
+        template: getDataflowNameTemplate,
         className: styles.middleColumn
       },
       {
@@ -143,7 +149,7 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getProviderIdTemplate = datasetData => <p>{datasetData.dataProviderId}</p>;
 
-  const getDataflowIdTemplate = datasetData => <p>{datasetData.dataflowName}</p>;
+  const getDataflowNameTemplate = datasetData => <p>{datasetData.dataflowName}</p>;
 
   const getDatasetIdTemplate = datasetData => <p>{datasetData.datasetId}</p>;
 
