@@ -2,10 +2,11 @@ package org.eea.orchestrator.scheduling;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,8 @@ public class JobForRestartingReleaseTasks {
 
 
     private static final String BEARER = "Bearer ";
+    /** The Constant SPLIT_FILE_PATTERN_NAME: {@value}. */
+    private static final String SPLIT_FILE_PATTERN_NAME = "snapshot_%s_%s%s";
     /**
      * The Constant LOG.
      */
@@ -85,16 +88,18 @@ public class JobForRestartingReleaseTasks {
                         long snapshotId = jsonNode.get("snapshotId").asLong();
                         int splitFileId = jsonNode.get("splitFileId").asInt();
                         int numberOfSplitFiles = jsonNode.get("numberOfSplitFiles").asInt();
-                        long firstFieldId = jsonNode.get("firstFieldId").asLong();
-                        long lastFieldId = jsonNode.get("lastFieldId").asLong();
+                        String firstFieldId = jsonNode.get("firstFieldId").asText();
+                        String lastFieldId = jsonNode.get("lastFieldId").asText();
 
+                        String currentSplitFileName = null;
                         boolean currentFileHasBeenCopied = recordStoreControllerZuul.recoverCheck(datasetId, firstFieldId, lastFieldId);
                         if (currentFileHasBeenCopied) {
+                            currentSplitFileName = String.format(SPLIT_FILE_PATTERN_NAME, snapshotId, splitFileId, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
                             splitFileId++;
                         }
                         LOG.info("Release task currentFileHasBeenCopied: {} with splitFileId: {}", currentFileHasBeenCopied, splitFileId);
 
-                        recordStoreControllerZuul.restoreSpecificFileSnapshotData(datasetId, snapshotId, splitFileId, numberOfSplitFiles, releaseTask.getProcessId());
+                        recordStoreControllerZuul.restoreSpecificFileSnapshotData(datasetId, snapshotId, splitFileId, numberOfSplitFiles, releaseTask.getProcessId(), currentSplitFileName);
                     } catch (Exception e) {
                         LOG.error("Error while restarting release task for task id {}", taskId);
                     }

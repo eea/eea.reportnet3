@@ -21,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.math.BigInteger;
 import java.util.List;
 
 @Component
@@ -76,23 +77,28 @@ public class JobForCancellingValidationsWithoutTasks {
             LOG.info("Running scheduled job cancelInProgressValidationsWithoutTasks");
             List<ProcessVO> processesInProgress = processControllerZuul.listInProgressValidationProcessesThatExceedTime(maxTimeInMinutesForInProgressValidationWithoutTasks);
             if (processesInProgress.size() > 0) {
-                LOG.info("Cancelling processes " + processesInProgress);
                 processesInProgress.stream().forEach(processVO -> {
                     try {
-                        LOG.info("Updating validation process to status CANCELLED for processId", processVO.getProcessId());
-                        processControllerZuul.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(),
-                                ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, processVO.getProcessId(),
-                                processVO.getUser(), processVO.getPriority(), processVO.isReleased());
-                        LOG.info("Updated validation process to status CANCELLED for processId", processVO.getProcessId());
-                        TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
-                        UsernamePasswordAuthenticationToken authentication =
-                                new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                        validationControllerZuul.deleteLocksToReleaseProcess(processVO.getDatasetId());
-                        LOG.info("Locks removed for canceled process {}, datasetId {}", processVO.getProcessId(), processVO.getDatasetId());
-                        Long jobId = jobProcessService.findJobIdByProcessId(processVO.getProcessId());
-                        jobService.updateJobStatus(jobId, JobStatusEnum.CANCELLED);
-                        LOG.info("Job cancelled for canceled process {}, datasetId {}", processVO.getProcessId(), processVO.getDatasetId());
+                        List<BigInteger> tasks = validationControllerZuul.findTasksByProcessId(processVO.getProcessId());
+                        if (tasks.size()==0) {
+                            LOG.info("Cancelling processe " + processVO);
+                            LOG.info("Updating validation process to status CANCELLED for processId", processVO.getProcessId());
+                            processControllerZuul.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(),
+                                    ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, processVO.getProcessId(),
+                                    processVO.getUser(), processVO.getPriority(), processVO.isReleased());
+                            LOG.info("Updated validation process to status CANCELLED for processId", processVO.getProcessId());
+                            TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
+                            UsernamePasswordAuthenticationToken authentication =
+                                    new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                            validationControllerZuul.deleteLocksToReleaseProcess(processVO.getDatasetId());
+                            LOG.info("Locks removed for canceled process {}, datasetId {}", processVO.getProcessId(), processVO.getDatasetId());
+                            Long jobId = jobProcessService.findJobIdByProcessId(processVO.getProcessId());
+                            if (jobId!=null) {
+                                jobService.updateJobStatus(jobId, JobStatusEnum.CANCELLED);
+                            }
+                            LOG.info("Job cancelled for canceled process {}, datasetId {}", processVO.getProcessId(), processVO.getDatasetId());
+                        }
                     } catch (Exception e) {
                         LOG.error("Error while running scheduled task cancelInProgressValidationsWithoutTasks for processId " + processVO.getProcessId());
                     }
