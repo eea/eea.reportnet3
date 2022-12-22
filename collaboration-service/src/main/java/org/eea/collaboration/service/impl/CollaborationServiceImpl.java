@@ -1,15 +1,5 @@
 package org.eea.collaboration.service.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.transaction.Transactional;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.eea.collaboration.mapper.MessageMapper;
@@ -23,12 +13,17 @@ import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.MessageAttachmentVO;
 import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
+import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
+import org.eea.security.authorization.AdminUserAuthorization;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,11 +36,30 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * The Class CollaborationServiceImpl.
  */
 @Service
 public class CollaborationServiceImpl implements CollaborationService {
+
+  /**
+   * The admin user.
+   */
+  @Value("${eea.keycloak.admin.user}")
+  private String adminUser;
+
+  /**
+   * The admin pass.
+   */
+  @Value("${eea.keycloak.admin.password}")
+  private String adminPass;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CollaborationServiceImpl.class);
@@ -79,18 +93,28 @@ public class CollaborationServiceImpl implements CollaborationService {
   @Autowired
   private DocumentControllerZuul documentControllerZuul;
 
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
+
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
+
+  @Autowired
+  private AdminUserAuthorization adminUserAuthorization;
+
   /**
    * Creates the message.
    *
    * @param dataflowId the dataflow id
-   * @param user the user
    * @param messageVO the message VO
+   * @param user the user
+   * @param jobId the jobId
    * @return the message VO
    * @throws EEAForbiddenException the EEA forbidden exception
    * @throws EEAIllegalArgumentException the EEA illegal argument exception
    */
   @Override
-  public MessageVO createMessage(Long dataflowId, String user, MessageVO messageVO)
+  public MessageVO createMessage(Long dataflowId, MessageVO messageVO, String user, Long jobId)
       throws EEAForbiddenException, EEAIllegalArgumentException {
 
     Long providerId = messageVO.getProviderId();
@@ -98,6 +122,12 @@ public class CollaborationServiceImpl implements CollaborationService {
 
     if (providerId == null || content == null || content.isEmpty()) {
       throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGING_BAD_REQUEST);
+    }
+
+    if (jobId!=null) {
+      JobVO job = jobControllerZuul.findJobById(jobId);
+      TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
+      adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, job);
     }
 
     boolean direction = authorizeAndGetDirection(dataflowId, providerId);

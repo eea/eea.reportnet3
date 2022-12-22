@@ -42,18 +42,18 @@ public class CollaborationControllerImplTest {
 
   @Test
   public void createMessageTest() throws EEAIllegalArgumentException, EEAForbiddenException {
-    Mockito.when(collaborationService.createMessage(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+    Mockito.when(collaborationService.createMessage(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new MessageVO());
-    Assert.assertNotNull(collaborationControllerImpl.createMessage(1L, "test", new MessageVO()));
+    Assert.assertNotNull(collaborationControllerImpl.createMessage(1L, new MessageVO(), "test", 1L));
   }
 
   @Test(expected = ResponseStatusException.class)
   public void createMessageEEAIllegalArgumentExceptionTest()
       throws EEAIllegalArgumentException, EEAForbiddenException {
-    Mockito.when(collaborationService.createMessage(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+    Mockito.when(collaborationService.createMessage(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenThrow(EEAIllegalArgumentException.class);
     try {
-      collaborationControllerImpl.createMessage(1L, "test", new MessageVO());
+      collaborationControllerImpl.createMessage(1L, new MessageVO(), "test", 1L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
@@ -63,10 +63,10 @@ public class CollaborationControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void createMessageEEAForbiddenExceptionExceptionTest()
       throws EEAIllegalArgumentException, EEAForbiddenException {
-    Mockito.when(collaborationService.createMessage(Mockito.anyLong(), Mockito.any(), Mockito.any()))
+    Mockito.when(collaborationService.createMessage(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenThrow(EEAForbiddenException.class);
     try {
-      collaborationControllerImpl.createMessage(1L, "test", new MessageVO());
+      collaborationControllerImpl.createMessage(1L, new MessageVO(), "test", 1L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;

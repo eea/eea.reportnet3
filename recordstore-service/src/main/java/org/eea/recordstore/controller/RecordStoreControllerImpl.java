@@ -13,6 +13,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.validation.ProcessTaskVO;
@@ -199,13 +200,15 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @ApiParam(value = "ProcessId", example = "5eb5a2a9-c53f-4192", required = false) @RequestParam(
               value = "processId", required = false) String processId) {
     try {
-      ThreadPropertiesManager.setVariable("user",
-          SecurityContextHolder.getContext().getAuthentication().getName());
+      ProcessVO processVO = null;
+      if (processId!=null) {
+        processVO = processService.getByProcessId(processId);
+      }
+      String user = processVO!=null ? processVO.getUser() : SecurityContextHolder.getContext().getAuthentication().getName();
+      ThreadPropertiesManager.setVariable("user", user);
       LOG.info(
-          "The user invoking RecordStoreControllerImpl.createSnapshotData is {} and the datasetId {} with processId {}",
-          SecurityContextHolder.getContext().getAuthentication().getName(), datasetId, processId);
-      LOG.info("The user set on threadPropertiesManager is {}",
-          ThreadPropertiesManager.getVariable("user"));
+          "The user invoking RecordStoreControllerImpl.createSnapshotData is {} and the datasetId {} with processId {}", user, datasetId, processId);
+      LOG.info("The user set on threadPropertiesManager is {}", ThreadPropertiesManager.getVariable("user"));
       if (StringUtils.isNotBlank(dateRelease)) {
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateRelease);
       }

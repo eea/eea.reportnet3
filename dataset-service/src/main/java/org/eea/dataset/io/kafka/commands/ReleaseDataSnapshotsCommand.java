@@ -246,7 +246,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         messageVO.setProviderId(dataset.getDataProviderId());
         messageVO.setContent(country + " released " + dataflowName + " successfully");
         messageVO.setAutomatic(true);
-        collaborationControllerZuul.createMessage(dataflowVO.getId(), user, messageVO);
+        collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO, user, jobId);
         LOG.info("Automatic feedback message created of dataflow {}, datasetId {} and jobId {}. Message: {}", dataflowVO.getId(), datasetId, jobId,
             messageVO.getContent());
       }

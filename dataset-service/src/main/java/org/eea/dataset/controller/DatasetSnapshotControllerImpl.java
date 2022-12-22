@@ -785,6 +785,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDataflowId(dataflowId);
     userNotificationContentVO.setProviderId(dataProviderId);
+    userNotificationContentVO.setUserId(user);
     notificationControllerZuul.createUserNotificationPrivate("RELEASE_START_EVENT",
         userNotificationContentVO);
 

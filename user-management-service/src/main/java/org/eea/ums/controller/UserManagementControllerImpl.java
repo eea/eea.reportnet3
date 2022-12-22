@@ -214,6 +214,20 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   /**
+   * Gets resources by userId
+   * @param userId
+   * @return
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping("/private/resourcesByUserId")
+  @ApiOperation(value = "Get logged User's Resources", response = ResourceAccessVO.class,
+          responseContainer = "List", hidden = true)
+  public List<ResourceAccessVO> getResourcesByUserId(@RequestParam("userId") String userId) {
+    return securityProviderInterfaceService.getResourcesByUser(userId);
+  }
+
+  /**
    * Gets the resources by user.
    *
    * @param resourceType the resource type

@@ -9,6 +9,7 @@ import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuu
 import org.eea.interfaces.controller.orchestrator.JobHistoryController.JobHistoryControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
@@ -17,16 +18,19 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.security.authorization.AdminUserAuthorization;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -41,6 +45,18 @@ import java.util.*;
  */
 @Component
 public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCommand {
+
+  /**
+   * The admin user.
+   */
+  @Value("${eea.keycloak.admin.user}")
+  private String adminUser;
+
+  /**
+   * The admin pass.
+   */
+  @Value("${eea.keycloak.admin.password}")
+  private String adminPass;
 
   /** The data set metabase repository. */
   @Autowired
@@ -74,6 +90,12 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   /** The job process controller zuul */
   @Autowired
   private JobProcessControllerZuul jobProcessControllerZuul;
+
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
+
+  @Autowired
+  private AdminUserAuthorization adminUserAuthorization;
 
   /**
    * The Constant LOG.
@@ -116,7 +138,8 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       List<LinkedHashMap<String, String>> authorities = new ArrayList<>();
       if (validationJobId!=null) {
         valJobVo = jobControllerZuul.findJobById(validationJobId);
-        authorities = (List<LinkedHashMap<String, String>>) valJobVo.getParameters().get("authorities");
+        TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
+        adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, valJobVo);
       }
       String user = valJobVo!=null ? valJobVo.getCreatorUsername() : SecurityContextHolder.getContext().getAuthentication().getName();
       LOG.info("The user on CheckBlockersDataSnapshotCommand.execute is {} and datasetId {}", user, datasetId);
@@ -132,7 +155,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       Map<String, Object> parameters = new HashMap<>();
       parameters.put("dataflowId", dataset.getDataflowId());
       parameters.put("dataProviderId", dataset.getDataProviderId());
-      parameters.put("authorities", authorities);
+      parameters.put("userId", valJobVo.getParameters().get("userId"));
       JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, user,true, dataset.getDataflowId(), dataset.getDataProviderId(), null);
 
       JobStatusEnum statusToInsert = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), true, dataset.getDataflowId(), dataset.getDataProviderId(), datasets);

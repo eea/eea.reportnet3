@@ -727,7 +727,7 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DataSetMetabase()));
     datasetMetabaseService.updateDatasetStatus(new DatasetStatusMessageVO());
-    Mockito.verify(collaborationControllerZuul, times(1)).createMessage(Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.verify(collaborationControllerZuul, times(1)).createMessage(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**

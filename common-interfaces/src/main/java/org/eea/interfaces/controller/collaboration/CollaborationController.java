@@ -33,13 +33,14 @@ public interface CollaborationController {
    * Creates the message.
    *
    * @param dataflowId the dataflow id
-   * @param user the user
    * @param messageVO the message VO
+   * @param user the user
+   * @param jobId the jobId
    * @return the message VO
    */
   @PostMapping("/createMessage/dataflow/{dataflowId}")
-  MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId, @RequestParam String user,
-      @RequestBody MessageVO messageVO);
+  MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId, @RequestBody MessageVO messageVO,
+                          @RequestParam String user, @RequestParam Long jobId);
 
   /**
    * Creates the message attachment.
