@@ -6,17 +6,20 @@ import org.axonframework.messaging.MetaData;
 import org.eea.axon.release.commands.CreateReleaseStartNotificationCommand;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.orchestrator.mapper.JobMapper;
 import org.eea.orchestrator.persistence.domain.Job;
 import org.eea.orchestrator.persistence.repository.JobRepository;
 import org.eea.orchestrator.service.JobHistoryService;
 import org.eea.orchestrator.service.JobService;
 import org.eea.orchestrator.utils.JobUtils;
+import org.eea.security.authorization.AdminUserAuthorization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +53,15 @@ public class JobServiceImpl implements JobService {
     @Value(value = "${scheduling.inProgress.export.maximum.jobs}")
     private Long maximumNumberOfInProgressExportJobs;
 
+    @Value("${eea.keycloak.admin.user}")
+    private String adminUser;
+
+    @Value("${eea.keycloak.admin.password}")
+    private String adminPass;
+
+    @Autowired
+    private UserManagementController.UserManagementControllerZull userManagementControllerZull;
+
     @Autowired
     private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
 
@@ -75,6 +87,10 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     private transient CommandGateway commandGateway;
+
+    @Autowired
+    private AdminUserAuthorization adminUserAuthorization;
+
 
     /**
      * enable release with saga implementation
@@ -216,6 +232,8 @@ public class JobServiceImpl implements JobService {
         Boolean validate = (Boolean) parameters.get("validate");
         if (this.enableReleaseSaga) {
             LOG.info("Starting release process for dataflow {}, dataProvider {}", dataflowId, dataProviderId);
+            TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
+            adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, jobVO);
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             CreateReleaseStartNotificationCommand command = CreateReleaseStartNotificationCommand.builder().transactionId(UUID.randomUUID().toString()).releaseAggregateId(UUID.randomUUID().toString())
                     .dataflowId(dataflowId).dataProviderId(dataProviderId).restrictFromPublic(restrictFromPublic).validate(validate).jobId(jobVO.getId()).build();
@@ -251,7 +269,7 @@ public class JobServiceImpl implements JobService {
     @Transactional
     @Override
     public void deleteFinishedJobsBasedOnDuration(){
-        jobRepository.deleteJobsBasedOnStatusAndDuration(new HashSet<>(Arrays.asList(JobStatusEnum.FINISHED.getValue(), JobStatusEnum.REFUSED.getValue(), JobStatusEnum.FAILED.getValue(), JobStatusEnum.CANCELLED.getValue())));
+        jobRepository.deleteJobsBasedOnStatusAndDuration(new HashSet<>(Arrays.asList(JobStatusEnum.FINISHED.getValue(), JobStatusEnum.REFUSED.getValue(), JobStatusEnum.FAILED.getValue(), JobStatusEnum.CANCELED.getValue())));
     }
 
     @Transactional

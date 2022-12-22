@@ -23,6 +23,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
@@ -128,13 +129,17 @@ public class ValidationControllerImpl implements ValidationController {
 
     LOG.info("Called ValidationControllerImpl.validateDataSetData for datasetId {} and released {} with jobId {}", datasetId, released, jobId);
 
-    if (jobId!=null && !released) {
-      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
+    JobVO jobVO = null;
+    if (jobId!=null) {
+      jobVO = jobControllerZuul.findJobById(jobId);
+      if (!released) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
+      }
     }
+    String user = jobVO!=null ? jobVO.getCreatorUsername() : SecurityContextHolder.getContext().getAuthentication().getName();
 
     // Set the user name on the thread
-    ThreadPropertiesManager.setVariable("user",
-        SecurityContextHolder.getContext().getAuthentication().getName());
+    ThreadPropertiesManager.setVariable("user", user);
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -144,8 +149,7 @@ public class ValidationControllerImpl implements ValidationController {
     int priority = validationHelper.getPriority(dataset.getDataflowId());
     if (!released) {
       processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
-          ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, uuid,
-          SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
+          ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, uuid, user, priority, released);
       if (jobId!=null) {
         JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, uuid, datasetId, null, null);
         jobProcessControllerZuul.save(jobProcessVO);
@@ -159,7 +163,7 @@ public class ValidationControllerImpl implements ValidationController {
       // queue validations
       processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
           ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, uuid,
-          SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
+          user, priority, released);
 
       if (jobId!=null) {
         JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, uuid, datasetId, null, null);
@@ -170,7 +174,7 @@ public class ValidationControllerImpl implements ValidationController {
         String processId = UUID.randomUUID().toString();
         processControllerZuul.updateProcess(datasetToReleaseId, dataset.getDataflowId(),
             ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId,
-            SecurityContextHolder.getContext().getAuthentication().getName(), priority, released);
+            user, priority, released);
 
         if (jobId!=null) {
           JobProcessVO jobProcess = new JobProcessVO(null, jobId, processId, datasetToReleaseId, null, null);

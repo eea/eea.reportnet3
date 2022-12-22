@@ -1160,6 +1160,14 @@
     "value": "JHtRVUVSWV9NRVNTQUdFX0dFT01FVFJZX0VSUk9SOkludmFsaWQgZ2VvbWV0cnl9"
   },
   {
+    "key": "config/application/eea.keycloak.admin.user",
+    "value": "JHtLRVlDTE9BS19BRE1JTl9VU0VSOnJlcG9ydG5ldF9hZG1pbn0="
+  },
+  {
+    "key": "config/application/eea.keycloak.admin.password",
+    "value": "JHtLRVlDTE9BS19BRE1JTl9QQVNTV09SRDoxMjM0fQ=="
+  },
+  {
     "key": "config/application/eea.keycloak.redirect_uri",
     "value": "JHtLRVlDTE9BS19SRURJUkVDVF9VUkk6aHR0cDovL2s4cy1ub2RlMDAxLmRldm9hbWkuYWx0aWEuZXM6MzA0NDUvZGF0YS1mbG93LXRhc2svfQ=="
   },
@@ -1798,14 +1806,6 @@
   {
     "key": "config/recordstore/enableTableDistributionJob",
     "value": "JHtSRUNPUkRTVE9SRS5FTkFCTEVfVEFCTEVfRElTVFJJQlVUSU9OX0pPQjowIDAsMzAgKiAqICogKn0="
-  },
-  {
-    "key": "config/orchestrator/eea.keycloak.admin.password",
-    "value": "JHtLRVlDTE9BS19BRE1JTl9QQVNTV09SRDphZG1pbn0="
-  },
-  {
-    "key": "config/orchestrator/eea.keycloak.admin.user",
-    "value": "JHtLRVlDTE9BS19BRE1JTl9VU0VSOnJlcG9ydG5ldF9hZG1pbn0="
   },
   {
     "key": "config/orchestrator/kafka.bootstrapAddress",

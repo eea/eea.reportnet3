@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.orchestrator.service.JobService;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,6 +124,8 @@ public class JobControllerImpl implements JobController {
             }
             parameters.put("datasetId", datasetId);
             parameters.put("released", released);
+            String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
+            parameters.put("userId", userId);
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);
             LOG.info("Adding validation job for datasetId {} and released {} for creator {} with status {}", datasetId, released, username, statusToInsert);
             jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released);
@@ -164,7 +167,8 @@ public class JobControllerImpl implements JobController {
         parameters.put("restrictFromPublic", restrictFromPublic);
         parameters.put("validate", validate);
         parameters.put("datasetId", datasetIds);
-        parameters.put("authorities", SecurityContextHolder.getContext().getAuthentication().getAuthorities());
+        String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
+        parameters.put("userId", userId);
         JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), dataflowId, dataProviderId, datasetIds, true);
 
         LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
@@ -237,6 +241,8 @@ public class JobControllerImpl implements JobController {
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("dataflowId", dataflowId);
+        String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
+        parameters.put("userId", userId);
         JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.COPY_TO_EU_DATASET.toString(), dataflowId, null, null, false);
         LOG.info("Adding copy to eudataset job for dataflowId={}", dataflowId);
         Long jobId = jobService.addJob(dataflowId, null, null, parameters, JobTypeEnum.COPY_TO_EU_DATASET, statusToInsert, false);

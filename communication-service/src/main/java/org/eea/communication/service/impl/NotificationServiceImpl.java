@@ -1,9 +1,5 @@
 package org.eea.communication.service.impl;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import org.eea.communication.mapper.SystemNotificationMapper;
 import org.eea.communication.mapper.UserNotificationMapper;
 import org.eea.communication.persistence.SystemNotification;
@@ -14,6 +10,7 @@ import org.eea.communication.service.NotificationService;
 import org.eea.communication.service.model.Notification;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.communication.SystemNotificationVO;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.communication.UserNotificationListVO;
 import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -29,6 +26,11 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The Class NotificationServiceImpl.
@@ -102,7 +104,9 @@ public class NotificationServiceImpl implements NotificationService {
     try {
       userNotificationVO.setInsertDate(new Date());
       UserNotification userNotification = userNotificationMapper.classToEntity(userNotificationVO);
-      userNotification.setUserId(SecurityContextHolder.getContext().getAuthentication().getName());
+      UserNotificationContentVO userNotificationContentVO = userNotificationVO.getContent();
+      String userId = userNotificationContentVO!=null && userNotificationContentVO.getUserId()!=null ? userNotificationContentVO.getUserId() : SecurityContextHolder.getContext().getAuthentication().getName();
+      userNotification.setUserId(userId);
       userNotificationRepository.save(userNotification);
       LOG.info("User Notification created succesfully in mongo");
     } catch (IllegalArgumentException e) {

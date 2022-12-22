@@ -1,6 +1,9 @@
 package org.eea.dataset.controller;
 
-import java.util.List;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.eea.dataset.service.EUDatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
@@ -8,6 +11,7 @@ import org.eea.interfaces.controller.dataset.EUDatasetController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -19,10 +23,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+
+import java.util.List;
 
 /**
  * The Class EUDatasetControllerImpl.
@@ -89,19 +91,20 @@ public class EUDatasetControllerImpl implements EUDatasetController {
       @ApiParam(type = "Long", value = "Dataflow id", example = "0") @LockCriteria(
           name = "dataflowId") @PathVariable("dataflowId") Long dataflowId, @RequestParam(name = "jobId", required = false) Long jobId) {
 
+    JobVO jobVO = null;
     if (jobId!=null) {
       jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
+      jobVO = jobControllerZuul.findJobById(jobId);
     }
-
+    String user = jobVO!=null ? jobVO.getCreatorUsername() : SecurityContextHolder.getContext().getAuthentication().getName();
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDataflowId(dataflowId);
-    notificationControllerZuul.createUserNotificationPrivate("COPY_TO_EU_DATASET_INIT",
-        userNotificationContentVO);
+    userNotificationContentVO.setUserId(user);
+    notificationControllerZuul.createUserNotificationPrivate("COPY_TO_EU_DATASET_INIT", userNotificationContentVO);
 
     try {
       // Set the user name on the thread
-      ThreadPropertiesManager.setVariable("user",
-          SecurityContextHolder.getContext().getAuthentication().getName());
+      ThreadPropertiesManager.setVariable("user", user);
       LOG.info("Populating data for dataflowId {}", dataflowId);
       euDatasetService.populateEUDatasetWithDataCollection(dataflowId, jobId);
     } catch (EEAException e) {

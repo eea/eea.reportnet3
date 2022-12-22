@@ -1,8 +1,5 @@
 package org.eea.collaboration.controller;
 
-import static org.mockito.Mockito.times;
-import java.io.IOException;
-import java.util.ArrayList;
 import org.eea.collaboration.persistence.domain.Message;
 import org.eea.collaboration.service.CollaborationService;
 import org.eea.collaboration.service.helper.CollaborationServiceHelper;
@@ -25,6 +22,11 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
+import static org.mockito.Mockito.times;
+
 @RunWith(MockitoJUnitRunner.class)
 public class CollaborationControllerImplTest {
 
@@ -40,18 +42,18 @@ public class CollaborationControllerImplTest {
 
   @Test
   public void createMessageTest() throws EEAIllegalArgumentException, EEAForbiddenException {
-    Mockito.when(collaborationService.createMessage(Mockito.anyLong(), Mockito.any()))
+    Mockito.when(collaborationService.createMessage(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(new MessageVO());
-    Assert.assertNotNull(collaborationControllerImpl.createMessage(1L, new MessageVO()));
+    Assert.assertNotNull(collaborationControllerImpl.createMessage(1L, new MessageVO(), "test", 1L));
   }
 
   @Test(expected = ResponseStatusException.class)
   public void createMessageEEAIllegalArgumentExceptionTest()
       throws EEAIllegalArgumentException, EEAForbiddenException {
-    Mockito.when(collaborationService.createMessage(Mockito.anyLong(), Mockito.any()))
+    Mockito.when(collaborationService.createMessage(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenThrow(EEAIllegalArgumentException.class);
     try {
-      collaborationControllerImpl.createMessage(1L, new MessageVO());
+      collaborationControllerImpl.createMessage(1L, new MessageVO(), "test", 1L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       throw e;
@@ -61,10 +63,10 @@ public class CollaborationControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void createMessageEEAForbiddenExceptionExceptionTest()
       throws EEAIllegalArgumentException, EEAForbiddenException {
-    Mockito.when(collaborationService.createMessage(Mockito.anyLong(), Mockito.any()))
+    Mockito.when(collaborationService.createMessage(Mockito.anyLong(), Mockito.any(), Mockito.any(), Mockito.any()))
         .thenThrow(EEAForbiddenException.class);
     try {
-      collaborationControllerImpl.createMessage(1L, new MessageVO());
+      collaborationControllerImpl.createMessage(1L, new MessageVO(), "test", 1L);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;

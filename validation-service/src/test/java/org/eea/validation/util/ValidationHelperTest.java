@@ -261,6 +261,9 @@ public class ValidationHelperTest {
     Mockito.when(validationService.countRecordsDataset(Mockito.eq(1l))).thenReturn(1);
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any()))
         .thenReturn(new DataSetSchema());
+    ProcessVO processVO = new ProcessVO();
+    processVO.setUser("test");
+    Mockito.when(processControllerZuul.findById(anyString())).thenReturn(processVO);
 
     validationHelper.executeValidation(1l, "1", false, false);
     Mockito.verify(validationService, Mockito.times(1)).deleteAllValidation(Mockito.eq(1l));
@@ -281,9 +284,6 @@ public class ValidationHelperTest {
     TableValue table = new TableValue();
     table.setId(1l);
     tables.add(table);
-
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
 
     ConsumerGroupVO consumerGroups = new ConsumerGroupVO();
     Collection<MemberDescriptionVO> members = new ArrayList<>();
@@ -324,6 +324,7 @@ public class ValidationHelperTest {
     Mockito.when(rulesRepository.findSqlRulesEnabled(Mockito.any()))
         .thenReturn(Arrays.asList(rule));
     ProcessVO processVO = new ProcessVO();
+    processVO.setUser("test");
     Mockito.when(processControllerZuul.findById(anyString())).thenReturn(processVO);
     validationHelper.executeValidation(1l, "1", false, true);
     Mockito.verify(referenceDatasetControllerZuul, Mockito.times(1))

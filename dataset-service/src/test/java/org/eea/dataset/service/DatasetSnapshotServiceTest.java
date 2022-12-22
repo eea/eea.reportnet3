@@ -311,8 +311,6 @@ public class DatasetSnapshotServiceTest {
     datasetVO.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
     datasetVO.setId(1L);
     when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(datasetVO);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.empty());
@@ -354,8 +352,6 @@ public class DatasetSnapshotServiceTest {
     datasetVO.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
     datasetVO.setId(1L);
     when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(datasetVO);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.empty());
@@ -730,8 +726,6 @@ public class DatasetSnapshotServiceTest {
       listUnique.add(unique);
       listUnique.add(unique2);
 
-      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-      Mockito.when(authentication.getName()).thenReturn("user");
       when(documentControllerZuul.getSnapshotDocument(Mockito.any(), Mockito.any())).thenReturn(
           objectMapper.writeValueAsBytes(schema), objectMapper2.writeValueAsBytes(rule),
           objectMapper3.writeValueAsBytes(listUnique));
@@ -744,7 +738,7 @@ public class DatasetSnapshotServiceTest {
       when(uniqueConstraintRepository.saveAll(Mockito.any())).thenReturn(new ArrayList<>());
       doThrow(new EEAException("failed")).when(schemaService)
           .updatePKCatalogueAndForeignsAfterSnapshot(Mockito.any(), Mockito.any());
-      datasetSnapshotService.restoreSchemaSnapshot(1L, 1L, "fdafda-jdjafi");
+      datasetSnapshotService.restoreSchemaSnapshot(1L, 1L, null);
     } catch (EEAException e) {
       Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
     }
@@ -1119,8 +1113,6 @@ public class DatasetSnapshotServiceTest {
     DataCollection dataCollection = new DataCollection();
     dataCollection.setId(1L);
     dataCollection.setDatasetSchema("SCHEMA");
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     Mockito.when(partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.empty());

@@ -3001,7 +3001,7 @@ public class DatasetServiceImpl implements DatasetService {
         if (null != originDatasetDesign) {
           String processId = UUID.randomUUID().toString();
           LOG.info("Updating process for dataflowId {}, dataset {}, processId {} to status IN_QUEUE", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
-          processControllerZuul.updateProcess(datasetId, originDatasetDesign.getDataflowId(),
+          processControllerZuul.updateProcess(originDatasetDesign.getId(), originDatasetDesign.getDataflowId(),
                   ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.COPY_REFERENCE_DATASET, processId,
                   SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, false);
           LOG.info("Updated process for dataflowId {}, dataset {}, processId {} to status IN_QUEUE", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
@@ -3009,7 +3009,7 @@ public class DatasetServiceImpl implements DatasetService {
           LOG.info("Prefilling data into the reference datasetId {}.", datasetId);
 
           LOG.info("Updating process for dataflowId {}, dataset {}, processId {} to status IN_PROGRESS", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
-          processControllerZuul.updateProcess(datasetId, originDatasetDesign.getDataflowId(),
+          processControllerZuul.updateProcess(originDatasetDesign.getId(), originDatasetDesign.getDataflowId(),
                   ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.COPY_REFERENCE_DATASET, processId,
                   SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, false);
           LOG.info("Updated process for dataflowId {}, dataset {}, processId {} to status IN_PROGRESS", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);

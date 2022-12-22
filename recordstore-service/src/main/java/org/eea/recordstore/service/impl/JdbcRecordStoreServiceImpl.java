@@ -1130,8 +1130,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 processId);
 
             JobProcessVO jobProcessVO = jobProcessControllerZuul.findJobProcessByProcessId(processId);
+            ProcessVO processVO = processService.getByProcessId(processId);
 
-            if (jobProcessVO!=null && jobProcessVO.getAggregateId()!=null) {
+            if (jobProcessVO!=null && processVO.getProcessType().equals(ProcessTypeEnum.RELEASE.toString()) && jobProcessVO.getAggregateId()!=null) {
               DomainEventStream datasetAggregateEvents = embeddedEventStore.readEvents(jobProcessVO.getAggregateId());
               List<? extends DomainEventMessage<?>> datasetAggregateEventMessages = datasetAggregateEvents.asStream().collect(Collectors.toList());
               DomainEventMessage<?> domainEventMessage = datasetAggregateEventMessages.get(datasetAggregateEventMessages.size() - 1);
@@ -1595,15 +1596,23 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void notificationCreateAndCheckRelease(Long idDataset, Long idSnapshot, String type,
       String dateRelease, boolean prefillingReference, String processId) {
+    ProcessVO processVO = null;
+    if (processId!=null) {
+      processVO = processService.getByProcessId(processId);
+    }
+    String user = processVO!=null ? processVO.getUser() : SecurityContextHolder.getContext().getAuthentication().getName();
+
+
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, idDataset);
-    LOG.info("The user on notificationCreateAndCheckRelease is {} and the datasetId {} of processId {}",
-        SecurityContextHolder.getContext().getAuthentication().getName(), idDataset, processId);
-    LOG.info("The user set on threadPropertiesManager is {}",
-        SecurityContextHolder.getContext().getAuthentication().getName());
+    value.put(LiteralConstants.USER, user);
+
+    LOG.info("The user on notificationCreateAndCheckRelease is {} and the datasetId {} of processId {}", user, idDataset, processId);
+    LOG.info("The user set on threadPropertiesManager is {}", user);
     if (Boolean.TRUE.equals(prefillingReference)) {
       type = REFERENCE;
     }
+
     switch (type) {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
@@ -1621,7 +1630,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         break;
       case COLLECTION:
         Map<String, Object> valueEU = new HashMap<>();
-        valueEU.put("user", SecurityContextHolder.getContext().getAuthentication().getName());
+        valueEU.put(LiteralConstants.USER, user);
         valueEU.put("dataset_id", idDataset);
         valueEU.put("snapshot_id", idSnapshot);
         valueEU.put("processId", processId);
@@ -1630,8 +1639,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         break;
       case REFERENCE:
         Map<String, Object> valueReference = new HashMap<>();
-        valueReference.put("user",
-            SecurityContextHolder.getContext().getAuthentication().getName());
+        valueReference.put(LiteralConstants.USER, user);
         valueReference.put("dataset_id", idDataset);
         valueReference.put("snapshot_id", idSnapshot);
         valueReference.put("processId", processId);
@@ -1674,10 +1682,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             : LockSignature.RESTORE_SNAPSHOT.getValue()
         : null;
 
-
+    Long jobId = null;
+    String user = null;
+    if (processId!=null) {
+      jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      ProcessVO processVO = processService.getByProcessId(processId);
+      user = processVO!=null ? processVO.getUser() : null;
+    }
 
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.USER, user);
     ConnectionDataVO conexion =
         getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + datasetId);
     // We get the datasetId from the snapshot
@@ -1710,10 +1725,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
 
       DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-      Long jobId = null;
-      if (processId!=null) {
-        jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
-      }
       restoreFromSnapshot(dataset.getDataflowId(), datasetId, idSnapshot, datasetType, con, processId, jobId);
 
       updateJobStatusToFinished(jobId);
@@ -1726,6 +1737,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
         Map<String, Object> createXls = new HashMap<>();
         createXls.put(LiteralConstants.DATASET_ID, datasetId);
+        createXls.put(LiteralConstants.USER, user);
         kafkaSenderUtils.releaseKafkaEvent(
             EventType.RESTORE_PREFILLING_REFERENCE_SNAPSHOT_COMPLETED_EVENT, createXls);
       }
@@ -1749,6 +1761,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           Map<String, Object> valueEU = new HashMap<>();
           valueEU.put(LiteralConstants.DATASET_ID, datasetId);
           valueEU.put("snapshot_id", idSnapshot);
+          valueEU.put(LiteralConstants.USER, user);
           kafkaSenderUtils.releaseKafkaEvent(
               EventType.RESTORE_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT, valueEU);
         }
