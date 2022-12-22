@@ -726,6 +726,8 @@ public class DatasetMetabaseServiceTest {
   public void updateDatasetStatusTest() throws EEAException {
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DataSetMetabase()));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     datasetMetabaseService.updateDatasetStatus(new DatasetStatusMessageVO());
     Mockito.verify(collaborationControllerZuul, times(1)).createMessage(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
@@ -745,6 +747,8 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DataSetMetabase()));
     Mockito.when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dfVO);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     datasetMetabaseService.updateDatasetStatus(dsMetabaseVO);
     Mockito.verify(recordStoreControllerZuul, times(1)).updateSnapshotDisabled(Mockito.any());
   }
@@ -764,6 +768,8 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(new DataSetMetabase()));
     Mockito.when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dfVO);
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     datasetMetabaseService.updateDatasetStatus(dsMetabaseVO);
     Mockito.verify(dataFlowControllerZuul, times(1)).getMetabaseById(Mockito.any());
   }
@@ -786,6 +792,8 @@ public class DatasetMetabaseServiceTest {
         .thenReturn(Optional.of(dsMetabase));
     Mockito.when(designDatasetRepository.findFirstByDatasetSchema(Mockito.anyString()))
         .thenReturn(Optional.of(designDataset));
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("name");
     datasetMetabaseService.updateDatasetStatus(dsMetabaseVO);
     Mockito.verify(collaborationControllerZuul, times(1)).notifyNewMessages(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
