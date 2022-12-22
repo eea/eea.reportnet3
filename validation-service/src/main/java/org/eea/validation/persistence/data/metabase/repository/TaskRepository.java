@@ -116,6 +116,13 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
           value = "select id from task where process_id= :processId")
   List<Long> getTaskIdsByProcessId(@Param("processId") String processId);
 
+  /**
+   * Finds tasks by processId
+   * @param processId
+   * @return
+   */
+  @Query(nativeQuery = true, value = "select id from task where process_id=:processId")
+  List<BigInteger> findByProcessId(@Param("processId") String processId);
 }
 
 

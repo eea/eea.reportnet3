@@ -124,7 +124,7 @@ private char loadDataDelimiter=',';
         task.get().setFinishDate(new Date());
         taskRepository.save(task.get());
       }
-    } catch (IOException | EEAException e) {
+    } catch (Exception e) {
       LOG_ERROR.error("Error Executing:"+ImportCsvFileChunkToDatasetCommand.class.getName() +" \n"+e.getMessage());
       if(task.isPresent()){
         task.get().setStatus(ProcessStatusEnum.CANCELED);

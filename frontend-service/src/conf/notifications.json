@@ -399,6 +399,9 @@
           "key": "USER_SERVICE_OLD_LOGIN_ERROR"
         },
         {
+          "key": "DATASETS_FORM_ERROR"
+        },
+        {
           "key": "LOAD_SNAPSHOTS_LIST_ERROR"
         },
         {

@@ -513,13 +513,14 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @ApiParam(value = "Ending number", example = "0", required = true)
       @RequestParam("endingNumber") int endingNumber,
       @ApiParam(value = "Process Id", example = "0", required = true)
-      @RequestParam("processId") String processId) throws SQLException, IOException {
+      @RequestParam("processId") String processId,
+      @RequestParam(name = "currentSplitFileName", required = false) String currentSplitFileName) throws SQLException, IOException {
 
     try {
       LOG.info("Method restoreSpecificSnapshotData starts for datasetId: {}, idSnapshot: {}, startingNumber: {}, endingNumber: {}, processId: {}",
           datasetId, idSnapshot, startingNumber, endingNumber, processId);
 
-      recordStoreService.restoreSpecificFileSnapshot(datasetId, idSnapshot, startingNumber, endingNumber, processId);
+      recordStoreService.restoreSpecificFileSnapshot(datasetId, idSnapshot, startingNumber, endingNumber, processId, currentSplitFileName);
 
       LOG.info("Method restoreSpecificFileSnapshot ends");
     } catch (Exception e) {
@@ -544,9 +545,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @ApiParam(value = "Dataset Id", example = "0", required = true)
       @RequestParam("datasetId") Long datasetId,
       @ApiParam(value = "First FieldId", example = "0", required = true)
-      @RequestParam("firstFieldId") Long firstFieldId,
+      @RequestParam("firstFieldId") String firstFieldId,
       @ApiParam(value = "Last FieldId", example = "0", required = true)
-      @RequestParam("lastFieldId") Long lastFieldId) {
+      @RequestParam("lastFieldId") String lastFieldId) {
     try {
       LOG.info("Method recoverCheck starts for datasetId: {}, firstFieldId: {}, lastFieldId: {}",
           datasetId, firstFieldId, lastFieldId);

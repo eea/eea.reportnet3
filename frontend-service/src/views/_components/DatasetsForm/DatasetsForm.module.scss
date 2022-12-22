@@ -1,0 +1,71 @@
+.boxContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  align-items: left;
+  width: 400px;
+  font-weight: 400;
+}
+.boxContainer .box {
+  background-color: var(--c-white-color);
+  width: 400px;
+}
+.boxContainer .box .header {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: left;
+  margin-bottom: 0.5rem;
+  margin-left: 0.8rem;
+}
+.boxContainer .box .header h1 {
+  border: none;
+  font-size: 1.2rem;
+}
+
+.boxContainer .box form fieldset {
+  border: none;
+}
+.boxContainer .box form fieldset label {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+.boxContainer .box form fieldset input {
+  width: 70%;
+  padding: 0.5rem;
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+.boxContainer .box form fieldset.buttonHolder {
+  text-align: left !important;
+}
+
+:global .rp-btn {
+  width: 35% !important;
+  border-radius: 5px;
+}
+
+.error {
+  padding: 1rem;
+  border: 2px solid var(--errors);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--errors);
+  margin: 1rem;
+}
+
+.hasErrors {
+  border: 2px solid var(--errors) !important;
+  &:focus {
+    box-shadow: none !important;
+  }
+}

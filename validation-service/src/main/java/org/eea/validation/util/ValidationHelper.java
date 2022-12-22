@@ -1219,4 +1219,8 @@ public class ValidationHelper implements DisposableBean {
       return isFinished;
     }
   }
+
+  public List<BigInteger> findTasksByProcessId(String processId) {
+     return taskRepository.findByProcessId(processId);
+  }
 }

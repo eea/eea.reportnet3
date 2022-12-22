@@ -220,7 +220,8 @@ public interface RecordStoreController {
       @RequestParam("idSnapshot") Long idSnapshot,
       @RequestParam("startingNumber") int startingNumber,
       @RequestParam("endingNumber") int endingNumber,
-      @RequestParam("processId") String processId) throws SQLException, IOException;
+      @RequestParam("processId") String processId,
+      @RequestParam(name = "currentSplitFileName", required = false) String currentSplitFileName) throws SQLException, IOException;
 
   /**
    * Check if data of file has been imported to dataset
@@ -233,8 +234,8 @@ public interface RecordStoreController {
   @GetMapping(value = "/recoverCheck")
   boolean recoverCheck(
       @RequestParam("datasetId") Long datasetId,
-      @RequestParam("firstFieldId") Long firstFieldId,
-      @RequestParam("lastFieldId") Long lastFieldId);
+      @RequestParam("firstFieldId") String firstFieldId,
+      @RequestParam("lastFieldId") String lastFieldId);
 
   /**
    * Finds tasks by datasetId for in progress process

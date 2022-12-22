@@ -142,4 +142,28 @@ public interface ValidationController {
    */
   @DeleteMapping(value = "/deleteLocksToReleaseProcess/{datasetId}")
   void deleteLocksToReleaseProcess(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Finds tasks by processId
+   * @param processId
+   * @return
+   */
+  @GetMapping(value = "/private/findTasksByProcessId/{processId}")
+  List<BigInteger> findTasksByProcessId(@PathVariable("processId") String processId);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

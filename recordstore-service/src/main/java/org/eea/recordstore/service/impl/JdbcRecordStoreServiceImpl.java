@@ -1096,12 +1096,27 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
      * @param processId
      */
     @Async @Override public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
-        int startingNumber, int endingNumber, String processId) throws SQLException, IOException {
+        int startingNumber, int endingNumber, String processId, String currentSplitFileName) throws SQLException, IOException {
 
         LOG.info(
             "Method restoreSpecificFileSnapshot starts with datasetId {}, idSnapshot {}, startingNumber {}, endingNumber {} and processId {}",
             datasetId, idSnapshot, startingNumber, endingNumber, processId);
         try {
+            if (currentSplitFileName!=null) {
+              String currentSplitFile = pathSnapshot + currentSplitFileName;
+              TaskVO task = taskService.findReleaseTaskBySplitFileNameAndProcessId(currentSplitFileName, processId);
+              LOG.info("Updating task status of task with id {} for file {} with idSnapshot {} and processId {} to FINISHED", task.getId(), currentSplitFileName, idSnapshot, processId);
+              taskService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), task.getId());
+              LOG.info("Updated task status of task with id {} for file {} with idSnapshot {} and processId {} to FINISHED", task.getId(), currentSplitFileName, idSnapshot, processId);
+
+              try {
+                LOG.info("File {} copied and will be deleted", currentSplitFile);
+                deleteFile(Arrays.asList(currentSplitFile));
+                LOG.info("File {} has been deleted", currentSplitFile);
+              } catch (Exception e) {
+                LOG.error("Error while trying to delete split snap file {}", currentSplitFile);
+              }
+            }
             ConnectionDataVO connection =
                 getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + datasetId);
             Connection con =
@@ -1164,7 +1179,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
 
     @Override
-    public boolean recoverCheckForStuckFile(Long datasetId, Long firstFieldId, Long lastFieldId) {
+    public boolean recoverCheckForStuckFile(Long datasetId, String firstFieldId, String lastFieldId) {
         try {
             LOG.info(
                 "Method recoverCheckForStuckFile called for datasetId {}, firstFieldId {} and lastFieldId {}",
@@ -1965,18 +1980,19 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 TaskVO task = taskService.findReleaseTaskBySplitFileNameAndProcessId(splitFileName, processId);
                 LOG.info("Method copyProcessSpecificSnapshot for file {} found task {}", splitFileName, task);
 
-                LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
+                LOG.info("Updating task status of task with {} for file {} with idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
                 task.setStartingDate(new Date());
                 task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-                taskService.updateTaskStartingDate(task);
-                LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
+                task.setPod(serviceInstanceId);
+                task = taskService.saveTask(task);
+                LOG.info("Updated task status of task with {} for file {} with idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
 
                 LOG.info("Recover copy file {}", splitFile);
                 copyFromFileRecovery(copyQueryField, splitFile, cm);
 
-                LOG.info("Updating release task status of task with {} for file {} with idSnapshot {} and processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
+                LOG.info("Updating task status of task with {} for file {} with idSnapshot {} and processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
                 taskService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), task.getId());
-                LOG.info("Updated release task status of task with {} for file {} with idSnapshot {} and processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
+                LOG.info("Updated task status of task with {} for file {} with idSnapshot {} and processId {} to FINISHED", task.getId(), splitFileName, idSnapshot, processId);
 
                 try {
                     LOG.info("Recover file {} copied and will be deleted", splitFile);

@@ -229,7 +229,7 @@ public interface RecordStoreService {
    * @param type
    */
   void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot, int startingNumber,
-      int endingNumber, String type) throws SQLException, IOException;
+      int endingNumber, String type, String currentSplitFileName) throws SQLException, IOException;
 
 
   /**
@@ -240,7 +240,7 @@ public interface RecordStoreService {
    * @param lastFieldId
    * @return
    */
-  boolean recoverCheckForStuckFile(Long datasetId, Long firstFieldId, Long lastFieldId);
+  boolean recoverCheckForStuckFile(Long datasetId, String firstFieldId, String lastFieldId);
 
 
   /**

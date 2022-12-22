@@ -478,4 +478,28 @@ public class ValidationControllerImpl implements ValidationController {
           example = "15") @PathVariable("datasetId") Long datasetId) {
     validationHelper.deleteLockToReleaseProcess(datasetId);
   }
+
+  /**
+   * Finds tasks by processId
+   * @param processId
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/findTasksByProcessId/{processId}")
+  public List<BigInteger> findTasksByProcessId(@PathVariable("processId") String processId) {
+    return validationHelper.findTasksByProcessId(processId);
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
