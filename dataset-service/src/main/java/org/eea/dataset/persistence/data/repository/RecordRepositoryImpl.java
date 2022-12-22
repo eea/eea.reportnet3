@@ -1542,6 +1542,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return
    */
   @Override
+  @Transactional
   public boolean truncateDataset(Long datasetId) {
 
     LOG.info("Method truncateDataset called for datasetId {}", datasetId);
@@ -1551,9 +1552,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       String sql = new StringBuilder("truncate table dataset_").append(datasetId)
               .append(".record_value cascade").toString();
 
-      Query query = entityManager.createQuery(sql);
-      deleted = query.executeUpdate() == 1;
-
+      Query query = entityManager.createNativeQuery(sql);
+      entityManager.joinTransaction();
+       query.executeUpdate();
+       deleted = true;
       LOG.info("Dataset id {} has been truncated with query: {}", datasetId, sql);
     } catch (Exception e) {
       LOG_ERROR.error(
