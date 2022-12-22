@@ -126,8 +126,10 @@ public class CollaborationServiceImpl implements CollaborationService {
 
     if (jobId!=null) {
       JobVO job = jobControllerZuul.findJobById(jobId);
-      TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
-      adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, job);
+      if (job.getParameters().get("userId")!=null) {
+        TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
+        adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, job);
+      }
     }
 
     boolean direction = authorizeAndGetDirection(dataflowId, providerId);

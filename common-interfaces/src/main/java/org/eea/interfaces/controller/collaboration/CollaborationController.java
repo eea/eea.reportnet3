@@ -40,7 +40,7 @@ public interface CollaborationController {
    */
   @PostMapping("/createMessage/dataflow/{dataflowId}")
   MessageVO createMessage(@PathVariable("dataflowId") Long dataflowId, @RequestBody MessageVO messageVO,
-                          @RequestParam String user, @RequestParam Long jobId);
+                          @RequestParam(required = false) String user, @RequestParam(required = false) Long jobId);
 
   /**
    * Creates the message attachment.

@@ -133,7 +133,10 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
     try {
       Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-      Long validationJobId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("validation_job_id")));
+      Long validationJobId = null;
+      if (eeaEventVO.getData().get("validation_job_id")!=null) {
+        validationJobId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("validation_job_id")));
+      }
       JobVO valJobVo = null;
       List<LinkedHashMap<String, String>> authorities = new ArrayList<>();
       if (validationJobId!=null) {
@@ -151,22 +154,22 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
               dataset.getDataflowId(), dataset.getDataProviderId());
       Collections.sort(datasets);
 
+      String userId = valJobVo!=null ? (String) valJobVo.getParameters().get("userId") : null;
       Timestamp ts = new Timestamp(System.currentTimeMillis());
       Map<String, Object> parameters = new HashMap<>();
       parameters.put("dataflowId", dataset.getDataflowId());
       parameters.put("dataProviderId", dataset.getDataProviderId());
-      parameters.put("userId", valJobVo.getParameters().get("userId"));
+      parameters.put("userId", userId);
       JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, user,true, dataset.getDataflowId(), dataset.getDataProviderId(), null);
 
-      JobStatusEnum statusToInsert = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), true, dataset.getDataflowId(), dataset.getDataProviderId(), datasets);
+      JobStatusEnum statusToInsert = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), true, dataset.getDataflowId(), dataset.getDataProviderId(), datasets);
       if (statusToInsert == JobStatusEnum.REFUSED) {
+        releaseJob.setJobStatus(JobStatusEnum.REFUSED);
+        addReleaseJob(user, dataset, releaseJob, statusToInsert);
+        datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(), dataset.getDataProviderId());
         return;
       }
-
-      LOG.info("Adding release job for dataflowId {}, dataProviderId {} and creator {} with status {}", dataset.getDataflowId(), dataset.getDataProviderId(), user, statusToInsert);
-      releaseJob = jobControllerZuul.save(releaseJob);
-      jobHistoryControllerZuul.save(releaseJob);
-      LOG.info("Added release job for dataflowId {}, dataProviderId {} and creator {} with status {} and jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), user, statusToInsert, releaseJob.getId());
+      releaseJob = addReleaseJob(user, dataset, releaseJob, statusToInsert);
 
       // we check if one or more dataset have error, if have we create a notification and abort
       // process of releasing
@@ -232,6 +235,14 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
       throw e;
     }
+  }
+
+  private JobVO addReleaseJob(String user, DataSetMetabase dataset, JobVO releaseJob, JobStatusEnum statusToInsert) {
+    LOG.info("Adding release job for dataflowId {}, dataProviderId {} and creator {} with status {}", dataset.getDataflowId(), dataset.getDataProviderId(), user, statusToInsert);
+    releaseJob = jobControllerZuul.save(releaseJob);
+    jobHistoryControllerZuul.save(releaseJob);
+    LOG.info("Added release job for dataflowId {}, dataProviderId {} and creator {} with status {} and jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), user, statusToInsert, releaseJob.getId());
+    return releaseJob;
   }
 
   /**
