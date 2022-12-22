@@ -273,7 +273,7 @@ export const Dataflows = () => {
     const adminControlStatusBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'tools',
-      isVisible: isAdmin || isCustodian,
+      isVisible: isAdmin,
       label: 'controlStatus',
       onClick: () => manageDialogs('isControlStatusDialogVisible', true),
       title: 'controlStatus'

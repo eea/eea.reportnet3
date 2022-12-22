@@ -3446,6 +3446,7 @@ public class DatasetServiceImpl implements DatasetService {
         truncateDataset.setDatasetName(dataSetMetabase.getDataSetName());
         truncateDataset.setDataProviderId(dataProviderId);
         truncateDataset.setDataflowName(dataFlowVO.getName());
+        truncateDataset.setDataflowId(dataSetMetabase.getDataflowId());
       }
     } catch (Exception e) {
       LOG_ERROR.error("Error in getDatasetDataToBeDeleted. Error message: {}", e.getMessage(), e);

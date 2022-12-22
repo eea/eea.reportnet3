@@ -20,4 +20,6 @@ public class TruncateDataset {
 
     /** The dataflow name. */
     private String dataflowName;
+
+    private Long dataflowId;
 }

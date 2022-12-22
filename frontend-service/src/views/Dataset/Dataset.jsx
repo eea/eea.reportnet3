@@ -1230,7 +1230,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               label={
                 actionsContext.exportDatasetProcessing
                   ? resourcesContext.messages['exportInProgress']
-                  : resourcesContext.messages['export']
+                  : resourcesContext.messages['exportDataset']
               }
               onClick={event => exportMenuRef.current.show(event)}
             />
