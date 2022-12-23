@@ -734,6 +734,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       }
       LOG_ERROR.error("Error creating snapshot for dataset {}, processId {}", idDataset, processId, e);
       Map<String, Object> value = new HashMap<>();
+      ProcessVO processVO = null;
+      if (processId!=null) {
+        processVO = processService.getByProcessId(processId);
+        value.put(LiteralConstants.USER, processVO.getUser());
+      }
       value.put(LiteralConstants.DATASET_ID, idDataset);
       releaseNotificableKafkaEvent(eventType, value, idDataset, e.getMessage());
 
@@ -1608,7 +1613,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     if (processId!=null) {
       jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
       ProcessVO processVO = processService.getByProcessId(processId);
-      user = processVO!=null ? processVO.getUser() : null;
+      user = processVO!=null ? processVO.getUser() : SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
     Map<String, Object> value = new HashMap<>();
@@ -2020,10 +2025,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   void releaseNotificableKafkaEvent(EventType event, Map<String, Object> value, Long datasetId,
       String error) {
 
+    String user = value!=null && value.get(LiteralConstants.USER)!=null ? (String) value.get(LiteralConstants.USER) : SecurityContextHolder.getContext().getAuthentication().getName();
     if (!EventType.RELEASE_COMPLETED_EVENT.equals(event)) {
       try {
         NotificationVO notificationVO = NotificationVO.builder()
-            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .user(user)
             .datasetId(datasetId).error(error).build();
         DataSetMetabaseVO datasetMetabaseVO =
             dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
