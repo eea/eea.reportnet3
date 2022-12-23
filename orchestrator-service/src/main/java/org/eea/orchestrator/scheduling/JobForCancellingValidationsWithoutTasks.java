@@ -95,7 +95,7 @@ public class JobForCancellingValidationsWithoutTasks {
                             LOG.info("Locks removed for canceled process {}, datasetId {}", processVO.getProcessId(), processVO.getDatasetId());
                             Long jobId = jobProcessService.findJobIdByProcessId(processVO.getProcessId());
                             if (jobId!=null) {
-                                jobService.updateJobStatus(jobId, JobStatusEnum.CANCELLED);
+                                jobService.updateJobStatus(jobId, JobStatusEnum.CANCELED);
                             }
                             LOG.info("Job cancelled for canceled process {}, datasetId {}", processVO.getProcessId(), processVO.getDatasetId());
                         }

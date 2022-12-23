@@ -6,15 +6,13 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.orchestrator.service.JobService;
-import org.eea.utils.LiteralConstants;
+import org.eea.security.authorization.AdminUserAuthorization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.support.CronTrigger;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -34,6 +32,9 @@ public class JobForExecutingQueuedJobs {
      */
     @Value("${eea.keycloak.admin.password}")
     private String adminPass;
+
+    @Autowired
+    private AdminUserAuthorization adminUserAuthorization;
 
     /**
      * The Constant LOG.
@@ -66,11 +67,9 @@ public class JobForExecutingQueuedJobs {
             }
             LOG.info("Running scheduled task executeQueuedJobs");
             TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(adminUser, LiteralConstants.BEARER_TOKEN + tokenVo.getAccessToken(), null);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
             for (JobVO job: jobs) {
                 try {
+                    adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, job);
                     if (!jobService.canJobBeExecuted(job)) {
                         LOG.info("Job with id {} and of type {} can not be executed right now.", job.getId(), job.getJobType().getValue());
                         continue;

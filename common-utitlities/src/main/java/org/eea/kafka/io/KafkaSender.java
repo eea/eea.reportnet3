@@ -48,7 +48,9 @@ public class KafkaSender {
   public void sendMessage(final EEAEventVO event) {
 
     kafkaTemplate.executeInTransaction(operations -> {
-      event.getData().put("user", SecurityContextHolder.getContext().getAuthentication().getName());
+      if (event.getData().get("user")==null) {
+        event.getData().put("user", SecurityContextHolder.getContext().getAuthentication().getName());
+      }
       event.getData().put("token",
           String.valueOf(SecurityContextHolder.getContext().getAuthentication().getCredentials()));
 

@@ -12,6 +12,7 @@ import org.eea.dataset.service.EUDatasetService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
@@ -20,6 +21,7 @@ import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.service.LockService;
@@ -91,6 +93,10 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   @Autowired
   private JobProcessControllerZuul jobProcessControllerZuul;
 
+  /** The job controller zuul */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
+
 
   /**
    * Gets the EU dataset by dataflow id.
@@ -113,6 +119,11 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   @Override
   @Async
   public void populateEUDatasetWithDataCollection(Long dataflowId, Long jobId) throws EEAException {
+    JobVO jobVO = null;
+    if (jobId!=null) {
+      jobVO = jobControllerZuul.findJobById(jobId);
+    }
+    String user = jobVO!=null ? jobVO.getCreatorUsername() : SecurityContextHolder.getContext().getAuthentication().getName();
     // First we lock some operations
     List<ReportingDatasetVO> reportings =
         reportingDatasetService.getDataSetIdByDataflowId(dataflowId);
@@ -132,7 +143,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
       String processId = UUID.randomUUID().toString();
       processControllerZuul.updateProcess(dataCollection.getId(), dataflowId,
               ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.COPY_TO_EU_DATASET, processId,
-              SecurityContextHolder.getContext().getAuthentication().getName(), defaultCopyToEUDatasetProcessPriority, false);
+              user, defaultCopyToEUDatasetProcessPriority, false);
       LOG.info("Created copy to eudataset process for dataflowId {}, dataset {}, jobId {}", dataflowId, dataCollection.getId(), jobId);
 
       CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
@@ -147,7 +158,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
       LOG.info("Updating copy to eudataset process for dataflowId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataflowId, dataCollection.getId(), jobId, processId);
       processControllerZuul.updateProcess(dataCollection.getId(), dataflowId,
               ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.COPY_TO_EU_DATASET, processId,
-              SecurityContextHolder.getContext().getAuthentication().getName(), defaultCopyToEUDatasetProcessPriority, false);
+              user, defaultCopyToEUDatasetProcessPriority, false);
       LOG.info("Updating copy to eudataset process for dataflowId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataflowId, dataCollection.getId(), jobId, processId);
 
       datasetSnapshotService.addSnapshot(dataCollection.getId(), createSnapshotVO,

@@ -20,11 +20,13 @@ public interface CollaborationService {
    *
    * @param dataflowId the dataflow id
    * @param messageVO the message VO
+   * @param user the user
+   * @param jobId the jobId
    * @return the message VO
    * @throws EEAIllegalArgumentException the EEA illegal argument exception
    * @throws EEAForbiddenException the EEA forbidden exception
    */
-  MessageVO createMessage(Long dataflowId, MessageVO messageVO)
+  MessageVO createMessage(Long dataflowId, MessageVO messageVO, String user, Long jobId)
       throws EEAIllegalArgumentException, EEAForbiddenException;
 
   /**

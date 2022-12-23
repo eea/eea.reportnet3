@@ -1,13 +1,5 @@
 package org.eea.collaboration.service.impl;
 
-import static org.mockito.Mockito.times;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
 import org.eea.collaboration.mapper.MessageMapper;
 import org.eea.collaboration.persistence.domain.Message;
 import org.eea.collaboration.persistence.repository.MessageRepository;
@@ -39,6 +31,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.io.IOException;
+import java.util.*;
+
+import static org.mockito.Mockito.times;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CollaborationServiceImplTest {
@@ -85,7 +82,7 @@ public class CollaborationServiceImplTest {
     messageVO.setProviderId(1L);
     messageVO.setContent("");
     try {
-      collaborationServiceImpl.createMessage(1L, messageVO);
+      collaborationServiceImpl.createMessage(1L, messageVO, "test", 1L);
     } catch (EEAIllegalArgumentException e) {
       Assert.assertEquals(EEAErrorMessage.MESSAGING_BAD_REQUEST, e.getMessage());
       throw e;
@@ -102,10 +99,8 @@ public class CollaborationServiceImplTest {
         .when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(new ArrayList<Long>());
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("name");
     try {
-      collaborationServiceImpl.createMessage(1L, messageVO);
+      collaborationServiceImpl.createMessage(1L, messageVO, "test", null);
     } catch (EEAForbiddenException e) {
       Assert.assertEquals(EEAErrorMessage.MESSAGING_AUTHORIZATION_FAILED, e.getMessage());
       throw e;
@@ -131,7 +126,7 @@ public class CollaborationServiceImplTest {
         .thenReturn(datasetIds);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
-    collaborationServiceImpl.createMessage(1L, messageVO);
+    collaborationServiceImpl.createMessage(1L, messageVO, "test", null);
     Mockito.verify(messageMapper, Mockito.times(1)).entityToClass(Mockito.any());
   }
 
@@ -155,7 +150,7 @@ public class CollaborationServiceImplTest {
         .thenReturn(datasetIds);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
-    collaborationServiceImpl.createMessage(1L, messageVO);
+    collaborationServiceImpl.createMessage(1L, messageVO, "test", null);
     Mockito.verify(messageMapper, Mockito.times(1)).entityToClass(Mockito.any());
   }
 
@@ -166,7 +161,7 @@ public class CollaborationServiceImplTest {
     messageVO.setProviderId(null);
     messageVO.setContent("content");
     try {
-      collaborationServiceImpl.createMessage(1L, messageVO);
+      collaborationServiceImpl.createMessage(1L, messageVO, "test", 1L);
     } catch (EEAIllegalArgumentException e) {
       Assert.assertEquals(EEAErrorMessage.MESSAGING_BAD_REQUEST, e.getMessage());
       throw e;
@@ -180,7 +175,7 @@ public class CollaborationServiceImplTest {
     messageVO.setProviderId(1L);
     messageVO.setContent(null);
     try {
-      collaborationServiceImpl.createMessage(1L, messageVO);
+      collaborationServiceImpl.createMessage(1L, messageVO, "test", 1L);
     } catch (EEAIllegalArgumentException e) {
       Assert.assertEquals(EEAErrorMessage.MESSAGING_BAD_REQUEST, e.getMessage());
       throw e;
@@ -600,9 +595,8 @@ public class CollaborationServiceImplTest {
         .when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(null);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     try {
-      collaborationServiceImpl.createMessage(1L, messageVO);
+      collaborationServiceImpl.createMessage(1L, messageVO, "test", null);
     } catch (EEAForbiddenException e) {
       Assert.assertEquals(EEAErrorMessage.MESSAGING_AUTHORIZATION_FAILED, e.getMessage());
       throw e;

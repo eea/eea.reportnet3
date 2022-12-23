@@ -12,7 +12,7 @@ public enum JobStatusEnum {
     REFUSED("REFUSED"),
 
     /** The cancelled. */
-    CANCELLED("CANCELLED"),
+    CANCELED("CANCELED"),
 
     /** The failed. */
     FAILED("FAILED"),
