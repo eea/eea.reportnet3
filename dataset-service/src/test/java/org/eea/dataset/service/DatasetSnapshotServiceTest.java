@@ -5,8 +5,7 @@ package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -311,11 +310,9 @@ public class DatasetSnapshotServiceTest {
     datasetVO.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
     datasetVO.setId(1L);
     when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(datasetVO);
-    Mockito.when(partitionDataSetMetabaseRepository
-        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
-        .thenReturn(Optional.empty());
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
+    partition.setId(1L);
+    Mockito.when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(anyLong(), anyString())).thenReturn(Optional.of(partition));
     datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), null, new Date().toString(),
         false, null);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
@@ -352,11 +349,9 @@ public class DatasetSnapshotServiceTest {
     datasetVO.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
     datasetVO.setId(1L);
     when(datasetMetabaseService.findDatasetMetabase(Mockito.anyLong())).thenReturn(datasetVO);
-    Mockito.when(partitionDataSetMetabaseRepository
-        .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
-        .thenReturn(Optional.empty());
-    Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
-        .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
+    PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
+    partition.setId(1L);
+    Mockito.when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(anyLong(), anyString())).thenReturn(Optional.of(partition));
     datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L, new Date().toString(),
         false, null);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
@@ -736,6 +731,8 @@ public class DatasetSnapshotServiceTest {
 
       when(uniqueConstraintRepository.deleteByDatasetSchemaId(Mockito.any())).thenReturn(0L);
       when(uniqueConstraintRepository.saveAll(Mockito.any())).thenReturn(new ArrayList<>());
+      Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+      Mockito.when(authentication.getName()).thenReturn("user");
       doThrow(new EEAException("failed")).when(schemaService)
           .updatePKCatalogueAndForeignsAfterSnapshot(Mockito.any(), Mockito.any());
       datasetSnapshotService.restoreSchemaSnapshot(1L, 1L, null);
@@ -1128,8 +1125,9 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(dataSetMetabaseRepository.findDataflowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.anyLong()))
         .thenReturn(representatives);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
+    partition.setId(1L);
+    Mockito.when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(anyLong(), anyString())).thenReturn(Optional.of(partition));
     datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), null, new Date().toString(),
         false, null);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());

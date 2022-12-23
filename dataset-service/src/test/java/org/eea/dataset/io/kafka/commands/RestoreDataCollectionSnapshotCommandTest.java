@@ -90,8 +90,6 @@ public class RestoreDataCollectionSnapshotCommandTest {
     when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
     when(euDatasetService.removeLocksRelatedToPopulateEU(Mockito.any())).thenReturn(Boolean.TRUE);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("name");
     restoreDataCollectionSnapshotCommand.execute(eeaEventVO);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
