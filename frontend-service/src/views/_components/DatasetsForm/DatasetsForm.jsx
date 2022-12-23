@@ -14,11 +14,11 @@ export const DatasetsForm = ({ getDatasetData }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [errors, setErrors] = useState({ datasetId: '', dataProviderId: '' });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [datasetsFormError, setDatasetsFormError] = useState();
   const [dataProviderId, setDataProviderId] = useState('');
   const [datasetId, setDatasetId] = useState('');
+  const [datasetsFormError, setDatasetsFormError] = useState();
+  const [errors, setErrors] = useState({ datasetId: '', dataProviderId: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const checkIsEmptyDatasetId = () =>
     datasetId.length === 0

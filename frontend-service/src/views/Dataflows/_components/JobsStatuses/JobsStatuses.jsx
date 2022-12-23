@@ -97,8 +97,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       nestedOptions: [
         { key: 'jobId', label: resourcesContext.messages['jobId'], keyfilter: 'pint' },
         { key: 'dataflowId', label: resourcesContext.messages['dataflowId'] },
-        { key: 'providerId', label: resourcesContext.messages['providerId'] },
         { key: 'datasetId', label: resourcesContext.messages['datasetId'] },
+        { key: 'providerId', label: resourcesContext.messages['providerId'] },
         { key: 'creatorUsername', label: resourcesContext.messages['creatorUsername'] }
       ],
       type: 'INPUT'
@@ -174,21 +174,15 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         className: styles.middleColumn
       },
       {
-        key: 'creatorUsername',
-        header: resourcesContext.messages['creatorUsername'],
-        template: getJobCreatorUsernameTemplate,
-        className: styles.middleColumn
-      },
-      {
-        key: 'jobType',
-        header: resourcesContext.messages['jobType'],
-        template: getJobTypeTemplate,
-        className: styles.middleColumn
-      },
-      {
         key: 'dataflowId',
         header: resourcesContext.messages['dataflowId'],
         template: getDataflowIdTemplate,
+        className: styles.middleColumn
+      },
+      {
+        key: 'datasetId',
+        header: resourcesContext.messages['datasetId'],
+        template: getDatasetIdTemplate,
         className: styles.middleColumn
       },
       {
@@ -198,9 +192,15 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         className: styles.middleColumn
       },
       {
-        key: 'datasetId',
-        header: resourcesContext.messages['datasetId'],
-        template: getDatasetIdTemplate,
+        key: 'creatorUsername',
+        header: resourcesContext.messages['creatorUsername'],
+        template: getJobCreatorUsernameTemplate,
+        className: styles.middleColumn
+      },
+      {
+        key: 'jobType',
+        header: resourcesContext.messages['jobType'],
+        template: getJobTypeTemplate,
         className: styles.middleColumn
       },
       {
