@@ -398,7 +398,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   private void releaseEvent(EventType eventType, Long datasetId, String error, Map<String, Object> value) {
     try {
-      String user = value!=null ? (String) value.get(LiteralConstants.USER) : SecurityContextHolder.getContext().getAuthentication().getName();
+      String user = value!=null && value.get(LiteralConstants.USER)!=null ? (String) value.get(LiteralConstants.USER) : SecurityContextHolder.getContext().getAuthentication().getName();
       if (error == null) {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value,
             NotificationVO.builder()

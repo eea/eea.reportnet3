@@ -26,12 +26,6 @@ public class AdminUserAuthorizationImpl implements AdminUserAuthorization {
     @Value("${eea.keycloak.admin.user}")
     private String adminUser;
 
-    /**
-     * The admin pass.
-     */
-    @Value("${eea.keycloak.admin.password}")
-    private String adminPass;
-
     @Autowired
     private UserManagementControllerZull userManagementControllerZull;
 
