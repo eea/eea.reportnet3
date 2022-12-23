@@ -36,6 +36,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
+  const [expandedRows, setExpandedRows] = useState(null);
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -168,6 +169,11 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const getTableColumns = () => {
     const columns = [
       {
+        key: 'expanderColumn',
+        style: { width: '3em' },
+        className: styles.middleColumn
+      },
+      {
         key: 'jobId',
         header: resourcesContext.messages['jobId'],
         template: getJobIdTemplate,
@@ -228,10 +234,12 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         body={column.template}
         className={column.className ? column.className : ''}
         columnResizeMode="expand"
+        expander={column.key === 'expanderColumn'}
         field={column.key}
         header={column.header}
         key={column.key}
-        sortable={column.key !== 'buttonsUniqueId'}
+        sortable={column.key !== 'buttonsUniqueId' && column.key !== 'expanderColumn'}
+        style={column.style}
       />
     ));
   };
@@ -261,6 +269,22 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const getProviderIdTemplate = job => <p>{job.providerId}</p>;
 
   const getDatasetIdTemplate = job => <p>{job.datasetId}</p>;
+
+  const rowExpansionTemplate = data => {
+    return (
+      <div className={styles.expandedTable}>
+        <h6>Job history</h6>
+        <DataTable responsiveLayout="scroll" value={data}>
+          <Column field="id" header={resourcesContext.messages['jobId']}></Column>
+          <Column field="jobStatus" header={resourcesContext.messages['jobStatus']}></Column>
+          <Column
+            field="dateStatusChanged"
+            header={resourcesContext.messages['dateStatusChanged']}
+            body={data.id}></Column>
+        </DataTable>
+      </div>
+    );
+  };
 
   const onRefresh = () => {
     setIsRefreshing(true);
@@ -330,6 +354,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         <DataTable
           autoLayout={true}
           className={styles.jobStatusesTable}
+          expandedRows={expandedRows}
           first={firstRow}
           hasDefaultCurrentPage={true}
           lazy={true}
@@ -341,6 +366,9 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               pageNum: event.page
             })
           }
+          onRowToggle={e => {
+            setExpandedRows(e.data);
+          }}
           onSort={onSort}
           paginator={true}
           paginatorRight={
@@ -352,6 +380,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           }
           reorderableColumns={true}
           resizableColumns={true}
+          rowExpansionTemplate={rowExpansionTemplate}
           rows={numberRows}
           rowsPerPageOptions={[5, 10, 15]}
           sortField={sort.field}
