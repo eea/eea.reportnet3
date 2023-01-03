@@ -153,8 +153,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           value: config.jobRunningStatus.FINISHED.key
         },
         {
-          type: resourcesContext.messages[config.jobRunningStatus.CANCELLED.label].toUpperCase(),
-          value: config.jobRunningStatus.CANCELLED.key
+          type: resourcesContext.messages[config.jobRunningStatus.CANCELED.label].toUpperCase(),
+          value: config.jobRunningStatus.CANCELED.key
         },
         {
           type: resourcesContext.messages[config.jobRunningStatus.IN_PROGRESS.label].toUpperCase(),
