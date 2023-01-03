@@ -81,12 +81,12 @@ public class JobForCancellingValidationsWithoutTasks {
                     try {
                         List<BigInteger> tasks = validationControllerZuul.findTasksByProcessId(processVO.getProcessId());
                         if (tasks.size()==0) {
-                            LOG.info("Cancelling processe " + processVO);
-                            LOG.info("Updating validation process to status CANCELLED for processId", processVO.getProcessId());
+                            LOG.info("Cancelling process " + processVO);
+                            LOG.info("Updating validation process to status CANCELED for processId", processVO.getProcessId());
                             processControllerZuul.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(),
                                     ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, processVO.getProcessId(),
                                     processVO.getUser(), processVO.getPriority(), processVO.isReleased());
-                            LOG.info("Updated validation process to status CANCELLED for processId", processVO.getProcessId());
+                            LOG.info("Updated validation process to status CANCELED for processId", processVO.getProcessId());
                             TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
                             UsernamePasswordAuthenticationToken authentication =
                                     new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
@@ -97,7 +97,7 @@ public class JobForCancellingValidationsWithoutTasks {
                             if (jobId!=null) {
                                 jobService.updateJobStatus(jobId, JobStatusEnum.CANCELED);
                             }
-                            LOG.info("Job cancelled for canceled process {}, datasetId {}", processVO.getProcessId(), processVO.getDatasetId());
+                            LOG.info("Job canceled for canceled process {}, datasetId {}", processVO.getProcessId(), processVO.getDatasetId());
                         }
                     } catch (Exception e) {
                         LOG.error("Error while running scheduled task cancelInProgressValidationsWithoutTasks for processId " + processVO.getProcessId());
