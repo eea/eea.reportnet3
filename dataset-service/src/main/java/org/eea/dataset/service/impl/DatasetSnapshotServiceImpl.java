@@ -54,6 +54,7 @@ import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
@@ -61,10 +62,12 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.security.authorization.AdminUserAuthorization;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -84,6 +87,18 @@ import java.util.stream.Collectors;
  */
 @Service("datasetSnapshotService")
 public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
+
+  /**
+   * The admin user.
+   */
+  @Value("${eea.keycloak.admin.user}")
+  private String adminUser;
+
+  /**
+   * The admin pass.
+   */
+  @Value("${eea.keycloak.admin.password}")
+  private String adminPass;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetSnapshotServiceImpl.class);
@@ -218,6 +233,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
   @Autowired
   private ProcessControllerZuul processControllerZuul;
+
+  @Autowired
+  private AdminUserAuthorization adminUserAuthorization;
 
   /**
    * Gets the by id.
@@ -1109,11 +1127,16 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       representativeControllerZuul.updateRepresentativeVisibilityRestrictions(dataflowId,
               dataProviderId, restrictFromPublic);
 
+      JobVO valJobVo = null;
+      if (jobId!=null) {
+        valJobVo = jobControllerZuul.findJobById(jobId);
+        TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
+        adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, valJobVo);
+      }
       // if the user is admin can release without validations
       if (!isAdmin() || validate) {
         validationControllerZuul.validateDataSetData(dataset.getId(), true, jobId);
       } else {
-        JobVO valJobVo = jobControllerZuul.findJobById(jobId);
         if (jobId!=null) {
           jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
         }
