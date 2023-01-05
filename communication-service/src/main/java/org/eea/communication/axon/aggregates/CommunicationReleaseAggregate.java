@@ -70,6 +70,7 @@ public class CommunicationReleaseAggregate {
                 UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
                 userNotificationContentVO.setDataflowId(command.getDataflowId());
                 userNotificationContentVO.setProviderId(command.getDataProviderId());
+                userNotificationContentVO.setUserId(command.getUser());
                 UserNotificationVO userNotificationVO = new UserNotificationVO();
                 userNotificationVO.setEventType("RELEASE_START_EVENT");
                 userNotificationVO.setContent(userNotificationContentVO);

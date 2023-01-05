@@ -8,10 +8,12 @@ import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.kafka.domain.EventType;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The Interface DatasetSnapshotService.
@@ -312,4 +314,13 @@ public interface DatasetSnapshotService {
    * @param status
    */
   void changeDatasetStatus(Long datasetId, DatasetStatusEnum status);
+
+  /**
+   *
+   * @param eventType
+   * @param datasetId
+   * @param error
+   * @param value
+   */
+  void releaseEvent(EventType eventType, Long datasetId, String error, Map<String, Object> value);
 }

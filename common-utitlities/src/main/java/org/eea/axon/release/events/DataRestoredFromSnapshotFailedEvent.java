@@ -29,4 +29,5 @@ public class DataRestoredFromSnapshotFailedEvent {
     private Map<Long, String> datasetReleaseProcessId;
     private Map<Long, Long> datasetDataCollection;
     private Long jobId;
+    private String user;
 }

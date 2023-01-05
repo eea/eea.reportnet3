@@ -52,7 +52,7 @@ public class CollaborationReleaseAggregate {
             messageVO.setProviderId(command.getDataProviderId());
             messageVO.setContent(command.getDatasetName() + " released " + command.getDataflowName() + " successfully");
             messageVO.setAutomatic(true);
-            collaborationService.createMessage(command.getDataflowId(), messageVO);
+            collaborationService.createMessage(command.getDataflowId(), messageVO, command.getUser(), command.getJobId());
             LOG.info("Automatic feedback message created of dataflow {}. Message: {}", command.getDataflowId(), messageVO.getContent());
 
             MessageForSuccessfulReleaseCreatedEvent event = new MessageForSuccessfulReleaseCreatedEvent();

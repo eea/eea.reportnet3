@@ -25,4 +25,5 @@ public class ReleaseRefusedEvent {
     private boolean validate;
     private List<Long> datasetIds;
     private Long jobId;
+    private String user;
 }

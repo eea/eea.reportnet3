@@ -27,4 +27,5 @@ public class CreateSnapshotRecordRorReleaseInMetabaseCommand {
     private boolean validate;
     private List<Long> datasetIds;
     private Long jobId;
+    private String user;
 }

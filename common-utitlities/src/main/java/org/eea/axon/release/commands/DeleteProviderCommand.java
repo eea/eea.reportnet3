@@ -32,4 +32,5 @@ public class DeleteProviderCommand {
     private List<Long> dataCollectionForDeletion;
     private Map<Long, Long> datasetDataCollection;
     private Long jobId;
+    private String user;
 }

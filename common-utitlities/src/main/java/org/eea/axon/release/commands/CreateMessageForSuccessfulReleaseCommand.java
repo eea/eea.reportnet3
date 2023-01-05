@@ -34,4 +34,5 @@ public class CreateMessageForSuccessfulReleaseCommand {
     private String dataflowName;
     private String datasetName;
     private Long jobId;
+    private String user;
 }

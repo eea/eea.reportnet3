@@ -27,4 +27,5 @@ public class ValidationTasksForReleaseCanceledEvent {
     private List<Long> datasetIds;
     private Map<Long, String> datasetProcessId;
     private Long jobId;
+    private String user;
 }

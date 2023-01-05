@@ -1,19 +1,17 @@
-package org.eea.axon.release.commands;
+package org.eea.axon.release.events;
 
 import lombok.*;
-import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 import java.util.List;
 import java.util.Map;
 
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Getter
 @Setter
-public class CancelValidationProcessForReleaseCommand {
+public class ValidationJobFinishedEvent {
 
-    @TargetAggregateIdentifier
     private String validationReleaseAggregateId;
     private String recordStoreReleaseAggregateId;
     private String datasetReleaseAggregateId;
@@ -22,8 +20,8 @@ public class CancelValidationProcessForReleaseCommand {
     private String dataflowReleaseAggregateId;
     private String collaborationReleaseAggregateId;
     private String transactionId;
-    private Long dataflowId;
     private Long dataProviderId;
+    private Long dataflowId;
     private boolean restrictFromPublic;
     private boolean validate;
     private List<Long> datasetIds;

@@ -31,4 +31,5 @@ public class MessageForSuccessfulReleaseCreatedEvent {
    private Map<Long, Date> datasetDateRelease;
    private String datasetName;
    private String dataflowName;
+   private String user;
 }

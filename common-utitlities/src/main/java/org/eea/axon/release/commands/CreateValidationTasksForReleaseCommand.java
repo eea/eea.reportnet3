@@ -30,4 +30,5 @@ public class CreateValidationTasksForReleaseCommand {
     private Map<Long, String> datasetValidationProcessId;
     private Long datasetIForMaterializedViewEvent;
     private Long jobId;
+    private String user;
 }

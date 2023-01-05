@@ -4,30 +4,28 @@ import lombok.*;
 import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 import java.util.List;
-import java.util.Map;
 
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-public class CancelValidationProcessForReleaseCommand {
+public class SetValidationJobFinishedCommand {
 
     @TargetAggregateIdentifier
-    private String validationReleaseAggregateId;
-    private String recordStoreReleaseAggregateId;
     private String datasetReleaseAggregateId;
     private String releaseAggregateId;
     private String communicationReleaseAggregateId;
     private String dataflowReleaseAggregateId;
+    private String validationReleaseAggregateId;
     private String collaborationReleaseAggregateId;
+    private String recordStoreReleaseAggregateId;
     private String transactionId;
     private Long dataflowId;
     private Long dataProviderId;
     private boolean restrictFromPublic;
     private boolean validate;
     private List<Long> datasetIds;
-    private Map<Long, String> datasetValidationProcessId;
     private Long jobId;
     private String user;
 }

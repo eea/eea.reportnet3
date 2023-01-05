@@ -34,4 +34,5 @@ public class RestoreDataFromSnapshotCommand {
     private List<Long> datasetsReleased;
     private Long datasetToRelease;
     private Long jobId;
+    private String user;
 }

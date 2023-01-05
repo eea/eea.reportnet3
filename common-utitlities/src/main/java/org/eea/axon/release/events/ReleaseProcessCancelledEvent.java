@@ -27,4 +27,5 @@ public class ReleaseProcessCancelledEvent {
     private List<Long> datasetIds;
     private Map<Long, String> datasetReleaseProcessId;
     private Long jobId;
+    private String user;
 }

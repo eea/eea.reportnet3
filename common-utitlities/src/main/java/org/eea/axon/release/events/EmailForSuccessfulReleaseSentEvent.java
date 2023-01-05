@@ -32,4 +32,5 @@ public class EmailForSuccessfulReleaseSentEvent {
    private String dataflowName;
    private String datasetName;
    private Long jobId;
+   private String user;
 }

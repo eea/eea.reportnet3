@@ -30,4 +30,5 @@ public class RevertDatasetStatusCommand {
     private Map<Long, Long> datasetSnapshots;
     private Map<Long, Long> datasetDataCollection;
     private Long jobId;
+    private String user;
 }

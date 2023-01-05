@@ -27,4 +27,5 @@ public class ValidationTasksForReleaseCreationFailedEvent {
     private List<Long> datasetIds;
     private Map<Long, String> datasetValidationProcessId;
     private Long jobId;
+    private String user;
 }

@@ -131,8 +131,7 @@ public class RecordStoreReleaseAggregate {
                     LOG.info("Updating release process status of process with processId {} to CANCELED for dataflowId {}, dataProviderId {}, jobId {}", processId, command.getDataProviderId(), command.getJobId());
                     ProcessVO processVO = processService.getByProcessId(processId);
                     processService.updateProcess(processVO.getDatasetId(), command.getDataflowId(),
-                            ProcessStatusEnum.CANCELED, ProcessTypeEnum.RELEASE, processId,
-                            SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
+                            ProcessStatusEnum.CANCELED, ProcessTypeEnum.RELEASE, processId, command.getUser(), defaultReleaseProcessPriority, true);
                     LOG.info("Updated release process status of process with processId {} to CANCELED for dataflowId {}, dataProviderId {}, jobId {}", processId, command.getDataProviderId(), command.getJobId());
                 });
             }

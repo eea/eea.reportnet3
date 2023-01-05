@@ -29,4 +29,5 @@ public class DatasetStatusRevertedEvent {
     private Map<Long, Long> datasetDataCollection;
     private List<Long> dataCollectionForDeletion;
     private Long jobId;
+    private String user;
 }

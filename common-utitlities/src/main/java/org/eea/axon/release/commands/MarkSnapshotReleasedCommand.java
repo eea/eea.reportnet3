@@ -32,4 +32,5 @@ public class MarkSnapshotReleasedCommand {
     private Map<Long, Long> datasetDateRelease;
     private Map<Long, Long> datasetDataCollection;
     private Long jobId;
+    private String user;
 }

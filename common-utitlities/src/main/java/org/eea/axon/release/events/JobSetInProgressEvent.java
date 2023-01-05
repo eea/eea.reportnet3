@@ -21,5 +21,5 @@ public class JobSetInProgressEvent {
     private boolean restrictFromPublic;
     private boolean validate;
     private Long jobId;
-
+    private String user;
 }

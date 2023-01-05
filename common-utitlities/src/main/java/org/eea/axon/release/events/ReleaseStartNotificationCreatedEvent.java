@@ -22,4 +22,5 @@ public class ReleaseStartNotificationCreatedEvent {
    private boolean restrictFromPublic;
    private boolean validate;
    private Long jobId;
+   private String user;
 }

@@ -31,4 +31,5 @@ public class RefreshMaterializedViewForReferenceDatasetCommand {
     private Long datasetIForMaterializedViewEvent;
     private List<Long> referencesToRefresh;
     private Long jobId;
+    private String user;
 }

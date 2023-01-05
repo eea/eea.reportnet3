@@ -236,7 +236,7 @@ public class JobServiceImpl implements JobService {
             adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, jobVO);
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             CreateReleaseStartNotificationCommand command = CreateReleaseStartNotificationCommand.builder().transactionId(UUID.randomUUID().toString()).releaseAggregateId(UUID.randomUUID().toString())
-                    .dataflowId(dataflowId).dataProviderId(dataProviderId).restrictFromPublic(restrictFromPublic).validate(validate).jobId(jobVO.getId()).build();
+                    .dataflowId(dataflowId).dataProviderId(dataProviderId).restrictFromPublic(restrictFromPublic).validate(validate).jobId(jobVO.getId()).user(jobVO.getCreatorUsername()).build();
             commandGateway.send(GenericCommandMessage.asCommandMessage(command).withMetaData(MetaData.with("auth", authentication)));
         } else {
             dataSetSnapshotControllerZuul.createReleaseSnapshots(dataflowId, dataProviderId, restrictFromPublic, validate, jobVO.getId());

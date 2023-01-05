@@ -34,4 +34,5 @@ public class SendNotificationForSuccessfulReleaseCommand {
     private String dataflowName;
     private String datasetName;
     private Long jobId;
+    private String user;
 }

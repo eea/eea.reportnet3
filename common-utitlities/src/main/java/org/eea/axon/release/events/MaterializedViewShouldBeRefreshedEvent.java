@@ -29,4 +29,5 @@ public class MaterializedViewShouldBeRefreshedEvent {
     private Long datasetIForMaterializedViewEvent;
     private List<Long> referencesToRefresh;
     private Long jobId;
+    private String user;
 }

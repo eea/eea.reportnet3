@@ -33,4 +33,5 @@ public class CreateEmailForSuccessfulReleaseCommand {
     private Map<Long, Long> datasetSnapshots;
     private Map<Long, Long> datasetDataCollection;
     private Map<Long, Date> datasetDateRelease;
+    private String user;
 }

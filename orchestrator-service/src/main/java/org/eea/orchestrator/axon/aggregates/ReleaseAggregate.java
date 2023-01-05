@@ -5,10 +5,7 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.messaging.MetaData;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.eea.axon.release.commands.CreateReleaseStartNotificationCommand;
-import org.eea.axon.release.commands.SetJobCancelledCommand;
-import org.eea.axon.release.commands.SetJobFinishedCommand;
-import org.eea.axon.release.commands.SetJobInProgressCommand;
+import org.eea.axon.release.commands.*;
 import org.eea.axon.release.events.*;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.orchestrator.service.JobService;
@@ -29,6 +26,7 @@ public class ReleaseAggregate {
     private boolean restrictFromPublic;
     private boolean validate;
     private Long jobId;
+    private String user;
 
     private static final Logger LOG = LoggerFactory.getLogger(ReleaseAggregate.class);
 
@@ -52,6 +50,7 @@ public class ReleaseAggregate {
         this.restrictFromPublic = event.isRestrictFromPublic();
         this.validate = event.isValidate();
         this.jobId = event.getJobId();
+        this.user = event.getUser();
     }
 
     @CommandHandler
@@ -64,6 +63,20 @@ public class ReleaseAggregate {
             apply(event, metaData);
         } catch (Exception e) {
             LOG.error("Error while setting release job status to IN_PROGRESS for dataflowId {}, dataProviderId {}, jobId {}, {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId(), e.getMessage());
+            throw e;
+        }
+    }
+
+    @CommandHandler
+    public void handle(SetValidationJobFinishedCommand command, MetaData metaData, JobService jobService) {
+        try {
+            jobService.updateJobStatus(command.getJobId(), JobStatusEnum.FINISHED);
+
+            ValidationJobFinishedEvent event = new ValidationJobFinishedEvent();
+            BeanUtils.copyProperties(command, event);
+            apply(event, metaData);
+        } catch (Exception e) {
+            LOG.error("Error while setting release job status to FINISHED for dataflowId {}, dataProviderId {}, jobId {}, {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId(), e.getMessage());
             throw e;
         }
     }
@@ -85,7 +98,7 @@ public class ReleaseAggregate {
     @CommandHandler
     public void handle(SetJobCancelledCommand command, JobService jobService) {
         try {
-            jobService.updateJobStatus(command.getJobId(), JobStatusEnum.CANCELLED);
+            jobService.updateJobStatus(command.getJobId(), JobStatusEnum.CANCELED);
 
             JobCancelledEvent event = new JobCancelledEvent();
             BeanUtils.copyProperties(command, event);

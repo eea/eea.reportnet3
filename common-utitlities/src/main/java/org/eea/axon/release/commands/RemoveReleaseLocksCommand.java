@@ -33,4 +33,5 @@ public class RemoveReleaseLocksCommand {
     private Map<Long, Long> datasetDataCollection;
     private Map<Long, Date> datasetDateRelease;
     private Long jobId;
+    private String user;
 }

@@ -396,7 +396,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param datasetId the dataset id
    * @param error the error
    */
-  private void releaseEvent(EventType eventType, Long datasetId, String error, Map<String, Object> value) {
+  @Override
+  public void releaseEvent(EventType eventType, Long datasetId, String error, Map<String, Object> value) {
     try {
       String user = value!=null && value.get(LiteralConstants.USER)!=null ? (String) value.get(LiteralConstants.USER) : SecurityContextHolder.getContext().getAuthentication().getName();
       if (error == null) {

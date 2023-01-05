@@ -372,13 +372,13 @@ public class DatasetReleaseAggregate {
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_PROVIDER_COMPLETED_EVENT,
                         null,
                         NotificationVO.builder()
-                                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                                .user(command.getUser())
                                 .dataflowId(command.getDataflowId()).dataflowName(command.getDataflowName())
                                 .providerId(command.getDataProviderId()).build());
             } else {
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
                         NotificationVO.builder()
-                                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                                .user(command.getUser())
                                 .dataflowId(command.getDataflowId()).dataflowName(command.getDataflowName())
                                 .providerId(command.getDataProviderId()).build());
             }
@@ -451,6 +451,22 @@ public class DatasetReleaseAggregate {
         }
     }
 
+    @CommandHandler
+    public void handle(SendReleaseFailedNotificationCommand command, DatasetSnapshotService datasetSnapshotService) {
+        try {
+            Map<String, Object> value = new HashMap<>();
+            value.put(LiteralConstants.USER, command.getUser());
+            datasetSnapshotService.releaseEvent(EventType.RELEASE_FAILED_EVENT, null, null, value);
+
+            NotificationForFailedReleaseSent event = new NotificationForFailedReleaseSent();
+            BeanUtils.copyProperties(command, event);
+            apply(event);
+        } catch (Exception e) {
+            LOG.error("Error while sending notification for failed release for dataflowId {}, dataProviderId {}, jobId {}", command.getDataflowId(), command.getDataProviderId(), command.getJobId());
+            throw e;
+        }
+    }
+
     private void setAuthorities(LinkedHashMap auth) {
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
         List<LinkedHashMap<String, String>> authorities = (List<LinkedHashMap<String, String>>) auth.get("authorities");
@@ -464,7 +480,7 @@ public class DatasetReleaseAggregate {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("dataflowId", command.getDataflowId());
         parameters.put("dataProviderId", command.getDataProviderId());
-        JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(),true, command.getDataflowId(), command.getDataProviderId(), null);
+        JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, command.getUser(),true, command.getDataflowId(), command.getDataProviderId(), null);
 
         LOG.info("Adding release job for dataflowId {}, dataProviderId {} and creator {} with status {}", command.getDataflowId(), command.getDataProviderId(), SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
         releaseJob = jobControllerZuul.save(releaseJob);
@@ -477,8 +493,7 @@ public class DatasetReleaseAggregate {
         LOG.info("Creating release process for dataflowId {}, dataProviderId {}, jobId {}", command.getDataflowId(), command.getDataProviderId(), releaseJob.getId());
         String processId = UUID.randomUUID().toString();
         processControllerZuul.updateProcess(datasetId, command.getDataflowId(),
-                ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, processId,
-                SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
+                ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, processId, command.getUser(), defaultReleaseProcessPriority, true);
         LOG.info("Created release process for dataflowId {}, dataProviderId {}, jobId {} and processId {}", command.getDataflowId(), command.getDataProviderId(), releaseJob.getId(), processId);
 
         LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", command.getDataflowId(), command.getDataProviderId(), releaseJob.getId(), processId);
@@ -488,8 +503,7 @@ public class DatasetReleaseAggregate {
 
         LOG.info("Updating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", command.getDataflowId(), command.getDataProviderId(), datasetId, releaseJob.getId(), processId);
         processControllerZuul.updateProcess(datasetId, command.getDataflowId(),
-                ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, processId,
-                SecurityContextHolder.getContext().getAuthentication().getName(), defaultReleaseProcessPriority, true);
+                ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, processId, command.getUser(), defaultReleaseProcessPriority, true);
         LOG.info("Updated release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", command.getDataflowId(), command.getDataProviderId(), datasetId, releaseJob.getId(), processId);
         return processId;
     }
@@ -515,7 +529,7 @@ public class DatasetReleaseAggregate {
 
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
                 NotificationVO.builder()
-                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .user(command.getUser())
                         .datasetId(id)
                         .error("One or more datasets have blockers errors, Release aborted")
                         .providerId(command.getDataProviderId()).build());

@@ -45,18 +45,6 @@ public class ValidationReleaseAggregate {
 
     @AggregateIdentifier
     private String validationReleaseAggregateId;
-    private String datasetReleaseAggregateId;
-    private String releaseAggregateId;
-    private String communicationReleaseAggregateId;
-    private String dataflowReleaseAggregateId;
-    private String collaborationReleaseAggregateId;
-    private String recordStoreReleaseAggregateId;
-    private String transactionId;
-    private Long dataProviderId;
-    private Long dataflowId;
-    private boolean restrictFromPublic;
-    private boolean validate;
-    private List<Long> datasetIds;
     private Map<Long, String> datasetValidationProcessId;
     private Long datasetIForMaterializedViewEvent;
     private List<Long> referencesToRefresh;
@@ -79,9 +67,7 @@ public class ValidationReleaseAggregate {
                 LOG.info("Adding validation process for dataflowId {}, dataProvider {}, dataset {}, jobId {}", command.getDataflowId(), command.getDataProviderId(), datasetId, command.getJobId());
                 String processId = UUID.randomUUID().toString();
                 datasetProcessId.put(datasetId, processId);
-                processControllerZuul.updateProcess(datasetId, command.getDataflowId(),
-                        ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId,
-                        SecurityContextHolder.getContext().getAuthentication().getName(), priority, true);
+                processControllerZuul.updateProcess(datasetId, command.getDataflowId(), ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.VALIDATION, processId, command.getUser(), priority, true);
 
                 if (command.getJobId()!=null) {
                     JobProcessVO jobProcessVO = new JobProcessVO(null, command.getJobId(), processId, datasetId, command.getTransactionId(), command.getValidationReleaseAggregateId());
@@ -125,9 +111,9 @@ public class ValidationReleaseAggregate {
             }
 
             validationHelper.addLockToReleaseProcess(datasetId);
+            int priority = validationHelper.getPriority(command.getDataflowId());
             if (processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
-                    ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, command.getDatasetValidationProcessId().get(datasetId),
-                    SecurityContextHolder.getContext().getAuthentication().getName(), 0, true)) {
+                    ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, command.getDatasetValidationProcessId().get(datasetId), command.getUser(), priority, true)) {
 
                 // If there's no SQL rules enabled, no need to refresh the views, so directly start the
                 // validation
@@ -176,7 +162,8 @@ public class ValidationReleaseAggregate {
     }
 
     @CommandHandler
-    public void handle(UpdateMaterializedViewCommand command, MetaData metaData, RecordStoreControllerZuul recordStoreControllerZuul, ProcessControllerZuul processControllerZuul, DataSetMetabaseControllerZuul datasetMetabaseControllerZuul) {
+    public void handle(UpdateMaterializedViewCommand command, MetaData metaData, RecordStoreControllerZuul recordStoreControllerZuul, ProcessControllerZuul processControllerZuul,
+                       DataSetMetabaseControllerZuul datasetMetabaseControllerZuul, @Autowired ValidationHelper validationHelper) {
         LinkedHashMap auth = (LinkedHashMap) metaData.get("auth");
         setAuthorities(auth);
 
@@ -186,9 +173,10 @@ public class ValidationReleaseAggregate {
                     recordStoreControllerZuul.launchUpdateMaterializedQueryView(Long.valueOf(dataset));
                 } catch (Exception e) {
                     LOG.error("Error refreshing the materialized view of the dataset {}", dataset, e);
+                    int priority = validationHelper.getPriority(command.getDataflowId());
                     processControllerZuul.updateProcess(command.getDatasetIForMaterializedViewEvent(), -1L, ProcessStatusEnum.CANCELED,
                             ProcessTypeEnum.VALIDATION, command.getDatasetValidationProcessId().get(command.getDatasetIForMaterializedViewEvent()),
-                            SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
+                            command.getUser(), priority, true);
                     datasetMetabaseControllerZuul.updateDatasetRunningStatus(command.getDatasetIForMaterializedViewEvent(),
                             DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
                 }
@@ -217,8 +205,7 @@ public class ValidationReleaseAggregate {
                 if (!process.getStatus().equals(ProcessStatusEnum.FINISHED) && !process.getStatus().equals(ProcessStatusEnum.CANCELED)) {
                     LOG.info("Cancelling validation process for dataflowId {}, dataProviderId {}, datasetId {}, jobId {}, processId {}", command.getDataflowId(), command.getDataProviderId(), datasetId, command.getJobId(), process.getProcessId());
                     if (processControllerZuul.updateProcess(datasetId, command.getDataflowId(),
-                            ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, process.getProcessId(),
-                            SecurityContextHolder.getContext().getAuthentication().getName(), priority, true)) {
+                            ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, process.getProcessId(), command.getUser(), priority, true)) {
                         LOG.info("Canceled validation process for dataflowId {}, dataProviderId {}, datasetId {}, jobId {}, processId {}", command.getDataflowId(), command.getDataProviderId(), datasetId, command.getJobId(), process.getProcessId());
                     }
                 }

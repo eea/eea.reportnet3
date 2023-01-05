@@ -28,4 +28,5 @@ public class CancelReleaseProcessFailedEvent {
     private Map<Long, Long> datasetSnapshots;
     private Map<Long, String> datasetReleaseProcessId;
     private Long jobId;
+    private String user;
 }

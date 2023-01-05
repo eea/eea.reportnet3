@@ -31,4 +31,5 @@ public class SnapshotMarkedReleasedEvent {
     private Map<Long, Date> datasetDateRelease;
     private Map<Long, Long> datasetDataCollection;
     private Long jobId;
+    private String user;
 }

@@ -30,4 +30,5 @@ public class DatasetRunningStatusRevertedEvent {
     private Map<Long, Long> datasetDataCollection;
     private List<Long> datasetsReleased;
     private Long jobId;
+    private String user;
 }
