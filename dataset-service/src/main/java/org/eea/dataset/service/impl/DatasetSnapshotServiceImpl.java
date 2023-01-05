@@ -51,6 +51,7 @@ import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -1112,15 +1113,17 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       if (!isAdmin() || validate) {
         validationControllerZuul.validateDataSetData(dataset.getId(), true, jobId);
       } else {
+        JobVO valJobVo = jobControllerZuul.findJobById(jobId);
         if (jobId!=null) {
           jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
         }
         String processId = UUID.randomUUID().toString();
-        String notificationUser = SecurityContextHolder.getContext().getAuthentication().getName();
+        String notificationUser = valJobVo!=null ? valJobVo.getCreatorUsername() : SecurityContextHolder.getContext().getAuthentication().getName();
         Map<String, Object> value = new HashMap<>();
         value.put(LiteralConstants.DATASET_ID, dataset.getId());
         value.put("uuid", processId);
         value.put("user", notificationUser);
+        value.put("validation_job_id", jobId);
         kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
       }
       LOG.info("Successfully created release snapshots for dataflowId {} and dataProviderId {} with jobId {}", dataflowId, dataProviderId, jobId);
