@@ -16,7 +16,6 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DatasetsForm } from 'views/_components/DatasetsForm';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
-import { Filters } from 'views/_components/Filters';
 import { Spinner } from 'views/_components/Spinner';
 
 import { ControlStatusesService } from 'services/ControlStatusesService';
@@ -62,11 +61,6 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
       setDatasetName(data.datasetName);
       setDataProviderId(data.dataProviderId);
       setDataflowId(data.dataflowId);
-
-      console.log('data.datasetId: ' + data.datasetId);
-      console.log('data.datasetName: ' + data.datasetName);
-      console.log('data.dataProviderId: ' + data.dataProviderId);
-      console.log('data.dataflowId: ' + data.dataflowId);
 
       if (
         data.datasetId === null ||

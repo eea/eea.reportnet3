@@ -20,7 +20,7 @@
     <dataset.version>v3.1.6-saga</dataset.version>
     <document.version>v3.1.6-saga</document.version>
     <frontend.version>v3.1.6-saga</frontend.version>
-    <indexsearch.version>vv3.1.6-saga</indexsearch.version>
+    <indexsearch.version>v3.1.6-saga</indexsearch.version>
     <inspire.version>v3.1.6-saga</inspire.version>
     <recordstore.version>v3.1.6-saga</recordstore.version>
     <ums.version>v3.1.6-saga</ums.version>
