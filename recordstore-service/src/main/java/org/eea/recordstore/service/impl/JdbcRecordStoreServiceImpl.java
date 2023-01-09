@@ -1738,15 +1738,22 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private void updateJobStatusToFinished(Long jobId) {
     if (jobId!=null) {
       List<String> processes = jobProcessControllerZuul.findProcessesByJobId(jobId);
+      Long datasetId = processService.getByProcessId(processes.get(0)).getDatasetId();
+      DataSetMetabaseVO dataSetMetabase = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+      List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(dataSetMetabase.getDataflowId(), dataSetMetabase.getDataProviderId());
       LOG.info("Method updateJobStatusToFinished with jobId: {} and processes: {}", jobId, processes);
 
       boolean release = true;
-      for (String id : processes) {
-        ProcessVO processVO = processService.getByProcessId(id);
-        if (!processVO.getStatus().equals(ProcessStatusEnum.FINISHED.toString())) {
-          release = false;
-          break;
+      if (processes.size()==datasetIds.size()) {
+        for (String id : processes) {
+          ProcessVO processVO = processService.getByProcessId(id);
+          if (!processVO.getStatus().equals(ProcessStatusEnum.FINISHED.toString())) {
+            release = false;
+            break;
+          }
         }
+      } else {
+        release = false;
       }
 
       if (release) {
