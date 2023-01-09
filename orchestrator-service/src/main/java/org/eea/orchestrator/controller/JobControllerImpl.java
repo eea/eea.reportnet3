@@ -267,7 +267,7 @@ public class JobControllerImpl implements JobController {
     }
 
     @PostMapping(value = "/updateFmeJobId/{jobId}/{fmeJobId}")
-    public void updateFmeJobId(Long jobId, String fmeJobId) {
+    public void updateFmeJobId(@PathVariable("jobId") Long jobId, @PathVariable("fmeJobId") String fmeJobId) {
         jobService.updateFmeJobId(jobId,fmeJobId);
     }
 

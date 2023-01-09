@@ -123,7 +123,7 @@ public interface JobController {
 
 
     @PostMapping(value = "/updateFmeJobId/{jobId}/{fmeJobId}")
-    void updateFmeJobId(@PathVariable("id") Long jobId, @PathVariable("fmeJobId") String fmeJobId);
+    void updateFmeJobId(@PathVariable("jobId") Long jobId, @PathVariable("fmeJobId") String fmeJobId);
 
     /**
      * Saves job

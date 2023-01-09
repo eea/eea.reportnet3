@@ -487,6 +487,7 @@ public interface DatasetController {
    * @param replace the replace
    * @param integrationId the integration id
    * @param delimiter the delimiter
+   * @param fmeJobId the fmeJobId
    */
   @PostMapping("/v2/importFileData/{datasetId}")
   void importBigFileData(@PathVariable("datasetId") Long datasetId,
@@ -497,7 +498,7 @@ public interface DatasetController {
       @RequestParam(value = "replace", required = false) boolean replace,
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
-                         @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
 
 
   /**
@@ -533,6 +534,7 @@ public interface DatasetController {
    * @param replace the replace
    * @param integrationId the integration id
    * @param delimiter the delimiter
+   * @param fmeJobId the fmeJobId
    */
   @PostMapping("/{datasetId}/importFileData")
   void importFileDataLegacy(@PathVariable("datasetId") Long datasetId,
@@ -542,7 +544,8 @@ public interface DatasetController {
       @RequestParam("file") MultipartFile file,
       @RequestParam(value = "replace", required = false) boolean replace,
       @RequestParam(value = "integrationId", required = false) Long integrationId,
-      @RequestParam(value = "delimiter", required = false) String delimiter);
+      @RequestParam(value = "delimiter", required = false) String delimiter,
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
 
 
   /**

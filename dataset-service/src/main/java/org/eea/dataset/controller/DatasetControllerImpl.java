@@ -412,9 +412,11 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
           value = "integrationId", required = false) Long integrationId,
       @ApiParam(type = "String", value = "File delimiter",
-          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
-    this.importFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
-        integrationId, delimiter);
+          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+      @ApiParam(type = "String", value = "Fme Job Id",
+              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+    this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
+        integrationId, delimiter, fmeJobId);
   }
 
   /**
