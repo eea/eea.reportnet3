@@ -244,4 +244,18 @@ public interface RecordStoreController {
    */
   @GetMapping(value = "/private/releaseTasksByDatasetId/{datasetId}")
   List<ProcessTaskVO> findReleaseTasksForInProgressProcessByDatasetId(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Finds tasks with type IMPORT_TASK and status IN_PROGRESS
+   * @return the tasks
+   */
+  @GetMapping(value = "/private/findImportTasksInProgress")
+  List<TaskVO> findImportTasksInProgress();
+
+  /**
+   * Restarts a task
+   * @return
+   */
+  @PostMapping(value = "/private/restartTask")
+  void restartTask(@RequestParam Long taskId);
 }

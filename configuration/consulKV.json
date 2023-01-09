@@ -1824,6 +1824,10 @@
     "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
   },
   {
+    "key": "config/orchestrator/scheduling.inProgress.import.task.max.hours",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
+  },
+  {
     "key": "config/orchestrator/scheduling.inProgress.import.maximum.jobs",
     "value": "JHtJTl9QUk9HUkVTU19JTVBPUlRfTUFYSU1VTV9KT0JTOjJ9"
   },

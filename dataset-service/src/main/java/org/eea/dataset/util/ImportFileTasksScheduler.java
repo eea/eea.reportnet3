@@ -108,10 +108,10 @@ public class ImportFileTasksScheduler extends MessageReceiver {
               consumeMessage(message);
               freeThreads=  checkFreeThreads();
             } catch (EEAException | JsonProcessingException e) {
-              LOG_ERROR.error("failed the import task shedule because of {} ", e);
+              LOG.error("failed the import task schedule because of {} ", e);
             } catch (ObjectOptimisticLockingFailureException e) {
               newDelay = 1L;
-              LOG_ERROR.error(e.getMessage());
+              LOG.error(e.getMessage());
             }
           }else{
             break;
