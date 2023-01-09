@@ -121,6 +121,10 @@ public interface JobController {
     @PostMapping(value = "/updateJobStatus/{id}/{status}")
     void updateJobStatus(@PathVariable("id") Long jobId, @PathVariable("status") JobStatusEnum status);
 
+
+    @PostMapping(value = "/updateFmeJobId/{jobId}/{fmeJobId}")
+    void updateFmeJobId(@PathVariable("id") Long jobId, @PathVariable("fmeJobId") String fmeJobId);
+
     /**
      * Saves job
      * @param jobVO
@@ -148,6 +152,9 @@ public interface JobController {
      */
     @GetMapping(value = "/findJobById/{jobId}")
     JobVO findJobById(@PathVariable("jobId") Long jobId);
+
+    @GetMapping(value = "/findJobByFmeJobId/{fmeJobId}")
+    JobVO findJobByFmeJobId(@PathVariable("fmeJobId") String fmeJobId);
 }
 
 

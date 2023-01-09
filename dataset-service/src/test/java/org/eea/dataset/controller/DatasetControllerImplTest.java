@@ -303,7 +303,7 @@ public class DatasetControllerImplTest {
     doNothing().when(fileTreatmentHelper).importFileData(1L,2L, "tableSchemaId", multipartFile, true,
         1L, "delimiter", 0L);
     datasetControllerImpl.importBigFileData(1L, 2L, 1L, "tableSchemaId", multipartFile, true, 1L,
-        "delimiter");
+        "delimiter",null);
     Mockito.verify(fileTreatmentHelper, times(1)).importFileData(1L,2L, "tableSchemaId", multipartFile,
         true, 1L, "delimiter", 0L);
   }
@@ -322,7 +322,7 @@ public class DatasetControllerImplTest {
         multipartFile, true, 1L, "delimiter", 0L);
     try {
       datasetControllerImpl.importBigFileData(1L, 2L, 1L, "tableSchemaId", multipartFile, true, 1L,
-          "delimiter");
+          "delimiter",null);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.IMPORTING_FILE_DATASET, e.getReason());

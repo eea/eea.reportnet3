@@ -7,10 +7,13 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
+import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -52,6 +55,8 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
 
+  @Autowired
+  private JobController.JobControllerZuul jobControllerZuul;
 
   /**
    * Gets the event type.
@@ -72,6 +77,8 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
   public void execute(EEAEventVO eeaEventVO) {
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("datasetId")));
     String fileName = eeaEventVO.getData().get("fileName").toString();
+    String jobId = eeaEventVO.getData().get("jobId").toString();
+
     File file = new File(fileName);
     Long integrationId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("integrationId")));
     IntegrationVO integrationVO = integrationController.findIntegrationById(integrationId);
@@ -85,12 +92,16 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
       externalParameters.put("fileIS", "");
       integrationVO.setExternalParameters(externalParameters);
 
-      if ((Integer) integrationController
-          .executeIntegrationProcess(IntegrationToolTypeEnum.FME,
-              IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationVO)
-          .getExecutionResultParams().get("id") == 0) {
-        error = true;
-      }
+    ExecutionResultVO executionResultVO = integrationController
+              .executeIntegrationProcess(IntegrationToolTypeEnum.FME,
+                      IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationVO);
+
+    String fmeJobId = (String) executionResultVO.getExecutionResultParams().get("id");
+    if(Integer.valueOf(fmeJobId)==0){
+      error = true;
+    }
+    jobControllerZuul.updateFmeJobId(Long.parseLong(jobId),fmeJobId);
+
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
       throw e;

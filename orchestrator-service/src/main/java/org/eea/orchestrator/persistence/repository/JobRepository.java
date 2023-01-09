@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -25,6 +26,9 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
      * @return the list of job entries
      */
     List<Job> findAllByJobStatusOrderById(JobStatusEnum jobStatus);
+
+
+    Optional<Job> findJobByFmeJobId(String fmeJobId);
 
     /**
      *

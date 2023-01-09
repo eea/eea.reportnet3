@@ -55,4 +55,7 @@ public class Job {
 
     @Column(name = "DATASET_ID")
     private Long datasetId;
+
+    @Column(name = "FME_JOB_ID")
+    private String fmeJobId;
 }

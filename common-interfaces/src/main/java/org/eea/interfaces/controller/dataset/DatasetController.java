@@ -496,7 +496,8 @@ public interface DatasetController {
       @RequestParam("file") MultipartFile file,
       @RequestParam(value = "replace", required = false) boolean replace,
       @RequestParam(value = "integrationId", required = false) Long integrationId,
-      @RequestParam(value = "delimiter", required = false) String delimiter);
+      @RequestParam(value = "delimiter", required = false) String delimiter,
+                         @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
 
 
   /**
