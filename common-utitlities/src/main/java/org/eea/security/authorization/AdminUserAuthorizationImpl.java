@@ -29,10 +29,16 @@ public class AdminUserAuthorizationImpl implements AdminUserAuthorization {
     @Autowired
     private UserManagementControllerZull userManagementControllerZull;
 
+    private static final String ROLE_ADMIN = "ROLE_ADMIN";
+
     @Override
     public void setAdminSecurityContextAuthenticationWithJobUserRoles(TokenVO tokenVo, JobVO job) {
         String userId = (String) job.getParameters().get("userId");
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        boolean isAdmin = this.userManagementControllerZull.checkAdmin(userId);
+        if (isAdmin) {
+            grantedAuthorities.add(new SimpleGrantedAuthority(ROLE_ADMIN));
+        }
         List<ResourceAccessVO> resourceAccessVOS = this.userManagementControllerZull.getResourcesByUserId(userId);
         // ObjectAccessRoleEnum expression has the following format
         // ROLE_DATASCHEMA-1-DATA_CUSTODIAN
