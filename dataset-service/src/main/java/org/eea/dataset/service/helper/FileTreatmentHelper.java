@@ -1162,7 +1162,7 @@ public class FileTreatmentHelper implements DisposableBean {
          * @throws EEAException the EEA exception
          */
         private void prepareFmeFileProcess (Long datasetId, File file, IntegrationVO integrationVO,
-                String mimeType, String tableSchemaId,boolean replace,Long jobId) throws IOException, EEAException {
+                String mimeType, String tableSchemaId,boolean replace, Long jobId) throws IOException, EEAException {
 
             LOG.info("Start FME-Import process: datasetId={}, integrationVO={}", datasetId, integrationVO);
             Map<String, String> internalParameters = integrationVO.getInternalParameters();
@@ -1186,7 +1186,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
             // delete precious data if necessary
             if (replace) {
-                wipeDataAsync(datasetId, tableSchemaId, file, integrationVO);
+                wipeDataAsync(datasetId, tableSchemaId, file, integrationVO, jobId);
                 LOG.info("Data has been wiped for datasetId {}", datasetId);
             } else {
                 Map<String, Object> valuesFME = new HashMap<>();
@@ -1569,10 +1569,11 @@ public class FileTreatmentHelper implements DisposableBean {
          * @param tableSchemaId the table schema id
          * @param file the file
          * @param integrationVO the integration VO
+         * @param jobId the job id
          */
         @Async
         private void wipeDataAsync (Long datasetId, String tableSchemaId, File file,
-                IntegrationVO integrationVO){
+                IntegrationVO integrationVO, Long jobId){
             if (null != tableSchemaId) {
                 datasetService.deleteTableBySchema(tableSchemaId, datasetId);
             } else {
@@ -1583,6 +1584,7 @@ public class FileTreatmentHelper implements DisposableBean {
             valuesFME.put("datasetId", datasetId);
             valuesFME.put("fileName", file);
             valuesFME.put("integrationId", integrationVO.getId());
+            valuesFME.put("jobId", jobId);
             kafkaSenderUtils.releaseKafkaEvent(EventType.CONTINUE_FME_PROCESS_EVENT, valuesFME);
         }
 
