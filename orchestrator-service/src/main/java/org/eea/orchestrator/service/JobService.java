@@ -38,4 +38,9 @@ public interface JobService {
     JobVO findById(Long jobId);
 
     boolean canExecuteReleaseOnDataflow(Long dataflowId);
+
+    JobVO findByFmeJobId(String fmeJobId);
+
+    void updateFmeJobId(Long jobId,String fmeJobId);
+
 }

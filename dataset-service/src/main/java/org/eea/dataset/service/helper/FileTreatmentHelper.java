@@ -336,12 +336,30 @@ public class FileTreatmentHelper implements DisposableBean {
                                boolean replace, Long integrationId, String delimiter, Long jobId) throws EEAException {
 
         if (delimiter != null && delimiter.length() > 1) {
-            LOG_ERROR.error("Error when importing file data for datasetId {} and tableSchemaId {}. ReplaceData is {}. The size of the delimiter cannot be greater than 1", datasetId, tableSchemaId, replace);
+            LOG.error("Error when importing file data for datasetId {} and tableSchemaId {}. ReplaceData is {}. The size of the delimiter cannot be greater than 1", datasetId, tableSchemaId, replace);
             datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                     DatasetRunningStatusEnum.ERROR_IN_IMPORT);
             throw new EEAException("The size of the delimiter cannot be greater than 1");
         }
-        String processUUID = UUID.randomUUID().toString();
+
+        //if there is already a process created for the import then it should be updated instead of creating a new one
+        String processUUID = null;
+        Boolean processExists = false;
+        if(jobId != null){
+            List<String> processIds = jobProcessControllerZuul.findProcessesByJobId(jobId);
+            if(processIds != null && processIds.size() > 0){
+                processUUID = processIds.get(0);
+                processExists = true;
+                LOG.info("Process with id {} already exists for import job {}", processUUID, jobId);
+            }
+            else{
+                processUUID = UUID.randomUUID().toString();
+            }
+        }
+        else{
+            processUUID = UUID.randomUUID().toString();
+        }
+
         Boolean defaultReleaseStatusToBeChanged = null;
 
         DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
@@ -349,7 +367,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.IMPORT, processUUID,
                 SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, defaultReleaseStatusToBeChanged);
 
-        if(jobId != null){
+        if(jobId != null && !processExists){
             JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID, datasetId, null, null);
             jobProcessControllerZuul.save(jobProcessVO);
         }
@@ -365,7 +383,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     LockSignature.IMPORT_BIG_FILE_DATA.getValue());
             importBigFileData.put(LiteralConstants.DATASETID, datasetId);
             lockService.removeLockByCriteria(importBigFileData);
-            LOG_ERROR.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}",
+            LOG.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}",
                     datasetId, tableSchemaId, file.getOriginalFilename());
             throw new EEAException(
                     "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
@@ -387,7 +405,7 @@ public class FileTreatmentHelper implements DisposableBean {
         // delete the temporary table from etlExport
         datasetService.deleteTempEtlExport(datasetId);
 
-        fileManagement(datasetId, dataflowId, processUUID, defaultReleaseStatusToBeChanged, tableSchemaId, schema, file, replace, integrationId, delimiter);
+        fileManagement(datasetId, dataflowId, processUUID, defaultReleaseStatusToBeChanged, tableSchemaId, schema, file, replace, integrationId, delimiter,jobId);
     }
 
     /**
@@ -889,7 +907,7 @@ public class FileTreatmentHelper implements DisposableBean {
      * @throws EEAException the EEA exception
      */
     private void fileManagement(Long datasetId, Long dataflowId, String processId, Boolean released, String tableSchemaId, DataSetSchema schema,
-                                MultipartFile multipartFile, boolean replace, Long integrationId, String delimiter)
+                                MultipartFile multipartFile, boolean replace, Long integrationId, String delimiter,Long jobId)
             throws EEAException {
         if (processControllerZuul.updateProcess(datasetId, dataflowId,
                 ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.IMPORT, processId,
@@ -951,7 +969,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     // Queue import tasks for stored files
                     if (!files.isEmpty()) {
                         queueImportProcess(datasetId,processId, null, schema, files, originalFileName, integrationVO,
-                                replace, delimiter, multipartFileMimeType);
+                                replace, delimiter, multipartFileMimeType,jobId);
                     } else {
                         releaseLockAndDeleteImportFileDirectory(datasetId);
                         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
@@ -961,6 +979,8 @@ public class FileTreatmentHelper implements DisposableBean {
                         throw new EEAException("Empty zip file");
                     }
                 } else {
+
+                    //Fme -External Integrations Case
 
                     File file = new File(folder, originalFileName);
                     File fileStore = new File(fileStoreRoot, originalFileName);
@@ -999,7 +1019,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
                     // Queue import task for the stored file
                     queueImportProcess(datasetId,processId, tableSchemaId, schema, files, originalFileName, integrationVO,
-                            replace, delimiter, multipartFileMimeType);
+                            replace, delimiter, multipartFileMimeType,jobId);
 
                     LOG.info("Queued import process for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
                 }
@@ -1100,11 +1120,11 @@ public class FileTreatmentHelper implements DisposableBean {
          */
         private void queueImportProcess(Long datasetId,String processId, String tableSchemaId, DataSetSchema schema,
                                         List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
-                                        String delimiter, String mimeType) throws IOException, EEAException {
+                                        String delimiter, String mimeType,Long jobId) throws IOException, EEAException {
             LOG.info("Queueing import process for datasetId {} tableSchemaId {} and file {}", datasetId, tableSchemaId, originalFileName);
             if (null != integrationVO) {
                 prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
-                        replace);
+                        replace,jobId);
             } else {
                 importExecutorService.submit(() -> {
                     try {
@@ -1142,7 +1162,7 @@ public class FileTreatmentHelper implements DisposableBean {
          * @throws EEAException the EEA exception
          */
         private void prepareFmeFileProcess (Long datasetId, File file, IntegrationVO integrationVO,
-                String mimeType, String tableSchemaId,boolean replace) throws IOException, EEAException {
+                String mimeType, String tableSchemaId,boolean replace, Long jobId) throws IOException, EEAException {
 
             LOG.info("Start FME-Import process: datasetId={}, integrationVO={}", datasetId, integrationVO);
             Map<String, String> internalParameters = integrationVO.getInternalParameters();
@@ -1166,13 +1186,14 @@ public class FileTreatmentHelper implements DisposableBean {
 
             // delete precious data if necessary
             if (replace) {
-                wipeDataAsync(datasetId, tableSchemaId, file, integrationVO);
+                wipeDataAsync(datasetId, tableSchemaId, file, integrationVO, jobId);
                 LOG.info("Data has been wiped for datasetId {}", datasetId);
             } else {
                 Map<String, Object> valuesFME = new HashMap<>();
                 valuesFME.put("datasetId", datasetId);
                 valuesFME.put("fileName", file);
                 valuesFME.put("integrationId", integrationVO.getId());
+                valuesFME.put("jobId", jobId);
                 kafkaSenderUtils.releaseKafkaEvent(EventType.CONTINUE_FME_PROCESS_EVENT, valuesFME);
             }
         }
@@ -1253,14 +1274,13 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Finished import process for datasetId {} and file {}", datasetId, originalFileName);
 
         }
-        private void rn3FileProcessIntoTasks (Long datasetId, String processId, String tableSchemaId, DataSetSchema
-        datasetSchema,
-                List < File > files, String originalFileName,boolean replace, String delimiter)
-          throws InterruptedException {
-            LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
+        private void rn3FileProcessIntoTasks (Long datasetId, String processId, String tableSchemaId,
+                                              DataSetSchema datasetSchema, List <File> files, String originalFileName, boolean replace, String delimiter) throws InterruptedException {
+            LOG.info("Start RN3-Import segmentation process: datasetId={}, files={}", datasetId, files);
 
             // delete precious data if necessary
             wipeData(datasetId, tableSchemaId, replace);
+            LOG.info("Data has been wiped during rn3FileProcessIntoTasks datasetId {}, files {}", datasetId, files);
 
             // Wait a second before continue to avoid duplicated insertions
             Thread.sleep(1000);
@@ -1549,10 +1569,11 @@ public class FileTreatmentHelper implements DisposableBean {
          * @param tableSchemaId the table schema id
          * @param file the file
          * @param integrationVO the integration VO
+         * @param jobId the job id
          */
         @Async
         private void wipeDataAsync (Long datasetId, String tableSchemaId, File file,
-                IntegrationVO integrationVO){
+                IntegrationVO integrationVO, Long jobId){
             if (null != tableSchemaId) {
                 datasetService.deleteTableBySchema(tableSchemaId, datasetId);
             } else {
@@ -1563,6 +1584,7 @@ public class FileTreatmentHelper implements DisposableBean {
             valuesFME.put("datasetId", datasetId);
             valuesFME.put("fileName", file);
             valuesFME.put("integrationId", integrationVO.getId());
+            valuesFME.put("jobId", jobId);
             kafkaSenderUtils.releaseKafkaEvent(EventType.CONTINUE_FME_PROCESS_EVENT, valuesFME);
         }
 
@@ -1598,8 +1620,7 @@ public class FileTreatmentHelper implements DisposableBean {
          * @throws IOException Signals that an I/O exception has occurred.
          */
         private void processFile (@DatasetId Long datasetId, String fileName, InputStream is,
-                String idTableSchema,boolean replace, DataSetSchema schema, String delimiter)
-      throws EEAException, IOException {
+                String idTableSchema,boolean replace, DataSetSchema schema, String delimiter) throws EEAException, IOException {
             // obtains the file type from the extension
             if (fileName == null) {
                 throw new EEAException(EEAErrorMessage.FILE_NAME);

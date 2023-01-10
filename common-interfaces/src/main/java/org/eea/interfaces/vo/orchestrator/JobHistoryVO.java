@@ -55,4 +55,6 @@ public class JobHistoryVO {
 
     /** The dataset id */
     private Long datasetId;
+
+    private String fmeJobId;
 }

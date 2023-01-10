@@ -129,7 +129,7 @@ public class CheckBlockersDataSnapshotCommandTest {
             datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
         .thenReturn(datasetsId);
     Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.QUEUED);
-    JobVO jobVO = new JobVO(Long.valueOf(1), JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "test", true, 1L, 1L, 1L);
+    JobVO jobVO = new JobVO(Long.valueOf(1), JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "test", true, 1L, 1L, 1L, null);
     Mockito.when(jobControllerZuul.save(any(JobVO.class))).thenReturn(jobVO);
     Mockito.doNothing().when(jobHistoryControllerZuul).save(any(JobVO.class));
     Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(false);
@@ -170,7 +170,7 @@ public class CheckBlockersDataSnapshotCommandTest {
             datasetMetabase.getDataflowId(), datasetMetabase.getDataProviderId()))
         .thenReturn(datasetsId);
     Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.QUEUED);
-    JobVO jobVO = new JobVO(Long.valueOf(1), JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "test", true, 1L, 1L, 1L);
+    JobVO jobVO = new JobVO(Long.valueOf(1), JobTypeEnum.RELEASE, JobStatusEnum.QUEUED, new Timestamp(System.currentTimeMillis()), new Timestamp(System.currentTimeMillis()), null, "test", true, 1L, 1L, 1L, null);
     Mockito.when(jobControllerZuul.save(any(JobVO.class))).thenReturn(jobVO);
     Mockito.when(validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)).thenReturn(true);
     checkBlockersDataSnapshotCommand.execute(eeaEventVO);

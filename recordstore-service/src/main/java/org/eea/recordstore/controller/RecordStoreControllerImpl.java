@@ -658,4 +658,26 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     });
     return processTaskVOS;
   }
+
+  /**
+   * Creates the update query view.
+   *
+   * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
+   */
+  @PutMapping("/createUpdateQueryView")
+  @PreAuthorize("isAuthenticated()")
+  @ApiOperation(value = "Creates or updates a View", hidden = true)
+  public void createUpdateView(
+      @ApiParam(value = "Dataset Id", example = "0") @RequestParam("datasetId") Long datasetId,
+      @ApiParam(value = "Is the schema going to be materialized?",
+          example = "true") @RequestParam("isMaterialized") boolean isMaterialized) {
+    try {
+      LOG.info("Update query view for datasetId {}", datasetId);
+      recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating update query view for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
+  }
 }

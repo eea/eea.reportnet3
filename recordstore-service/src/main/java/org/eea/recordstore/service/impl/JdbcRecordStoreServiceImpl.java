@@ -1821,29 +1821,44 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private void updateJobStatusToFinished(Long jobId) {
     if (jobId!=null) {
       List<String> processes = jobProcessControllerZuul.findProcessesByJobId(jobId);
-      Long datasetId = processService.getByProcessId(processes.get(0)).getDatasetId();
+      ProcessVO process = processService.getByProcessId(processes.get(0));
+      Long datasetId = process.getDatasetId();
       DataSetMetabaseVO dataSetMetabase = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-      List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(dataSetMetabase.getDataflowId(), dataSetMetabase.getDataProviderId());
       LOG.info("Method updateJobStatusToFinished with jobId: {} and processes: {}", jobId, processes);
 
-      boolean release = true;
-      if (processes.size()==datasetIds.size()) {
-        for (String id : processes) {
-          ProcessVO processVO = processService.getByProcessId(id);
-          if (!processVO.getStatus().equals(ProcessStatusEnum.FINISHED.toString())) {
-            release = false;
-            break;
-          }
+      boolean finished = true;
+      if (process.getProcessType().equals(ProcessTypeEnum.RELEASE.toString())) {
+        List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(dataSetMetabase.getDataflowId(), dataSetMetabase.getDataProviderId());
+        if (processes.size()==datasetIds.size()) {
+          finished = isFinished(processes, finished);
+        } else {
+          finished = false;
         }
-      } else {
-        release = false;
+      } else if (process.getProcessType().equals(ProcessTypeEnum.COPY_TO_EU_DATASET.toString())) {
+        List<EUDatasetVO> euDatasets = euDatasetControllerZuul.findEUDatasetByDataflowId(dataSetMetabase.getDataflowId());
+        if (processes.size()==euDatasets.size()) {
+          finished = isFinished(processes, finished);
+        } else {
+          finished = false;
+        }
       }
 
-      if (release) {
+      if (finished) {
         jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
         LOG.info("Method updateJobStatusToFinished updated jobId: {} with status {}", jobId, JobStatusEnum.FINISHED);
       }
     }
+  }
+
+  private boolean isFinished(List<String> processes, boolean release) {
+    for (String id : processes) {
+      ProcessVO processVO = processService.getByProcessId(id);
+      if (!processVO.getStatus().equals(ProcessStatusEnum.FINISHED.toString())) {
+        release = false;
+        break;
+      }
+    }
+    return release;
   }
 
   /**

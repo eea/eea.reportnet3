@@ -42,7 +42,7 @@ public class CSVSegmentedReaderStrategy {
     /**
      * The Constant LOG.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CSVSegmentedReaderStrategy.class);
 
     /**
      * The delimiter.

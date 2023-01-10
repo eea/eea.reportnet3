@@ -121,7 +121,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release) {
         Timestamp ts = new Timestamp(System.currentTimeMillis());
-        Job job = new Job(null, jobType, jobStatus, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), release, dataflowId, dataProviderId, datasetId);
+        Job job = new Job(null, jobType, jobStatus, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), release, dataflowId, dataProviderId, datasetId,null);
         job = jobRepository.save(job);
         jobHistoryService.saveJobHistory(job);
         return job.getId();
@@ -301,6 +301,28 @@ public class JobServiceImpl implements JobService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public JobVO findByFmeJobId(String fmeJobId) {
+        Optional<Job> job = jobRepository.findJobByFmeJobId(fmeJobId);
+        if (job.isPresent()){
+            return jobMapper.entityToClass(job.get());
+        }
+        return null;
+    }
+
+    @Override
+    public void updateFmeJobId(Long jobId, String fmeJobId) {
+        Optional<Job> job = jobRepository.findById(jobId);
+        if(job.isPresent()){
+            job.get().setFmeJobId(fmeJobId);
+            jobRepository.save(job.get());
+            jobHistoryService.saveJobHistory(job.get());
+        }
+        else{
+            LOG.info("Could not update fmeJobId for jobId {} because the id does not exist", jobId);
+        }
     }
 
 }

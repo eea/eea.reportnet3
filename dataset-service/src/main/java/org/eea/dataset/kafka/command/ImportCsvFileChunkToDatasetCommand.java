@@ -21,6 +21,7 @@ import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -62,8 +63,11 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
   //@Value("${dataset.import.batchRecordSave}")
   private int batchRecordSave=2500;
 
-//  @Value("${loadDataDelimiter}")
-private char loadDataDelimiter=',';
+  /**
+   * The delimiter.
+   */
+  @Value("${loadDataDelimiter}")
+  private char loadDataDelimiter;
 
 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -102,7 +106,7 @@ private char loadDataDelimiter=',';
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     DataSetSchema dataSetSchema =  mapper.convertValue(eeaEventVO.getData().get("DataSetSchema"), new TypeReference<DataSetSchema>() { });
     String idTableSchema = String.valueOf(eeaEventVO.getData().get("idTableSchema"));
-    String delimiter = String.valueOf(eeaEventVO.getData().get("delimiter"));
+    String delimiter = (eeaEventVO.getData().get("delimiter") != null) ? String.valueOf(eeaEventVO.getData().get("delimiter")) : null;
     Long startLine = Long.parseLong((String) eeaEventVO.getData().get("startLine"));
     Long endLine = Long.parseLong((String) eeaEventVO.getData().get("endLine"));
     Long partitionId = Long.parseLong((String) eeaEventVO.getData().get("partitionId"));
@@ -116,7 +120,7 @@ private char loadDataDelimiter=',';
       }
       DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
-      fileTreatmentHelper.reinitializeCsvSegmentedReaderStrategy(delimiter != null ? delimiter.charAt(0) : loadDataDelimiter,fileCommon,datasetId,fieldMaxLength,provider.getCode(),batchRecordSave);
+      fileTreatmentHelper.reinitializeCsvSegmentedReaderStrategy(delimiter != null ? delimiter.charAt(0) : loadDataDelimiter, fileCommon, datasetId, fieldMaxLength, provider.getCode(), batchRecordSave);
       fileTreatmentHelper.importCsvFileChunk(datasetId,  fileName, inputStream,partitionId,
                idTableSchema,  replacebool,  dataSetSchema,  delimiter, startLine, endLine);
       if(task.isPresent()){
@@ -125,7 +129,7 @@ private char loadDataDelimiter=',';
         taskRepository.save(task.get());
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Error Executing:"+ImportCsvFileChunkToDatasetCommand.class.getName() +" \n"+e.getMessage());
+      LOG_ERROR.error("Error Executing: "+ImportCsvFileChunkToDatasetCommand.class.getName() +" \n"+e.getMessage());
       if(task.isPresent()){
         task.get().setStatus(ProcessStatusEnum.CANCELED);
         taskRepository.save(task.get());
