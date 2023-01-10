@@ -633,7 +633,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param isMaterialized the is materialized
    */
   @PutMapping("/createUpdateQueryView")
-  @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Creates or updates a View", hidden = true)
   public void createUpdateView(
