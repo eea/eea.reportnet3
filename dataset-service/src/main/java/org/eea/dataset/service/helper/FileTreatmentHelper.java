@@ -336,12 +336,30 @@ public class FileTreatmentHelper implements DisposableBean {
                                boolean replace, Long integrationId, String delimiter, Long jobId) throws EEAException {
 
         if (delimiter != null && delimiter.length() > 1) {
-            LOG_ERROR.error("Error when importing file data for datasetId {} and tableSchemaId {}. ReplaceData is {}. The size of the delimiter cannot be greater than 1", datasetId, tableSchemaId, replace);
+            LOG.error("Error when importing file data for datasetId {} and tableSchemaId {}. ReplaceData is {}. The size of the delimiter cannot be greater than 1", datasetId, tableSchemaId, replace);
             datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                     DatasetRunningStatusEnum.ERROR_IN_IMPORT);
             throw new EEAException("The size of the delimiter cannot be greater than 1");
         }
-        String processUUID = UUID.randomUUID().toString();
+
+        //if there is already a process created for the import then it should be updated instead of creating a new one
+        String processUUID = null;
+        Boolean processExists = false;
+        if(jobId != null){
+            List<String> processIds = jobProcessControllerZuul.findProcessesByJobId(jobId);
+            if(processIds != null && processIds.size() > 0){
+                processUUID = processIds.get(0);
+                processExists = true;
+                LOG.info("Process with id {} already exists for import job {}", processUUID, jobId);
+            }
+            else{
+                processUUID = UUID.randomUUID().toString();
+            }
+        }
+        else{
+            processUUID = UUID.randomUUID().toString();
+        }
+
         Boolean defaultReleaseStatusToBeChanged = null;
 
         DataSetSchema schema = datasetService.getSchemaIfReportable(datasetId, tableSchemaId);
@@ -349,7 +367,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.IMPORT, processUUID,
                 SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, defaultReleaseStatusToBeChanged);
 
-        if(jobId != null){
+        if(jobId != null && !processExists){
             JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
             jobProcessControllerZuul.save(jobProcessVO);
         }
@@ -365,7 +383,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     LockSignature.IMPORT_BIG_FILE_DATA.getValue());
             importBigFileData.put(LiteralConstants.DATASETID, datasetId);
             lockService.removeLockByCriteria(importBigFileData);
-            LOG_ERROR.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}",
+            LOG.error("Dataset not reportable: datasetId={}, tableSchemaId={}, fileName={}",
                     datasetId, tableSchemaId, file.getOriginalFilename());
             throw new EEAException(
                     "Dataset not reportable: datasetId=" + datasetId + ", tableSchemaId=" + tableSchemaId);
