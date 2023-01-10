@@ -1256,14 +1256,13 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Finished import process for datasetId {} and file {}", datasetId, originalFileName);
 
         }
-        private void rn3FileProcessIntoTasks (Long datasetId, String processId, String tableSchemaId, DataSetSchema
-        datasetSchema,
-                List < File > files, String originalFileName,boolean replace, String delimiter)
-          throws InterruptedException {
-            LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
+        private void rn3FileProcessIntoTasks (Long datasetId, String processId, String tableSchemaId,
+                                              DataSetSchema datasetSchema, List <File> files, String originalFileName, boolean replace, String delimiter) throws InterruptedException {
+            LOG.info("Start RN3-Import segmentation process: datasetId={}, files={}", datasetId, files);
 
             // delete precious data if necessary
             wipeData(datasetId, tableSchemaId, replace);
+            LOG.info("Data has been wiped during rn3FileProcessIntoTasks datasetId {}, files {}", datasetId, files);
 
             // Wait a second before continue to avoid duplicated insertions
             Thread.sleep(1000);
@@ -1601,8 +1600,7 @@ public class FileTreatmentHelper implements DisposableBean {
          * @throws IOException Signals that an I/O exception has occurred.
          */
         private void processFile (@DatasetId Long datasetId, String fileName, InputStream is,
-                String idTableSchema,boolean replace, DataSetSchema schema, String delimiter)
-      throws EEAException, IOException {
+                String idTableSchema,boolean replace, DataSetSchema schema, String delimiter) throws EEAException, IOException {
             // obtains the file type from the extension
             if (fileName == null) {
                 throw new EEAException(EEAErrorMessage.FILE_NAME);

@@ -21,6 +21,7 @@ import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -62,8 +63,11 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
   //@Value("${dataset.import.batchRecordSave}")
   private int batchRecordSave=2500;
 
-//  @Value("${loadDataDelimiter}")
-private char loadDataDelimiter=',';
+  /**
+   * The delimiter.
+   */
+  @Value("${loadDataDelimiter}")
+  private char loadDataDelimiter;
 
 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -116,7 +120,7 @@ private char loadDataDelimiter=',';
       }
       DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
 
-      fileTreatmentHelper.reinitializeCsvSegmentedReaderStrategy(delimiter != null ? delimiter.charAt(0) : loadDataDelimiter,fileCommon,datasetId,fieldMaxLength,provider.getCode(),batchRecordSave);
+      fileTreatmentHelper.reinitializeCsvSegmentedReaderStrategy(delimiter != null ? delimiter.charAt(0) : loadDataDelimiter, fileCommon, datasetId, fieldMaxLength, provider.getCode(), batchRecordSave);
       fileTreatmentHelper.importCsvFileChunk(datasetId,  fileName, inputStream,partitionId,
                idTableSchema,  replacebool,  dataSetSchema,  delimiter, startLine, endLine);
       if(task.isPresent()){
