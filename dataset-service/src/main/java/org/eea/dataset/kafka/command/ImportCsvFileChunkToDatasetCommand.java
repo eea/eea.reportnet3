@@ -66,8 +66,8 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
   /**
    * The delimiter.
    */
-  @Value("${loadDataDelimiter}")
-  private char loadDataDelimiter;
+  //@Value("${loadDataDelimiter}")
+  private char loadDataDelimiter = '|';
 
 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -129,7 +129,7 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
         taskRepository.save(task.get());
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Error Executing:"+ImportCsvFileChunkToDatasetCommand.class.getName() +" \n"+e.getMessage());
+      LOG_ERROR.error("Error Executing: "+ImportCsvFileChunkToDatasetCommand.class.getName() +" \n"+e.getMessage());
       if(task.isPresent()){
         task.get().setStatus(ProcessStatusEnum.CANCELED);
         taskRepository.save(task.get());
