@@ -66,8 +66,8 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
   /**
    * The delimiter.
    */
-  //@Value("${loadDataDelimiter}")
-  private char loadDataDelimiter = '|';
+  @Value("${loadDataDelimiter}")
+  private char loadDataDelimiter;
 
 
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");

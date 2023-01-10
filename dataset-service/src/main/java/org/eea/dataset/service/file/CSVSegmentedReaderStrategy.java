@@ -167,8 +167,6 @@ public class CSVSegmentedReaderStrategy {
             // if first line is empty throw an error
             lineEmpty(firstLine);
 
-            LOG.info("Importing csv - for datasetId {} tableSchemaId {} First line is {} and delimiter is {}", datasetId, idTableSchema, firstLine, delimiter);
-
             // Get the headers
             List<FieldSchema> headers = setHeaders(firstLine, idTableSchema, dataSetSchema);
             String idRecordSchema = fileCommon.findIdRecord(idTableSchema, dataSetSchema);
