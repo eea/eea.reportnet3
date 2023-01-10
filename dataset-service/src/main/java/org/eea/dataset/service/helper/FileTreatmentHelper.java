@@ -387,7 +387,7 @@ public class FileTreatmentHelper implements DisposableBean {
         // delete the temporary table from etlExport
         datasetService.deleteTempEtlExport(datasetId);
 
-        fileManagement(datasetId, dataflowId, processUUID, defaultReleaseStatusToBeChanged, tableSchemaId, schema, file, replace, integrationId, delimiter);
+        fileManagement(datasetId, dataflowId, processUUID, defaultReleaseStatusToBeChanged, tableSchemaId, schema, file, replace, integrationId, delimiter,jobId);
     }
 
     /**
@@ -889,7 +889,7 @@ public class FileTreatmentHelper implements DisposableBean {
      * @throws EEAException the EEA exception
      */
     private void fileManagement(Long datasetId, Long dataflowId, String processId, Boolean released, String tableSchemaId, DataSetSchema schema,
-                                MultipartFile multipartFile, boolean replace, Long integrationId, String delimiter)
+                                MultipartFile multipartFile, boolean replace, Long integrationId, String delimiter,Long jobId)
             throws EEAException {
         if (processControllerZuul.updateProcess(datasetId, dataflowId,
                 ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.IMPORT, processId,
@@ -951,7 +951,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     // Queue import tasks for stored files
                     if (!files.isEmpty()) {
                         queueImportProcess(datasetId,processId, null, schema, files, originalFileName, integrationVO,
-                                replace, delimiter, multipartFileMimeType);
+                                replace, delimiter, multipartFileMimeType,jobId);
                     } else {
                         releaseLockAndDeleteImportFileDirectory(datasetId);
                         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
@@ -961,6 +961,8 @@ public class FileTreatmentHelper implements DisposableBean {
                         throw new EEAException("Empty zip file");
                     }
                 } else {
+
+                    //Fme -External Integrations Case
 
                     File file = new File(folder, originalFileName);
                     File fileStore = new File(fileStoreRoot, originalFileName);
@@ -999,7 +1001,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
                     // Queue import task for the stored file
                     queueImportProcess(datasetId,processId, tableSchemaId, schema, files, originalFileName, integrationVO,
-                            replace, delimiter, multipartFileMimeType);
+                            replace, delimiter, multipartFileMimeType,jobId);
 
                     LOG.info("Queued import process for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
                 }
@@ -1100,11 +1102,11 @@ public class FileTreatmentHelper implements DisposableBean {
          */
         private void queueImportProcess(Long datasetId,String processId, String tableSchemaId, DataSetSchema schema,
                                         List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
-                                        String delimiter, String mimeType) throws IOException, EEAException {
+                                        String delimiter, String mimeType,Long jobId) throws IOException, EEAException {
             LOG.info("Queueing import process for datasetId {} tableSchemaId {} and file {}", datasetId, tableSchemaId, originalFileName);
             if (null != integrationVO) {
                 prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
-                        replace);
+                        replace,jobId);
             } else {
                 importExecutorService.submit(() -> {
                     try {
@@ -1142,7 +1144,7 @@ public class FileTreatmentHelper implements DisposableBean {
          * @throws EEAException the EEA exception
          */
         private void prepareFmeFileProcess (Long datasetId, File file, IntegrationVO integrationVO,
-                String mimeType, String tableSchemaId,boolean replace) throws IOException, EEAException {
+                String mimeType, String tableSchemaId,boolean replace,Long jobId) throws IOException, EEAException {
 
             LOG.info("Start FME-Import process: datasetId={}, integrationVO={}", datasetId, integrationVO);
             Map<String, String> internalParameters = integrationVO.getInternalParameters();
@@ -1173,6 +1175,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 valuesFME.put("datasetId", datasetId);
                 valuesFME.put("fileName", file);
                 valuesFME.put("integrationId", integrationVO.getId());
+                valuesFME.put("jobId", jobId);
                 kafkaSenderUtils.releaseKafkaEvent(EventType.CONTINUE_FME_PROCESS_EVENT, valuesFME);
             }
         }

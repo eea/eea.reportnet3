@@ -32,6 +32,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -265,14 +266,24 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
           value = "integrationId", required = false) Long integrationId,
       @ApiParam(type = "String", value = "File delimiter",
-          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
+          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+      @ApiParam(type = "String", value = "Fme Job Id",
+              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
 
     Long jobId = null;
     try {
       if (dataflowId == null){
         dataflowId = datasetService.getDataFlowIdById(datasetId);
       }
-      jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter);
+
+      if(fmeJobId!=null){
+        JobVO job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+        jobId = job.getId();
+        LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {}", fmeJobId, jobId);
+      }else{
+        jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter);
+      }
+
       LOG.info("Importing big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
       fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId, delimiter, jobId);
       LOG.info("Successfully imported big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
@@ -401,9 +412,11 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
           value = "integrationId", required = false) Long integrationId,
       @ApiParam(type = "String", value = "File delimiter",
-          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
-    this.importFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
-        integrationId, delimiter);
+          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+      @ApiParam(type = "String", value = "Fme Job Id",
+              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+    this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
+        integrationId, delimiter, fmeJobId);
   }
 
   /**

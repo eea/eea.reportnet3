@@ -266,6 +266,11 @@ public class JobControllerImpl implements JobController {
         }
     }
 
+    @PostMapping(value = "/updateFmeJobId/{jobId}/{fmeJobId}")
+    public void updateFmeJobId(@PathVariable("jobId") Long jobId, @PathVariable("fmeJobId") String fmeJobId) {
+        jobService.updateFmeJobId(jobId,fmeJobId);
+    }
+
     /**
      * Saves job
      * @param jobVO
@@ -300,6 +305,11 @@ public class JobControllerImpl implements JobController {
     @GetMapping(value = "/findJobById/{jobId}")
     public JobVO findJobById(@PathVariable("jobId") Long jobId) {
         return jobService.findById(jobId);
+    }
+
+    @GetMapping(value = "/findJobByFmeJobId/{fmeJobId}")
+    public JobVO findJobByFmeJobId(String fmeJobId) {
+        return jobService.findByFmeJobId(fmeJobId);
     }
 }
 
