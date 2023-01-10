@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataflow.integration.ExecutionResultVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.domain.EEAEventVO;
@@ -46,6 +47,9 @@ public class ReplacingDataPreviousCallFMECommandTest {
   private LockService lockService;
 
   @Mock
+  private JobControllerZuul jobControllerZuul;
+
+  @Mock
   File mockFile;
 
 
@@ -73,6 +77,7 @@ public class ReplacingDataPreviousCallFMECommandTest {
     data.put("datasetId", 1L);
     data.put("integrationId", 1L);
     data.put("fileName", "test.csv");
+    data.put("jobId", 1L);
     eeaEventVO.setData(data);
 
     authentication = Mockito.mock(Authentication.class);
