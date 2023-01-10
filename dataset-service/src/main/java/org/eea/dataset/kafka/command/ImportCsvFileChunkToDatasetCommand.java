@@ -106,7 +106,7 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     DataSetSchema dataSetSchema =  mapper.convertValue(eeaEventVO.getData().get("DataSetSchema"), new TypeReference<DataSetSchema>() { });
     String idTableSchema = String.valueOf(eeaEventVO.getData().get("idTableSchema"));
-    String delimiter = String.valueOf(eeaEventVO.getData().get("delimiter"));
+    String delimiter = (eeaEventVO.getData().get("delimiter") != null) ? String.valueOf(eeaEventVO.getData().get("delimiter")) : null;
     Long startLine = Long.parseLong((String) eeaEventVO.getData().get("startLine"));
     Long endLine = Long.parseLong((String) eeaEventVO.getData().get("endLine"));
     Long partitionId = Long.parseLong((String) eeaEventVO.getData().get("partitionId"));
