@@ -91,6 +91,27 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     }
   };
 
+  const getJobHistory = async jobId => {
+    setLoadingStatus('pending');
+
+    try {
+      const data = await JobsStatusesService.getJobHistory(jobId);
+
+      for (let d of data) {
+        console.log('getJobHistory data: ' + d.id);
+      }
+
+      setLoadingStatus('success');
+    } catch (error) {
+      console.error('JobsStatus - getJobHistory.', error);
+      setLoadingStatus('error');
+      notificationContext.add({ type: 'GET_JOBS_STATUSES_ERROR' }, true);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
   const onSort = event => setSort({ field: event.sortField, order: event.sortOrder });
 
   const filterOptions = [
@@ -271,12 +292,16 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const getDatasetIdTemplate = job => <p>{job.datasetId}</p>;
 
   const rowExpansionTemplate = data => {
+    console.log('data.id is: ' + data.id);
+    console.log('expandedRows is: ' + expandedRows);
+    // getJobHistory(data.id);
+
     return (
       <div className={styles.expandedTable}>
-        <h6>Job history</h6>
+        <h6>Job history for job {data.id} </h6>
         <DataTable responsiveLayout="scroll" value={data}>
-          <Column field="id" header={resourcesContext.messages['jobId']}></Column>
-          <Column field="jobStatus" header={resourcesContext.messages['jobStatus']}></Column>
+          {/* <Column field="id" header={resourcesContext.messages['jobId']}></Column> */}
+          <Column field="jobStatus" header={resourcesContext.messages['jobStatus']} body={data.id}></Column>
           <Column
             field="dateStatusChanged"
             header={resourcesContext.messages['dateStatusChanged']}
@@ -368,6 +393,11 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           }
           onRowToggle={e => {
             setExpandedRows(e.data);
+            for (let d of e.data) {
+              getJobHistory(d.id);
+              console.log('e.data: ' + d.id);
+            }
+            // console.log('e.data: ' + e.data.id);
           }}
           onSort={onSort}
           paginator={true}

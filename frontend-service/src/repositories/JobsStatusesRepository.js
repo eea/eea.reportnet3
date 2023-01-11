@@ -30,5 +30,12 @@ export const JobsStatusesRepository = {
         creatorUsername,
         jobStatus
       })
+    }),
+
+  getJobHistory: async jobId =>
+    await HTTPRequester.get({
+      url: getUrl(JobsStatusesConfig.getJobHistory, {
+        jobId
+      })
     })
 };

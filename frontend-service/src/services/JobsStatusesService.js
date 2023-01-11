@@ -34,5 +34,11 @@ export const JobsStatusesService = {
     });
 
     return response.data;
+  },
+
+  getJobHistory: async jobId => {
+    const response = await JobsStatusesRepository.getJobHistory(jobId);
+
+    return response.data;
   }
 };
