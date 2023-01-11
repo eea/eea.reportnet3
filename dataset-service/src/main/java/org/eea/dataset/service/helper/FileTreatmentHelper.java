@@ -886,11 +886,13 @@ public class FileTreatmentHelper implements DisposableBean {
                     LockSignature.IMPORT_BIG_FILE_DATA.getValue());
             importBigFileData.put(LiteralConstants.DATASETID, datasetId);
             lockService.removeLockByCriteria(importBigFileData);
-            FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
-
+            File toBeDeleted = new File(importPath, datasetId.toString());
+            if(toBeDeleted.exists()){
+                FileUtils.deleteDirectory(toBeDeleted);
+            }
             releaseLockReleasingProcess(datasetId);
         } catch (IOException e) {
-            LOG_ERROR.error("Error deleting files: datasetId={}", datasetId, e);
+            LOG.error("Error deleting files: datasetId={}", datasetId, e);
         }
     }
 
@@ -920,7 +922,7 @@ public class FileTreatmentHelper implements DisposableBean {
             } else {
                 integrationVO = getIntegrationVO(integrationId);
                 if (null == integrationVO) {
-                    LOG_ERROR.error("Error. Integration {} not found", integrationId);
+                    LOG.error("Error. Integration {} not found for datasetId {} dataflowId {} and processId {}", integrationId, datasetId, dataflowId, processId);
                 }
             }
 
@@ -929,7 +931,7 @@ public class FileTreatmentHelper implements DisposableBean {
             } else {
                 integrationVO = getIntegrationVO(integrationId);
                 if (null == integrationVO) {
-                    LOG_ERROR.error("Error in fileManagement. Integration {} not found. datasetId: {} and tableSchemaId: {}", integrationId, datasetId, tableSchemaId);
+                    LOG.error("Error in fileManagement. Integration {} not found. datasetId: {} and tableSchemaId: {} and processId {}", integrationId, datasetId, tableSchemaId, processId);
                 }
             }
 
@@ -974,7 +976,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         releaseLockAndDeleteImportFileDirectory(datasetId);
                         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                                 DatasetRunningStatusEnum.ERROR_IN_IMPORT);
-                        LOG_ERROR.error("Error trying to import a zip file into datasetId {} and tableSchemaId: {}. Empty zip file",
+                        LOG.error("Error trying to import a zip file into datasetId {} and tableSchemaId: {}. Empty zip file",
                                 datasetId, tableSchemaId);
                         throw new EEAException("Empty zip file");
                     }
