@@ -1093,7 +1093,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 while ((len = in.read(buf)) > 0) {
                   out.write(buf, 0, len);
                 }
-
+                in.close();
                 entry = zip.getNextEntry();
                 files.add(file);
             }
