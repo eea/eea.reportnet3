@@ -56,12 +56,12 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  //@Value("${dataset.fieldMaxLength}")
-  private int fieldMaxLength=10000;
+  @Value("${dataset.fieldMaxLength}")
+  private int fieldMaxLength;
 
   /** The batch record save. */
-  //@Value("${dataset.import.batchRecordSave}")
-  private int batchRecordSave=2500;
+  @Value("${dataset.import.batchRecordSave}")
+  private int batchRecordSave;
 
   /**
    * The delimiter.
