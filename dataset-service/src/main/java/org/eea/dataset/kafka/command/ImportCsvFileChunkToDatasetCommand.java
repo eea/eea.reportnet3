@@ -12,6 +12,7 @@ import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.CsvFileChunkRecoveryDetails;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
@@ -101,11 +102,25 @@ private char loadDataDelimiter=',';
     ObjectMapper mapper = new ObjectMapper();
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     DataSetSchema dataSetSchema =  mapper.convertValue(eeaEventVO.getData().get("DataSetSchema"), new TypeReference<DataSetSchema>() { });
+
+
+    CsvFileChunkRecoveryDetails csvFileChunkRecoveryDetails =  mapper.convertValue(eeaEventVO.getData().get("CsvFileChunkRecoveryDetails"), new TypeReference<CsvFileChunkRecoveryDetails>() { });
+
+    if(csvFileChunkRecoveryDetails==null){
+      //Initialize it once and pass it around as a reference, to store the records and fields temp files names and then save them to the Task
+      csvFileChunkRecoveryDetails = new CsvFileChunkRecoveryDetails();
+    }
+    if(task.isPresent()){
+      csvFileChunkRecoveryDetails.setTaskId(task.get().getId());
+    }
+
+
     String idTableSchema = String.valueOf(eeaEventVO.getData().get("idTableSchema"));
     String delimiter = String.valueOf(eeaEventVO.getData().get("delimiter"));
     Long startLine = Long.parseLong((String) eeaEventVO.getData().get("startLine"));
     Long endLine = Long.parseLong((String) eeaEventVO.getData().get("endLine"));
     Long partitionId = Long.parseLong((String) eeaEventVO.getData().get("partitionId"));
+    Boolean recoveryMode = true;
 
     try (InputStream inputStream = Files.newInputStream(Path.of(filePath))) {
       // Obtain the data provider code to insert into the record
@@ -118,10 +133,11 @@ private char loadDataDelimiter=',';
 
       fileTreatmentHelper.reinitializeCsvSegmentedReaderStrategy(delimiter != null ? delimiter.charAt(0) : loadDataDelimiter,fileCommon,datasetId,fieldMaxLength,provider.getCode(),batchRecordSave);
       fileTreatmentHelper.importCsvFileChunk(datasetId,  fileName, inputStream,partitionId,
-               idTableSchema,  replacebool,  dataSetSchema,  delimiter, startLine, endLine);
+               idTableSchema,  replacebool,  dataSetSchema,  delimiter, startLine, endLine, csvFileChunkRecoveryDetails);
       if(task.isPresent()){
         task.get().setStatus(ProcessStatusEnum.FINISHED);
         task.get().setFinishDate(new Date());
+
         taskRepository.save(task.get());
       }
     } catch (Exception e) {

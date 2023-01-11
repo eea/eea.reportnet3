@@ -12,6 +12,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.UUID;
+
+import lombok.Getter;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The Class PostgresBulkImporter.
  */
+@Getter
 public class PostgresBulkImporter implements Closeable {
 
   /** The Constant LOG. */
@@ -70,7 +73,21 @@ public class PostgresBulkImporter implements Closeable {
     outputStream = new FileOutputStream(temporaryFile);
     writeHeaders();
   }
-
+  public PostgresBulkImporter(ConnectionDataVO connectionDataVO, String schema, String tableName,
+                              String path,String existingFileName) throws IOException {
+    url = connectionDataVO.getConnectionString();
+    user = connectionDataVO.getUser();
+    password = connectionDataVO.getPassword();
+    this.schema = schema;
+    this.tableName = tableName;
+    if(existingFileName!=null) {
+      temporaryFile = new File(path, existingFileName);
+    }else{
+      temporaryFile = new File(path, UUID.randomUUID().toString() + ".bin");
+    }
+    outputStream = new FileOutputStream(temporaryFile);
+    writeHeaders();
+  }
   /**
    * Adds the tuple.
    *

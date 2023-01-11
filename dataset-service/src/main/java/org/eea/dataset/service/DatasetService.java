@@ -14,11 +14,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.model.TruncateDataset;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -572,7 +568,7 @@ public interface DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
-  void storeRecords(Long datasetId, List<RecordValue> recordList, ConnectionDataVO connectionDataVO)
+  void storeRecords(Long datasetId, List<RecordValue> recordList, ConnectionDataVO connectionDataVO, CsvFileChunkRecoveryDetails csvFileChunkRecoveryDetails)
       throws IOException, SQLException;
 
   /**
