@@ -141,7 +141,7 @@ public class PostgresBulkImporter implements Closeable {
   public void close() throws IOException {
     try {
       if (null != temporaryFile) {
-        Files.deleteIfExists(temporaryFile.toPath());
+      //  Files.deleteIfExists(temporaryFile.toPath());
       }
     } finally {
       if (null != outputStream) {

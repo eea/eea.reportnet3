@@ -3142,6 +3142,7 @@ public class DatasetServiceImpl implements DatasetService {
         eeaEventVO.getData().put("CsvFileChunkRecoveryDetails",csvFileChunkRecoveryDetails);
         task.get().setJson(objectMapper.writeValueAsString(eeaEventVO));
         taskRepository.save(task.get());
+        taskRepository.flush();
       }
       LOG.info("RN3-Import file: Temporary binary files IMPORTED for datasetId={}", datasetId);
     } catch (SQLException e) {

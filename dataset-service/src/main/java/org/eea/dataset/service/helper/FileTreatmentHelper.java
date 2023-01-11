@@ -868,10 +868,10 @@ public class FileTreatmentHelper implements DisposableBean {
                     LockSignature.IMPORT_BIG_FILE_DATA.getValue());
             importBigFileData.put(LiteralConstants.DATASETID, datasetId);
             lockService.removeLockByCriteria(importBigFileData);
-            FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
+          //  FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
 
             releaseLockReleasingProcess(datasetId);
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOG_ERROR.error("Error deleting files: datasetId={}", datasetId, e);
         }
     }
