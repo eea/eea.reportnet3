@@ -54,7 +54,7 @@ public class ImportFileTasksScheduler extends MessageReceiver {
 
   /** The delay. */
   //@Value("${validation.scheduled.consumer}")
-  private Long delay=10000l;
+  private Long delay=1000l;
 
   /** The max running tasks. */
   //@Value("${validation.tasks.parallelism}")
@@ -87,10 +87,7 @@ public class ImportFileTasksScheduler extends MessageReceiver {
   public void scheduledConsumer() {
     Long newDelay = delay;
     try {
-     int freeThreads = checkFreeThreads();
-      if (freeThreads > 0) {
         for (Task task : taskRepository.findAllByTaskTypeAndStatusOrderByIdAsc(TaskType.IMPORT_TASK,ProcessStatusEnum.IN_QUEUE)) {
-          if(freeThreads>0){
             try {
               task.setStartingDate(new Date());
               task.setPod(serviceInstanceId);
@@ -106,19 +103,15 @@ public class ImportFileTasksScheduler extends MessageReceiver {
               message.getPayload().getData().put("service_instance_id", serviceInstanceId);
 
               consumeMessage(message);
-              freeThreads=  checkFreeThreads();
             } catch (EEAException | JsonProcessingException e) {
               LOG.error("failed the import task schedule because of {} ", e);
             } catch (ObjectOptimisticLockingFailureException e) {
               newDelay = 1L;
               LOG.error(e.getMessage());
             }
-          }else{
-            break;
-          }
 
         }
-      }
+
 
     } finally {
       scheduler.schedule(() -> scheduledConsumer(), newDelay, TimeUnit.MILLISECONDS);

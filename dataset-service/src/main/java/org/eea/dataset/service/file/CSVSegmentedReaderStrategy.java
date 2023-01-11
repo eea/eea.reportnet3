@@ -205,7 +205,7 @@ public class CSVSegmentedReaderStrategy {
                     dataset, manageFixedRecords, connectionDataVO);
 
         } catch (final IOException | SQLException e) {
-            LOG_ERROR.error(e.getMessage());
+            LOG.error(e.getMessage());
             throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
         }
         LOG.info("Reading Csv File Completed in dataset {}", datasetId);
