@@ -88,6 +88,7 @@ public class PostgresBulkImporter implements Closeable {
       outputStream = new FileOutputStream(temporaryFile);
       writeHeaders();
     }else{
+      temporaryFile = new File(path, UUID.randomUUID().toString() + ".bin");
       outputStream = new FileOutputStream(temporaryFile);
       writeHeaders();
     }
