@@ -68,6 +68,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -87,6 +89,30 @@ import java.util.stream.Collectors;
  */
 @Service("datasetSnapshotService")
 public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
+
+  /**
+   * The connection url.
+   */
+  @Value("${spring.datasource.url}")
+  private String connectionUrl;
+
+  /**
+   * The connection username.
+   */
+  @Value("${spring.datasource.dataset.username}")
+  private String connectionUsername;
+
+  /**
+   * The connection password.
+   */
+  @Value("${spring.datasource.dataset.password}")
+  private String connectionPassword;
+
+  /**
+   * The connection driver.
+   */
+  @Value("${spring.datasource.driverClassName}")
+  private String connectionDriver;
 
   /**
    * The admin user.
@@ -117,6 +143,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
   /** The Constant FILE_PATTERN_NAME_INTEGRITY. */
   private static final String FILE_PATTERN_NAME_INTEGRITY = "integritySnapshot_%s-DesignDataset_%s";
+
+  /** Time out for deleting provider in seconds */
+  private static final int DELETE_PROVIDER_QUERY_TIME_OUT = 3600;
 
   /** The partition data set metabase repository. */
   @Autowired
@@ -588,7 +617,23 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     if (provider != null && idDataCollection != null) {
       TenantResolver
           .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataCollection));
-      deleteHelper.deleteRecordValuesByProvider(idDataCollection, provider.getCode(), processId);
+      try {
+        deleteHelper.deleteRecordValuesByProvider(idDataCollection, provider.getCode(), processId);
+      } catch (Exception e) {
+        LOG.info("Executing delete operation with custom query time out for datasetId {}, providerCode {}", idDataCollection, provider.getCode());
+        String datasetName = "dataset_" + idDataCollection;
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName(connectionDriver);
+        dataSource.setUrl(connectionUrl);
+        dataSource.setUsername(connectionUsername);
+        dataSource.setPassword(connectionPassword);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        jdbcTemplate.setQueryTimeout(DELETE_PROVIDER_QUERY_TIME_OUT);
+        StringBuilder deleteSql = new StringBuilder("delete from ");
+        deleteSql.append(datasetName).append(".record_value where data_provider_code = ?");
+        jdbcTemplate.update(deleteSql.toString(), provider.getCode());
+        LOG.info("Executed delete operation with custom query time out for datasetId {}, providerCode {}", idDataCollection, provider.getCode());
+      }
 
       // Restore data from snapshot
       try {
