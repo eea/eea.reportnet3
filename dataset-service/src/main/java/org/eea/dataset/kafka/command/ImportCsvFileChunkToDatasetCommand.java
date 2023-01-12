@@ -139,6 +139,11 @@ private char loadDataDelimiter=',';
         task.get().setStatus(ProcessStatusEnum.FINISHED);
         task.get().setFinishDate(new Date());
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        EEAEventVO eeaEventVOToUpdate = objectMapper.readValue(task.get().getJson(), EEAEventVO.class);
+        eeaEventVOToUpdate.getData().put("CsvFileChunkRecoveryDetails",csvFileChunkRecoveryDetails);
+        task.get().setJson(objectMapper.writeValueAsString(eeaEventVOToUpdate));
         taskRepository.save(task.get());
       }
     } catch (Exception e) {

@@ -3127,23 +3127,17 @@ public class DatasetServiceImpl implements DatasetService {
     // First time of importing a CSV batch, the details object will be empty But not NULL.
       // if its completely Null, do nothing
       if(csvFileChunkRecoveryDetails!=null) {
-        csvFileChunkRecoveryDetails.setRecordsBulkImporterTemporaryFile(recordsImporter.getTemporaryFile().getName());
-        csvFileChunkRecoveryDetails.setFieldsBulkImporterTemporaryFile(fieldsImporter.getTemporaryFile().getName());
+        if(csvFileChunkRecoveryDetails.getRecordsBulkImporterTemporaryFile()==null){
+          csvFileChunkRecoveryDetails.setRecordsBulkImporterTemporaryFile(recordsImporter.getTemporaryFile().getName());
+        }
+        if(csvFileChunkRecoveryDetails.getFieldsBulkImporterTemporaryFile()==null){
+          csvFileChunkRecoveryDetails.setFieldsBulkImporterTemporaryFile(fieldsImporter.getTemporaryFile().getName());
+        }
       }
       LOG.info("RN3-Import file: Temporary binary files CREATED for datasetId={}", datasetId);
       recordsImporter.copy();
       fieldsImporter.copy();
 
-      Optional<Task> task = taskRepository.findById(csvFileChunkRecoveryDetails.getTaskId());
-      if(task.isPresent()){
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        EEAEventVO eeaEventVO = objectMapper.readValue(task.get().getJson(), EEAEventVO.class);
-        eeaEventVO.getData().put("CsvFileChunkRecoveryDetails",csvFileChunkRecoveryDetails);
-        task.get().setJson(objectMapper.writeValueAsString(eeaEventVO));
-        taskRepository.save(task.get());
-        taskRepository.flush();
-      }
       LOG.info("RN3-Import file: Temporary binary files IMPORTED for datasetId={}", datasetId);
     } catch (SQLException e) {
       LOG_ERROR.error("Cannot save the records for dataset {}", datasetId, e);

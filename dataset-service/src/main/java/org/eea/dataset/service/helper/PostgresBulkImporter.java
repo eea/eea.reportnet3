@@ -48,7 +48,7 @@ public class PostgresBulkImporter implements Closeable {
   private final String tableName;
 
   /** The temporary file. */
-  private final File temporaryFile;
+  private  File temporaryFile;
 
   /** The output stream. */
   private OutputStream outputStream;
@@ -81,12 +81,17 @@ public class PostgresBulkImporter implements Closeable {
     this.schema = schema;
     this.tableName = tableName;
     if(existingFileName!=null) {
-      temporaryFile = new File(path, existingFileName);
+      temporaryFile = new File(path+existingFileName);
+      if(!temporaryFile.exists()){
+        temporaryFile = new File(path, UUID.randomUUID().toString() + ".bin");
+      }
+      outputStream = new FileOutputStream(temporaryFile);
+      writeHeaders();
     }else{
-      temporaryFile = new File(path, UUID.randomUUID().toString() + ".bin");
+      outputStream = new FileOutputStream(temporaryFile);
+      writeHeaders();
     }
-    outputStream = new FileOutputStream(temporaryFile);
-    writeHeaders();
+
   }
   /**
    * Adds the tuple.
