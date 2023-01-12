@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -81,7 +82,9 @@ public class PostgresBulkImporter implements Closeable {
     this.schema = schema;
     this.tableName = tableName;
     if(existingFileName!=null) {
-      temporaryFile = new File(path+existingFileName);
+      Path pathToFolder = Path.of(path);
+      Path pathToFile = pathToFolder.resolve(existingFileName);
+      temporaryFile = pathToFile.toFile();
       if(!temporaryFile.exists()){
         temporaryFile = new File(path, UUID.randomUUID().toString() + ".bin");
       }
