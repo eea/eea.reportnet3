@@ -1123,7 +1123,12 @@ public class FileTreatmentHelper implements DisposableBean {
         private void queueImportProcess(Long datasetId,String processId, String tableSchemaId, DataSetSchema schema,
                                         List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
                                         String delimiter, String mimeType,Long jobId) throws IOException, EEAException {
-            LOG.info("Queueing import process for datasetId {} tableSchemaId {} and file {}", datasetId, tableSchemaId, originalFileName);
+            int workingThreads =
+                ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) importExecutorService)
+                    .getDelegateExecutorService()).getActiveCount();
+            LOG.info("Queueing import process for datasetId {} tableSchemaId {} and file {}. Working import threads {}, Available import threads {}",
+                datasetId, tableSchemaId, originalFileName, workingThreads, maxRunningTasks - workingThreads);
+
             if (null != integrationVO) {
                 prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
                         replace,jobId);
