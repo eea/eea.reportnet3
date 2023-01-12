@@ -1,15 +1,5 @@
 package org.eea.dataset.service.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -17,46 +7,15 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.eea.dataset.mapper.DataSetMapper;
-import org.eea.dataset.mapper.FieldNoValidationMapper;
-import org.eea.dataset.mapper.FieldValidationMapper;
-import org.eea.dataset.mapper.RecordMapper;
-import org.eea.dataset.mapper.RecordNoValidationMapper;
-import org.eea.dataset.mapper.RecordValidationMapper;
-import org.eea.dataset.persistence.data.domain.AttachmentValue;
-import org.eea.dataset.persistence.data.domain.DatasetValue;
-import org.eea.dataset.persistence.data.domain.FieldValidation;
-import org.eea.dataset.persistence.data.domain.FieldValue;
-import org.eea.dataset.persistence.data.domain.RecordValidation;
-import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.data.domain.Validation;
-import org.eea.dataset.persistence.data.repository.AttachmentRepository;
-import org.eea.dataset.persistence.data.repository.DatasetRepository;
-import org.eea.dataset.persistence.data.repository.FieldRepository;
-import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
-import org.eea.dataset.persistence.data.repository.RecordRepository;
-import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
+import org.eea.dataset.mapper.*;
+import org.eea.dataset.persistence.data.domain.*;
+import org.eea.dataset.persistence.data.repository.*;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository.IDError;
-import org.eea.dataset.persistence.data.repository.TableRepository;
-import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
 import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.data.util.SortField;
-import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.DesignDataset;
-import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
-import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
-import org.eea.dataset.persistence.metabase.domain.Statistics;
-import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
-import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
+import org.eea.dataset.persistence.metabase.domain.*;
+import org.eea.dataset.persistence.metabase.repository.*;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
@@ -83,17 +42,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
-import org.eea.interfaces.vo.dataset.ExportFilterVO;
-import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.FieldValidationVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.RecordValidationVO;
-import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -124,15 +73,52 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
+
+import javax.transaction.Transactional;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The Class DatasetServiceImpl.
  */
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
+
+  /**
+   * The connection url.
+   */
+  @Value("${spring.datasource.url}")
+  private String connectionUrl;
+
+  /**
+   * The connection username.
+   */
+  @Value("${spring.datasource.dataset.username}")
+  private String connectionUsername;
+
+  /**
+   * The connection password.
+   */
+  @Value("${spring.datasource.dataset.password}")
+  private String connectionPassword;
+
+  /**
+   * The connection driver.
+   */
+  @Value("${spring.datasource.driverClassName}")
+  private String connectionDriver;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
@@ -320,6 +306,9 @@ public class DatasetServiceImpl implements DatasetService {
    * The default process priority
    */
   private int defaultProcessPriority = 20;
+
+  /** Time out for deleting provider in seconds */
+  private static final int DELETE_QUERY_TIME_OUT = 3600;
 
   /**
    * Save all records.
@@ -2928,8 +2917,25 @@ public class DatasetServiceImpl implements DatasetService {
    * @param tableSchemaId the table schema id
    */
   private void deleteRecordsFromIdTableSchema(Long datasetId, String tableSchemaId) {
-    recordRepository.deleteRecordWithIdTableSchema(tableSchemaId);
-    LOG.info("Executed deleteRecords: datasetId={}, tableSchemaId={}", datasetId, tableSchemaId);
+    try {
+      recordRepository.deleteRecordWithIdTableSchema(tableSchemaId);
+      LOG.info("Executed deleteRecords: datasetId={}, tableSchemaId={}", datasetId, tableSchemaId);
+    } catch (Exception e) {
+      LOG.info("RN3 Import process: executing delete operation with custom query time out for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
+      String datasetName = "dataset_" + datasetId;
+      DriverManagerDataSource dataSource = new DriverManagerDataSource();
+      dataSource.setDriverClassName(connectionDriver);
+      dataSource.setUrl(connectionUrl);
+      dataSource.setUsername(connectionUsername);
+      dataSource.setPassword(connectionPassword);
+      JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+      jdbcTemplate.setQueryTimeout(DELETE_QUERY_TIME_OUT);
+      StringBuilder deleteSql = new StringBuilder("delete from ");
+      deleteSql.append(datasetName).append(".record_value r where r.id_table in (select t.id from ");
+      deleteSql.append(datasetName).append(".table_value t where t.id_table_schema= ?)");
+      jdbcTemplate.update(deleteSql.toString(), tableSchemaId);
+      LOG.info("RN3 Import process: executed delete operation with custom query time out for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
+    }
   }
 
   /**

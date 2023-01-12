@@ -632,7 +632,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         StringBuilder deleteSql = new StringBuilder("delete from ");
         deleteSql.append(datasetName).append(".record_value where data_provider_code = ?");
         jdbcTemplate.update(deleteSql.toString(), provider.getCode());
-        LOG.info("Executing delete operation with custom query time out for datasetId {}, providerCode {}", idDataCollection, provider.getCode());
+        LOG.info("Executed delete operation with custom query time out for datasetId {}, providerCode {}", idDataCollection, provider.getCode());
       }
 
       // Restore data from snapshot
