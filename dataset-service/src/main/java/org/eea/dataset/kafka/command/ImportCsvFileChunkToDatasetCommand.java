@@ -38,6 +38,8 @@ import java.util.Optional;
 @Component
 public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerCommand {
 
+  private static final Logger LOG = LoggerFactory.getLogger(ImportCsvFileChunkToDatasetCommand.class);
+
   /**
    * The validation helper.
    */
@@ -111,6 +113,9 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
     Long endLine = Long.parseLong((String) eeaEventVO.getData().get("endLine"));
     Long partitionId = Long.parseLong((String) eeaEventVO.getData().get("partitionId"));
 
+    String taskIdStr = (taskId != null) ? String.valueOf(taskId) : "null";
+    LOG.info("Executing import task with id {} for datasetId {}", taskIdStr, datasetId);
+
     try (InputStream inputStream = Files.newInputStream(Path.of(filePath))) {
       // Obtain the data provider code to insert into the record
       Long providerId = 0L;
@@ -123,16 +128,24 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
       fileTreatmentHelper.reinitializeCsvSegmentedReaderStrategy(delimiter != null ? delimiter.charAt(0) : loadDataDelimiter, fileCommon, datasetId, fieldMaxLength, provider.getCode(), batchRecordSave);
       fileTreatmentHelper.importCsvFileChunk(datasetId,  fileName, inputStream,partitionId,
                idTableSchema,  replacebool,  dataSetSchema,  delimiter, startLine, endLine);
+      LOG.info("Updating status of task with id {} and datasetId {} to FINISHED.", taskIdStr, datasetId);
       if(task.isPresent()){
         task.get().setStatus(ProcessStatusEnum.FINISHED);
         task.get().setFinishDate(new Date());
         taskRepository.save(task.get());
       }
+      else{
+        LOG.error("Could not update task with id {} and datasetId {} because task is not present.", taskIdStr, datasetId);
+      }
     } catch (Exception e) {
-      LOG_ERROR.error("Error Executing: "+ImportCsvFileChunkToDatasetCommand.class.getName() +" \n"+e.getMessage());
+      LOG.error("Error Executing ImportCsvFileChunkToDatasetCommand for taskId {} and datasetId {} Error message is {}", taskIdStr, datasetId, e.getMessage());
+      LOG.info("Updating status of task with id {} and datasetId {} to CANCELED.", taskIdStr, datasetId);
       if(task.isPresent()){
         task.get().setStatus(ProcessStatusEnum.CANCELED);
         taskRepository.save(task.get());
+      }
+      else{
+        LOG.error("Could not update task with id {} and datasetId {} because task is not present.", taskIdStr, datasetId);
       }
     }
 
