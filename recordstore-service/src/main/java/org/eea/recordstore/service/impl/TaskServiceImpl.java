@@ -1,5 +1,7 @@
 package org.eea.recordstore.service.impl;
 
+import org.eea.interfaces.vo.metabase.TaskType;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.recordstore.mapper.TaskMapper;
 import org.eea.recordstore.persistence.domain.Task;
@@ -76,5 +78,21 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void updateTaskStartingDate(TaskVO taskVO) {
         taskRepository.updateStatusAndSAndStartingDate(taskVO.getId(), taskVO.getStatus().toString(), taskVO.getStartingDate());
+    }
+
+    /**
+     * Finds tasks with type IMPORT_TASK and status IN_PROGRESS
+     * @return the tasks
+     */
+    @Override
+    public List<TaskVO> findImportTasksInProgress(){
+        List<Task> tasks = taskRepository.findByTaskTypeAndStatus(TaskType.IMPORT_TASK, ProcessStatusEnum.IN_PROGRESS);
+        return taskMapper.entityListToClass(tasks);
+    }
+
+    @Transactional
+    @Override
+    public void restartTask(Long taskId) {
+        taskRepository.updateStatusAndSAndStartingDate(taskId, ProcessStatusEnum.IN_QUEUE.toString(), new Date());
     }
 }

@@ -647,4 +647,27 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       throw e;
     }
   }
+
+  /**
+   * Finds tasks with type IMPORT_TASK and status IN_PROGRESS
+   * @return the tasks
+   */
+  @HystrixCommand
+  @GetMapping(value = "/private/findImportTasksInProgress")
+  @ApiOperation(value = "Find the import tasks with status in progress", hidden = true)
+  public List<TaskVO> findImportTasksInProgress() {
+    return taskService.findImportTasksInProgress();
+  }
+
+  /**
+   * Saves or updates a task
+   * @return
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/private/restartTask")
+  @ApiOperation(value = "Restarts a task", hidden = true)
+  public void restartTask(@RequestParam Long taskId){
+    taskService.restartTask(taskId);
+  }
 }

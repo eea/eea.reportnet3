@@ -3401,7 +3401,7 @@ public class DatasetServiceTest {
         .when(fieldValueIdGenerator
             .generate(Mockito.nullable(SharedSessionContractImplementor.class), Mockito.any()))
         .thenReturn("fieldId");
-    datasetService.storeRecords(1L, recordValues, new ConnectionDataVO());
+    datasetService.storeRecords(1L, recordValues, new ConnectionDataVO(),null);
   }
 
   /**

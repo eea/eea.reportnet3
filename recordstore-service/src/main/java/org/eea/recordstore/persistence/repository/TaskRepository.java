@@ -1,5 +1,7 @@
 package org.eea.recordstore.persistence.repository;
 
+import org.eea.interfaces.vo.metabase.TaskType;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.recordstore.persistence.domain.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -58,4 +60,14 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
         value = "update task set status= :status ,date_start= :dateStart where id=:taskId ")
     void updateStatusAndSAndStartingDate(@Param("taskId") Long taskId, @Param("status") String status,
         @Param("dateStart") Date dateStart);
+
+
+    /**
+     * Finds tasks based on type and status
+     *
+     * @param taskType the task type
+     * @param status the status
+     * @return the task list
+     */
+    List<Task> findByTaskTypeAndStatus(TaskType taskType, ProcessStatusEnum status);
 }

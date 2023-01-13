@@ -554,7 +554,7 @@ public class FileCommonUtils {
       }
     } else {
       datasetService.storeRecords(datasetId, dataset.getTableValues().get(0).getRecords(),
-          connectionDataVO);
+          connectionDataVO,dataset.getCsvFileChunkRecoveryDetails());
     }
     LOG.info("Persisted imported dataset with datasetId {}, tableSchemaId {}. Filename is {}", datasetId, idTableSchema, fileName);
   }

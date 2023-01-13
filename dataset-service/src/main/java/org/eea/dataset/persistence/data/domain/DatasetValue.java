@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import org.eea.interfaces.vo.dataset.CsvFileChunkRecoveryDetails;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -58,6 +60,10 @@ public class DatasetValue {
   /** The level error. */
   @Transient
   private ErrorTypeEnum levelError;
+
+
+  @Transient
+  private CsvFileChunkRecoveryDetails csvFileChunkRecoveryDetails;
 
   /**
    * return Objects.hash(id, tableValues, idRecordSchema); Equals.

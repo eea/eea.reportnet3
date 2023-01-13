@@ -17,6 +17,7 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.CsvFileChunkRecoveryDetails;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,7 +143,7 @@ public class CSVSegmentedReaderStrategy {
     @Transactional(rollbackOn = Exception.class)
     protected DatasetValue readLines(final InputStream inputStream, Long startLine, Long endLine, final Long partitionId,
                                      final String idTableSchema, Long datasetId, String fileName, boolean replace,
-                                     DataSetSchema dataSetSchema, ConnectionDataVO connectionDataVO) throws EEAException {
+                                     DataSetSchema dataSetSchema, ConnectionDataVO connectionDataVO,CsvFileChunkRecoveryDetails csvFileChunkRecoveryDetails) throws EEAException {
         LOG.info("Processing entries at method readLines in dataset {}", datasetId);
         // Init variables
         String[] line;
@@ -150,6 +151,7 @@ public class CSVSegmentedReaderStrategy {
         final List<TableValue> tables = new ArrayList<>();
         final DatasetValue dataset = new DatasetValue();
         dataset.setId(datasetId);
+        dataset.setCsvFileChunkRecoveryDetails(csvFileChunkRecoveryDetails);
         table.setIdTableSchema(idTableSchema);
         table.setRecords(new ArrayList<>());
         table.setDatasetId(dataset);
@@ -193,7 +195,7 @@ public class CSVSegmentedReaderStrategy {
             while ((line = reader.readNext()) != null && numLines < endLine) {
                 final List<String> values = Arrays.asList(line);
                 sanitizeAndCreateDataSet(partitionId, table, tables, values, headers, idTableSchema,
-                        idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords);
+                        idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords,numLines);
                 numLines++;
             }
             dataset.setTableValues(tables);
@@ -242,11 +244,11 @@ public class CSVSegmentedReaderStrategy {
     private void sanitizeAndCreateDataSet(final Long partitionId, TableValue table,
                                           final List<TableValue> tables, final List<String> values, List<FieldSchema> headers,
                                           final String idTableSchema, final String idRecordSchema, final List<FieldSchema> fieldSchemas,
-                                          boolean isDesignDataset, boolean isFixedNumberOfRecords) {
+                                          boolean isDesignDataset, boolean isFixedNumberOfRecords,int currentCsvLine) {
         // if the line is white then skip it
         if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
             addRecordToTable(table, tables, values, partitionId, headers, idTableSchema, idRecordSchema,
-                    fieldSchemas, isDesignDataset, isFixedNumberOfRecords);
+                    fieldSchemas, isDesignDataset, isFixedNumberOfRecords,currentCsvLine);
         }
     }
 
@@ -345,18 +347,18 @@ public class CSVSegmentedReaderStrategy {
     private void addRecordToTable(TableValue table, final List<TableValue> tables,
                                   final List<String> values, final Long partitionId, List<FieldSchema> headers,
                                   final String idTableSchema, final String idRecordSchema, List<FieldSchema> fieldSchemas,
-                                  boolean isDesignDataset, boolean isFixedNumberOfRecords) {
+                                  boolean isDesignDataset, boolean isFixedNumberOfRecords,int currentCsvLine) {
         // Create object Table and set the attributes
         if (null == table.getIdTableSchema()) {
             table.setIdTableSchema(idTableSchema);
 
             table.setRecords(createRecords(values, partitionId, table.getIdTableSchema(), headers,
-                    idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords, table));
+                    idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords, table,currentCsvLine));
             tables.add(table);
 
         } else {
             table.getRecords().addAll(createRecords(values, partitionId, table.getIdTableSchema(),
-                    headers, idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords, table));
+                    headers, idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords, table,currentCsvLine));
         }
     }
 
@@ -377,7 +379,7 @@ public class CSVSegmentedReaderStrategy {
     private List<RecordValue> createRecords(final List<String> values, final Long partitionId,
                                             final String idTableSchema, List<FieldSchema> headers, final String idRecordSchema,
                                             List<FieldSchema> fieldSchemas, boolean isDesignDataset, boolean isFixedNumberOfRecords,
-                                            TableValue tableValue) {
+                                            TableValue tableValue,int currentCsvLine) {
         final List<RecordValue> records = new ArrayList<>();
         final RecordValue record = new RecordValue();
         if (null != idTableSchema) {
@@ -388,6 +390,7 @@ public class CSVSegmentedReaderStrategy {
         record.setDatasetPartitionId(partitionId);
         record.setDataProviderCode(this.providerCode);
         record.setTableValue(tableValue);
+        record.setCurrentCsvLine(currentCsvLine);
         records.add(record);
         return records;
     }
@@ -483,9 +486,9 @@ public class CSVSegmentedReaderStrategy {
         });
     }
 
-    public void parseFile(InputStream inputStream, Long startLine, Long endLine, Long partitionId, String idTableSchema, Long datasetId, String fileName, boolean replace, DataSetSchema schema, ConnectionDataVO connectionDataVO) throws EEAException {
+    public void parseFile(InputStream inputStream, Long startLine, Long endLine, Long partitionId, String idTableSchema, Long datasetId, String fileName, boolean replace, DataSetSchema schema, ConnectionDataVO connectionDataVO, CsvFileChunkRecoveryDetails csvFileChunkRecoveryDetails) throws EEAException {
         readLines(inputStream, startLine, endLine, partitionId, idTableSchema, datasetId, fileName, replace, schema,
-                connectionDataVO);
+                connectionDataVO, csvFileChunkRecoveryDetails);
 
     }
 }

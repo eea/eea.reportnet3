@@ -886,13 +886,11 @@ public class FileTreatmentHelper implements DisposableBean {
                     LockSignature.IMPORT_BIG_FILE_DATA.getValue());
             importBigFileData.put(LiteralConstants.DATASETID, datasetId);
             lockService.removeLockByCriteria(importBigFileData);
-            File toBeDeleted = new File(importPath, datasetId.toString());
-            if(toBeDeleted.exists()){
-                FileUtils.deleteDirectory(toBeDeleted);
-            }
+          //  FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
+
             releaseLockReleasingProcess(datasetId);
-        } catch (IOException e) {
-            LOG.error("Error deleting files: datasetId={}", datasetId, e);
+        } catch (Exception e) {
+            LOG_ERROR.error("Error deleting files: datasetId={}", datasetId, e);
         }
     }
 
@@ -1665,7 +1663,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
         public void importCsvFileChunk (@DatasetId Long datasetId, String fileName, InputStream is, Long partitionId,
                 String idTableSchema,boolean replace, DataSetSchema schema, String delimiter, Long startLine, Long
-        endLine)  throws EEAException, IOException {
+        endLine,CsvFileChunkRecoveryDetails csvFileChunkRecoveryDetails)  throws EEAException, IOException {
             if (fileName == null) {
                 throw new EEAException(EEAErrorMessage.FILE_NAME);
             }
@@ -1685,7 +1683,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
                 LOG.info("CSV Import File Chunk start: startLine:{} ,endLine:{} ,datasetId:{}, filename:{}",startLine,endLine,datasetId,fileName);
                 this.csvSegmentedReaderStrategy.parseFile(is, startLine, endLine, partitionId, idTableSchema, datasetId,
-                        fileName, replace, schema, connectionDataVO);
+                        fileName, replace, schema, connectionDataVO, csvFileChunkRecoveryDetails);
             } catch (Exception e) {
                 LOG.error("CSV Import File Chunk Error:{}",e);
                 throw e;
