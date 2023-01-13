@@ -1,0 +1,85 @@
+
+Skip to content
+Pull requests
+Issues
+Codespaces
+Marketplace
+Explore
+@sotav-trasys
+eea /
+eea.reportnet3
+Public
+
+Fork your own copy of eea/eea.reportnet3
+
+Code
+Issues
+Pull requests 12
+Actions
+Projects
+Wiki
+Security
+
+    Insights
+
+eea.reportnet3/parent-poms/parent/pom.xml
+@DimosthenisKitsios
+DimosthenisKitsios Update pom version to v3.1.6-DEV
+Latest commit 0fc1688 Oct 18, 2022
+History
+4 contributors
+@canovic
+@antonjos
+@DimosthenisKitsios
+@favvamary
+33 lines (33 sloc) 1.47 KB
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.1.3.RELEASE</version>
+  </parent>
+  <groupId>org.eea</groupId>
+  <artifactId>eea-pom</artifactId>
+  <packaging>pom</packaging>
+  <version>3.0.0</version>
+  <properties>
+    <api-gateway.version>v3.1.6-DEV</api-gateway.version>
+    <communication.version>v3.1.6-DEV</communication.version>
+    <collaboration.version>v3.1.6-DEV</collaboration.version>
+    <dataflow.version>v3.1.6-DEV</dataflow.version>
+    <dataset.version>v3.1.6-DEV</dataset.version>
+    <document.version>v3.1.6-DEV</document.version>
+    <frontend.version>v3.1.6-DEV</frontend.version>
+    <indexsearch.version>v3.1.6-DEV</indexsearch.version>
+    <inspire.version>v3.1.6-DEV</inspire.version>
+    <recordstore.version>v3.1.6-DEV</recordstore.version>
+    <ums.version>v3.1.6-DEV</ums.version>
+    <validation.version>v3.1.6-DEV</validation.version>
+    <common-interfaces.version>v3.1.6-DEV</common-interfaces.version>
+    <common-utitlities.version>v3.1.6-DEV</common-utitlities.version>
+    <rod.version>v3.1.6-DEV</rod.version>
+    <orchestrator.version>v3.1.6-DEV</orchestrator.version>
+  </properties>
+</project>
+Footer
+© 2023 GitHub, Inc.
+Footer navigation
+
+    Terms
+    Privacy
+    Security
+    Status
+    Docs
+    Contact GitHub
+    Pricing
+    API
+    Training
+    Blog
+    About
+
+eea.reportnet3/pom.xml at develop · eea/eea.reportnet3
