@@ -1764,6 +1764,14 @@
     "value": "JHtEQVRBU0VUX0lNUE9SVF9CQVRDSFJFQ09SRFNBVkU6MjUwMH0="
   },
   {
+    "key": "config/dataset/spring.datasource.driverClassName",
+    "value": "JHtEQVRBU0VUX0RSSVZFUl9DTEFTUzpvcmcucG9zdGdyZXNxbC5Ecml2ZXJ9"
+  },
+  {
+    "key": "config/dataset/spring.datasource.url",
+    "value": "JHtEQVRBU0VUX0NPTk5FQ1RJT05fU1RSSU5HOmpkYmM6cG9zdGdyZXNxbDovL2xvY2FsaG9zdC9kYXRhc2V0c30="
+  },
+  {
     "key": "config/apiGateway/zuul.routes.process.path",
     "value": "L3Byb2Nlc3MvKio="
   },
