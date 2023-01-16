@@ -38,6 +38,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -212,11 +213,11 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);
         createSnapshotVO.setAutomatic(Boolean.TRUE);
-        TimeZone.setDefault(TimeZone.getTimeZone("CET"));
-        Date ahora = new Date();
-        SimpleDateFormat formateador = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        createSnapshotVO.setDescription("Release " + formateador.format(ahora) + " CET");
-        Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now());
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        //force date to CET
+        Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now(ZoneId.of("CET")));
+        createSnapshotVO.setDescription("Release " + dateFormatter.format(dateRelease) + " CET");
 
         LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
         JobProcessVO jobProcessVO = new JobProcessVO(null, releaseJob.getId(), processId);

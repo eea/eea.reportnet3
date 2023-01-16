@@ -81,6 +81,7 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -345,8 +346,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
       // 1. Create the snapshot in the metabase
       Snapshot snap = new Snapshot();
-      TimeZone.setDefault(TimeZone.getTimeZone("CET"));
-      snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+      //force date to CET
+      snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now(ZoneId.of("CET"))));
       snap.setDescription(createSnapshotVO.getDescription());
       DataSetMetabase dataset = new DataSetMetabase();
       dataset.setId(idDataset);
@@ -713,8 +714,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     try (ByteArrayOutputStream outStream = new ByteArrayOutputStream()) {
       // 1. Create the snapshot in the metabase
       SnapshotSchema snap = new SnapshotSchema();
-      TimeZone.setDefault(TimeZone.getTimeZone("CET"));
-      snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+      //force date to CET
+      snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now(ZoneId.of("CET"))));
       snap.setDescription(description);
       DesignDataset designDataset = new DesignDataset();
       designDataset.setId(idDataset);
@@ -772,9 +773,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // we need the partitionId. By now only consider the user root
       Long idPartition = obtainPartition(idDataset, "root").getId();
       recordStoreControllerZuul.createSnapshotData(idDataset, idSnapshot, idPartition, null, false, null);
-      LOG.info("Successfully added snapshot with snapshotId {} and datasetId {}", idSnapshot, idDataset);
+      LOG.info("Successfully added schema snapshot with snapshotId {} and datasetId {}", idSnapshot, idDataset);
     } catch (Exception e) {
-      LOG_ERROR.error("Error creating snapshot for datasetId {}", idDataset, e);
+      LOG_ERROR.error("Error creating schema snapshot for datasetId {}", idDataset, e);
       releaseEvent(EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage(), null);
       // Release the lock manually
       Map<String, Object> createSchemaSnapshot = new HashMap<>();

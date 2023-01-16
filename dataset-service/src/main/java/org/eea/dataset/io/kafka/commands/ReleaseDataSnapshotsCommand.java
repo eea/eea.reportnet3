@@ -165,7 +165,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);
         createSnapshotVO.setAutomatic(Boolean.TRUE);
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         createSnapshotVO.setDescription("Release " + dateRelease + " CET");
 
         LOG.info("Creating release process for dataflowId {}, dataProviderId {} dataset {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
@@ -220,7 +219,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
                 dataset.getDataProviderId());
 
 
-        // we send diferent notification if have morethan one dataset or have only one to redirect
+        // we send different notification if we have more than one dataset or have only one to redirect
         if (!Collections.isEmpty(datasetMetabaseListIds) && datasetMetabaseListIds.size() > 1) {
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_PROVIDER_COMPLETED_EVENT,
               null,
