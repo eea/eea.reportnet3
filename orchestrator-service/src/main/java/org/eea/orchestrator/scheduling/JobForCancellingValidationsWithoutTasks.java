@@ -106,6 +106,9 @@ public class JobForCancellingValidationsWithoutTasks {
                                     ProcessVO process = processControllerZuul.findById(processId);
                                     if (!process.getStatus().equals(ProcessStatusEnum.FINISHED) && !process.getStatus().equals(ProcessStatusEnum.CANCELED)) {
                                         LOG.info("Cancelling process {}", processVO.getProcessId());
+                                        LOG.info("Cancelling running validation tasks for process {}", process.getProcessId());
+                                        validationControllerZuul.cancelRunningProcessTasks(process.getProcessId());
+                                        LOG.info("Cancelled running validation tasks for process {}", process.getProcessId());
                                         LOG.info("Updating validation process to status CANCELED for processId {}", processId);
                                         processControllerZuul.updateProcess(process.getDatasetId(), process.getDataflowId(),
                                                 ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, process.getProcessId(),

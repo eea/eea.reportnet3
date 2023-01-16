@@ -142,6 +142,13 @@ public interface ValidationController {
    */
   @GetMapping(value = "/private/findTasksByProcessId/{processId}")
   List<BigInteger> findTasksByProcessId(@PathVariable("processId") String processId);
+
+  /**
+   * cancel process tasks
+   * @param processId
+   */
+  @PutMapping(value = "/private/cancelProcessTasks/{processId}")
+  void cancelRunningProcessTasks(@PathVariable("processId") String processId);
 }
 
 
