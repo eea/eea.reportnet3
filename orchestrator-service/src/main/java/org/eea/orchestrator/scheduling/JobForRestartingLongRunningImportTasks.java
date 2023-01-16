@@ -39,25 +39,34 @@ public class JobForRestartingLongRunningImportTasks {
     }
 
     /**
-     * The job runs every 5 minutes. It finds tasks that have been stuck in status IN_PROGRESS for more than a number of hours
+     * The job runs every 2 minutes. It finds tasks that have been stuck in status IN_PROGRESS for more than a number of hours
      * and changes their status to IN_QUEUE so that they are picked up by the ImportFileTasksScheduler.scheduledConsumer() method
      */
+    //For now this scheduled task will not do anything but log the cases because this use case might already be resolved
     public void restartLongRunningImportTasks() {
-        LOG.info("Running scheduled task restartLongRunningImportTasks");
         try {
             List<TaskVO> tasks = recordStoreControllerZuul.findImportTasksInProgress();
+            String tasksWithEmptyStartingDates = "";
+            String tasksWithMaxDuration = "";
             for(TaskVO task : tasks){
                 if(task.getStartingDate() == null) {
-                    //in json set replace = true to overwrite
-                    recordStoreControllerZuul.restartTask(task.getId());
+                    tasksWithEmptyStartingDates += task.getId().toString() + " ";
+                    //recordStoreControllerZuul.restartTask(task.getId());
                 }
                 Long durationInMs = new Date().getTime() - task.getStartingDate().getTime();
                 long durationInHours = TimeUnit.MILLISECONDS.toHours(durationInMs);
                 if(durationInHours > maxHoursForInProgressImportTasks) {
-                    //in json set replace = true to overwrite
-                    recordStoreControllerZuul.restartTask(task.getId());
+                    tasksWithMaxDuration += task.getId().toString() + " ";
+                    //recordStoreControllerZuul.restartTask(task.getId());
                 }
             }
+            if(tasksWithEmptyStartingDates.length() > 0 ){
+                LOG.info("Found tasks that are in status IN_PROGRESS but their starting date is empty. The tasks ids are: {}", tasksWithEmptyStartingDates);
+            }
+            if(tasksWithMaxDuration.length() > 0 ){
+                LOG.info("Found tasks that are in status IN_PROGRESS for more than {} hours. The tasks ids are: {}", maxHoursForInProgressImportTasks, tasksWithEmptyStartingDates);
+            }
+
         } catch (Exception e) {
             LOG.error("Unexpected error! Error while running scheduled task restartLongRunningImportTasks. Message: {}", e.getMessage());
         }

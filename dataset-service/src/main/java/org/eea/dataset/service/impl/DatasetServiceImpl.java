@@ -3118,13 +3118,20 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param recordList the record list
    * @param connectionDataVO the connection data VO
+   * @param csvFileChunkRecoveryDetails the csvFileChunkRecoveryDetails object
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
   @Override
   public void storeRecords(@DatasetId Long datasetId, List<RecordValue> recordList,
-      ConnectionDataVO connectionDataVO,CsvFileChunkRecoveryDetails csvFileChunkRecoveryDetails) throws IOException, SQLException {
+      ConnectionDataVO connectionDataVO, CsvFileChunkRecoveryDetails csvFileChunkRecoveryDetails) throws IOException, SQLException {
 
+    Boolean isRecoveryProcess = false;
+    if(csvFileChunkRecoveryDetails != null && (csvFileChunkRecoveryDetails.getRecordsBulkImporterTemporaryFile() != null
+            || csvFileChunkRecoveryDetails.getFieldsBulkImporterTemporaryFile() != null )){
+      isRecoveryProcess = true;
+    }
 
     String schema = LiteralConstants.DATASET_PREFIX + datasetId;
 
@@ -3133,38 +3140,39 @@ public class DatasetServiceImpl implements DatasetService {
 
         PostgresBulkImporter recordsImporter = new PostgresBulkImporter(connectionDataVO, schema,
             "record_value (ID, ID_RECORD_SCHEMA,ID_TABLE,DATASET_PARTITION_ID,DATA_PROVIDER_CODE) ",
-            importPath,csvFileChunkRecoveryDetails!=null?csvFileChunkRecoveryDetails.getRecordsBulkImporterTemporaryFile():null);
+            importPath, csvFileChunkRecoveryDetails != null ? csvFileChunkRecoveryDetails.getRecordsBulkImporterTemporaryFile() : null);
         PostgresBulkImporter fieldsImporter = new PostgresBulkImporter(connectionDataVO, schema,
             "field_value (ID, TYPE, VALUE, ID_FIELD_SCHEMA, ID_RECORD, GEOMETRY) ", importPath,
-                csvFileChunkRecoveryDetails!=null?csvFileChunkRecoveryDetails.getFieldsBulkImporterTemporaryFile():null)) {
+                csvFileChunkRecoveryDetails !=null ? csvFileChunkRecoveryDetails.getFieldsBulkImporterTemporaryFile() : null)) {
 
       LOG.info("RN3-Import - PostgresBulkImporter started: datasetId={}", datasetId);
-    if (csvFileChunkRecoveryDetails==null || csvFileChunkRecoveryDetails.getRecordsBulkImporterTemporaryFile()==null || csvFileChunkRecoveryDetails.getFieldsBulkImporterTemporaryFile()==null) {
-      for (RecordValue recordValue : recordList) {
-        CsvLineAndRecordFieldsHolder csvLineAndRecordFieldsHolder = new CsvLineAndRecordFieldsHolder();
-        recordValue.setCsvLineAndRecordFieldsHolder(csvLineAndRecordFieldsHolder);
-        String recordId = (String) recordValueIdGenerator.generate(null, recordValue);
-        recordValue.setId(recordId);
-        csvLineAndRecordFieldsHolder.setCsvLine(recordValue.getCurrentCsvLine());
-        csvLineAndRecordFieldsHolder.setRecordId(recordId);
-        List<String> fieldsIdsList = new ArrayList<>();
-        csvLineAndRecordFieldsHolder.setRecordFieldsIds(fieldsIdsList);
-        recordsImporter.addTuple(new Object[]{recordId, recordValue.getIdRecordSchema(),
-                recordValue.getTableValue().getId(), recordValue.getDatasetPartitionId(),
-                recordValue.getDataProviderCode()});
+      if (csvFileChunkRecoveryDetails==null || csvFileChunkRecoveryDetails.getRecordsBulkImporterTemporaryFile()==null || csvFileChunkRecoveryDetails.getFieldsBulkImporterTemporaryFile()==null) {
+        for (RecordValue recordValue : recordList) {
+          CsvLineAndRecordFieldsHolder csvLineAndRecordFieldsHolder = new CsvLineAndRecordFieldsHolder();
+          recordValue.setCsvLineAndRecordFieldsHolder(csvLineAndRecordFieldsHolder);
+          String recordId = (String) recordValueIdGenerator.generate(null, recordValue);
+          recordValue.setId(recordId);
+          csvLineAndRecordFieldsHolder.setCsvLine(recordValue.getCurrentCsvLine());
+          csvLineAndRecordFieldsHolder.setRecordId(recordId);
+          List<String> fieldsIdsList = new ArrayList<>();
+          csvLineAndRecordFieldsHolder.setRecordFieldsIds(fieldsIdsList);
+          recordsImporter.addTuple(new Object[]{recordId, recordValue.getIdRecordSchema(),
+                  recordValue.getTableValue().getId(), recordValue.getDatasetPartitionId(),
+                  recordValue.getDataProviderCode()});
 
-        for (FieldValue fieldValue : recordValue.getFields()) {
-          String fieldId = (String) fieldValueIdGenerator.generate(null, fieldValue);
-          fieldsIdsList.add(fieldId);
-          fieldValue.setId(fieldId);
-          fieldsImporter.addTuple(new Object[]{fieldId, fieldValue.getType().getValue(),
-                  fieldValue.getValue(), fieldValue.getIdFieldSchema(), recordId, null});
+          for (FieldValue fieldValue : recordValue.getFields()) {
+            String fieldId = (String) fieldValueIdGenerator.generate(null, fieldValue);
+            fieldsIdsList.add(fieldId);
+            fieldValue.setId(fieldId);
+            fieldsImporter.addTuple(new Object[]{fieldId, fieldValue.getType().getValue(),
+                    fieldValue.getValue(), fieldValue.getIdFieldSchema(), recordId, null});
+          }
         }
       }
-    }
     // First time of importing a CSV batch, the details object will be empty But not NULL.
       // if its completely Null, do nothing
       if(csvFileChunkRecoveryDetails!=null) {
+        csvFileChunkRecoveryDetails.setNumberOfRecords(recordList.size());
         if(csvFileChunkRecoveryDetails.getRecordsBulkImporterTemporaryFile()==null){
           csvFileChunkRecoveryDetails.setRecordsBulkImporterTemporaryFile(recordsImporter.getTemporaryFile().getName());
         }
@@ -3178,8 +3186,14 @@ public class DatasetServiceImpl implements DatasetService {
 
       LOG.info("RN3-Import file: Temporary binary files IMPORTED for datasetId={}", datasetId);
     } catch (SQLException e) {
-      LOG_ERROR.error("Cannot save the records for dataset {}", datasetId, e);
-      throw e;
+      if( isRecoveryProcess &&
+      e.getClass().getCanonicalName().equals("org.postgresql.util.PSQLException") && e.getMessage().contains("ERROR: duplicate")){
+        LOG.info("Cannot save the records for dataset {} in recovery process because they already exist", datasetId, e);
+      }
+      else {
+        LOG.error("Cannot save the records for dataset {}", datasetId, e);
+        throw e;
+      }
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in storeRecords for datasetId {}. Message: {}", datasetId, e.getMessage());
       throw e;

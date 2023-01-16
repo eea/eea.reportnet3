@@ -63,18 +63,18 @@ public class JobForRestartingReleaseTasks {
     }
 
     /**
-     * The job runs every 5 minutes. It finds task ids for tasks that have status=IN_PROGRESS for more than maxTimeInMinutesForInProgressTasks
+     * The job runs every 30 minutes. It finds task ids for tasks that have status=IN_PROGRESS for more than maxTimeInMinutesForInProgressTasks
      * and sets their status to status=IN_QUEUE.
      */
     public void restartReleaseTasks() {
         try {
-            LOG.info("Method restartReleaseTask started");
             //Get the release tasks which are in progress
             List<BigInteger> releaseTasksInProgress = recordStoreControllerZuul.findReleaseTasksInProgress(maxTimeInMinutesForInProgressReleaseTasks);
             ObjectMapper objectMapper = new ObjectMapper();
-            LOG.info("Release tasks in progress {}", releaseTasksInProgress);
+
 
             if (releaseTasksInProgress.size() > 0) {
+                LOG.info("Release tasks in progress {}", releaseTasksInProgress);
                 TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
                 UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);

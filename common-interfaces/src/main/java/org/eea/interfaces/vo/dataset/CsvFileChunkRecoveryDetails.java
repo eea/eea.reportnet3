@@ -12,4 +12,6 @@ public class CsvFileChunkRecoveryDetails {
     private String fieldsBulkImporterTemporaryFile;
 
     private Long taskId;
+
+    private Integer numberOfRecords;
 }
