@@ -1113,7 +1113,20 @@ public class ValidationHelper implements DisposableBean {
             value.put("validation_job_id", jobId);
 
             if (datasetId.equals(process.getDatasetId()) && process.isReleased()) {
-              ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
+              ProcessVO nextProcess = null;
+              if (jobId!=null) {
+                List<String> processes = jobProcessControllerZuul.findProcessesByJobId(jobId);
+                processes.remove(process.getProcessId());
+                for (String procId : processes) {
+                  ProcessVO processVO = processControllerZuul.findById(procId);
+                  if (processVO.getStatus().equals(ProcessStatusEnum.IN_QUEUE.toString())) {
+                    nextProcess = processVO;
+                    break;
+                  }
+                }
+              } else {
+                nextProcess = processControllerZuul.getNextProcess(processId);
+              }
               if (null != nextProcess) {
                 executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
                     true);
