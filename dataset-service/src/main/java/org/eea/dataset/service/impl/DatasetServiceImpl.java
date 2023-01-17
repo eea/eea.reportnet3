@@ -1,18 +1,5 @@
 package org.eea.dataset.service.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -69,7 +56,6 @@ import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
-import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -323,9 +309,6 @@ public class DatasetServiceImpl implements DatasetService {
    * The default process priority
    */
   private int defaultProcessPriority = 20;
-
-  /** Time out for deleting provider in seconds */
-  private static final int DELETE_QUERY_TIME_OUT = 3600;
 
   /**
    * Save all records.
@@ -2938,20 +2921,34 @@ public class DatasetServiceImpl implements DatasetService {
       recordRepository.deleteRecordWithIdTableSchema(tableSchemaId);
       LOG.info("Executed deleteRecords: datasetId={}, tableSchemaId={}", datasetId, tableSchemaId);
     } catch (Exception e) {
-      LOG.info("RN3 Import process: executing delete operation with custom query time out for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
-      String datasetName = "dataset_" + datasetId;
-      DriverManagerDataSource dataSource = new DriverManagerDataSource();
-      dataSource.setDriverClassName(connectionDriver);
-      dataSource.setUrl(connectionUrl);
-      dataSource.setUsername(connectionUsername);
-      dataSource.setPassword(connectionPassword);
-      JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-      jdbcTemplate.setQueryTimeout(DELETE_QUERY_TIME_OUT);
-      StringBuilder deleteSql = new StringBuilder("delete from ");
-      deleteSql.append(datasetName).append(".record_value r where r.id_table in (select t.id from ");
-      deleteSql.append(datasetName).append(".table_value t where t.id_table_schema= ?)");
-      jdbcTemplate.update(deleteSql.toString(), tableSchemaId);
-      LOG.info("RN3 Import process: executed delete operation with custom query time out for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
+      try {
+        LOG.info("RN3 Import process: executing delete operation with custom query time out for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
+        Long totalCountOfRecords = recordRepository.countByTableSchema(tableSchemaId);
+        String datasetName = "dataset_" + datasetId;
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName(connectionDriver);
+        dataSource.setUrl(connectionUrl);
+        dataSource.setUsername(connectionUsername);
+        dataSource.setPassword(connectionPassword);
+        while (totalCountOfRecords>0) {
+          LOG.info("RN3 Import process: executing delete for 100000 records out of {} for datasetId {}, tableSchemaId {}", totalCountOfRecords, datasetId, tableSchemaId);
+          JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+          StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT r.id FROM ");
+          deleteSql.append(datasetName).append(".record_value r join ");
+          deleteSql.append(datasetName).append(".table_value t on r.id_table = t.id where t.id_table_schema = ? LIMIT 100000) ");
+          deleteSql.append("DELETE FROM ");
+          deleteSql.append(datasetName).append(".record_value rv ");
+          deleteSql.append("USING rows WHERE rv.id = rows.id;");
+          jdbcTemplate.update(deleteSql.toString(), tableSchemaId);
+          LOG.info("RN3 Import process: deleted 100000 records for datasetId {}, tableSchemaId {}, counting again", datasetId, tableSchemaId);
+          totalCountOfRecords = recordRepository.countByTableSchema(tableSchemaId);
+          LOG.info("RN3 Import process: executing for datasetId {}, tableSchemaId {}, records remaining {}", datasetId, tableSchemaId, totalCountOfRecords);
+        }
+         LOG.info("RN3 Import process: executed delete operation with custom query time out for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
+      } catch (Exception er) {
+        LOG.error("RN3 Import process: error executing delete operation with custom query time out for datasetId {}, tableSchemaId {}, {}", datasetId, tableSchemaId, er.getMessage());
+        throw er;
+      }
     }
   }
 
