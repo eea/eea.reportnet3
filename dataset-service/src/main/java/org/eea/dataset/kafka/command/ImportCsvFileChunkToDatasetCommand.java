@@ -92,7 +92,6 @@ private char loadDataDelimiter=',';
     Object replace = eeaEventVO.getData().get("replace");
 
     Long taskId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("task_id")));
-    Optional<Task> task = taskRepository.findById(taskId);
 
     boolean replacebool = !(replace instanceof Boolean) || (boolean) replace;
 
@@ -110,10 +109,7 @@ private char loadDataDelimiter=',';
       //Initialize it once and pass it around as a reference, to store the records and fields temp files names and then save them to the Task
       csvFileChunkRecoveryDetails = new CsvFileChunkRecoveryDetails();
     }
-    if(task.isPresent()){
-      csvFileChunkRecoveryDetails.setTaskId(task.get().getId());
-
-    }
+      csvFileChunkRecoveryDetails.setTaskId(taskId);
 
 
     String idTableSchema = String.valueOf(eeaEventVO.getData().get("idTableSchema"));
@@ -135,6 +131,7 @@ private char loadDataDelimiter=',';
       fileTreatmentHelper.reinitializeCsvSegmentedReaderStrategy(delimiter != null ? delimiter.charAt(0) : loadDataDelimiter,fileCommon,datasetId,fieldMaxLength,provider.getCode(),batchRecordSave);
       fileTreatmentHelper.importCsvFileChunk(datasetId,  fileName, inputStream,partitionId,
                idTableSchema,  replacebool,  dataSetSchema,  delimiter, startLine, endLine, csvFileChunkRecoveryDetails);
+      Optional<Task> task = taskRepository.findById(taskId);
       if(task.isPresent()){
         task.get().setStatus(ProcessStatusEnum.FINISHED);
         task.get().setFinishDate(new Date());
@@ -144,13 +141,14 @@ private char loadDataDelimiter=',';
         EEAEventVO eeaEventVOToUpdate = objectMapper.readValue(task.get().getJson(), EEAEventVO.class);
         eeaEventVOToUpdate.getData().put("CsvFileChunkRecoveryDetails",csvFileChunkRecoveryDetails);
         task.get().setJson(objectMapper.writeValueAsString(eeaEventVOToUpdate));
-        taskRepository.save(task.get());
+        taskRepository.saveAndFlush(task.get());
       }
     } catch (Exception e) {
       LOG_ERROR.error("Error Executing: "+ImportCsvFileChunkToDatasetCommand.class.getName() +" \n"+e.getMessage());
+      Optional<Task> task = taskRepository.findById(taskId);
       if(task.isPresent()){
         task.get().setStatus(ProcessStatusEnum.CANCELED);
-        taskRepository.save(task.get());
+        taskRepository.saveAndFlush(task.get());
       }
     }
 
