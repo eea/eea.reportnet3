@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
+import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.*;
 import org.eea.dataset.persistence.metabase.repository.*;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -145,9 +146,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The Constant FILE_PATTERN_NAME_INTEGRITY. */
   private static final String FILE_PATTERN_NAME_INTEGRITY = "integritySnapshot_%s-DesignDataset_%s";
 
-  /** Time out for deleting provider in seconds */
-  private static final int DELETE_PROVIDER_QUERY_TIME_OUT = 3600;
-
   /** The partition data set metabase repository. */
   @Autowired
   private PartitionDataSetMetabaseRepository partitionDataSetMetabaseRepository;
@@ -266,6 +264,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
   @Autowired
   private AdminUserAuthorization adminUserAuthorization;
+
+  @Autowired
+  private RecordRepository recordRepository;
 
   /**
    * Gets the by id.
@@ -621,19 +622,33 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       try {
         deleteHelper.deleteRecordValuesByProvider(idDataCollection, provider.getCode(), processId);
       } catch (Exception e) {
-        LOG.info("Executing delete operation with custom query time out for datasetId {}, providerCode {}", idDataCollection, provider.getCode());
-        String datasetName = "dataset_" + idDataCollection;
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(connectionDriver);
-        dataSource.setUrl(connectionUrl);
-        dataSource.setUsername(connectionUsername);
-        dataSource.setPassword(connectionPassword);
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-        jdbcTemplate.setQueryTimeout(DELETE_PROVIDER_QUERY_TIME_OUT);
-        StringBuilder deleteSql = new StringBuilder("delete from ");
-        deleteSql.append(datasetName).append(".record_value where data_provider_code = ?");
-        jdbcTemplate.update(deleteSql.toString(), provider.getCode());
-        LOG.info("Executed delete operation with custom query time out for datasetId {}, providerCode {}", idDataCollection, provider.getCode());
+        try {
+          LOG.info("Release process: Executing delete operation with custom query time out for datasetId {}, providerCode {}", idDataCollection, provider.getCode());
+          Long totalCountOfRecords = recordRepository.countRecordValueByDataProviderCode(provider.getCode());
+          String datasetName = "dataset_" + idDataCollection;
+          DriverManagerDataSource dataSource = new DriverManagerDataSource();
+          dataSource.setDriverClassName(connectionDriver);
+          dataSource.setUrl(connectionUrl);
+          dataSource.setUsername(connectionUsername);
+          dataSource.setPassword(connectionPassword);
+          while (totalCountOfRecords>0) {
+            LOG.info("Release process: executing delete for 100000 records out of {} for datasetId {}, providerCode {}", totalCountOfRecords, idDataCollection, provider.getCode());
+            JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+            StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT id FROM ");
+            deleteSql.append(datasetName).append(".record_value where data_provider_code = ? LIMIT 100000) ");
+            deleteSql.append("DELETE FROM ");
+            deleteSql.append(datasetName).append(".record_value rv ");
+            deleteSql.append("USING rows WHERE rv.id = rows.id;");
+            jdbcTemplate.update(deleteSql.toString(), provider.getCode());
+            LOG.info("Release process: deleted 100000 records for datasetId {}, providerCode {}, counting again", idDataCollection, provider.getCode());
+            totalCountOfRecords = recordRepository.countRecordValueByDataProviderCode(provider.getCode());
+            LOG.info("Release process: executing delete for datasetId {}, providerCode {}, records remaining {}", idDataCollection, provider.getCode(), totalCountOfRecords);
+          }
+          LOG.info("Release process: Executed delete operation with custom query time out for datasetId {}, providerCode {}", idDataCollection, provider.getCode());
+        } catch (Exception er) {
+          LOG.error("Release process: error executing delete operation with custom query time out for datasetId {}, providerCode {}, {}", idDataCollection, provider.getCode(), er.getMessage());
+          throw er;
+        }
       }
 
       // Restore data from snapshot
