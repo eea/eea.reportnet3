@@ -1997,4 +1997,24 @@ public class DatasetControllerImpl implements DatasetController {
     LOG.info("Successfully validated attachment for datasetId {}, fieldId {} and fileName {} Result: {}", datasetId, idField, originalFilename, result);
     return result;
   }
+
+  /**
+   * Deletes the locks related to import
+   * @param datasetId
+   * @return
+   */
+  @Override
+  @DeleteMapping(value = "/deleteLocksToImportProcess/{datasetId}")
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Deletes the locks related to import", hidden = true)
+  public void deleteLocksToImportProcess(@ApiParam(value = "Dataset id from which locks should be removed",
+          example = "15") @PathVariable("datasetId") Long datasetId) {
+    try {
+      datasetService.deleteLocksToImportProcess(datasetId);
+    }
+    catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting locks related to import process for datasetId {} Message: {}",  datasetId, e.getMessage());
+      throw e;
+    }
+  }
 }

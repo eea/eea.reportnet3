@@ -25,6 +25,8 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * The interface Dataset service.
@@ -619,4 +621,11 @@ public interface DatasetService {
    * @return
    */
   boolean truncateDataset(Long datasetId);
+
+  /**
+   * Deletes the locks related to import
+   * @param datasetId
+   * @return
+   */
+  void deleteLocksToImportProcess(Long datasetId);
 }

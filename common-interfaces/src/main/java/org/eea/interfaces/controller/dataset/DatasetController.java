@@ -633,4 +633,12 @@ public interface DatasetController {
   @DeleteMapping("/private/deleteTempEtlExport/{datasetId}")
   void deleteTempEtlExport(@PathVariable("datasetId") Long datasetId);
 
+  /**
+   * Deletes the locks related to import
+   * @param datasetId
+   * @return
+   */
+  @DeleteMapping(value = "/deleteLocksToImportProcess/{datasetId}")
+  void deleteLocksToImportProcess(@PathVariable("datasetId") Long datasetId);
+
 }

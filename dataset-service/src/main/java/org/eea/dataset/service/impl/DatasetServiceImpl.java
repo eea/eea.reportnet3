@@ -3536,4 +3536,24 @@ public class DatasetServiceImpl implements DatasetService {
     LOG.info("Dataset {} has been truncated", datasetId);
     return deleted;
   }
+
+
+  /**
+   * Deletes the locks related to import
+   * @param datasetId
+   * @return
+   */
+  @Override
+  public void deleteLocksToImportProcess(Long datasetId){
+    Map<String, Object> importFileData = new HashMap<>();
+    importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+    importFileData.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(importFileData);
+    Map<String, Object> importBigFileData = new HashMap<>();
+    importBigFileData.put(LiteralConstants.SIGNATURE,
+            LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+    importBigFileData.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(importBigFileData);
+    fileTreatmentHelper.releaseLockReleasingProcess(datasetId);
+  }
 }
