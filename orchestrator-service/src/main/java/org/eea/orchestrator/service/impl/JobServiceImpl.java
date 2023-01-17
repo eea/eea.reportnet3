@@ -88,6 +88,19 @@ public class JobServiceImpl implements JobService {
         return jobMapper.entityListToClass(jobs);
     }
 
+    @Override
+    public List<JobVO> getJobsByStatusAndTypeAndMaxDuration(JobTypeEnum jobType, JobStatusEnum status, Long maxDuration){
+        List<Job> jobs = jobRepository.findByJobStatusAndJobType(status, jobType);
+        List<Job> longRunningJobs = new ArrayList<>();
+        for(Job job : jobs){
+            Long durationOfJob = new Date().getTime() - job.getDateStatusChanged().getTime();
+            if (durationOfJob > maxDuration){
+                longRunningJobs.add(job);
+            }
+        }
+        return jobMapper.entityListToClass(longRunningJobs);
+    }
+
     @Transactional
     @Override
     public Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release) {
