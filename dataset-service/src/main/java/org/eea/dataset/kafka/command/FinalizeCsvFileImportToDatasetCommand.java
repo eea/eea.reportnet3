@@ -71,8 +71,7 @@ public class FinalizeCsvFileImportToDatasetCommand extends AbstractEEAEventHandl
             //return status of task in_queue
             if (task.isPresent()) {
                 task.get().setStatus(ProcessStatusEnum.IN_QUEUE);
-                this.taskRepository.save(task.get());
-                this.taskRepository.flush();
+                this.taskRepository.saveAndFlush(task.get());
             }
             return;
         }

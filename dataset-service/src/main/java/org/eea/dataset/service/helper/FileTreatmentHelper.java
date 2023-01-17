@@ -1453,7 +1453,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
             if(task.isPresent()){
                 task.get().setStatus(ProcessStatusEnum.FINISHED);
-                taskRepository.save(task.get());
+                taskRepository.saveAndFlush(task.get());
             }
             Map<String, Object> value = new HashMap<>();
             value.put(LiteralConstants.DATASET_ID, datasetId);
@@ -1525,7 +1525,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG_ERROR.error("RN3-Import file error for datasetId {}", datasetId, e);
             if(task.isPresent()){
                 task.get().setStatus(ProcessStatusEnum.CANCELED);
-                this.taskRepository.save(task.get());
+                this.taskRepository.saveAndFlush(task.get());
             }
         }
     }
@@ -1758,7 +1758,6 @@ public class FileTreatmentHelper implements DisposableBean {
     void addImportTaskToProcess(String filePath, Long partitionId,String idTableSchema,Long dataflowId,Long datasetId, String fileName,boolean replace,
                                 DataSetSchema schema, ConnectionDataVO connectionDataVO,Long startLine,Long endLine,
                                 final String processId, final EventType eventType,String delimiter) {
-        // if (checkStartedProcess(processId)) {
         if(true){
             EEAEventVO eeaEventVO = new EEAEventVO();
             eeaEventVO.setEventType(eventType);
@@ -1790,7 +1789,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 json = objectMapper.writeValueAsString(eeaEventVO);
                 Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.IMPORT_TASK, new Date(), null, null,
                         json, 0);
-                taskRepository.save(task);
+                taskRepository.saveAndFlush(task);
             } catch (JsonProcessingException e) {
                 LOG_ERROR.error("error processing json");
             }
@@ -1802,7 +1801,6 @@ public class FileTreatmentHelper implements DisposableBean {
     void addExcelImportTaskToProcess(String filePath, Long partitionId,String idTableSchema,Long dataflowId,Long datasetId, String fileName,boolean replace,
                                 DataSetSchema schema, ConnectionDataVO connectionDataVO,
                                 final String processId, final EventType eventType,String delimiter) {
-        // if (checkStartedProcess(processId)) {
         if(true){
             EEAEventVO eeaEventVO = new EEAEventVO();
             eeaEventVO.setEventType(eventType);
@@ -1831,7 +1829,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 json = objectMapper.writeValueAsString(eeaEventVO);
                 Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.IMPORT_TASK, new Date(), null, null,
                         json, 0);
-                taskRepository.save(task);
+                taskRepository.saveAndFlush(task);
             } catch (JsonProcessingException e) {
                 LOG_ERROR.error("error processing json");
             }

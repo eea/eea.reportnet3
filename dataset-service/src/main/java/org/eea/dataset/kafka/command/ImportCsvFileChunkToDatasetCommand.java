@@ -98,7 +98,6 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
     Object replace = eeaEventVO.getData().get("replace");
 
     Long taskId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("task_id")));
-    Optional<Task> task = taskRepository.findById(taskId);
 
     boolean replacebool = !(replace instanceof Boolean) || (boolean) replace;
 
@@ -116,10 +115,7 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
       //Initialize it once and pass it around as a reference, to store the records and fields temp files names and then save them to the Task
       csvFileChunkRecoveryDetails = new CsvFileChunkRecoveryDetails();
     }
-    if(task.isPresent()){
-      csvFileChunkRecoveryDetails.setTaskId(task.get().getId());
-
-    }
+      csvFileChunkRecoveryDetails.setTaskId(taskId);
 
 
     String idTableSchema = String.valueOf(eeaEventVO.getData().get("idTableSchema"));
@@ -145,6 +141,7 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
       fileTreatmentHelper.importCsvFileChunk(datasetId,  fileName, inputStream,partitionId,
                idTableSchema,  replacebool,  dataSetSchema,  delimiter, startLine, endLine, csvFileChunkRecoveryDetails);
       LOG.info("Updating status of task with id {} and datasetId {} to FINISHED.", taskIdStr, datasetId);
+      Optional<Task> task = taskRepository.findById(taskId);
       if(task.isPresent()){
         task.get().setStatus(ProcessStatusEnum.FINISHED);
         task.get().setFinishDate(new Date());
@@ -154,7 +151,7 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
         EEAEventVO eeaEventVOToUpdate = objectMapper.readValue(task.get().getJson(), EEAEventVO.class);
         eeaEventVOToUpdate.getData().put("CsvFileChunkRecoveryDetails",csvFileChunkRecoveryDetails);
         task.get().setJson(objectMapper.writeValueAsString(eeaEventVOToUpdate));
-        taskRepository.save(task.get());
+        taskRepository.saveAndFlush(task.get());
       }
       else{
         LOG.error("Could not update task with id {} and datasetId {} because task is not present.", taskIdStr, datasetId);
@@ -162,9 +159,10 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
     } catch (Exception e) {
       LOG.error("Error Executing ImportCsvFileChunkToDatasetCommand for taskId {} and datasetId {} Error message is {}", taskIdStr, datasetId, e.getMessage());
       LOG.info("Updating status of task with id {} and datasetId {} to CANCELED.", taskIdStr, datasetId);
+      Optional<Task> task = taskRepository.findById(taskId);
       if(task.isPresent()){
         task.get().setStatus(ProcessStatusEnum.CANCELED);
-        taskRepository.save(task.get());
+        taskRepository.saveAndFlush(task.get());
       }
       else{
         LOG.error("Could not update task with id {} and datasetId {} because task is not present.", taskIdStr, datasetId);

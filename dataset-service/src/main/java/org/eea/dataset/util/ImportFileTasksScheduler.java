@@ -92,8 +92,7 @@ public class ImportFileTasksScheduler extends MessageReceiver {
               task.setStartingDate(new Date());
               task.setPod(serviceInstanceId);
               task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-              taskRepository.save(task);
-              taskRepository.flush();
+              taskRepository.saveAndFlush(task);
 
               ObjectMapper objectMapper = new ObjectMapper();
               objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
