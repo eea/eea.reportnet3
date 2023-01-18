@@ -394,7 +394,23 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
             })
           }
           onRowExpand={e => {
-            getJobHistory(e.data.id);
+            const historyData = jobStatusHistory[e.data.id] ?? [];
+
+            if (!(historyData.length === 0)) {
+              const jobHistoryFinalized = historyData.find(
+                jobHistory =>
+                  jobHistory.jobStatus === 'REFUSED' ||
+                  jobHistory.jobStatus === 'CANCELLED' ||
+                  jobHistory.jobStatus === 'FAILED' ||
+                  jobHistory.jobStatus === 'FINISHED'
+              );
+
+              if (!jobHistoryFinalized) {
+                getJobHistory(e.data.id);
+              }
+            } else {
+              getJobHistory(e.data.id);
+            }
           }}
           onRowToggle={e => {
             setExpandedRows(e.data);
