@@ -723,13 +723,17 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.RECORD_REQUIRED);
     }
 
+    LOG.info("PaM group save: Find database Metabase for datasetId {}", datasetId);
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+
+    LOG.info("PaM group save: Get table schema for datasetSchemaId {} and tableSchemaId {}", datasetMetabaseVO.getDatasetSchema(), tableSchemaId);
     TableSchema tableSchema = getTableSchema(tableSchemaId, datasetMetabaseVO.getDatasetSchema());
 
     if (null == tableSchema) {
       throw new EEAException(EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
 
+    LOG.info("PaM group save: Get data provider for dataProviderId {}", datasetMetabaseVO.getDataProviderId());
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
@@ -750,6 +754,7 @@ public class DatasetServiceImpl implements DatasetService {
       }
     }
 
+    LOG.info("PaM group save: Create records and save all for datasetId {}", datasetId);
     recordRepository
         .saveAll(createRecords(datasetId, dataProviderCode, recordVOs, datasetType, tableSchema));
   }
@@ -2484,7 +2489,7 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValues.add(fieldValue);
       }
     }
-    LOG.info("Created {} records for datasetId {}", recordValues.size(), datasetId);
+    LOG.info("PaM group save: Created {} records for datasetId {}", recordValues.size(), datasetId);
     return recordValues;
   }
 

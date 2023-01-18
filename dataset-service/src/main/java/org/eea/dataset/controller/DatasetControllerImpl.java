@@ -605,9 +605,9 @@ public class DatasetControllerImpl implements DatasetController {
           name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @ApiParam(value = "table Records") @RequestBody List<TableVO> tableRecords) {
     try {
-      LOG.info("Inserting multiple records for datasetId {}", datasetId);
+      LOG.info("PaM group save: Inserting multiple records for datasetId {}", datasetId);
       updateRecordHelper.executeMultiCreateProcess(datasetId, tableRecords);
-      LOG.info("Successfully inserted multiple records for datasetId {}", datasetId);
+      LOG.info("PaM group save: Successfully inserted multiple records for datasetId {}", datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error inserting records for datasetId {} Message : {}", datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

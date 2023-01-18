@@ -126,7 +126,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     for (TableVO tableVO : tableRecords) {
       datasetService.insertRecords(datasetId, tableVO.getRecords(), tableVO.getIdTableSchema());
     }
-    LOG.info("Records have been created for datasetId {}", datasetId);
+    LOG.info("PaM group save: Records have been created for datasetId {}", datasetId);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
