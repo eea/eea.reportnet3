@@ -42,6 +42,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [jobStatus, setJobStatus] = useState(null);
+  const [jobStatusHistory, setJobStatusHistory] = useState({});
   const [jobsStatuses, setJobsStatusesList] = useState([]);
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
@@ -97,9 +98,10 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     try {
       const data = await JobsStatusesService.getJobHistory(jobId);
 
-      for (let d of data) {
-        console.log('getJobHistory data: ' + d.id);
-      }
+      setJobStatusHistory(state => ({
+        ...state,
+        [jobId]: data
+      }));
 
       setLoadingStatus('success');
     } catch (error) {
@@ -292,20 +294,20 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const getDatasetIdTemplate = job => <p>{job.datasetId}</p>;
 
   const rowExpansionTemplate = data => {
-    console.log('data.id is: ' + data.id);
-    console.log('expandedRows is: ' + expandedRows);
-    // getJobHistory(data.id);
+    const historyData = jobStatusHistory[data.id] ?? [];
 
     return (
       <div className={styles.expandedTable}>
         <h6>Job history for job {data.id} </h6>
-        <DataTable responsiveLayout="scroll" value={data}>
-          {/* <Column field="id" header={resourcesContext.messages['jobId']}></Column> */}
-          <Column field="jobStatus" header={resourcesContext.messages['jobStatus']} body={data.id}></Column>
+        <DataTable responsiveLayout="scroll" value={historyData}>
           <Column
+            body={getJobStatusTemplate}
+            field="jobStatus"
+            header={resourcesContext.messages['jobStatus']}></Column>
+          <Column
+            body={job => getDateStatusChangedTemplate(job, 'dateStatusChanged')}
             field="dateStatusChanged"
-            header={resourcesContext.messages['dateStatusChanged']}
-            body={data.id}></Column>
+            header={resourcesContext.messages['dateStatusChanged']}></Column>
         </DataTable>
       </div>
     );
@@ -391,13 +393,11 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               pageNum: event.page
             })
           }
+          onRowExpand={e => {
+            getJobHistory(e.data.id);
+          }}
           onRowToggle={e => {
             setExpandedRows(e.data);
-            for (let d of e.data) {
-              getJobHistory(d.id);
-              console.log('e.data: ' + d.id);
-            }
-            // console.log('e.data: ' + e.data.id);
           }}
           onSort={onSort}
           paginator={true}

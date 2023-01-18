@@ -203,7 +203,7 @@ export class DataTable extends Component {
     tableClassName: PropTypes.string,
     tableStyle: PropTypes.any,
     totalRecords: PropTypes.number,
-    value: PropTypes.oneOfType([PropTypes.array, PropTypes.object]),
+    value: PropTypes.array,
     virtualRowHeight: PropTypes.number,
     virtualScroll: PropTypes.bool,
     virtualScrollDelay: PropTypes.number
