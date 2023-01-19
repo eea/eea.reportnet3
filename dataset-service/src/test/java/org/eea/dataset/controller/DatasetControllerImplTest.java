@@ -2,7 +2,7 @@ package org.eea.dataset.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -35,6 +35,7 @@ import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.lock.service.LockService;
 import org.eea.utils.LiteralConstants;
 import org.junit.Assert;
@@ -299,7 +300,7 @@ public class DatasetControllerImplTest {
   public void testImportBigFileData() throws Exception {
     MultipartFile multipartFile =
         new MockMultipartFile("multipartFile", "multipartFile".getBytes());
-
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
     doNothing().when(fileTreatmentHelper).importFileData(1L,2L, "tableSchemaId", multipartFile, true,
         1L, "delimiter", 0L);
     datasetControllerImpl.importBigFileData(1L, 2L, 1L, "tableSchemaId", multipartFile, true, 1L,
@@ -317,7 +318,7 @@ public class DatasetControllerImplTest {
   public void testImportBigFileDataEEAException() throws Exception {
     MultipartFile multipartFile =
         new MockMultipartFile("multipartFile", "multipartFile".getBytes());
-
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
     doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(1L,2L, "tableSchemaId",
         multipartFile, true, 1L, "delimiter", 0L);
     try {
@@ -1450,6 +1451,7 @@ public class DatasetControllerImplTest {
 
     Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.nullable(Long.class));
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
     datasetControllerImpl.importFileDataLegacy(1L, 1L, 1L, "5cf0e9b3b793310e9ceca190", fileMock, true,
         1L, null, null);
     Mockito.verify(fileTreatmentHelper, times(1)).importFileData(Mockito.anyLong(), Mockito.any(),Mockito.any(),
