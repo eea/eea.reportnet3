@@ -2923,37 +2923,32 @@ public class DatasetServiceImpl implements DatasetService {
    */
   private void deleteRecordsFromIdTableSchema(Long datasetId, String tableSchemaId) {
     try {
-      recordRepository.deleteRecordWithIdTableSchema(tableSchemaId);
-      LOG.info("Executed deleteRecords: datasetId={}, tableSchemaId={}", datasetId, tableSchemaId);
-    } catch (Exception e) {
-      try {
-        LOG.info("RN3 Import process: executing delete operation with custom query time out for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
-        Long totalCountOfRecords = recordRepository.countByTableSchema(tableSchemaId);
-        String datasetName = "dataset_" + datasetId;
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(connectionDriver);
-        dataSource.setUrl(connectionUrl);
-        dataSource.setUsername(connectionUsername);
-        dataSource.setPassword(connectionPassword);
-        while (totalCountOfRecords>0) {
-          LOG.info("RN3 Import process: executing delete for 100000 records out of {} for datasetId {}, tableSchemaId {}", totalCountOfRecords, datasetId, tableSchemaId);
-          JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-          StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT r.id FROM ");
-          deleteSql.append(datasetName).append(".record_value r join ");
-          deleteSql.append(datasetName).append(".table_value t on r.id_table = t.id where t.id_table_schema = ? LIMIT 100000) ");
-          deleteSql.append("DELETE FROM ");
-          deleteSql.append(datasetName).append(".record_value rv ");
-          deleteSql.append("USING rows WHERE rv.id = rows.id;");
-          jdbcTemplate.update(deleteSql.toString(), tableSchemaId);
-          LOG.info("RN3 Import process: deleted 100000 records for datasetId {}, tableSchemaId {}, counting again", datasetId, tableSchemaId);
-          totalCountOfRecords = recordRepository.countByTableSchema(tableSchemaId);
-          LOG.info("RN3 Import process: executing for datasetId {}, tableSchemaId {}, records remaining {}", datasetId, tableSchemaId, totalCountOfRecords);
-        }
-         LOG.info("RN3 Import process: executed delete operation with custom query time out for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
-      } catch (Exception er) {
-        LOG.error("RN3 Import process: error executing delete operation with custom query time out for datasetId {}, tableSchemaId {}, {}", datasetId, tableSchemaId, er.getMessage());
-        throw er;
+      LOG.info("RN3 Import process: executing delete operation for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
+      Long totalCountOfRecords = recordRepository.countByTableSchema(tableSchemaId);
+      String datasetName = "dataset_" + datasetId;
+      DriverManagerDataSource dataSource = new DriverManagerDataSource();
+      dataSource.setDriverClassName(connectionDriver);
+      dataSource.setUrl(connectionUrl);
+      dataSource.setUsername(connectionUsername);
+      dataSource.setPassword(connectionPassword);
+      while (totalCountOfRecords>0) {
+        LOG.info("RN3 Import process: executing delete for 100000 records out of {} for datasetId {}, tableSchemaId {}", totalCountOfRecords, datasetId, tableSchemaId);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT r.id FROM ");
+        deleteSql.append(datasetName).append(".record_value r join ");
+        deleteSql.append(datasetName).append(".table_value t on r.id_table = t.id where t.id_table_schema = ? LIMIT 100000) ");
+        deleteSql.append("DELETE FROM ");
+        deleteSql.append(datasetName).append(".record_value rv ");
+        deleteSql.append("USING rows WHERE rv.id = rows.id;");
+        jdbcTemplate.update(deleteSql.toString(), tableSchemaId);
+        LOG.info("RN3 Import process: deleted 100000 records for datasetId {}, tableSchemaId {}, counting again", datasetId, tableSchemaId);
+        totalCountOfRecords = recordRepository.countByTableSchema(tableSchemaId);
+        LOG.info("RN3 Import process: executing for datasetId {}, tableSchemaId {}, records remaining {}", datasetId, tableSchemaId, totalCountOfRecords);
       }
+      LOG.info("RN3 Import process: executed delete operation for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
+    } catch (Exception er) {
+      LOG.error("RN3 Import process: error executing delete operation for datasetId {}, tableSchemaId {}, {}", datasetId, tableSchemaId, er.getMessage());
+      throw er;
     }
   }
 

@@ -42,6 +42,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [jobStatus, setJobStatus] = useState(null);
+  const [jobStatusHistory, setJobStatusHistory] = useState({});
   const [jobsStatuses, setJobsStatusesList] = useState([]);
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
@@ -83,6 +84,28 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       setLoadingStatus('success');
     } catch (error) {
       console.error('JobsStatus - getJobsStatuses.', error);
+      setLoadingStatus('error');
+      notificationContext.add({ type: 'GET_JOBS_STATUSES_ERROR' }, true);
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  const getJobHistory = async jobId => {
+    setLoadingStatus('pending');
+
+    try {
+      const data = await JobsStatusesService.getJobHistory(jobId);
+
+      setJobStatusHistory(state => ({
+        ...state,
+        [jobId]: data
+      }));
+
+      setLoadingStatus('success');
+    } catch (error) {
+      console.error('JobsStatus - getJobHistory.', error);
       setLoadingStatus('error');
       notificationContext.add({ type: 'GET_JOBS_STATUSES_ERROR' }, true);
     } finally {
@@ -271,16 +294,20 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const getDatasetIdTemplate = job => <p>{job.datasetId}</p>;
 
   const rowExpansionTemplate = data => {
+    const historyData = jobStatusHistory[data.id] ?? [];
+
     return (
       <div className={styles.expandedTable}>
-        <h6>Job history</h6>
-        <DataTable responsiveLayout="scroll" value={data}>
-          <Column field="id" header={resourcesContext.messages['jobId']}></Column>
-          <Column field="jobStatus" header={resourcesContext.messages['jobStatus']}></Column>
+        <h6>Job history for job {data.id} </h6>
+        <DataTable responsiveLayout="scroll" value={historyData}>
           <Column
+            body={getJobStatusTemplate}
+            field="jobStatus"
+            header={resourcesContext.messages['jobStatus']}></Column>
+          <Column
+            body={job => getDateStatusChangedTemplate(job, 'dateStatusChanged')}
             field="dateStatusChanged"
-            header={resourcesContext.messages['dateStatusChanged']}
-            body={data.id}></Column>
+            header={resourcesContext.messages['dateStatusChanged']}></Column>
         </DataTable>
       </div>
     );
@@ -366,6 +393,25 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               pageNum: event.page
             })
           }
+          onRowExpand={e => {
+            const historyData = jobStatusHistory[e.data.id] ?? [];
+
+            if (!(historyData.length === 0)) {
+              const jobHistoryFinalized = historyData.find(
+                jobHistory =>
+                  jobHistory.jobStatus === 'REFUSED' ||
+                  jobHistory.jobStatus === 'CANCELLED' ||
+                  jobHistory.jobStatus === 'FAILED' ||
+                  jobHistory.jobStatus === 'FINISHED'
+              );
+
+              if (!jobHistoryFinalized) {
+                getJobHistory(e.data.id);
+              }
+            } else {
+              getJobHistory(e.data.id);
+            }
+          }}
           onRowToggle={e => {
             setExpandedRows(e.data);
           }}

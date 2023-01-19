@@ -1,9 +1,5 @@
 package org.eea.dataset.service.helper;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.transaction.Transactional;
-
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -24,9 +20,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import javax.transaction.Transactional;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The Class FileTreatmentHelper.
@@ -39,6 +42,30 @@ public class DeleteHelper {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DeleteHelper.class);
+
+  /**
+   * The connection url.
+   */
+  @Value("${spring.datasource.url}")
+  private String connectionUrl;
+
+  /**
+   * The connection username.
+   */
+  @Value("${spring.datasource.dataset.username}")
+  private String connectionUsername;
+
+  /**
+   * The connection password.
+   */
+  @Value("${spring.datasource.dataset.password}")
+  private String connectionPassword;
+
+  /**
+   * The connection driver.
+   */
+  @Value("${spring.datasource.driverClassName}")
+  private String connectionDriver;
 
   /** The kafka sender helper. */
   @Autowired
@@ -210,7 +237,33 @@ public class DeleteHelper {
     RecordValue recordValue = recordRepository.findFirstByDataProviderCode(providerCode);
     if (recordValue!=null) {
       LOG.info("Deleting data with providerCode: {} for release processId {}", providerCode, processId);
-      recordRepository.deleteByDataProviderCode(providerCode);
+      try {
+        LOG.info("Release process: Executing delete operation with custom query time out for datasetId {}, providerCode {}", datasetId, providerCode);
+        Long totalCountOfRecords = recordRepository.countRecordValueByDataProviderCode(providerCode);
+        String datasetName = "dataset_" + datasetId;
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setDriverClassName(connectionDriver);
+        dataSource.setUrl(connectionUrl);
+        dataSource.setUsername(connectionUsername);
+        dataSource.setPassword(connectionPassword);
+        while (totalCountOfRecords>0) {
+          LOG.info("Release process: executing delete for 100000 records out of {} for datasetId {}, providerCode {}", totalCountOfRecords, datasetId, providerCode);
+          JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+          StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT id FROM ");
+          deleteSql.append(datasetName).append(".record_value where data_provider_code = ? LIMIT 100000) ");
+          deleteSql.append("DELETE FROM ");
+          deleteSql.append(datasetName).append(".record_value rv ");
+          deleteSql.append("USING rows WHERE rv.id = rows.id;");
+          jdbcTemplate.update(deleteSql.toString(), providerCode);
+          LOG.info("Release process: deleted 100000 records for datasetId {}, providerCode {}, counting again", datasetId, providerCode);
+          totalCountOfRecords = recordRepository.countRecordValueByDataProviderCode(providerCode);
+          LOG.info("Release process: executing delete for datasetId {}, providerCode {}, records remaining {}", datasetId, providerCode, totalCountOfRecords);
+        }
+        LOG.info("Release process: Executed delete operation with custom query time out for datasetId {}, providerCode {}", datasetId, providerCode);
+      } catch (Exception er) {
+        LOG.error("Release process: error executing delete operation with custom query time out for datasetId {}, providerCode {}, {}", datasetId, providerCode, er.getMessage());
+        throw er;
+      }
     }
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);

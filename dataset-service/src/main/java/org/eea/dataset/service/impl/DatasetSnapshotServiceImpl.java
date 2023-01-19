@@ -69,8 +69,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -91,30 +89,6 @@ import java.util.stream.Collectors;
  */
 @Service("datasetSnapshotService")
 public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
-
-  /**
-   * The connection url.
-   */
-  @Value("${spring.datasource.url}")
-  private String connectionUrl;
-
-  /**
-   * The connection username.
-   */
-  @Value("${spring.datasource.dataset.username}")
-  private String connectionUsername;
-
-  /**
-   * The connection password.
-   */
-  @Value("${spring.datasource.dataset.password}")
-  private String connectionPassword;
-
-  /**
-   * The connection driver.
-   */
-  @Value("${spring.datasource.driverClassName}")
-  private String connectionDriver;
 
   /**
    * The admin user.
@@ -619,37 +593,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     if (provider != null && idDataCollection != null) {
       TenantResolver
           .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataCollection));
-      try {
-        deleteHelper.deleteRecordValuesByProvider(idDataCollection, provider.getCode(), processId);
-      } catch (Exception e) {
-        try {
-          LOG.info("Release process: Executing delete operation with custom query time out for datasetId {}, providerCode {}", idDataCollection, provider.getCode());
-          Long totalCountOfRecords = recordRepository.countRecordValueByDataProviderCode(provider.getCode());
-          String datasetName = "dataset_" + idDataCollection;
-          DriverManagerDataSource dataSource = new DriverManagerDataSource();
-          dataSource.setDriverClassName(connectionDriver);
-          dataSource.setUrl(connectionUrl);
-          dataSource.setUsername(connectionUsername);
-          dataSource.setPassword(connectionPassword);
-          while (totalCountOfRecords>0) {
-            LOG.info("Release process: executing delete for 100000 records out of {} for datasetId {}, providerCode {}", totalCountOfRecords, idDataCollection, provider.getCode());
-            JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-            StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT id FROM ");
-            deleteSql.append(datasetName).append(".record_value where data_provider_code = ? LIMIT 100000) ");
-            deleteSql.append("DELETE FROM ");
-            deleteSql.append(datasetName).append(".record_value rv ");
-            deleteSql.append("USING rows WHERE rv.id = rows.id;");
-            jdbcTemplate.update(deleteSql.toString(), provider.getCode());
-            LOG.info("Release process: deleted 100000 records for datasetId {}, providerCode {}, counting again", idDataCollection, provider.getCode());
-            totalCountOfRecords = recordRepository.countRecordValueByDataProviderCode(provider.getCode());
-            LOG.info("Release process: executing delete for datasetId {}, providerCode {}, records remaining {}", idDataCollection, provider.getCode(), totalCountOfRecords);
-          }
-          LOG.info("Release process: Executed delete operation with custom query time out for datasetId {}, providerCode {}", idDataCollection, provider.getCode());
-        } catch (Exception er) {
-          LOG.error("Release process: error executing delete operation with custom query time out for datasetId {}, providerCode {}, {}", idDataCollection, provider.getCode(), er.getMessage());
-          throw er;
-        }
-      }
+      deleteHelper.deleteRecordValuesByProvider(idDataCollection, provider.getCode(), processId);
 
       // Restore data from snapshot
       try {
