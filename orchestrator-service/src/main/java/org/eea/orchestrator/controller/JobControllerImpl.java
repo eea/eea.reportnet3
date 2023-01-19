@@ -203,7 +203,8 @@ public class JobControllerImpl implements JobController {
             @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
                     value = "integrationId", required = false) Long integrationId,
             @ApiParam(type = "String", value = "File delimiter",
-            example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
+            example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+                              @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus) {
 
         ThreadPropertiesManager.setVariable("user",
                 SecurityContextHolder.getContext().getAuthentication().getName());
@@ -219,6 +220,9 @@ public class JobControllerImpl implements JobController {
         parameters.put("integrationId", integrationId);
         parameters.put("delimiter", delimiter);
         JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
+        if(jobStatus != null){
+            statusToInsert = jobStatus;
+        }
 
         LOG.info("Adding import job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={}, replace={}, integrationId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, replace, integrationId, SecurityContextHolder.getContext().getAuthentication().getName());
         Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.IMPORT, statusToInsert, false);
@@ -293,7 +297,8 @@ public class JobControllerImpl implements JobController {
      */
     @Override
     @GetMapping(value = "/checkEligibility")
-    public JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release, @RequestParam("dataflowId") Long dataflowId, @RequestParam("dataProviderID") Long dataProviderId, @RequestParam("datasets") List<Long> datasets) {
+    public JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release,
+                                               @RequestParam("dataflowId") Long dataflowId, @RequestParam(value="dataProviderID", required = false) Long dataProviderId, @RequestParam("datasets") List<Long> datasets) {
         return jobService.checkEligibilityOfJob(jobType, dataflowId, dataProviderId, datasets, release);
     }
 

@@ -38,7 +38,7 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
     @Transactional
     @Modifying
     @Query(nativeQuery = true,
-            value = "DELETE FROM jobs WHERE job_status in :statuses AND date_status_changed < now() - interval '1 days'")
+            value = "DELETE FROM jobs WHERE job_status in :statuses AND date_status_changed < now() - interval '3 days'")
     void deleteJobsBasedOnStatusAndDuration(@Param("statuses") Set<String> statuses);
 
     /**
@@ -56,6 +56,15 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
      * @return
      */
     List<Job> findByJobStatusAndJobType(JobStatusEnum jobStatus, JobTypeEnum jobType);
+
+    /**
+     *
+     * @param jobStatus
+     * @param jobType
+     * @param datasetId
+     * @return
+     */
+    List<Job> findByJobStatusAndJobTypeInAndDatasetId(JobStatusEnum jobStatus, List<JobTypeEnum> jobType, Long datasetId);
 
     /**
      *

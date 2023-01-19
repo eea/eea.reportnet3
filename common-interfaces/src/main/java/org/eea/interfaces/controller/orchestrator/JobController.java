@@ -91,6 +91,7 @@ public interface JobController {
      * @param replace the replace
      * @param integrationId the id of the integration
      * @param delimiter the delimiter
+     * @param jobStatus the status of the job
      * @return the job id
      */
     @PostMapping(value = "/addImport/{datasetId}")
@@ -101,7 +102,8 @@ public interface JobController {
                        @RequestParam("fileName") String fileName,
                        @RequestParam(value = "replace", required = false) boolean replace,
                        @RequestParam(value = "integrationId", required = false) Long integrationId,
-                       @RequestParam(value = "delimiter", required = false) String delimiter);
+                       @RequestParam(value = "delimiter", required = false) String delimiter,
+                      @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus);
 
 
     /**
@@ -143,7 +145,7 @@ public interface JobController {
      */
     @GetMapping(value = "/checkEligibility")
     JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release, @RequestParam("dataflowId") Long dataflowId,
-                                        @RequestParam("dataProviderID") Long dataProviderId, @RequestParam("datasets") List<Long> datasets);
+                                        @RequestParam(value="dataProviderID", required = false) Long dataProviderId, @RequestParam("datasets") List<Long> datasets);
 
     /**
      * Finds job by id

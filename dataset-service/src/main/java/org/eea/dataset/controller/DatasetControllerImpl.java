@@ -34,6 +34,7 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -270,6 +271,7 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "Fme Job Id",
               example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
 
+    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
     Long jobId = null;
     try {
       if (dataflowId == null){
@@ -279,16 +281,24 @@ public class DatasetControllerImpl implements DatasetController {
       if(fmeJobId!=null){
         JobVO job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
         jobId = job.getId();
-        LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {}", fmeJobId, jobId);
+        LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, datasetId);
       }else{
-        jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter);
+        //check if there is already an import job with status IN_PROGRESS for the specific datasetId
+        List<Long> datasetIds = new ArrayList<>();
+        datasetIds.add(datasetId);
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+        jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus);
+        if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
+          LOG.info("Added import job with id {} for datasetId {} with status REFUSED because there already is an import job with status IN_PROGRESS for the same datasetId", jobId, datasetId);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_DATASET);
+        }
       }
 
       LOG.info("Importing big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
       fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId, delimiter, jobId);
       LOG.info("Successfully imported big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
     } catch (EEAException e) {
-      LOG_ERROR.error(
+      LOG.error(
           "File import failed: dataflowId={} datasetId={}, tableSchemaId={}, fileName={}. Message: {}", dataflowId, datasetId,
           tableSchemaId, file.getOriginalFilename(), e.getMessage(), e);
       if (jobId!=null) {
@@ -302,8 +312,8 @@ public class DatasetControllerImpl implements DatasetController {
           EEAErrorMessage.IMPORTING_FILE_DATASET);
     } catch (Exception e) {
       String fileName = (file != null) ? file.getName() : null;
-      LOG_ERROR.error("Unexpected error! Error importing big file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
-      if (jobId!=null) {
+      LOG.error("Unexpected error! Error importing big file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
+      if (jobId!=null && jobStatus != JobStatusEnum.REFUSED) {
         jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
       }
       throw e;
@@ -358,7 +368,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       LOG.info("Successfully imported file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
     } catch (EEAException e) {
-      LOG_ERROR.error(
+      LOG.error(
           "File import failed: datasetId={}, tableSchemaId={}, fileName={}. Message: {}", datasetId,
           tableSchemaId, file.getOriginalFilename(), e.getMessage(), e);
       Map<String, Object> importFileData = new HashMap<>();
@@ -369,7 +379,7 @@ public class DatasetControllerImpl implements DatasetController {
           EEAErrorMessage.IMPORTING_FILE_DATASET);
     } catch (Exception e) {
       String fileName = (file != null) ? file.getName() : null;
-      LOG_ERROR.error("Unexpected error! Error importing file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error importing file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
       throw e;
     }
   }
