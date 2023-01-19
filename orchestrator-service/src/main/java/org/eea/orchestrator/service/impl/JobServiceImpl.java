@@ -144,7 +144,6 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public JobStatusEnum checkEligibilityOfJob(String jobType, Long dataflowId, Long dataProviderId, List<Long> datasetIds, boolean release){
-        //TODO implement check for all jobTypes
         if (jobType.equals(JobTypeEnum.VALIDATION.toString()) && release || jobType.equals(JobTypeEnum.RELEASE.toString())) {
             List<Job> validationJobList = jobRepository.findByJobTypeAndJobStatusInAndRelease(JobTypeEnum.VALIDATION, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), false);
             for (Job job : validationJobList) {
@@ -192,6 +191,15 @@ public class JobServiceImpl implements JobService {
                 if (dataflowId.equals(insertedDataflowId)) {
                     return JobStatusEnum.REFUSED;
                 }
+            }
+        }
+        else if (jobType.equals(JobTypeEnum.IMPORT.toString())) {
+            List<Job> jobList = jobRepository.findByJobStatusAndJobTypeInAndDatasetId(JobStatusEnum.IN_PROGRESS, Arrays.asList(JobTypeEnum.IMPORT, JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), datasetIds.get(0));
+            if(jobList != null && jobList.size() > 0){
+                return JobStatusEnum.REFUSED;
+            }
+            else{
+                return JobStatusEnum.IN_PROGRESS;
             }
         }
         return JobStatusEnum.QUEUED;
