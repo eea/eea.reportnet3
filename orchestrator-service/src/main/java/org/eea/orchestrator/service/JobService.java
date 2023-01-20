@@ -6,6 +6,7 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.springframework.data.domain.Pageable;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -44,5 +45,7 @@ public interface JobService {
     JobVO findByFmeJobId(String fmeJobId);
 
     void updateFmeJobId(Long jobId,String fmeJobId);
+
+    List<BigInteger> listJobsThatExceedTimeWithSpecificStatus(String status, long timeInMinutes);
 
 }

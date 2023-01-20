@@ -132,4 +132,24 @@ public class EUDatasetControllerImpl implements EUDatasetController {
     this.populateDataFromDataCollection(dataflowId, null);
   }
 
+  /**
+   * Remove locks related to populate eu
+   * @param dataflowId
+   */
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/removeLocksRelatedToPopulateEU/{dataflowId}")
+  @ApiOperation(value = "Remove locks related to populate eu", hidden = true)
+  public void removeLocksRelatedToPopulateEU(@PathVariable("dataflowId") Long dataflowId) {
+    euDatasetService.removeLocksRelatedToPopulateEU(dataflowId);
+  }
 }
+
+
+
+
+
+
+
+
+

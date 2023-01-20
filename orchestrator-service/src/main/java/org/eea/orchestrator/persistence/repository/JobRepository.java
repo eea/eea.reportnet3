@@ -9,6 +9,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import javax.transaction.Transactional;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -105,5 +106,35 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
      * @return
      */
     List<Job> findByDataflowIdAndJobTypeInAndJobStatusAndRelease(Long dataflowId, List<JobTypeEnum> jobType, JobStatusEnum jobStatus, boolean release);
+
+    /**
+     * Finds jobs that are in a specific status for more than timeInMinutes
+     * @param status
+     * @param timeInMinutes
+     * @return
+     */
+    @Query(nativeQuery = true,
+            value = "select id from jobs where job_status= :status and (extract(epoch from LOCALTIMESTAMP - date_status_changed) / 60) > :timeInMinutes")
+    List<BigInteger> findJobsThatExceedTimeWithSpecificStatus(@Param("status") String status, @Param("timeInMinutes") long timeInMinutes);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

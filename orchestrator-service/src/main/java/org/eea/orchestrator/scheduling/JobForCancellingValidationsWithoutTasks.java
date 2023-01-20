@@ -126,7 +126,7 @@ public class JobForCancellingValidationsWithoutTasks {
                             LOG.info("Job canceled for canceled process {}, datasetId {}", processVO.getProcessId(), processVO.getDatasetId());
                         }
                     } catch (Exception e) {
-                        LOG.error("Error while running scheduled task cancelInProgressValidationsWithoutTasks for processId {}", processVO.getProcessId());
+                        LOG.error("Error while running scheduled task cancelInProgressValidationsWithoutTasks for processId {}, {}", processVO.getProcessId(), e.getMessage());
                     }
                 });
             }
