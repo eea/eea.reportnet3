@@ -246,19 +246,24 @@ public class JobControllerImpl implements JobController {
     @ApiOperation(value = "Copy data collections data to EU datasets by dataflow id",
             notes = "Allowed roles: CUSTODIAN, STEWARD")
     public void addCopyToEUDatasetJob(@ApiParam(type = "Long", value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
-        ThreadPropertiesManager.setVariable("user",
-                SecurityContextHolder.getContext().getAuthentication().getName());
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        ThreadPropertiesManager.setVariable("user", username);
 
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("dataflowId", dataflowId);
-        String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
-        parameters.put("userId", userId);
-        JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.COPY_TO_EU_DATASET.toString(), dataflowId, null, null, false);
-        LOG.info("Adding copy to eudataset job for dataflowId={}", dataflowId);
-        Long jobId = jobService.addJob(dataflowId, null, null, parameters, JobTypeEnum.COPY_TO_EU_DATASET, statusToInsert, false);
-        LOG.info("Successfully added copy to eudataset job with id {} for dataflowId={}", jobId, dataflowId);
-        if (statusToInsert == JobStatusEnum.REFUSED) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_COPY_TO_EU_DATASET_JOB);
+        try {
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("dataflowId", dataflowId);
+            String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
+            parameters.put("userId", userId);
+            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.COPY_TO_EU_DATASET.toString(), dataflowId, null, null, false);
+            LOG.info("Adding copy to eudataset job for dataflowId={}", dataflowId);
+            Long jobId = jobService.addJob(dataflowId, null, null, parameters, JobTypeEnum.COPY_TO_EU_DATASET, statusToInsert, false);
+            LOG.info("Successfully added copy to eudataset job with id {} for dataflowId={}", jobId, dataflowId);
+            if (statusToInsert == JobStatusEnum.REFUSED) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_COPY_TO_EU_DATASET_JOB);
+            }
+        } catch (Exception e) {
+            LOG.error("Unexpected error! Could not add copy to eudataset job for dataflowId {}, creator {}. Message: {}", dataflowId, username, e.getMessage());
+            throw e;
         }
     }
 
