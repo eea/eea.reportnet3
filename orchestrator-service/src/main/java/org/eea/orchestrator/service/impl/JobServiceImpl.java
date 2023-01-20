@@ -1,5 +1,6 @@
 package org.eea.orchestrator.service.impl;
 
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
@@ -58,20 +59,24 @@ public class JobServiceImpl implements JobService {
     @Autowired
     private JobRepository jobRepository;
 
-    /** The job mapper. */
     @Autowired
     private JobMapper jobMapper;
 
     @Autowired
     private JobHistoryService jobHistoryService;
 
-    /** The job utils. */
+    @Autowired
+    private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+    /**
+     * The job utils.
+     */
     @Autowired
     private JobUtils jobUtils;
 
     @Override
     public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, Long providerId,
-                          Long datasetId, String creatorUsername, String jobStatuses){
+                          Long datasetId, String creatorUsername, String jobStatuses) {
         String sortedTableColumn = jobUtils.getJobColumnNameByObjectName(sortedColumn);
         List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, providerId, datasetId, creatorUsername, jobStatuses);
         List<JobVO> jobVOList = jobMapper.entityListToClass(jobs);
@@ -84,18 +89,18 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<JobVO> getJobsByStatus(JobStatusEnum status){
+    public List<JobVO> getJobsByStatus(JobStatusEnum status) {
         List<Job> jobs = jobRepository.findAllByJobStatusOrderById(status);
         return jobMapper.entityListToClass(jobs);
     }
 
     @Override
-    public List<JobVO> getJobsByStatusAndTypeAndMaxDuration(JobTypeEnum jobType, JobStatusEnum status, Long maxDuration){
+    public List<JobVO> getJobsByStatusAndTypeAndMaxDuration(JobTypeEnum jobType, JobStatusEnum status, Long maxDuration) {
         List<Job> jobs = jobRepository.findByJobStatusAndJobType(status, jobType);
         List<Job> longRunningJobs = new ArrayList<>();
-        for(Job job : jobs){
+        for (Job job : jobs) {
             Long durationOfJob = new Date().getTime() - job.getDateStatusChanged().getTime();
-            if (durationOfJob > maxDuration){
+            if (durationOfJob > maxDuration) {
                 longRunningJobs.add(job);
             }
         }
@@ -103,7 +108,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<JobVO> getJobsByTypeAndStatus(JobTypeEnum type, JobStatusEnum status){
+    public List<JobVO> getJobsByTypeAndStatus(JobTypeEnum type, JobStatusEnum status) {
         List<Job> jobs = jobRepository.findByJobTypeAndJobStatus(type, status);
         return jobMapper.entityListToClass(jobs);
     }
@@ -112,14 +117,14 @@ public class JobServiceImpl implements JobService {
     @Override
     public Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release) {
         Timestamp ts = new Timestamp(System.currentTimeMillis());
-        Job job = new Job(null, jobType, jobStatus, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), release, dataflowId, dataProviderId, datasetId,null);
+        Job job = new Job(null, jobType, jobStatus, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), release, dataflowId, dataProviderId, datasetId, null);
         job = jobRepository.save(job);
         jobHistoryService.saveJobHistory(job);
         return job.getId();
     }
 
     @Override
-    public Boolean canJobBeExecuted(JobVO job){
+    public Boolean canJobBeExecuted(JobVO job) {
         JobTypeEnum jobType = job.getJobType();
         Integer numberOfCurrentJobs = 0;
         if (jobType == JobTypeEnum.VALIDATION && job.isRelease() || jobType == JobTypeEnum.RELEASE) {
@@ -134,64 +139,55 @@ public class JobServiceImpl implements JobService {
         } else {
             numberOfCurrentJobs = jobRepository.countByJobStatusAndJobType(JobStatusEnum.IN_PROGRESS, jobType);
         }
-        if(job.getJobType() == JobTypeEnum.IMPORT && numberOfCurrentJobs < maximumNumberOfInProgressImportJobs){
+        if (job.getJobType() == JobTypeEnum.IMPORT && numberOfCurrentJobs < maximumNumberOfInProgressImportJobs) {
             return true;
-        }
-        else if(jobType == JobTypeEnum.VALIDATION && !job.isRelease() && numberOfCurrentJobs < maximumNumberOfInProgressValidationJobs){
+        } else if (jobType == JobTypeEnum.VALIDATION && !job.isRelease() && numberOfCurrentJobs < maximumNumberOfInProgressValidationJobs) {
             return true;
-        }
-        else if(jobType == JobTypeEnum.COPY_TO_EU_DATASET && numberOfCurrentJobs < maximumNumberOfInProgressCopyToEuDatasetJobs){
+        } else if (jobType == JobTypeEnum.COPY_TO_EU_DATASET && numberOfCurrentJobs < maximumNumberOfInProgressCopyToEuDatasetJobs) {
             return true;
-        }
-        else if(jobType == JobTypeEnum.EXPORT && numberOfCurrentJobs < maximumNumberOfInProgressExportJobs){
+        } else if (jobType == JobTypeEnum.EXPORT && numberOfCurrentJobs < maximumNumberOfInProgressExportJobs) {
             return true;
         }
         return false;
     }
 
     @Override
-    public JobStatusEnum checkEligibilityOfJob(String jobType, Long dataflowId, Long dataProviderId, List<Long> datasetIds, boolean release){
-        if (jobType.equals(JobTypeEnum.VALIDATION.toString()) && release || jobType.equals(JobTypeEnum.RELEASE.toString())) {
-            List<Job> validationJobList = jobRepository.findByJobTypeAndJobStatusInAndRelease(JobTypeEnum.VALIDATION, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), false);
-            for (Job job : validationJobList) {
+    public JobStatusEnum checkEligibilityOfJob(String jobType, Long dataflowId, Long dataProviderId, List<Long> datasetIds, boolean release) {
+        if (jobType.equals(JobTypeEnum.VALIDATION.toString()) || jobType.equals(JobTypeEnum.RELEASE.toString())) {
+            List<Job> jobsList = jobRepository.findByJobTypeInAndJobStatusIn(Arrays.asList(JobTypeEnum.VALIDATION, JobTypeEnum.RELEASE, JobTypeEnum.IMPORT), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
+            for (Job job : jobsList) {
                 Map<String, Object> insertedParameters = job.getParameters();
-                Long insertedDatasetId = Long.valueOf((Integer) insertedParameters.get("datasetId"));
-                for (Long id : datasetIds) {
-                    if(id.equals(insertedDatasetId)){
-                        return JobStatusEnum.REFUSED;
+                if (!job.isRelease()) {
+                    //validation job without release or import job
+                    for (Long id : datasetIds) {
+                        if (id.equals(job.getDatasetId())) {
+                            return JobStatusEnum.REFUSED;
+                        }
+                    }
+                } else {
+                    //validation job with release or release job
+                    List<Long> datasets = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
+                    List<Long> insertedDatasetIds = new ArrayList<>();
+                    if (datasets.size()>0) {
+                        //provider has more than one reporting datasets
+                        List<Integer> insertedDatasetIdsInt = (List<Integer>) insertedParameters.get("datasetId");
+                        insertedDatasetIdsInt.stream().forEach(insId -> insertedDatasetIds.add(insId.longValue()));
+                    } else {
+                        //provider has only one dataset
+                        Long insertedDatasetId = Long.valueOf((Integer) insertedParameters.get("datasetId"));
+                        insertedDatasetIds.add(insertedDatasetId);
+                    }
+                    for (Long id : datasetIds) {
+                        for (Long insertedDatasetId : insertedDatasetIds) {
+                            if (id.equals(insertedDatasetId)) {
+                                return JobStatusEnum.REFUSED;
+                            }
+                        }
                     }
                 }
             }
-            List<Job> jobsRelatedToReleaseList = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), release);
-            for(Job job: jobsRelatedToReleaseList){
-                Map<String, Object> insertedParameters = job.getParameters();
-                Long insertedDataflowId = Long.valueOf((Integer) insertedParameters.get("dataflowId"));
-                Long insertedDataProviderId = Long.valueOf((Integer) insertedParameters.get("dataProviderId"));
-                if(dataflowId.equals(insertedDataflowId) && dataProviderId.equals(insertedDataProviderId)){
-                    return JobStatusEnum.REFUSED;
-                }
-            }
-        } else if (jobType.equals(JobTypeEnum.VALIDATION.toString()) && !release) {
-            Long datasetId = datasetIds.get(0);
-            List<Job> jobList = jobRepository.findByJobTypeAndJobStatusInAndRelease(JobTypeEnum.VALIDATION, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), release);
-            for(Job job: jobList){
-                Map<String, Object> insertedParameters = job.getParameters();
-                Long insertedDatasetId = Long.valueOf((Integer) insertedParameters.get("datasetId"));
-                if(datasetId.equals(insertedDatasetId)){
-                    return JobStatusEnum.REFUSED;
-                }
-            }
-            List<Job> jobsRelatedToReleaseList = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), true);
-            for (Job job : jobsRelatedToReleaseList) {
-                Map<String, Object> insertedParameters = job.getParameters();
-                Long insertedDataflowId = Long.valueOf((Integer) insertedParameters.get("dataflowId"));
-                Long insertedDataProviderId = Long.valueOf((Integer) insertedParameters.get("dataProviderId"));
-                if(dataflowId.equals(insertedDataflowId) && dataProviderId!=null && dataProviderId.equals(insertedDataProviderId)){
-                    return JobStatusEnum.REFUSED;
-                }
-            }
         } else if (jobType.equals(JobTypeEnum.COPY_TO_EU_DATASET.toString())) {
-            List<Job> jobList = jobRepository.findByJobTypeAndJobStatusInAndRelease(JobTypeEnum.COPY_TO_EU_DATASET, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), release);
+            List<Job> jobList = jobRepository.findByJobTypeInAndJobStatusIn(Arrays.asList(JobTypeEnum.COPY_TO_EU_DATASET), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
             for (Job job : jobList) {
                 Map<String, Object> insertedParameters = job.getParameters();
                 Long insertedDataflowId = Long.valueOf((Integer) insertedParameters.get("dataflowId"));
@@ -199,13 +195,11 @@ public class JobServiceImpl implements JobService {
                     return JobStatusEnum.REFUSED;
                 }
             }
-        }
-        else if (jobType.equals(JobTypeEnum.IMPORT.toString())) {
+        } else if (jobType.equals(JobTypeEnum.IMPORT.toString())) {
             List<Job> jobList = jobRepository.findByJobStatusAndJobTypeInAndDatasetId(JobStatusEnum.IN_PROGRESS, Arrays.asList(JobTypeEnum.IMPORT, JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), datasetIds.get(0));
-            if(jobList != null && jobList.size() > 0){
+            if (jobList != null && jobList.size() > 0) {
                 return JobStatusEnum.REFUSED;
-            }
-            else{
+            } else {
                 return JobStatusEnum.IN_PROGRESS;
             }
         }
@@ -213,7 +207,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public void prepareAndExecuteValidationJob(JobVO jobVO){
+    public void prepareAndExecuteValidationJob(JobVO jobVO) {
         Job job = jobMapper.classToEntity(jobVO);
         Map<String, Object> parameters = job.getParameters();
         Long datasetId = Long.valueOf((Integer) parameters.get("datasetId"));
@@ -222,7 +216,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public void prepareAndExecuteReleaseJob(JobVO jobVO){
+    public void prepareAndExecuteReleaseJob(JobVO jobVO) {
         Job job = jobMapper.classToEntity(jobVO);
         Map<String, Object> parameters = job.getParameters();
         Long dataflowId = Long.valueOf((Integer) parameters.get("dataflowId"));
@@ -242,28 +236,27 @@ public class JobServiceImpl implements JobService {
 
     @Transactional
     @Override
-    public void updateJobStatus(Long jobId, JobStatusEnum status){
+    public void updateJobStatus(Long jobId, JobStatusEnum status) {
         Optional<Job> job = jobRepository.findById(jobId);
-        if(job.isPresent()){
+        if (job.isPresent()) {
             job.get().setJobStatus(status);
             job.get().setDateStatusChanged(new Timestamp(System.currentTimeMillis()));
             jobRepository.save(job.get());
             jobHistoryService.saveJobHistory(job.get());
-        }
-        else{
+        } else {
             LOG.info("Could not update status for jobId {} because the id does not exist", jobId);
         }
     }
 
     @Transactional
     @Override
-    public void deleteFinishedJobsBasedOnDuration(){
+    public void deleteFinishedJobsBasedOnDuration() {
         jobRepository.deleteJobsBasedOnStatusAndDuration(new HashSet<>(Arrays.asList(JobStatusEnum.FINISHED.getValue(), JobStatusEnum.REFUSED.getValue(), JobStatusEnum.FAILED.getValue(), JobStatusEnum.CANCELED.getValue())));
     }
 
     @Transactional
     @Override
-    public void deleteJob(JobVO jobVO){
+    public void deleteJob(JobVO jobVO) {
         jobRepository.deleteById(jobVO.getId());
         LOG.info("Removed job with id {} and type {}", jobVO.getId(), jobVO.getJobType().getValue());
     }
@@ -277,7 +270,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public JobVO findById(Long jobId) {
         Optional<Job> job = jobRepository.findById(jobId);
-        if (job.isPresent()){
+        if (job.isPresent()) {
             return jobMapper.entityToClass(job.get());
         }
         return null;
@@ -286,7 +279,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean canExecuteReleaseOnDataflow(Long dataflowId) {
         List<Job> jobs = jobRepository.findByDataflowIdAndJobTypeInAndJobStatusAndRelease(dataflowId, Arrays.asList(JobTypeEnum.VALIDATION, JobTypeEnum.RELEASE), JobStatusEnum.IN_PROGRESS, true);
-        if (jobs.size()>0) {
+        if (jobs.size() > 0) {
             return false;
         }
         return true;
@@ -295,7 +288,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public JobVO findByFmeJobId(String fmeJobId) {
         Optional<Job> job = jobRepository.findJobByFmeJobId(fmeJobId);
-        if (job.isPresent()){
+        if (job.isPresent()) {
             return jobMapper.entityToClass(job.get());
         }
         return null;
@@ -304,12 +297,11 @@ public class JobServiceImpl implements JobService {
     @Override
     public void updateFmeJobId(Long jobId, String fmeJobId) {
         Optional<Job> job = jobRepository.findById(jobId);
-        if(job.isPresent()){
+        if (job.isPresent()) {
             job.get().setFmeJobId(fmeJobId);
             jobRepository.save(job.get());
             jobHistoryService.saveJobHistory(job.get());
-        }
-        else{
+        } else {
             LOG.info("Could not update fmeJobId for jobId {} because the id does not exist", jobId);
         }
     }

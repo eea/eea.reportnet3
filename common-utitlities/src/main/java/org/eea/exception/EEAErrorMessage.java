@@ -717,10 +717,10 @@ public final class EEAErrorMessage {
           "An unknown error happenned while restarting task.";
 
   /** The Constant DUPLICATE_RELEASE_JOB: {@value}. */
-  public static final String DUPLICATE_RELEASE_JOB = "There is already a duplicate release job to be executed";
+  public static final String DUPLICATE_RELEASE_JOB = "There is already a job running on this provider";
 
   /** The Constant DUPLICATE_COPY_TO_EU_DATASET_JOB: {@value}. */
-  public static final String DUPLICATE_COPY_TO_EU_DATASET_JOB = "There is already a duplicate copy to eudataset job to be executed on this dataflow";
+  public static final String DUPLICATE_COPY_TO_EU_DATASET_JOB = "There is already a copy to eudataset job to be executed on this dataflow";
 
   /** The Constant DUPLICATE_JOB */
   public static final String DUPLICATE_JOB = "There is already a job running on this dataset";

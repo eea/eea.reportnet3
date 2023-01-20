@@ -157,25 +157,31 @@ public class JobControllerImpl implements JobController {
         @ApiParam(type = "boolean", value = "Restric from public", example = "true") @RequestParam(name = "restrictFromPublic", required = true, defaultValue = "false") boolean restrictFromPublic,
         @ApiParam(type = "boolean", value = "Execute validations", example = "true") @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate) {
 
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         ThreadPropertiesManager.setVariable("user",
                 SecurityContextHolder.getContext().getAuthentication().getName());
 
-        List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
-        Map<String, Object> parameters = new HashMap<>();
-        parameters.put("dataflowId", dataflowId);
-        parameters.put("dataProviderId", dataProviderId);
-        parameters.put("restrictFromPublic", restrictFromPublic);
-        parameters.put("validate", validate);
-        parameters.put("datasetId", datasetIds);
-        String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
-        parameters.put("userId", userId);
-        JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), dataflowId, dataProviderId, datasetIds, true);
+        try {
+            List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("dataflowId", dataflowId);
+            parameters.put("dataProviderId", dataProviderId);
+            parameters.put("restrictFromPublic", restrictFromPublic);
+            parameters.put("validate", validate);
+            parameters.put("datasetId", datasetIds);
+            String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
+            parameters.put("userId", userId);
+            JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), dataflowId, dataProviderId, datasetIds, true);
 
-        LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
-        jobService.addJob(dataflowId, dataProviderId, null, parameters, JobTypeEnum.VALIDATION, statusToInsert, true);
-        LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
-        if (statusToInsert == JobStatusEnum.REFUSED) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
+            LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
+            jobService.addJob(dataflowId, dataProviderId, null, parameters, JobTypeEnum.VALIDATION, statusToInsert, true);
+            LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
+            if (statusToInsert == JobStatusEnum.REFUSED) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
+            }
+        } catch (Exception e) {
+            LOG.error("Unexpected error! Could not add release job for dataflowId {}, providerId {} and creator {}. Message: {}", dataflowId, dataProviderId, username, e.getMessage());
+            throw e;
         }
     }
 
