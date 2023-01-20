@@ -24,8 +24,8 @@ public class JobForRestartingLongRunningImportTasks {
      */
     private static final Logger LOG = LoggerFactory.getLogger(JobForRestartingLongRunningImportTasks.class);
 
-    @Value(value = "${scheduling.inProgress.import.task.max.hours}")
-    private long maxHoursForInProgressImportTasks;
+    @Value(value = "${scheduling.inProgress.import.task.max.ms.restart}")
+    private long maxTimeForInProgressImportTasks;
 
     @Autowired
     private RecordStoreControllerZuul recordStoreControllerZuul;
@@ -35,11 +35,11 @@ public class JobForRestartingLongRunningImportTasks {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> restartLongRunningImportTasks(),
-                new CronTrigger("0 */2 * * * *"));
+                new CronTrigger("0 0 * * * *"));
     }
 
     /**
-     * The job runs every 2 minutes. It finds tasks that have been stuck in status IN_PROGRESS for more than a number of hours
+     * The job runs every hour. It finds tasks that have been stuck in status IN_PROGRESS for more than a number of hours
      * and changes their status to IN_QUEUE so that they are picked up by the ImportFileTasksScheduler.scheduledConsumer() method
      */
     //For now this scheduled task will not do anything but log the cases because this use case might already be resolved
@@ -54,8 +54,7 @@ public class JobForRestartingLongRunningImportTasks {
                     //recordStoreControllerZuul.restartTask(task.getId());
                 }
                 Long durationInMs = new Date().getTime() - task.getStartingDate().getTime();
-                long durationInHours = TimeUnit.MILLISECONDS.toHours(durationInMs);
-                if(durationInHours > maxHoursForInProgressImportTasks) {
+                if(durationInMs > maxTimeForInProgressImportTasks) {
                     tasksWithMaxDuration += task.getId().toString() + " ";
                     //recordStoreControllerZuul.restartTask(task.getId());
                 }
@@ -64,7 +63,7 @@ public class JobForRestartingLongRunningImportTasks {
                 LOG.info("Found tasks that are in status IN_PROGRESS but their starting date is empty. The tasks ids are: {}", tasksWithEmptyStartingDates);
             }
             if(tasksWithMaxDuration.length() > 0 ){
-                LOG.info("Found tasks that are in status IN_PROGRESS for more than {} hours. The tasks ids are: {}", maxHoursForInProgressImportTasks, tasksWithEmptyStartingDates);
+                LOG.info("Found tasks that are in status IN_PROGRESS for more than {} ms. The tasks ids are: {}", maxTimeForInProgressImportTasks, tasksWithMaxDuration);
             }
 
         } catch (Exception e) {

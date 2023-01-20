@@ -1,5 +1,6 @@
 package org.eea.validation.persistence.data.metabase.repository;
 
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The Interface TaskRepository.
@@ -119,6 +121,29 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
    */
   @Query(nativeQuery = true, value = "select id from task where process_id=:processId")
   List<BigInteger> findByProcessId(@Param("processId") String processId);
+
+  /**
+   * Finds tasks by processId and status
+   * @param processId
+   * @param status
+   * @return
+   */
+  List<Task> findByProcessIdAndStatus(String processId, ProcessStatusEnum status);
+
+  /**
+   * Update status and finish date based on process id and current status.
+   *
+   * @param status
+   * @param dateFinish
+   * @param processId
+   * @param statuses
+   */
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true,
+          value = "update task set status= :status ,date_finish= :dateFinish where process_id=:processId and status in :statuses")
+  void updateTaskStatusByProcessIdAndCurrentStatus(@Param("status") String status, @Param("dateFinish") Date dateFinish,
+                                                   @Param("processId") String processId, @Param("statuses") Set<String> statuses);
 
   @Modifying
   @Transactional

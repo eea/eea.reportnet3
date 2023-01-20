@@ -74,8 +74,9 @@ public class JobForExecutingQueuedJobs {
                         LOG.info("Job with id {} and of type {} can not be executed right now.", job.getId(), job.getJobType().getValue());
                         continue;
                     }
-                    LOG.info("Job with id {} and of type {} will be executed.", job.getId(), job.getJobType().getValue());
+                    LOG.info("Trying to execute job with id {} and of type {}", job.getId(), job.getJobType().getValue());
                     if (job.getJobType() == JobTypeEnum.VALIDATION && !job.isRelease()) {
+                        LOG.info("Job with id {} and of type {} will be executed.", job.getId(), job.getJobType().getValue());
                         //call validation mechanism
                         jobService.prepareAndExecuteValidationJob(job);
                     } else if (job.getJobType() == JobTypeEnum.IMPORT) {
@@ -85,11 +86,13 @@ public class JobForExecutingQueuedJobs {
                         if (!jobService.canExecuteReleaseOnDataflow(job.getDataflowId())) {
                             continue;
                         }
+                        LOG.info("Job with id {} and of type {} will be executed.", job.getId(), job.getJobType().getValue());
                         //call release mechanism
                         jobService.prepareAndExecuteReleaseJob(job);
                     } else if (job.getJobType() == JobTypeEnum.EXPORT) {
                         //call export mechanism
                     } else if (job.getJobType() == JobTypeEnum.COPY_TO_EU_DATASET) {
+                        LOG.info("Job with id {} and of type {} will be executed.", job.getId(), job.getJobType().getValue());
                         jobService.prepareAndExecuteCopyToEUDatasetJob(job);
                     } else {
                         LOG.error("Error trying to execute queued job with id {}. Job type is {}", job.getId(), job.getJobType().getValue());

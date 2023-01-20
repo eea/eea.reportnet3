@@ -1174,4 +1174,22 @@ public class ValidationHelper implements DisposableBean {
   public void cancelRunningProcessTasks(String processId) {
     taskRepository.cancelRunningProcessTasks(processId, new Date());
   }
+
+  public Boolean findIfTasksExistByProcessIdAndStatusAndDuration(String processId, ProcessStatusEnum status, Long maxDuration) {
+    List<Task> tasks = taskRepository.findByProcessIdAndStatus(processId, status);
+    for(Task task: tasks){
+      if(task.getStartingDate() != null) {
+        Long taskDuration =  new Date().getTime() - task.getStartingDate().getTime();
+        if(taskDuration > maxDuration) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  @Transactional
+  public void updateTaskStatusByProcessIdAndCurrentStatus(ProcessStatusEnum status, String processId, Set<String> currentStatuses){
+    taskRepository.updateTaskStatusByProcessIdAndCurrentStatus(status.toString(), new Date(), processId, currentStatuses);
+  }
 }

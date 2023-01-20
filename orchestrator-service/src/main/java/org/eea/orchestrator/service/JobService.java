@@ -18,6 +18,8 @@ public interface JobService {
 
     List<JobVO> getJobsByStatusAndTypeAndMaxDuration(JobTypeEnum jobType, JobStatusEnum status, Long maxDuration);
 
+    List<JobVO> getJobsByTypeAndStatus(JobTypeEnum type, JobStatusEnum status);
+
     Boolean canJobBeExecuted(JobVO job);
 
     JobStatusEnum checkEligibilityOfJob(String jobType, Long dataflowId, Long dataProviderId, List<Long> datasetId, boolean release);

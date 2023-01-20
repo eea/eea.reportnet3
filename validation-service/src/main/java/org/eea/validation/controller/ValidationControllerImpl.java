@@ -56,6 +56,7 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 /**
  * The Class ValidationControllerImpl.
@@ -495,6 +496,38 @@ public class ValidationControllerImpl implements ValidationController {
   @PutMapping(value = "/private/cancelProcessTasks/{processId}")
   public void cancelRunningProcessTasks(@PathVariable("processId") String processId) {
     validationHelper.cancelRunningProcessTasks(processId);
+  }
+
+  /**
+   * Finds if tasks exist by processId and status and duration
+   * @param processId
+   * @param status
+   * @param maxDuration
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/findIfTasksExistByProcessIdAndStatusAndDuration/{processId}")
+  public Boolean findIfTasksExistByProcessIdAndStatusAndDuration(@PathVariable("processId") String processId, @RequestParam("status") ProcessStatusEnum status, @RequestParam("maxDuration") Long maxDuration) {
+    return validationHelper.findIfTasksExistByProcessIdAndStatusAndDuration(processId, status, maxDuration);
+  }
+
+  /**
+   * Updates task status based on process id and current status
+   *
+   * @param status the status
+   * @param processId the process id
+   * @param currentStatuses the list of statuses
+   */
+  @Override
+  @PostMapping(value = "/private/updateTaskStatusByProcessIdAndCurrentStatuses/{processId}")
+  public void updateTaskStatusByProcessIdAndCurrentStatuses(@PathVariable("processId") String processId,  @RequestParam("status") ProcessStatusEnum status, @RequestParam("statuses") Set<String> currentStatuses){
+    try {
+      validationHelper.updateTaskStatusByProcessIdAndCurrentStatus(status, processId, currentStatuses);
+    }
+    catch (Exception e) {
+        LOG.error("Unexpected error! Error when updating tasks status for processId {} Message: {}",  processId, e.getMessage());
+        throw e;
+    }
   }
 }
 
