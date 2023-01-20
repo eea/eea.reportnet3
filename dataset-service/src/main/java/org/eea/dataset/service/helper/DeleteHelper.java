@@ -238,7 +238,7 @@ public class DeleteHelper {
     if (recordValue!=null) {
       LOG.info("Deleting data with providerCode: {} for release processId {}", providerCode, processId);
       try {
-        LOG.info("Release process: Executing delete operation with custom query time out for datasetId {}, providerCode {}", datasetId, providerCode);
+        LOG.info("Release process: Executing delete operation for datasetId {}, providerCode {}", datasetId, providerCode);
         Long totalCountOfRecords = recordRepository.countRecordValueByDataProviderCode(providerCode);
         String datasetName = "dataset_" + datasetId;
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -259,9 +259,9 @@ public class DeleteHelper {
           totalCountOfRecords = recordRepository.countRecordValueByDataProviderCode(providerCode);
           LOG.info("Release process: executing delete for datasetId {}, providerCode {}, records remaining {}", datasetId, providerCode, totalCountOfRecords);
         }
-        LOG.info("Release process: Executed delete operation with custom query time out for datasetId {}, providerCode {}", datasetId, providerCode);
+        LOG.info("Release process: Executed delete operation for datasetId {}, providerCode {}", datasetId, providerCode);
       } catch (Exception er) {
-        LOG.error("Release process: error executing delete operation with custom query time out for datasetId {}, providerCode {}, {}", datasetId, providerCode, er.getMessage());
+        LOG.error("Release process: error executing delete operation for datasetId {}, providerCode {}, {}", datasetId, providerCode, er.getMessage());
         throw er;
       }
     }

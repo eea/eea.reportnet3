@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -305,6 +306,11 @@ public class JobServiceImpl implements JobService {
         else{
             LOG.info("Could not update fmeJobId for jobId {} because the id does not exist", jobId);
         }
+    }
+
+    @Override
+    public List<BigInteger> listJobsThatExceedTimeWithSpecificStatus(String status, long timeInMinutes) {
+        return jobRepository.findJobsThatExceedTimeWithSpecificStatus(status, timeInMinutes);
     }
 
 }
