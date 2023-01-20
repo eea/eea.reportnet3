@@ -33,10 +33,10 @@
   color: var(--statusBox-draft-color);
 }
 
-.error, 
-.incorrect, 
-.invalid, 
-.cancelled {
+.error,
+.incorrect,
+.invalid,
+.canceled {
   background-color: var(--statusBox-error-bg);
   color: var(--statusBox-error-color);
 }

@@ -9,5 +9,5 @@
   "IN_QUEUE": { "key": "IN_QUEUE", "label": "inQueue" },
   "FINISHED": { "key": "FINISHED", "label": "finished" },
   "IN_PROGRESS": { "key": "IN_PROGRESS", "label": "inProgress" },
-  "CANCELED": { "key": "CANCELED", "label": "cancelled" }
+  "CANCELED": { "key": "CANCELED", "label": "canceled" }
 }

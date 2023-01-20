@@ -400,7 +400,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               const jobHistoryFinalized = historyData.find(
                 jobHistory =>
                   jobHistory.jobStatus === 'REFUSED' ||
-                  jobHistory.jobStatus === 'CANCELLED' ||
+                  jobHistory.jobStatus === 'CANCELED' ||
                   jobHistory.jobStatus === 'FAILED' ||
                   jobHistory.jobStatus === 'FINISHED'
               );

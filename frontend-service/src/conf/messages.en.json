@@ -85,7 +85,7 @@
     "businessDataflowUpdatingError": "Failed updating business dataflow",
     "callFmeProcessFailedEvent": "Error calling to FME at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
     "cancel": "Cancel",
-    "cancelled": "Cancelled",
+    "canceled": "Canceled",
     "canceled": "Canceled",
     "category": "Category",
     "categoryDescription": "Description",
