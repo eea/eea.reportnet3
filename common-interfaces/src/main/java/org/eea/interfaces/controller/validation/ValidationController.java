@@ -3,6 +3,7 @@ package org.eea.interfaces.controller.validation;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -142,6 +144,24 @@ public interface ValidationController {
    */
   @GetMapping(value = "/private/findTasksByProcessId/{processId}")
   List<BigInteger> findTasksByProcessId(@PathVariable("processId") String processId);
+
+  /**
+   * Finds if tasks exist by processId and status
+   * @param processId
+   * @return
+   */
+   @GetMapping(value = "/private/findIfTasksExistByProcessIdAndStatusAndDuration/{processId}")
+   Boolean findIfTasksExistByProcessIdAndStatusAndDuration(@PathVariable("processId") String processId, @RequestParam("status") ProcessStatusEnum status, @RequestParam("maxDuration") Long maxDuration);
+
+  /**
+   * Updates task status based on process id and current status
+   *
+   * @param status the status
+   * @param processId the process id
+   * @param currentStatuses the list of statuses
+   */
+  @PostMapping(value = "/updateTaskStatusByProcessIdAndCurrentStatuses/{processId}")
+  void updateTaskStatusByProcessIdAndCurrentStatus(@PathVariable("processId") String processId,  @RequestParam("statuses") ProcessStatusEnum status, @RequestParam("statuses") Set<String> currentStatuses);
 }
 
 

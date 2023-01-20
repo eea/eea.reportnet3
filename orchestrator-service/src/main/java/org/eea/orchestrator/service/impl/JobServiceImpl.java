@@ -88,6 +88,12 @@ public class JobServiceImpl implements JobService {
         return jobMapper.entityListToClass(jobs);
     }
 
+    @Override
+    public List<JobVO> getJobsByTypeAndStatus(JobTypeEnum type, JobStatusEnum status){
+        List<Job> jobs = jobRepository.findByJobTypeAndJobStatus(type, status);
+        return jobMapper.entityListToClass(jobs);
+    }
+
     @Transactional
     @Override
     public Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release) {

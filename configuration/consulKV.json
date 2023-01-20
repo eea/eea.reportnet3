@@ -1824,7 +1824,11 @@
     "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
   },
   {
-    "key": "config/orchestrator/scheduling.inProgress.import.task.max.hours",
+    "key": "config/orchestrator/scheduling.inProgress.import.task.max.ms.restart",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.import.task.max.ms.fail",
     "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
   },
   {
