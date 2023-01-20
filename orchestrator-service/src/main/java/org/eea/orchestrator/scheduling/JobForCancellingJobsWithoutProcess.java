@@ -71,7 +71,7 @@ public class JobForCancellingJobsWithoutProcess {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> cancelInProgressJobsWithoutProcess(),
-                new CronTrigger("0 */1 * * * *"));
+                new CronTrigger("0 */30 * * * *"));
     }
 
     /**
@@ -90,6 +90,7 @@ public class JobForCancellingJobsWithoutProcess {
                 try {
                     List<String> processes = jobProcessService.findProcessesByJobId(id.longValue());
                     if (processes.size()==0) {
+                        LOG.info("Setting job {} without process to failed", id);
                         jobService.updateJobStatus(id.longValue(), JobStatusEnum.FAILED);
                         JobVO job = jobService.findById(id.longValue());
                         if ((job.getJobType().equals(JobTypeEnum.VALIDATION) && job.isRelease()) || job.getJobType().equals(JobTypeEnum.RELEASE)) {
