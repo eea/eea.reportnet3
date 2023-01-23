@@ -16,7 +16,8 @@ public interface JobService {
 
     List<JobVO> getJobsByStatus(JobStatusEnum status);
 
-    List<JobVO> getJobsByStatusAndTypeAndMaxDuration(JobTypeEnum jobType, JobStatusEnum status, Long maxDuration);
+    List<JobVO> getJobsByStatusAndTypeAndMaxDuration(JobTypeEnum jobType, JobStatusEnum status, Long maxDuration, Long maxFMEDuration);
+
 
     List<JobVO> getJobsByTypeAndStatus(JobTypeEnum type, JobStatusEnum status);
 

@@ -39,6 +39,11 @@ public class JobForCancellingImportJobsWithoutTasks {
     @Value(value = "${scheduling.inProgress.import.jobs.without.tasks.max.time}")
     private Long maxTimeInMsForInProgressImportJobsWithoutTasks;
 
+    /* The maximum time in milliseconds for which a fme import job can be in progress without any tasks */
+    @Value(value = "${scheduling.inProgress.fme.import.jobs.without.tasks.max.time}")
+    private Long maxTimeInMsForInProgressFMEImportJobsWithoutTasks;
+
+
     /**
      * The admin user.
      */
@@ -86,7 +91,7 @@ public class JobForCancellingImportJobsWithoutTasks {
     public void cancelInProgressImportJobsWithoutTasks() {
         try {
             LOG.info("Running scheduled job cancelInProgressImportJobsWithoutTasks");
-            List<JobVO> longRunningJobs = jobService.getJobsByStatusAndTypeAndMaxDuration(JobTypeEnum.IMPORT, JobStatusEnum.IN_PROGRESS, maxTimeInMsForInProgressImportJobsWithoutTasks);
+            List<JobVO> longRunningJobs = jobService.getJobsByStatusAndTypeAndMaxDuration(JobTypeEnum.IMPORT, JobStatusEnum.IN_PROGRESS, maxTimeInMsForInProgressImportJobsWithoutTasks, maxTimeInMsForInProgressFMEImportJobsWithoutTasks);
             Boolean longRunningProcessWithoutTasks = false;
             for (JobVO job: longRunningJobs){
                 //get job processes

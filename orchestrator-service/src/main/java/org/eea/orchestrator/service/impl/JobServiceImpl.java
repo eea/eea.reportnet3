@@ -1,5 +1,6 @@
 package org.eea.orchestrator.service.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
@@ -95,12 +96,15 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<JobVO> getJobsByStatusAndTypeAndMaxDuration(JobTypeEnum jobType, JobStatusEnum status, Long maxDuration) {
+    public List<JobVO> getJobsByStatusAndTypeAndMaxDuration(JobTypeEnum jobType, JobStatusEnum status, Long maxDuration, Long maxFMEDuration) {
         List<Job> jobs = jobRepository.findByJobStatusAndJobType(status, jobType);
         List<Job> longRunningJobs = new ArrayList<>();
         for (Job job : jobs) {
             Long durationOfJob = new Date().getTime() - job.getDateStatusChanged().getTime();
-            if (durationOfJob > maxDuration) {
+            if (StringUtils.isNotBlank(job.getFmeJobId()) && durationOfJob > maxFMEDuration) {
+                longRunningJobs.add(job);
+            }
+            else if(StringUtils.isBlank(job.getFmeJobId()) && durationOfJob > maxDuration){
                 longRunningJobs.add(job);
             }
         }
