@@ -64,7 +64,7 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
      * @param datasetId
      * @return
      */
-    List<Job> findByJobStatusAndJobTypeInAndDatasetId(JobStatusEnum jobStatus, List<JobTypeEnum> jobType, Long datasetId);
+    List<Job> findByJobStatusInAndJobTypeInAndDatasetId(List<JobStatusEnum> jobStatus, List<JobTypeEnum> jobType, Long datasetId);
 
     /**
      *
