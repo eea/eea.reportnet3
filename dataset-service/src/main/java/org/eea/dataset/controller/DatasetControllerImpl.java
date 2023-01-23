@@ -316,6 +316,10 @@ public class DatasetControllerImpl implements DatasetController {
       if (jobId!=null && jobStatus != JobStatusEnum.REFUSED) {
         jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
       }
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(importFileData);
       throw e;
     }
   }

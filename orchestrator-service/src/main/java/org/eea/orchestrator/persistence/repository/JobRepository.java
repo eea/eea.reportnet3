@@ -65,7 +65,7 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
      * @param datasetId
      * @return
      */
-    List<Job> findByJobStatusAndJobTypeInAndDatasetId(JobStatusEnum jobStatus, List<JobTypeEnum> jobType, Long datasetId);
+    List<Job> findByJobStatusInAndJobTypeInAndDatasetId(List<JobStatusEnum> jobStatus, List<JobTypeEnum> jobType, Long datasetId);
 
     /**
      *
@@ -97,6 +97,14 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
      * @return the entries
      */
     List<Job> findByJobTypeInAndJobStatusIn(List<JobTypeEnum> jobType, List<JobStatusEnum> jobStatus);
+
+    /**
+     * Retrieves jobs based on statuses and types
+     * @param jobType
+     * @param jobStatus
+     * @return
+     */
+    List<Job> findByJobTypeInAndJobStatusInAndRelease(List<JobTypeEnum> jobType, List<JobStatusEnum> jobStatus, boolean release);
 
     /**
      * Finds jobs by dataflowId, jobType, job status and release

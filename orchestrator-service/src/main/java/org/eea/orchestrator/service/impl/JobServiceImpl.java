@@ -195,11 +195,23 @@ public class JobServiceImpl implements JobService {
                     return JobStatusEnum.REFUSED;
                 }
             }
-        } else if (jobType.equals(JobTypeEnum.IMPORT.toString())) {
-            List<Job> jobList = jobRepository.findByJobStatusAndJobTypeInAndDatasetId(JobStatusEnum.IN_PROGRESS, Arrays.asList(JobTypeEnum.IMPORT, JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), datasetIds.get(0));
-            if (jobList != null && jobList.size() > 0) {
+        }
+        else if (jobType.equals(JobTypeEnum.IMPORT.toString())) {
+            List<Job> jobList = jobRepository.findByJobStatusInAndJobTypeInAndDatasetId(Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), Arrays.asList(JobTypeEnum.IMPORT, JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), datasetIds.get(0));
+            if(jobList != null && jobList.size() > 0){
                 return JobStatusEnum.REFUSED;
-            } else {
+            }
+            else{
+                List<Job> releasesAndValidations = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), true);
+                for (Job job : releasesAndValidations) {
+                    Map<String, Object> insertedParameters = job.getParameters();
+                    if(insertedParameters.get("datasetId") != null) {
+                        List<Long> insertedDatasetIds = (List<Long>) insertedParameters.get("datasetId");
+                        if (insertedDatasetIds.contains(datasetIds.get(0).intValue())) {
+                            return JobStatusEnum.REFUSED;
+                        }
+                    }
+                }
                 return JobStatusEnum.IN_PROGRESS;
             }
         }
