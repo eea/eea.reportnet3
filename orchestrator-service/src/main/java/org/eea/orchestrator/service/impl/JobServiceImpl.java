@@ -103,8 +103,7 @@ public class JobServiceImpl implements JobService {
             Long durationOfJob = new Date().getTime() - job.getDateStatusChanged().getTime();
             if (StringUtils.isNotBlank(job.getFmeJobId()) && durationOfJob > maxFMEDuration) {
                 longRunningJobs.add(job);
-            }
-            else if(StringUtils.isBlank(job.getFmeJobId()) && durationOfJob > maxDuration){
+            } else if (StringUtils.isBlank(job.getFmeJobId()) && durationOfJob > maxDuration) {
                 longRunningJobs.add(job);
             }
         }
@@ -161,29 +160,15 @@ public class JobServiceImpl implements JobService {
             List<Job> jobsList = jobRepository.findByJobTypeInAndJobStatusIn(Arrays.asList(JobTypeEnum.VALIDATION, JobTypeEnum.RELEASE, JobTypeEnum.IMPORT), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
             for (Job job : jobsList) {
                 Map<String, Object> insertedParameters = job.getParameters();
-                if (!job.isRelease()) {
-                    //validation job without release or import job
-                    for (Long id : datasetIds) {
-                        if (id.equals(job.getDatasetId())) {
-                            return JobStatusEnum.REFUSED;
-                        }
+                if (job.getDatasetId()!=null) {
+                    if (datasetIds.contains(job.getDatasetId())) {
+                        return JobStatusEnum.REFUSED;
                     }
                 } else {
-                    //validation job with release or release job
-                    List<Long> datasets = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
-                    List<Long> insertedDatasetIds = new ArrayList<>();
-                    if (datasets.size()>0) {
-                        //provider has more than one reporting datasets
-                        List<Integer> insertedDatasetIdsInt = (List<Integer>) insertedParameters.get("datasetId");
-                        insertedDatasetIdsInt.stream().forEach(insId -> insertedDatasetIds.add(insId.longValue()));
-                    } else {
-                        //provider has only one dataset
-                        Long insertedDatasetId = Long.valueOf((Integer) insertedParameters.get("datasetId"));
-                        insertedDatasetIds.add(insertedDatasetId);
-                    }
-                    for (Long id : datasetIds) {
-                        for (Long insertedDatasetId : insertedDatasetIds) {
-                            if (id.equals(insertedDatasetId)) {
+                    List<Integer> insertedDatasetIds = (List<Integer>) insertedParameters.get("datasetId");
+                    if (insertedDatasetIds != null && insertedDatasetIds.size() > 0) {
+                        for (Integer insertedDatasetId : insertedDatasetIds) {
+                            if (datasetIds.contains(insertedDatasetId.longValue())) {
                                 return JobStatusEnum.REFUSED;
                             }
                         }
@@ -199,17 +184,15 @@ public class JobServiceImpl implements JobService {
                     return JobStatusEnum.REFUSED;
                 }
             }
-        }
-        else if (jobType.equals(JobTypeEnum.IMPORT.toString())) {
+        } else if (jobType.equals(JobTypeEnum.IMPORT.toString())) {
             List<Job> jobList = jobRepository.findByJobStatusInAndJobTypeInAndDatasetId(Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), Arrays.asList(JobTypeEnum.IMPORT, JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), datasetIds.get(0));
-            if(jobList != null && jobList.size() > 0){
+            if (jobList != null && jobList.size() > 0) {
                 return JobStatusEnum.REFUSED;
-            }
-            else{
+            } else {
                 List<Job> releasesAndValidations = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), true);
                 for (Job job : releasesAndValidations) {
                     Map<String, Object> insertedParameters = job.getParameters();
-                    if(insertedParameters.get("datasetId") != null) {
+                    if (insertedParameters.get("datasetId") != null) {
                         List<Long> insertedDatasetIds = (List<Long>) insertedParameters.get("datasetId");
                         if (insertedDatasetIds.contains(datasetIds.get(0).intValue())) {
                             return JobStatusEnum.REFUSED;
