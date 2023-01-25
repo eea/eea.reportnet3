@@ -399,6 +399,9 @@
           "key": "USER_SERVICE_OLD_LOGIN_ERROR"
         },
         {
+          "key": "DATASETS_FORM_ERROR"
+        },
+        {
           "key": "LOAD_SNAPSHOTS_LIST_ERROR"
         },
         {
@@ -870,8 +873,11 @@
         { "key": "DELETE_NATIONAL_COORDINATORS_ERROR" },
         { "key": "CREATE_NATIONAL_COORDINATORS_ERROR" },
         { "key": "GET_VALIDATIONS_STATUSES_ERROR" },
+        { "key": "GET_JOBS_STATUSES_ERROR" },
+        { "key": "GET_CONTROL_STATUSES_ERROR" },
         { "key": "DELETE_VALIDATION_FROM_QUEUE_ERROR" },
-        { "key": "SET_VALIDATIONS_STATUS_PRIORITY_ERROR" }
+        { "key": "SET_VALIDATIONS_STATUS_PRIORITY_ERROR" },
+        { "key": "DELETE_PROVIDER_DATASET_DATA_ERROR" }
       ]
     },
     {

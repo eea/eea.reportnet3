@@ -61,6 +61,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import static org.mockito.ArgumentMatchers.anyString;
+
 /**
  * The Class ValidationHelperTest.
  */
@@ -259,12 +261,15 @@ public class ValidationHelperTest {
     Mockito
         .when(processControllerZuul.updateProcess(Mockito.anyLong(), Mockito.anyLong(),
             Mockito.any(ProcessStatusEnum.class), Mockito.any(ProcessTypeEnum.class),
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyBoolean()))
+            anyString(), anyString(), Mockito.anyInt(), Mockito.anyBoolean()))
         .thenReturn(true);
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rules);
     Mockito.when(validationService.countRecordsDataset(Mockito.eq(1l))).thenReturn(1);
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any()))
         .thenReturn(new DataSetSchema());
+    ProcessVO processVO = new ProcessVO();
+    processVO.setUser("test");
+    Mockito.when(processControllerZuul.findById(anyString())).thenReturn(processVO);
 
     validationHelper.executeValidation(1l, "1", false, false);
     Mockito.verify(validationService, Mockito.times(1)).deleteAllValidation(Mockito.eq(1l));
@@ -285,9 +290,6 @@ public class ValidationHelperTest {
     TableValue table = new TableValue();
     table.setId(1l);
     tables.add(table);
-
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
 
     ConsumerGroupVO consumerGroups = new ConsumerGroupVO();
     Collection<MemberDescriptionVO> members = new ArrayList<>();
@@ -322,11 +324,14 @@ public class ValidationHelperTest {
     Mockito
         .when(processControllerZuul.updateProcess(Mockito.anyLong(), Mockito.anyLong(),
             Mockito.any(ProcessStatusEnum.class), Mockito.any(ProcessTypeEnum.class),
-            Mockito.anyString(), Mockito.anyString(), Mockito.anyInt(), Mockito.anyBoolean()))
+            anyString(), anyString(), Mockito.anyInt(), Mockito.anyBoolean()))
         .thenReturn(true);
     Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(Arrays.asList(rule));
     Mockito.when(rulesRepository.findSqlRulesEnabled(Mockito.any()))
         .thenReturn(Arrays.asList(rule));
+    ProcessVO processVO = new ProcessVO();
+    processVO.setUser("test");
+    Mockito.when(processControllerZuul.findById(anyString())).thenReturn(processVO);
     validationHelper.executeValidation(1l, "1", false, true);
     Mockito.verify(referenceDatasetControllerZuul, Mockito.times(1))
         .findReferenceDatasetByDataflowId(Mockito.any());

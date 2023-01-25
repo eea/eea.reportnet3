@@ -712,6 +712,19 @@ public final class EEAErrorMessage {
   /** The Constant DATAFLOW_UPDATE_ERROR: {@value}. */
   public static final String DATAFLOW_UPDATE_ERROR = "Dataflow can't be updated";
 
+  /** The Constant RESTARTING_TASK: {@value}. */
+  public static final String RESTARTING_TASK =
+          "An unknown error happenned while restarting task.";
+
+  /** The Constant DUPLICATE_RELEASE_JOB: {@value}. */
+  public static final String DUPLICATE_RELEASE_JOB = "There is already a job running on this provider";
+
+  /** The Constant DUPLICATE_COPY_TO_EU_DATASET_JOB: {@value}. */
+  public static final String DUPLICATE_COPY_TO_EU_DATASET_JOB = "There is already a copy to eudataset job to be executed on this dataflow";
+
+  /** The Constant DUPLICATE_JOB */
+  public static final String DUPLICATE_JOB = "There is already a job running on this dataset";
+
   /**
    * Instantiates a new EEA error message.
    */

@@ -41,6 +41,7 @@ import { IntegrationService } from 'services/IntegrationService';
 import { ValidationService } from 'services/ValidationService';
 import { WebformService } from 'services/WebformService';
 
+import { ActionsContext } from 'views/_functions/Contexts/ActionsContext';
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
@@ -58,6 +59,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const navigate = useNavigate();
   const { dataflowId, datasetId } = useParams();
 
+  const actionsContext = useContext(ActionsContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -112,22 +114,26 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     id: null,
     name: ''
   });
+
+  // const [exportProcessingMessage, setExportProcessingMessage] = useState(null);
+
   const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDataset, setIsDataset] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
+
   const [isDownloadingQCRules, setIsDownloadingQCRules] = useState(false);
   const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isReferenceDataset, setIsReferenceDataset] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isReportingWebform, setIsReportingWebform] = useState(false);
   const [selectedView, setSelectedView] = useState('');
   const [isTestDataset, setIsTestDataset] = useState(false);
+
   const [isUpdatableDialogVisible, setIsUpdatableDialogVisible] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [metadata, setMetadata] = useState(undefined);
@@ -139,8 +145,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [webformData, setWebformData] = useState(null);
   const [webformOptions, setWebformOptions] = useState([]);
-  const [importProcessing, setImportProcessing] = useState(false);
-  const [importProcessingMessage, setImportProcessingMessage] = useState(null);
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
@@ -254,7 +258,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
-      setIsLoadingFile(false);
+      actionsContext.changeExportDatasetState(false);
     }
 
     if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_VALIDATIONS_FAILED_EVENT')) {
@@ -278,7 +282,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   } = useReporterDataset(datasetId, dataflowId);
 
   useEffect(() => {
-    testImport();
+    actionsContext.testProcess(datasetId, 'DATASET_IMPORT');
   }, [datasetId]);
 
   useEffect(() => {
@@ -453,6 +457,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onConfirmDelete = async () => {
+    const testCase = 'DATASET_DELETE';
+    actionsContext.testProcess(datasetId, testCase);
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
       await DatasetService.deleteData(datasetId);
@@ -477,6 +483,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onConfirmValidate = async () => {
+    const testCase = 'DATASET_VALIDATE';
+    actionsContext.testProcess(datasetId, testCase);
     try {
       await DatasetService.validate(datasetId);
       notificationContext.add(
@@ -577,6 +585,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       }
     }
   };
+
   useEffect(() => {
     const isNotification = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
@@ -597,7 +606,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false, completed: false, withError: true });
     }
 
-    const isImportDataCompleted = notificationContext.toShow.some(
+    const isImportDataCompleted = notificationContext.toShow.find(
       notification => notification.key === 'IMPORT_REPORTING_COMPLETED_EVENT'
     );
 
@@ -605,12 +614,24 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       notification => notification.key === 'RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT'
     );
 
-    const isDeletedDataCompleted = notificationContext.toShow.some(
+    const isDeletedDataCompleted = notificationContext.toShow.find(
       notification => notification.key === 'DELETE_DATASET_DATA_COMPLETED_EVENT'
     );
 
-    if (isImportDataCompleted || isRestoreSnapshotDataCompleted || isDeletedDataCompleted) {
+    const isDeletedTableDataCompleted = notificationContext.toShow.find(
+      notification => notification.key === 'DELETE_TABLE_COMPLETED_EVENT'
+    );
+
+    if (
+      (isImportDataCompleted && isImportDataCompleted.content?.datasetId.toString() === datasetId.toString()) ||
+      (isDeletedDataCompleted && isDeletedDataCompleted.content?.datasetId.toString() === datasetId.toString()) ||
+      (isDeletedTableDataCompleted &&
+        isDeletedTableDataCompleted.content?.datasetId.toString() === datasetId.toString())
+    ) {
       onHighlightRefresh(true);
+    }
+
+    if (isImportDataCompleted || isRestoreSnapshotDataCompleted || isDeletedDataCompleted) {
       changeProgressStepBar({ step: 1, currentStep: 2, isRunning: true, completed: false, withError: false });
     }
   }, [notificationContext]);
@@ -629,7 +650,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT',
       'DOWNLOAD_EXPORT_TABLE_DATA_FILE_ERROR'
     ],
-    setIsLoadingFile,
+    actionsContext.changeExportDatasetState,
     false
   );
 
@@ -668,7 +689,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onExportDataExternalIntegration = async integrationId => {
-    setIsLoadingFile(true);
+    const testCase = 'DATASET_EXPORT';
+    actionsContext.testProcess(datasetId, testCase);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
@@ -685,7 +707,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onExportDataInternalExtension = async fileType => {
-    setIsLoadingFile(true);
+    const testCase = 'DATASET_EXPORT';
+    actionsContext.testProcess(datasetId, testCase);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
       await DatasetService.exportDatasetData(datasetId, fileType);
@@ -964,29 +987,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
   };
 
-  const testImport = () => {
-    const timeout = ms => {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    };
-    const testImportTimer = async () => {
-      const importStatus = await DatasetService.testImportProcess(datasetId);
-
-      if (importStatus?.data && !importStatus?.data?.importInProgress) {
-        setImportProcessing(false);
-        setImportProcessingMessage(null);
-      } else {
-        setImportProcessingMessage(importStatus?.data?.message);
-        await timeout(5000);
-        testImportTimer();
-      }
-    };
-    setImportProcessing(true);
-    testImportTimer();
-  };
-
   const onUpload = async () => {
-    testImport();
-
+    const testCase = 'DATASET_IMPORT';
+    actionsContext.testProcess(datasetId, testCase);
     setIsImportDatasetDialogVisible(false);
     setSelectedCustomImportIntegration({ id: null, name: null });
     const {
@@ -1184,9 +1187,22 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                   className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${
                     !hasWritePermissions ? null : 'p-button-animated-blink'
                   }`}
-                  disabled={!hasWritePermissions || importProcessing}
-                  icon={importProcessing ? 'spinnerAnimate' : 'import'}
-                  label={importProcessingMessage ? importProcessingMessage : resourcesContext.messages['importDataset']}
+                  disabled={
+                    !hasWritePermissions ||
+                    actionsContext.importDatasetProcessing ||
+                    actionsContext.exportDatasetProcessing ||
+                    actionsContext.deleteDatasetProcessing ||
+                    actionsContext.importTableProcessing ||
+                    actionsContext.exportTableProcessing ||
+                    actionsContext.deleteTableProcessing ||
+                    actionsContext.validateDatasetProcessing
+                  }
+                  icon={actionsContext.importDatasetProcessing ? 'spinnerAnimate' : 'import'}
+                  label={
+                    actionsContext.importDatasetProcessing
+                      ? resourcesContext.messages['importInProgress']
+                      : resourcesContext.messages['importDataset']
+                  }
                   onClick={event => importMenuRef.current.show(event)}
                 />
                 <Menu
@@ -1200,9 +1216,22 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             )}
             <Button
               className="p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step"
-              icon={isLoadingFile ? 'spinnerAnimate' : 'export'}
+              disabled={
+                actionsContext.importDatasetProcessing ||
+                actionsContext.exportDatasetProcessing ||
+                actionsContext.deleteDatasetProcessing ||
+                actionsContext.importTableProcessing ||
+                actionsContext.exportTableProcessing ||
+                actionsContext.deleteTableProcessing ||
+                actionsContext.validateDatasetProcessing
+              }
+              icon={actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'}
               id="buttonExportDataset"
-              label={resourcesContext.messages['exportDataset']}
+              label={
+                actionsContext.exportDatasetProcessing
+                  ? resourcesContext.messages['exportInProgress']
+                  : resourcesContext.messages['exportDataset']
+              }
               onClick={event => exportMenuRef.current.show(event)}
             />
             <Menu
@@ -1212,10 +1241,46 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               popup={true}
               ref={exportMenuRef}
             />
-            <DatasetDeleteDataDialog disabled={!hasWritePermissions} onConfirmDelete={onConfirmDelete} />
+            <DatasetDeleteDataDialog
+              disabled={
+                !hasWritePermissions ||
+                actionsContext.importDatasetProcessing ||
+                actionsContext.exportDatasetProcessing ||
+                actionsContext.deleteDatasetProcessing ||
+                actionsContext.importTableProcessing ||
+                actionsContext.exportTableProcessing ||
+                actionsContext.deleteTableProcessing ||
+                actionsContext.validateDatasetProcessing
+              }
+              icon={actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'}
+              label={
+                actionsContext.deleteDatasetProcessing
+                  ? resourcesContext.messages['deleteInProgress']
+                  : resourcesContext.messages['deleteDatasetData']
+              }
+              onConfirmDelete={onConfirmDelete}
+            />
           </div>
           <div className="p-toolbar-group-right">
-            <DatasetValidateDialog disabled={!hasWritePermissions} onConfirmValidate={onConfirmValidate} />
+            <DatasetValidateDialog
+              disabled={
+                !hasWritePermissions ||
+                actionsContext.importDatasetProcessing ||
+                actionsContext.exportDatasetProcessing ||
+                actionsContext.deleteDatasetProcessing ||
+                actionsContext.importTableProcessing ||
+                actionsContext.exportTableProcessing ||
+                actionsContext.deleteTableProcessing ||
+                actionsContext.validateDatasetProcessing
+              }
+              icon={actionsContext.validateDatasetProcessing ? 'spinnerAnimate' : 'validate'}
+              label={
+                actionsContext.validateDatasetProcessing
+                  ? resourcesContext.messages['validationInProgress']
+                  : resourcesContext.messages['validate']
+              }
+              onConfirmValidate={onConfirmValidate}
+            />
             <Button
               className="p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step p-button-animated-blink"
               icon="warning"
@@ -1326,8 +1391,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           replaceCheck={true}
           url={`${window.env.REACT_APP_BACKEND}${
             isNil(selectedCustomImportIntegration.id)
-              ? getUrl(DatasetConfig.importFileDataset, {
+              ? getUrl(DatasetConfig.importFileDatasetUpd, {
                   datasetId: datasetId,
+                  dataflowId: dataflowId,
                   delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
                 })
               : getUrl(DatasetConfig.importFileDatasetExternal, {

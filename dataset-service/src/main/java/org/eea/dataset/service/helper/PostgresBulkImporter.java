@@ -8,10 +8,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.UUID;
+
+import lombok.Getter;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
@@ -24,6 +27,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The Class PostgresBulkImporter.
  */
+@Getter
 public class PostgresBulkImporter implements Closeable {
 
   /** The Constant LOG. */
@@ -45,7 +49,7 @@ public class PostgresBulkImporter implements Closeable {
   private final String tableName;
 
   /** The temporary file. */
-  private final File temporaryFile;
+  private  File temporaryFile;
 
   /** The output stream. */
   private OutputStream outputStream;
@@ -70,7 +74,28 @@ public class PostgresBulkImporter implements Closeable {
     outputStream = new FileOutputStream(temporaryFile);
     writeHeaders();
   }
+  public PostgresBulkImporter(ConnectionDataVO connectionDataVO, String schema, String tableName,
+                              String path,String existingFileName) throws IOException {
+    url = connectionDataVO.getConnectionString();
+    user = connectionDataVO.getUser();
+    password = connectionDataVO.getPassword();
+    this.schema = schema;
+    this.tableName = tableName;
+    if(existingFileName!=null) {
+      Path pathToFolder = Path.of(path);
+      Path pathToFile = pathToFolder.resolve(existingFileName);
+      temporaryFile = pathToFile.toFile();
+      if(!temporaryFile.exists()){
+        temporaryFile = new File(path, UUID.randomUUID().toString() + ".bin");
+      }
+      outputStream = new FileOutputStream(temporaryFile,true);
+    }else{
+      temporaryFile = new File(path, UUID.randomUUID().toString() + ".bin");
+      outputStream = new FileOutputStream(temporaryFile);
+      writeHeaders();
+    }
 
+  }
   /**
    * Adds the tuple.
    *
@@ -124,7 +149,7 @@ public class PostgresBulkImporter implements Closeable {
   public void close() throws IOException {
     try {
       if (null != temporaryFile) {
-        Files.deleteIfExists(temporaryFile.toPath());
+      //  Files.deleteIfExists(temporaryFile.toPath());
       }
     } finally {
       if (null != outputStream) {

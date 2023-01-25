@@ -60,4 +60,7 @@ public class UserNotificationContentVO {
 
   /** The dataset status. */
   private DatasetStatusEnum datasetStatus;
+
+  /** The user id */
+  private String userId;
 }

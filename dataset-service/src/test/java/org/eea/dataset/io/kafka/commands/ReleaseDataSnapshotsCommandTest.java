@@ -1,10 +1,5 @@
 package org.eea.dataset.io.kafka.commands;
 
-import static org.mockito.Mockito.times;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.eea.dataset.persistence.metabase.repository.ChangesEUDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -15,6 +10,8 @@ import org.eea.interfaces.controller.collaboration.CollaborationController.Colla
 import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -33,6 +30,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 
 /**
  * The Class RestoreDataCollectionSnapshotCommandTest.
@@ -80,6 +85,12 @@ public class ReleaseDataSnapshotsCommandTest {
   @Mock
   private ChangesEUDatasetRepository changesEUDatasetRepository;
 
+  @Mock
+  private ProcessControllerZuul processControllerZuul;
+
+  @Mock
+  private JobProcessControllerZuul jobProcessControllerZuul;
+
   /** The eea event VO. */
   private EEAEventVO eeaEventVO;
 
@@ -126,11 +137,13 @@ public class ReleaseDataSnapshotsCommandTest {
     datasetsId.add(2L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(1L)).thenReturn(dataSetMetabaseVO);
     Mockito.when(datasetMetabaseService.getLastDatasetForRelease(1L)).thenReturn(null);
+    Mockito.when(jobProcessControllerZuul.findJobIdByProcessId(anyString())).thenReturn(null);
 
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setName("dataflowName");
     dataflowVO.setShowPublicInfo(false);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
+
 
     DataProviderVO provider = new DataProviderVO();
     provider.setId(1L);
@@ -160,6 +173,7 @@ public class ReleaseDataSnapshotsCommandTest {
     datasetsId.add(2L);
     Mockito.when(datasetMetabaseService.findDatasetMetabase(1L)).thenReturn(dataSetMetabaseVO);
     Mockito.when(datasetMetabaseService.getLastDatasetForRelease(1L)).thenReturn(null);
+    Mockito.when(jobProcessControllerZuul.findJobIdByProcessId(anyString())).thenReturn(null);
 
     List<Long> idsLong = new ArrayList<>();
     idsLong.add(1L);

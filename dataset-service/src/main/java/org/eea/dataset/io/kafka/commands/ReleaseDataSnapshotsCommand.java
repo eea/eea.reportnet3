@@ -1,10 +1,6 @@
 package org.eea.dataset.io.kafka.commands;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.TimeZone;
+import io.jsonwebtoken.lang.Collections;
 import org.eea.dataset.persistence.metabase.domain.ChangesEUDataset;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
 import org.eea.dataset.persistence.metabase.repository.ChangesEUDatasetRepository;
@@ -17,6 +13,8 @@ import org.eea.interfaces.controller.collaboration.CollaborationController.Colla
 import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.communication.EmailVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -24,6 +22,10 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.orchestrator.JobProcessVO;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
@@ -37,7 +39,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import io.jsonwebtoken.lang.Collections;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * The Class PropagateNewFieldCommand.
@@ -89,6 +93,13 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   @Autowired
   private DataCollectionRepository dataCollectionRepository;
 
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
+  /** The job process controller zuul */
+  @Autowired
+  private JobProcessControllerZuul jobProcessControllerZuul;
+
   /**
    * The Constant LOG.
    */
@@ -97,6 +108,11 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR =
       LoggerFactory.getLogger(ReleaseDataSnapshotsCommand.class);
+
+  /**
+   * The default release process priority
+   */
+  private int defaultReleaseProcessPriority = 20;
 
   /**
    * Gets the event type.
@@ -120,6 +136,15 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
     try {
       Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
       String dateRelease = String.valueOf(eeaEventVO.getData().get("dateRelease"));
+      String processId = String.valueOf(eeaEventVO.getData().get("process_id"));
+      Long jobId = null;
+      ProcessVO processVO = null;
+      if (processId!=null) {
+        jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+        processVO = processControllerZuul.findById(processId);
+      }
+
+      String user = processVO!=null ? processVO.getUser() : SecurityContextHolder.getContext().getAuthentication().getName();
 
       Long nextData = datasetMetabaseService.getLastDatasetForRelease(datasetId);
       DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
@@ -127,12 +152,12 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       // Fill the table changes to eu_dataset and put there are changes in the DC data
       ChangesEUDataset providerRelease = new ChangesEUDataset();
       Optional<DataCollection> dc =
-              dataCollectionRepository.findFirstByDatasetSchema(dataset.getDatasetSchema());
+          dataCollectionRepository.findFirstByDatasetSchema(dataset.getDatasetSchema());
       if (dc.isPresent()) {
         providerRelease.setDatacollection(dc.get().getId());
       }
       DataProviderVO provider =
-              representativeControllerZuul.findDataProviderById(dataset.getDataProviderId());
+          representativeControllerZuul.findDataProviderById(dataset.getDataProviderId());
       providerRelease.setProvider(provider.getCode());
       changesEUDatasetRepository.saveAndFlush(providerRelease);
 
@@ -140,12 +165,29 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);
         createSnapshotVO.setAutomatic(Boolean.TRUE);
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         createSnapshotVO.setDescription("Release " + dateRelease + " CET");
 
-        datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease, false);
+        LOG.info("Creating release process for dataflowId {}, dataProviderId {} dataset {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
+        String nextProcessId = UUID.randomUUID().toString();
+        processControllerZuul.updateProcess(nextData, dataset.getDataflowId(),
+                ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, nextProcessId,
+                user, defaultReleaseProcessPriority, true);
+        LOG.info("Created release process with processId {} for dataflowId {}, dataProviderId {} dataset {}, jobId {}", nextProcessId, dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
 
+        if (jobId!=null) {
+          LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextProcessId);
+          JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, nextProcessId);
+          jobProcessControllerZuul.save(jobProcessVO);
+          LOG.info("Created jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextProcessId);
+        }
 
+        LOG.info("Updating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
+        processControllerZuul.updateProcess(nextData, dataset.getDataflowId(),
+                ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, nextProcessId,
+                user, defaultReleaseProcessPriority, true);
+        LOG.info("Updated release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
+
+        datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease, false, nextProcessId);
       } else {
 
         // now when all finish we create the file to save the data to public export
@@ -155,7 +197,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
             fileTreatmentHelper.savePublicFiles(dataflowVO.getId(), dataset.getDataProviderId());
           } catch (IOException e) {
             LOG_ERROR.error("Folder not created in dataflow {} with dataprovider {} and datasetId {} message {}",
-              dataset.getDataflowId(), dataset.getDataProviderId(), datasetId, e.getMessage(), e);
+                dataset.getDataflowId(), dataset.getDataProviderId(), datasetId, e.getMessage(), e);
           } catch (Exception e) {
             LOG_ERROR.error("Unexpected error! Error creating folder for dataflow {} with dataprovider {}. Message {}",
                     dataset.getDataflowId(), dataset.getDataProviderId(), e.getMessage());
@@ -165,34 +207,34 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         // At this point the process of releasing all the datasets has been finished so we unlock
         // everything involved
         datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
-                dataset.getDataProviderId());
+            dataset.getDataProviderId());
 
         // Send email to requesters
         sendMail(dateRelease, dataset, dataflowVO);
 
-      LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {} DatasetId: {}",
-          dataset.getDataflowId(), dataset.getDataProviderId(), datasetId);
-      List<Long> datasetMetabaseListIds =
-          datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(dataflowVO.getId(),
-              dataset.getDataProviderId());
+        LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {} DatasetId: {}, JobId: {}",
+            dataset.getDataflowId(), dataset.getDataProviderId(), datasetId, jobId);
+        List<Long> datasetMetabaseListIds =
+            datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(dataflowVO.getId(),
+                dataset.getDataProviderId());
 
 
-        // we send diferent notification if have morethan one dataset or have only one to redirect
+        // we send different notification if we have more than one dataset or have only one to redirect
         if (!Collections.isEmpty(datasetMetabaseListIds) && datasetMetabaseListIds.size() > 1) {
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_PROVIDER_COMPLETED_EVENT,
-                  null,
-                  NotificationVO.builder()
-                          .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                          .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
-                          .providerId(dataset.getDataProviderId()).build());
+              null,
+              NotificationVO.builder()
+                  .user(user)
+                  .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
+                  .providerId(dataset.getDataProviderId()).build());
 
 
         } else {
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
-                  NotificationVO.builder()
-                          .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                          .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
-                          .providerId(dataset.getDataProviderId()).build());
+              NotificationVO.builder()
+                  .user(user)
+                  .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
+                  .providerId(dataset.getDataProviderId()).build());
         }
 
         // send feedback message
@@ -203,10 +245,9 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         messageVO.setProviderId(dataset.getDataProviderId());
         messageVO.setContent(country + " released " + dataflowName + " successfully");
         messageVO.setAutomatic(true);
-        collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO);
-        LOG.info("Automatic feedback message created of dataflow {} and datasetID {}. Message: {}", dataflowVO.getId(), datasetId,
-                messageVO.getContent());
-
+        collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO, user, jobId);
+        LOG.info("Automatic feedback message created of dataflow {}, datasetId {} and jobId {}. Message: {}", dataflowVO.getId(), datasetId, jobId,
+            messageVO.getContent());
       }
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());

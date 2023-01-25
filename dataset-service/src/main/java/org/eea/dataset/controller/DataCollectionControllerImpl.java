@@ -181,9 +181,10 @@ public class DataCollectionControllerImpl implements DataCollectionController {
 
     try {
       // This method will release the lock
-      LOG.info("Creating empty data collection for dataflowId {}", dataflowId);
+       LOG.info("Creating empty data collection for dataflowId {}", dataflowId);
       dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
-          manualCheck, showPublicInfo, referenceDataflow, stopAndNotifyPKError);
+              manualCheck, showPublicInfo, referenceDataflow, stopAndNotifyPKError);
+      LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error creating empty data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
@@ -233,6 +234,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       // This method will release the lock
       LOG.info("Updating data collection for dataflowId {}", dataflowId);
       dataCollectionService.updateDataCollection(dataflowId, referenceDataflow);
+      LOG.info("DataCollection update for Dataflow {} started", dataflowId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error updating data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;

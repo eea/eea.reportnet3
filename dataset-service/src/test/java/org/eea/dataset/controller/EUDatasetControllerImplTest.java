@@ -90,9 +90,9 @@ public class EUDatasetControllerImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    doNothing().when(euDatasetService).populateEUDatasetWithDataCollection(Mockito.any());
-    euDatasetControllerImpl.populateDataFromDataCollection(1L);
-    Mockito.verify(euDatasetService, times(1)).populateEUDatasetWithDataCollection(Mockito.any());
+    doNothing().when(euDatasetService).populateEUDatasetWithDataCollection(Mockito.any(), Mockito.any());
+    euDatasetControllerImpl.populateDataFromDataCollection(1L, null);
+    Mockito.verify(euDatasetService, times(1)).populateEUDatasetWithDataCollection(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -107,9 +107,9 @@ public class EUDatasetControllerImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    doNothing().when(euDatasetService).populateEUDatasetWithDataCollection(Mockito.any());
+    doNothing().when(euDatasetService).populateEUDatasetWithDataCollection(Mockito.any(), Mockito.any());
     euDatasetControllerImpl.populateDataFromDataCollectionLegacy(1L);
-    Mockito.verify(euDatasetService, times(1)).populateEUDatasetWithDataCollection(Mockito.any());
+    Mockito.verify(euDatasetService, times(1)).populateEUDatasetWithDataCollection(Mockito.any(), Mockito.any());
   }
 
   /**
@@ -125,9 +125,9 @@ public class EUDatasetControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException("failed")).when(euDatasetService)
-        .populateEUDatasetWithDataCollection(Mockito.any());
-    euDatasetControllerImpl.populateDataFromDataCollection(1L);
-    Mockito.verify(euDatasetService, times(1)).populateEUDatasetWithDataCollection(Mockito.any());
+        .populateEUDatasetWithDataCollection(Mockito.any(), Mockito.any());
+    euDatasetControllerImpl.populateDataFromDataCollection(1L, null);
+    Mockito.verify(euDatasetService, times(1)).populateEUDatasetWithDataCollection(Mockito.any(), Mockito.any());
 
   }
 }

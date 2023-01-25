@@ -1,24 +1,5 @@
 package org.eea.dataset.service.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -26,46 +7,15 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.eea.dataset.mapper.DataSetMapper;
-import org.eea.dataset.mapper.FieldNoValidationMapper;
-import org.eea.dataset.mapper.FieldValidationMapper;
-import org.eea.dataset.mapper.RecordMapper;
-import org.eea.dataset.mapper.RecordNoValidationMapper;
-import org.eea.dataset.mapper.RecordValidationMapper;
-import org.eea.dataset.persistence.data.domain.AttachmentValue;
-import org.eea.dataset.persistence.data.domain.DatasetValue;
-import org.eea.dataset.persistence.data.domain.FieldValidation;
-import org.eea.dataset.persistence.data.domain.FieldValue;
-import org.eea.dataset.persistence.data.domain.RecordValidation;
-import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.persistence.data.domain.TableValue;
-import org.eea.dataset.persistence.data.domain.Validation;
-import org.eea.dataset.persistence.data.repository.AttachmentRepository;
-import org.eea.dataset.persistence.data.repository.DatasetRepository;
-import org.eea.dataset.persistence.data.repository.FieldRepository;
-import org.eea.dataset.persistence.data.repository.FieldValidationRepository;
-import org.eea.dataset.persistence.data.repository.RecordRepository;
-import org.eea.dataset.persistence.data.repository.RecordValidationRepository;
+import org.eea.dataset.mapper.*;
+import org.eea.dataset.persistence.data.domain.*;
+import org.eea.dataset.persistence.data.repository.*;
 import org.eea.dataset.persistence.data.repository.RecordValidationRepository.IDError;
-import org.eea.dataset.persistence.data.repository.TableRepository;
-import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.data.sequence.FieldValueIdGenerator;
 import org.eea.dataset.persistence.data.sequence.RecordValueIdGenerator;
 import org.eea.dataset.persistence.data.util.SortField;
-import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.DesignDataset;
-import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
-import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
-import org.eea.dataset.persistence.metabase.domain.Statistics;
-import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
-import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
+import org.eea.dataset.persistence.metabase.domain.*;
+import org.eea.dataset.persistence.metabase.repository.*;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
@@ -78,11 +28,13 @@ import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.PostgresBulkImporter;
+import org.eea.dataset.service.model.TruncateDataset;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
@@ -90,17 +42,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
-import org.eea.interfaces.vo.dataset.ExportFilterVO;
-import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.FieldValidationVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.RecordValidationVO;
-import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -112,6 +54,8 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -129,15 +73,52 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
+
+import javax.transaction.Transactional;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The Class DatasetServiceImpl.
  */
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
+
+  /**
+   * The connection url.
+   */
+  @Value("${spring.datasource.url}")
+  private String connectionUrl;
+
+  /**
+   * The connection username.
+   */
+  @Value("${spring.datasource.dataset.username}")
+  private String connectionUsername;
+
+  /**
+   * The connection password.
+   */
+  @Value("${spring.datasource.dataset.password}")
+  private String connectionPassword;
+
+  /**
+   * The connection driver.
+   */
+  @Value("${spring.datasource.driverClassName}")
+  private String connectionDriver;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
@@ -313,9 +294,21 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
 
+  /** The process controller zuul */
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
+  @Autowired
+  private TaskRepository taskRepository;
+
   /** The import path. */
   @Value("${importPath}")
   private String importPath;
+
+  /**
+   * The default process priority
+   */
+  private int defaultProcessPriority = 20;
 
   /**
    * Save all records.
@@ -730,17 +723,17 @@ public class DatasetServiceImpl implements DatasetService {
       throw new EEAException(EEAErrorMessage.RECORD_REQUIRED);
     }
 
-    LOG.info("Find database Metabase for datasetId {}", datasetId);
+    LOG.info("PaM group save: Find database Metabase for datasetId {}", datasetId);
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
 
-    LOG.info("Get table schema for datasetSchemaId {} and tableSchemaId {}", datasetMetabaseVO.getDatasetSchema(), tableSchemaId);
+    LOG.info("PaM group save: Get table schema for datasetSchemaId {} and tableSchemaId {}", datasetMetabaseVO.getDatasetSchema(), tableSchemaId);
     TableSchema tableSchema = getTableSchema(tableSchemaId, datasetMetabaseVO.getDatasetSchema());
 
     if (null == tableSchema) {
       throw new EEAException(EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
     }
 
-    LOG.info("Get data provider for dataProviderId {}", datasetMetabaseVO.getDataProviderId());
+    LOG.info("PaM group save: Get data provider for dataProviderId {}", datasetMetabaseVO.getDataProviderId());
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
     String dataProviderCode = null != datasetMetabaseVO.getDataProviderId()
         ? representativeControllerZuul.findDataProviderById(datasetMetabaseVO.getDataProviderId())
@@ -761,7 +754,7 @@ public class DatasetServiceImpl implements DatasetService {
       }
     }
 
-    LOG.info("Create records and save all for datasetId {}", datasetId);
+    LOG.info("PaM group save: Create records and save all for datasetId {}", datasetId);
     recordRepository
         .saveAll(createRecords(datasetId, dataProviderCode, recordVOs, datasetType, tableSchema));
   }
@@ -1714,7 +1707,7 @@ public class DatasetServiceImpl implements DatasetService {
             recordStoreControllerZuul.getConnectionToDataset(schema);
         TenantResolver.setTenantName(String.format(DATASET_ID, targetDataset.getId()));
         try {
-          storeRecords(targetDataset.getId(), targetRecords, connectionDataVO);
+          storeRecords(targetDataset.getId(), targetRecords, connectionDataVO,null);
         } catch (IOException | SQLException e) {
           LOG_ERROR.error(
               "Error saving the list of records into the dataset {} when executing a prefill data",
@@ -2496,7 +2489,7 @@ public class DatasetServiceImpl implements DatasetService {
         fieldValues.add(fieldValue);
       }
     }
-    LOG.info("Created {} records for datasetId {}", recordValues.size(), datasetId);
+    LOG.info("PaM group save: Created {} records for datasetId {}", recordValues.size(), datasetId);
     return recordValues;
   }
 
@@ -2929,8 +2922,34 @@ public class DatasetServiceImpl implements DatasetService {
    * @param tableSchemaId the table schema id
    */
   private void deleteRecordsFromIdTableSchema(Long datasetId, String tableSchemaId) {
-    recordRepository.deleteRecordWithIdTableSchema(tableSchemaId);
-    LOG.info("Executed deleteRecords: datasetId={}, tableSchemaId={}", datasetId, tableSchemaId);
+    try {
+      LOG.info("RN3 Import process: executing delete operation for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
+      Long totalCountOfRecords = recordRepository.countByTableSchema(tableSchemaId);
+      String datasetName = "dataset_" + datasetId;
+      DriverManagerDataSource dataSource = new DriverManagerDataSource();
+      dataSource.setDriverClassName(connectionDriver);
+      dataSource.setUrl(connectionUrl);
+      dataSource.setUsername(connectionUsername);
+      dataSource.setPassword(connectionPassword);
+      while (totalCountOfRecords>0) {
+        LOG.info("RN3 Import process: executing delete for 100000 records out of {} for datasetId {}, tableSchemaId {}", totalCountOfRecords, datasetId, tableSchemaId);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT r.id FROM ");
+        deleteSql.append(datasetName).append(".record_value r join ");
+        deleteSql.append(datasetName).append(".table_value t on r.id_table = t.id where t.id_table_schema = ? LIMIT 100000) ");
+        deleteSql.append("DELETE FROM ");
+        deleteSql.append(datasetName).append(".record_value rv ");
+        deleteSql.append("USING rows WHERE rv.id = rows.id;");
+        jdbcTemplate.update(deleteSql.toString(), tableSchemaId);
+        LOG.info("RN3 Import process: deleted 100000 records for datasetId {}, tableSchemaId {}, counting again", datasetId, tableSchemaId);
+        totalCountOfRecords = recordRepository.countByTableSchema(tableSchemaId);
+        LOG.info("RN3 Import process: executing for datasetId {}, tableSchemaId {}, records remaining {}", datasetId, tableSchemaId, totalCountOfRecords);
+      }
+      LOG.info("RN3 Import process: executed delete operation for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
+    } catch (Exception er) {
+      LOG.error("RN3 Import process: error executing delete operation for datasetId {}, tableSchemaId {}, {}", datasetId, tableSchemaId, er.getMessage());
+      throw er;
+    }
   }
 
   /**
@@ -3000,12 +3019,26 @@ public class DatasetServiceImpl implements DatasetService {
         DesignDataset originDatasetDesign =
             designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema).orElse(null);
         if (null != originDatasetDesign) {
+          String processId = UUID.randomUUID().toString();
+          LOG.info("Updating process for dataflowId {}, dataset {}, processId {} to status IN_QUEUE", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
+          processControllerZuul.updateProcess(originDatasetDesign.getId(), originDatasetDesign.getDataflowId(),
+                  ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.COPY_REFERENCE_DATASET, processId,
+                  SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, false);
+          LOG.info("Updated process for dataflowId {}, dataset {}, processId {} to status IN_QUEUE", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
+
           LOG.info("Prefilling data into the reference datasetId {}.", datasetId);
+
+          LOG.info("Updating process for dataflowId {}, dataset {}, processId {} to status IN_PROGRESS", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
+          processControllerZuul.updateProcess(originDatasetDesign.getId(), originDatasetDesign.getDataflowId(),
+                  ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.COPY_REFERENCE_DATASET, processId,
+                  SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, false);
+          LOG.info("Updated process for dataflowId {}, dataset {}, processId {} to status IN_PROGRESS", originDatasetDesign.getDataflowId(), originDatasetDesign.getId(), processId);
+
           CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
           createSnapshotVO.setDescription(originDatasetDesign.getDatasetSchema());
           createSnapshotVO.setReleased(false);
           datasetSnapshotService.addSnapshot(originDatasetDesign.getId(), createSnapshotVO,
-              datasetSnapshotService.obtainPartition(datasetId, "root").getId(), null, true);
+              datasetSnapshotService.obtainPartition(datasetId, "root").getId(), null, true, processId);
         }
       }
     } catch (Exception e) {
@@ -3082,46 +3115,82 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param recordList the record list
    * @param connectionDataVO the connection data VO
+   * @param csvFileChunkRecoveryDetails the csvFileChunkRecoveryDetails object
+   *
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
   @Override
   public void storeRecords(@DatasetId Long datasetId, List<RecordValue> recordList,
-      ConnectionDataVO connectionDataVO) throws IOException, SQLException {
+      ConnectionDataVO connectionDataVO, CsvFileChunkRecoveryDetails csvFileChunkRecoveryDetails) throws IOException, SQLException {
+
+    Boolean isRecoveryProcess = false;
+    if(csvFileChunkRecoveryDetails != null && (csvFileChunkRecoveryDetails.getRecordsBulkImporterTemporaryFile() != null
+            || csvFileChunkRecoveryDetails.getFieldsBulkImporterTemporaryFile() != null )){
+      isRecoveryProcess = true;
+    }
 
     String schema = LiteralConstants.DATASET_PREFIX + datasetId;
 
     LOG.info("RN3-Import - Starting PostgresBulkImporter: datasetId={}", datasetId);
     try (
+
         PostgresBulkImporter recordsImporter = new PostgresBulkImporter(connectionDataVO, schema,
             "record_value (ID, ID_RECORD_SCHEMA,ID_TABLE,DATASET_PARTITION_ID,DATA_PROVIDER_CODE) ",
-            importPath);
+            importPath, csvFileChunkRecoveryDetails != null ? csvFileChunkRecoveryDetails.getRecordsBulkImporterTemporaryFile() : null);
         PostgresBulkImporter fieldsImporter = new PostgresBulkImporter(connectionDataVO, schema,
-            "field_value (ID, TYPE, VALUE, ID_FIELD_SCHEMA, ID_RECORD, GEOMETRY) ", importPath)) {
+            "field_value (ID, TYPE, VALUE, ID_FIELD_SCHEMA, ID_RECORD, GEOMETRY) ", importPath,
+                csvFileChunkRecoveryDetails !=null ? csvFileChunkRecoveryDetails.getFieldsBulkImporterTemporaryFile() : null)) {
 
       LOG.info("RN3-Import - PostgresBulkImporter started: datasetId={}", datasetId);
+      if (csvFileChunkRecoveryDetails==null || csvFileChunkRecoveryDetails.getRecordsBulkImporterTemporaryFile()==null || csvFileChunkRecoveryDetails.getFieldsBulkImporterTemporaryFile()==null) {
+        for (RecordValue recordValue : recordList) {
+          CsvLineAndRecordFieldsHolder csvLineAndRecordFieldsHolder = new CsvLineAndRecordFieldsHolder();
+          recordValue.setCsvLineAndRecordFieldsHolder(csvLineAndRecordFieldsHolder);
+          String recordId = (String) recordValueIdGenerator.generate(null, recordValue);
+          recordValue.setId(recordId);
+          csvLineAndRecordFieldsHolder.setCsvLine(recordValue.getCurrentCsvLine());
+          csvLineAndRecordFieldsHolder.setRecordId(recordId);
+          List<String> fieldsIdsList = new ArrayList<>();
+          csvLineAndRecordFieldsHolder.setRecordFieldsIds(fieldsIdsList);
+          recordsImporter.addTuple(new Object[]{recordId, recordValue.getIdRecordSchema(),
+                  recordValue.getTableValue().getId(), recordValue.getDatasetPartitionId(),
+                  recordValue.getDataProviderCode()});
 
-      for (RecordValue recordValue : recordList) {
-
-        String recordId = (String) recordValueIdGenerator.generate(null, recordValue);
-        recordsImporter.addTuple(new Object[] {recordId, recordValue.getIdRecordSchema(),
-            recordValue.getTableValue().getId(), recordValue.getDatasetPartitionId(),
-            recordValue.getDataProviderCode()});
-
-        for (FieldValue fieldValue : recordValue.getFields()) {
-          String fieldId = (String) fieldValueIdGenerator.generate(null, fieldValue);
-          fieldsImporter.addTuple(new Object[] {fieldId, fieldValue.getType().getValue(),
-              fieldValue.getValue(), fieldValue.getIdFieldSchema(), recordId, null});
+          for (FieldValue fieldValue : recordValue.getFields()) {
+            String fieldId = (String) fieldValueIdGenerator.generate(null, fieldValue);
+            fieldsIdsList.add(fieldId);
+            fieldValue.setId(fieldId);
+            fieldsImporter.addTuple(new Object[]{fieldId, fieldValue.getType().getValue(),
+                    fieldValue.getValue(), fieldValue.getIdFieldSchema(), recordId, null});
+          }
         }
       }
-
+    // First time of importing a CSV batch, the details object will be empty But not NULL.
+      // if its completely Null, do nothing
+      if(csvFileChunkRecoveryDetails!=null) {
+        csvFileChunkRecoveryDetails.setNumberOfRecords(recordList.size());
+        if(csvFileChunkRecoveryDetails.getRecordsBulkImporterTemporaryFile()==null){
+          csvFileChunkRecoveryDetails.setRecordsBulkImporterTemporaryFile(recordsImporter.getTemporaryFile().getName());
+        }
+        if(csvFileChunkRecoveryDetails.getFieldsBulkImporterTemporaryFile()==null){
+          csvFileChunkRecoveryDetails.setFieldsBulkImporterTemporaryFile(fieldsImporter.getTemporaryFile().getName());
+        }
+      }
       LOG.info("RN3-Import file: Temporary binary files CREATED for datasetId={}", datasetId);
       recordsImporter.copy();
       fieldsImporter.copy();
+
       LOG.info("RN3-Import file: Temporary binary files IMPORTED for datasetId={}", datasetId);
     } catch (SQLException e) {
-      LOG_ERROR.error("Cannot save the records for dataset {}", datasetId, e);
-      throw e;
+      if( isRecoveryProcess &&
+      e.getClass().getCanonicalName().equals("org.postgresql.util.PSQLException") && e.getMessage().contains("ERROR: duplicate")){
+        LOG.info("Cannot save the records for dataset {} in recovery process because they already exist", datasetId, e);
+      }
+      else {
+        LOG.error("Cannot save the records for dataset {}", datasetId, e);
+        throw e;
+      }
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in storeRecords for datasetId {}. Message: {}", datasetId, e.getMessage());
       throw e;
@@ -3403,4 +3472,87 @@ public class DatasetServiceImpl implements DatasetService {
     return dictionary;
   }
 
+  /**
+   * Find dataset data for dataset id and data provider id if can be deleted.
+   *
+   * @param datasetId
+   * @param dataProviderId
+   * @return
+   */
+  @Override
+  public TruncateDataset getDatasetDataToBeDeleted(Long datasetId, Long dataProviderId) {
+
+    LOG.info("Method getDatasetDataToBeDeleted called for datasetId {} and dataProviderId {}", datasetId, dataProviderId);
+    TruncateDataset truncateDataset = new TruncateDataset();
+    boolean canBeDeleted;
+
+    try {
+      DataSetMetabase dataSetMetabase = dataSetMetabaseRepository.findByIdAndDataProviderId(datasetId, dataProviderId);
+      LOG.info("Dataset retrieved {} for datasetId {} and dataProviderId {}", dataSetMetabase, datasetId, dataProviderId);
+
+      if (dataSetMetabase != null) {
+        DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabase.getDatasetSchema()));
+        DataFlowVO dataFlowVO =dataflowControllerZuul.getMetabaseById(dataSetMetabase.getDataflowId());
+
+        canBeDeleted = dataSetSchema.getTableSchemas().stream()
+            .allMatch(table -> table.getReadOnly() && table.getFixedNumber() == Boolean.FALSE);
+
+        LOG.info("Method getDatasetDataToBeDeleted canBeDeleted: {} for datasetId {} and dataProviderId {} ",
+            canBeDeleted, datasetId, dataProviderId);
+
+        truncateDataset.setDatasetId(datasetId);
+        truncateDataset.setDatasetName(dataSetMetabase.getDataSetName());
+        truncateDataset.setDataProviderId(dataProviderId);
+        truncateDataset.setDataflowName(dataFlowVO.getName());
+        truncateDataset.setDataflowId(dataSetMetabase.getDataflowId());
+      }
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in getDatasetDataToBeDeleted. Error message: {}", e.getMessage(), e);
+    }
+
+    return truncateDataset;
+  }
+
+
+  /**
+   * Truncate dataset by dataset id
+   * @param datasetId
+   * @return
+   */
+  @Override
+  public boolean truncateDataset(Long datasetId) {
+    LOG.info("Method truncateDataset called for datasetId {}", datasetId);
+    boolean deleted = false;
+
+    try {
+      deleted = recordRepository.truncateDataset(datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error(
+          "Error in getDatasetDataToBeDeleted. Error message: {}",
+          e.getMessage(), e);
+    }
+
+    LOG.info("Dataset {} has been truncated", datasetId);
+    return deleted;
+  }
+
+
+  /**
+   * Deletes the locks related to import
+   * @param datasetId
+   * @return
+   */
+  @Override
+  public void deleteLocksToImportProcess(Long datasetId){
+    Map<String, Object> importFileData = new HashMap<>();
+    importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
+    importFileData.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(importFileData);
+    Map<String, Object> importBigFileData = new HashMap<>();
+    importBigFileData.put(LiteralConstants.SIGNATURE,
+            LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+    importBigFileData.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(importBigFileData);
+    fileTreatmentHelper.releaseLockReleasingProcess(datasetId);
+  }
 }

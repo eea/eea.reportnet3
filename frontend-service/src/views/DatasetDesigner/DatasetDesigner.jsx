@@ -1645,12 +1645,21 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 popup={true}
                 ref={exportMenuRef}
               />
-              <DatasetDeleteDataDialog onConfirmDelete={onConfirmDelete} onHideDelete={onHideDelete}>
+              <DatasetDeleteDataDialog
+                icon="trash"
+                label={resourcesContext.messages['deleteDatasetData']}
+                onConfirmDelete={onConfirmDelete}
+                onHideDelete={onHideDelete}>
                 {deletePrefilledDataCheckbox}
               </DatasetDeleteDataDialog>
             </div>
             <div className="p-toolbar-group-right">
-              <DatasetValidateDialog disabled={isDesignDatasetEditorRead} onConfirmValidate={onConfirmValidate} />
+              <DatasetValidateDialog
+                disabled={isDesignDatasetEditorRead}
+                icon="validate"
+                label={resourcesContext.messages['validate']}
+                onConfirmValidate={onConfirmValidate}
+              />
               <Button
                 className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
                 icon="warning"
@@ -1881,8 +1890,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             replaceCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${
               isNil(selectedCustomImportIntegration.id)
-                ? getUrl(DatasetConfig.importFileDataset, {
+                ? getUrl(DatasetConfig.importFileDatasetUpd, {
                     datasetId: datasetId,
+                    dataflowId: dataflowId,
                     delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
                   })
                 : getUrl(DatasetConfig.importFileDatasetExternal, {

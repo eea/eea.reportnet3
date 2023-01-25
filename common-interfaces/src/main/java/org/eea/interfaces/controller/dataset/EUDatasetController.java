@@ -1,12 +1,11 @@
 package org.eea.interfaces.controller.dataset;
 
-import java.util.List;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 /**
@@ -39,7 +38,7 @@ public interface EUDatasetController {
    * @param idDataflow the id dataflow
    */
   @PostMapping("/v1/populateData/dataflow/{dataflowId}")
-  void populateDataFromDataCollection(@PathVariable("dataflowId") Long idDataflow);
+  void populateDataFromDataCollection(@PathVariable("dataflowId") Long idDataflow, @RequestParam(name = "jobId", required = false) Long jobId);
 
   /**
    * Populate data from data collection legacy.
@@ -49,4 +48,18 @@ public interface EUDatasetController {
   @PostMapping("/populateData/dataflow/{dataflowId}")
   void populateDataFromDataCollectionLegacy(@PathVariable("dataflowId") Long idDataflow);
 
+  /**
+   * Remove locks related to populate eu
+   * @param dataflowId
+   */
+  @PutMapping("/private/removeLocksRelatedToPopulateEU/{dataflowId}")
+  void removeLocksRelatedToPopulateEU(@PathVariable("dataflowId") Long dataflowId);
 }
+
+
+
+
+
+
+
+

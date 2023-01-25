@@ -187,8 +187,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       if (e instanceof InterruptedException) {
         Thread.currentThread().interrupt();
       }
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          "Error creating design dataset for dataflowId " + dataflowId);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating design dataset for dataflowId " + dataflowId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error creating empty dataset schema {} for dataflowId {} Message: {}", datasetSchemaName, dataflowId, e.getMessage());
       throw e;
@@ -1000,8 +999,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       Boolean isValid = false;
       if (dataflow.getDesignDatasets() != null && !dataflow.getDesignDatasets().isEmpty()) {
         Set<Boolean> results = dataflow.getDesignDatasets().parallelStream()
-                .map(ds -> dataschemaService.validateSchema(ds.getDatasetSchema(), dataflow.getType()))
-                .collect(Collectors.toSet());
+          .map(ds -> dataschemaService.validateSchema(ds.getDatasetSchema(), dataflow.getType()))
+          .collect(Collectors.toSet());
         isValid = results.contains(true) && !results.contains(false);
       }
       LOG.info("Successfully validated schemas for dataflowId {}. Result is {}", dataflowId, isValid);
@@ -1037,8 +1036,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         try {
           schemas.add(dataschemaService.getDataSchemaByDatasetId(false, design.getId()));
         } catch (EEAException e) {
-          LOG_ERROR.error("Error finding dataset schema by dataflow id. DatasetId: {}. Message: {}",
-                  idDataflow, e.getMessage(), e);
+          LOG_ERROR.error("Error finding dataset schema by dataflowId {}. Message: {}",
+              idDataflow, e.getMessage(), e);
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.SCHEMA_NOT_FOUND);
         } catch (Exception e) {
           Long datasetId = (design != null) ? design.getId() : null;
@@ -1492,6 +1491,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       LOG.info("Importing schemas from the dataflowId {}", dataflowId);
       dataschemaService.importSchemas(dataflowId, file.getInputStream(),
           file.getOriginalFilename());
+      LOG.info("Successfully imported schemas from the dataflowId {}", dataflowId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error importing schemas on the dataflowId {}. Message: {}", dataflowId,
           e.getMessage(), e);
@@ -1613,6 +1613,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       LOG.info("Importing field Schemas for datasetId {}", datasetId);
       dataschemaService.importFieldsSchema(tableSchemaId, datasetSchemaId, datasetId,
           file.getInputStream(), replace);
+      LOG.info("Successfully imported field Schemas for datasetId {}", datasetId);
     } catch (IOException e) {
       LOG_ERROR.error("File importing field schemas for datasetId {} failed. fileName={}", datasetId,
           file.getOriginalFilename(), e);

@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
+
 /**
  * The Interface ProcessController.
  */
@@ -125,4 +127,11 @@ public interface ProcessController {
   @GetMapping(value = "/private/next/{processId}")
   ProcessVO getNextProcess(@PathVariable("processId") String processId);
 
+  /**
+   * Lists the process ids of validation processes that are in progress for more than the specified period of time
+   * @param timeInMinutes
+   * @return
+   */
+  @GetMapping(value = "/private/listValidationProcessesInProgress/{timeInMinutes}")
+  List<ProcessVO> listInProgressValidationProcessesThatExceedTime(@PathVariable("timeInMinutes") long timeInMinutes);
 }

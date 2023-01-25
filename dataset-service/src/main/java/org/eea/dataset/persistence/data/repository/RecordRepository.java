@@ -131,4 +131,11 @@ public interface RecordRepository
    */
   RecordValue findFirstByDataProviderCode(String providerCode);
 
+  /**
+   * Count by provider code
+   * @param providerCode
+   * @return
+   */
+  Long countRecordValueByDataProviderCode(String providerCode);
+
 }

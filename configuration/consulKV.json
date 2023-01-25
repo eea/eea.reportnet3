@@ -1144,6 +1144,14 @@
     "value": "JHtRVUVSWV9NRVNTQUdFX0dFT01FVFJZX0VSUk9SOkludmFsaWQgZ2VvbWV0cnl9"
   },
   {
+    "key": "config/application/eea.keycloak.admin.user",
+    "value": "JHtLRVlDTE9BS19BRE1JTl9VU0VSOnJlcG9ydG5ldF9hZG1pbn0="
+  },
+  {
+    "key": "config/application/eea.keycloak.admin.password",
+    "value": "JHtLRVlDTE9BS19BRE1JTl9QQVNTV09SRDoxMjM0fQ=="
+  },
+  {
     "key": "config/application/eea.keycloak.redirect_uri",
     "value": "JHtLRVlDTE9BS19SRURJUkVDVF9VUkk6aHR0cDovL2s4cy1ub2RlMDAxLmRldm9hbWkuYWx0aWEuZXM6MzA0NDUvZGF0YS1mbG93LXRhc2svfQ=="
   },
@@ -1391,7 +1399,11 @@
     "key": "config/dataset/importPath",
     "value": "JHtEQVRBU0VUX1BBVEg6QzpcaW1wb3J0XH0="
   },
-    {
+  {
+    "key": "config/dataset/importStorePath",
+    "value": "JHtEQVRBU0VUX1BBVEg6L2hvbWUvbWFyaWEvRG93bmxvYWRzL3JlcG9ydG5ldDMvcGF0aHMvaW1wb3J0RmlsZXN9"
+  },
+  {
     "key": "config/dataset/pathPublicFile",
     "value": "JHtEQVRBU0VUX1BVQkxJQ19GSUxFX1BBVEg6QzpcaW1wb3J0RmlsZXNQdWJsaWNcfQ=="
   },
@@ -1752,6 +1764,14 @@
     "value": "JHtEQVRBU0VUX0lNUE9SVF9CQVRDSFJFQ09SRFNBVkU6MjUwMH0="
   },
   {
+    "key": "config/dataset/spring.datasource.driverClassName",
+    "value": "JHtEQVRBU0VUX0RSSVZFUl9DTEFTUzpvcmcucG9zdGdyZXNxbC5Ecml2ZXJ9"
+  },
+  {
+    "key": "config/dataset/spring.datasource.url",
+    "value": "JHtEQVRBU0VUX0NPTk5FQ1RJT05fU1RSSU5HOmpkYmM6cG9zdGdyZXNxbDovL2xvY2FsaG9zdC9kYXRhc2V0c30="
+  },
+  {
     "key": "config/apiGateway/zuul.routes.process.path",
     "value": "L3Byb2Nlc3MvKio="
   },
@@ -1778,5 +1798,141 @@
   {
     "key": "config/recordstore/enableTableDistributionJob",
     "value": "JHtSRUNPUkRTVE9SRS5FTkFCTEVfVEFCTEVfRElTVFJJQlVUSU9OX0pPQjowIDAsMzAgKiAqICogKn0="
+  },
+  {
+    "key": "config/orchestrator/kafka.bootstrapAddress",
+    "value": "JHtLQUZLQV9CT09UU1RSQVBfVVJMOmxvY2FsaG9zdDo5MDkyfQ=="
+  },
+  {
+    "key": "config/orchestrator/management.metrics.export.elastic.enabled",
+    "value": "JHtFTEFTVElDX01FVFJJQ19FTkFCTEU6ZmFsc2V9"
+  },
+  {
+    "key": "config/orchestrator/management.metrics.export.elastic.host",
+    "value": "JHtFTEFTVElDX0hPU1Q6aHR0cHM6Ly9lbGFzdGljbWV0cmljcy5lZWEuZXVyb3BhLmV1OjQ0M30="
+  },
+  {
+    "key": "config/orchestrator/management.metrics.export.elastic.index",
+    "value": "JHtFTEFTVElDX0lOREVYOmRldi1vcmNoZXN0cmF0b3ItbWV0cmljc30="
+  },
+  {
+    "key": "config/orchestrator/management.metrics.export.elastic.indexDateFormat",
+    "value": "JHtFTEFTVElDX0lOREVYX0RBVEVfRk9STUFUOnl5eXktTU19"
+  },
+  {
+    "key": "config/orchestrator/management.metrics.export.elastic.password",
+    "value": "JHtFTEFTVElDX1BBU1NXT1JEOldoMXRlVGVhNzB9"
+  },
+  {
+    "key": "config/orchestrator/management.metrics.export.elastic.userName",
+    "value": "JHtFTEFTVElDX1VTRVJOQU1FOmFkbWlufQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.validation.task.max.time",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.import.task.max.ms.restart",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.import.task.max.ms.fail",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.import.jobs.without.tasks.max.time",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.fme.import.jobs.without.tasks.max.time",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.import.maximum.jobs",
+    "value": "JHtJTl9QUk9HUkVTU19JTVBPUlRfTUFYSU1VTV9KT0JTOjJ9"
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.validation.maximum.jobs",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX01BWElNVU1fSk9CUzoyfQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.validation.process.without.task.max.time",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1dJVEhPVVRfVEFTS19NQVhfVElNRTo2MH0="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.release.maximum.jobs",
+    "value": "JHtJTl9QUk9HUkVTU19SRUxFQVNFX01BWElNVU1fSk9CUzoyfQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.copyToEUDataset.maximum.jobs",
+    "value": "JHtJTl9QUk9HUkVTU19DT1BZX1RPX0VVX0RBVEFTRVRfTUFYSU1VTV9KT0JTOjJ9"
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.export.maximum.jobs",
+    "value": "JHtJTl9QUk9HUkVTU19FWFBPUlRfTUFYSU1VTV9KT0JTOjJ9"
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.job.without.process.max.time",
+    "value": "JHtJTl9QUk9HUkVTU19KT0JfV0lUSE9VVF9QUk9DRVNTX01BWF9USU1FOjEwfQ=="
+  },
+  {
+    "key": "config/application/spring.datasource.orchestratorDb.driver-class-name",
+    "value": "JHtPUkNIRVNUQVRPUl9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
+  },
+  {
+    "key": "config/application/spring.datasource.orchestratorDb.password",
+    "value": "JHtPUkNIRVNUUkFUT1JfQ09OTkVDVElPTl9QQVNTV09SRDpyb290fQ=="
+  },
+  {
+    "key": "config/application/spring.datasource.orchestratorDb.url",
+    "value": "JHtPUkNIRVNUUkFUT1JfQ09OTkVDVElPTl9VUkw6amRiYzpwb3N0Z3Jlc3FsOi8vbG9jYWxob3N0OjU0MzEvb3JjaGVzdHJhdG9yX2RifQ=="
+  },
+  {
+    "key": "config/application/spring.datasource.orchestratorDb.username",
+    "value": "JHtPUkNIRVNUUkFUT1JfQ09OTkVDVElPTl9VU0VSOnJvb3R9"
+  },
+  {
+    "key": "config/application/spring.jpa.hibernate.orchestratorDb.ddl-auto",
+    "value": "JHtPUkNIRVNUUkFUT1JfRERMX0FVVE86dmFsaWRhdGV9"
+  },
+  {
+    "key": "config/orchestrator/feign.client.config.default.connectTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/orchestrator/feign.client.config.default.loggerLevel",
+    "value": "JHtGRUlHTl9DTElFTlRfTE9HX0xFVkVMOmJhc2ljfQ=="
+  },
+  {
+    "key": "config/orchestrator/feign.client.config.default.readTimeout",
+    "value": "JHtGRUlHTl9DTElFTlRfUkVBRF9USU1FT1VUOjEwMDAwfQ=="
+  },
+  {
+    "key": "config/orchestrator/management.endpoint.health.show-details",
+    "value": "YWx3YXlz"
+  },
+  {
+    "key": "config/orchestrator/management.endpoints.web.exposure.include",
+    "value": "Kg=="
+  },
+  {
+    "key": "config/orchestrator/spring.jpa.hibernate.ddl-auto",
+    "value": "JHtNRVRBQkFTRV9ERExfQVVUTzp2YWxpZGF0ZX0="
+  },
+  {
+    "key": "config/orchestrator/spring.jpa.properties.hibernate.dialect",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+  },
+  {
+    "key": "config/orchestrator/spring.jpa.hibernate.show-sql",
+    "value": "JHtTSE9XX1NRTDpmYWxzZX0="
+  },
+  {
+    "key": "config/orchestrator/spring.jpa.hibernate.flushMode",
+    "value": "Y29tbWl0"
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.release.task.max.time",
+    "value": "MzA="
   }
 ]

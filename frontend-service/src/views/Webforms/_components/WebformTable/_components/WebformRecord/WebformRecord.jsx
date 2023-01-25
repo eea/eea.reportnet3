@@ -305,16 +305,16 @@ export const WebformRecord = ({
                                     )}
                                 </div>
                                 {element.validations &&
-                                    uniqBy(element.validations, element => {
-                                        return [element.message, element.errorLevel].join();
-                                    }).map(validation => (
-                                        <IconTooltip
-                                            className="webform-validationErrors"
-                                            key={validation.id}
-                                            levelError={validation.levelError}
-                                            message={validation.message}
-                                        />
-                                    ))}
+                                uniqBy(element.validations, element => {
+                                    return [element.message, element.errorLevel].join();
+                                }).map(validation => (
+                                    <IconTooltip
+                                        className="webform-validationErrors"
+                                        key={validation.id}
+                                        levelError={validation.levelError}
+                                        message={validation.message}
+                                    />
+                                ))}
                             </div>
                         </div>
                     )
@@ -324,11 +324,11 @@ export const WebformRecord = ({
                     checkLabelVisibility(element) && (
                         <div key={uniqueId(element.title)}>
                             {element.level === 2 &&
-                                <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
+                            <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
                             {element.level === 3 &&
-                                <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+                            <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
                             {element.level === 4 &&
-                                <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+                            <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
                             {<span style={{color: 'var(--errors)'}}>{element.showRequiredCharacter ? ' *' : ''}</span>}
                             {element.tooltip && isNil(element.customType) && (
                                 <Button

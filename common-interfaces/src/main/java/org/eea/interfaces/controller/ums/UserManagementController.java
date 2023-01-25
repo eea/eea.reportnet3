@@ -89,6 +89,22 @@ public interface UserManagementController {
   List<ResourceAccessVO> getResourcesByUser();
 
   /**
+   * Gets resources by userId
+   * @param userId
+   * @return
+   */
+  @GetMapping("/private/resourcesByUserId")
+  List<ResourceAccessVO> getResourcesByUserId(@RequestParam("userId") String userId);
+
+  /**
+   * Checks if user is admin
+   * @param userId
+   * @return
+   */
+  @GetMapping("/private/checkAdmin")
+  boolean checkAdmin(@RequestParam("userId") String userId);
+
+  /**
    * Gets the resources by user.
    *
    * @param resourceType the resource type

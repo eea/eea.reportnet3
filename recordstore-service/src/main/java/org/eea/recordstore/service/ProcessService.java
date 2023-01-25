@@ -6,6 +6,7 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 
 
 /**
@@ -75,4 +76,26 @@ public interface ProcessService {
    * @return the process VO
    */
   ProcessVO findNextProcess(String processId);
+
+  /**
+   * Finds processId by datasetId and status
+   * @param datasetId
+   * @param status
+   * @return
+   */
+  List<String> findProcessIdByDatasetAndStatusIn(Long datasetId, String processType, List<String> status);
+
+  /**
+   * Finds processId by type and status
+   * @param type
+   * @param status
+   * @return
+   */
+  List<ProcessVO> findProcessIdByTypeAndStatusThatExceedTime(String type, String status, long timeInMinutes);
 }
+
+
+
+
+
+

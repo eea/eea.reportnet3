@@ -13,6 +13,7 @@ export const ActionsColumn = ({
   hideDeletion = false,
   hideEdition = false,
   isDeletingDocument,
+  isDeletingDatasetData,
   isUpdating,
   onCloneClick,
   onDeleteClick,
@@ -69,12 +70,22 @@ export const ActionsColumn = ({
       {!isNil(onDeleteClick) && !hideDeletion && (
         <Button
           className={`${`p-button-rounded p-button-secondary-transparent ${styles.deleteRowButton}`} ${
-            isDeletingDocument || (rowUpdatingId === rowDataId && isUpdating) || disabledButtons
+            isDeletingDocument ||
+            isDeletingDatasetData ||
+            (rowUpdatingId === rowDataId && isUpdating) ||
+            disabledButtons
               ? null
               : 'p-button-animated-blink'
           }`}
-          disabled={isDeletingDocument || (rowUpdatingId === rowDataId && isUpdating) || disabledButtons}
-          icon={rowDeletingId !== rowDataId || !isDeletingDocument ? 'trash' : 'spinnerAnimate'}
+          disabled={
+            isDeletingDocument ||
+            isDeletingDatasetData ||
+            (rowUpdatingId === rowDataId && isUpdating) ||
+            disabledButtons
+          }
+          icon={
+            rowDeletingId !== rowDataId || !isDeletingDatasetData || !isDeletingDocument ? 'trash' : 'spinnerAnimate'
+          }
           onClick={onDeleteClick}
           tooltip={resourcesContext.messages['delete']}
           tooltipOptions={{ position: 'top' }}

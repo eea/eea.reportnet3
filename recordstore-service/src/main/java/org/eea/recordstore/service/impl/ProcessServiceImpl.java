@@ -1,9 +1,6 @@
 package org.eea.recordstore.service.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import javax.transaction.Transactional;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
@@ -23,7 +20,11 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
-import com.fasterxml.jackson.core.JsonProcessingException;
+
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 
 
@@ -220,8 +221,31 @@ public class ProcessServiceImpl implements ProcessService {
         datasetMetabaseControllerZuul.findDatasetMetabaseById(processToUpdate.getDatasetId());
 
     // return next in_queue process with the same dataflow and dataset+dataprovider as the previous
-    return processMapper.entityToClass(processRepository.findNextProcess(
+    return processMapper.entityToClass(processRepository.findNextValidationProcess(
         processToUpdate.getDataflowId(), dataset.getDataProviderId(), dataset.getId()));
+  }
+
+  /**
+   * Finds processId by datasetId and status
+   * @param datasetId
+   * @param status
+   * @return
+   */
+  @Override
+  public List<String> findProcessIdByDatasetAndStatusIn(Long datasetId, String processType, List<String> status) {
+     return processRepository.findProcessIdsByDatasetIdAndProcessTypeAndStatusIn(datasetId, processType, status);
+  }
+
+  /**
+   * Finds processId by type and status
+   * @param type
+   * @param status
+   * @return
+   */
+  @Override
+  public List<ProcessVO> findProcessIdByTypeAndStatusThatExceedTime(String type, String status, long timeInMinutes) {
+    List<EEAProcess> eeaProcesses = processRepository.findProcessIdsByProcessTypeAndStatus(type, status, timeInMinutes);
+    return processMapper.entityListToClass(eeaProcesses);
   }
 
 }

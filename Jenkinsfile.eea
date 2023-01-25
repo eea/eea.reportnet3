@@ -55,6 +55,7 @@ pipeline {
                     env.DATASET_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=dataset.version -q -DforceStdout', returnStdout: true
                     env.RECORDSTORE_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=recordstore.version -q -DforceStdout', returnStdout: true
                     env.VALIDATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=validation.version -q -DforceStdout', returnStdout: true
+                    env.ORCHESTRATOR_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=orchestrator.version -q -DforceStdout', returnStdout: true
                     env.DOCUMENT_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=document.version -q -DforceStdout', returnStdout: true
                     env.API_GATEWAY_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=api-gateway.version -q -DforceStdout', returnStdout: true
                     env.COMMUNICATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=communication.version -q -DforceStdout', returnStdout: true
@@ -111,6 +112,14 @@ pipeline {
                 script {
                     def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
                     image = docker.build("eeacms/validation-service:" + env.VALIDATION_VERSION, "--build-arg JAR_FILE=validation-service/target/validation-service-" + env.VALIDATION_VERSION + ".jar --build-arg MS_PORT=9000 .")
+                    docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
+                        image.push()
+                        image.push(date)
+                    }
+                }
+                script {
+                    def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+                    image = docker.build("eeacms/orchestrator-service:" + env.ORCHESTRATOR_VERSION, "--build-arg JAR_FILE=orchestrator-service/target/orchestrator-service-" + env.ORCHESTRATOR_VERSION + ".jar --build-arg MS_PORT=8091 .")
                     docker.withRegistry('https://index.docker.io/v1/', 'eeajenkins') {
                         image.push()
                         image.push(date)

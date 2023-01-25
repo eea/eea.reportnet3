@@ -5,7 +5,8 @@
   padding: 4px;
 }
 
-.blocker {
+.blocker,
+.refused {
   background-color: rgba(var(--statusBox-blocker-bg), 0.8);
   color: rgba(var(--statusBox-blocker-color), 0.8);
 }
@@ -20,7 +21,8 @@
   color: var(--c-black-color);
 }
 
-.disabled {
+.disabled,
+.failed {
   background-color: var(--statusBox-false-bg);
   color: var(--statusBox-false-color);
 }
@@ -31,16 +33,17 @@
   color: var(--statusBox-draft-color);
 }
 
-.error, 
-.incorrect, 
-.invalid, 
-.cancelled {
+.error,
+.incorrect,
+.invalid,
+.canceled {
   background-color: var(--statusBox-error-bg);
   color: var(--statusBox-error-color);
 }
 
 .info,
-.inQueue {
+.inQueue,
+.queued {
   background-color: var(--statusBox-info-bg);
   color: var(--statusBox-info-color);
 }

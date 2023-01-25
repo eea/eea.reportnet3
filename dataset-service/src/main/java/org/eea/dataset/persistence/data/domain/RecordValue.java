@@ -13,6 +13,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import org.eea.interfaces.vo.dataset.CsvLineAndRecordFieldsHolder;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.hibernate.annotations.GenericGenerator;
 import lombok.Getter;
@@ -90,6 +92,11 @@ public class RecordValue {
   @Transient
   private ErrorTypeEnum levelError;
 
+  @Transient
+  private Integer currentCsvLine;
+
+  @Transient
+  private CsvLineAndRecordFieldsHolder csvLineAndRecordFieldsHolder;
   /**
    * Hash code.
    *

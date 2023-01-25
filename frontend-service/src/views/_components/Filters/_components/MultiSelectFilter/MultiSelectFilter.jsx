@@ -50,6 +50,10 @@ export const MultiSelectFilter = ({
       return <LevelError className={`${config.datasetRunningStatus[item.value].label}`} type={item.type} />;
     }
 
+    if (template === 'JobsStatus') {
+      return <LevelError className={`${config.jobRunningStatus[item.value].label}`} type={item.type} />;
+    }
+
     return <span>{item.type?.toString()}</span>;
   };
 

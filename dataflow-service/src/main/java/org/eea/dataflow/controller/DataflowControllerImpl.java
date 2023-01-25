@@ -694,6 +694,7 @@ public class DataflowControllerImpl implements DataFlowController {
       try{
         LOG.info("Deleting dataflow with id {}", dataflowId);
         dataflowService.deleteDataFlow(dataflowId);
+        LOG.info("Successfully deleted dataflow with id {}", dataflowId);
       } catch (Exception e){
         LOG_ERROR.error("Unexpected error! Could not delete dataflow with id {} Message: {}", dataflowId, e.getMessage());
         throw e;
@@ -1032,6 +1033,7 @@ public class DataflowControllerImpl implements DataFlowController {
     try {
       LOG.info("Exporting schema information for dataflow with id {}", dataflowId);
       dataflowHelper.exportSchemaInformation(dataflowId);
+      LOG.info("Successfully exported schema information for dataflow with id {}", dataflowId);
     } catch (IOException | EEAException e) {
       LOG_ERROR.error(
           "Error downloading file generated from export from the dataflowId {}. Message: {}",

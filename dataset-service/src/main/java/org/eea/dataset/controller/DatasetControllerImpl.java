@@ -17,10 +17,12 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
+import org.eea.dataset.service.model.TruncateDataset;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.*;
@@ -30,6 +32,9 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -114,6 +119,10 @@ public class DatasetControllerImpl implements DatasetController {
   /** The notification controller zuul. */
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
+
+  /** The job controller zuul */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
 
   /**
    * Gets the data tables values.
@@ -258,17 +267,43 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
           value = "integrationId", required = false) Long integrationId,
       @ApiParam(type = "String", value = "File delimiter",
-          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
+          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+      @ApiParam(type = "String", value = "Fme Job Id",
+              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
 
+    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
+    Long jobId = null;
     try {
+      if (dataflowId == null){
+        dataflowId = datasetService.getDataFlowIdById(datasetId);
+      }
+
+      if(fmeJobId!=null){
+        JobVO job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+        jobId = job.getId();
+        LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, datasetId);
+      }else{
+        //check if there is already an import job with status IN_PROGRESS for the specific datasetId
+        List<Long> datasetIds = new ArrayList<>();
+        datasetIds.add(datasetId);
+        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+        jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus);
+        if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
+          LOG.info("Added import job with id {} for datasetId {} with status REFUSED because there already is an import job with status IN_PROGRESS for the same datasetId", jobId, datasetId);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_DATASET);
+        }
+      }
+
       LOG.info("Importing big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
-      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId,
-          delimiter);
+      fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId, delimiter, jobId);
       LOG.info("Successfully imported big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
     } catch (EEAException e) {
-      LOG_ERROR.error(
+      LOG.error(
           "File import failed: dataflowId={} datasetId={}, tableSchemaId={}, fileName={}. Message: {}", dataflowId, datasetId,
           tableSchemaId, file.getOriginalFilename(), e.getMessage(), e);
+      if (jobId!=null) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      }
       Map<String, Object> importFileData = new HashMap<>();
       importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
       importFileData.put(LiteralConstants.DATASETID, datasetId);
@@ -277,7 +312,14 @@ public class DatasetControllerImpl implements DatasetController {
           EEAErrorMessage.IMPORTING_FILE_DATASET);
     } catch (Exception e) {
       String fileName = (file != null) ? file.getName() : null;
-      LOG_ERROR.error("Unexpected error! Error importing big file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error importing big file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
+      if (jobId!=null && jobStatus != JobStatusEnum.REFUSED) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      }
+      Map<String, Object> importFileData = new HashMap<>();
+      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+      importFileData.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(importFileData);
       throw e;
     }
   }
@@ -325,12 +367,12 @@ public class DatasetControllerImpl implements DatasetController {
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
 
     try {
+      fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId,delimiter, null);
       LOG.info("Importing file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
-      fileTreatmentHelper.importFileData(datasetId, tableSchemaId, file, replace, integrationId,
-          delimiter);
+
       LOG.info("Successfully imported file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
     } catch (EEAException e) {
-      LOG_ERROR.error(
+      LOG.error(
           "File import failed: datasetId={}, tableSchemaId={}, fileName={}. Message: {}", datasetId,
           tableSchemaId, file.getOriginalFilename(), e.getMessage(), e);
       Map<String, Object> importFileData = new HashMap<>();
@@ -341,7 +383,7 @@ public class DatasetControllerImpl implements DatasetController {
           EEAErrorMessage.IMPORTING_FILE_DATASET);
     } catch (Exception e) {
       String fileName = (file != null) ? file.getName() : null;
-      LOG_ERROR.error("Unexpected error! Error importing file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error importing file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -384,9 +426,11 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
           value = "integrationId", required = false) Long integrationId,
       @ApiParam(type = "String", value = "File delimiter",
-          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
-    this.importFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
-        integrationId, delimiter);
+          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+      @ApiParam(type = "String", value = "Fme Job Id",
+              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+    this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
+        integrationId, delimiter, fmeJobId);
   }
 
   /**
@@ -575,9 +619,9 @@ public class DatasetControllerImpl implements DatasetController {
           name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @ApiParam(value = "table Records") @RequestBody List<TableVO> tableRecords) {
     try {
-      LOG.info("Inserting multiple records for datasetId {}", datasetId);
+      LOG.info("PaM group save: Inserting multiple records for datasetId {}", datasetId);
       updateRecordHelper.executeMultiCreateProcess(datasetId, tableRecords);
-      LOG.info("Successfully inserted multiple records for datasetId {}", datasetId);
+      LOG.info("PaM group save: Successfully inserted multiple records for datasetId {}", datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error inserting records for datasetId {} Message : {}", datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -636,6 +680,7 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
       deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false);
+      LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
       throw e;
@@ -677,6 +722,7 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("Privately deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
       deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted);
+      LOG.info("Successfully privately deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error privately deleting dataset data for dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId, e.getMessage());
       throw e;
@@ -762,6 +808,7 @@ public class DatasetControllerImpl implements DatasetController {
       LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
       // This method will release the lock
       deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
+      LOG.info("Successfully deleted table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error deleting table data for dataflowId {} datasetId {} tableSchemaId {} and providerId {} Message: {}", dataflowId, datasetId, tableSchemaId, providerId, e.getMessage());
       throw e;
@@ -835,6 +882,7 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("Exporting table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       fileTreatmentHelper.exportFile(datasetId, mimeType, tableSchemaId, tableName, exportFilterVO);
+      LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
     } catch (EEAException | IOException e) {
       LOG_ERROR.info("Error exporting table data from dataset id {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -1047,7 +1095,7 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("Calling etlExport for dataflowId {} and datasetId {}", dataflowId, datasetId);
       StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
-          outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+        outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
       LOG.info("Successfully called etlExport for dataflowId {} and datasetId {}",dataflowId, datasetId);
       return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
     } catch (Exception e) {
@@ -1095,11 +1143,13 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
+
     try {
       LOG.info("Calling etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
       StreamingResponseBody responsebody = outputStream -> datasetService.etlExportDataset(datasetId,
-          outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+        outputStream, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
       LOG.info("Successfully called etlExport v2 for dataflowId {} and datasetId {}", dataflowId, datasetId);
+
       return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error in etlExportDatasetV2 for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
@@ -1536,6 +1586,7 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("Deleting data before replacing for datasetId {} and integrationId {}", datasetId, integrationId);
       deleteHelper.executeDeleteImportDataAsyncBeforeReplacing(datasetId, integrationId, operation);
+      LOG.info("Successfully deleting data before replacing for datasetId {} and integrationId {}", datasetId, integrationId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error deleting data before replacing for datasetId {} and integrationId {} Message: {}", datasetId, integrationId, e.getMessage());
       throw e;
@@ -1852,11 +1903,51 @@ public class DatasetControllerImpl implements DatasetController {
 
       LOG.info("Method checkLocks results: {},", results);
     } catch (Exception e) {
-      LOG_ERROR.error("Error while executing method checkLocks ffor datasetId: {}, dataflowId: {}, dataProviderId: {}", datasetId, dataflowId, dataProviderId, e);
+      LOG_ERROR.error("Error while executing method checkLocks for datasetId: {}, dataflowId: {}, dataProviderId: {}", datasetId, dataflowId, dataProviderId, e);
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     return new ResponseEntity<>(results, HttpStatus.OK);
+  }
+
+
+  /**
+   * Gets dataset Data to be truncated
+   *
+   * @param datasetId
+   * @param dataProviderId
+   * @return
+   */
+  @PostMapping("/private/getDatasetData")
+  @ApiOperation(value = "Get dataset data to be truncated", hidden = true)
+  public TruncateDataset getDatasetData(
+      @RequestParam(value = "datasetId") Long datasetId,
+      @RequestParam(value = "dataProviderId") Long dataProviderId) {
+    LOG.info("Method getDatasetData called for datasetId: {} and dataProviderId {}", datasetId, dataProviderId);
+    if (datasetId == null || dataProviderId == null) {
+      return null;
+    }
+
+    TruncateDataset datasetDataToBeDeleted = new TruncateDataset();
+    try {
+      datasetDataToBeDeleted = datasetService.getDatasetDataToBeDeleted(datasetId, dataProviderId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error while executing method getDatasetData for datasetId: {}, dataProviderId: {}", datasetId, dataProviderId, e);
+    }
+
+    LOG.info("Method getDatasetData returns truncateDataset: {}", datasetDataToBeDeleted);
+    return datasetDataToBeDeleted;
+  }
+
+
+  @DeleteMapping("/private/truncateDataset")
+  @ApiOperation(value = "Truncate dataset by dataset id", hidden = true)
+  public Boolean truncateDataset(@RequestParam("datasetId") Long datasetId) {
+    LOG.info("Method truncateDataset called for datasetId: {}", datasetId);
+    if (datasetId == null) {
+      return null;
+    }
+    return datasetService.truncateDataset(datasetId);
   }
 
   /**
@@ -1919,5 +2010,25 @@ public class DatasetControllerImpl implements DatasetController {
     }
     LOG.info("Successfully validated attachment for datasetId {}, fieldId {} and fileName {} Result: {}", datasetId, idField, originalFilename, result);
     return result;
+  }
+
+  /**
+   * Deletes the locks related to import
+   * @param datasetId
+   * @return
+   */
+  @Override
+  @DeleteMapping(value = "/deleteLocksToImportProcess/{datasetId}")
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Deletes the locks related to import", hidden = true)
+  public void deleteLocksToImportProcess(@ApiParam(value = "Dataset id from which locks should be removed",
+          example = "15") @PathVariable("datasetId") Long datasetId) {
+    try {
+      datasetService.deleteLocksToImportProcess(datasetId);
+    }
+    catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error deleting locks related to import process for datasetId {} Message: {}",  datasetId, e.getMessage());
+      throw e;
+    }
   }
 }

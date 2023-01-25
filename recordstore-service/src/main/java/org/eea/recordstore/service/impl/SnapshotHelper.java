@@ -85,9 +85,9 @@ public class SnapshotHelper implements DisposableBean {
    */
   public void processRestoration(Long datasetId, Long idSnapshot, Long idPartition,
       DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
-      boolean prefillingReference) throws EEAException {
+      boolean prefillingReference, String processId) throws EEAException {
     RestorationTask restorationTask = new RestorationTask(datasetId, idSnapshot, idPartition,
-        datasetType, isSchemaSnapshot, deleteData, prefillingReference);
+        datasetType, isSchemaSnapshot, deleteData, prefillingReference, processId);
 
     // first every task is always queued up to ensure the order
 
@@ -134,6 +134,9 @@ public class SnapshotHelper implements DisposableBean {
 
     /** The prefilling reference. */
     Boolean prefillingReference;
+
+    /** The process id */
+    String processId;
   }
 
   /**
@@ -167,15 +170,15 @@ public class SnapshotHelper implements DisposableBean {
               .getDelegateExecutorService()).getActiveCount();
 
       LOG.info(
-          "Executing restoration for snapshot {}. Working restoration threads {}, Available restoration threads {}",
-          restorationTask.idSnapshot, workingThreads, maxRunningTasks - workingThreads);
+          "Executing restoration for snapshot {} and release processId {}. Working restoration threads {}, Available restoration threads {}",
+          restorationTask.idSnapshot, restorationTask.processId, workingThreads, maxRunningTasks - workingThreads);
       try {
         recordStoreService.restoreDataSnapshot(restorationTask.datasetId,
             restorationTask.idSnapshot, restorationTask.idPartition, restorationTask.datasetType,
             restorationTask.isSchemaSnapshot, restorationTask.deleteData,
-            restorationTask.prefillingReference);
+            restorationTask.prefillingReference, restorationTask.processId);
       } catch (SQLException | IOException | RecordStoreAccessException e) {
-        LOG_ERROR.error("Error restoring snapshot for dataset {}", restorationTask.datasetId, e);
+        LOG_ERROR.error("Error restoring snapshot for dataset {}, processId {}", restorationTask.datasetId, restorationTask.processId, e);
       } finally {
         Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
         LOG.info("Restoration task for snapshot {} finished, it has taken taken {} seconds",

@@ -1,8 +1,10 @@
 package org.eea.recordstore.controller;
 
 
-import java.util.Arrays;
-import java.util.List;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.eea.interfaces.controller.recordstore.ProcessController;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
@@ -16,16 +18,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The Class ProcessControllerImpl.
@@ -211,4 +209,23 @@ public class ProcessControllerImpl implements ProcessController {
     }
   }
 
+  /**
+   * Lists the process ids of validation processes that are in progress for more than the specified period of time
+   * @param timeInMinutes
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/listValidationProcessesInProgress/{timeInMinutes}")
+  @ApiOperation(value = "Lists the validation processes that are in progress for more than the specified period of time", hidden = true)
+  public List<ProcessVO> listInProgressValidationProcessesThatExceedTime(@ApiParam(
+          value = "Time limit in minutes that in progress validation processes exceed",
+          example = "15") @PathVariable("timeInMinutes") long timeInMinutes) {
+    LOG.info("Finding in progress validation processes that exceed {}", timeInMinutes);
+    try {
+      return processService.findProcessIdByTypeAndStatusThatExceedTime(ProcessTypeEnum.VALIDATION.toString(), ProcessStatusEnum.IN_PROGRESS.toString(), timeInMinutes);
+    } catch (Exception e) {
+      LOG.error("Error while finding in progress tasks that exceed " + timeInMinutes + " minutes " + e.getMessage());
+      return new ArrayList<>();
+    }
+  }
 }

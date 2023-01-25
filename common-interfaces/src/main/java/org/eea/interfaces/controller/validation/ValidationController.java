@@ -1,17 +1,18 @@
 package org.eea.interfaces.controller.validation;
 
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletResponse;
+import java.math.BigInteger;
+import java.util.List;
+import java.util.Set;
+
 
 /**
  * The Interface ValidationController.
@@ -26,16 +27,17 @@ public interface ValidationController {
 
   }
 
-
   /**
-   * Validate data set data.
+   * Executes the validation job
    *
    * @param datasetId the dataset id
    * @param released the released
+   * @param jobId the jobId
+   * @return
    */
   @PutMapping(value = "/dataset/{id}")
   void validateDataSetData(@PathVariable("id") Long datasetId,
-      @RequestParam(value = "released", required = false) boolean released);
+                           @RequestParam(value = "released", required = false) boolean released, @RequestParam(value = "jobId") Long jobId);
 
   /**
    * Gets the failed validations by id dataset.
@@ -111,4 +113,76 @@ public interface ValidationController {
   @GetMapping("/downloadFile/{datasetId}")
   void downloadFile(@PathVariable Long datasetId, @RequestParam String fileName,
       HttpServletResponse response);
+
+  /**
+   * Sets the status to IN_QUEUE for a given task id
+   * @param taskId
+   */
+  @PutMapping(value = "/restartTask/{taskId}")
+  void restartTask(@PathVariable("taskId") Long taskId);
+
+  /**
+   * Lists the task ids of validation tasks that are in progress for more than the specified period of time
+   * @param timeInMinutes
+   * @return
+   */
+  @GetMapping(value = "/listInProgressValidationTasks/{timeInMinutes}")
+  List<BigInteger> listInProgressValidationTasksThatExceedTime(@PathVariable("timeInMinutes") long timeInMinutes);
+
+  /**
+   * Deletes the locks related to release
+   * @param datasetId
+   * @return
+   */
+  @DeleteMapping(value = "/deleteLocksToReleaseProcess/{datasetId}")
+  void deleteLocksToReleaseProcess(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Finds tasks by processId
+   * @param processId
+   * @return
+   */
+  @GetMapping(value = "/private/findTasksByProcessId/{processId}")
+  List<BigInteger> findTasksByProcessId(@PathVariable("processId") String processId);
+
+  /**
+   * cancel process tasks
+   * @param processId
+   */
+  @PutMapping(value = "/private/cancelProcessTasks/{processId}")
+  void cancelRunningProcessTasks(@PathVariable("processId") String processId);
+
+  /**
+   * Finds if tasks exist by processId and status
+   * @param processId
+   * @return
+   */
+   @GetMapping(value = "/private/findIfTasksExistByProcessIdAndStatusAndDuration/{processId}")
+   Boolean findIfTasksExistByProcessIdAndStatusAndDuration(@PathVariable("processId") String processId, @RequestParam("status") ProcessStatusEnum status, @RequestParam("maxDuration") Long maxDuration);
+
+  /**
+   * Updates task status based on process id and current status
+   *
+   * @param status the status
+   * @param processId the process id
+   * @param currentStatuses the list of statuses
+   */
+  @PostMapping(value = "/private/updateTaskStatusByProcessIdAndCurrentStatuses/{processId}")
+  void updateTaskStatusByProcessIdAndCurrentStatuses(@PathVariable("processId") String processId,  @RequestParam("status") ProcessStatusEnum status, @RequestParam("statuses") Set<String> currentStatuses);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

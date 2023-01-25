@@ -583,6 +583,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     try {
       LOG.info("Validating lead reporters for dataflowId {}", dataflowId);
       representativeService.validateLeadReporters(dataflowId, true);
+      LOG.info("Successfully validated lead reporters for dataflowId {}", dataflowId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error validating lead reporters: dataflowId {}", dataflowId, e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

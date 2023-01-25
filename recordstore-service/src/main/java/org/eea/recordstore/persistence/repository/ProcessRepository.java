@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 /**
  * The Interface ProcessRepository.
  */
@@ -32,16 +34,17 @@ public interface ProcessRepository
   /**
    * Checks if is process finished.
    *
-   * @param processId the process id
+   * @param dataflowId
+   * @param dataProviderId
    * @return true, if is process finished
    */
   @Query(nativeQuery = true,
-      value = "select case when (select count(p.id) from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.status not in ('FINISHED','CANCELED'))>1 then false else true end")
+      value = "select case when (select count(p.id) from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.process_type='VALIDATION' and p.status not in ('FINISHED','CANCELED'))>1 then false else true end")
   boolean isProcessFinished(@Param("dataflowId") Long dataflowId,
       @Param("dataProviderId") Long dataProviderId);
 
   /**
-   * Find next process.
+   * Find next validation process.
    *
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
@@ -49,7 +52,28 @@ public interface ProcessRepository
    * @return the EEA process
    */
   @Query(nativeQuery = true,
-      value = "select p.* from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.status='IN_QUEUE' and d.id <> :datasetId limit 1")
-  EEAProcess findNextProcess(@Param("dataflowId") Long dataflowId,
-      @Param("dataProviderId") Long dataProviderId, @Param("datasetId") Long datasetId);
+      value = "select p.* from process p join dataset d on p.dataset_id = d.id where p.dataflow_id =:dataflowId and d.data_provider_id = :dataProviderId and p.process_type='VALIDATION' and p.status='IN_QUEUE' and d.id <> :datasetId limit 1")
+  EEAProcess findNextValidationProcess(@Param("dataflowId") Long dataflowId,
+                                       @Param("dataProviderId") Long dataProviderId, @Param("datasetId") Long datasetId);
+
+  /**
+   * Finds process ids by dataset id and process type and status
+   * @param datasetId
+   * @param processType
+   * @param status
+   * @return
+   */
+  @Query(nativeQuery = true,
+          value = "select p.process_id from process p where p.dataset_id= :datasetId and p.process_type= :processType and p.status in (:status) ")
+  List<String> findProcessIdsByDatasetIdAndProcessTypeAndStatusIn(@Param("datasetId") Long datasetId, @Param("processType") String processType, @Param("status") List<String> status);
+
+  /**
+   * Finds processes that exceed the specified period of time by process type and status
+   * @param processType
+   * @param status
+   * @return
+   */
+  @Query(nativeQuery = true,
+          value = "select * from process where process_type= :processType and status= :status and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
+  List<EEAProcess> findProcessIdsByProcessTypeAndStatus(@Param("processType") String processType, @Param("status") String status, @Param("timeInMinutes") long timeInMinutes);
 }

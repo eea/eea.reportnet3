@@ -1,24 +1,9 @@
 package org.eea.validation.util;
 
-import java.sql.Timestamp;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
@@ -26,17 +11,20 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
+import org.eea.interfaces.vo.metabase.TaskType;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
@@ -76,10 +64,19 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
+
+import javax.annotation.PostConstruct;
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 /**
  * The Class ValidationHelper.
@@ -171,6 +168,12 @@ public class ValidationHelper implements DisposableBean {
   /** The data flow controller zuul. */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
+
+  @Autowired
+  private JobProcessControllerZuul jobProcessControllerZuul;
 
   /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
@@ -278,9 +281,10 @@ public class ValidationHelper implements DisposableBean {
       processId = UUID.randomUUID().toString();
       LOG.info("processId is empty. Generating one: {} for validating datasetId {}", processId, datasetId);
     }
+    ProcessVO processVO = processControllerZuul.findById(processId);
     if (processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
         ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), 0, released)) {
+        processVO.getUser(), 0, released)) {
 
 
       // If there's no SQL rules enabled, no need to refresh the views, so directly start the
@@ -866,7 +870,7 @@ public class ValidationHelper implements DisposableBean {
       } catch (JsonProcessingException e) {
         LOG_ERROR.error("error processing json for processId {}", processId);
       }
-      Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, new Date(), null, null,
+      Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.VALIDATION_TASK, new Date(), null, null,
           json, 0, null);
       taskRepository.save(task);
       LOG.info("Added validation task {} for process {}",task.getId(), processId);
@@ -930,6 +934,16 @@ public class ValidationHelper implements DisposableBean {
   }
 
   /**
+   * update task status
+   * @param taskId
+   * @param status
+   */
+  @Transactional
+  public void updateTaskStatus(Long taskId, ProcessStatusEnum status) {
+    taskRepository.updateStatus(taskId, status.toString());
+  }
+
+  /**
    * Update task.
    *
    * @param taskId the task id
@@ -952,6 +966,10 @@ public class ValidationHelper implements DisposableBean {
     taskRepository.cancelStatusAndFinishDate(taskId, finishDate);
   }
 
+  @Transactional
+  public List<BigInteger> getInProgressValidationTasksThatExceedTime(long timeInMinutes) {
+     return taskRepository.getInProgressValidationTasksThatExceedTime(timeInMinutes);
+  }
 
   /**
    * Instantiates a new validation task.
@@ -1089,13 +1107,33 @@ public class ValidationHelper implements DisposableBean {
           kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
           if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
               ProcessTypeEnum.VALIDATION, processId,
-              SecurityContextHolder.getContext().getAuthentication().getName(), 0, null)) {
+              process.getUser(), 0, null)) {
+
+            Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+            value.put("validation_job_id", jobId);
+
             if (datasetId.equals(process.getDatasetId()) && process.isReleased()) {
-              ProcessVO nextProcess = processControllerZuul.getNextProcess(processId);
+              ProcessVO nextProcess = null;
+              if (jobId!=null) {
+                List<String> processes = jobProcessControllerZuul.findProcessesByJobId(jobId);
+                processes.remove(process.getProcessId());
+                for (String procId : processes) {
+                  ProcessVO processVO = processControllerZuul.findById(procId);
+                  if (processVO.getStatus().equals(ProcessStatusEnum.IN_QUEUE.toString())) {
+                    nextProcess = processVO;
+                    break;
+                  }
+                }
+              } else {
+                nextProcess = processControllerZuul.getNextProcess(processId);
+              }
               if (null != nextProcess) {
                 executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
-                    false);
+                    true);
               } else if (processControllerZuul.isProcessFinished(processId)) {
+                if (jobId!=null) {
+                  jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+                }
                 kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
                     value);
               }
@@ -1104,6 +1142,9 @@ public class ValidationHelper implements DisposableBean {
               // Delete the lock to the Release process
               deleteLockToReleaseProcess(datasetId);
 
+              if (jobId!=null) {
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+              }
               kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
                   value,
                   NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
@@ -1123,5 +1164,32 @@ public class ValidationHelper implements DisposableBean {
       }
       return isFinished;
     }
+  }
+
+  public List<BigInteger> findTasksByProcessId(String processId) {
+     return taskRepository.findByProcessId(processId);
+  }
+
+  @Transactional
+  public void cancelRunningProcessTasks(String processId) {
+    taskRepository.cancelRunningProcessTasks(processId, new Date());
+  }
+
+  public Boolean findIfTasksExistByProcessIdAndStatusAndDuration(String processId, ProcessStatusEnum status, Long maxDuration) {
+    List<Task> tasks = taskRepository.findByProcessIdAndStatus(processId, status);
+    for(Task task: tasks){
+      if(task.getStartingDate() != null) {
+        Long taskDuration =  new Date().getTime() - task.getStartingDate().getTime();
+        if(taskDuration > maxDuration) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  @Transactional
+  public void updateTaskStatusByProcessIdAndCurrentStatus(ProcessStatusEnum status, String processId, Set<String> currentStatuses){
+    taskRepository.updateTaskStatusByProcessIdAndCurrentStatus(status.toString(), new Date(), processId, currentStatuses);
   }
 }

@@ -1,13 +1,10 @@
 package org.eea.recordstore.controller;
 
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -16,8 +13,15 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.ProcessTaskVO;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.eea.recordstore.service.ProcessService;
 import org.eea.recordstore.service.RecordStoreService;
+import org.eea.recordstore.service.TaskService;
 import org.eea.recordstore.service.impl.SnapshotHelper;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
@@ -26,21 +30,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The Class RecordStoreControllerImpl.
@@ -55,6 +57,18 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @Autowired
   private RecordStoreService recordStoreService;
+
+  /**
+   * The process service
+   */
+  @Autowired
+  private ProcessService processService;
+
+  /**
+   * The task service
+   */
+  @Autowired
+  private TaskService taskService;
 
   /**
    * The restore snapshot helper.
@@ -182,30 +196,34 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           value = "dateRelease", required = false) String dateRelease,
       @ApiParam(value = "Prefilling reference", example = "false", required = false) @RequestParam(
           value = "prefillingReference", required = false,
-          defaultValue = "false") Boolean prefillingReference) {
+          defaultValue = "false") Boolean prefillingReference,
+      @ApiParam(value = "ProcessId", example = "5eb5a2a9-c53f-4192", required = false) @RequestParam(
+              value = "processId", required = false) String processId) {
     try {
-      ThreadPropertiesManager.setVariable("user",
-          SecurityContextHolder.getContext().getAuthentication().getName());
+      ProcessVO processVO = null;
+      if (processId!=null) {
+        processVO = processService.getByProcessId(processId);
+      }
+      String user = processVO!=null ? processVO.getUser() : SecurityContextHolder.getContext().getAuthentication().getName();
+      ThreadPropertiesManager.setVariable("user", user);
       LOG.info(
-          "The user invoking RecordStoreControllerImpl.createSnapshotData is {} and the datasetId {}",
-          SecurityContextHolder.getContext().getAuthentication().getName(), datasetId);
-      LOG.info("The user set on threadPropertiesManager is {}",
-          ThreadPropertiesManager.getVariable("user"));
+          "The user invoking RecordStoreControllerImpl.createSnapshotData is {} and the datasetId {} with processId {}", user, datasetId, processId);
+      LOG.info("The user set on threadPropertiesManager is {}", ThreadPropertiesManager.getVariable("user"));
       if (StringUtils.isNotBlank(dateRelease)) {
         new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateRelease);
       }
       recordStoreService.createDataSnapshot(datasetId, idSnapshot, idPartitionDataset, dateRelease,
-          prefillingReference);
+          prefillingReference, processId);
       LOG.info("Snapshot created");
     } catch (SQLException | IOException | RecordStoreAccessException | EEAException
         | ParseException e) {
       LOG_ERROR.error(
-          "Error creating a snapshot for the dataset: DatasetId {}. idSnapshot {}. Message: {}",
-          datasetId, idSnapshot, e.getMessage(), e);
+          "Error creating a snapshot for the dataset: DatasetId {}. idSnapshot {}. processId {} Message: {}",
+          datasetId, idSnapshot, processId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_SNAPSHOT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error creating snapshot data with id {} for datasetId {}. Message: {}", idSnapshot, datasetId, e.getMessage());
+      LOG_ERROR.error("Unexpected error! Error creating snapshot data with id {} for datasetId {}, processId {}. Message: {}", idSnapshot, datasetId, processId, e.getMessage());
       throw e;
     }
 
@@ -243,7 +261,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
               defaultValue = "true") Boolean deleteData,
       @ApiParam(value = "Prefilling reference", example = "false", required = false) @RequestParam(
           value = "prefillingReference", required = false,
-          defaultValue = "false") Boolean prefillingReference) {
+          defaultValue = "false") Boolean prefillingReference,
+      @ApiParam(value = "Process Id", example = "5eb5a2a9-c53f-4192", required = false) @RequestParam(
+              value = "processId", required = false) String processId) {
 
     try {
       // TO DO Status will be updated based on the running process in the dataset, this call will be
@@ -251,15 +271,15 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.RESTORING_SNAPSHOT);
       restoreSnapshotHelper.processRestoration(datasetId, idSnapshot, idPartition, datasetType,
-          isSchemaSnapshot, deleteData, prefillingReference);
+          isSchemaSnapshot, deleteData, prefillingReference, processId);
     } catch (EEAException e) {
       LOG_ERROR.error(
-          "Error restoring a snapshot for the dataset: DatasetId {}. idSnapshot {}. Message: {}",
-          datasetId, idSnapshot, e.getMessage(), e);
+          "Error restoring a snapshot for the dataset: DatasetId {}. idSnapshot {}. processId {}. Message: {}",
+          datasetId, idSnapshot, processId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RESTORING_SNAPSHOT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error restoring snapshot data with id {} for datasetId {}. Message: {}", idSnapshot, datasetId, e.getMessage());
+      LOG_ERROR.error("Unexpected error! Error restoring snapshot data with id {} for datasetId {} and processId {}. Message: {}", idSnapshot, datasetId, processId, e.getMessage());
       throw e;
     }
 
@@ -471,15 +491,17 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   }
 
 
-
   /**
+   /**
    * Restore specific file snapshot data.
    *
    * @param datasetId
    * @param idSnapshot
    * @param startingNumber
    * @param endingNumber
-   * @param type
+   * @param processId
+   * @throws SQLException
+   * @throws IOException
    */
   @HystrixCommand
   @PostMapping(value = "/restoreSpecificFileSnapshotData")
@@ -491,23 +513,161 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @ApiParam(value = "Snapshot Id", example = "0", required = true)
       @RequestParam("idSnapshot") Long idSnapshot,
       @ApiParam(value = "Starting number", example = "0", required = true)
-      @RequestParam("startingNumber") Long startingNumber,
+      @RequestParam("startingNumber") int startingNumber,
       @ApiParam(value = "Ending number", example = "0", required = true)
-      @RequestParam("endingNumber") Long endingNumber,
-      @ApiParam(value = "FIELD or ATTACHMENT", example = "FIELD", required = true)
-      @RequestParam("type") String type) {
+      @RequestParam("endingNumber") int endingNumber,
+      @ApiParam(value = "Process Id", example = "0", required = true)
+      @RequestParam("processId") String processId,
+      @RequestParam(name = "currentSplitFileName", required = false) String currentSplitFileName) throws SQLException, IOException {
 
     try {
-      LOG.info("Method restoreSpecificSnapshotData starts for datasetId: {}, idSnapshot: {}, startingNumber: {}, endingNumber: {}, type: {}",
-          datasetId, idSnapshot, startingNumber, endingNumber, type);
+      LOG.info("Method restoreSpecificSnapshotData starts for datasetId: {}, idSnapshot: {}, startingNumber: {}, endingNumber: {}, processId: {}",
+          datasetId, idSnapshot, startingNumber, endingNumber, processId);
 
-      recordStoreService.restoreSpecificFileSnapshot(datasetId, idSnapshot, startingNumber, endingNumber, type);
+      recordStoreService.restoreSpecificFileSnapshot(datasetId, idSnapshot, startingNumber, endingNumber, processId, currentSplitFileName);
 
       LOG.info("Method restoreSpecificFileSnapshot ends");
     } catch (Exception e) {
       LOG_ERROR.error("Error in method restoreSpecificSnapshotData for datasetId: {} with error {}", datasetId, e);
+      throw e;
     }
 
   }
 
+  /**
+   * Check if data of file has been imported to dataset
+   *
+   * @param datasetId
+   * @param firstFieldId
+   * @param lastFieldId
+   * @return
+   */
+  @HystrixCommand
+  @GetMapping(value = "/recoverCheck")
+  @ApiOperation(value = "Check if data of file has been imported to dataset", hidden = true)
+  public boolean recoverCheck(
+      @ApiParam(value = "Dataset Id", example = "0", required = true)
+      @RequestParam("datasetId") Long datasetId,
+      @ApiParam(value = "First FieldId", example = "0", required = true)
+      @RequestParam("firstFieldId") String firstFieldId,
+      @ApiParam(value = "Last FieldId", example = "0", required = true)
+      @RequestParam("lastFieldId") String lastFieldId) {
+    try {
+      LOG.info("Method recoverCheck starts for datasetId: {}, firstFieldId: {}, lastFieldId: {}",
+          datasetId, firstFieldId, lastFieldId);
+
+      return recordStoreService.recoverCheckForStuckFile(datasetId, firstFieldId, lastFieldId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in method recoverCheck for datasetId: {} with error {}", datasetId, e);
+      throw e;
+    }
+  }
+
+  /**
+   * Lists the tasks that are in progress for more than the specified period of time
+   *
+   * @param timeInMinutes
+   * @return
+   */
+  @HystrixCommand
+  @Override
+  @GetMapping(value = "/findReleaseTasksInProgress/{timeInMinutes}")
+  @ApiOperation(value = "Lists the tasks that are in progress for more than the specified period of time", hidden = true)
+  public List<BigInteger> findReleaseTasksInProgress(@ApiParam(
+      value = "Time limit in minutes that in progress release tasks exceed",
+      example = "15") @PathVariable("timeInMinutes") long timeInMinutes) {
+    LOG.info("Method findReleaseTasksInProgress finding in progress tasks that exceed {} minutes", timeInMinutes);
+    try {
+      return recordStoreService.getReleaseTasksInProgress(timeInMinutes);
+    } catch (Exception e) {
+      LOG.error("Error in method findReleaseTasksInProgress while finding in progress tasks that exceed {} minutes with error {}", timeInMinutes, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Find the release task by task id
+   *
+   * @param taskId
+   * @return
+   */
+  @HystrixCommand
+  @GetMapping(value = "/findReleaseTaskByTaskId/{taskId}")
+  @ApiOperation(value = "Find the release task by task id", hidden = true)
+  public TaskVO findReleaseTaskByTaskId(
+      @ApiParam(value = "Task Id") @PathVariable("taskId") long taskId) {
+    LOG.info("Method findReleaseTaskByTaskId finding release task by task id {}", taskId);
+    try {
+      return recordStoreService.findReleaseTaskByTaskId(taskId);
+    } catch (Exception e) {
+      LOG.error("Error in method findReleaseTaskByTaskId while finding task with task id {} and error {}", taskId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Finds tasks by datasetId for in progress process
+   * @param datasetId
+   * @return
+   */
+  @HystrixCommand
+  @GetMapping(value = "/private/releaseTasksByDatasetId/{datasetId}")
+  @ApiOperation(value = "Find the release tasks for in progress process by datasetId", hidden = true)
+  public List<ProcessTaskVO> findReleaseTasksForInProgressProcessByDatasetId(@ApiParam(value = "Dataset Id") @PathVariable("datasetId") Long datasetId) {
+    List<String> processIds = processService.findProcessIdByDatasetAndStatusIn(datasetId, ProcessTypeEnum.RELEASE.toString(), Arrays.asList(ProcessStatusEnum.IN_PROGRESS.toString()));
+    List<ProcessTaskVO> processTaskVOS = new ArrayList<>();
+    processIds.forEach(processId -> {
+      ProcessTaskVO processTaskVO = new ProcessTaskVO();
+      processTaskVO.setProcessId(processId);
+      List<TaskVO> taskVOS = taskService.findTaskByProcessId(processId);
+      processTaskVO.setTasks(taskVOS);
+      processTaskVOS.add(processTaskVO);
+    });
+    return processTaskVOS;
+  }
+
+  /**
+   * Creates the update query view.
+   *
+   * @param datasetId the dataset id
+   * @param isMaterialized the is materialized
+   */
+  @PutMapping("/createUpdateQueryView")
+  @PreAuthorize("isAuthenticated()")
+  @ApiOperation(value = "Creates or updates a View", hidden = true)
+  public void createUpdateView(
+      @ApiParam(value = "Dataset Id", example = "0") @RequestParam("datasetId") Long datasetId,
+      @ApiParam(value = "Is the schema going to be materialized?",
+          example = "true") @RequestParam("isMaterialized") boolean isMaterialized) {
+    try {
+      LOG.info("Update query view for datasetId {}", datasetId);
+      recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error creating update query view for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Finds tasks with type IMPORT_TASK and status IN_PROGRESS
+   * @return the tasks
+   */
+  @HystrixCommand
+  @GetMapping(value = "/private/findImportTasksInProgress")
+  @ApiOperation(value = "Find the import tasks with status in progress", hidden = true)
+  public List<TaskVO> findImportTasksInProgress() {
+    return taskService.findImportTasksInProgress();
+  }
+
+  /**
+   * Saves or updates a task
+   * @return
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/private/restartTask")
+  @ApiOperation(value = "Restarts a task", hidden = true)
+  public void restartTask(@RequestParam Long taskId){
+    taskService.restartTask(taskId);
+  }
 }

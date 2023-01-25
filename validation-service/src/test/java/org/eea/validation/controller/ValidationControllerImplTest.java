@@ -1,10 +1,5 @@
 package org.eea.validation.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
@@ -12,6 +7,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.kafka.io.KafkaSender;
 import org.eea.lock.service.impl.LockServiceImpl;
 import org.eea.validation.service.ValidationService;
@@ -31,6 +27,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -106,7 +106,7 @@ public class ValidationControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
-      validationController.validateDataSetData(null, false);
+      validationController.validateDataSetData(null, false, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getReason());
@@ -125,7 +125,7 @@ public class ValidationControllerImplTest {
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
     Mockito.when(validationHelper.getPriority(Mockito.any())).thenReturn(60);
-    validationController.validateDataSetData(1L, false);
+    validationController.validateDataSetData(1L, false, null);
     Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
@@ -143,7 +143,7 @@ public class ValidationControllerImplTest {
         .thenReturn(new DataSetMetabaseVO());
     Mockito.when(validationHelper.getPriority(Mockito.any())).thenReturn(60);
     try {
-      validationController.validateDataSetData(1L, false);
+      validationController.validateDataSetData(1L, false, null);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.LOCKED, e.getStatus());
       Assert.assertEquals(EEAErrorMessage.METHOD_LOCKED, e.getReason());
@@ -159,7 +159,7 @@ public class ValidationControllerImplTest {
         .thenReturn(new DataSetMetabaseVO());
     doThrow(new EEAException("e")).when(validationHelper).executeValidation(Mockito.anyLong(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean());
-    validationController.validateDataSetData(1L, false);
+    validationController.validateDataSetData(1L, false, null);
 
     Mockito.verify(validationHelper, times(1)).deleteLockToReleaseProcess(Mockito.any());
   }
@@ -284,5 +284,11 @@ public class ValidationControllerImplTest {
         1, 10, null, false, null, null, "", ""));
   }
 
+  @Test
+  public void restartTaskTest() {
+    doNothing().when(validationHelper).updateTaskStatus(anyLong(), any(ProcessStatusEnum.class));
+    validationController.restartTask(Long.valueOf(1));
+    verify(validationHelper).updateTaskStatus(anyLong(), any(ProcessStatusEnum.class));
+  }
 
 }

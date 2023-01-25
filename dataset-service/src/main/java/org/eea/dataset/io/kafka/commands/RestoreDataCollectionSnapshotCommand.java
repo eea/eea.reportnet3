@@ -81,7 +81,8 @@ public class RestoreDataCollectionSnapshotCommand extends AbstractEEAEventHandle
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     try {
       Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-      ThreadPropertiesManager.setVariable("user", String.valueOf(eeaEventVO.getData().get("user")));
+      String user = String.valueOf(eeaEventVO.getData().get("user"));
+      ThreadPropertiesManager.setVariable("user", user);
 
       if (datasetSnapshotService.getSnapshotsByIdDataset(datasetId).isEmpty()) {
         Map<String, Object> value = new HashMap<>();
@@ -94,7 +95,7 @@ public class RestoreDataCollectionSnapshotCommand extends AbstractEEAEventHandle
           kafkaSenderUtils.releaseNotificableKafkaEvent(
                   EventType.COPY_DATA_TO_EUDATASET_COMPLETED_EVENT, value,
                   NotificationVO.builder()
-                          .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                          .user(user)
                           .datasetId(datasetId).build());
 
           // delete the datacollections in the table of changes now that the data is copied

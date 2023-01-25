@@ -1535,4 +1535,35 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return stringQuery.toString();
   }
 
+  /**
+   * Truncate dataset by dataset id
+   *
+   * @param datasetId
+   * @return
+   */
+  @Override
+  @Transactional
+  public boolean truncateDataset(Long datasetId) {
+
+    LOG.info("Method truncateDataset called for datasetId {}", datasetId);
+    boolean deleted;
+
+    try {
+      String sql = new StringBuilder("truncate table dataset_").append(datasetId)
+              .append(".record_value cascade").toString();
+
+      Query query = entityManager.createNativeQuery(sql);
+      entityManager.joinTransaction();
+       query.executeUpdate();
+       deleted = true;
+      LOG.info("Dataset id {} has been truncated with query: {}", datasetId, sql);
+    } catch (Exception e) {
+      LOG_ERROR.error(
+          "Error in method truncateDataset for datasetId {} with error",
+          datasetId, e);
+      throw e;
+    }
+
+    return deleted;
+  }
 }

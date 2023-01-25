@@ -38,6 +38,7 @@ import org.eea.ums.service.UserNationalCoordinatorService;
 import org.eea.ums.service.UserRoleService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
+import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,6 +120,8 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   private static final String ERROR_ADDING_CONTRIBUTOR =
       "Error adding contributor to resource. Message: {}";
+
+  private static final String ADMIN = "ADMIN";
 
   /**
    * Generate token.
@@ -211,6 +214,35 @@ public class UserManagementControllerImpl implements UserManagementController {
       userId = details.get(AuthenticationDetails.USER_ID);
     }
     return securityProviderInterfaceService.getResourcesByUser(userId);
+  }
+
+  /**
+   * Gets resources by userId
+   * @param userId
+   * @return
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping("/private/resourcesByUserId")
+  @ApiOperation(value = "Get logged User's Resources", response = ResourceAccessVO.class,
+          responseContainer = "List", hidden = true)
+  public List<ResourceAccessVO> getResourcesByUserId(@RequestParam("userId") String userId) {
+    return securityProviderInterfaceService.getResourcesByUser(userId);
+  }
+
+  /**
+   * Checks if user is admin
+   * @param userId
+   * @return
+   */
+  @Override
+  @GetMapping("/private/checkAdmin")
+  public boolean checkAdmin(@RequestParam("userId") String userId) {
+    RoleRepresentation[] roles = keycloakConnectorService.getUserRoles(userId);
+    if (roles.length>0) {
+      return Arrays.stream(roles).anyMatch(role -> role.getName().equals(ADMIN));
+    }
+    return false;
   }
 
   /**

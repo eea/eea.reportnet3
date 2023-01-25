@@ -164,6 +164,10 @@ public class KafkaSenderUtils {
               ? Long.parseLong(notificationMap.get("providerId").toString())
               : null;
 
+      String user = (notificationMap.get("user") != null)
+              ? notificationMap.get("user").toString()
+              : null;
+
       UserNotificationContentVO content = new UserNotificationContentVO();
       content.setDataflowId(dataflowId);
       content.setDataflowName(dataflowName);
@@ -185,6 +189,7 @@ public class KafkaSenderUtils {
               ? DatasetStatusEnum.valueOf(notificationMap.get("datasetStatus").toString())
               : null);
       content.setProviderId(providerId);
+      content.setUserId(user);
       notificationControllerZuul.createUserNotificationPrivate(eventType, content);
       LOG.info("Save user notification, eventType: {}, notification content: {}", eventType, content);
 

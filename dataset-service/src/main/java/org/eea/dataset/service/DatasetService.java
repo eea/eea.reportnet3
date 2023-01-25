@@ -12,12 +12,9 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.service.model.TruncateDataset;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -28,6 +25,8 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * The interface Dataset service.
@@ -571,7 +570,7 @@ public interface DatasetService {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws SQLException the SQL exception
    */
-  void storeRecords(Long datasetId, List<RecordValue> recordList, ConnectionDataVO connectionDataVO)
+  void storeRecords(Long datasetId, List<RecordValue> recordList, ConnectionDataVO connectionDataVO, CsvFileChunkRecoveryDetails csvFileChunkRecoveryDetails)
       throws IOException, SQLException;
 
   /**
@@ -606,4 +605,27 @@ public interface DatasetService {
    * @param datasetId the dataset id
    */
   void deleteTempEtlExport(@DatasetId Long datasetId);
+
+  /**
+   * Find dataset data for dataset id and data provider id if can be deleted.
+   *
+   * @param datasetId
+   * @param dataProviderId
+   * @return
+   */
+  TruncateDataset getDatasetDataToBeDeleted(Long datasetId, Long dataProviderId);
+
+  /**
+   * Truncate dataset by dataset id
+   * @param datasetId
+   * @return
+   */
+  boolean truncateDataset(Long datasetId);
+
+  /**
+   * Deletes the locks related to import
+   * @param datasetId
+   * @return
+   */
+  void deleteLocksToImportProcess(Long datasetId);
 }

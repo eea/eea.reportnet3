@@ -96,6 +96,7 @@ pipeline {
                    env.DATASET_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=dataset.version -q -DforceStdout', returnStdout: true
                    env.RECORDSTORE_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=recordstore.version -q -DforceStdout', returnStdout: true
                    env.VALIDATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=validation.version -q -DforceStdout', returnStdout: true
+                   env.ORCHESTRATOR_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=orchestrator.version -q -DforceStdout', returnStdout: true
                    env.COLLABORATION_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=collaboration.version -q -DforceStdout', returnStdout: true
                    env.DOCUMENT_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=document.version -q -DforceStdout', returnStdout: true
                    env.API_GATEWAY_VERSION = sh script: 'mvn -f $WORKSPACE/parent-poms/parent/pom.xml  help:evaluate -Dexpression=api-gateway.version -q -DforceStdout', returnStdout: true
@@ -146,6 +147,13 @@ pipeline {
                             app = docker.build("k8s-swi001:5000/validation-service:1.0" + env.TAG_SUFIX, "--build-arg JAR_FILE=target/validation-service-" + env.VALIDATION_VERSION + ".jar --build-arg MS_PORT=8015 -f ./Dockerfile ./validation-service")
                             app.push()
                             sh 'docker rmi k8s-swi001:5000/validation-service:1.0${TAG_SUFIX}'
+                        }
+                        script {
+                            echo 'Orchestrator Service'
+                            def app
+                            app = docker.build("k8s-swi001:5000/orchestrator-service:1.0" + env.TAG_SUFIX, "--build-arg JAR_FILE=target/orchestrator-service-" + env.ORCHESTRATOR_VERSION + ".jar --build-arg MS_PORT=8091 -f ./Dockerfile ./orchestrator-service")
+                            app.push()
+                            sh 'docker rmi k8s-swi001:5000/orchestrator-service:1.0${TAG_SUFIX}'
                         }
                         script {
                             echo 'Collaboration Service'
