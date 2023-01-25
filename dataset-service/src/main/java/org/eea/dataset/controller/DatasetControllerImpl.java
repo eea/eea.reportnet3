@@ -347,7 +347,7 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
       @ApiResponse(code = 400, message = "Error importing file"),
       @ApiResponse(code = 500, message = "Error importing file")})
-  // @Deprecated
+  // @Deprecated but still called by FME
   public void importFileData(
       @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
           name = "datasetId") @PathVariable("datasetId") Long datasetId,
@@ -364,28 +364,12 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
           value = "integrationId", required = false) Long integrationId,
       @ApiParam(type = "String", value = "File delimiter",
-          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter) {
+          example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+      @ApiParam(type = "String", value = "Fme Job Id",
+              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
 
-    try {
-      fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId,delimiter, null);
-      LOG.info("Importing file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
-
-      LOG.info("Successfully imported file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
-    } catch (EEAException e) {
-      LOG.error(
-          "File import failed: datasetId={}, tableSchemaId={}, fileName={}. Message: {}", datasetId,
-          tableSchemaId, file.getOriginalFilename(), e.getMessage(), e);
-      Map<String, Object> importFileData = new HashMap<>();
-      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_FILE_DATA.getValue());
-      importFileData.put(LiteralConstants.DATASETID, datasetId);
-      lockService.removeLockByCriteria(importFileData);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.IMPORTING_FILE_DATASET);
-    } catch (Exception e) {
-      String fileName = (file != null) ? file.getName() : null;
-      LOG.error("Unexpected error! Error importing file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
-      throw e;
-    }
+    this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
+            integrationId, delimiter, fmeJobId);
   }
 
   /**
