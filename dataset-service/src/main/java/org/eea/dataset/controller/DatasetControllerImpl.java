@@ -11,6 +11,11 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
+import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.data.repository.RecordRepository;
+import org.eea.dataset.persistence.data.repository.TableRepository;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -24,6 +29,7 @@ import org.eea.interfaces.controller.communication.NotificationController.Notifi
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -123,6 +129,17 @@ public class DatasetControllerImpl implements DatasetController {
   /** The job controller zuul */
   @Autowired
   private JobControllerZuul jobControllerZuul;
+
+  @Autowired
+  private DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  @Autowired
+  private RecordRepository recordRepository;
+
+  @Autowired
+  private TableRepository tableRepository;
+
+
 
   /**
    * Gets the data tables values.
@@ -1933,6 +1950,59 @@ public class DatasetControllerImpl implements DatasetController {
     }
     return datasetService.truncateDataset(datasetId);
   }
+
+  /**
+   * Count data collection records for a specific provider.
+   *
+   * @return the records count
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/countRecords/{dataflowId}/{providerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Count data collection records for a specific provider.",
+          response = DataflowCountVO.class, responseContainer = "List", hidden = true)
+  public Integer getRecordsCountByDataflowAndProvider(@PathVariable("dataflowId") Long dataflowId,
+                                                   @PathVariable("providerId") Long providerId) {
+    List<DataSetMetabase> metabaseList= dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowId , providerId);
+    Integer count = 0;
+    if(metabaseList!=null){
+
+      for (DataSetMetabase dataSetMetabase : metabaseList) {
+
+        List<TableValue> tables=  tableRepository.findAllByDatasetId(dataSetMetabase.getId());
+
+        if(tables!=null){
+
+          for (TableValue table : tables) {
+            count = count + Math.toIntExact( recordRepository.countByTableSchema(table.getIdTableSchema()));
+          }
+
+        }
+
+
+      }
+    }
+    // Get for the Given DataflowID, the Datasets it has
+    //Get for each Dataset The tables
+    // we need a method to find all tables for each dataset
+    //get for each table, the RecordValues. The size of all those, will be returned
+    return null;
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   /**
    * Creates the response entity.

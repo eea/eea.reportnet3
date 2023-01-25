@@ -1,6 +1,8 @@
 package org.eea.dataset.persistence.data.repository;
 
 import java.util.List;
+
+import org.eea.dataset.persistence.data.domain.DatasetValue;
 import org.eea.dataset.persistence.data.domain.TableValidation;
 import org.eea.dataset.persistence.data.domain.TableValue;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,6 +22,10 @@ public interface TableRepository extends JpaRepository<TableValue, Long> {
    */
   @Query(value = "SELECT u FROM TableValue u")
   List<TableValue> findAllTables();
+
+
+  @Query(value = "SELECT u FROM TableValue u WHERE u.datasetId=?1")
+  List<TableValue> findAllByDatasetId(Long datasetId);
 
   /**
    * Count records by id table.

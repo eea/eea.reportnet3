@@ -643,4 +643,15 @@ public interface DatasetController {
   @DeleteMapping(value = "/deleteLocksToImportProcess/{datasetId}")
   void deleteLocksToImportProcess(@PathVariable("datasetId") Long datasetId);
 
+
+  /**
+   * Count data collection records for a specific provider.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @return records count(int)
+   */
+  @GetMapping("/private/countRecords/{dataflowId}/{providerId}")
+  Integer getRecordsCountByDataflowAndProvider(
+          @PathVariable("dataflowId") Long dataflowId, @PathVariable("providerId") Long providerId);
 }
