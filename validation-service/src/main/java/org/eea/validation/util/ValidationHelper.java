@@ -1192,4 +1192,12 @@ public class ValidationHelper implements DisposableBean {
   public void updateTaskStatusByProcessIdAndCurrentStatus(ProcessStatusEnum status, String processId, Set<String> currentStatuses){
     taskRepository.updateTaskStatusByProcessIdAndCurrentStatus(status.toString(), new Date(), processId, currentStatuses);
   }
+
+  public Integer findTasksCountByProcessIdAndStatusIn(String processId,List<String> status) {
+    return taskRepository.findTasksCountByProcessIdAndStatusIn(processId, status);
+  }
+
+  public BigInteger getFinishedValidationTaskThatExceedsTime(String processId, long timeInMinutes) {
+    return taskRepository.getFinishedValidationTaskThatExceedsTime(processId, timeInMinutes);
+  }
 }

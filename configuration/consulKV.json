@@ -1876,6 +1876,14 @@
     "value": "JHtJTl9QUk9HUkVTU19KT0JfV0lUSE9VVF9QUk9DRVNTX01BWF9USU1FOjEwfQ=="
   },
   {
+    "key": "config/orchestrator/scheduling.inProgress.validation.job.finished.task.max.time",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX0pPQl9GSU5JU0hFRF9UQVNLX01BWF9USU1FOjE1fQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.validation.job.max.time",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX0pPQl9NQVhfVElNRToxMjB9"
+  },
+  {
     "key": "config/application/spring.datasource.orchestratorDb.driver-class-name",
     "value": "JHtPUkNIRVNUQVRPUl9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
   },

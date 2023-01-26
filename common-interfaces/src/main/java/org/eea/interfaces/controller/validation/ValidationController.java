@@ -169,6 +169,35 @@ public interface ValidationController {
    */
   @PostMapping(value = "/private/updateTaskStatusByProcessIdAndCurrentStatuses/{processId}")
   void updateTaskStatusByProcessIdAndCurrentStatuses(@PathVariable("processId") String processId,  @RequestParam("status") ProcessStatusEnum status, @RequestParam("statuses") Set<String> currentStatuses);
+
+  /**
+   * Finds tasks by processId and status
+   * @param processId
+   * @param status
+   * @return
+   */
+  @GetMapping(value = "/private/findTasksCountByProcessIdAndStatusIn/{processId}")
+  Integer findTasksCountByProcessIdAndStatusIn(@PathVariable("processId") String processId, @RequestParam("status") List<String> status);
+
+  /**
+   * Finds the latest finished task that is in finished status for more than timeInMinutes minutes
+   * @param processId
+   * @param timeInMinutes
+   * @return
+   */
+  @GetMapping(value = "/private/getFinishedValidationTasksThatExceedTime")
+  BigInteger getFinishedValidationTaskThatExceedsTime(@RequestParam("processId") String processId, @RequestParam("timeInMinutes") long timeInMinutes);
+
+  /**
+   * Executes validation
+   * @param datasetId
+   * @param processId
+   * @param released
+   * @param updateViews
+   * @throws Exception
+   */
+  @PutMapping("/private/executeValidation/{datasetId}")
+  void executeValidation(@PathVariable("datasetId") Long datasetId, @RequestParam("processId") String processId, @RequestParam("released") boolean released, @RequestParam("updateViews") boolean updateViews) throws Exception;
 }
 
 

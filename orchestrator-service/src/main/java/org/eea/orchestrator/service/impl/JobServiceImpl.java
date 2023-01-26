@@ -310,4 +310,8 @@ public class JobServiceImpl implements JobService {
         return jobRepository.findJobsThatExceedTimeWithSpecificStatus(status, timeInMinutes);
     }
 
+    @Override
+    public List<JobVO> findJobsThatExceedTimeWithSpecificTypeAndStatus(String jobType, String status, long timeInMinutes) {
+        return jobMapper.entityListToClass(jobRepository.findJobsThatExceedTimeWithSpecificTypeAndStatus(jobType, status, timeInMinutes));
+    }
 }

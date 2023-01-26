@@ -529,6 +529,36 @@ public class ValidationControllerImpl implements ValidationController {
         throw e;
     }
   }
+
+  /**
+   * Finds tasks by processId and status
+   * @param processId
+   * @param status
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/findTasksCountByProcessIdAndStatusIn/{processId}")
+  public Integer findTasksCountByProcessIdAndStatusIn(@PathVariable("processId") String processId, @RequestParam("status") List<String> status) {
+    return validationHelper.findTasksCountByProcessIdAndStatusIn(processId, status);
+  }
+
+  /**
+   * Finds the latest finished task that is in finished status for more than timeInMinutes minutes
+   * @param processId
+   * @param timeInMinutes
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/getFinishedValidationTasksThatExceedTime")
+  public BigInteger getFinishedValidationTaskThatExceedsTime(@RequestParam("processId") String processId, @RequestParam("timeInMinutes") long timeInMinutes) {
+    return validationHelper.getFinishedValidationTaskThatExceedsTime(processId, timeInMinutes);
+  }
+
+  @Override
+  @PutMapping("/private/executeValidation/{datasetId}")
+  public void executeValidation(@PathVariable("datasetId") Long datasetId, @RequestParam("processId") String processId, @RequestParam("released") boolean released, @RequestParam("updateViews") boolean updateViews) throws EEAException {
+    validationHelper.executeValidation(datasetId, processId, released, updateViews);
+  }
 }
 
 

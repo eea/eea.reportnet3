@@ -145,11 +145,36 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   void updateTaskStatusByProcessIdAndCurrentStatus(@Param("status") String status, @Param("dateFinish") Date dateFinish,
                                                    @Param("processId") String processId, @Param("statuses") Set<String> statuses);
 
+  /**
+   * Cancels tasks by processId and status
+   * @param processId
+   * @param dateFinish
+   */
   @Modifying
   @Transactional
   @Query(nativeQuery = true,
           value = "update task set status='CANCELED', date_finish= :dateFinish where process_id=:processId and status in ('IN_QUEUE','IN_PROGRESS')")
   void cancelRunningProcessTasks(@Param("processId") String processId, @Param("dateFinish") Date dateFinish);
+
+  /**
+   * Finds tasks by processId and status
+   * @param processId
+   * @param status
+   * @return
+   */
+  @Query(nativeQuery = true,
+          value = "select count(*) from task where process_id=:processId and status in :status")
+  Integer findTasksCountByProcessIdAndStatusIn(@Param("processId") String processId,@Param("status") List<String> status);
+
+  /**
+   * Finds the latest finished task that is in finished status for more than timeInMinutes minutes
+   * @param processId
+   * @param timeInMinutes
+   * @return
+   */
+  @Query(nativeQuery = true,
+          value = "select id from task t where t.id in (select id from task where status='FINISHED' and task_type='VALIDATION_TASK' and process_id= :processId order by date_finish desc limit 1) and (extract(epoch from LOCALTIMESTAMP - t.date_finish) / 60) > :timeInMinutes")
+  BigInteger getFinishedValidationTaskThatExceedsTime(@Param("processId") String processId, @Param("timeInMinutes") long timeInMinutes);
 }
 
 
