@@ -100,7 +100,8 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
                     if (jobVO.isRelease()) {
                         //validation with release true
                         boolean finished = true;
-                        String queuedProcess = null;
+                        String uuid = null, user = null, queuedProcess = null;
+                        Long datasetId = null;
                         for (String processId : processes) {
                             ProcessVO process = processControllerZuul.findById(processId);
                             if (process.getStatus().equals(ProcessStatusEnum.IN_QUEUE.toString())) {
@@ -109,27 +110,24 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
                             }
                             finished = isProcessFinished(processId);
                             if (!finished) break;
-                        }
-                        if (finished && queuedProcess==null) {
-                            //all processes of the provider datasets are finished, as all tasks are finished
-                            LOG.info("Finalizing stuck validation job {}", jobVO.getId());
-                            String uuid = null, user = null;
-                            Long datasetId = null;
-                            for (String processId : processes) {
-                                ProcessVO process = processControllerZuul.findById(processId);
+                            else {
                                 if (process.getStatus().equals(ProcessStatusEnum.IN_PROGRESS.toString())) {
                                     processControllerZuul.updateProcess(process.getDatasetId(), process.getDataflowId(), ProcessStatusEnum.FINISHED,
                                             ProcessTypeEnum.VALIDATION, processId, process.getUser(), 0, null);
                                 }
-                                uuid = processId;
-                                user = process.getUser();
-                                datasetId = process.getDatasetId();
                             }
+                            uuid = processId;
+                            user = process.getUser();
+                            datasetId = process.getDatasetId();
+                        }
+                        if (finished && queuedProcess == null) {
+                            //all processes of the provider datasets are finished, as all tasks are finished
+                            LOG.info("Finalizing stuck validation job {}", jobVO.getId());
                             Map<String, Object> value = createValue(jobVO.getId(), uuid, user, datasetId);
                             jobService.updateJobStatus(jobVO.getId(), JobStatusEnum.FINISHED);
                             kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
                                     value);
-                        } else if (queuedProcess!=null) {
+                        } else if (queuedProcess != null) {
                             //a process for one of the provider datasets is stuck in state IN_QUEUE, so execute validation for that process
                             ProcessVO process = processControllerZuul.findById(queuedProcess);
                             validationControllerZuul.executeValidation(process.getDatasetId(), process.getProcessId(), true, true);
@@ -164,7 +162,7 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
         }
     }
 
-    private  Map<String, Object> createValue(Long jobId, String uuid, String user, Long datasetId) {
+    private Map<String, Object> createValue(Long jobId, String uuid, String user, Long datasetId) {
         Map<String, Object> value = new HashMap<>();
         value.put("uuid", uuid);
         value.put("user", user);
