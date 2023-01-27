@@ -88,7 +88,10 @@ public class ImportFileTasksScheduler extends MessageReceiver {
     try {
         for (Task task : taskRepository.findAllByTaskTypeAndStatusOrderByIdAsc(TaskType.IMPORT_TASK,ProcessStatusEnum.IN_QUEUE)) {
             try {
-              taskRepository.updateStartingDateAndStatusAndPod(new Date(), ProcessStatusEnum.IN_PROGRESS.toString(), serviceInstanceId, task.getId());
+              task.setStartingDate(new Date());
+              task.setPod(serviceInstanceId);
+              task.setStatus(ProcessStatusEnum.IN_PROGRESS);
+              taskRepository.saveAndFlush(task);
 
               ObjectMapper objectMapper = new ObjectMapper();
               objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
