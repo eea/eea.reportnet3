@@ -51,5 +51,5 @@ public interface JobService {
 
     List<BigInteger> listJobsThatExceedTimeWithSpecificStatus(String status, long timeInMinutes);
 
-    List<JobVO> findJobsThatExceedTimeWithSpecificTypeAndStatus(String jobType, String status, long timeInMinutes);
+    List<JobVO> findByStatusAndJobType(JobStatusEnum status, JobTypeEnum jobType);
 }

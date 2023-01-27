@@ -311,7 +311,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public List<JobVO> findJobsThatExceedTimeWithSpecificTypeAndStatus(String jobType, String status, long timeInMinutes) {
-        return jobMapper.entityListToClass(jobRepository.findJobsThatExceedTimeWithSpecificTypeAndStatus(jobType, status, timeInMinutes));
+    public List<JobVO> findByStatusAndJobType(JobStatusEnum status, JobTypeEnum jobType) {
+        return jobMapper.entityListToClass(jobRepository.findByJobStatusAndJobType(status, jobType));
     }
 }

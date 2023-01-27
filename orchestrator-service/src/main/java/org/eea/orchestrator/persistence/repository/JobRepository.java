@@ -125,10 +125,6 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
     @Query(nativeQuery = true,
             value = "select id from jobs where job_status= :status and (extract(epoch from LOCALTIMESTAMP - date_status_changed) / 60) > :timeInMinutes")
     List<BigInteger> findJobsThatExceedTimeWithSpecificStatus(@Param("status") String status, @Param("timeInMinutes") long timeInMinutes);
-
-    @Query(nativeQuery = true,
-            value = "select * from jobs where job_type= :jobType and job_status= :status and (extract(epoch from LOCALTIMESTAMP - date_status_changed) / 60) > :timeInMinutes")
-    List<Job> findJobsThatExceedTimeWithSpecificTypeAndStatus(@Param("jobType") String jobType, @Param("status") String status, @Param("timeInMinutes") long timeInMinutes);
 }
 
 

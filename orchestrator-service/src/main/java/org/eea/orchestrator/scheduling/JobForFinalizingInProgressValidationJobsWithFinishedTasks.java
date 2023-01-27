@@ -36,9 +36,6 @@ import java.util.Map;
 @Component
 public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
 
-    @Value(value = "${scheduling.inProgress.validation.job.max.time}")
-    private long maxTimeInMinutesForInProgressValidationJobs;
-
     @Value(value = "${scheduling.inProgress.validation.job.finished.task.max.time}")
     private long maxTimeInMinutesForFinishedTasksOfInProgressValidationJobs;
 
@@ -79,17 +76,17 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> finalizeInProgressValidationJobsWithoutTasks(),
-                new CronTrigger("0 */30 * * * *"));
+                new CronTrigger("0 0 * * * *"));
     }
 
     /**
-     * The job runs every 30 minutes. It finds jobs that have status=IN_PROGRESS for more than maxTimeInMinutesForInProgressValidationJobs, have all their tasks finished
+     * The job runs every hour. It finds jobs that have status=IN_PROGRESS for more than maxTimeInMinutesForInProgressValidationJobs, have all their tasks finished
      * and the latest finished task is in finished status for more than maxTimeInMinutesForFinishedTasksOfInProgressValidationJobs minutes
      */
     public void finalizeInProgressValidationJobsWithoutTasks() {
         try {
             LOG.info("Running scheduled job finalizeInProgressValidationJobsWithoutTasks");
-            List<JobVO> jobs = jobService.findJobsThatExceedTimeWithSpecificTypeAndStatus(JobTypeEnum.VALIDATION.toString(), JobStatusEnum.IN_PROGRESS.toString(), maxTimeInMinutesForInProgressValidationJobs);
+            List<JobVO> jobs = jobService.findByStatusAndJobType(JobStatusEnum.IN_PROGRESS, JobTypeEnum.VALIDATION);
             TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
