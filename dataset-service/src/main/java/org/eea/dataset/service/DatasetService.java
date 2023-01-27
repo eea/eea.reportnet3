@@ -628,4 +628,14 @@ public interface DatasetService {
    * @return
    */
   void deleteLocksToImportProcess(Long datasetId);
+
+  /**
+   * Releases notification regarding Refused import job
+   * @param datasetId
+   * @param dataflowId
+   * @param tableSchemaId
+   * @param originalFileName
+   * @return
+   */
+  void releaseImportRefusedNotification(Long datasetId, Long dataflowId, String tableSchemaId, String originalFileName);
 }

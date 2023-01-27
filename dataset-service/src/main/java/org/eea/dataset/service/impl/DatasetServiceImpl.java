@@ -3555,4 +3555,42 @@ public class DatasetServiceImpl implements DatasetService {
     lockService.removeLockByCriteria(importBigFileData);
     fileTreatmentHelper.releaseLockReleasingProcess(datasetId);
   }
+
+  /**
+   * Releases notification regarding Refused import job
+   * @param datasetId
+   * @param dataflowId
+   * @param tableSchemaId
+   * @param originalFileName
+   * @return
+   */
+  @Override
+  public void releaseImportRefusedNotification(Long datasetId, Long dataflowId, String tableSchemaId, String originalFileName){
+    try {
+
+      DataSetSchema datasetSchema = getSchemaIfReportable(datasetId, tableSchemaId);
+      if(datasetSchema == null){
+        throw new Exception("Schema is not reportable for datasetId " + datasetId + " and tableSchemaId " + tableSchemaId);
+      }
+      boolean guessTableName = null == tableSchemaId;
+      if (guessTableName) {
+        tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(datasetSchema, originalFileName);
+      }
+
+      EventType eventType = EventType.IMPORT_REPORTING_REFUSED_EVENT;
+      Map<String, Object> value = new HashMap<>();
+      value.put(LiteralConstants.DATASET_ID, datasetId);
+      value.put(LiteralConstants.USER,
+              SecurityContextHolder.getContext().getAuthentication().getName());
+      NotificationVO notificationVO = NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .datasetId(datasetId).tableSchemaId(tableSchemaId).fileName(originalFileName).error("There is another job with status QUEUED or IN_PROGRESS for the datasetId " + datasetId)
+              .build();
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
+    }
+    catch(Exception e){
+      LOG.error("Unexpected error! Could not send notification for IMPORT_REPORTING_REFUSED_EVENT event for datasetId {} dataflowId {} tableSchemaId {} and file {}. Message {}",
+              datasetId, dataflowId, tableSchemaId, originalFileName, e.getMessage());
+    }
+  }
 }

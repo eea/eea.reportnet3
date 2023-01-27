@@ -66,7 +66,7 @@ public class ImportReportingFailedEventTest {
     Mockito.when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
         .thenReturn(datasetMetabaseVO);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
-    Mockito.when(datasetMetabaseVO.getDatasetSchema()).thenReturn("dataseSchemaId");
+    Mockito.when(datasetMetabaseVO.getDatasetSchema()).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.getTableSchemaName(Mockito.any(), Mockito.any()))
         .thenReturn("tableSchemaName");
     Mockito.when(datasetMetabaseVO.getDataSetName()).thenReturn("datasetName");
