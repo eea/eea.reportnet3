@@ -12,7 +12,6 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.job.JobScheduler;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.message.MessageReceiver;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,10 +88,7 @@ public class ImportFileTasksScheduler extends MessageReceiver {
     try {
         for (Task task : taskRepository.findAllByTaskTypeAndStatusOrderByIdAsc(TaskType.IMPORT_TASK,ProcessStatusEnum.IN_QUEUE)) {
             try {
-              task.setStartingDate(new Date());
-              task.setPod(serviceInstanceId);
-              task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-              taskRepository.saveAndFlush(task);
+              taskRepository.updateStartingDateAndStatusAndPod(new Date(), ProcessStatusEnum.IN_PROGRESS.toString(), serviceInstanceId, task.getId());
 
               ObjectMapper objectMapper = new ObjectMapper();
               objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
