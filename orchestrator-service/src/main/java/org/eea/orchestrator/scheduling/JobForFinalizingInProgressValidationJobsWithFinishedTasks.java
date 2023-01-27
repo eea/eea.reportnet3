@@ -80,8 +80,8 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
     }
 
     /**
-     * The job runs every hour. It finds jobs that have status=IN_PROGRESS for more than maxTimeInMinutesForInProgressValidationJobs, have all their tasks finished
-     * and the latest finished task is in finished status for more than maxTimeInMinutesForFinishedTasksOfInProgressValidationJobs minutes
+     * The job runs every hour. It finds in_progress validation jobs that have all their tasks finished and the latest finished task
+     * is in finished status for more than maxTimeInMinutesForFinishedTasksOfInProgressValidationJobs minutes
      */
     public void finalizeInProgressValidationJobsWithoutTasks() {
         try {
