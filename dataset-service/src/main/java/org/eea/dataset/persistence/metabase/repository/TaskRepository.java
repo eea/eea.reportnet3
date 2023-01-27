@@ -105,6 +105,18 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
   List<Task> findAllByProcessIdAndStatusIn(String processId,List<ProcessStatusEnum> status);
 
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true,
+          value = "update task set status= :status ,date_finish= :dateFinish, json= :json where id=:taskId ")
+  void updateStatusAndFinishDateAndJson(@Param("status") String status, @Param("dateFinish") Date dateFinish, @Param("json") String json, @Param("taskId") Long taskId);
+
+  @Modifying
+  @Transactional
+  @Query(nativeQuery = true,
+          value = "update task set status= :status where id=:taskId ")
+  void updateStatus(@Param("status") String status, @Param("taskId") Long taskId);
+
 }
 
 

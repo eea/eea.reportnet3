@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -143,15 +142,12 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
       LOG.info("Updating status of task with id {} and datasetId {} to FINISHED.", taskIdStr, datasetId);
       Optional<Task> task = taskRepository.findById(taskId);
       if(task.isPresent()){
-        task.get().setStatus(ProcessStatusEnum.FINISHED);
-        task.get().setFinishDate(new Date());
-
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         EEAEventVO eeaEventVOToUpdate = objectMapper.readValue(task.get().getJson(), EEAEventVO.class);
         eeaEventVOToUpdate.getData().put("CsvFileChunkRecoveryDetails",csvFileChunkRecoveryDetails);
         task.get().setJson(objectMapper.writeValueAsString(eeaEventVOToUpdate));
-        taskRepository.saveAndFlush(task.get());
+        taskRepository.updateStatusAndFinishDateAndJson(ProcessStatusEnum.FINISHED.toString(), new Date(), task.get().getJson(), task.get().getId());
       }
       else{
         LOG.error("Could not update task with id {} and datasetId {} because task is not present.", taskIdStr, datasetId);
@@ -161,8 +157,7 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
       LOG.info("Updating status of task with id {} and datasetId {} to CANCELED.", taskIdStr, datasetId);
       Optional<Task> task = taskRepository.findById(taskId);
       if(task.isPresent()){
-        task.get().setStatus(ProcessStatusEnum.CANCELED);
-        taskRepository.saveAndFlush(task.get());
+        taskRepository.updateStatusAndFinishDate(task.get().getId(), ProcessStatusEnum.CANCELED.toString(), new Date());
       }
       else{
         LOG.error("Could not update task with id {} and datasetId {} because task is not present.", taskIdStr, datasetId);

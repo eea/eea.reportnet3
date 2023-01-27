@@ -1452,8 +1452,7 @@ public class FileTreatmentHelper implements DisposableBean {
             releaseLockAndDeleteImportFileDirectory(datasetId);
 
             if(task.isPresent()){
-                task.get().setStatus(ProcessStatusEnum.FINISHED);
-                taskRepository.saveAndFlush(task.get());
+                this.updateTask(task.get().getId(), ProcessStatusEnum.FINISHED, new Date());
             }
             Map<String, Object> value = new HashMap<>();
             value.put(LiteralConstants.DATASET_ID, datasetId);
@@ -1524,8 +1523,7 @@ public class FileTreatmentHelper implements DisposableBean {
         } catch (EEAException e) {
             LOG_ERROR.error("RN3-Import file error for datasetId {}", datasetId, e);
             if(task.isPresent()){
-                task.get().setStatus(ProcessStatusEnum.CANCELED);
-                this.taskRepository.saveAndFlush(task.get());
+                this.updateTask(task.get().getId(), ProcessStatusEnum.CANCELED, new Date());
             }
         }
     }
