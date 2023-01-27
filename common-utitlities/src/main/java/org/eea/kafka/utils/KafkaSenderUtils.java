@@ -112,7 +112,7 @@ public class KafkaSenderUtils {
       saveUserNotification(eventType.toString(), notificationMap);
       value.put("notification", notificationMap);
       releaseKafkaEvent(eventType, value);
-      LOG.info("released kafaka event {}", eventType);
+      LOG.info("released kafka event {}", eventType);
     } catch (Exception e) {
       String eventTopic = (eventType != null) ? eventType.getTopic() : null;
       Long datasetId = (notificationVO != null) ? notificationVO.getDatasetId() : null;

@@ -1340,7 +1340,7 @@ public class FileTreatmentHelper implements DisposableBean {
          * @return the table schema id from file name
          * @throws EEAException the EEA exception
          */
-        private String getTableSchemaIdFromFileName (DataSetSchema schema, String fileName)
+        public String getTableSchemaIdFromFileName(DataSetSchema schema, String fileName)
       throws EEAException {
             String tableSchemaId = "";
             String tableName = fileName.substring(0, fileName.lastIndexOf((".")));

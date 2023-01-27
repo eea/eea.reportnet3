@@ -642,6 +642,7 @@
     "externalExportReportingCompletedEvent": "External reporting export file generated successfully",
     "externalExportReportingFailedEvent": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "importReportingRefusedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> because there is another job with status QUEUED or IN_PROGRESS for this dataset",
     "externalImportDesignFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignFromOtherSystemCompletedEvent": "External processes ended at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignFromOtherSystemFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
