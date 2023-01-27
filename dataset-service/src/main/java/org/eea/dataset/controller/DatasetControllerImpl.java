@@ -290,12 +290,7 @@ public class DatasetControllerImpl implements DatasetController {
         if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
           LOG.info("Added import job with id {} for datasetId {} with status REFUSED because there already is an import job with status IN_PROGRESS for the same datasetId", jobId, datasetId);
           datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());
-          //release locks
-          Map<String, Object> importFileData = new HashMap<>();
-          importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
-          importFileData.put(LiteralConstants.DATASETID, datasetId);
-          lockService.removeLockByCriteria(importFileData);
-          return;
+          throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
         }
       }
 
