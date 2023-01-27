@@ -833,6 +833,13 @@
             "parameters": ["dataflowId", "datasetId", "datasetName"]
           }
         },
+        {
+          "key": "IMPORT_REPORTING_REFUSED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
         { "key": "UNLOCK_DATASET_ERROR" },
         { "key": "LOAD_DATASETS_SUMMARY_ERROR" },
         { "key": "LOADING_WEBFORM_ERROR" },
@@ -971,13 +978,6 @@
         },
         {
           "key": "EXTERNAL_IMPORT_DESIGN_COMPLETED_EVENT",
-          "navigateTo": {
-            "section": "DATASET_SCHEMA",
-            "parameters": ["dataflowId", "datasetId"]
-          }
-        },
-        {
-          "key": "IMPORT_REPORTING_REFUSED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]
