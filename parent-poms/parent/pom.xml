@@ -13,7 +13,7 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.2-validation-validation</api-gateway.version>
+    <api-gateway.version>v3.2-validation</api-gateway.version>
     <communication.version>v3.2-validation</communication.version>
     <collaboration.version>v3.2-validation</collaboration.version>
     <dataflow.version>v3.2-validation</dataflow.version>
