@@ -222,7 +222,7 @@ public class ProcessControllerImpl implements ProcessController {
           example = "15") @PathVariable("timeInMinutes") long timeInMinutes) {
     LOG.info("Finding in progress validation processes that exceed {}", timeInMinutes);
     try {
-      return processService.findProcessIdByTypeAndStatusThatExceedTime(ProcessTypeEnum.VALIDATION.toString(), ProcessStatusEnum.IN_PROGRESS.toString(), timeInMinutes);
+      return processService.findProcessIdByTypeInAndStatusThatExceedTime(Arrays.asList(ProcessTypeEnum.VALIDATION.toString(),ProcessTypeEnum.RELEASE.toString()), ProcessStatusEnum.IN_PROGRESS.toString(), timeInMinutes);
     } catch (Exception e) {
       LOG.error("Error while finding in progress tasks that exceed " + timeInMinutes + " minutes " + e.getMessage());
       return new ArrayList<>();

@@ -170,7 +170,7 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
 
     boolean isProcessFinished(String processId) {
         boolean finished = true;
-        Integer unfinishedTasks = validationControllerZuul.findTasksCountByProcessIdAndStatusIn(processId, Arrays.asList(ProcessStatusEnum.IN_QUEUE.toString(), ProcessStatusEnum.IN_PROGRESS.toString()));
+        Integer unfinishedTasks = validationControllerZuul.findTasksCountByProcessIdAndStatusIn(processId, Arrays.asList(ProcessStatusEnum.IN_QUEUE.toString(), ProcessStatusEnum.IN_PROGRESS.toString(), ProcessStatusEnum.CANCELED.toString()));
         //check if all tasks have finished
         if (unfinishedTasks > 0) {
             finished = false;
