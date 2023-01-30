@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,12 +89,17 @@ public class JobForCancellingValidationsWithoutTasks {
     public void cancelInProgressValidationsWithoutTasks() {
         try {
             LOG.info("Running scheduled job cancelInProgressValidationsWithoutTasks");
-            List<ProcessVO> processesInProgress = processControllerZuul.listInProgressValidationProcessesThatExceedTime(maxTimeInMinutesForInProgressValidationWithoutTasks);
+            List<ProcessVO> processesInProgress = processControllerZuul.listProcessesThatExceedTime(Arrays.asList(ProcessTypeEnum.VALIDATION.toString(),ProcessTypeEnum.RELEASE.toString()), ProcessStatusEnum.IN_PROGRESS.toString(), maxTimeInMinutesForInProgressValidationWithoutTasks);
             if (processesInProgress.size() > 0) {
-                processesInProgress.stream().forEach(processVO -> {
+                for (ProcessVO processVO : processesInProgress) {
                     try {
                         List<BigInteger> tasks = validationControllerZuul.findTasksByProcessId(processVO.getProcessId());
                         if (tasks.size()==0) {
+                            Long jobId = jobProcessService.findJobIdByProcessId(processVO.getProcessId());
+                            JobVO jobVO = jobService.findById(jobId);
+                            if (jobVO.getJobStatus().equals(JobStatusEnum.CANCELED)) {
+                                continue;
+                            }
                             LOG.info("Cancelling process {}", processVO.getProcessId());
                             LOG.info("Updating validation process to status CANCELED for processId {}", processVO.getProcessId());
                             processControllerZuul.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(),
@@ -104,8 +110,6 @@ public class JobForCancellingValidationsWithoutTasks {
                             UsernamePasswordAuthenticationToken authentication =
                                     new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
                             SecurityContextHolder.getContext().setAuthentication(authentication);
-                            Long jobId = jobProcessService.findJobIdByProcessId(processVO.getProcessId());
-                            JobVO jobVO = jobService.findById(jobId);
                             validationControllerZuul.deleteLocksToReleaseProcess(processVO.getDatasetId());
                             LOG.info("Locks removed for canceled process {}, datasetId {}", processVO.getProcessId(), processVO.getDatasetId());
                             if (jobVO.isRelease()) {
@@ -147,7 +151,7 @@ public class JobForCancellingValidationsWithoutTasks {
                     } catch (Exception e) {
                         LOG.error("Error while running scheduled task cancelInProgressValidationsWithoutTasks for processId {}, {}", processVO.getProcessId(), e.getMessage());
                     }
-                });
+                }
             }
         } catch (Exception e) {
             LOG.error("Error while running scheduled task cancelInProgressValidationsWithoutTasks " + e.getMessage());
