@@ -39,7 +39,7 @@ public class JobForCleanupOfFinishedJobs {
         try {
             jobService.deleteFinishedJobsBasedOnDuration();
         } catch (Exception e) {
-            LOG.error("Unexpected error! Error while running scheduled task cleanupFinishedJobs. Message: {}", e.getMessage());
+            LOG.error("Unexpected error! Error while running scheduled task cleanupFinishedJobs. Message: ", e);
         }
     }
 }

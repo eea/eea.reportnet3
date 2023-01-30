@@ -99,11 +99,11 @@ public class JobForExecutingQueuedJobs {
                         jobService.deleteJob(job);
                     }
                 } catch (Exception e) {
-                    LOG.error("Unexpected error! Error while handling job with id {}. Message: {}", job.getId(), e.getMessage());
+                    LOG.error("Unexpected error! Error while handling job with id {}. Error: {}", job.getId(), e);
                 }
             }
         } catch (Exception e) {
-            LOG.error("Unexpected error! Error while running scheduled task executeQueuedJobs. Message: {}", e.getMessage());
+            LOG.error("Unexpected error! Error while running scheduled task executeQueuedJobs. Error: ", e);
         }
     }
 }

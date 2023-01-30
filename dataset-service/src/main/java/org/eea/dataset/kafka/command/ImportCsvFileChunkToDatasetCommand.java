@@ -153,7 +153,7 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
         LOG.error("Could not update task with id {} and datasetId {} because task is not present.", taskIdStr, datasetId);
       }
     } catch (Exception e) {
-      LOG.error("Error Executing ImportCsvFileChunkToDatasetCommand for taskId {} and datasetId {} Error message is {}", taskIdStr, datasetId, e.getMessage());
+      LOG.error("Error Executing ImportCsvFileChunkToDatasetCommand for taskId {} and datasetId {} Error message is {}", taskIdStr, datasetId, e);
       LOG.info("Updating status of task with id {} and datasetId {} to CANCELED.", taskIdStr, datasetId);
       Optional<Task> task = taskRepository.findById(taskId);
       if(task.isPresent()){
