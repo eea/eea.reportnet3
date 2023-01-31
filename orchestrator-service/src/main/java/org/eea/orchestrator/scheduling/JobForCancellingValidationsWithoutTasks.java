@@ -141,10 +141,10 @@ public class JobForCancellingValidationsWithoutTasks {
                             String user = jobVO.getCreatorUsername();
                             value.put(LiteralConstants.USER, user);
                             if (jobVO.getJobType().equals(JobTypeEnum.VALIDATION) && !jobVO.isRelease()) {
-                                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FAILED_EVENT, value,
+                                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT, value,
                                         NotificationVO.builder().datasetId(jobVO.getDatasetId()).user(user).error("No tasks created").build());
                             } else {
-                                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_FAILED_EVENT, value,
+                                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, value,
                                         NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error("No tasks created").build());
                             }
                         }
