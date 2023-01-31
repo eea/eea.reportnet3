@@ -3,7 +3,10 @@ package org.eea.interfaces.controller.validation;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -180,13 +183,16 @@ public interface ValidationController {
   Integer findTasksCountByProcessIdAndStatusIn(@PathVariable("processId") String processId, @RequestParam("status") List<String> status);
 
   /**
-   * Finds the latest finished task that is in finished status for more than timeInMinutes minutes
+   * Finds the latest task that is in a specific status for more than timeInMinutes minutes
    * @param processId
    * @param timeInMinutes
+   * @param statuses
+   * @param taskType
    * @return
    */
-  @GetMapping(value = "/private/getFinishedValidationTasksThatExceedTime")
-  BigInteger getFinishedValidationTaskThatExceedsTime(@RequestParam("processId") String processId, @RequestParam("timeInMinutes") long timeInMinutes);
+  @GetMapping(value = "/private/getTaskThatExceedsTimeByStatusesAndType")
+  TaskVO getTaskThatExceedsTimeByStatusesAndType(@RequestParam("processId") String processId, @RequestParam("timeInMinutes") long timeInMinutes,
+                                                      @RequestParam("statuses") Set<String> statuses, @RequestParam("taskType") TaskType taskType);
 
   /**
    * Executes validation
