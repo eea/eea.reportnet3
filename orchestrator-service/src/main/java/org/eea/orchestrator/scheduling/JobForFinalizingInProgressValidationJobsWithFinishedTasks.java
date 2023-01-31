@@ -3,6 +3,7 @@ package org.eea.orchestrator.scheduling;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
+import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
@@ -10,6 +11,7 @@ import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.TokenVO;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -27,11 +29,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
@@ -176,7 +174,7 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
             finished = false;
         } else {
             //if all tasks have finished, check if the latest finished task is in finished state for more than maxTimeInMinutesForFinishedTasksOfInProgressValidationJobs minutes
-            BigInteger finishedTask = validationControllerZuul.getFinishedValidationTaskThatExceedsTime(processId, maxTimeInMinutesForFinishedTasksOfInProgressValidationJobs);
+            TaskVO finishedTask = validationControllerZuul.getTaskThatExceedsTimeByStatusesAndType(processId, maxTimeInMinutesForFinishedTasksOfInProgressValidationJobs, new HashSet<>(Arrays.asList(ProcessStatusEnum.FINISHED.toString())), TaskType.VALIDATION_TASK);
             if (finishedTask == null) {
                 finished = false;
             }
