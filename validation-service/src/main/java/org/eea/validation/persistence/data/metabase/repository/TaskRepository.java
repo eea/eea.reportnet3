@@ -1,6 +1,8 @@
 package org.eea.validation.persistence.data.metabase.repository;
 
+import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -167,14 +169,17 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   Integer findTasksCountByProcessIdAndStatusIn(@Param("processId") String processId,@Param("status") List<String> status);
 
   /**
-   * Finds the latest finished task that is in finished status for more than timeInMinutes minutes
+   * Finds the latest task that is in a specific status for more than timeInMinutes minutes
    * @param processId
    * @param timeInMinutes
+   * @param statuses
+   * @param taskType
    * @return
    */
   @Query(nativeQuery = true,
-          value = "select id from task t where t.id in (select id from task where status='FINISHED' and task_type='VALIDATION_TASK' and process_id= :processId order by date_finish desc limit 1) and (extract(epoch from LOCALTIMESTAMP - t.date_finish) / 60) > :timeInMinutes")
-  BigInteger getFinishedValidationTaskThatExceedsTime(@Param("processId") String processId, @Param("timeInMinutes") long timeInMinutes);
+          value = "select * from task t where t.id in (select id from task where status in :statuses and task_type= :taskType and process_id= :processId order by date_finish desc limit 1) and (extract(epoch from LOCALTIMESTAMP - t.date_finish) / 60) > :timeInMinutes")
+  Task getTaskThatExceedsTimeByStatusesAndType(@Param("processId") String processId, @Param("timeInMinutes") long timeInMinutes,
+                                                      @Param("statuses") Set<String> statuses, @Param("taskType") String taskType);
 }
 
 

@@ -22,14 +22,17 @@ import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.eea.validation.util.ValidationHelper;
@@ -543,15 +546,17 @@ public class ValidationControllerImpl implements ValidationController {
   }
 
   /**
-   * Finds the latest finished task that is in finished status for more than timeInMinutes minutes
+   * Finds the latest task that is in a specific status for more than timeInMinutes minutes
    * @param processId
    * @param timeInMinutes
+   * @param statuses
+   * @param taskType
    * @return
    */
-  @Override
-  @GetMapping(value = "/private/getFinishedValidationTasksThatExceedTime")
-  public BigInteger getFinishedValidationTaskThatExceedsTime(@RequestParam("processId") String processId, @RequestParam("timeInMinutes") long timeInMinutes) {
-    return validationHelper.getFinishedValidationTaskThatExceedsTime(processId, timeInMinutes);
+  @GetMapping(value = "/private/getTaskThatExceedsTimeByStatusesAndType")
+  public TaskVO getTaskThatExceedsTimeByStatusesAndType(@RequestParam("processId") String processId, @RequestParam("timeInMinutes") long timeInMinutes,
+                                                      @RequestParam("statuses") Set<String> statuses, @RequestParam("taskType") TaskType taskType){
+    return validationHelper.getTaskThatExceedsTimeByStatusesAndType(processId, timeInMinutes, statuses, taskType);
   }
 
   @Override
