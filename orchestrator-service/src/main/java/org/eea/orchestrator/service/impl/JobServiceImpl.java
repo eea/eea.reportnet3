@@ -348,4 +348,18 @@ public class JobServiceImpl implements JobService {
         }
     }
 
+    @Override
+    public void releaseCopyToEuDatasetRefusedNotification(Long jobId, String user, Long dataflowId) {
+        Map<String, Object> value = new HashMap<>();
+        value.put(LiteralConstants.USER, user);
+        value.put("copyToEuDataset_job_id", jobId);
+        try {
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATA_TO_EUDATASET_REFUSED_EVENT, value,
+                    NotificationVO.builder().user(user).dataflowId(dataflowId)
+                            .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataflowId).build());
+        } catch (EEAException e) {
+            LOG.error("Could not release RELEASE_REFUSED_EVENT for jobId {} , dataflowId {} and user {}. Error Message: ", jobId, dataflowId, user, e.getMessage());
+        }
+    }
+
 }

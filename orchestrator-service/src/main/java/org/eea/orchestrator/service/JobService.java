@@ -55,5 +55,7 @@ public interface JobService {
 
     void releaseReleaseRefusedNotification(Long jobId, String user, Long dataflowId, Long providerId);
 
+    void releaseCopyToEuDatasetRefusedNotification(Long jobId, String user, Long dataflowId);
+
     List<JobVO> findByStatusAndJobType(JobStatusEnum status, JobTypeEnum jobType);
 }

@@ -266,7 +266,9 @@ public class JobControllerImpl implements JobController {
             LOG.info("Successfully added copy to eudataset job with id {} for dataflowId={}", jobId, dataflowId);
             if (statusToInsert == JobStatusEnum.REFUSED) {
                 //send Refused notification
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_COPY_TO_EU_DATASET_JOB);
+                LOG.info("Added copyToEuDataset job with id {} for dataflowId {} with status REFUSED", jobId, dataflowId);
+                jobService.releaseCopyToEuDatasetRefusedNotification(jobId, username, dataflowId);
+                throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DUPLICATE_COPY_TO_EU_DATASET_JOB);
             }
         } catch (Exception e) {
             LOG.error("Unexpected error! Could not add copy to eudataset job for dataflowId {}, creator {}. Error: {}", dataflowId, username, e);

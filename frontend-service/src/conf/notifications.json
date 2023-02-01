@@ -856,6 +856,14 @@
             "hasQueryString": true
           }
         },
+        {
+          "key": "COPY_DATA_TO_EUDATASET_REFUSED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"],
+            "hasQueryString": true
+          }
+        },
         { "key": "UNLOCK_DATASET_ERROR" },
         { "key": "LOAD_DATASETS_SUMMARY_ERROR" },
         { "key": "LOADING_WEBFORM_ERROR" },
