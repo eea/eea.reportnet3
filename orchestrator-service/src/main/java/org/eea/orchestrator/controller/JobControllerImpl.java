@@ -132,6 +132,7 @@ public class JobControllerImpl implements JobController {
             LOG.info("Successfully added validation job for datasetId {}, released {} and creator {} with status {}", datasetId, released, username, statusToInsert);
             if (statusToInsert == JobStatusEnum.REFUSED) {
                 //send Refused notification
+                LOG.info("Added validation job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
                 jobService.releaseValidationRefusedNotification(jobId, username, datasetId);
                 throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DUPLICATE_JOB);
             }
@@ -176,11 +177,13 @@ public class JobControllerImpl implements JobController {
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), dataflowId, dataProviderId, datasetIds, true);
 
             LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
-            jobService.addJob(dataflowId, dataProviderId, null, parameters, JobTypeEnum.VALIDATION, statusToInsert, true);
+            Long jobId = jobService.addJob(dataflowId, dataProviderId, null, parameters, JobTypeEnum.VALIDATION, statusToInsert, true);
             LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
             if (statusToInsert == JobStatusEnum.REFUSED) {
                 //send Refused notification
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
+                LOG.info("Added release job with id {} for dataflowId {} and providerId {} with status REFUSED", jobId, dataflowId, dataProviderId);
+                jobService.releaseReleaseRefusedNotification(jobId, username, dataflowId, dataProviderId);
+                throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
             }
         } catch (Exception e) {
             LOG.error("Unexpected error! Could not add release job for dataflowId {}, providerId {} and creator {}. Error: {}", dataflowId, dataProviderId, username, e);

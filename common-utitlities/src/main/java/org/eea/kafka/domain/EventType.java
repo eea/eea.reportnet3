@@ -32,6 +32,9 @@ public enum EventType {
   IMPORT_REPORTING_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "import_reporting_refused_event", true),
 
+  /** The release refused event. */
+  RELEASE_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "dataset_released_refused_key", true),
+
   /** The import reporting failed event. */
   IMPORT_REPORTING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_reporting_failed_event", true),

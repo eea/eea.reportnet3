@@ -10,6 +10,7 @@ import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -330,6 +331,20 @@ public class JobServiceImpl implements JobService {
                     NotificationVO.builder().user(user).datasetId(datasetId).error("There is another job with status QUEUED or IN_PROGRESS for the datasetId " + datasetId).build());
         } catch (EEAException e) {
             LOG.error("Could not release VALIDATION_REFUSED_EVENT for jobId {} , datasetId {} and user {}. Error Message: ", jobId, datasetId, user, e.getMessage());
+        }
+    }
+
+    @Override
+    public void releaseReleaseRefusedNotification(Long jobId, String user, Long dataflowId, Long providerId){
+        Map<String, Object> value = new HashMap<>();
+        value.put(LiteralConstants.USER, user);
+        value.put("release_job_id", jobId);
+        try {
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_REFUSED_EVENT, value,
+                    NotificationVO.builder().user(user).dataflowId(dataflowId).providerId(providerId)
+                            .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataflowId + " and providerId " + providerId).build());
+        } catch (EEAException e) {
+            LOG.error("Could not release RELEASE_REFUSED_EVENT for jobId {} , dataflowId {} , providerId {} and user {}. Error Message: ", jobId, dataflowId, providerId, user, e.getMessage());
         }
     }
 

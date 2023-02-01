@@ -61,19 +61,19 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
 
     DataSetMetabaseVO dataSetMetabaseVO =
         datasetMetabaseController.findDatasetMetabaseById(datasetId);
-    List<DesignDatasetVO> desingDataset = datasetMetabaseController
+    List<DesignDatasetVO> designDataset = datasetMetabaseController
         .findDesignDataSetIdByDataflowId(dataSetMetabaseVO.getDataflowId());
 
-    // we find the name of the dataset to asing it for the notiFicaion
+    // we find the name of the dataset to use it for the notification
     String datasetName = "";
-    for (DesignDatasetVO designDatasetVO : desingDataset) {
+    for (DesignDatasetVO designDatasetVO : designDataset) {
       if (designDatasetVO.getDatasetSchema()
           .equalsIgnoreCase(dataSetMetabaseVO.getDatasetSchema())) {
         datasetName = designDatasetVO.getDataSetName();
       }
     }
 
-    // we find if the the dataset i in DESIGN or REPORTING
+    // we find if the dataset i in DESIGN or REPORTING
     String dataProviderName =
         "DESIGN".equalsIgnoreCase(dataSetMetabaseVO.getDatasetTypeEnum().getValue()) ? "DESIGN"
             : dataSetMetabaseVO.getDataSetName();
