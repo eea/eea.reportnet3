@@ -1,6 +1,6 @@
 package org.eea.orchestrator.scheduling;
 
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
@@ -70,9 +70,9 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
     @Autowired
     private UserManagementControllerZull userManagementControllerZull;
     @Autowired
-    private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
-    @Autowired
     private KafkaSenderUtils kafkaSenderUtils;
+    @Autowired
+    private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
 
     @PostConstruct
     private void init() {
@@ -129,9 +129,7 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
                                         LOG.info("Updated validation process to status CANCELED for processId {}", processId);
                                     }
                                 }
-                                List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(jobVO.getDataflowId(), jobVO.getProviderId());
-                                datasetIds.remove(processVO.getDatasetId());
-                                datasetIds.forEach(id -> validationControllerZuul.deleteLocksToReleaseProcess(id));
+                                dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(jobVO.getDataflowId(), jobVO.getProviderId());
                             }
                             if (jobId!=null) {
                                 jobService.updateJobStatus(jobId, JobStatusEnum.CANCELED);

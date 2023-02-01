@@ -884,7 +884,22 @@
         { "key": "GET_CONTROL_STATUSES_ERROR" },
         { "key": "DELETE_VALIDATION_FROM_QUEUE_ERROR" },
         { "key": "SET_VALIDATIONS_STATUS_PRIORITY_ERROR" },
-        { "key": "DELETE_PROVIDER_DATASET_DATA_ERROR" }
+        { "key": "DELETE_PROVIDER_DATASET_DATA_ERROR" },
+        {
+          "key": "VALIDATION_CANCELED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
+        {
+          "key": "RELEASE_CANCELED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "providerId"]
+          }
+        }
       ]
     },
     {
@@ -946,13 +961,6 @@
           "navigateTo": {
             "section": "DATAFLOW",
             "parameters": ["dataflowId", "dataProvider"]
-          }
-        },
-        {
-          "key": "RELEASE_CANCELED_EVENT",
-          "navigateTo": {
-            "section": "DATAFLOW",
-            "parameters": ["dataflowId", "providerId"]
           }
         },
         {
