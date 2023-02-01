@@ -88,7 +88,7 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
      */
     public void cancelInProgressValidationsAndReleasesWithoutTasks() {
         try {
-            LOG.info("Running scheduled job cancelInProgressValidationsWithoutTasks");
+            LOG.info("Running scheduled job cancelInProgressValidationsAndReleasesWithoutTasks");
             List<ProcessVO> processesInProgress = processControllerZuul.listProcessesThatExceedTime(Arrays.asList(ProcessTypeEnum.VALIDATION.toString(),ProcessTypeEnum.RELEASE.toString()), ProcessStatusEnum.IN_PROGRESS.toString(), maxTimeInMinutesForInProgressValidationWithoutTasks);
             if (processesInProgress.size() > 0) {
                 for (ProcessVO processVO : processesInProgress) {
@@ -101,11 +101,11 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
                                 continue;
                             }
                             LOG.info("Cancelling process {}", processVO.getProcessId());
-                            LOG.info("Updating validation process to status CANCELED for processId {}", processVO.getProcessId());
+                            LOG.info("Updating process to status CANCELED for processId {}", processVO.getProcessId());
                             processControllerZuul.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(),
                                     ProcessStatusEnum.CANCELED, ProcessTypeEnum.valueOf(processVO.getProcessType()), processVO.getProcessId(),
                                     processVO.getUser(), processVO.getPriority(), processVO.isReleased());
-                            LOG.info("Updated validation process to status CANCELED for processId {}", processVO.getProcessId());
+                            LOG.info("Updated process to status CANCELED for processId {}", processVO.getProcessId());
                             TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
                             UsernamePasswordAuthenticationToken authentication =
                                     new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
@@ -119,14 +119,14 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
                                     ProcessVO process = processControllerZuul.findById(processId);
                                     if (!process.getStatus().equals(ProcessStatusEnum.FINISHED.toString()) && !process.getStatus().equals(ProcessStatusEnum.CANCELED.toString())) {
                                         LOG.info("Cancelling process {}", processVO.getProcessId());
-                                        LOG.info("Cancelling running validation tasks for process {}", process.getProcessId());
+                                        LOG.info("Cancelling running tasks for process {}", process.getProcessId());
                                         validationControllerZuul.cancelRunningProcessTasks(process.getProcessId());
-                                        LOG.info("Cancelled running validation tasks for process {}", process.getProcessId());
-                                        LOG.info("Updating validation process to status CANCELED for processId {}", processId);
+                                        LOG.info("Cancelled running tasks for process {}", process.getProcessId());
+                                        LOG.info("Updating process to status CANCELED for processId {}", processId);
                                         processControllerZuul.updateProcess(process.getDatasetId(), process.getDataflowId(),
                                                 ProcessStatusEnum.CANCELED, ProcessTypeEnum.valueOf(processVO.getProcessType()), process.getProcessId(),
                                                 process.getUser(), process.getPriority(), process.isReleased());
-                                        LOG.info("Updated validation process to status CANCELED for processId {}", processId);
+                                        LOG.info("Updated process to status CANCELED for processId {}", processId);
                                     }
                                 }
                                 dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(jobVO.getDataflowId(), jobVO.getProviderId());
@@ -147,12 +147,12 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
                             }
                         }
                     } catch (Exception e) {
-                        LOG.error("Error while running scheduled task cancelInProgressValidationsWithoutTasks for processId {}, {}", processVO.getProcessId(), e);
+                        LOG.error("Error while running scheduled task cancelInProgressValidationsAndReleasesWithoutTasks for processId {}, {}", processVO.getProcessId(), e);
                     }
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while running scheduled task cancelInProgressValidationsWithoutTasks ", e);
+            LOG.error("Error while running scheduled task cancelInProgressValidationsAndReleasesWithoutTasks ", e);
         }
     }
 }
