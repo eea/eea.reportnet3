@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class JobForCancellingValidationsWithoutTasks {
+public class JobForCancellingValidationsAndReleasesWithoutTasks {
 
     @Value(value = "${scheduling.inProgress.validation.process.without.task.max.time}")
     private long maxTimeInMinutesForInProgressValidationWithoutTasks;
@@ -57,7 +57,7 @@ public class JobForCancellingValidationsWithoutTasks {
     /**
      * The Constant LOG.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(JobForCancellingValidationsWithoutTasks.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JobForCancellingValidationsAndReleasesWithoutTasks.class);
 
     @Autowired
     private ProcessControllerZuul processControllerZuul;
@@ -78,7 +78,7 @@ public class JobForCancellingValidationsWithoutTasks {
     private void init() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
-        scheduler.schedule(() -> cancelInProgressValidationsWithoutTasks(),
+        scheduler.schedule(() -> cancelInProgressValidationsAndReleasesWithoutTasks(),
                 new CronTrigger("0 0 * * * *"));
     }
 
@@ -86,7 +86,7 @@ public class JobForCancellingValidationsWithoutTasks {
      * The job runs every hour. It finds validation processes that have status=IN_PROGRESS for more than maxTimeInMinutesForInProgressValidationWithoutTasks
      * and have no tasks created and sets their status to CANCELED
      */
-    public void cancelInProgressValidationsWithoutTasks() {
+    public void cancelInProgressValidationsAndReleasesWithoutTasks() {
         try {
             LOG.info("Running scheduled job cancelInProgressValidationsWithoutTasks");
             List<ProcessVO> processesInProgress = processControllerZuul.listProcessesThatExceedTime(Arrays.asList(ProcessTypeEnum.VALIDATION.toString(),ProcessTypeEnum.RELEASE.toString()), ProcessStatusEnum.IN_PROGRESS.toString(), maxTimeInMinutesForInProgressValidationWithoutTasks);
