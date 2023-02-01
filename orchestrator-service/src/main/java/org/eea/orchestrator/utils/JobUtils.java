@@ -49,6 +49,9 @@ public class JobUtils {
        else if(name.equals("datasetId")){
            columnName = "dataset_id";
        }
+       else if(name.equals("fmeJobId")){
+           columnName = "fme_job_id";
+       }
        else{
            LOG.info("Could not match jobs header {} to a column in the table", name);
        }
