@@ -53,4 +53,5 @@ public interface JobService {
 
     void releaseValidationRefusedNotification(Long jobId, String user, Long datasetId);
 
+    List<JobVO> findByStatusAndJobType(JobStatusEnum status, JobTypeEnum jobType);
 }

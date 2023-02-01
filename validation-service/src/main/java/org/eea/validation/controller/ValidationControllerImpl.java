@@ -22,14 +22,17 @@ import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.eea.validation.util.ValidationHelper;
@@ -528,6 +531,38 @@ public class ValidationControllerImpl implements ValidationController {
         LOG.error("Unexpected error! Error when updating tasks status for processId {} Message: {}",  processId, e.getMessage());
         throw e;
     }
+  }
+
+  /**
+   * Finds tasks by processId and status
+   * @param processId
+   * @param status
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/findTasksCountByProcessIdAndStatusIn/{processId}")
+  public Integer findTasksCountByProcessIdAndStatusIn(@PathVariable("processId") String processId, @RequestParam("status") List<String> status) {
+    return validationHelper.findTasksCountByProcessIdAndStatusIn(processId, status);
+  }
+
+  /**
+   * Finds the latest task that is in a specific status for more than timeInMinutes minutes
+   * @param processId
+   * @param timeInMinutes
+   * @param statuses
+   * @param taskType
+   * @return
+   */
+  @GetMapping(value = "/private/getTaskThatExceedsTimeByStatusesAndType")
+  public TaskVO getTaskThatExceedsTimeByStatusesAndType(@RequestParam("processId") String processId, @RequestParam("timeInMinutes") long timeInMinutes,
+                                                      @RequestParam("statuses") Set<String> statuses, @RequestParam("taskType") TaskType taskType){
+    return validationHelper.getTaskThatExceedsTimeByStatusesAndType(processId, timeInMinutes, statuses, taskType);
+  }
+
+  @Override
+  @PutMapping("/private/executeValidation/{datasetId}")
+  public void executeValidation(@PathVariable("datasetId") Long datasetId, @RequestParam("processId") String processId, @RequestParam("released") boolean released, @RequestParam("updateViews") boolean updateViews) throws EEAException {
+    validationHelper.executeValidation(datasetId, processId, released, updateViews);
   }
 }
 

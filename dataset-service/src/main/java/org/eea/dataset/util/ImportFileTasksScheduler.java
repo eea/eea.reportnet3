@@ -12,7 +12,6 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.job.JobScheduler;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.message.MessageReceiver;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

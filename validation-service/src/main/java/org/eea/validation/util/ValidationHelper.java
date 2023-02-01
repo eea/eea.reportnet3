@@ -28,6 +28,7 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -39,6 +40,7 @@ import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.kafka.command.Validator;
+import org.eea.validation.mapper.TaskMapper;
 import org.eea.validation.persistence.data.domain.TableValue;
 import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
@@ -64,6 +66,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
@@ -177,6 +180,10 @@ public class ValidationHelper implements DisposableBean {
 
   /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
+
+  /** The data set mapper. */
+  @Autowired
+  private TaskMapper taskMapper;
 
 
   /**
@@ -1191,5 +1198,17 @@ public class ValidationHelper implements DisposableBean {
   @Transactional
   public void updateTaskStatusByProcessIdAndCurrentStatus(ProcessStatusEnum status, String processId, Set<String> currentStatuses){
     taskRepository.updateTaskStatusByProcessIdAndCurrentStatus(status.toString(), new Date(), processId, currentStatuses);
+  }
+
+  public Integer findTasksCountByProcessIdAndStatusIn(String processId,List<String> status) {
+    return taskRepository.findTasksCountByProcessIdAndStatusIn(processId, status);
+  }
+
+  public TaskVO  getTaskThatExceedsTimeByStatusesAndType(String processId, long timeInMinutes, Set<String> statuses, TaskType taskType) {
+    Task task = taskRepository.getTaskThatExceedsTimeByStatusesAndType(processId, timeInMinutes, statuses, taskType.getValue());
+    if(task == null){
+      return null;
+    }
+    return taskMapper.entityToClass(task);
   }
 }

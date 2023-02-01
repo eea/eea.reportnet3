@@ -124,7 +124,7 @@ public class JobForCancellingImportJobsWithoutTasks {
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while running scheduled task cancelInProgressValidationsWithoutTasks " + e.getMessage());
+            LOG.error("Error while running scheduled task cancelInProgressValidationsWithoutTasks ", e);
         }
     }
 }

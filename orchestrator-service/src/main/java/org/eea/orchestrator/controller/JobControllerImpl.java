@@ -91,7 +91,7 @@ public class JobControllerImpl implements JobController {
             LOG.info("Retrieving jobs for status {}", status.getValue());
             return jobService.getJobsByStatus(status);
         } catch (Exception e){
-            LOG.error("Unexpected error! Could not retrieve jobs that have status {}. Message: {}", status.getValue(), e.getMessage());
+            LOG.error("Unexpected error! Could not retrieve jobs that have status {}. Error: {}", status.getValue(), e);
             throw e;
         }
     }
@@ -136,7 +136,7 @@ public class JobControllerImpl implements JobController {
                 throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DUPLICATE_JOB);
             }
         } catch (Exception e){
-            LOG.error("Unexpected error! Could not add validation job for datasetId {}, released {} and creator {}. Message: {}", datasetId, released, username, e.getMessage());
+            LOG.error("Unexpected error! Could not add validation job for datasetId {}, released {} and creator {}. Error: {}", datasetId, released, username, e);
             throw e;
         }
     }
@@ -183,7 +183,7 @@ public class JobControllerImpl implements JobController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
             }
         } catch (Exception e) {
-            LOG.error("Unexpected error! Could not add release job for dataflowId {}, providerId {} and creator {}. Message: {}", dataflowId, dataProviderId, username, e.getMessage());
+            LOG.error("Unexpected error! Could not add release job for dataflowId {}, providerId {} and creator {}. Error: {}", dataflowId, dataProviderId, username, e);
             throw e;
         }
     }
@@ -266,7 +266,7 @@ public class JobControllerImpl implements JobController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_COPY_TO_EU_DATASET_JOB);
             }
         } catch (Exception e) {
-            LOG.error("Unexpected error! Could not add copy to eudataset job for dataflowId {}, creator {}. Message: {}", dataflowId, username, e.getMessage());
+            LOG.error("Unexpected error! Could not add copy to eudataset job for dataflowId {}, creator {}. Error: {}", dataflowId, username, e);
             throw e;
         }
     }

@@ -10,6 +10,7 @@ import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
+import { routes } from 'conf/routes';
 
 import { Button } from 'views/_components/Button';
 import { DataTable } from 'views/_components/DataTable';
@@ -19,6 +20,8 @@ import { LevelError } from 'views/_components/LevelError';
 import { Spinner } from 'views/_components/Spinner';
 
 import { JobsStatusesService } from 'services/JobsStatusesService';
+
+import { getUrl } from 'repositories/_utils/UrlUtils';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -203,6 +206,12 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         className: styles.middleColumn
       },
       {
+        key: 'fmeJobId',
+        header: resourcesContext.messages['fmeJobId'],
+        template: getFmeJobIdTemplate,
+        className: styles.middleColumn
+      },
+      {
         key: 'dataflowId',
         header: resourcesContext.messages['dataflowId'],
         template: getDataflowIdTemplate,
@@ -277,6 +286,18 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   );
 
   const getJobIdTemplate = job => <p>{job.id}</p>;
+
+  const getFmeJobIdTemplate = job => (
+    <a
+      href={getUrl(routes.FME, { fmeJobId: job.fmeJobId }, true)}
+      rel="noopener noreferrer"
+      style={{ cursor: 'pointer' }}
+      target="_blank"
+      type="button">
+      {job.fmeJobId}
+    </a>
+  );
+
   const getJobTypeTemplate = job => <p>{job.jobType}</p>;
 
   const getDateAddedTemplate = (job, field) =>

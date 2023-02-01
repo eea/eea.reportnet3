@@ -79,7 +79,7 @@ public class JobForRestartingDelayedValidationTasks {
                 });
             }
         } catch (Exception e) {
-            LOG.error("Error while running scheduled task restartDelayedTasks " + e.getMessage());
+            LOG.error("Error while running scheduled task restartDelayedTasks ", e);
         }
     }
 }

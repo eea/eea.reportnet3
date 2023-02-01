@@ -316,6 +316,10 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public List<JobVO> findByStatusAndJobType(JobStatusEnum status, JobTypeEnum jobType) {
+        return jobMapper.entityListToClass(jobRepository.findByJobStatusAndJobType(status, jobType));
+    }
+    @Override
     public void releaseValidationRefusedNotification(Long jobId, String user, Long datasetId){
         Map<String, Object> value = new HashMap<>();
         value.put("user", user);

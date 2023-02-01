@@ -16,6 +16,7 @@ export const routes = {
   DOCUMENTS: '/dataflow/:dataflowId/documents',
   EU_DATASET: '/dataflow/:dataflowId/euDataset/:datasetId',
   EULOGIN: '/eulogin',
+  FME: 'https://fme.discomap.eea.europa.eu/fmeserver/#/job/:fmeJobId/summary',
   LOGIN: '/login',
   PRIVACY_POLICY_EIONET: 'https://www.eionet.europa.eu/reportnet/platform/footer/privacypolicy',
   PRIVACY_STATEMENT: '/privacyPolicy',

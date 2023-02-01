@@ -3,7 +3,10 @@ package org.eea.interfaces.controller.validation;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -169,6 +172,38 @@ public interface ValidationController {
    */
   @PostMapping(value = "/private/updateTaskStatusByProcessIdAndCurrentStatuses/{processId}")
   void updateTaskStatusByProcessIdAndCurrentStatuses(@PathVariable("processId") String processId,  @RequestParam("status") ProcessStatusEnum status, @RequestParam("statuses") Set<String> currentStatuses);
+
+  /**
+   * Finds tasks by processId and status
+   * @param processId
+   * @param status
+   * @return
+   */
+  @GetMapping(value = "/private/findTasksCountByProcessIdAndStatusIn/{processId}")
+  Integer findTasksCountByProcessIdAndStatusIn(@PathVariable("processId") String processId, @RequestParam("status") List<String> status);
+
+  /**
+   * Finds the latest task that is in a specific status for more than timeInMinutes minutes
+   * @param processId
+   * @param timeInMinutes
+   * @param statuses
+   * @param taskType
+   * @return
+   */
+  @GetMapping(value = "/private/getTaskThatExceedsTimeByStatusesAndType")
+  TaskVO getTaskThatExceedsTimeByStatusesAndType(@RequestParam("processId") String processId, @RequestParam("timeInMinutes") long timeInMinutes,
+                                                      @RequestParam("statuses") Set<String> statuses, @RequestParam("taskType") TaskType taskType);
+
+  /**
+   * Executes validation
+   * @param datasetId
+   * @param processId
+   * @param released
+   * @param updateViews
+   * @throws Exception
+   */
+  @PutMapping("/private/executeValidation/{datasetId}")
+  void executeValidation(@PathVariable("datasetId") Long datasetId, @RequestParam("processId") String processId, @RequestParam("released") boolean released, @RequestParam("updateViews") boolean updateViews) throws Exception;
 }
 
 

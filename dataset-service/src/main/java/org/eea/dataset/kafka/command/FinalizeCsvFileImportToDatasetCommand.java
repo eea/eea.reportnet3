@@ -18,8 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * The Class EventHandlerCommand. Event Handler Command where we are encapsulating both
@@ -70,8 +72,7 @@ public class FinalizeCsvFileImportToDatasetCommand extends AbstractEEAEventHandl
             LOG_ERROR.info("Process with ID:" + processId + " has Tasks in Progress Status. Command: " + EventType.COMMAND_FINALIZE_CSV_FILE_IMPORT_TO_DATASET + " will abort execution");
             //return status of task in_queue
             if (task.isPresent()) {
-                task.get().setStatus(ProcessStatusEnum.IN_QUEUE);
-                this.taskRepository.saveAndFlush(task.get());
+                taskRepository.updateStatus(ProcessStatusEnum.IN_QUEUE.toString(), task.get().getId());
             }
             return;
         }

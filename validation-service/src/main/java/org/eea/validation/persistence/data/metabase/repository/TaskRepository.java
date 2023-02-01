@@ -1,6 +1,8 @@
 package org.eea.validation.persistence.data.metabase.repository;
 
+import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -145,11 +147,39 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   void updateTaskStatusByProcessIdAndCurrentStatus(@Param("status") String status, @Param("dateFinish") Date dateFinish,
                                                    @Param("processId") String processId, @Param("statuses") Set<String> statuses);
 
+  /**
+   * Cancels tasks by processId and status
+   * @param processId
+   * @param dateFinish
+   */
   @Modifying
   @Transactional
   @Query(nativeQuery = true,
           value = "update task set status='CANCELED', date_finish= :dateFinish where process_id=:processId and status in ('IN_QUEUE','IN_PROGRESS')")
   void cancelRunningProcessTasks(@Param("processId") String processId, @Param("dateFinish") Date dateFinish);
+
+  /**
+   * Finds tasks by processId and status
+   * @param processId
+   * @param status
+   * @return
+   */
+  @Query(nativeQuery = true,
+          value = "select count(*) from task where process_id=:processId and status in :status")
+  Integer findTasksCountByProcessIdAndStatusIn(@Param("processId") String processId,@Param("status") List<String> status);
+
+  /**
+   * Finds the latest task that is in a specific status for more than timeInMinutes minutes
+   * @param processId
+   * @param timeInMinutes
+   * @param statuses
+   * @param taskType
+   * @return
+   */
+  @Query(nativeQuery = true,
+          value = "select * from task t where t.id in (select id from task where status in :statuses and task_type= :taskType and process_id= :processId order by date_finish desc limit 1) and (extract(epoch from LOCALTIMESTAMP - t.date_finish) / 60) > :timeInMinutes")
+  Task getTaskThatExceedsTimeByStatusesAndType(@Param("processId") String processId, @Param("timeInMinutes") long timeInMinutes,
+                                                      @Param("statuses") Set<String> statuses, @Param("taskType") String taskType);
 }
 
 
