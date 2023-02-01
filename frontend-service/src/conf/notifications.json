@@ -840,6 +840,14 @@
             "parameters": ["dataflowId", "datasetId"]
           }
         },
+        {
+          "key": "VALIDATION_REFUSED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
         { "key": "UNLOCK_DATASET_ERROR" },
         { "key": "LOAD_DATASETS_SUMMARY_ERROR" },
         { "key": "LOADING_WEBFORM_ERROR" },

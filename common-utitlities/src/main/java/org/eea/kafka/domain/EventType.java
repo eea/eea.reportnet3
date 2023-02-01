@@ -21,6 +21,9 @@ public enum EventType {
   VALIDATION_RELEASE_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "validation_release_finished_key", true),
 
+  /** The validation refused event. */
+  VALIDATION_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_refused_key", true),
+
   /** The import reporting completed event. */
   IMPORT_REPORTING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_reporting_completed_event", true),

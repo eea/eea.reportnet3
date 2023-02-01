@@ -52,7 +52,7 @@ public class JobControllerImpl implements JobController {
 
     /** The valid columns. */
     List<String> validColumns = Arrays.asList("jobId", "creatorUsername", "jobType", "dataflowId", "providerId", "datasetId",
-            "jobStatus", "dateAdded", "dateStatusChanged");
+            "jobStatus", "dateAdded", "dateStatusChanged", "fmeJobId");
 
     @Override
     @HystrixCommand
@@ -128,10 +128,12 @@ public class JobControllerImpl implements JobController {
             parameters.put("userId", userId);
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);
             LOG.info("Adding validation job for datasetId {} and released {} for creator {} with status {}", datasetId, released, username, statusToInsert);
-            jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released);
+            Long jobId = jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released);
             LOG.info("Successfully added validation job for datasetId {}, released {} and creator {} with status {}", datasetId, released, username, statusToInsert);
             if (statusToInsert == JobStatusEnum.REFUSED) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_JOB);
+                //send Refused notification
+                jobService.releaseValidationRefusedNotification(jobId, username, datasetId);
+                throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DUPLICATE_JOB);
             }
         } catch (Exception e){
             LOG.error("Unexpected error! Could not add validation job for datasetId {}, released {} and creator {}. Message: {}", datasetId, released, username, e.getMessage());
@@ -177,6 +179,7 @@ public class JobControllerImpl implements JobController {
             jobService.addJob(dataflowId, dataProviderId, null, parameters, JobTypeEnum.VALIDATION, statusToInsert, true);
             LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
             if (statusToInsert == JobStatusEnum.REFUSED) {
+                //send Refused notification
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
             }
         } catch (Exception e) {
@@ -259,6 +262,7 @@ public class JobControllerImpl implements JobController {
             Long jobId = jobService.addJob(dataflowId, null, null, parameters, JobTypeEnum.COPY_TO_EU_DATASET, statusToInsert, false);
             LOG.info("Successfully added copy to eudataset job with id {} for dataflowId={}", jobId, dataflowId);
             if (statusToInsert == JobStatusEnum.REFUSED) {
+                //send Refused notification
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_COPY_TO_EU_DATASET_JOB);
             }
         } catch (Exception e) {

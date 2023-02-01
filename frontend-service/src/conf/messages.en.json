@@ -643,6 +643,8 @@
     "externalExportReportingFailedEvent": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importReportingRefusedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> because there is another job with status QUEUED or IN_PROGRESS for this dataset",
+    "validationRefusedEvent": "Failed validating data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> because there is another job with status QUEUED or IN_PROGRESS for this dataset",
+    "copyToEuDatasetRefusedEvent": "Failed during copy to eu dataset process for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> because there is another job with status QUEUED or IN_PROGRESS for this dataflow",
     "externalImportDesignFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignFromOtherSystemCompletedEvent": "External processes ended at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignFromOtherSystemFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",

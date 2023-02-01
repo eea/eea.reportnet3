@@ -51,4 +51,6 @@ public interface JobService {
 
     List<BigInteger> listJobsThatExceedTimeWithSpecificStatus(String status, long timeInMinutes);
 
+    void releaseValidationRefusedNotification(Long jobId, String user, Long datasetId);
+
 }
