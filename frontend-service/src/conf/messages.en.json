@@ -1591,6 +1591,8 @@
     "x": "X",
     "y": "Y",
     "yes": "Yes",
-    "zipCsvTable": "ZIP (.csv for each table)"
+    "zipCsvTable": "ZIP (.csv for each table)",
+    "validationCanceledEvent": "Validation canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>",
+    "releaseCanceledEvent": "Release canceled for <strong>{:dataProviderName}</strong> (<a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName})</a>"
   }
 }

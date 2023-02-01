@@ -210,19 +210,20 @@ public class ProcessControllerImpl implements ProcessController {
   }
 
   /**
-   * Lists the process ids of validation processes that are in progress for more than the specified period of time
+   * Lists the process ids of processes with type and status that are in progress for more than the specified period of time
    * @param timeInMinutes
    * @return
    */
   @Override
-  @GetMapping(value = "/private/listValidationProcessesInProgress/{timeInMinutes}")
-  @ApiOperation(value = "Lists the validation processes that are in progress for more than the specified period of time", hidden = true)
-  public List<ProcessVO> listInProgressValidationProcessesThatExceedTime(@ApiParam(
+  @GetMapping(value = "/private/listProcessesExceedingTime")
+  @ApiOperation(value = "Lists the processes with type that are in progress for more than the specified period of time", hidden = true)
+  public List<ProcessVO> listProcessesThatExceedTime(@ApiParam(value = "The type of processes") @RequestParam("type") List<String> type,
+          @ApiParam(value = "The status of processes") @RequestParam("status") String status, @ApiParam(
           value = "Time limit in minutes that in progress validation processes exceed",
-          example = "15") @PathVariable("timeInMinutes") long timeInMinutes) {
+          example = "15") @RequestParam("timeInMinutes") long timeInMinutes) {
     LOG.info("Finding in progress validation processes that exceed {}", timeInMinutes);
     try {
-      return processService.findProcessIdByTypeAndStatusThatExceedTime(ProcessTypeEnum.VALIDATION.toString(), ProcessStatusEnum.IN_PROGRESS.toString(), timeInMinutes);
+      return processService.findProcessIdByTypeInAndStatusThatExceedTime(Arrays.asList(ProcessTypeEnum.VALIDATION.toString(),ProcessTypeEnum.RELEASE.toString()), ProcessStatusEnum.IN_PROGRESS.toString(), timeInMinutes);
     } catch (Exception e) {
       LOG.error("Error while finding in progress tasks that exceed " + timeInMinutes + " minutes " + e.getMessage());
       return new ArrayList<>();

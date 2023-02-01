@@ -243,8 +243,8 @@ public class ProcessServiceImpl implements ProcessService {
    * @return
    */
   @Override
-  public List<ProcessVO> findProcessIdByTypeAndStatusThatExceedTime(String type, String status, long timeInMinutes) {
-    List<EEAProcess> eeaProcesses = processRepository.findProcessIdsByProcessTypeAndStatus(type, status, timeInMinutes);
+  public List<ProcessVO> findProcessIdByTypeInAndStatusThatExceedTime(List<String> type, String status, long timeInMinutes) {
+    List<EEAProcess> eeaProcesses = processRepository.findProcessIdsByProcessTypeInAndStatus(type, status, timeInMinutes);
     return processMapper.entityListToClass(eeaProcesses);
   }
 

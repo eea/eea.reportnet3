@@ -543,7 +543,13 @@ public enum EventType {
 
   /** The call fme process failed event. */
   CALL_FME_PROCESS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "call_fme_process_failed_event", true);
+      "call_fme_process_failed_event", true),
+
+  /** Validation failed event */
+  VALIDATION_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_canceled_event", true),
+
+  /** The release canceled event. */
+  RELEASE_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "release_canceled_event", true);
 
 
   /** The topic. */
