@@ -51,5 +51,11 @@ public interface JobService {
 
     List<BigInteger> listJobsThatExceedTimeWithSpecificStatus(String status, long timeInMinutes);
 
+    void releaseValidationRefusedNotification(Long jobId, String user, Long datasetId);
+
+    void releaseReleaseRefusedNotification(Long jobId, String user, Long dataflowId, Long providerId);
+
+    void releaseCopyToEuDatasetRefusedNotification(Long jobId, String user, Long dataflowId);
+
     List<JobVO> findByStatusAndJobType(JobStatusEnum status, JobTypeEnum jobType);
 }

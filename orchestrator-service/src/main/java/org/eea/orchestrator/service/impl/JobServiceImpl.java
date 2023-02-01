@@ -1,6 +1,7 @@
 package org.eea.orchestrator.service.impl;
 
 import org.apache.commons.lang.StringUtils;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
@@ -9,12 +10,17 @@ import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.orchestrator.mapper.JobMapper;
 import org.eea.orchestrator.persistence.domain.Job;
 import org.eea.orchestrator.persistence.repository.JobRepository;
 import org.eea.orchestrator.service.JobHistoryService;
 import org.eea.orchestrator.service.JobService;
 import org.eea.orchestrator.utils.JobUtils;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +73,7 @@ public class JobServiceImpl implements JobService {
     private JobHistoryService jobHistoryService;
 
     @Autowired
-    private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+    private KafkaSenderUtils kafkaSenderUtils;
 
     /**
      * The job utils.
@@ -314,4 +320,46 @@ public class JobServiceImpl implements JobService {
     public List<JobVO> findByStatusAndJobType(JobStatusEnum status, JobTypeEnum jobType) {
         return jobMapper.entityListToClass(jobRepository.findByJobStatusAndJobType(status, jobType));
     }
+    @Override
+    public void releaseValidationRefusedNotification(Long jobId, String user, Long datasetId){
+        Map<String, Object> value = new HashMap<>();
+        value.put("user", user);
+        value.put("validation_job_id", jobId);
+        value.put(LiteralConstants.DATASET_ID, datasetId);
+        try {
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_REFUSED_EVENT, value,
+                    NotificationVO.builder().user(user).datasetId(datasetId).error("There is another job with status QUEUED or IN_PROGRESS for the datasetId " + datasetId).build());
+        } catch (EEAException e) {
+            LOG.error("Could not release VALIDATION_REFUSED_EVENT for jobId {} , datasetId {} and user {}. Error Message: ", jobId, datasetId, user, e.getMessage());
+        }
+    }
+
+    @Override
+    public void releaseReleaseRefusedNotification(Long jobId, String user, Long dataflowId, Long providerId){
+        Map<String, Object> value = new HashMap<>();
+        value.put(LiteralConstants.USER, user);
+        value.put("release_job_id", jobId);
+        try {
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_REFUSED_EVENT, value,
+                    NotificationVO.builder().user(user).dataflowId(dataflowId).providerId(providerId)
+                            .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataflowId + " and providerId " + providerId).build());
+        } catch (EEAException e) {
+            LOG.error("Could not release RELEASE_REFUSED_EVENT for jobId {} , dataflowId {} , providerId {} and user {}. Error Message: ", jobId, dataflowId, providerId, user, e.getMessage());
+        }
+    }
+
+    @Override
+    public void releaseCopyToEuDatasetRefusedNotification(Long jobId, String user, Long dataflowId) {
+        Map<String, Object> value = new HashMap<>();
+        value.put(LiteralConstants.USER, user);
+        value.put("copyToEuDataset_job_id", jobId);
+        try {
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATA_TO_EUDATASET_REFUSED_EVENT, value,
+                    NotificationVO.builder().user(user).dataflowId(dataflowId)
+                            .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataflowId).build());
+        } catch (EEAException e) {
+            LOG.error("Could not release RELEASE_REFUSED_EVENT for jobId {} , dataflowId {} and user {}. Error Message: ", jobId, dataflowId, user, e.getMessage());
+        }
+    }
+
 }
