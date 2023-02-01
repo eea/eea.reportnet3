@@ -284,6 +284,7 @@ public class CSVSegmentedReaderStrategy {
             if (idTableSchema != null) {
                 final FieldSchema fieldSchema =
                         fileCommon.findIdFieldSchema(value, idTableSchema, dataSetSchema);
+                LOG.info("Processing findIdFieldSchema result {} for value {}, idTableSchema {} and dataSetSchema {}", fieldSchema, value, idTableSchema, dataSetSchema);
                 if (null != fieldSchema) {
                     atLeastOneFieldSchema = true;
                     header.setIdFieldSchema(fieldSchema.getIdFieldSchema());
