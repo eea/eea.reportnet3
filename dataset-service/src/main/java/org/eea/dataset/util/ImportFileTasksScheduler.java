@@ -23,6 +23,10 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -88,14 +92,22 @@ public class ImportFileTasksScheduler extends MessageReceiver {
     try {
         for (Task task : taskRepository.findAllByTaskTypeAndStatusOrderByIdAsc(TaskType.IMPORT_TASK,ProcessStatusEnum.IN_QUEUE)) {
             try {
+              ObjectMapper objectMapper = new ObjectMapper();
+              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+              EEAEventVO event = objectMapper.readValue(task.getJson(), EEAEventVO.class);
+              String filePath = String.valueOf(event.getData().get("filePath"));
+              try {
+                InputStream inputStream = Files.newInputStream(Path.of(filePath));
+                inputStream.close();
+              } catch (IOException er) {
+                LOG.error("Error while trying to access file {} for task with id {}, {}", filePath, task.getId(), er);
+                continue;
+              }
               task.setStartingDate(new Date());
               task.setPod(serviceInstanceId);
               task.setStatus(ProcessStatusEnum.IN_PROGRESS);
               taskRepository.saveAndFlush(task);
 
-              ObjectMapper objectMapper = new ObjectMapper();
-              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-              EEAEventVO event = objectMapper.readValue(task.getJson(), EEAEventVO.class);
               Message<EEAEventVO> message = MessageBuilder.withPayload(event).build();
               message.getPayload().getData().put("task_id", task.getId());
               message.getPayload().getData().put("service_instance_id", serviceInstanceId);

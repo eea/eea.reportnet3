@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.6-ARCHITECTURE</api-gateway.version>
-    <communication.version>v3.1.6-ARCHITECTURE</communication.version>
-    <collaboration.version>v3.1.6-ARCHITECTURE</collaboration.version>
-    <dataflow.version>v3.1.6-ARCHITECTURE</dataflow.version>
-    <dataset.version>v3.1.6-ARCHITECTURE</dataset.version>
-    <document.version>v3.1.6-ARCHITECTURE</document.version>
-    <frontend.version>v3.1.6-ARCHITECTURE</frontend.version>
-    <indexsearch.version>v3.1.6-ARCHITECTURE</indexsearch.version>
-    <inspire.version>v3.1.6-ARCHITECTURE</inspire.version>
-    <recordstore.version>v3.1.6-ARCHITECTURE</recordstore.version>
-    <ums.version>v3.1.6-ARCHITECTURE</ums.version>
-    <validation.version>v3.1.6-ARCHITECTURE</validation.version>
-    <common-interfaces.version>v3.1.6-ARCHITECTURE</common-interfaces.version>
-    <common-utitlities.version>v3.1.6-ARCHITECTURE</common-utitlities.version>
-    <rod.version>v3.1.6-ARCHITECTURE</rod.version>
-    <orchestrator.version>v3.1.6-ARCHITECTURE</orchestrator.version>
+    <api-gateway.version>v3.1.6-1611128</api-gateway.version>
+    <communication.version>v3.1.6-1611128</communication.version>
+    <collaboration.version>v3.1.6-1611128</collaboration.version>
+    <dataflow.version>v3.1.6-1611128</dataflow.version>
+    <dataset.version>v3.1.6-1611128</dataset.version>
+    <document.version>v3.1.6-1611128</document.version>
+    <frontend.version>v3.1.6-1611128</frontend.version>
+    <indexsearch.version>v3.1.6-1611128</indexsearch.version>
+    <inspire.version>v3.1.6-1611128</inspire.version>
+    <recordstore.version>v3.1.6-1611128</recordstore.version>
+    <ums.version>v3.1.6-1611128</ums.version>
+    <validation.version>v3.1.6-1611128</validation.version>
+    <common-interfaces.version>v3.1.6-1611128</common-interfaces.version>
+    <common-utitlities.version>v3.1.6-1611128</common-utitlities.version>
+    <rod.version>v3.1.6-1611128</rod.version>
+    <orchestrator.version>v3.1.6-1611128</orchestrator.version>
   </properties>
 </project>
