@@ -103,7 +103,9 @@ public class ImportFileTasksScheduler extends MessageReceiver {
                 LOG.error("Error while trying to access file {} for task with id {}, {}", filePath, task.getId(), er);
                 continue;
               } finally {
-                inputStream.close();
+                if (inputStream!=null) {
+                  inputStream.close();
+                }
               }
               task.setStartingDate(new Date());
               task.setPod(serviceInstanceId);
