@@ -125,7 +125,7 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
     Boolean recoveryMode = true;
 
     String taskIdStr = (taskId != null) ? String.valueOf(taskId) : "null";
-    LOG.info("Executing import task with id {} for datasetId {}", taskIdStr, datasetId);
+    LOG.info("Executing import task with id {} for datasetId {} filePath {]", taskIdStr, datasetId, filePath);
 
     try (InputStream inputStream = Files.newInputStream(Path.of(filePath))) {
       // Obtain the data provider code to insert into the record
