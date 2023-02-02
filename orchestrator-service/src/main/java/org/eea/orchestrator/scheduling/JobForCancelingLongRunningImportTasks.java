@@ -1,6 +1,10 @@
 package org.eea.orchestrator.scheduling;
 
 import org.apache.tomcat.jni.Proc;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -25,9 +29,7 @@ import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 
 import javax.annotation.PostConstruct;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class JobForCancelingLongRunningImportTasks {
@@ -72,6 +74,9 @@ public class JobForCancelingLongRunningImportTasks {
 
     @Autowired
     private UserManagementController.UserManagementControllerZull userManagementControllerZull;
+
+    @Autowired
+    private KafkaSenderUtils kafkaSenderUtils;
 
     @PostConstruct
     private void init() {
@@ -121,6 +126,15 @@ public class JobForCancelingLongRunningImportTasks {
 
                     dataSetControllerZuul.deleteLocksToImportProcess(job.getDatasetId());
                     LOG.info("Locks removed for failed job {}, datasetId {}", job.getId(), job.getDatasetId());
+
+                    Map<String, Object> value = new HashMap<>();
+                    String user = job.getCreatorUsername();
+                    value.put(LiteralConstants.USER, user);
+                    Map<String, Object> insertedParameters = job.getParameters();
+                    String fileName = (String) insertedParameters.get("fileName");
+                    String tableSchemaId = (String) insertedParameters.get("tableSchemaId");
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.LONG_RUNNING_IMPORT_FAILED_EVENT, value,
+                            NotificationVO.builder().datasetId(job.getDatasetId()).tableSchemaId(tableSchemaId).fileName(fileName).user(user).error("Long running import tasks").build());
                 }
             }
         } catch (Exception e) {

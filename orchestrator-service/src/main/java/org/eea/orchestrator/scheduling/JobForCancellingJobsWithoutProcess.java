@@ -10,8 +10,12 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.ums.TokenVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.orchestrator.service.JobProcessService;
 import org.eea.orchestrator.service.JobService;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +28,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class JobForCancellingJobsWithoutProcess {
@@ -65,6 +71,8 @@ public class JobForCancellingJobsWithoutProcess {
     private EUDatasetControllerZuul euDatasetControllerZuul;
     @Autowired
     private UserManagementControllerZull userManagementControllerZull;
+    @Autowired
+    private KafkaSenderUtils kafkaSenderUtils;
 
     @PostConstruct
     private void init() {
@@ -76,7 +84,7 @@ public class JobForCancellingJobsWithoutProcess {
 
     /**
      * The job runs every 30 minutes. It finds jobs that have status=IN_PROGRESS for more than maxTimeInMinutesForInProgressJobsWithoutProcess
-     * and have no process created and sets their status to FAILED
+     * and have no process created and sets their status to CANCELED
      */
     public void cancelInProgressJobsWithoutProcess() {
         try {
@@ -90,17 +98,31 @@ public class JobForCancellingJobsWithoutProcess {
                 try {
                     List<String> processes = jobProcessService.findProcessesByJobId(id.longValue());
                     if (processes.size()==0) {
-                        LOG.info("Setting job {} without process to failed", id);
-                        jobService.updateJobStatus(id.longValue(), JobStatusEnum.FAILED);
+                        LOG.info("Setting job {} without process to canceled", id);
+                        jobService.updateJobStatus(id.longValue(), JobStatusEnum.CANCELED);
                         JobVO job = jobService.findById(id.longValue());
+                        Map<String, Object> value = new HashMap<>();
+                        String user = job.getCreatorUsername();
+                        value.put(LiteralConstants.USER, user);
                         if ((job.getJobType().equals(JobTypeEnum.VALIDATION) && job.isRelease()) || job.getJobType().equals(JobTypeEnum.RELEASE)) {
                             dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(job.getDataflowId(), job.getProviderId());
+                            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, value,
+                                    NotificationVO.builder().dataflowId(job.getDataflowId()).providerId(job.getProviderId()).user(user).error("No processes created").build());
                         } else if (job.getJobType().equals(JobTypeEnum.VALIDATION) && !job.isRelease()) {
                             validationControllerZuul.deleteLocksToReleaseProcess(job.getDatasetId());
+                            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT, value,
+                                    NotificationVO.builder().datasetId(job.getDatasetId()).user(user).error("No processes created").build());
                         } else if (job.getJobType().equals(JobTypeEnum.IMPORT)) {
                             dataSetControllerZuul.deleteLocksToImportProcess(job.getDatasetId());
+                            Map<String, Object> insertedParameters = job.getParameters();
+                            String fileName = (String) insertedParameters.get("fileName");
+                            String tableSchemaId = (String) insertedParameters.get("tableSchemaId");
+                            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_CANCELED_EVENT, value,
+                                    NotificationVO.builder().datasetId(job.getDatasetId()).tableSchemaId(tableSchemaId).fileName(fileName).user(user).error("No processes created").build());
                         } else if (job.getJobType().equals(JobTypeEnum.COPY_TO_EU_DATASET)) {
                             euDatasetControllerZuul.removeLocksRelatedToPopulateEU(job.getDataflowId());
+                            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATA_TO_EUDATASET_CANCELED_EVENT, value,
+                                    NotificationVO.builder().dataflowId(job.getDataflowId()).user(user).error("No processes created").build());
                         }
                     }
                 } catch (Exception er) {

@@ -558,7 +558,18 @@ public enum EventType {
   VALIDATION_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_canceled_event", true),
 
   /** The release canceled event. */
-  RELEASE_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "release_canceled_event", true);
+  RELEASE_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "release_canceled_event", true),
+
+  /** The copy to eudataset canceled event */
+  COPY_DATA_TO_EUDATASET_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "copy_to_eu_dataset_canceled_event", true),
+
+  /** The import reporting canceled event. */
+  IMPORT_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_canceled_event", true),
+
+  /** The long running import failed event */
+  LONG_RUNNING_IMPORT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "long_running_import_failed_event", true);
 
 
   /** The topic. */

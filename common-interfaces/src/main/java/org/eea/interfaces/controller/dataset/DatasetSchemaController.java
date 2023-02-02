@@ -1,24 +1,15 @@
 package org.eea.interfaces.controller.dataset;
 
-import java.util.List;
 import org.eea.interfaces.vo.dataset.OrderVO;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.*;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * The Interface DatasetSchemaController.
@@ -473,5 +464,14 @@ public interface DatasetSchemaController {
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   public ResponseEntity<byte[]> exportFieldSchemasFromDatasetLegacy(
       @PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Get table schema name
+   * @param datasetSchemaId
+   * @param tableSchemaId
+   * @return
+   */
+  @GetMapping(value = "/private/getTableSchemName")
+  String getTableSchemaName(@RequestParam("datasetSchemaId") String datasetSchemaId, @RequestParam("tableSchemaId") String tableSchemaId);
 
 }

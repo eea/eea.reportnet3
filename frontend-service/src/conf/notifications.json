@@ -864,6 +864,14 @@
             "hasQueryString": true
           }
         },
+        {
+          "key": "COPY_DATA_TO_EUDATASET_CANCELED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"],
+            "hasQueryString": true
+          }
+        },
         { "key": "UNLOCK_DATASET_ERROR" },
         { "key": "LOAD_DATASETS_SUMMARY_ERROR" },
         { "key": "LOADING_WEBFORM_ERROR" },
@@ -921,7 +929,24 @@
           "key": "RELEASE_CANCELED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
-            "parameters": ["dataflowId", "providerId"]
+            "parameters": ["dataflowId", "providerId"],
+            "hasQueryString": true
+          }
+        },
+        {
+          "key": "IMPORT_CANCELED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
+        {
+          "key": "LONG_RUNNING_IMPORT_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
           }
         }
       ]

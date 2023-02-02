@@ -1723,4 +1723,16 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       }
     }
   }
+
+  /**
+   * Get table schema name
+   * @param datasetSchemaId
+   * @param tableSchemaId
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/getTableSchemName")
+  public String getTableSchemaName(@RequestParam("datasetSchemaId") String datasetSchemaId, @RequestParam("tableSchemaId") String tableSchemaId) {
+    return dataschemaService.getTableSchemaName(datasetSchemaId, tableSchemaId);
+  }
 }
