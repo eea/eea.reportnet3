@@ -96,12 +96,14 @@ public class ImportFileTasksScheduler extends MessageReceiver {
               objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
               EEAEventVO event = objectMapper.readValue(task.getJson(), EEAEventVO.class);
               String filePath = String.valueOf(event.getData().get("filePath"));
+              InputStream inputStream = null;
               try {
-                InputStream inputStream = Files.newInputStream(Path.of(filePath));
-                inputStream.close();
+                inputStream = Files.newInputStream(Path.of(filePath));
               } catch (IOException er) {
                 LOG.error("Error while trying to access file {} for task with id {}, {}", filePath, task.getId(), er);
                 continue;
+              } finally {
+                inputStream.close();
               }
               task.setStartingDate(new Date());
               task.setPod(serviceInstanceId);
@@ -115,7 +117,7 @@ public class ImportFileTasksScheduler extends MessageReceiver {
               consumeMessage(message);
             } catch (EEAException | JsonProcessingException e) {
               LOG.error("failed the import task schedule because of {} ", e);
-            } catch (ObjectOptimisticLockingFailureException e) {
+            } catch (ObjectOptimisticLockingFailureException | IOException e) {
               newDelay = 1L;
               LOG.error(e.getMessage());
             }
