@@ -67,7 +67,7 @@ public class JobForRestartingLongRunningImportTasks {
             }
 
         } catch (Exception e) {
-            LOG.error("Unexpected error! Error while running scheduled task restartLongRunningImportTasks. Message: {}", e.getMessage());
+            LOG.error("Unexpected error! Error while running scheduled task restartLongRunningImportTasks.", e);
         }
     }
 }

@@ -330,7 +330,7 @@ public class JobServiceImpl implements JobService {
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_REFUSED_EVENT, value,
                     NotificationVO.builder().user(user).datasetId(datasetId).error("There is another job with status QUEUED or IN_PROGRESS for the datasetId " + datasetId).build());
         } catch (EEAException e) {
-            LOG.error("Could not release VALIDATION_REFUSED_EVENT for jobId {} , datasetId {} and user {}. Error Message: ", jobId, datasetId, user, e.getMessage());
+            LOG.error("Could not release VALIDATION_REFUSED_EVENT for jobId {} , datasetId {} and user {}. Error Message: ", jobId, datasetId, user, e);
         }
     }
 
@@ -344,7 +344,7 @@ public class JobServiceImpl implements JobService {
                     NotificationVO.builder().user(user).dataflowId(dataflowId).providerId(providerId)
                             .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataflowId + " and providerId " + providerId).build());
         } catch (EEAException e) {
-            LOG.error("Could not release RELEASE_REFUSED_EVENT for jobId {} , dataflowId {} , providerId {} and user {}. Error Message: ", jobId, dataflowId, providerId, user, e.getMessage());
+            LOG.error("Could not release RELEASE_REFUSED_EVENT for jobId {} , dataflowId {} , providerId {} and user {}. Error Message: ", jobId, dataflowId, providerId, user, e);
         }
     }
 
@@ -358,7 +358,7 @@ public class JobServiceImpl implements JobService {
                     NotificationVO.builder().user(user).dataflowId(dataflowId)
                             .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataflowId).build());
         } catch (EEAException e) {
-            LOG.error("Could not release RELEASE_REFUSED_EVENT for jobId {} , dataflowId {} and user {}. Error Message: ", jobId, dataflowId, user, e.getMessage());
+            LOG.error("Could not release RELEASE_REFUSED_EVENT for jobId {} , dataflowId {} and user {}. Error Message: ", jobId, dataflowId, user, e);
         }
     }
 

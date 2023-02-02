@@ -40,7 +40,7 @@ public class JobHistoryControllerImpl implements JobHistoryController {
             LOG.info("Retrieving job history for job {}", jobId);
             return jobHistoryService.getJobHistory(jobId);
         } catch (Exception e){
-            LOG.error("Unexpected error! Could not retrieve job history for job {}. Error: {}", jobId, e);
+            LOG.error("Unexpected error! Could not retrieve job history for job {}. ", jobId, e);
             throw e;
         }
     }

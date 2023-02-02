@@ -91,7 +91,7 @@ public class JobControllerImpl implements JobController {
             LOG.info("Retrieving jobs for status {}", status.getValue());
             return jobService.getJobsByStatus(status);
         } catch (Exception e){
-            LOG.error("Unexpected error! Could not retrieve jobs that have status {}. Error: {}", status.getValue(), e);
+            LOG.error("Unexpected error! Could not retrieve jobs that have status {}. ", status.getValue(), e);
             throw e;
         }
     }
@@ -285,7 +285,7 @@ public class JobControllerImpl implements JobController {
             LOG.info("Updating job with id {} to status {}", jobId, status.getValue());
             jobService.updateJobStatus(jobId, status);
         } catch (Exception e){
-            LOG.error("Unexpected error! Could not update job to in progress for id {} and status {}. Message: {}", jobId, status.getValue(), e.getMessage());
+            LOG.error("Unexpected error! Could not update job to in progress for id {} and status {}.", jobId, status.getValue(), e);
             throw e;
         }
     }

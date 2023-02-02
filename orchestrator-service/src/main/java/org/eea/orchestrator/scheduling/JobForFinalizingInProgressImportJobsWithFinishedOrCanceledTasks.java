@@ -122,7 +122,7 @@ public class JobForFinalizingInProgressImportJobsWithFinishedOrCanceledTasks {
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while running scheduled job finalizeInProgressImportJobsWithCompletedTasks " + e.getMessage());
+            LOG.error("Error while running scheduled job finalizeInProgressImportJobsWithCompletedTasks ", e);
         }
     }
 

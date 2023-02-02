@@ -153,7 +153,7 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while running scheduled job finalizeInProgressValidationJobsWithoutTasks " + e.getMessage());
+            LOG.error("Error while running scheduled job finalizeInProgressValidationJobsWithoutTasks ", e);
         }
     }
 
