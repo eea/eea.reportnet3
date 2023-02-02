@@ -244,7 +244,6 @@ public class FileCommonUtils {
     // Find the idFieldSchema
     TableSchema recordSchemas = findTableSchema(idTablaSchema, dataSetSchema);
     RecordSchema recordSchema = null != recordSchemas ? recordSchemas.getRecordSchema() : null;
-    LOG.info("Method findIdFieldSchema TableSchema recordSchemas {} and RecordSchema recordSchema {}", recordSchemas, recordSchema);
     if (null != recordSchema && null != recordSchema.getFieldSchema()) {
       for (FieldSchema fieldSchema : recordSchema.getFieldSchema()) {
         if (null != fieldSchema.getHeaderName()
