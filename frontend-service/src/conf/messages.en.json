@@ -643,6 +643,9 @@
     "externalExportReportingFailedEvent": "Failed exporting data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importReportingRefusedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> because there is another job with status QUEUED or IN_PROGRESS for this dataset",
+    "validationRefusedEvent": "Failed validating data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> because there is another job with status QUEUED or IN_PROGRESS for this dataset",
+    "releaseRefusedEvent": "Failed releasing data for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> because there is another job with status QUEUED or IN_PROGRESS for this dataflow",
+    "copyDataToEudatasetRefusedEvent": "Failed during copy to eu dataset process for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> because there is another job with status QUEUED or IN_PROGRESS for this dataflow",
     "externalImportDesignFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignFromOtherSystemCompletedEvent": "External processes ended at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignFromOtherSystemFailedEvent": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
@@ -696,6 +699,7 @@
     "findDataset": "Find dataset",
     "finished": "Finished",
     "fixedNumber": "Fixed number of records",
+    "fmeJobId": "FME job id",
     "frequencyColumnTitle": "Frequency",
     "from": "From",
     "generateApiKey": "Generate new API-key",
@@ -1590,6 +1594,11 @@
     "x": "X",
     "y": "Y",
     "yes": "Yes",
-    "zipCsvTable": "ZIP (.csv for each table)"
+    "zipCsvTable": "ZIP (.csv for each table)",
+    "validationCanceledEvent": "Validation canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a> with error no processes or tasks created",
+    "releaseCanceledEvent": "Release canceled for <strong>{:dataProviderName}</strong> (<a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>) with error no processes or tasks created",
+    "importCanceledEvent": "Import canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> with error no processes or tasks created",
+    "longRunningImportFailedEvent": "Long running import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> with error no processes or tasks created"
   }
 }

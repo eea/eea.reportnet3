@@ -288,7 +288,7 @@ public class DatasetControllerImpl implements DatasetController {
         jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
         jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus);
         if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
-          LOG.info("Added import job with id {} for datasetId {} with status REFUSED because there already is an import job with status IN_PROGRESS for the same datasetId", jobId, datasetId);
+          LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
           datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());
           throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
         }

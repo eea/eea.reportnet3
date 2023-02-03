@@ -11,8 +11,12 @@ import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.TokenVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.orchestrator.service.JobProcessService;
 import org.eea.orchestrator.service.JobService;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +29,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class JobForCancellingImportJobsWithoutTasks {
@@ -76,6 +82,9 @@ public class JobForCancellingImportJobsWithoutTasks {
     @Autowired
     private UserManagementController.UserManagementControllerZull userManagementControllerZull;
 
+    @Autowired
+    private KafkaSenderUtils kafkaSenderUtils;
+
     @PostConstruct
     private void init() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
@@ -121,10 +130,19 @@ public class JobForCancellingImportJobsWithoutTasks {
 
                     dataSetControllerZuul.deleteLocksToImportProcess(job.getDatasetId());
                     LOG.info("Locks removed for failed job {}, datasetId {}", job.getId(), job.getDatasetId());
+
+                    Map<String, Object> value = new HashMap<>();
+                    String user = job.getCreatorUsername();
+                    value.put(LiteralConstants.USER, user);
+                    Map<String, Object> insertedParameters = job.getParameters();
+                    String fileName = (String) insertedParameters.get("fileName");
+                    String tableSchemaId = (String) insertedParameters.get("tableSchemaId");
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_CANCELED_EVENT, value,
+                            NotificationVO.builder().datasetId(job.getDatasetId()).tableSchemaId(tableSchemaId).fileName(fileName).user(user).error("No tasks created").build());
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while running scheduled task cancelInProgressValidationsWithoutTasks " + e.getMessage());
+            LOG.error("Error while running scheduled task cancelInProgressValidationsWithoutTasks ", e);
         }
     }
 }

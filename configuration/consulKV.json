@@ -1880,6 +1880,10 @@
     "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX0pPQl9GSU5JU0hFRF9UQVNLX01BWF9USU1FOjMwfQ=="
   },
   {
+    "key": "config/orchestrator/scheduling.inProgress.import.job.completed.task.max.time",
+    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX0pPQl9GSU5JU0hFRF9UQVNLX01BWF9USU1FOjMwfQ=="
+  },
+  {
     "key": "config/application/spring.datasource.orchestratorDb.driver-class-name",
     "value": "JHtPUkNIRVNUQVRPUl9EUklWRVJfQ0xBU1M6b3JnLnBvc3RncmVzcWwuRHJpdmVyfQ=="
   },

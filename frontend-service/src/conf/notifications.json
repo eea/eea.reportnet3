@@ -840,6 +840,38 @@
             "parameters": ["dataflowId", "datasetId"]
           }
         },
+        {
+          "key": "VALIDATION_REFUSED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
+        {
+          "key": "RELEASE_REFUSED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "dataProvider"],
+            "hasQueryString": true
+          }
+        },
+        {
+          "key": "COPY_DATA_TO_EUDATASET_REFUSED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"],
+            "hasQueryString": true
+          }
+        },
+        {
+          "key": "COPY_DATA_TO_EUDATASET_CANCELED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"],
+            "hasQueryString": true
+          }
+        },
         { "key": "UNLOCK_DATASET_ERROR" },
         { "key": "LOAD_DATASETS_SUMMARY_ERROR" },
         { "key": "LOADING_WEBFORM_ERROR" },
@@ -884,7 +916,39 @@
         { "key": "GET_CONTROL_STATUSES_ERROR" },
         { "key": "DELETE_VALIDATION_FROM_QUEUE_ERROR" },
         { "key": "SET_VALIDATIONS_STATUS_PRIORITY_ERROR" },
-        { "key": "DELETE_PROVIDER_DATASET_DATA_ERROR" }
+        { "key": "DELETE_PROVIDER_DATASET_DATA_ERROR" },
+        {
+          "key": "VALIDATION_CANCELED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
+        {
+          "key": "RELEASE_CANCELED_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "providerId"],
+            "hasQueryString": true
+          }
+        },
+        {
+          "key": "IMPORT_CANCELED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
+        {
+          "key": "LONG_RUNNING_IMPORT_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        }
       ]
     },
     {

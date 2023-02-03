@@ -21,7 +21,7 @@ import java.util.Map;
  * The Class ValidationFinishedEvent.
  */
 @Component
-public class ValidationFinishedEvent implements NotificableEventHandler {
+public class ValidationCanceledEvent implements NotificableEventHandler {
 
 
   /**
@@ -43,7 +43,7 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.VALIDATION_FINISHED_EVENT;
+    return EventType.VALIDATION_CANCELED_EVENT;
   }
 
   /**
@@ -61,19 +61,19 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
 
     DataSetMetabaseVO dataSetMetabaseVO =
         datasetMetabaseController.findDatasetMetabaseById(datasetId);
-    List<DesignDatasetVO> designDataset = datasetMetabaseController
+    List<DesignDatasetVO> desingDataset = datasetMetabaseController
         .findDesignDataSetIdByDataflowId(dataSetMetabaseVO.getDataflowId());
 
-    // we find the name of the dataset to use it for the notification
+    // we find the name of the dataset to asing it for the notiFicaion
     String datasetName = "";
-    for (DesignDatasetVO designDatasetVO : designDataset) {
+    for (DesignDatasetVO designDatasetVO : desingDataset) {
       if (designDatasetVO.getDatasetSchema()
           .equalsIgnoreCase(dataSetMetabaseVO.getDatasetSchema())) {
         datasetName = designDatasetVO.getDataSetName();
       }
     }
 
-    // we find if the dataset i in DESIGN or REPORTING
+    // we find if the the dataset i in DESIGN or REPORTING
     String dataProviderName =
         "DESIGN".equalsIgnoreCase(dataSetMetabaseVO.getDatasetTypeEnum().getValue()) ? "DESIGN"
             : dataSetMetabaseVO.getDataSetName();
@@ -92,6 +92,7 @@ public class ValidationFinishedEvent implements NotificableEventHandler {
     notification.put("dataProviderName", dataProviderName);
     notification.put("type", type);
     notification.put("typeStatus", dataFlowVO.getStatus().toString());
+    notification.put("error", notificationVO.getError());
     return notification;
   }
 }

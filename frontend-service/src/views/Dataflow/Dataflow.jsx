@@ -335,10 +335,11 @@ export const Dataflow = () => {
             manageReportersBtn: isLeadReporterOfCountry,
             manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
             propertiesBtn: true,
-            releaseableBtn: !isDesign && isLeadDesigner,
-            restrictFromPublicBtn:
-                isLeadReporterOfCountry && dataflowState.showPublicInfo && isReleased && !isBusinessDataflow,
-            showPublicInfoBtn: !isDesign && isLeadDesigner,
+            releaseableBtn: !isDesign && (isLeadDesigner || isAdmin),
+            restrictFromPublicBtn: 
+                isLeadReporterOfCountry && dataflowState.showPublicInfo && 
+                isReleased && !isBusinessDataflow,
+            showPublicInfoBtn: !isDesign && (isLeadDesigner || isAdmin),
             usersListBtn:
                 hasCustodianPermissions ||
                 isLeadReporterOfCountry ||

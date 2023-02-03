@@ -52,7 +52,7 @@ public class JobControllerImpl implements JobController {
 
     /** The valid columns. */
     List<String> validColumns = Arrays.asList("jobId", "creatorUsername", "jobType", "dataflowId", "providerId", "datasetId",
-            "jobStatus", "dateAdded", "dateStatusChanged");
+            "jobStatus", "dateAdded", "dateStatusChanged", "fmeJobId");
 
     @Override
     @HystrixCommand
@@ -91,7 +91,7 @@ public class JobControllerImpl implements JobController {
             LOG.info("Retrieving jobs for status {}", status.getValue());
             return jobService.getJobsByStatus(status);
         } catch (Exception e){
-            LOG.error("Unexpected error! Could not retrieve jobs that have status {}. Message: {}", status.getValue(), e.getMessage());
+            LOG.error("Unexpected error! Could not retrieve jobs that have status {}. ", status.getValue(), e);
             throw e;
         }
     }
@@ -128,13 +128,16 @@ public class JobControllerImpl implements JobController {
             parameters.put("userId", userId);
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);
             LOG.info("Adding validation job for datasetId {} and released {} for creator {} with status {}", datasetId, released, username, statusToInsert);
-            jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released);
+            Long jobId = jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released);
             LOG.info("Successfully added validation job for datasetId {}, released {} and creator {} with status {}", datasetId, released, username, statusToInsert);
             if (statusToInsert == JobStatusEnum.REFUSED) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_JOB);
+                //send Refused notification
+                LOG.info("Added validation job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
+                jobService.releaseValidationRefusedNotification(jobId, username, datasetId);
+                throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DUPLICATE_JOB);
             }
         } catch (Exception e){
-            LOG.error("Unexpected error! Could not add validation job for datasetId {}, released {} and creator {}. Message: {}", datasetId, released, username, e.getMessage());
+            LOG.error("Unexpected error! Could not add validation job for datasetId {}, released {} and creator {}. Error: {}", datasetId, released, username, e);
             throw e;
         }
     }
@@ -174,13 +177,16 @@ public class JobControllerImpl implements JobController {
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), dataflowId, dataProviderId, datasetIds, true);
 
             LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
-            jobService.addJob(dataflowId, dataProviderId, null, parameters, JobTypeEnum.VALIDATION, statusToInsert, true);
+            Long jobId = jobService.addJob(dataflowId, dataProviderId, null, parameters, JobTypeEnum.VALIDATION, statusToInsert, true);
             LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
             if (statusToInsert == JobStatusEnum.REFUSED) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
+                //send Refused notification
+                LOG.info("Added release job with id {} for dataflowId {} and providerId {} with status REFUSED", jobId, dataflowId, dataProviderId);
+                jobService.releaseReleaseRefusedNotification(jobId, username, dataflowId, dataProviderId);
+                throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
             }
         } catch (Exception e) {
-            LOG.error("Unexpected error! Could not add release job for dataflowId {}, providerId {} and creator {}. Message: {}", dataflowId, dataProviderId, username, e.getMessage());
+            LOG.error("Unexpected error! Could not add release job for dataflowId {}, providerId {} and creator {}. Error: {}", dataflowId, dataProviderId, username, e);
             throw e;
         }
     }
@@ -259,10 +265,13 @@ public class JobControllerImpl implements JobController {
             Long jobId = jobService.addJob(dataflowId, null, null, parameters, JobTypeEnum.COPY_TO_EU_DATASET, statusToInsert, false);
             LOG.info("Successfully added copy to eudataset job with id {} for dataflowId={}", jobId, dataflowId);
             if (statusToInsert == JobStatusEnum.REFUSED) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_COPY_TO_EU_DATASET_JOB);
+                //send Refused notification
+                LOG.info("Added copyToEuDataset job with id {} for dataflowId {} with status REFUSED", jobId, dataflowId);
+                jobService.releaseCopyToEuDatasetRefusedNotification(jobId, username, dataflowId);
+                throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DUPLICATE_COPY_TO_EU_DATASET_JOB);
             }
         } catch (Exception e) {
-            LOG.error("Unexpected error! Could not add copy to eudataset job for dataflowId {}, creator {}. Message: {}", dataflowId, username, e.getMessage());
+            LOG.error("Unexpected error! Could not add copy to eudataset job for dataflowId {}, creator {}. Error: {}", dataflowId, username, e);
             throw e;
         }
     }
@@ -276,7 +285,7 @@ public class JobControllerImpl implements JobController {
             LOG.info("Updating job with id {} to status {}", jobId, status.getValue());
             jobService.updateJobStatus(jobId, status);
         } catch (Exception e){
-            LOG.error("Unexpected error! Could not update job to in progress for id {} and status {}. Message: {}", jobId, status.getValue(), e.getMessage());
+            LOG.error("Unexpected error! Could not update job to in progress for id {} and status {}.", jobId, status.getValue(), e);
             throw e;
         }
     }

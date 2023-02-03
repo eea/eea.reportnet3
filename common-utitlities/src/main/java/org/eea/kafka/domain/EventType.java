@@ -21,6 +21,9 @@ public enum EventType {
   VALIDATION_RELEASE_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "validation_release_finished_key", true),
 
+  /** The validation refused event. */
+  VALIDATION_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_refused_key", true),
+
   /** The import reporting completed event. */
   IMPORT_REPORTING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_reporting_completed_event", true),
@@ -28,6 +31,12 @@ public enum EventType {
   /** The import reporting refused event. */
   IMPORT_REPORTING_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "import_reporting_refused_event", true),
+
+  /** The release refused event. */
+  RELEASE_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "dataset_released_refused_key", true),
+
+  /** The copyToEuDataset refused event. */
+  COPY_DATA_TO_EUDATASET_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "copy_to_eu_dataset_refused_key", true),
 
   /** The import reporting failed event. */
   IMPORT_REPORTING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
@@ -543,7 +552,24 @@ public enum EventType {
 
   /** The call fme process failed event. */
   CALL_FME_PROCESS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "call_fme_process_failed_event", true);
+      "call_fme_process_failed_event", true),
+
+  /** Validation failed event */
+  VALIDATION_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_canceled_event", true),
+
+  /** The release canceled event. */
+  RELEASE_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "release_canceled_event", true),
+
+  /** The copy to eudataset canceled event */
+  COPY_DATA_TO_EUDATASET_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "copy_to_eu_dataset_canceled_event", true),
+
+  /** The import reporting canceled event. */
+  IMPORT_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_canceled_event", true),
+
+  /** The long running import failed event */
+  LONG_RUNNING_IMPORT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "long_running_import_failed_event", true);
 
 
   /** The topic. */

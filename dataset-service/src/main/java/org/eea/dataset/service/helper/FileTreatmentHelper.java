@@ -1683,7 +1683,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 this.csvSegmentedReaderStrategy.parseFile(is, startLine, endLine, partitionId, idTableSchema, datasetId,
                         fileName, replace, schema, connectionDataVO, csvFileChunkRecoveryDetails);
             } catch (Exception e) {
-                LOG.error("CSV Import File Chunk Error:{}",e);
+                LOG.error("CSV Import File Chunk Error:",e);
                 throw e;
             } finally {
                 is.close();

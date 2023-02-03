@@ -128,10 +128,10 @@ public interface ProcessController {
   ProcessVO getNextProcess(@PathVariable("processId") String processId);
 
   /**
-   * Lists the process ids of validation processes that are in progress for more than the specified period of time
+   * Lists the process ids of processes with type and status that are in progress for more than the specified period of time
    * @param timeInMinutes
    * @return
    */
-  @GetMapping(value = "/private/listValidationProcessesInProgress/{timeInMinutes}")
-  List<ProcessVO> listInProgressValidationProcessesThatExceedTime(@PathVariable("timeInMinutes") long timeInMinutes);
+  @GetMapping(value = "/private/listProcessesExceedingTime")
+  List<ProcessVO> listProcessesThatExceedTime(@RequestParam("type") List<String> type, @RequestParam("status") String status, @RequestParam("timeInMinutes") long timeInMinutes);
 }
