@@ -277,8 +277,11 @@ public class DatasetControllerImpl implements DatasetController {
         dataflowId = datasetService.getDataFlowIdById(datasetId);
       }
 
-      if(fmeJobId!=null){
-        JobVO job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+      JobVO job = null;
+      if (fmeJobId!=null) {
+        job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+      }
+      if(job!=null){
         jobId = job.getId();
         LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, datasetId);
       }else{
