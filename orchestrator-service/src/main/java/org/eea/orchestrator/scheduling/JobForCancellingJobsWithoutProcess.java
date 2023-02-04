@@ -116,7 +116,10 @@ public class JobForCancellingJobsWithoutProcess {
                             dataSetControllerZuul.deleteLocksToImportProcess(job.getDatasetId());
                             Map<String, Object> insertedParameters = job.getParameters();
                             String fileName = (String) insertedParameters.get("fileName");
-                            String tableSchemaId = (String) insertedParameters.get("tableSchemaId");
+                            String tableSchemaId = null;
+                            if(insertedParameters.get("tableSchemaId") != null) {
+                                tableSchemaId = (String) insertedParameters.get("tableSchemaId");
+                            }
                             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_CANCELED_EVENT, value,
                                     NotificationVO.builder().datasetId(job.getDatasetId()).tableSchemaId(tableSchemaId).fileName(fileName).user(user).error("No processes created").build());
                         } else if (job.getJobType().equals(JobTypeEnum.COPY_TO_EU_DATASET)) {

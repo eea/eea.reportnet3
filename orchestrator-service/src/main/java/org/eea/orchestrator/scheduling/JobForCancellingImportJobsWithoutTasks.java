@@ -136,7 +136,10 @@ public class JobForCancellingImportJobsWithoutTasks {
                     value.put(LiteralConstants.USER, user);
                     Map<String, Object> insertedParameters = job.getParameters();
                     String fileName = (String) insertedParameters.get("fileName");
-                    String tableSchemaId = (String) insertedParameters.get("tableSchemaId");
+                    String tableSchemaId = null;
+                    if(insertedParameters.get("tableSchemaId") != null) {
+                        tableSchemaId = (String) insertedParameters.get("tableSchemaId");
+                    }
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_CANCELED_EVENT, value,
                             NotificationVO.builder().datasetId(job.getDatasetId()).tableSchemaId(tableSchemaId).fileName(fileName).user(user).error("No tasks created").build());
                 }

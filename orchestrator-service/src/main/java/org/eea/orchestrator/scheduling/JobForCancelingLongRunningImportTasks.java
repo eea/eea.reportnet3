@@ -132,7 +132,10 @@ public class JobForCancelingLongRunningImportTasks {
                     value.put(LiteralConstants.USER, user);
                     Map<String, Object> insertedParameters = job.getParameters();
                     String fileName = (String) insertedParameters.get("fileName");
-                    String tableSchemaId = (String) insertedParameters.get("tableSchemaId");
+                    String tableSchemaId = null;
+                    if(insertedParameters.get("tableSchemaId") != null) {
+                        tableSchemaId = (String) insertedParameters.get("tableSchemaId");
+                    }
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.LONG_RUNNING_IMPORT_FAILED_EVENT, value,
                             NotificationVO.builder().datasetId(job.getDatasetId()).tableSchemaId(tableSchemaId).fileName(fileName).user(user).error("Long running import tasks").build());
                 }
