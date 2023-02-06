@@ -1600,6 +1600,5 @@
     "importCanceledEvent": "Import canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "longRunningImportFailedEvent": "Long running import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> with error no processes or tasks created",
-    "disableRulesErrorEvent": "Data Collection creation proccess stopped: there are SQL rules containing errors"
   }
 }
