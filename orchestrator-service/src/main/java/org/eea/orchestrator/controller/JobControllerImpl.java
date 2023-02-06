@@ -58,7 +58,7 @@ public class JobControllerImpl implements JobController {
     @HystrixCommand
     @GetMapping
     @ApiOperation(value = "Gets the jobs", response = JobVO.class, responseContainer = "List", hidden = false)
-    @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
+    @PreAuthorize("isAuthenticated()")
     public JobsVO getJobs(
             @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
             @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
