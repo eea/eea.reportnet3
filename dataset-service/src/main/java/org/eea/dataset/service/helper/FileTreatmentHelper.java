@@ -1084,14 +1084,16 @@ public class FileTreatmentHelper implements DisposableBean {
                     throw e;
                 }
 
-                byte[] buf = new byte[1024];
-                int len;
-                out.putNextEntry(entry);
-                FileInputStream in = new FileInputStream(file);
-                while ((len = in.read(buf)) > 0) {
-                  out.write(buf, 0, len);
+                try (FileInputStream in = new FileInputStream(file)) {
+                    byte[] buf = new byte[1024];
+                    int len;
+                    out.putNextEntry(entry);
+                    while ((len = in.read(buf)) > 0) {
+                        out.write(buf, 0, len);
+                    }
+                } catch (Exception er) {
+                    LOG.error("Error while processing file {}", file.getPath());
                 }
-                in.close();
                 entry = zip.getNextEntry();
                 files.add(file);
             }
