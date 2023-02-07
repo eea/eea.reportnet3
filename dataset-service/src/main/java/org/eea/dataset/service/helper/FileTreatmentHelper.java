@@ -1092,7 +1092,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         out.write(buf, 0, len);
                     }
                 } catch (Exception er) {
-                    LOG.error("Error while processing file {}", file.getPath());
+                    LOG.error("Error while processing file {}, {}", file.getPath(), er);
                 }
                 entry = zip.getNextEntry();
                 files.add(file);
