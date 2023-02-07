@@ -263,4 +263,10 @@ public interface DatasetSnapshotController {
   @DeleteMapping(value = "/private/deleteSnapshotByDatasetIdAndDateReleasedIsNull/{datasetId}")
   void deleteSnapshotByDatasetIdAndDateReleasedIsNull(@PathVariable("datasetId") Long datasetId);
 
+  /**
+   * Removes historic release
+   * @param datasetId
+   */
+  @PutMapping(value = "/private/removeHistoricRelease/{datasetId}")
+  void removeHistoricRelease(@PathVariable("datasetId") Long datasetId);
 }

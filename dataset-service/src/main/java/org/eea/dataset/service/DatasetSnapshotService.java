@@ -260,4 +260,9 @@ public interface DatasetSnapshotService {
    */
   public void deleteSnapshotByDatasetIdAndDateReleasedIsNull(Long datasetId);
 
+  /**
+   * Removes historic release
+   * @param datasetId
+   */
+  void removeHistoricRelease(Long datasetId);
 }

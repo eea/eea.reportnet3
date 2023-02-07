@@ -888,4 +888,16 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     datasetSnapshotService.deleteSnapshotByDatasetIdAndDateReleasedIsNull(datasetId);
   }
 
+  /**
+   * Removes historic release
+   * @param datasetId
+   */
+  @Override
+  @HystrixCommand
+  @ApiOperation(value = "Private operation to remove historic release",
+          hidden = true)
+  @PutMapping(value = "/private/removeHistoricRelease/{datasetId}")
+  public void removeHistoricRelease(@PathVariable("datasetId") Long datasetId) {
+      datasetSnapshotService.removeHistoricRelease(datasetId);
+  }
 }
