@@ -310,11 +310,19 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getJobCreatorUsernameTemplate = job => <p>{job.creatorUsername}</p>;
 
-  const getDataflowTemplate = job => (
-    <p>
-      {job.dataflowName} - {job.dataflowId}
-    </p>
-  );
+  const getDataflowTemplate = job => {
+    return (
+      <div>
+        {job.dataflowName ? (
+          <p>
+            {job.dataflowName} - {job.dataflowId}
+          </p>
+        ) : (
+          <p>{job.dataflowId}</p>
+        )}
+      </div>
+    );
+  };
 
   const getProviderIdTemplate = job => <p>{job.providerId}</p>;
 
@@ -323,13 +331,23 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     const datasetId = job.datasetId;
     return (
       <p>
-        <a
-          href=""
-          onClick={() => {
-            navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
-          }}>
-          {job.datasetName} - {datasetId}
-        </a>
+        {job.datasetName ? (
+          <a
+            href=""
+            onClick={() => {
+              navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
+            }}>
+            {job.datasetName} - {datasetId}
+          </a>
+        ) : (
+          <a
+            href=""
+            onClick={() => {
+              navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
+            }}>
+            {datasetId}
+          </a>
+        )}
       </p>
     );
   };
