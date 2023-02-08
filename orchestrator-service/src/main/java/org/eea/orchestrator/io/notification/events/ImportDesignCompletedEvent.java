@@ -19,20 +19,6 @@ import java.util.Map;
 @Component
 public class ImportDesignCompletedEvent implements NotificableEventHandler {
 
-    @Autowired
-    private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
-
-    @Lazy
-    @Autowired
-    private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
-
-
-    /**
-     * The dataflow controller zuul.
-     */
-    @Autowired
-    private DataFlowControllerZuul dataflowControllerZuul;
-
     /**
      * Gets the event type.
      *
@@ -55,23 +41,11 @@ public class ImportDesignCompletedEvent implements NotificableEventHandler {
     @Override
     public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
         Long datasetId = notificationVO.getDatasetId();
-        DataSetMetabaseVO datasetVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-        Long dataflowId = notificationVO.getDataflowId() != null ? notificationVO.getDataflowId()
-                : datasetVO.getDataflowId();
-        DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
-
-        String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
-                : datasetVO.getDataSetName();
-        String dataflowName =
-                notificationVO.getDataflowName() != null ? notificationVO.getDataflowName()
-                        : dataFlowVO.getName();
+        Long dataflowId = notificationVO.getDataflowId();
+        String datasetName = notificationVO.getDatasetName() ;
+        String dataflowName = notificationVO.getDataflowName();
         String tableSchemaId = notificationVO.getTableSchemaId();
         String tableSchemaName = notificationVO.getTableSchemaName();
-
-        if (null == tableSchemaName && null != tableSchemaId) {
-            tableSchemaName =
-                    datasetSchemaControllerZuul.getTableSchemaName(datasetVO.getDatasetSchema(), tableSchemaId);
-        }
 
         Map<String, Object> notification = new HashMap<>();
         notification.put("user", notificationVO.getUser());
@@ -82,7 +56,6 @@ public class ImportDesignCompletedEvent implements NotificableEventHandler {
         notification.put("dataflowName", dataflowName);
         notification.put("tableSchemaName", tableSchemaName);
         notification.put("fileName", notificationVO.getFileName());
-        notification.put("typeStatus", dataFlowVO.getStatus().toString());
         return notification;
     }
 }
