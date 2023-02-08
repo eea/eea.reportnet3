@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Column } from 'primereact/column';
 
@@ -35,6 +36,7 @@ import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDa
 
 export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const filterBy = useRecoilValue(filterByCustomFilterStore('jobsStatuses'));
+  const navigate = useNavigate();
 
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
@@ -212,15 +214,15 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         className: styles.middleColumn
       },
       {
-        key: 'dataflowId',
-        header: resourcesContext.messages['dataflowId'],
-        template: getDataflowIdTemplate,
+        key: 'dataflow',
+        header: resourcesContext.messages['dataflow'],
+        template: getDataflowTemplate,
         className: styles.middleColumn
       },
       {
-        key: 'datasetId',
-        header: resourcesContext.messages['datasetId'],
-        template: getDatasetIdTemplate,
+        key: 'dataset',
+        header: resourcesContext.messages['dataset'],
+        template: getDatasetTemplate,
         className: styles.middleColumn
       },
       {
@@ -308,11 +310,29 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getJobCreatorUsernameTemplate = job => <p>{job.creatorUsername}</p>;
 
-  const getDataflowIdTemplate = job => <p>{job.dataflowId}</p>;
+  const getDataflowTemplate = job => (
+    <p>
+      {job.dataflowName} - {job.dataflowId}
+    </p>
+  );
 
   const getProviderIdTemplate = job => <p>{job.providerId}</p>;
 
-  const getDatasetIdTemplate = job => <p>{job.datasetId}</p>;
+  const getDatasetTemplate = job => {
+    const dataflowId = job.dataflowId;
+    const datasetId = job.datasetId;
+    return (
+      <p>
+        <a
+          href=""
+          onClick={() => {
+            navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
+          }}>
+          {job.datasetName} - {datasetId}
+        </a>
+      </p>
+    );
+  };
 
   const rowExpansionTemplate = data => {
     const historyData = jobStatusHistory[data.id] ?? [];
