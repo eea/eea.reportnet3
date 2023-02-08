@@ -214,15 +214,27 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         className: styles.middleColumn
       },
       {
-        key: 'dataflow',
-        header: resourcesContext.messages['dataflow'],
-        template: getDataflowTemplate,
+        key: 'dataflowId',
+        header: resourcesContext.messages['dataflowId'],
+        template: getDataflowIdTemplate,
+        className: styles.middleColumn
+      },
+      {
+        key: 'dataflowName',
+        header: resourcesContext.messages['dataflowNameTwoWords'],
+        template: getDataflowNameTemplate,
         className: styles.largeColumn
       },
       {
-        key: 'dataset',
-        header: resourcesContext.messages['dataset'],
-        template: getDatasetTemplate,
+        key: 'datasetId',
+        header: resourcesContext.messages['datasetId'],
+        template: getDatasetIdTemplate,
+        className: styles.middleColumn
+      },
+      {
+        key: 'datasetName',
+        header: resourcesContext.messages['datasetName'],
+        template: getDatasetNameTemplate,
         className: styles.largeColumn
       },
       {
@@ -310,47 +322,15 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getJobCreatorUsernameTemplate = job => <p>{job.creatorUsername}</p>;
 
-  const getDataflowTemplate = job => {
-    return (
-      <div>
-        {job.dataflowName ? (
-          <p>
-            {job.dataflowName} - {job.dataflowId}
-          </p>
-        ) : (
-          <p>{job.dataflowId}</p>
-        )}
-      </div>
-    );
-  };
+  const getDataflowIdTemplate = job => <p>{job.dataflowId}</p>;
+
+  const getDataflowNameTemplate = job => <p>{job.dataflowName}</p>;
+
+  const getDatasetIdTemplate = job => <p>{job.datasetId}</p>;
+
+  const getDatasetNameTemplate = job => <p>{job.datasetName}</p>;
 
   const getProviderIdTemplate = job => <p>{job.providerId}</p>;
-
-  const getDatasetTemplate = job => {
-    const dataflowId = job.dataflowId;
-    const datasetId = job.datasetId;
-    return (
-      <p>
-        {job.datasetName ? (
-          <a
-            href=""
-            onClick={() => {
-              navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
-            }}>
-            {job.datasetName} - {datasetId}
-          </a>
-        ) : (
-          <a
-            href=""
-            onClick={() => {
-              navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
-            }}>
-            {datasetId}
-          </a>
-        )}
-      </p>
-    );
-  };
 
   const rowExpansionTemplate = data => {
     const historyData = jobStatusHistory[data.id] ?? [];
