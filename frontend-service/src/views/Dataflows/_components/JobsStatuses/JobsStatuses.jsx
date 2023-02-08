@@ -199,13 +199,13 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       {
         key: 'expanderColumn',
         style: { width: '3em' },
-        className: styles.middleColumn
+        className: styles.smallColumn
       },
       {
         key: 'jobId',
         header: resourcesContext.messages['jobId'],
         template: getJobIdTemplate,
-        className: styles.middleColumn
+        className: styles.smallColumn
       },
       {
         key: 'fmeJobId',
@@ -217,13 +217,13 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         key: 'dataflow',
         header: resourcesContext.messages['dataflow'],
         template: getDataflowTemplate,
-        className: styles.middleColumn
+        className: styles.largeColumn
       },
       {
         key: 'dataset',
         header: resourcesContext.messages['dataset'],
         template: getDatasetTemplate,
-        className: styles.middleColumn
+        className: styles.largeColumn
       },
       {
         key: 'providerId',
