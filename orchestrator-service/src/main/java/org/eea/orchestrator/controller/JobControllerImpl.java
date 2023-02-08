@@ -4,8 +4,10 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
@@ -49,6 +51,10 @@ public class JobControllerImpl implements JobController {
     /** The dataset metabase controller zuul */
     @Autowired
     private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+    /** The dataset metabase controller zuul */
+    @Autowired
+    private DataFlowControllerZuul dataFlowControllerZuul;
 
     /** The valid columns. */
     List<String> validColumns = Arrays.asList("jobId", "creatorUsername", "jobType", "dataflowId", "providerId", "datasetId",
@@ -115,6 +121,15 @@ public class JobControllerImpl implements JobController {
         }
         try {
             DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+            String dataflowName = null;
+            try{
+                DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataset.getDataflowId(), null);
+                dataflowName = dataFlowVO.getName();
+            }
+            catch (Exception e) {
+                LOG.error("Error when trying to receive dataflow object for dataflowId {} ", dataset.getDataflowId(), e);
+            }
+
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("dataflowId", dataset.getDataflowId());
             Long dataProvider = null;
@@ -129,6 +144,7 @@ public class JobControllerImpl implements JobController {
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);
             LOG.info("Adding validation job for datasetId {} and released {} for creator {} with status {}", datasetId, released, username, statusToInsert);
             Long jobId = jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released, null);
+            Long jobId = jobService.addJob(dataset.getDataflowId(), dataProvider, datasetId, parameters, JobTypeEnum.VALIDATION, statusToInsert, released, dataflowName, dataset.getDataSetName());
             LOG.info("Successfully added validation job for datasetId {}, released {} and creator {} with status {}", datasetId, released, username, statusToInsert);
             if (statusToInsert == JobStatusEnum.REFUSED) {
                 //send Refused notification
@@ -165,6 +181,15 @@ public class JobControllerImpl implements JobController {
                 SecurityContextHolder.getContext().getAuthentication().getName());
 
         try {
+            String dataflowName = null;
+            try{
+                DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
+                dataflowName = dataFlowVO.getName();
+            }
+            catch (Exception e) {
+                LOG.error("Error when trying to receive dataflow object for dataflowId {} ", dataflowId, e);
+            }
+
             List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("dataflowId", dataflowId);
@@ -178,6 +203,7 @@ public class JobControllerImpl implements JobController {
 
             LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
             Long jobId = jobService.addJob(dataflowId, dataProviderId, null, parameters, JobTypeEnum.VALIDATION, statusToInsert, true, null);
+            Long jobId = jobService.addJob(dataflowId, dataProviderId, null, parameters, JobTypeEnum.VALIDATION, statusToInsert, true, dataflowName, null);
             LOG.info("Successfully added release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);
             if (statusToInsert == JobStatusEnum.REFUSED) {
                 //send Refused notification
@@ -237,9 +263,21 @@ public class JobControllerImpl implements JobController {
         if(jobStatus != null){
             statusToInsert = jobStatus;
         }
+        String dataflowName = null;
+        String datasetName = null;
+        try{
+            DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
+            dataflowName = dataFlowVO.getName();
+            DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+            datasetName = dataSetMetabaseVO.getDataSetName();
+        }
+        catch (Exception e) {
+            LOG.error("Error when trying to receive dataflow and dataset objects for dataflowId {} with dataflowName {} and datasetId {} with datasetName {} ", dataflowId, dataflowName, datasetId, datasetName, e);
+        }
 
         LOG.info("Adding import job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={}, replace={}, integrationId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, replace, integrationId, SecurityContextHolder.getContext().getAuthentication().getName());
         Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.IMPORT, statusToInsert, false, fmeJobId);
+        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.IMPORT, statusToInsert, false, dataflowName, datasetName);
         LOG.info("Successfully added import job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={}, replace={}, integrationId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, replace, integrationId, SecurityContextHolder.getContext().getAuthentication().getName());
         return jobId;
     }
@@ -258,6 +296,16 @@ public class JobControllerImpl implements JobController {
         ThreadPropertiesManager.setVariable("user", username);
 
         try {
+
+            String dataflowName = null;
+            try{
+                DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
+                dataflowName = dataFlowVO.getName();
+            }
+            catch (Exception e) {
+                LOG.error("Error when trying to receive dataflow object for dataflowId {} ", dataflowId, e);
+            }
+
             Map<String, Object> parameters = new HashMap<>();
             parameters.put("dataflowId", dataflowId);
             String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
@@ -265,6 +313,7 @@ public class JobControllerImpl implements JobController {
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.COPY_TO_EU_DATASET.toString(), dataflowId, null, null, false);
             LOG.info("Adding copy to eudataset job for dataflowId={}", dataflowId);
             Long jobId = jobService.addJob(dataflowId, null, null, parameters, JobTypeEnum.COPY_TO_EU_DATASET, statusToInsert, false, null);
+            Long jobId = jobService.addJob(dataflowId, null, null, parameters, JobTypeEnum.COPY_TO_EU_DATASET, statusToInsert, false, dataflowName, null);
             LOG.info("Successfully added copy to eudataset job with id {} for dataflowId={}", jobId, dataflowId);
             if (statusToInsert == JobStatusEnum.REFUSED) {
                 //send Refused notification

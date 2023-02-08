@@ -58,4 +58,10 @@ public class Job {
 
     @Column(name = "FME_JOB_ID")
     private String fmeJobId;
+
+    @Column(name = "DATAFLOW_NAME")
+    private String dataflowName;
+
+    @Column(name = "DATASET_NAME")
+    private String datasetName;
 }

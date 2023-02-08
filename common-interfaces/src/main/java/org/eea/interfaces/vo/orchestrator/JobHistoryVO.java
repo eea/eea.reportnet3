@@ -56,5 +56,12 @@ public class JobHistoryVO {
     /** The dataset id */
     private Long datasetId;
 
+    /** The fme job id */
     private String fmeJobId;
+
+    /** The dataflow name */
+    private String dataflowName;
+
+    /** The dataset name */
+    private String datasetName;
 }
