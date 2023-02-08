@@ -1385,4 +1385,12 @@ public void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId)
     }
   }
 
+  /**
+   * Removes historic release
+   * @param datasetId
+   */
+  @Override
+  public void removeHistoricRelease(Long datasetId) {
+      snapshotRepository.removeHistoricRelease(datasetId);
+  }
 }

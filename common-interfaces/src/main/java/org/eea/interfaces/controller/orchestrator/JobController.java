@@ -103,7 +103,8 @@ public interface JobController {
                        @RequestParam(value = "replace", required = false) boolean replace,
                        @RequestParam(value = "integrationId", required = false) Long integrationId,
                        @RequestParam(value = "delimiter", required = false) String delimiter,
-                      @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus);
+                      @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
+                      @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
 
 
     /**
