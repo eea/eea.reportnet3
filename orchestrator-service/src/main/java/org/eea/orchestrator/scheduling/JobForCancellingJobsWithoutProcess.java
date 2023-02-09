@@ -95,7 +95,7 @@ public class JobForCancellingJobsWithoutProcess {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> cancelInProgressJobsWithoutProcess(),
-                new CronTrigger("0 */15 * * * *"));
+                new CronTrigger("0 */30 * * * *"));
     }
 
     /**

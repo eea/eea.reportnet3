@@ -98,7 +98,7 @@ public class JobForFinalizingInProgressImportJobsWithFinishedOrCanceledTasks {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> finalizeInProgressImportJobsWithCompletedTasks(),
-                new CronTrigger("0 */15 * * * *"));
+                new CronTrigger("0 0 * * * *"));
     }
 
     /**
