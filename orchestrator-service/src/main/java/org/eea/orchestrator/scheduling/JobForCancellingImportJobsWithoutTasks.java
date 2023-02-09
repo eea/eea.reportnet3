@@ -106,7 +106,7 @@ public class JobForCancellingImportJobsWithoutTasks {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> cancelInProgressImportJobsWithoutTasks(),
-                new CronTrigger("0 0 * * * *"));
+                new CronTrigger("0 */15 * * * *"));
     }
 
     /**

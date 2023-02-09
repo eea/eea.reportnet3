@@ -100,7 +100,7 @@ public class JobForCancelingLongRunningImportTasks {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> cancelLongRunningImportTasks(),
-                new CronTrigger("0 0 * * * *"));
+                new CronTrigger("0 */15 * * * *"));
     }
 
     /**
