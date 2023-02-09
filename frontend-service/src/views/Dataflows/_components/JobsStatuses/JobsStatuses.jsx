@@ -219,24 +219,24 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         template: getDataflowIdTemplate,
         className: styles.middleColumn
       },
-      {
-        key: 'dataflowName',
-        header: resourcesContext.messages['dataflowNameTwoWords'],
-        template: getDataflowNameTemplate,
-        className: styles.largeColumn
-      },
+      // {
+      //   key: 'dataflowName',
+      //   header: resourcesContext.messages['dataflowNameTwoWords'],
+      //   template: getDataflowNameTemplate,
+      //   className: styles.largeColumn
+      // },
       {
         key: 'datasetId',
         header: resourcesContext.messages['datasetId'],
         template: getDatasetIdTemplate,
         className: styles.middleColumn
       },
-      {
-        key: 'datasetName',
-        header: resourcesContext.messages['datasetName'],
-        template: getDatasetNameTemplate,
-        className: styles.largeColumn
-      },
+      // {
+      //   key: 'datasetName',
+      //   header: resourcesContext.messages['datasetName'],
+      //   template: getDatasetNameTemplate,
+      //   className: styles.largeColumn
+      // },
       {
         key: 'providerId',
         header: resourcesContext.messages['providerId'],
