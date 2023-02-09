@@ -228,6 +228,22 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
+   * Gets the name by id.
+   *
+   * @param id the id
+   * @return the name
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public String getDataflowNameById(Long id) {
+    Optional<Dataflow> dataflowVO = dataflowRepository.findById(id);
+    if(dataflowVO.isPresent()){
+      return dataflowVO.get().getName();
+    }
+    return null;
+  }
+
+  /**
    * Gets the by id with representatives filtered by user email.
    *
    * @param id the id

@@ -12,6 +12,8 @@ import org.eea.interfaces.vo.dataset.DatasetStatusMessageVO;
 import org.eea.interfaces.vo.dataset.StatisticsVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * The Interface DatasetMetabaseService.
@@ -33,6 +35,15 @@ public interface DatasetMetabaseService {
    * @return the data set metabase VO
    */
   DataSetMetabaseVO findDatasetMetabase(Long idDataset);
+
+
+  /**
+   * Find dataset name by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data set name
+   */
+  String findDatasetNameById(Long datasetId);
 
   /**
    * Find data set by dataflow ids.

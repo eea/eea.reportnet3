@@ -142,12 +142,32 @@ public class DataflowControllerImpl implements DataFlowController {
             dataflowService.getByIdWithRepresentativesFilteredByUserEmail(dataflowId, providerId);
       }
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG.error("Could not retrieve dataflow with id {} and providerId {} ", dataflowId, providerId, e);
     } catch (Exception e){
-      LOG_ERROR.error("Unexpected error! Could not retrieve dataflow with id {} and providerId {}. Message: {}", dataflowId, providerId, e.getMessage());
+      LOG.error("Unexpected error! Could not retrieve dataflow with id {} and providerId {} ", dataflowId, providerId, e);
       throw e;
     }
     return result;
+  }
+
+  /**
+   * Find dataflow name by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data flow name
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/v1/dataflowName/{dataflowId}")
+  public String findDataflowNameById(@PathVariable("dataflowId") Long dataflowId){
+    try{
+      return dataflowService.getDataflowNameById(dataflowId);
+    }
+    catch(Exception e){
+      LOG.error("Unexpected error! Could not retrieve dataflow name for dataflow with id {} ", dataflowId, e);
+      throw e;
+    }
   }
 
   /**

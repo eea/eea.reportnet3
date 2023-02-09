@@ -164,12 +164,12 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
       String dataflowName = null;
       try{
-        DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataset.getDataflowId(), null);
-        dataflowName = dataFlowVO.getName();
+        dataflowName = dataFlowControllerZuul.findDataflowNameById(dataset.getDataflowId());
       }
       catch (Exception e) {
-        LOG.error("Error when trying to receive dataflow object for dataflowId {} ", dataset.getDataflowId(), e);
+        LOG.error("Error when trying to receive dataflow name for dataflowId {} ", dataset.getDataflowId(), e);
       }
+
 
       String userId = valJobVo!=null ? (String) valJobVo.getParameters().get("userId") : null;
       Timestamp ts = new Timestamp(System.currentTimeMillis());

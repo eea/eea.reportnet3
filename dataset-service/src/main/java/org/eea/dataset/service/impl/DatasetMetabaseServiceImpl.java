@@ -237,6 +237,21 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return metabaseVO;
   }
 
+  /**
+   * Find dataset name by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data set name
+   */
+  @Override
+  public String findDatasetNameById(Long datasetId){
+    Optional<DataSetMetabase> dataSetMetabase = dataSetMetabaseRepository.findById(datasetId);
+    if(dataSetMetabase.isPresent()){
+      return dataSetMetabase.get().getDataSetName();
+    }
+    return null;
+  }
+
 
   /**
    * Find data set by dataflow ids.
