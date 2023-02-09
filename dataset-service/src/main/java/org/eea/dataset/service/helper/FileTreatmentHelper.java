@@ -938,8 +938,8 @@ public class FileTreatmentHelper implements DisposableBean {
                 File folder = new File(root, datasetId.toString());
                 String saveLocationPath = folder.getCanonicalPath();
 
-                if(!folder.mkdirs()) {
-                    folder.mkdirs();
+                if(!folder.exists()) {
+                    folder.mkdir();
                 }
 
                 List<File> files = new ArrayList<>();

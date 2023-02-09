@@ -58,7 +58,7 @@ public class JobControllerImpl implements JobController {
 
     /** The valid columns. */
     List<String> validColumns = Arrays.asList("jobId", "creatorUsername", "jobType", "dataflowId", "providerId", "datasetId",
-            "jobStatus", "dateAdded", "dateStatusChanged", "fmeJobId");
+            "jobStatus", "dateAdded", "dateStatusChanged", "fmeJobId", "dataflowName", "datasetName");
 
     @Override
     @HystrixCommand
