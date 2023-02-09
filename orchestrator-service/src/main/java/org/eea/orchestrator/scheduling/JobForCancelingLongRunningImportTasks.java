@@ -112,8 +112,8 @@ public class JobForCancelingLongRunningImportTasks {
             LOG.info("Running scheduled job cancelLongRunningImportTasks");
 
             List<JobVO> longRunningJobs = jobService.getJobsByTypeAndStatus(JobTypeEnum.IMPORT, JobStatusEnum.IN_PROGRESS);
-            Boolean longRunningTasksExist = false;
             for (JobVO job: longRunningJobs){
+                Boolean longRunningTasksExist = false;
                 //get job processes
                 List<String> processIds = jobProcessService.findProcessesByJobId(job.getId());
                 for(String processId: processIds){

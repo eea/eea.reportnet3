@@ -117,10 +117,10 @@ public class JobForCancellingImportJobsWithoutTasks {
         try {
             LOG.info("Running scheduled job cancelInProgressImportJobsWithoutTasks");
             List<JobVO> longRunningJobs = jobService.getJobsByStatusAndTypeAndMaxDuration(JobTypeEnum.IMPORT, JobStatusEnum.IN_PROGRESS, maxTimeInMsForInProgressImportJobsWithoutTasks, maxTimeInMsForInProgressFMEImportJobsWithoutTasks);
-            Boolean longRunningProcessWithoutTasks = false;
             for (JobVO job: longRunningJobs){
                 //get job processes
                 List<String> processIds = jobProcessService.findProcessesByJobId(job.getId());
+                Boolean longRunningProcessWithoutTasks = false;
                 for(String processId: processIds){
                     List<BigInteger> tasks = validationControllerZuul.findTasksByProcessId(processId);
                     if(tasks.size() == 0) {
