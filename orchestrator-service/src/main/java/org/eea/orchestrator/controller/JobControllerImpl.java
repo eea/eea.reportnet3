@@ -123,11 +123,10 @@ public class JobControllerImpl implements JobController {
             DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
             String dataflowName = null;
             try{
-                DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataset.getDataflowId(), null);
-                dataflowName = dataFlowVO.getName();
+                dataflowName = dataFlowControllerZuul.findDataflowNameById(dataset.getDataflowId());
             }
             catch (Exception e) {
-                LOG.error("Error when trying to receive dataflow object for dataflowId {} ", dataset.getDataflowId(), e);
+                LOG.error("Error when trying to receive dataflow name for dataflowId {} ", dataset.getDataflowId(), e);
             }
 
             Map<String, Object> parameters = new HashMap<>();
@@ -182,11 +181,10 @@ public class JobControllerImpl implements JobController {
         try {
             String dataflowName = null;
             try{
-                DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
-                dataflowName = dataFlowVO.getName();
+                dataflowName = dataFlowControllerZuul.findDataflowNameById(dataflowId);
             }
             catch (Exception e) {
-                LOG.error("Error when trying to receive dataflow object for dataflowId {} ", dataflowId, e);
+                LOG.error("Error when trying to receive dataflow name for dataflowId {} ", dataflowId, e);
             }
 
             List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
@@ -261,16 +259,22 @@ public class JobControllerImpl implements JobController {
         if(jobStatus != null){
             statusToInsert = jobStatus;
         }
+
+
         String dataflowName = null;
-        String datasetName = null;
         try{
-            DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
-            dataflowName = dataFlowVO.getName();
-            DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-            datasetName = dataSetMetabaseVO.getDataSetName();
+            dataflowName = dataFlowControllerZuul.findDataflowNameById(dataflowId);
         }
         catch (Exception e) {
-            LOG.error("Error when trying to receive dataflow and dataset objects for dataflowId {} with dataflowName {} and datasetId {} with datasetName {} ", dataflowId, dataflowName, datasetId, datasetName, e);
+            LOG.error("Error when trying to receive dataflow name for dataflowId {} ", dataflowId, e);
+        }
+
+        String datasetName = null;
+        try{
+            datasetName = dataSetMetabaseControllerZuul.findDatasetNameById(datasetId);
+        }
+        catch (Exception e) {
+            LOG.error("Error when trying to receive dataset name for datasetId {} ", datasetId, e);
         }
 
         LOG.info("Adding import job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={}, replace={}, integrationId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, replace, integrationId, SecurityContextHolder.getContext().getAuthentication().getName());
@@ -296,11 +300,10 @@ public class JobControllerImpl implements JobController {
 
             String dataflowName = null;
             try{
-                DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
-                dataflowName = dataFlowVO.getName();
+                dataflowName = dataFlowControllerZuul.findDataflowNameById(dataflowId);
             }
             catch (Exception e) {
-                LOG.error("Error when trying to receive dataflow object for dataflowId {} ", dataflowId, e);
+                LOG.error("Error when trying to receive dataflow name for dataflowId {} ", dataflowId, e);
             }
 
             Map<String, Object> parameters = new HashMap<>();
