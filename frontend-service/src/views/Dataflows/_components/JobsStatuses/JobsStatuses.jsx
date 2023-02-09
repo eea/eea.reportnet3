@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Column } from 'primereact/column';
 
@@ -35,6 +36,7 @@ import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDa
 
 export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const filterBy = useRecoilValue(filterByCustomFilterStore('jobsStatuses'));
+  const navigate = useNavigate();
 
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
@@ -197,13 +199,13 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       {
         key: 'expanderColumn',
         style: { width: '3em' },
-        className: styles.middleColumn
+        className: styles.smallColumn
       },
       {
         key: 'jobId',
         header: resourcesContext.messages['jobId'],
         template: getJobIdTemplate,
-        className: styles.middleColumn
+        className: styles.smallColumn
       },
       {
         key: 'fmeJobId',
@@ -217,12 +219,24 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         template: getDataflowIdTemplate,
         className: styles.middleColumn
       },
+      // {
+      //   key: 'dataflowName',
+      //   header: resourcesContext.messages['dataflowNameTwoWords'],
+      //   template: getDataflowNameTemplate,
+      //   className: styles.largeColumn
+      // },
       {
         key: 'datasetId',
         header: resourcesContext.messages['datasetId'],
         template: getDatasetIdTemplate,
         className: styles.middleColumn
       },
+      // {
+      //   key: 'datasetName',
+      //   header: resourcesContext.messages['datasetName'],
+      //   template: getDatasetNameTemplate,
+      //   className: styles.largeColumn
+      // },
       {
         key: 'providerId',
         header: resourcesContext.messages['providerId'],
@@ -310,9 +324,13 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getDataflowIdTemplate = job => <p>{job.dataflowId}</p>;
 
-  const getProviderIdTemplate = job => <p>{job.providerId}</p>;
+  const getDataflowNameTemplate = job => <p>{job.dataflowName}</p>;
 
   const getDatasetIdTemplate = job => <p>{job.datasetId}</p>;
+
+  const getDatasetNameTemplate = job => <p>{job.datasetName}</p>;
+
+  const getProviderIdTemplate = job => <p>{job.providerId}</p>;
 
   const rowExpansionTemplate = data => {
     const historyData = jobStatusHistory[data.id] ?? [];

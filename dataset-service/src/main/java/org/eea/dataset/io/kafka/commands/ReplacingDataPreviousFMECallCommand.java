@@ -1,10 +1,5 @@
 package org.eea.dataset.io.kafka.commands;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.commons.io.FileUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
@@ -23,6 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -106,21 +105,6 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
       throw e;
-    } finally {
-      try {
-        FileUtils.deleteDirectory(new File(importPath, datasetId.toString()));
-      } catch (IOException e) {
-        if (integrationVO != null && integrationVO.getExternalParameters() != null) {
-          integrationVO.getExternalParameters().put("fileIS", "contentFileNotShowedInTheLog");
-        }
-        LOG_ERROR.error(
-            "Error processing the call to FME executing integration: datasetId={}, fileName={}, IntegrationVO={}",
-            datasetId, file.getName(), integrationVO);
-        manageLock(datasetId);
-      } catch (Exception e) {
-        LOG_ERROR.error("Unexpected error! Error deleting directory for datasetId {}. Message: {}", datasetId, e.getMessage());
-        throw e;
-      }
     }
     if (error) {
       if (integrationVO != null && integrationVO.getExternalParameters() != null) {

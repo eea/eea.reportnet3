@@ -52,6 +52,12 @@ public class JobUtils {
        else if(name.equals("fmeJobId")){
            columnName = "fme_job_id";
        }
+       else if(name.equals("dataflowName")){
+           columnName = "dataflow_name";
+       }
+       else if(name.equals("datasetName")){
+           columnName = "dataset_name";
+       }
        else{
            LOG.info("Could not match jobs header {} to a column in the table", name);
        }

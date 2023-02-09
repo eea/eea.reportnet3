@@ -5,11 +5,13 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobHistoryController.JobHistoryControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
@@ -79,6 +81,11 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   /** The process controller zuul */
   @Autowired
   private ProcessControllerZuul processControllerZuul;
+
+
+  /** The dataflow controller zuul */
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
 
   /** The job controller zuul */
   @Autowired
@@ -155,6 +162,15 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
               dataset.getDataflowId(), dataset.getDataProviderId());
       Collections.sort(datasets);
 
+      String dataflowName = null;
+      try{
+        DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataset.getDataflowId(), null);
+        dataflowName = dataFlowVO.getName();
+      }
+      catch (Exception e) {
+        LOG.error("Error when trying to receive dataflow object for dataflowId {} ", dataset.getDataflowId(), e);
+      }
+
       String userId = valJobVo!=null ? (String) valJobVo.getParameters().get("userId") : null;
       Timestamp ts = new Timestamp(System.currentTimeMillis());
       Map<String, Object> parameters = new HashMap<>();
@@ -162,7 +178,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       parameters.put("dataProviderId", dataset.getDataProviderId());
       parameters.put("userId", userId);
       parameters.put("datasetId", datasets);
-      JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, user,true, dataset.getDataflowId(), dataset.getDataProviderId(), null,null);
+      JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, user,true, dataset.getDataflowId(), dataset.getDataProviderId(), null,null, dataflowName,null);
 
       JobStatusEnum statusToInsert = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), true, dataset.getDataflowId(), dataset.getDataProviderId(), datasets);
       if (statusToInsert == JobStatusEnum.REFUSED) {

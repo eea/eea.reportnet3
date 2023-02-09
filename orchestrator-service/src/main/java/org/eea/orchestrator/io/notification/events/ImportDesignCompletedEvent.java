@@ -16,28 +16,26 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * The Class ImportReportingRefusedEvent.
- */
 @Component
-public class LongRunningImportFailedEvent implements NotificableEventHandler {
-
+public class ImportDesignCompletedEvent implements NotificableEventHandler {
 
     /**
-            * Gets the event type.
-            *
-            * @return the event type
-   */
+     * Gets the event type.
+     *
+     * @return the event type
+     */
     @Override
     public EventType getEventType() {
-        return EventType.LONG_RUNNING_IMPORT_FAILED_EVENT;
+        return EventType.IMPORT_DESIGN_COMPLETED_EVENT;
     }
 
     /**
      * Gets the map.
      *
      * @param notificationVO the notification VO
+     *
      * @return the map
+     *
      * @throws EEAException the EEA exception
      */
     @Override
@@ -49,7 +47,6 @@ public class LongRunningImportFailedEvent implements NotificableEventHandler {
         String tableSchemaId = notificationVO.getTableSchemaId();
         String tableSchemaName = notificationVO.getTableSchemaName();
 
-
         Map<String, Object> notification = new HashMap<>();
         notification.put("user", notificationVO.getUser());
         notification.put("datasetId", datasetId);
@@ -59,7 +56,6 @@ public class LongRunningImportFailedEvent implements NotificableEventHandler {
         notification.put("dataflowName", dataflowName);
         notification.put("tableSchemaName", tableSchemaName);
         notification.put("fileName", notificationVO.getFileName());
-        notification.put("error", notificationVO.getError());
         return notification;
     }
 }

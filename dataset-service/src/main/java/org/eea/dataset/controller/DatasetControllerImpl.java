@@ -277,8 +277,11 @@ public class DatasetControllerImpl implements DatasetController {
         dataflowId = datasetService.getDataFlowIdById(datasetId);
       }
 
-      if(fmeJobId!=null){
-        JobVO job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+      JobVO job = null;
+      if (fmeJobId!=null) {
+        job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+      }
+      if(job!=null){
         jobId = job.getId();
         LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, datasetId);
       }else{
@@ -286,7 +289,7 @@ public class DatasetControllerImpl implements DatasetController {
         List<Long> datasetIds = new ArrayList<>();
         datasetIds.add(datasetId);
         jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-        jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus);
+        jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus, fmeJobId);
         if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
           LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
           datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());

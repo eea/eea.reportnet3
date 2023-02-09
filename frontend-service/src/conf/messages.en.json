@@ -260,6 +260,7 @@
     "dataflowListRequesterHelp": "This is the main page where you can create a new dataflow or enter to the ones you have access or you have created",
     "dataflowLoadingLeadReportersInit": "Importing lead reporters to <strong>{:dataflowName}</strong>",
     "dataflowName": "Dataflow",
+    "dataflowNameTwoWords": "Dataflow Name",
     "dataflowNameExists": "Dataflow name already exists, please choose another one",
     "dataflowNameValidationMax": "Dataflow name is too long",
     "dataflowObligationEmpty": "Obligation is a required field",
@@ -293,7 +294,7 @@
     "datasetLoading": " is loading...",
     "datasetLoadingMessage": "The dataset ",
     "datasetLoadingTitle": "Data loading",
-    "datasetName": "Dataset name",
+    "datasetName": "Dataset Name",
     "datasetPartitionId": "Dataset partition id",
     "datasetReferenceMustBeUsed": "Tick if all target field values must be found in reference field values",
     "datasets": "Datasets",
@@ -1597,8 +1598,9 @@
     "zipCsvTable": "ZIP (.csv for each table)",
     "validationCanceledEvent": "Validation canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a> with error no processes or tasks created",
     "releaseCanceledEvent": "Release canceled for <strong>{:dataProviderName}</strong> (<a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>) with error no processes or tasks created",
-    "importCanceledEvent": "Import canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> with error no processes or tasks created",
+    "importCanceledEvent": "Import canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "longRunningImportFailedEvent": "Long running import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> with error no processes or tasks created"
+    "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> with error no processes or tasks created",
+    "disableRulesErrorEvent": "SQL rules containing errors were found in the Data Collection creation process"
   }
 }
