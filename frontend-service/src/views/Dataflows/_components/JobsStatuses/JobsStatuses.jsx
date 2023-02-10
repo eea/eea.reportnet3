@@ -318,7 +318,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       <div className={styles.tooltip}>
         {job.jobType}
         {isRelease}
-        {isRelease && <span className={styles.tooltiptext}>Validation For Realease</span>}
+        {isRelease && <span className={styles.tooltiptext}>Validation For Release</span>}
       </div>
     );
   };
