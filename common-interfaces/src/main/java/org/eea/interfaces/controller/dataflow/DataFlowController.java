@@ -50,6 +50,15 @@ public interface DataFlowController {
       @RequestParam(value = "providerId", required = false) Long providerId);
 
   /**
+   * Find dataflow name by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data flow name
+   */
+  @GetMapping(value = "/v1/dataflowName/{dataflowId}")
+  String findDataflowNameById(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
    * Find by id legacy.
    *
    * @param dataflowId the dataflow id

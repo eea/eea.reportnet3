@@ -152,33 +152,42 @@ public class JobForCancellingJobsWithoutProcess {
         value.put(LiteralConstants.USER, user);
         Map<String, Object> insertedParameters = job.getParameters();
         String fileName = (String) insertedParameters.get("fileName");
-        String tableSchemaId = null;
         String tableSchemaName = null;
+        String tableSchemaId = null;
         String dataflowName = job.getDataflowName();
         String datasetName = job.getDatasetName();
-        if(dataflowName == null){
-            try{
-                DataFlowVO dataFlowVO = dataflowControllerZuul.findById(job.getDataflowId(), null);
-                dataflowName = dataFlowVO.getName();
-            }
-            catch (Exception e) {
-                LOG.error("Error when trying to receive dataflow object for dataflowId {} with dataflowName {}", job.getDataflowId(), dataflowName, e);
+
+        if(dataflowName == null) {
+            try {
+                dataflowName = dataflowControllerZuul.findDataflowNameById(job.getDataflowId());
+            } catch (Exception e) {
+                LOG.error("Error when trying to receive dataflow name for dataflowId {} ", job.getDataflowId(), e);
             }
         }
-        if(datasetName == null){
-            try{
-                DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(job.getDatasetId());
-                datasetName = dataSetMetabaseVO.getDataSetName();
+
+        if(datasetName == null) {
+            try {
+                datasetName = dataSetMetabaseControllerZuul.findDatasetNameById(job.getDatasetId());
+            } catch (Exception e) {
+                LOG.error("Error when trying to receive dataset name for datasetId {} ", job.getDatasetId(), e);
             }
-            catch (Exception e) {
-                LOG.error("Error when trying to receive dataset object for datasetId {} with datasetName {} ", job.getDatasetId(), datasetName, e);
-            }
+        }
+
+        String datasetSchemaId = null;
+        try {
+            datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(job.getDatasetId());
+        } catch (Exception e) {
+            LOG.error("Error when trying to receive dataset schema id for datasetId {} ", job.getDatasetId(), e);
         }
 
         if(insertedParameters.get("tableSchemaId") != null) {
             tableSchemaId = (String) insertedParameters.get("tableSchemaId");
-            if (tableSchemaId != null && datasetName != null) {
-                tableSchemaName = datasetSchemaControllerZuul.getTableSchemaName(datasetName, tableSchemaId);
+            if (tableSchemaId != null && datasetSchemaId != null) {
+                try {
+                    tableSchemaName = datasetSchemaControllerZuul.getTableSchemaName(datasetSchemaId, tableSchemaId);
+                } catch (Exception e) {
+                    LOG.error("Error when trying to receive table schema name for tableSchemaId {} datasetId {} and datasetSchemaId {} ", tableSchemaId, job.getDatasetId(), datasetSchemaId, e);
+                }
             }
         }
 

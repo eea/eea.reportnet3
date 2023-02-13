@@ -32,6 +32,15 @@ public interface DataflowService {
   DataFlowVO getById(Long id, boolean removeWeblinksAndDocuments) throws EEAException;
 
   /**
+   * Gets the name by id.
+   *
+   * @param id the id
+   * @return the name
+   * @throws EEAException the EEA exception
+   */
+  String getDataflowNameById(Long id);
+
+  /**
    * Gets the by id with representatives filtered by user email.
    *
    * @param id the id

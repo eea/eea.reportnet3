@@ -73,6 +73,9 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseControllerImpl.class);
+
   /**
    * Find reporting data set id by dataflow id.
    *
@@ -120,6 +123,26 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   public DataSetMetabaseVO findDatasetMetabaseById(@ApiParam(type = "Long", value = "dataset Id",
       example = "0") @PathVariable("datasetId") Long datasetId) {
     return datasetMetabaseService.findDatasetMetabase(datasetId);
+  }
+
+  /**
+   * Find dataset name by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data set name
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/datasetName/{datasetId}")
+  public String findDatasetNameById(@PathVariable("datasetId") Long datasetId){
+    try{
+      return datasetMetabaseService.findDatasetNameById(datasetId);
+    }
+    catch(Exception e){
+      LOG.error("Unexpected error! Could not retrieve dataset name for dataset with id {} ", datasetId, e);
+      throw e;
+    }
   }
 
   /**

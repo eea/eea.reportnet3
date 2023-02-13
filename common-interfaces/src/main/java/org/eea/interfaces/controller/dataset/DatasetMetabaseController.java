@@ -70,6 +70,15 @@ public interface DatasetMetabaseController {
   @GetMapping(value = "/private/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   DataSetMetabaseVO findDatasetMetabaseById(@PathVariable("datasetId") Long datasetId);
 
+  /**
+   * Find dataset name by id.
+   *
+   * @param datasetId the dataset id
+   * @return the data set name
+   */
+  @GetMapping(value = "/datasetName/{datasetId}")
+  String findDatasetNameById(@PathVariable("datasetId") Long datasetId);
+
 
   /**
    * Find external dataset metabase by id.
