@@ -1963,45 +1963,46 @@ public class DatasetControllerImpl implements DatasetController {
           response = DataflowCountVO.class, responseContainer = "List", hidden = true)
   public Integer getRecordsCountByDataflowAndProvider(@PathVariable("dataflowId") Long dataflowId,
                                                    @PathVariable("providerId") Long providerId) {
-    List<DataSetMetabase> metabaseList= dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowId , providerId);
+    List<DataSetMetabase> datasetList= dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowId , providerId);
     Integer count = 0;
-    if(metabaseList!=null){
-
-      for (DataSetMetabase dataSetMetabase : metabaseList) {
-
+    if(datasetList!=null){
+      for (DataSetMetabase dataSetMetabase : datasetList) {
         List<TableValue> tables=  tableRepository.findAllByDatasetId(dataSetMetabase.getId());
-
         if(tables!=null){
-
           for (TableValue table : tables) {
             count = count + Math.toIntExact( recordRepository.countByTableSchema(table.getIdTableSchema()));
           }
-
         }
-
-
       }
     }
-    // Get for the Given DataflowID, the Datasets it has
-    //Get for each Dataset The tables
-    // we need a method to find all tables for each dataset
-    //get for each table, the RecordValues. The size of all those, will be returned
-    return null;
+    return count;
 
   }
 
+  /**
+   * Count dataset records
+   *
+   * @return the records count
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping(value = "/countDatasetRecords/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Count specific dataset records ",
+          response = DataflowCountVO.class, responseContainer = "List", hidden = true)
+  public Integer getRecordsCountByDataset(@PathVariable("datasetId") Long datasetId) {
 
+    Integer count = 0;
+    List<TableValue> tables=  tableRepository.findAllByDatasetId(datasetId);
+    if(tables!=null){
+      for (TableValue table : tables) {
+        count = count + Math.toIntExact( recordRepository.countByTableSchema(table.getIdTableSchema()));
+      }
+    }
 
+    return count;
 
-
-
-
-
-
-
-
-
-
+  }
 
 
   /**

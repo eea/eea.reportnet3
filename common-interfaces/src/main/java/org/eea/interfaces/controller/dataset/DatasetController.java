@@ -654,4 +654,15 @@ public interface DatasetController {
   @GetMapping("/private/countRecords/{dataflowId}/{providerId}")
   Integer getRecordsCountByDataflowAndProvider(
           @PathVariable("dataflowId") Long dataflowId, @PathVariable("providerId") Long providerId);
+
+
+  /**
+   * Count records for a dataset
+   *
+   * @param datasetId the dataset id
+   * @return records count(int)
+   */
+  @GetMapping("/countDatasetRecords/{datasetId}")
+  Integer getRecordsCountByDataset(
+          @PathVariable("datasetId") Long datasetId);
 }
