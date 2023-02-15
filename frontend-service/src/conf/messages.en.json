@@ -86,7 +86,7 @@
     "callFmeProcessFailedEvent": "Error calling to FME at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
     "cancel": "Cancel",
     "canceled": "Canceled",
-    "canceled": "Canceled",
+    "cancelProcess": "Are you sure you want to cancel <strong>{:selectedJobType}</strong> process with Job id <strong>{:jobId}</strong>?",
     "category": "Category",
     "categoryDescription": "Description",
     "categoryShortCode": "Short code",

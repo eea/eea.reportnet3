@@ -20,7 +20,8 @@ export const ActionsColumn = ({
   onEditClick,
   rowDataId,
   rowDeletingId,
-  rowUpdatingId
+  rowUpdatingId,
+  tooltip
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   return (
@@ -87,7 +88,7 @@ export const ActionsColumn = ({
             rowDeletingId !== rowDataId || !isDeletingDatasetData || !isDeletingDocument ? 'trash' : 'spinnerAnimate'
           }
           onClick={onDeleteClick}
-          tooltip={resourcesContext.messages['delete']}
+          tooltip={tooltip ?? resourcesContext.messages['delete']}
           tooltipOptions={{ position: 'top' }}
           type="button"
         />
