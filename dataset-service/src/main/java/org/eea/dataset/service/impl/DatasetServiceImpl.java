@@ -85,6 +85,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -145,6 +149,12 @@ public class DatasetServiceImpl implements DatasetService {
   /** The path public file. */
   @Value("${pathPublicFile}")
   private String pathPublicFile;
+
+  /**
+   * The export path.
+   */
+  @Value("${exportPath}")
+  private String exportPath;
 
   /** The dataset repository. */
   @Autowired
@@ -1325,12 +1335,11 @@ public class DatasetServiceImpl implements DatasetService {
       LOG.info("ETL Export process initiated to datasetId: {}", datasetId);
       exportDatasetETLSQL(datasetId, outputStream, tableSchemaId, limit, offset, filterValue,
           columnName, dataProviderCodes);
-      outputStream.flush();
       long endTime = System.currentTimeMillis() - startTime;
       LOG.info("ETL Export process completed for datasetId: {} in {} seconds", datasetId,
           endTime / 1000);
-    } catch (IOException | EEAException e) {
-      LOG.error("ETLExport error in  Dataset:", datasetId, e);
+    } catch (EEAException e) {
+      LOG.error("ETLExport error in  Dataset {}", datasetId, e);
     }
   }
 
@@ -3101,9 +3110,21 @@ public class DatasetServiceImpl implements DatasetService {
       String dataProviderCodes) throws EEAException {
     try {
       // Delete the query log and the timestamp part later, once the tests are finished.
-      outputStream.write(recordRepository.findAndGenerateETLJson(datasetId, outputStream,
-          tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes).getBytes());
-      LOG.info("Finish ETL Export proccess for datasetId {}", datasetId);
+      Files.createDirectories(Paths.get(exportPath));
+      File file = new File(exportPath + "/" + datasetId + "_etlExport");
+      Path filePath = Paths.get(file.getAbsolutePath());
+      Files.writeString(filePath, recordRepository.findAndGenerateETLJson(datasetId, outputStream,
+              tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes), StandardCharsets.UTF_8);
+      try {
+        Files.copy(filePath, outputStream);
+        outputStream.flush();
+      } catch (IOException e) {
+        LOG.error("Could not copy contents of etl export from file {} to outputStream for datasetId {}", filePath.getFileName(), datasetId);
+      }
+      finally {
+        file.delete();
+      }
+      LOG.info("Finish ETL Export process for datasetId {}", datasetId);
     } catch (IOException e) {
       LOG.error("ETLExport error for datasetId {} Message: {}", datasetId, e.getMessage(), e);
     }

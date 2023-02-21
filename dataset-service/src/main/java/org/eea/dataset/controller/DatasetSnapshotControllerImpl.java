@@ -801,16 +801,26 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
             restrictFromPublic, validate, jobId);
         LOG.info("Successfully created release snapshots for dataflowId {} and dataProviderId {} with jobId {}", dataflowId, dataProviderId, jobId);
       } catch (EEAException e) {
-        LOG_ERROR.error("Error releasing a snapshot for dataflowId {} and dataProviderId {} with jobId {}. Error Message: {}", dataflowId, dataProviderId, jobId, e.getMessage(), e);
+        LOG.error("Error releasing a snapshot for dataflowId {} and dataProviderId {} with jobId {}. Error Message: {}", dataflowId, dataProviderId, jobId, e.getMessage(), e);
         try {
           datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
         } catch (EEAException e1) {
-          LOG_ERROR.error("Error releasing snapshot locks for dataflowId {} and dataProviderId {} with jobId {} . Error Message: {}", dataflowId, dataProviderId, jobId, e1.getMessage(), e1);
+          LOG.error("Error releasing snapshot locks for dataflowId {} and dataProviderId {} with jobId {} . Error Message: {}", dataflowId, dataProviderId, jobId, e1.getMessage(), e1);
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
               EEAErrorMessage.EXECUTION_ERROR);
         }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXECUTION_ERROR,
             e);
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error releasing a snapshot for dataflowId {} and dataProviderId {} with jobId {}. Error Message: {}", dataflowId, dataProviderId, jobId, e.getMessage(), e);
+        try {
+          datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
+        } catch (EEAException e1) {
+          LOG.error("Error releasing snapshot locks for dataflowId {} and dataProviderId {} with jobId {} . Error Message: {}", dataflowId, dataProviderId, jobId, e1.getMessage(), e1);
+        }
+        finally {
+          throw e;
+        }
       }
     } else {
       try {
