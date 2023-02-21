@@ -131,8 +131,6 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
                                     }
                                     if (jobVO.getJobType().equals(JobTypeEnum.RELEASE)) {
                                         dataSetSnapshotControllerZuul.removeHistoricRelease(process.getDatasetId());
-                                    } else if (jobVO.getJobType().equals(JobTypeEnum.VALIDATION)) {
-                                        validationControllerZuul.deleteLocksToReleaseProcess(process.getDatasetId());
                                     }
                                 }
                                 dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(jobVO.getDataflowId(), jobVO.getProviderId());
