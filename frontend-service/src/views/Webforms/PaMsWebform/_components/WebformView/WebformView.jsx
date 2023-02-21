@@ -120,6 +120,8 @@ export const WebformView = ({
         return combinationTableRender('entities');
       case 'sectorobjectives':
         return combinationTableRender('sectors');
+      case 'dimensions':
+        return combinationTableRender('dimensions');
       default:
         break;
     }

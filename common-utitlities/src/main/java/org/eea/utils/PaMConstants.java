@@ -73,6 +73,7 @@ public final class PaMConstants {
 
   /** The Constant FK_PAMS_OTHER_OBJECTIVES: {@value}. */
   public static final String FK_PAMS_OTHER_OBJECTIVES = "FK_PAMS_OTHER_OBJECTIVES";
+  public static final String FK_PAMS_DIMENSIONS = "FK_PAMS_DIMENSIONS";
 
   /** The Constant IMPLEMENTATION_PERIOD_FINISH: {@value}. */
   public static final String IMPLEMENTATION_PERIOD_FINISH = "ImplementationPeriodFinish";
@@ -149,7 +150,9 @@ public final class PaMConstants {
   /** The Constant SINGLES: {@value}. */
   public static final String SINGLES = "SINGLES";
 
-
+  public static final String DIMENSIONS = "Dimensions";
+  public static final String DIMENSION = "Dimension";
+  public static final String OBJ_TARG_CONT = "ObjTargCont";
 
   /**
    * Instantiates a new pam constants.

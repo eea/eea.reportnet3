@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.pams.DimensionVO;
 import org.eea.interfaces.vo.pams.EntityPaMVO;
 import org.eea.interfaces.vo.pams.SectorVO;
 import org.eea.interfaces.vo.pams.SinglePaMVO;
@@ -110,6 +111,8 @@ public class PaMServiceImpl implements PaMService {
         // set attributes sectors
         setAttributesSectors(schemaIds, singlePamsIds[i], singlePaMVO, paMsFields,
             otherDatasetFields);
+        // set attributes dimensions
+        setAttributesDimensions(schemaIds, singlePamsIds[i], singlePaMVO, paMsFields);
         // set union policy other
         setAttributesUnionPolicyOther(schemaIds, singlePamsIds[i], singlePaMVO,
             paMsFields.get(PaMConstants.UNION_POLICY_OTHER));
@@ -147,6 +150,8 @@ public class PaMServiceImpl implements PaMService {
         schemaIds.get(PaMConstants.FK_PAMS_OTHER_OBJECTIVES), singlePamsIdsList, datasetId));
     tablesFields.put(PaMConstants.UNION_POLICY_OTHER, fieldRepository.findByFieldSchemaAndValue(
         schemaIds.get(PaMConstants.FK_PAMS_UNION_POLICY_OTHER), singlePamsIdsList, datasetId));
+    tablesFields.put(PaMConstants.DIMENSIONS, fieldRepository.findByFieldSchemaAndValue(
+        schemaIds.get(PaMConstants.FK_PAMS_DIMENSIONS), singlePamsIdsList, datasetId));
 
     return tablesFields;
   }
@@ -259,8 +264,36 @@ public class PaMServiceImpl implements PaMService {
       }
     }
     singlePaMVO.setSectors(sectors);
+  }
 
-
+  /**
+  * Sets the attributes dimensions
+  *
+  * @param schemaIds the schema ids
+  * @param singlePamId the single pam id
+  * @param singlePaMVO the single pa MVO
+  * @param paMsFields the pa ms fields
+  */
+  private void setAttributesDimensions(
+    Map<String, String> schemaIds,
+    String singlePamId,
+    SinglePaMVO singlePaMVO,
+    Map<String, List<FieldValue>> paMsFields
+  ) {
+    List<DimensionVO> dimensions = new ArrayList<>();
+    List<FieldValue> dimensionsFields = paMsFields.get(PaMConstants.DIMENSIONS);
+    if (dimensionsFields != null) {
+      for (FieldValue fieldValue : dimensionsFields) {
+        if (fieldValue != null && singlePamId.equals(fieldValue.getValue())) {
+          DimensionVO dimensionVO = new DimensionVO();
+          List<FieldValue> fields = hasRecordsAndFields(fieldValue);
+          dimensionVO.setDimension(getValue(fields, schemaIds.get(PaMConstants.DIMENSION)));
+          dimensionVO.setObjTargCont(getValue(fields, schemaIds.get(PaMConstants.OBJ_TARG_CONT)));
+          dimensions.add(dimensionVO);
+        }
+      }
+    }
+    singlePaMVO.setDimensions(dimensions);
   }
 
   /**
@@ -528,6 +561,7 @@ public class PaMServiceImpl implements PaMService {
         fileCommonUtils.getIdTableSchema(PaMConstants.OTHER_OBJECTIVES, schema);
     String unionPolicyOtherId =
         fileCommonUtils.getIdTableSchema(PaMConstants.UNION_POLICY_OTHER, schema);
+    String dimensionsId = fileCommonUtils.getIdTableSchema(PaMConstants.DIMENSIONS, schema);
 
 
     // PAMS
@@ -625,6 +659,11 @@ public class PaMServiceImpl implements PaMService {
         fileCommonUtils.findIdFieldSchema(PaMConstants.ID, unionPoliciesId, schemaPKs)));
     schemaIds.put(PaMConstants.UNION_POLICY, isFieldSchemaNull(
         fileCommonUtils.findIdFieldSchema(PaMConstants.UNION_POLICY, unionPoliciesId, schemaPKs)));
+
+    // DIMENSIONS
+    schemaIds.put(PaMConstants.FK_PAMS_DIMENSIONS, isFieldSchemaNull(fileCommonUtils.findIdFieldSchema(PaMConstants.FK_PAMS, dimensionsId, schema)));
+    schemaIds.put(PaMConstants.DIMENSION, isFieldSchemaNull(fileCommonUtils.findIdFieldSchema(PaMConstants.DIMENSION, dimensionsId, schema)));
+    schemaIds.put(PaMConstants.OBJ_TARG_CONT, isFieldSchemaNull(fileCommonUtils.findIdFieldSchema(PaMConstants.OBJ_TARG_CONT, dimensionsId, schema)));
 
     return schemaIds;
   }
