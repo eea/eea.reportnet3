@@ -158,6 +158,13 @@ public interface JobController {
 
     @GetMapping(value = "/findJobByFmeJobId/{fmeJobId}")
     JobVO findJobByFmeJobId(@PathVariable("fmeJobId") String fmeJobId);
+
+    /**
+     * Cancels job
+     * @param jobId
+     */
+    @PutMapping(value = "/private/cancelJob/{jobId}")
+    void cancelJob(@PathVariable("jobId") Long jobId) throws Exception;
 }
 
 

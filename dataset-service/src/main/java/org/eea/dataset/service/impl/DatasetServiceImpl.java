@@ -56,6 +56,7 @@ import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -300,6 +301,9 @@ public class DatasetServiceImpl implements DatasetService {
 
   @Autowired
   private TaskRepository taskRepository;
+
+  @Autowired
+  private TaskMapper taskMapper;
 
   /** The import path. */
   @Value("${importPath}")
@@ -3593,4 +3597,17 @@ public class DatasetServiceImpl implements DatasetService {
               datasetId, dataflowId, tableSchemaId, originalFileName, e.getMessage());
     }
   }
+
+  /**
+   * Finds tasks by processId and status
+   * @param processId
+   * @param status
+   * @return
+   */
+  @Override
+  public List<TaskVO> findTasksByProcessIdAndStatusIn(String processId, List<ProcessStatusEnum> status) {
+    List<Task> tasks = taskRepository.findAllByProcessIdAndStatusIn(processId, status);
+    return taskMapper.entityListToClass(tasks);
+  }
+
 }

@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.6-CANCEL-BUTTONS</api-gateway.version>
-    <communication.version>v3.1.6-CANCEL-BUTTONS</communication.version>
-    <collaboration.version>v3.1.6-CANCEL-BUTTONS</collaboration.version>
-    <dataflow.version>v3.1.6-CANCEL-BUTTONS</dataflow.version>
-    <dataset.version>v3.1.6-CANCEL-BUTTONS</dataset.version>
-    <document.version>v3.1.6-CANCEL-BUTTONS</document.version>
-    <frontend.version>v3.1.6-CANCEL-BUTTONS</frontend.version>
-    <indexsearch.version>v3.1.6-CANCEL-BUTTONS</indexsearch.version>
-    <inspire.version>v3.1.6-CANCEL-BUTTONS</inspire.version>
-    <recordstore.version>v3.1.6-CANCEL-BUTTONS</recordstore.version>
-    <ums.version>v3.1.6-CANCEL-BUTTONS</ums.version>
-    <validation.version>v3.1.6-CANCEL-BUTTONS</validation.version>
-    <common-interfaces.version>v3.1.6-CANCEL-BUTTONS</common-interfaces.version>
-    <common-utitlities.version>v3.1.6-CANCEL-BUTTONS</common-utitlities.version>
-    <rod.version>v3.1.6-CANCEL-BUTTONS</rod.version>
-    <orchestrator.version>v3.1.6-CANCEL-BUTTONS</orchestrator.version>
+    <api-gateway.version>v3.1.6-cancel</api-gateway.version>
+    <communication.version>v3.1.6-cancel</communication.version>
+    <collaboration.version>v3.1.6-cancel</collaboration.version>
+    <dataflow.version>v3.1.6-cancel</dataflow.version>
+    <dataset.version>v3.1.6-cancel</dataset.version>
+    <document.version>v3.1.6-cancel</document.version>
+    <frontend.version>v3.1.6-cancel</frontend.version>
+    <indexsearch.version>v3.1.6-cancel</indexsearch.version>
+    <inspire.version>v3.1.6-cancel</inspire.version>
+    <recordstore.version>v3.1.6-cancel</recordstore.version>
+    <ums.version>v3.1.6-cancel</ums.version>
+    <validation.version>v3.1.6-cancel</validation.version>
+    <common-interfaces.version>v3.1.6-cancel</common-interfaces.version>
+    <common-utitlities.version>v3.1.6-cancel</common-utitlities.version>
+    <rod.version>v3.1.6-cancel</rod.version>
+    <orchestrator.version>v3.1.6-cancel</orchestrator.version>
   </properties>
 </project>

@@ -195,6 +195,10 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         {
           type: resourcesContext.messages[config.jobRunningStatus.IN_PROGRESS.label].toUpperCase(),
           value: config.jobRunningStatus.IN_PROGRESS.key
+        },
+        {
+          type: resourcesContext.messages[config.jobRunningStatus.CANCELED_BY_USER.label].toUpperCase(),
+          value: config.jobRunningStatus.CANCELED_BY_USER.key
         }
       ],
       template: 'JobsStatus',
@@ -482,7 +486,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
                   jobHistory.jobStatus === 'REFUSED' ||
                   jobHistory.jobStatus === 'CANCELED' ||
                   jobHistory.jobStatus === 'FAILED' ||
-                  jobHistory.jobStatus === 'FINISHED'
+                  jobHistory.jobStatus === 'FINISHED' ||
+                  jobHistory.jobStatus === 'CANCELED_BY_USER'
               );
 
               if (!jobHistoryFinalized) {

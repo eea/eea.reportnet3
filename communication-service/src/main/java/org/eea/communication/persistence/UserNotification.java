@@ -98,4 +98,8 @@ public class UserNotification {
   /** The dataset status. */
   @Field(value = "datasetStatus")
   private DatasetStatusEnum datasetStatus;
+
+  /** The error */
+  @Field(value = "error")
+  private String error;
 }

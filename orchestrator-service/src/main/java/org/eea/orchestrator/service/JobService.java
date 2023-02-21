@@ -1,5 +1,6 @@
 package org.eea.orchestrator.service;
 
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
@@ -58,4 +59,6 @@ public interface JobService {
     void releaseCopyToEuDatasetRefusedNotification(Long jobId, String user, Long dataflowId);
 
     List<JobVO> findByStatusAndJobType(JobStatusEnum status, JobTypeEnum jobType);
+
+    void cancelJob(Long jobId) throws EEAException;
 }

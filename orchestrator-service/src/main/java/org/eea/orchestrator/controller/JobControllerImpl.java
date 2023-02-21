@@ -7,7 +7,6 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController;
-import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
@@ -385,6 +384,21 @@ public class JobControllerImpl implements JobController {
     @GetMapping(value = "/findJobByFmeJobId/{fmeJobId}")
     public JobVO findJobByFmeJobId(String fmeJobId) {
         return jobService.findByFmeJobId(fmeJobId);
+    }
+
+    /**
+     * Cancels job
+     * @param jobId
+     */
+    @Override
+    @PutMapping(value = "/private/cancelJob/{jobId}")
+    public void cancelJob(@PathVariable("jobId") Long jobId) throws Exception {
+        try {
+            jobService.cancelJob(jobId);
+        } catch (Exception e) {
+            LOG.error("Error while cancelling job with id {}, error is {}", jobId, e.getMessage());
+            throw e;
+        }
     }
 }
 

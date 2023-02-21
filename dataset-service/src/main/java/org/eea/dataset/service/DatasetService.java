@@ -1,12 +1,5 @@
 package org.eea.dataset.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Map;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
@@ -23,10 +16,18 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The interface Dataset service.
@@ -638,4 +639,13 @@ public interface DatasetService {
    * @return
    */
   void releaseImportRefusedNotification(Long datasetId, Long dataflowId, String tableSchemaId, String originalFileName);
+
+  /**
+   * Finds tasks by processId and status
+   * @param processId
+   * @param status
+   * @return
+   */
+  List<TaskVO> findTasksByProcessIdAndStatusIn(String processId, List<ProcessStatusEnum> status);
+
 }

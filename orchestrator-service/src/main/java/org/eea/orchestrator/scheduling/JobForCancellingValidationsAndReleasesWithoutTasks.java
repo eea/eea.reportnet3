@@ -129,7 +129,11 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
                                                 process.getUser(), process.getPriority(), process.isReleased());
                                         LOG.info("Updated process to status CANCELED for processId {}", processId);
                                     }
-                                    dataSetSnapshotControllerZuul.removeHistoricRelease(process.getDatasetId());
+                                    if (jobVO.getJobType().equals(JobTypeEnum.RELEASE)) {
+                                        dataSetSnapshotControllerZuul.removeHistoricRelease(process.getDatasetId());
+                                    } else if (jobVO.getJobType().equals(JobTypeEnum.VALIDATION)) {
+                                        validationControllerZuul.deleteLocksToReleaseProcess(process.getDatasetId());
+                                    }
                                 }
                                 dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(jobVO.getDataflowId(), jobVO.getProviderId());
                             }
