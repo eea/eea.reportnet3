@@ -114,7 +114,7 @@ public class JobServiceImpl implements JobService {
     private JobUtils jobUtils;
 
     private static final String BEARER = "Bearer ";
-    private static final String CANCELED_BY_USER_ERROR = "cancelled by user";
+    private static final String CANCELED_BY_ADMIN_ERROR = "cancelled by admin";
 
     @Override
     public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, Long providerId,
@@ -418,7 +418,7 @@ public class JobServiceImpl implements JobService {
                 validationControllerZuul.deleteLocksToReleaseProcess(processVO.getDatasetId());
             }
         }
-        updateJobStatus(jobId, JobStatusEnum.CANCELED_BY_USER);
+        updateJobStatus(jobId, JobStatusEnum.CANCELED_BY_ADMIN);
         LOG.info("Updated job {} to status CANCELED", jobId);
         Map<String, Object> value = new HashMap<>();
         String user = jobVO.getCreatorUsername();
@@ -436,28 +436,28 @@ public class JobServiceImpl implements JobService {
             case IMPORT:
                 //remove locks
                 dataSetControllerZuul.deleteLocksToImportProcess(jobVO.getDatasetId());
-                jobUtils.sendKafkaImportNotification(jobVO, EventType.IMPORT_CANCELED_EVENT, CANCELED_BY_USER_ERROR);
+                jobUtils.sendKafkaImportNotification(jobVO, EventType.IMPORT_CANCELED_EVENT, CANCELED_BY_ADMIN_ERROR);
                 break;
             case VALIDATION:
                 if (jobVO.isRelease()) {
                     dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(jobVO.getDataflowId(), jobVO.getProviderId());
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, value,
-                            NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error(CANCELED_BY_USER_ERROR).build());
+                            NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error(CANCELED_BY_ADMIN_ERROR).build());
                 } else {
                     validationControllerZuul.deleteLocksToReleaseProcess(jobVO.getDatasetId());
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT, value,
-                            NotificationVO.builder().datasetId(jobVO.getDatasetId()).user(user).error(CANCELED_BY_USER_ERROR).build());
+                            NotificationVO.builder().datasetId(jobVO.getDatasetId()).user(user).error(CANCELED_BY_ADMIN_ERROR).build());
                 }
                 break;
             case RELEASE:
                 dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(jobVO.getDataflowId(), jobVO.getProviderId());
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, value,
-                        NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error(CANCELED_BY_USER_ERROR).build());
+                        NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error(CANCELED_BY_ADMIN_ERROR).build());
                 break;
             case COPY_TO_EU_DATASET:
                 euDatasetControllerZuul.removeLocksRelatedToPopulateEU(jobVO.getDataflowId());
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATA_TO_EUDATASET_CANCELED_EVENT, value,
-                        NotificationVO.builder().dataflowId(jobVO.getDataflowId()).user(user).error(CANCELED_BY_USER_ERROR).build());
+                        NotificationVO.builder().dataflowId(jobVO.getDataflowId()).user(user).error(CANCELED_BY_ADMIN_ERROR).build());
                 break;
         }
     }

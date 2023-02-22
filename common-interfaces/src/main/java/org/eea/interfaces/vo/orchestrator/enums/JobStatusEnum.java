@@ -20,8 +20,8 @@ public enum JobStatusEnum {
     /** The finished. */
     FINISHED("FINISHED"),
 
-    /** The canceled by user */
-    CANCELED_BY_USER("CANCELED_BY_USER");
+    /** The canceled by admin */
+    CANCELED_BY_ADMIN("CANCELED_BY_ADMIN");
 
     /** The value. */
     private final String value;

@@ -5,5 +5,5 @@
   "CANCELED": { "key": "CANCELED", "label": "canceled" },
   "FAILED": { "key": "FAILED", "label": "failed" },
   "FINISHED": { "key": "FINISHED", "label": "finished" },
-  "CANCELED_BY_USER": { "key": "CANCELED_BY_USER", "label": "canceled_by_user" }
+  "CANCELED_BY_ADMIN": { "key": "CANCELED_BY_ADMIN", "label": "canceled_by_admin" }
 }

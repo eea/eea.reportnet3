@@ -1602,6 +1602,6 @@
     "longRunningImportFailedEvent": "Long running import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>, {:error}",
     "disableRulesErrorEvent": "SQL rules containing errors were found in the Data Collection creation process",
-    "canceled_by_user": "Canceled by user"
+    "canceled_by_admin": "Canceled by admin"
   }
 }
