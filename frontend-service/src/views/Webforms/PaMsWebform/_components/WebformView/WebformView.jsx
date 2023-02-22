@@ -157,23 +157,16 @@ export const WebformView = ({
   };
 
   const combinationTableRender = tableName => {
-    const combinatedTableValues = [];
-
-    singlesCalculatedData.forEach(singleRecord => {
-      const filteredValue = first(
-        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === tableName.toLowerCase())]
+    const calculated = singlesCalculatedData
+      .flatMap(singlesRecord =>
+        singlesRecord[Object.keys(singlesRecord).find(key => key.toLowerCase() === tableName.toLowerCase())]
+          .map(tableRecord => ({
+            pamsId: singlesRecord['id'],
+            pamName: singlesRecord['paMName'],
+            ...tableRecord,
+          }))
       );
-      if (!isNil(filteredValue) && !isEmpty(filteredValue)) {
-        const singleRecordValue = {
-          pamsId: singleRecord['id'],
-          pamName: singleRecord['paMName'],
-          ...filteredValue
-        };
-        combinatedTableValues.push(singleRecordValue);
-      }
-    });
-
-    return renderTable(uniqBy(combinatedTableValues, value => JSON.stringify(value)));
+    return renderTable(uniqBy(calculated, value => JSON.stringify(value)));
   };
 
   const isGroup = () => {
