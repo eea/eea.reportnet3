@@ -33,6 +33,7 @@ import org.eea.interfaces.vo.dataflow.integration.IntegrationParams;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.joda.time.LocalDateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,6 +125,8 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     Long datasetId = null;
     String fileName = null;
     IntegrationVO integration = new IntegrationVO();
+    JobVO job = null;
+    String jobId = null;
 
     try {
       for (Object param : executionParams) {
@@ -134,13 +137,17 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
             fileName = ((String) param);
           } else if (param instanceof IntegrationVO) {
             integration = ((IntegrationVO) param);
+          } else if (param instanceof JobVO) {
+            job = ((JobVO) param);
+            jobId = job.getId().toString();
           }
+
         }
       }
     } catch (IllegalArgumentException | SecurityException e) {
-      LOG_ERROR.error("Error getting params in FME Integration Executor: {} ", e.getMessage());
+      LOG_ERROR.error("Error getting params in FME Integration Executor for jobId {} : {} ", jobId, e.getMessage());
     }
-    LOG.info("Extracted params in FME Integration Executor. datasetId= {}, fileName= {}", datasetId, fileName);
+    LOG.info("Extracted params in FME Integration Executor. jobId {} datasetId= {}, fileName= {}", jobId, datasetId, fileName);
     if (IntegrationOperationTypeEnum.EXPORT.equals(integrationOperationTypeEnum)) {
       String extension = integration.getInternalParameters().get(IntegrationParams.FILE_EXTENSION);
       extension = null != extension ? extension.toLowerCase() : FileTypeEnum.XLSX.getValue();
@@ -178,7 +185,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
     fmeParams.put(IntegrationParams.REPOSITORY, repository);
 
     return switchIntegrationOperatorEnum(integrationOperationTypeEnum, fileName, integration,
-        apiKey, fmeAsyncJob, integrationOperationParams, fmeParams);
+        apiKey, fmeAsyncJob, integrationOperationParams, fmeParams, job);
   }
 
   /**
@@ -191,17 +198,20 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    * @param fmeAsyncJob the fme async job
    * @param integrationOperationParams the integration operation params
    * @param fmeParams the fme params
+   * @param jobVO the job object
    * @return the execution result VO
    */
   private ExecutionResultVO switchIntegrationOperatorEnum(IntegrationOperationTypeEnum operation,
       String fileName, IntegrationVO integration, String apiKey, FMEAsyncJob fmeAsyncJob,
-      Map<String, Long> integrationOperationParams, Map<String, String> fmeParams) {
+      Map<String, Long> integrationOperationParams, Map<String, String> fmeParams, JobVO jobVO) {
+
+    String jobId = (jobVO != null) ? jobVO.getId().toString() : null;
 
     Long datasetId = integrationOperationParams.get(IntegrationParams.DATASET_ID);
     Long dataflowId = integrationOperationParams.get(IntegrationParams.DATAFLOW_ID);
     Long providerId = integrationOperationParams.get(IntegrationParams.PROVIDER_ID);
     String paramDataProvider = null != providerId ? providerId.toString() : "design";
-    LOG.info("Called method switchIntegrationOperatorEnum datasetId= {}, fileName= {}, providerId= {}", datasetId, fileName, providerId);
+    LOG.info("Called method switchIntegrationOperatorEnum jobId {} datasetId= {}, fileName= {}, providerId= {}", jobId, datasetId, fileName, providerId);
 
     FMEJob fmeJob = new FMEJob();
     fmeJob.setDatasetId(integrationOperationParams.get(IntegrationParams.DATASET_ID));
@@ -257,17 +267,17 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
 
-        LOG.info("Creating Export FS in FME for datasetId {} and filename {}", datasetId, fileName);
+        LOG.info("Creating Export FS in FME for jobId {} datasetId {} and filename {}", jobId, datasetId, fileName);
         if (fmeCommunicationService
             .createDirectory(integrationOperationParams.get(IntegrationParams.DATASET_ID),
                 paramDataProvider)
             .equals(HttpStatus.CONFLICT)) {
-          LOG.info("Directory already exists. datasetId {} and filename {}", datasetId, fileName);
+          LOG.info("Directory already exists. jobId {} datasetId {} and filename {}", jobId, datasetId, fileName);
         }
 
-        LOG.info("Executing FME Export: fmeAsyncJob={} datasetId {}", fmeAsyncJob, datasetId);
+        LOG.info("Executing FME Export: jobId {} fmeAsyncJob={} datasetId {}", jobId, fmeAsyncJob, datasetId);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
-            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob, dataflowId);
+            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob, dataflowId, jobVO);
         break;
       case IMPORT:
         parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
@@ -281,13 +291,13 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
 
-        LOG.info("Upload {} to FME for datasetId {}", fileName, datasetId);
+        LOG.info("Upload {} to FME for jobId {} datasetId {}", fileName, jobId, datasetId);
         fmeCommunicationService.sendFile(datasetId, paramDataProvider, fileName);
-        LOG.info("File {} uploaded to FME for datasetId {}", fileName, datasetId);
+        LOG.info("File {} uploaded to FME for jobId {} datasetId {}", fileName, jobId, datasetId);
 
-        LOG.info("Executing FME Import: fmeAsyncJob={} datasetId {}", fmeAsyncJob, datasetId);
+        LOG.info("Executing FME Import: jobId {} fmeAsyncJob={}  datasetId {}", jobId, fmeAsyncJob, datasetId);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
-            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob, dataflowId);
+            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob, dataflowId, jobVO);
         break;
       case IMPORT_FROM_OTHER_SYSTEM:
         String countryCode = null != providerId
@@ -297,16 +307,16 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         parameters.add(saveParameter(IntegrationParams.PROVIDER_ID, paramDataProvider));
         parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
-        LOG.info("Executing FME Import to other system: fmeAsyncJob={} datasetId {}", fmeAsyncJob, datasetId);
+        LOG.info("Executing FME Import to other system: jobId {} fmeAsyncJob={} datasetId {}", jobId, fmeAsyncJob, datasetId);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
-            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob, dataflowId);
+            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob, dataflowId, jobVO);
         break;
       case EXPORT_EU_DATASET:
         parameters.addAll(addExternalParametersToFMEExecution(integration));
         fmeAsyncJob.setPublishedParameters(parameters);
-        LOG.info("Executing FME Export EU Dataset: fmeAsyncJob={} datasetId {}", fmeAsyncJob, datasetId);
+        LOG.info("Executing FME Export EU Dataset: jobId {} fmeAsyncJob={} datasetId {}", jobId, fmeAsyncJob, datasetId);
         fmeJobId = executeSubmit(fmeParams.get(IntegrationParams.REPOSITORY),
-            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob, dataflowId);
+            fmeParams.get(IntegrationParams.WORKSPACE), fmeAsyncJob, dataflowId, jobVO);
         break;
       default:
         fmeJobId = null;
@@ -326,7 +336,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       fmeCommunicationService.releaseNotifications(fmeJob, -1L, true);
     }
     fmeJobRepository.save(fmeJob);
-    LOG.info("Saved fme job for datasetId= {}, fileName= {}, providerId= {}", datasetId, fileName, providerId);
+    LOG.info("Saved fme job for jobId {} datasetId= {}, fileName= {}, providerId= {}", jobId, datasetId, fileName, providerId);
     return executionResultVO;
   }
 
@@ -399,14 +409,15 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
    * @param workspace the workspace
    * @param fmeAsyncJob the fme async job
    * @param dataflowId the dataflow id
+   * @param jobVO the job
    * @return the integer
    */
   private Integer executeSubmit(String repository, String workspace, FMEAsyncJob fmeAsyncJob,
-      Long dataflowId) {
+      Long dataflowId, JobVO jobVO) {
     Integer idFMEJob = null;
     try {
       idFMEJob =
-          fmeCommunicationService.submitAsyncJob(repository, workspace, fmeAsyncJob, dataflowId);
+          fmeCommunicationService.submitAsyncJob(repository, workspace, fmeAsyncJob, dataflowId, jobVO);
     } catch (Exception e) {
       LOG_ERROR.error("Error invoking FME due to reason {}", e.getMessage());
     }

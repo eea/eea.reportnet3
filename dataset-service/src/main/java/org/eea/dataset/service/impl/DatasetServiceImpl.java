@@ -862,7 +862,7 @@ public class DatasetServiceImpl implements DatasetService {
     IntegrationVO integrationVO =
         integrationController.findExportIntegration(datasetSchemaId, integrationId);
     integrationController.executeIntegrationProcess(IntegrationToolTypeEnum.FME,
-        IntegrationOperationTypeEnum.EXPORT, null, datasetId, integrationVO);
+        IntegrationOperationTypeEnum.EXPORT, null, datasetId, integrationVO, null);
     LOG.info("Executed FME export integration process  for datasetId {}", datasetId);
   }
 

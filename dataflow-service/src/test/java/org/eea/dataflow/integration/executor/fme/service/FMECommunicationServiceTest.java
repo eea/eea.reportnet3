@@ -101,7 +101,7 @@ public class FMECommunicationServiceTest {
     Mockito.when(restTemplate.exchange(Mockito.anyString(), Mockito.any(HttpMethod.class),
         Mockito.any(HttpEntity.class), Mockito.any(Class.class))).thenReturn(checkResult);
 
-    Integer result = fmeCommunicationService.submitAsyncJob("test", "test", fmeAsyncJob, null);
+    Integer result = fmeCommunicationService.submitAsyncJob("test", "test", fmeAsyncJob, null, null);
     Assert.assertEquals(preResult.getId(), result);
   }
 

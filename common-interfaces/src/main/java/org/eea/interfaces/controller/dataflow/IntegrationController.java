@@ -94,6 +94,7 @@ public interface IntegrationController {
    * @param file the file
    * @param datasetId the dataset id
    * @param integration the integration
+   * @param jobId the job id
    * @return the execution result VO
    */
   @PostMapping(value = "/private/executeIntegration")
@@ -101,7 +102,7 @@ public interface IntegrationController {
       @RequestParam("integrationTool") IntegrationToolTypeEnum integrationToolTypeEnum,
       @RequestParam("operation") IntegrationOperationTypeEnum integrationOperationTypeEnum,
       @RequestParam("file") final String file, @RequestParam("datasetId") Long datasetId,
-      @RequestBody IntegrationVO integration);
+      @RequestBody IntegrationVO integration, @RequestParam("jobId") final String jobId);
 
   /**
    * Execute EU dataset export.

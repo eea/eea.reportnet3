@@ -7,6 +7,7 @@ import org.eea.dataflow.persistence.domain.FMEJob;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -22,10 +23,11 @@ public interface FMECommunicationService {
    * @param workspace the workspace
    * @param fmeAsyncJob the fme async job
    * @param dataflowId the dataflow id
+   * @param jobVO the job
    * @return the integer
    */
   Integer submitAsyncJob(String repository, String workspace, FMEAsyncJob fmeAsyncJob,
-      Long dataflowId);
+      Long dataflowId, JobVO jobVO);
 
   /**
    * Send file.
