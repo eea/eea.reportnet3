@@ -92,7 +92,7 @@ public class ReplacingDataPreviousFMECallCommand extends AbstractEEAEventHandler
 
     ExecutionResultVO executionResultVO = integrationController
               .executeIntegrationProcess(IntegrationToolTypeEnum.FME,
-                      IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationVO);
+                      IntegrationOperationTypeEnum.IMPORT, fileName, datasetId, integrationVO, jobId);
 
     Integer fmeJobId = (Integer) executionResultVO.getExecutionResultParams().get("id");
     if(fmeJobId==0){

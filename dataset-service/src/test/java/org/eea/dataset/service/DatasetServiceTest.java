@@ -2517,10 +2517,10 @@ DatasetServiceTest {
         .when(integrationController.findExportIntegration(Mockito.anyString(), Mockito.anyLong()))
         .thenReturn(new IntegrationVO());
     Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new ExecutionResultVO());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(new ExecutionResultVO());
     datasetService.exportFileThroughIntegration(1L, 1L);
     Mockito.verify(integrationController, times(1)).executeIntegrationProcess(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**

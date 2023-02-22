@@ -11,6 +11,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
@@ -19,6 +20,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -80,6 +82,10 @@ public class IntegrationControllerImpl implements IntegrationController {
   /** The data set metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  /** The job controller zuul. */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
 
   /**
    * The Constant LOG_ERROR.
@@ -294,6 +300,7 @@ public class IntegrationControllerImpl implements IntegrationController {
    * @param integrationOperationTypeEnum the integration operation type enum
    * @param file the file
    * @param datasetId the dataset id
+   * @param jobId the job id
    * @param integration the integration
    *
    * @return the execution result VO
@@ -313,10 +320,16 @@ public class IntegrationControllerImpl implements IntegrationController {
           required = false) final String file,
       @ApiParam(value = "Dataset id", example = "0") @RequestParam("datasetId") Long datasetId,
       @ApiParam(type = "Object",
-          value = "IntegrationVO Object") @RequestBody IntegrationVO integration) {
+          value = "IntegrationVO Object") @RequestBody IntegrationVO integration,
+          @RequestParam(name = "jobId", required = false) final String jobId) {
     try{
+      JobVO jobVO = null;
+      if(jobId != null) {
+        jobVO = jobControllerZuul.findJobById(Long.parseLong(jobId));
+        LOG.info("Retrieved job with id {}", jobId);
+      }
       return integrationExecutorFactory.getExecutor(integrationToolTypeEnum)
-              .execute(integrationOperationTypeEnum, file, datasetId, integration);
+              .execute(integrationOperationTypeEnum, file, datasetId, integration, jobVO);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Could not execute integration process for file {} and datasetId {}. Message: {}", file, datasetId, e.getMessage());
       throw e;
