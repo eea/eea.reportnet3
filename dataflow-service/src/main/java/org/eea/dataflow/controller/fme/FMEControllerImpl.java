@@ -1,6 +1,5 @@
 package org.eea.dataflow.controller.fme;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,6 +46,9 @@ import springfox.documentation.annotations.ApiIgnore;
 @Api(tags = "FME : FME Manager")
 @ApiIgnore
 public class FMEControllerImpl implements FMEController {
+
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(FMEControllerImpl.class);
 
   /** The fme communication service. */
   @Autowired
@@ -128,6 +130,7 @@ public class FMEControllerImpl implements FMEController {
     lockCriteria.put(LiteralConstants.DATASETID, fmeOperationInfoVO.getDatasetId());
 
     try {
+      LOG.info("FME endpoint /operationFinished has been called for fmeJobId {} with status number {} ", fmeOperationInfoVO.getRn3JobId(), fmeOperationInfoVO.getStatusNumber());
       FMEJob fmeJob = fmeCommunicationService.authenticateAndAuthorize(
           fmeOperationInfoVO.getApiKey(), fmeOperationInfoVO.getRn3JobId());
       fmeCommunicationService.releaseNotifications(fmeJob, fmeOperationInfoVO.getStatusNumber(),
