@@ -108,12 +108,6 @@ public class JobServiceImpl implements JobService {
     private DataSetControllerZuul dataSetControllerZuul;
 
     @Autowired
-    private JobProcessService jobProcessService;
-
-    @Autowired
-    private ProcessControllerZuul processControllerZuul;
-
-    @Autowired
     private UserManagementControllerZull userManagementControllerZull;
 
     /**
