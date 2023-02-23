@@ -85,6 +85,10 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
         if (!countQuery) {
             stringQuery.append(" order by " + sortedColumn);
             stringQuery.append(asc ? " asc" : " desc");
+            if (sortedColumn.equals("job_type")) {
+                stringQuery.append(", release");
+                stringQuery.append(" desc");
+            }
             if (null != pageable) {
                 stringQuery.append(" LIMIT " + pageable.getPageSize());
                 stringQuery.append(" OFFSET " + pageable.getOffset());

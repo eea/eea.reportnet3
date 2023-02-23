@@ -312,7 +312,16 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     </a>
   );
 
-  const getJobTypeTemplate = job => <p>{job.jobType}</p>;
+  const getJobTypeTemplate = job => {
+    const isRelease = job.release && job.jobType === 'VALIDATION' ? '*' : '';
+    return (
+      <div className={styles.tooltip}>
+        {job.jobType}
+        {isRelease}
+        {isRelease && <span className={styles.tooltiptext}>Validation For Release</span>}
+      </div>
+    );
+  };
 
   const getDateAddedTemplate = (job, field) =>
     isNil(job[field]) ? '-' : getDateTimeFormatByUserPreferences(job[field]);
