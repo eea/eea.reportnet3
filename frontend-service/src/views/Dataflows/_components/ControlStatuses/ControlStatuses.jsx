@@ -166,7 +166,6 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
       }
 
       setLoadingStatus('success');
-      console.log('Is delete successfull: ' + isDeleteSuccessfull);
     } catch (error) {
       console.error('ControlStatus - onConfirmDeleteDialog.', error);
       setLoadingStatus('failed');

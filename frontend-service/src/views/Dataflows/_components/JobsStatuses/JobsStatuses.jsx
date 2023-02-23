@@ -1,5 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Fragment, useContext, useEffect, useState } from 'react';
 
 import { Column } from 'primereact/column';
 
@@ -13,7 +12,9 @@ import isNil from 'lodash/isNil';
 import { config } from 'conf';
 import { routes } from 'conf/routes';
 
+import { ActionsColumn } from 'views/_components/ActionsColumn';
 import { Button } from 'views/_components/Button';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
 import { Filters } from 'views/_components/Filters';
@@ -26,6 +27,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import { UserContext } from '../../../_functions/Contexts/UserContext';
 
 import { filterByCustomFilterStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
@@ -34,15 +36,21 @@ import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
+const { permissions } = config;
+
 export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const filterBy = useRecoilValue(filterByCustomFilterStore('jobsStatuses'));
-  const navigate = useNavigate();
 
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
+  const userContext = useContext(UserContext);
+  const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
 
   const [expandedRows, setExpandedRows] = useState(null);
   const [filteredRecords, setFilteredRecords] = useState(0);
+  const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -187,6 +195,10 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         {
           type: resourcesContext.messages[config.jobRunningStatus.IN_PROGRESS.label].toUpperCase(),
           value: config.jobRunningStatus.IN_PROGRESS.key
+        },
+        {
+          type: resourcesContext.messages[config.jobRunningStatus.CANCELED_BY_ADMIN.label].toUpperCase(),
+          value: config.jobRunningStatus.CANCELED_BY_ADMIN.key
         }
       ],
       template: 'JobsStatus',
@@ -275,6 +287,15 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       }
     ];
 
+    if (isAdmin) {
+      columns.push({
+        key: 'buttonsUniqueId',
+        header: resourcesContext.messages['actions'],
+        template: getCancelButton,
+        className: styles.smallColumn
+      });
+    }
+
     return columns.map(column => (
       <Column
         body={column.template}
@@ -289,6 +310,23 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       />
     ));
   };
+
+  const getCancelButton = job => (
+    <ActionsColumn
+      disabledButtons={
+        !(
+          job.jobStatus === 'IN_PROGRESS' &&
+          (job.jobType === 'IMPORT' || job.jobType === 'VALIDATION' || job.jobType === 'RELEASE')
+        )
+      }
+      onDeleteClick={() => {
+        setIsDeleteDialogVisible(true);
+        setJobStatus(job);
+      }}
+      rowDataId={job.id}
+      tooltip={resourcesContext.messages['cancel']}
+    />
+  );
 
   const getJobStatusTemplate = job => (
     <div>
@@ -384,6 +422,26 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
+  const onConfirmDeleteDialog = async () => {
+    setLoadingStatus('pending');
+    setIsDeleteDialogVisible(false);
+    try {
+      await JobsStatusesService.cancelJob(jobStatus.id);
+      setLoadingStatus('success');
+    } catch (error) {
+      console.error('JobsStatus - onConfirmDeleteDialog.', error);
+      setLoadingStatus('failed');
+    } finally {
+      setJobStatus(null);
+      getJobsStatuses();
+    }
+  };
+
+  const onHideDeleteDialog = () => {
+    setIsDeleteDialogVisible(false);
+    setJobStatus(null);
+  };
+
   const renderFilters = () => (
     <Filters
       className="lineItems"
@@ -450,7 +508,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
                   jobHistory.jobStatus === 'REFUSED' ||
                   jobHistory.jobStatus === 'CANCELED' ||
                   jobHistory.jobStatus === 'FAILED' ||
-                  jobHistory.jobStatus === 'FINISHED'
+                  jobHistory.jobStatus === 'FINISHED' ||
+                  jobHistory.jobStatus === 'CANCELED_BY_ADMIN'
               );
 
               if (!jobHistoryFinalized) {
@@ -488,15 +547,38 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   return (
-    <Dialog
-      blockScroll={false}
-      className="responsiveBigDialog"
-      footer={dialogFooter}
-      header={resourcesContext.messages['jobsMonitoring']}
-      modal={true}
-      onHide={onCloseDialog}
-      visible={isDialogVisible}>
-      {renderDialogContent()}
-    </Dialog>
+    <Fragment>
+      <Dialog
+        blockScroll={false}
+        className="responsiveBigDialog"
+        footer={dialogFooter}
+        header={resourcesContext.messages['jobsMonitoring']}
+        modal={true}
+        onHide={onCloseDialog}
+        visible={isDialogVisible}>
+        {renderDialogContent()}
+      </Dialog>
+
+      {isDeleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm="p-button-danger"
+          header={resourcesContext.messages['cancel']}
+          labelCancel={resourcesContext.messages['cancel']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onConfirmDeleteDialog}
+          onHide={onHideDeleteDialog}
+          visible={isDeleteDialogVisible}>
+          {
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['cancelProcess'], {
+                  selectedJobType: jobStatus.jobType,
+                  jobId: jobStatus.id
+                })
+              }}></p>
+          }
+        </ConfirmDialog>
+      )}
+    </Fragment>
   );
 };

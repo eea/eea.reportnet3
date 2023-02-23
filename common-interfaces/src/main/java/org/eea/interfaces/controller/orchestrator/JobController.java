@@ -172,6 +172,13 @@ public interface JobController {
     @PostMapping(value = "/private/updateJobAndProcess/{id}")
     void updateJobAndProcess(@PathVariable("id") Long jobId, @RequestParam(value = "jobStatus") JobStatusEnum jobStatus,
                              @RequestParam(value = "processStatus") ProcessStatusEnum processStatus);
+
+    /**
+     * Cancels job
+     * @param jobId
+     */
+    @PutMapping(value = "/cancelJob/{jobId}")
+    void cancelJob(@PathVariable("jobId") Long jobId) throws Exception;
 }
 
 

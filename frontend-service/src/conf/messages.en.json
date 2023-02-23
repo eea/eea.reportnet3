@@ -86,7 +86,7 @@
     "callFmeProcessFailedEvent": "Error calling to FME at <strong title='{:datasetName}'>{:shortDatasetName}</strong>",
     "cancel": "Cancel",
     "canceled": "Canceled",
-    "canceled": "Canceled",
+    "cancelProcess": "Are you sure you want to cancel <strong>{:selectedJobType}</strong> process with Job id <strong>{:jobId}</strong>?",
     "category": "Category",
     "categoryDescription": "Description",
     "categoryShortCode": "Short code",
@@ -1598,11 +1598,12 @@
     "y": "Y",
     "yes": "Yes",
     "zipCsvTable": "ZIP (.csv for each table)",
-    "validationCanceledEvent": "Validation canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a> with error no processes or tasks created",
-    "releaseCanceledEvent": "Release canceled for <strong>{:dataProviderName}</strong> (<a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>) with error no processes or tasks created",
-    "importCanceledEvent": "Import canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "validationCanceledEvent": "Validation canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>, {:error}",
+    "releaseCanceledEvent": "Release canceled for <strong>{:dataProviderName}</strong> (<a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>), {:error}",
+    "importCanceledEvent": "Import canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>, {:error}",
     "longRunningImportFailedEvent": "Long running import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> with error no processes or tasks created",
-    "disableRulesErrorEvent": "SQL rules containing errors were found in the Data Collection creation process"
+    "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>, {:error}",
+    "disableRulesErrorEvent": "SQL rules containing errors were found in the Data Collection creation process",
+    "canceled_by_admin": "Canceled by admin"
   }
 }

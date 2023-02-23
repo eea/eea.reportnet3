@@ -1,16 +1,10 @@
 package org.eea.orchestrator.scheduling;
 
-import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
-import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
@@ -21,6 +15,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.orchestrator.service.JobProcessService;
 import org.eea.orchestrator.service.JobService;
+import org.eea.orchestrator.utils.JobUtils;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,14 +76,7 @@ public class JobForCancellingJobsWithoutProcess {
     private KafkaSenderUtils kafkaSenderUtils;
 
     @Autowired
-    private DatasetSchemaController.DatasetSchemaControllerZuul datasetSchemaControllerZuul;
-
-    /** The dataflow controller zuul. */
-    @Autowired
-    private DataFlowController.DataFlowControllerZuul dataflowControllerZuul;
-
-    @Autowired
-    private DatasetMetabaseController.DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+    private JobUtils jobUtils;
 
     @PostConstruct
     private void init() {
@@ -130,7 +118,7 @@ public class JobForCancellingJobsWithoutProcess {
                                     NotificationVO.builder().datasetId(job.getDatasetId()).user(user).error("No processes created").build());
                         } else if (job.getJobType().equals(JobTypeEnum.IMPORT)) {
                             dataSetControllerZuul.deleteLocksToImportProcess(job.getDatasetId());
-                            sendKafkaNotificationForImport(job);
+                            jobUtils.sendKafkaImportNotification(job, EventType.IMPORT_CANCELED_EVENT, "No processes created");
                         } else if (job.getJobType().equals(JobTypeEnum.COPY_TO_EU_DATASET)) {
                             euDatasetControllerZuul.removeLocksRelatedToPopulateEU(job.getDataflowId());
                             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATA_TO_EUDATASET_CANCELED_EVENT, value,
@@ -143,61 +131,6 @@ public class JobForCancellingJobsWithoutProcess {
             }
         } catch (Exception e) {
             LOG.error("Error while running scheduled job cancelInProgressJobsWithoutProcess ", e);
-        }
-    }
-
-    private void sendKafkaNotificationForImport(JobVO job){
-        Map<String, Object> value = new HashMap<>();
-        String user = job.getCreatorUsername();
-        value.put(LiteralConstants.USER, user);
-        Map<String, Object> insertedParameters = job.getParameters();
-        String fileName = (String) insertedParameters.get("fileName");
-        String tableSchemaName = null;
-        String tableSchemaId = null;
-        String dataflowName = job.getDataflowName();
-        String datasetName = job.getDatasetName();
-
-        if(dataflowName == null) {
-            try {
-                dataflowName = dataflowControllerZuul.findDataflowNameById(job.getDataflowId());
-            } catch (Exception e) {
-                LOG.error("Error when trying to receive dataflow name for dataflowId {} ", job.getDataflowId(), e);
-            }
-        }
-
-        if(datasetName == null) {
-            try {
-                datasetName = dataSetMetabaseControllerZuul.findDatasetNameById(job.getDatasetId());
-            } catch (Exception e) {
-                LOG.error("Error when trying to receive dataset name for datasetId {} ", job.getDatasetId(), e);
-            }
-        }
-
-        String datasetSchemaId = null;
-        try {
-            datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(job.getDatasetId());
-        } catch (Exception e) {
-            LOG.error("Error when trying to receive dataset schema id for datasetId {} ", job.getDatasetId(), e);
-        }
-
-        if(insertedParameters.get("tableSchemaId") != null) {
-            tableSchemaId = (String) insertedParameters.get("tableSchemaId");
-            if (tableSchemaId != null && datasetSchemaId != null) {
-                try {
-                    tableSchemaName = datasetSchemaControllerZuul.getTableSchemaName(datasetSchemaId, tableSchemaId);
-                } catch (Exception e) {
-                    LOG.error("Error when trying to receive table schema name for tableSchemaId {} datasetId {} and datasetSchemaId {} ", tableSchemaId, job.getDatasetId(), datasetSchemaId, e);
-                }
-            }
-        }
-
-        try {
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_CANCELED_EVENT, value,
-                    NotificationVO.builder().datasetId(job.getDatasetId()).dataflowId(job.getDataflowId()).tableSchemaId(tableSchemaId).fileName(fileName)
-                            .dataflowName(dataflowName).datasetName(datasetName).tableSchemaName(tableSchemaName)
-                            .user(user).error("No processes created").build());
-        } catch (EEAException e) {
-            LOG.error("Error while releasing IMPORT_CANCELED_EVENT notification for jobId {} and datasetId {} ", job.getId(), job.getDatasetId(), e);
         }
     }
 }

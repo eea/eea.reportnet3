@@ -40,5 +40,9 @@ export const JobsStatusesService = {
     const response = await JobsStatusesRepository.getJobHistory(jobId);
 
     return response.data;
+  },
+
+  cancelJob: async jobId => {
+    await JobsStatusesRepository.cancelJob(jobId);
   }
 };

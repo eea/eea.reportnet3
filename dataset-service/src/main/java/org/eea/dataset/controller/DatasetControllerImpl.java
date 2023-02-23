@@ -1,12 +1,8 @@
 package org.eea.dataset.controller;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.*;
-import javax.servlet.http.HttpServletResponse;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import io.swagger.annotations.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +31,8 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -53,25 +51,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.util.*;
 
 /**
  * The Class DatasetControllerImpl.
@@ -2018,4 +2005,22 @@ public class DatasetControllerImpl implements DatasetController {
       throw e;
     }
   }
+
+  /**
+   * Finds tasks by processId and status
+   * @param processId
+   * @param status
+   * @return
+   */
+  @Override
+  @GetMapping("/private/findTasksByProcessIdAndStatusIn/{processId}")
+  public List<TaskVO> findTasksByProcessIdAndStatusIn(@PathVariable("processId") String processId, @RequestParam("status") List<ProcessStatusEnum> status) {
+      try {
+        return datasetService.findTasksByProcessIdAndStatusIn(processId, status);
+      } catch (Exception e) {
+        LOG.error("Error while finding tasks for processId {}, error is {}", processId, e.getMessage());
+        throw e;
+      }
+  }
+
 }

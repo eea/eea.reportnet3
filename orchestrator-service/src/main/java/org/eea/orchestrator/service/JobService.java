@@ -1,5 +1,6 @@
 package org.eea.orchestrator.service;
 
+import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
@@ -64,4 +65,6 @@ public interface JobService {
     List<JobVO> findByStatusAndJobType(JobStatusEnum status, JobTypeEnum jobType);
 
     void updateJobAndProcess(Long jobId, JobStatusEnum jobStatus, ProcessStatusEnum processStatus);
+
+    void cancelJob(Long jobId) throws EEAException;
 }

@@ -63,4 +63,7 @@ public class UserNotificationContentVO {
 
   /** The user id */
   private String userId;
+
+  /** The error */
+  private String error;
 }

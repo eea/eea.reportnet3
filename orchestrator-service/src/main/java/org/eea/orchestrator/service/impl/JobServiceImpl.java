@@ -2,8 +2,11 @@ package org.eea.orchestrator.service.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.orchestrator.JobVO;
@@ -13,6 +16,10 @@ import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.ums.TokenVO;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -29,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +65,18 @@ public class JobServiceImpl implements JobService {
     @Value(value = "${scheduling.inProgress.export.maximum.jobs}")
     private Long maximumNumberOfInProgressExportJobs;
 
+    /**
+     * The admin user.
+     */
+    @Value("${eea.keycloak.admin.user}")
+    private String adminUser;
+
+    /**
+     * The admin pass.
+     */
+    @Value("${eea.keycloak.admin.password}")
+    private String adminPass;
+
     @Autowired
     private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
 
@@ -84,11 +104,26 @@ public class JobServiceImpl implements JobService {
     @Autowired
     private ProcessControllerZuul processControllerZuul;
 
+    @Autowired
+    private DataSetControllerZuul dataSetControllerZuul;
+
+    @Autowired
+    private JobProcessService jobProcessService;
+
+    @Autowired
+    private ProcessControllerZuul processControllerZuul;
+
+    @Autowired
+    private UserManagementControllerZull userManagementControllerZull;
+
     /**
      * The job utils.
      */
     @Autowired
     private JobUtils jobUtils;
+
+    private static final String BEARER = "Bearer ";
+    private static final String CANCELED_BY_ADMIN_ERROR = "cancelled by admin";
 
     @Override
     public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, Long providerId,
@@ -329,6 +364,7 @@ public class JobServiceImpl implements JobService {
     public List<JobVO> findByStatusAndJobType(JobStatusEnum status, JobTypeEnum jobType) {
         return jobMapper.entityListToClass(jobRepository.findByJobStatusAndJobType(status, jobType));
     }
+
     @Override
     public void releaseValidationRefusedNotification(Long jobId, String user, Long datasetId){
         Map<String, Object> value = new HashMap<>();
@@ -379,6 +415,69 @@ public class JobServiceImpl implements JobService {
             ProcessVO processVO = processControllerZuul.findById(processId);
             processControllerZuul.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(), processStatus, ProcessTypeEnum.fromValue(processVO.getProcessType()),
                     processId, processVO.getUser(), processVO.getPriority(), processVO.isReleased());
+        }
+    }
+    @Override
+    public void cancelJob(Long jobId) throws EEAException {
+        JobVO jobVO = findById(jobId);
+        List<String> processIds = jobProcessService.findProcessesByJobId(jobId);
+        for (String processId : processIds) {
+            List<TaskVO> tasks = dataSetControllerZuul.findTasksByProcessIdAndStatusIn(processId, Arrays.asList(ProcessStatusEnum.IN_PROGRESS, ProcessStatusEnum.IN_QUEUE));
+            if (tasks.size()>0) {
+                validationControllerZuul.updateTaskStatusByProcessIdAndCurrentStatuses(processId, ProcessStatusEnum.CANCELED, new HashSet<>(Arrays.asList(ProcessStatusEnum.IN_QUEUE.toString(), ProcessStatusEnum.IN_PROGRESS.toString())));
+            }
+            ProcessVO processVO = processControllerZuul.findById(processId);
+            //update process status
+            processControllerZuul.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(),
+                    ProcessStatusEnum.CANCELED, ProcessTypeEnum.IMPORT, processVO.getProcessId(),
+                    processVO.getUser(), processVO.getPriority(), processVO.isReleased());
+            if (jobVO.isRelease() && jobVO.getJobType().equals(JobTypeEnum.RELEASE)) {
+                dataSetSnapshotControllerZuul.removeHistoricRelease(processVO.getDatasetId());
+            } else if (jobVO.isRelease() && jobVO.getJobType().equals(JobTypeEnum.VALIDATION)) {
+                validationControllerZuul.deleteLocksToReleaseProcess(processVO.getDatasetId());
+            }
+        }
+        updateJobStatus(jobId, JobStatusEnum.CANCELED_BY_ADMIN);
+        LOG.info("Updated job {} to status CANCELED", jobId);
+        Map<String, Object> value = new HashMap<>();
+        String user = jobVO.getCreatorUsername();
+        value.put(LiteralConstants.USER, user);
+
+        TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        removeLocksAndSendNotification(jobVO, value, user);
+    }
+
+    private void removeLocksAndSendNotification(JobVO jobVO, Map<String, Object> value, String user) throws EEAException {
+        switch (jobVO.getJobType()) {
+            case IMPORT:
+                //remove locks
+                dataSetControllerZuul.deleteLocksToImportProcess(jobVO.getDatasetId());
+                jobUtils.sendKafkaImportNotification(jobVO, EventType.IMPORT_CANCELED_EVENT, CANCELED_BY_ADMIN_ERROR);
+                break;
+            case VALIDATION:
+                if (jobVO.isRelease()) {
+                    dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(jobVO.getDataflowId(), jobVO.getProviderId());
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, value,
+                            NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error(CANCELED_BY_ADMIN_ERROR).build());
+                } else {
+                    validationControllerZuul.deleteLocksToReleaseProcess(jobVO.getDatasetId());
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT, value,
+                            NotificationVO.builder().datasetId(jobVO.getDatasetId()).user(user).error(CANCELED_BY_ADMIN_ERROR).build());
+                }
+                break;
+            case RELEASE:
+                dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(jobVO.getDataflowId(), jobVO.getProviderId());
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, value,
+                        NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error(CANCELED_BY_ADMIN_ERROR).build());
+                break;
+            case COPY_TO_EU_DATASET:
+                euDatasetControllerZuul.removeLocksRelatedToPopulateEU(jobVO.getDataflowId());
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATA_TO_EUDATASET_CANCELED_EVENT, value,
+                        NotificationVO.builder().dataflowId(jobVO.getDataflowId()).user(user).error(CANCELED_BY_ADMIN_ERROR).build());
+                break;
         }
     }
 }
