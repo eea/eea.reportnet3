@@ -391,7 +391,8 @@ public class JobControllerImpl implements JobController {
      * @param jobId
      */
     @Override
-    @PutMapping(value = "/private/cancelJob/{jobId}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PutMapping(value = "/cancelJob/{jobId}")
     public void cancelJob(@PathVariable("jobId") Long jobId) throws Exception {
         try {
             jobService.cancelJob(jobId);
