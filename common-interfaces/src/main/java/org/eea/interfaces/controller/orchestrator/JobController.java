@@ -3,6 +3,8 @@ package org.eea.interfaces.controller.orchestrator;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -158,6 +160,18 @@ public interface JobController {
 
     @GetMapping(value = "/findJobByFmeJobId/{fmeJobId}")
     JobVO findJobByFmeJobId(@PathVariable("fmeJobId") String fmeJobId);
+
+    /**
+     * Update job, process and task status
+     *
+     * @param jobId the job id
+     * @param jobStatus the job's status
+     * @param processStatus the process's status
+     * @return
+     */
+    @PostMapping(value = "/private/updateJobAndProcess/{id}")
+    void updateJobAndProcess(@PathVariable("id") Long jobId, @RequestParam(value = "jobStatus") JobStatusEnum jobStatus,
+                             @RequestParam(value = "processStatus") ProcessStatusEnum processStatus);
 }
 
 
