@@ -2,15 +2,17 @@ package org.eea.orchestrator.service.impl;
 
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -18,6 +20,7 @@ import org.eea.orchestrator.mapper.JobMapper;
 import org.eea.orchestrator.persistence.domain.Job;
 import org.eea.orchestrator.persistence.repository.JobRepository;
 import org.eea.orchestrator.service.JobHistoryService;
+import org.eea.orchestrator.service.JobProcessService;
 import org.eea.orchestrator.service.JobService;
 import org.eea.orchestrator.utils.JobUtils;
 import org.eea.utils.LiteralConstants;
@@ -74,6 +77,12 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     private KafkaSenderUtils kafkaSenderUtils;
+
+    @Autowired
+    private JobProcessService jobProcessService;
+
+    @Autowired
+    private ProcessControllerZuul processControllerZuul;
 
     /**
      * The job utils.
@@ -362,4 +371,14 @@ public class JobServiceImpl implements JobService {
         }
     }
 
+    @Override
+    public void updateJobAndProcess(Long jobId, JobStatusEnum jobStatus, ProcessStatusEnum processStatus){
+        updateJobStatus(jobId, jobStatus);
+        List<String> processIds = jobProcessService.findProcessesByJobId(jobId);
+        for (String processId : processIds) {
+            ProcessVO processVO = processControllerZuul.findById(processId);
+            processControllerZuul.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(), processStatus, ProcessTypeEnum.fromValue(processVO.getProcessType()),
+                    processId, processVO.getUser(), processVO.getPriority(), processVO.isReleased());
+        }
+    }
 }

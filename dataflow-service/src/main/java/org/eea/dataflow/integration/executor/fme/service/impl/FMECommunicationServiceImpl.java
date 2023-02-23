@@ -1,7 +1,5 @@
 package org.eea.dataflow.integration.executor.fme.service.impl;
 
-
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -29,8 +27,6 @@ import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
-import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
-import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
@@ -39,7 +35,6 @@ import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
-import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -148,14 +143,6 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   @Autowired
   private JobControllerZuul jobControllerZuul;
 
-  /** The job process controller zuul. */
-  @Autowired
-  private JobProcessControllerZuul jobProcessControllerZuul;
-
-  /** The process controller zuul. */
-  @Autowired
-  private ProcessControllerZuul processControllerZuul;
-
   /** The dataflow service. */
   @Autowired
   private DataflowService dataflowService;
@@ -243,13 +230,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   private void updateFailedJobAndProcess(JobVO jobVO){
     if (jobVO != null) {
       try {
-        jobControllerZuul.updateJobStatus(jobVO.getId(), JobStatusEnum.FAILED);
-        List<String> processIds = jobProcessControllerZuul.findProcessesByJobId(jobVO.getId());
-        for (String processId : processIds) {
-          ProcessVO processVO = processControllerZuul.findById(processId);
-          processControllerZuul.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(), ProcessStatusEnum.CANCELED, ProcessTypeEnum.IMPORT,
-                  processId, processVO.getUser(), processVO.getPriority(), processVO.isReleased());
-        }
+        jobControllerZuul.updateJobAndProcess(jobVO.getId(), JobStatusEnum.FAILED, ProcessStatusEnum.CANCELED);
       } catch (Exception e) {
         LOG.error("Could not update failed job and process for job id {} ", jobVO.getId(), e);
       }
