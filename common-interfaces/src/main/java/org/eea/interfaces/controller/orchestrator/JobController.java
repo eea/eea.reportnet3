@@ -163,7 +163,7 @@ public interface JobController {
      * Cancels job
      * @param jobId
      */
-    @PutMapping(value = "/private/cancelJob/{jobId}")
+    @PutMapping(value = "/cancelJob/{jobId}")
     void cancelJob(@PathVariable("jobId") Long jobId) throws Exception;
 }
 
