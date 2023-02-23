@@ -414,11 +414,14 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   );
 
   const onConfirmDeleteDialog = async () => {
+    setLoadingStatus('pending');
     setIsDeleteDialogVisible(false);
     try {
       await JobsStatusesService.cancelJob(jobStatus.id);
+      setLoadingStatus('success');
     } catch (error) {
       console.error('JobsStatus - onConfirmDeleteDialog.', error);
+      setLoadingStatus('failed');
     } finally {
       setJobStatus(null);
       getJobsStatuses();
