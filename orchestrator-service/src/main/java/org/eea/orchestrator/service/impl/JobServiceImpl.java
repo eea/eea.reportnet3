@@ -423,7 +423,7 @@ public class JobServiceImpl implements JobService {
             ProcessVO processVO = processControllerZuul.findById(processId);
             //update process status
             processControllerZuul.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(),
-                    ProcessStatusEnum.CANCELED, ProcessTypeEnum.IMPORT, processVO.getProcessId(),
+                    ProcessStatusEnum.CANCELED, ProcessTypeEnum.valueOf(processVO.getProcessType()), processVO.getProcessId(),
                     processVO.getUser(), processVO.getPriority(), processVO.isReleased());
             if (jobVO.isRelease() && jobVO.getJobType().equals(JobTypeEnum.RELEASE)) {
                 dataSetSnapshotControllerZuul.removeHistoricRelease(processVO.getDatasetId());
