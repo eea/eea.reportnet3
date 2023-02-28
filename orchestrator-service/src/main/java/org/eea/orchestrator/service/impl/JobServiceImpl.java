@@ -413,26 +413,33 @@ public class JobServiceImpl implements JobService {
     }
     @Override
     public void cancelJob(Long jobId) throws EEAException {
+        LOG.info("User cancelling job {}", jobId);
         JobVO jobVO = findById(jobId);
         List<String> processIds = jobProcessService.findProcessesByJobId(jobId);
         for (String processId : processIds) {
             List<TaskVO> tasks = dataSetControllerZuul.findTasksByProcessIdAndStatusIn(processId, Arrays.asList(ProcessStatusEnum.IN_PROGRESS, ProcessStatusEnum.IN_QUEUE));
             if (tasks.size()>0) {
+                LOG.info("User cancelling tasks for processId {} and job {}", processId, jobId);
                 validationControllerZuul.updateTaskStatusByProcessIdAndCurrentStatuses(processId, ProcessStatusEnum.CANCELED, new HashSet<>(Arrays.asList(ProcessStatusEnum.IN_QUEUE.toString(), ProcessStatusEnum.IN_PROGRESS.toString())));
+                LOG.info("User cancelled tasks for processId {} and job {}", processId, jobId);
             }
             ProcessVO processVO = processControllerZuul.findById(processId);
+            LOG.info("User cancelling process {} for job {}", processId, jobId);
             //update process status
             processControllerZuul.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(),
                     ProcessStatusEnum.CANCELED, ProcessTypeEnum.valueOf(processVO.getProcessType()), processVO.getProcessId(),
                     processVO.getUser(), processVO.getPriority(), processVO.isReleased());
+            LOG.info("User cancelled process {} for job {}", processId, jobId);
             if (jobVO.isRelease() && jobVO.getJobType().equals(JobTypeEnum.RELEASE)) {
+                LOG.info("Removing historic releases for job {} and datasetId {}", jobId, processVO.getDatasetId());
                 dataSetSnapshotControllerZuul.removeHistoricRelease(processVO.getDatasetId());
+                LOG.info("Removed historic releases for job {} and datasetId {}", jobId, processVO.getDatasetId());
             } else if (jobVO.isRelease() && jobVO.getJobType().equals(JobTypeEnum.VALIDATION)) {
                 validationControllerZuul.deleteLocksToReleaseProcess(processVO.getDatasetId());
             }
         }
         updateJobStatus(jobId, JobStatusEnum.CANCELED_BY_ADMIN);
-        LOG.info("Updated job {} to status CANCELED", jobId);
+        LOG.info("Updated job {} to status CANCELED_BY_ADMIN", jobId);
         Map<String, Object> value = new HashMap<>();
         String user = jobVO.getCreatorUsername();
         value.put(LiteralConstants.USER, user);
