@@ -315,7 +315,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     <ActionsColumn
       disabledButtons={
         !(
-          job.jobStatus === 'IN_PROGRESS' &&
+          (job.jobStatus === 'IN_PROGRESS' || job.jobStatus === 'QUEUED') &&
           (job.jobType === 'IMPORT' || job.jobType === 'VALIDATION' || job.jobType === 'RELEASE')
         )
       }
