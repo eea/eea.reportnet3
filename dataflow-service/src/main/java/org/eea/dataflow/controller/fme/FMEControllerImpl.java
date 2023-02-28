@@ -1,6 +1,5 @@
 package org.eea.dataflow.controller.fme;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,9 +10,15 @@ import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.controller.dataflow.integration.fme.FMEController;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.integration.fme.FMEOperationInfoVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.service.LockService;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -48,6 +53,9 @@ import springfox.documentation.annotations.ApiIgnore;
 @ApiIgnore
 public class FMEControllerImpl implements FMEController {
 
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(FMEControllerImpl.class);
+
   /** The fme communication service. */
   @Autowired
   private FMECommunicationService fmeCommunicationService;
@@ -65,6 +73,9 @@ public class FMEControllerImpl implements FMEController {
    */
   @Autowired
   private IntegrationService integrationService;
+
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -130,9 +141,14 @@ public class FMEControllerImpl implements FMEController {
     try {
       FMEJob fmeJob = fmeCommunicationService.authenticateAndAuthorize(
           fmeOperationInfoVO.getApiKey(), fmeOperationInfoVO.getRn3JobId());
+      LOG.info("FME endpoint /operationFinished has been called for fmeJobId {} with status number {} ", fmeJob.getJobId(), fmeOperationInfoVO.getStatusNumber());
       fmeCommunicationService.releaseNotifications(fmeJob, fmeOperationInfoVO.getStatusNumber(),
           fmeOperationInfoVO.isNotificationRequired());
       fmeCommunicationService.updateJobStatus(fmeJob, fmeOperationInfoVO.getStatusNumber());
+      if(fmeOperationInfoVO.getStatusNumber() != 0L && fmeJob.getOperation() == IntegrationOperationTypeEnum.IMPORT) {
+        updateFailedJobAndProcessStatus(fmeJob.getJobId());
+        LOG.info("Updated fme job, job and process in /operationFinished for fmeJobId {}", fmeJob.getJobId());
+      }
     } catch (EEAForbiddenException e) {
       exception = e;
       httpStatus = HttpStatus.FORBIDDEN;
@@ -152,6 +168,17 @@ public class FMEControllerImpl implements FMEController {
     if (null != exception) {
       throw new ResponseStatusException(httpStatus, exception.getMessage(), exception);
     }
+  }
+
+  private void updateFailedJobAndProcessStatus(Long fmeJobId){
+    try{
+      JobVO jobVO = jobControllerZuul.findJobByFmeJobId(fmeJobId.toString());
+      jobControllerZuul.updateJobAndProcess(jobVO.getId(), JobStatusEnum.FAILED, ProcessStatusEnum.CANCELED);
+    }
+    catch (Exception e) {
+      LOG.error("Could not update failed job and process for fme job id {} ", fmeJobId, e);
+    }
+
   }
 
   /**

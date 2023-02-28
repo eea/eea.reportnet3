@@ -7,12 +7,13 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController;
-import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.orchestrator.service.JobService;
 import org.eea.security.jwt.utils.AuthenticationDetails;
@@ -385,6 +386,42 @@ public class JobControllerImpl implements JobController {
     @GetMapping(value = "/findJobByFmeJobId/{fmeJobId}")
     public JobVO findJobByFmeJobId(String fmeJobId) {
         return jobService.findByFmeJobId(fmeJobId);
+    }
+
+    /**
+     * Update job, process and task status
+     *
+     * @param jobId the job id
+     * @param jobStatus the job's status
+     * @param processStatus the process's status
+     * @return
+     */
+    @PostMapping(value = "/private/updateJobAndProcess/{id}")
+    public void updateJobAndProcess(@PathVariable("id") Long jobId, @RequestParam(value = "jobStatus") JobStatusEnum jobStatus,
+                                  @RequestParam(value = "processStatus") ProcessStatusEnum processStatus){
+        try {
+            jobService.updateJobAndProcess(jobId, jobStatus, processStatus);
+        }
+        catch (Exception e){
+            LOG.error("Could not update job and process for job id {} with jobStatus {} and processStatus {}", jobId, jobStatus.getValue(), processStatus.toString(), e);
+            throw e;
+        }
+    }
+
+    /**
+     * Cancels job
+     * @param jobId
+     */
+    @Override
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @PutMapping(value = "/cancelJob/{jobId}")
+    public void cancelJob(@PathVariable("jobId") Long jobId) throws Exception {
+        try {
+            jobService.cancelJob(jobId);
+        } catch (Exception e) {
+            LOG.error("Error while cancelling job with id {}, error is {}", jobId, e.getMessage());
+            throw e;
+        }
     }
 }
 

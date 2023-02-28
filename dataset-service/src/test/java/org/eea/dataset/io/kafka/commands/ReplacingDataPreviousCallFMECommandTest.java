@@ -105,7 +105,7 @@ public class ReplacingDataPreviousCallFMECommandTest {
     Mockito.when(integrationController.findIntegrationById(Mockito.anyLong()))
         .thenReturn(integrationVO);
     Mockito.when(integrationController.executeIntegrationProcess(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(executionResult);
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(executionResult);
     replacingDataPreviousFMECallCommand.execute(eeaEventVO);
     Mockito.verify(integrationController, times(1)).findIntegrationById(Mockito.anyLong());
   }

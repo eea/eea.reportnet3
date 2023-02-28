@@ -1,18 +1,11 @@
 package org.eea.dataflow.integration.executor.fme.service.impl;
 
-
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -33,12 +26,17 @@ import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.FMEJobstatus;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -141,6 +139,10 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  /** The job controller zuul. */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
+
   /** The dataflow service. */
   @Autowired
   private DataflowService dataflowService;
@@ -157,15 +159,17 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
    * @param workspace the workspace
    * @param fmeAsyncJob the fme async job
    * @param dataflowId the dataflow id
+   * @param jobVO the job
    * @return the integer
    */
   @Override
   public Integer submitAsyncJob(String repository, String workspace, FMEAsyncJob fmeAsyncJob,
-      Long dataflowId) {
+      Long dataflowId, JobVO jobVO) {
 
     Map<String, String> uriParams = new HashMap<>();
     uriParams.put("repository", repository);
     uriParams.put("workspace", workspace);
+    String jobId = (jobVO != null) ? jobVO.getId().toString() : null;
 
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
@@ -193,10 +197,12 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       }
 
     } catch (HttpStatusCodeException exception) {
-      LOG_ERROR.error("Status code: {} message: {}", exception.getStatusCode().value(),
+      LOG_ERROR.error("For jobId {} Status code: {} message: {}", jobId,  exception.getStatusCode().value(),
           exception.getMessage(), exception);
       Map<String, PublishedParameter> mapParameters = fmeAsyncJob.getPublishedParameters().stream()
           .collect(Collectors.toMap(PublishedParameter::getName, Function.identity()));
+
+      updateFailedJobAndProcess(jobVO);
 
       Long datasetId = null;
       String fileName = "";
@@ -214,11 +220,21 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.CALL_FME_PROCESS_FAILED_EVENT, null,
             notificationVO);
       } catch (EEAException e1) {
-        LOG_ERROR.error("Failed sending kafka notification due to an error calling FME: {}",
+        LOG_ERROR.error("Failed sending kafka notification for jobId {} due to an error calling FME: {}", jobId,
             e1.getMessage(), e1);
       }
     }
     return result;
+  }
+
+  private void updateFailedJobAndProcess(JobVO jobVO){
+    if (jobVO != null) {
+      try {
+        jobControllerZuul.updateJobAndProcess(jobVO.getId(), JobStatusEnum.FAILED, ProcessStatusEnum.CANCELED);
+      } catch (Exception e) {
+        LOG.error("Could not update failed job and process for job id {} ", jobVO.getId(), e);
+      }
+    }
   }
 
   /**

@@ -37,5 +37,12 @@ export const JobsStatusesRepository = {
       url: getUrl(JobsStatusesConfig.getJobHistory, {
         jobId
       })
+    }),
+
+  cancelJob: async jobId =>
+    await HTTPRequester.update({
+      url: getUrl(JobsStatusesConfig.cancelJob, {
+        jobId
+      })
     })
 };

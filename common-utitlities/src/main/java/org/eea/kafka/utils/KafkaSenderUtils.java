@@ -190,6 +190,7 @@ public class KafkaSenderUtils {
               : null);
       content.setProviderId(providerId);
       content.setUserId(user);
+      content.setError(notificationMap.get("error") != null ? notificationMap.get("error").toString() : null);
       notificationControllerZuul.createUserNotificationPrivate(eventType, content);
       LOG.info("Save user notification, eventType: {}, notification content: {}", eventType, content);
 

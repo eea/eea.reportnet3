@@ -1,29 +1,21 @@
 package org.eea.interfaces.controller.dataset;
 
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
-import org.eea.interfaces.vo.dataset.DataSetVO;
-import org.eea.interfaces.vo.dataset.ETLDatasetVO;
-import org.eea.interfaces.vo.dataset.ExportFilterVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * The Interface DatasetController.
@@ -642,5 +634,14 @@ public interface DatasetController {
    */
   @DeleteMapping(value = "/deleteLocksToImportProcess/{datasetId}")
   void deleteLocksToImportProcess(@PathVariable("datasetId") Long datasetId);
+
+  /**
+   * Finds tasks by processId and status
+   * @param processId
+   * @param status
+   * @return
+   */
+  @GetMapping("/private/findTasksByProcessIdAndStatusIn/{processId}")
+  List<TaskVO> findTasksByProcessIdAndStatusIn(@PathVariable("processId") String processId, @RequestParam("status") List<ProcessStatusEnum> status);
 
 }

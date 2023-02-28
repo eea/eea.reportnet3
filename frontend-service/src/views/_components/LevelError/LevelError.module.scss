@@ -21,6 +21,11 @@
   color: var(--c-black-color);
 }
 
+.canceled_by_admin {
+  background-color: rgb(253, 204, 113);
+  color: rgb(185, 67, 24);
+}
+
 .disabled,
 .failed {
   background-color: var(--statusBox-false-bg);
