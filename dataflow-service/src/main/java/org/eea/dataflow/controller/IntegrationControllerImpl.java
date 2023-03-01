@@ -531,7 +531,7 @@ public class IntegrationControllerImpl implements IntegrationController {
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
   @PostMapping("/{integrationId}/runIntegration/dataset/{datasetId}")
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASET_LEAD_REPORTER','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASET_LEAD_REPORTER','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD','DATAFLOW_REPORTER_WRITE','DATASET_REPORTER_WRITE')")
   @ApiOperation(
       value = "Run an external integration process providing the integration id and the dataset where applies",
       response = ExecutionResultVO.class, hidden = true)
