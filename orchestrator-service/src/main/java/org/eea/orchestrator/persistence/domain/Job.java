@@ -64,4 +64,7 @@ public class Job {
 
     @Column(name = "DATASET_NAME")
     private String datasetName;
+
+    @Column(name = "JOB_INFO")
+    private String jobInfo;
 }

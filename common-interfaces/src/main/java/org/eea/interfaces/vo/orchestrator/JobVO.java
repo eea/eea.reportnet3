@@ -61,4 +61,7 @@ public class JobVO {
 
     /** The dataset name */
     private String datasetName;
+
+    /** The job info */
+    private String jobInfo;
 }
