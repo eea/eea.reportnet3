@@ -66,4 +66,7 @@ public class JobHistory {
 
     @Column(name = "DATASET_NAME")
     private String datasetName;
+
+    @Column(name = "JOB_INFO")
+    private String jobInfo;
 }

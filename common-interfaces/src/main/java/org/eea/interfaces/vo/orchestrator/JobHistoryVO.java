@@ -64,4 +64,7 @@ public class JobHistoryVO {
 
     /** The dataset name */
     private String datasetName;
+
+    /** The job info */
+    private String jobInfo;
 }
