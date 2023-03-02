@@ -520,24 +520,27 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
         LOG.info("Query: {} ", stringQuery);
 
-        Object resultPosition = null;
         // We need to know which is the first position in the temp table to take the results
         // If there's no position that means we have to import the data from that request
-        String queryPosition = "SELECT id from dataset_" + datasetId + ".temp_etlexport "
-            + "WHERE filter_value='" + filterChain + "' order by id limit 1";
-        Query queryPositionResult = entityManager.createNativeQuery(queryPosition);
+        Query recordsTmpExportQueryResult = entityManager.createNativeQuery(
+            "SELECT count(id) from dataset_" + datasetId + ".temp_etlexport " + "WHERE filter_value='" + filterChain + "';");
         try {
-          resultPosition = queryPositionResult.getSingleResult();
+          int recordsTmpExport = recordsTmpExportQueryResult.getFirstResult();
+          LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}", recordsTmpExport, filterChain, totalRecords);
 
-        } catch (NoResultException nre) {
-          LOG.info("temp table etlexport empty for this filter. Have to fill it");
-          fileTempEtlExport(datasetId, stringQuery.toString(), filterChain);
-          fileTempEtlImport(datasetId, filterChain);
-          resultPosition = queryPositionResult.getSingleResult();
+          while (recordsTmpExport != totalRecords) {
+            LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}. Deleting old records", recordsTmpExport, filterChain, totalRecords);
+            if (recordsTmpExport > 0) {
+              deleteTempEtlExportByFilterValue(datasetId, filterChain, recordsTmpExport, recordsTmpExportQueryResult);
+            }
+            recordsTmpExport = exportAndImportToEtlExportTable(datasetId, filterChain, stringQuery, recordsTmpExportQueryResult);
+          }
+        } catch (Exception e) {
+          LOG_ERROR.error("Error creating a file into the temp_etlexport from dataset {}", datasetId, e);
+          throw e;
         }
       }
     }
-
 
     // Second loop. Now the temp table is filled and we have to take the data
     GsonJsonParser gsonparser = new GsonJsonParser();
@@ -624,6 +627,24 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     System.gc();
 
     return resultjson.toString();
+  }
+
+  private int exportAndImportToEtlExportTable(Long datasetId, String filterChain, StringBuilder stringQuery, Query queryPositionResult) {
+    int records;
+    try {
+      LOG.info("Export data to snap file for datasetId {} with filter_value {}", datasetId, filterChain);
+      fileTempEtlExport(datasetId, stringQuery.toString(), filterChain);
+
+      LOG.info("Exported datta successfully. Import data from snap file to temp_etlexport for datasetId {} with filter_value {}", datasetId, filterChain);
+      fileTempEtlImport(datasetId, filterChain);
+
+      records = queryPositionResult.getFirstResult();
+      LOG.info("Records imported in temp_etlexport {} for datasetId {} with filter_value {}", records, datasetId, filterChain);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in exportAndImportToEtlExportTable for datasetId {} with filter_value {}", datasetId, filterChain, e);
+      throw e;
+    }
+    return records;
   }
 
   /**
@@ -1531,7 +1552,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       stringQuery.delete(stringQuery.lastIndexOf("and "), stringQuery.length() - 1);
     }
 
-    LOG.info(stringQuery.toString());
+    LOG.info("TotalRecordsQuery: {}", stringQuery);
     return stringQuery.toString();
   }
 
@@ -1565,5 +1586,40 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
 
     return deleted;
+  }
+
+  /** Delete from temp_etlexport by filter_value
+   * @param datasetId
+   * @param filterValue
+   * @param totalCountOfRecords
+   */
+  @Transactional
+  public void deleteTempEtlExportByFilterValue(Long datasetId, String filterValue, int totalCountOfRecords, Query queryPositionResult) {
+    try {
+      LOG.info("Delete totalCountOfRecords {} from table temp_etlexport for datasetId {} with filter_value {}", totalCountOfRecords, datasetId, filterValue);
+      int recordsLeft;
+      String datasetName = "dataset_" + datasetId;
+      do {
+        int loops = (int) Math.ceil(totalCountOfRecords / 100.000);
+        for (int i = 0; i < loops; i++) {
+          LOG.info("Delete from table temp_etlexport 100.000 records for datasetId {}", datasetId);
+          StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT id FROM ");
+          deleteSql.append(datasetName).append(".temp_etlexport where filter_value = '").append(filterValue).append("' LIMIT 100000) ");
+          deleteSql.append("DELETE FROM ");
+          deleteSql.append(datasetName).append(".temp_etlexport tmp ");
+          deleteSql.append("USING rows WHERE tmp.id = rows.id;");
+
+          Query query = entityManager.createNativeQuery(deleteSql.toString());
+          query.executeUpdate();
+          LOG.info("Deleted from table temp_etlexport 100.000 records for datasetId {}", datasetId);
+        }
+        totalCountOfRecords = recordsLeft = queryPositionResult.getFirstResult();
+      } while (recordsLeft == 0);
+      LOG.info("Delete operation of table temp_etlexport for datasetId {} has finished", datasetId);
+
+    } catch (Exception er) {
+      LOG.error("Error executing delete operation of table temp_etlexport for datasetId {} with filter_value {}", datasetId, filterValue, er);
+      throw er;
+    }
   }
 }
