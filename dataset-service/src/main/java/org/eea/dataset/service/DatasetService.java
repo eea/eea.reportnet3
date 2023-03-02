@@ -362,6 +362,15 @@ public interface DatasetService {
    */
   String getMimetype(String file) throws EEAException;
 
+  /**
+   * Get the file's extension
+   *
+   * @param file the filename
+   * @return the extension (with the dot)
+   * @throws EEAException the EEA exception
+   */
+  String getExtension(String file) throws EEAException;
+
 
   /**
    * Copy data.
