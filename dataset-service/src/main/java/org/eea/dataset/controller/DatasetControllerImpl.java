@@ -1978,7 +1978,7 @@ public class DatasetControllerImpl implements DatasetController {
     if (fieldSchema.getValidExtensions() != null) {
       List<String> extensions = Arrays.asList(fieldSchema.getValidExtensions());
       if (!extensions.isEmpty()
-          && !extensions.contains(datasetService.getMimetype(originalFilename))) {
+          && !extensions.contains(datasetService.getExtension(originalFilename))) {
         result = false;
       }
     }

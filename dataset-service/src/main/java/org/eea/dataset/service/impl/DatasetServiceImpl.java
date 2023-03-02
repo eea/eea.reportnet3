@@ -364,6 +364,24 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   /**
+   * Get the file's extension
+   *
+   * @param file the filename
+   * @return the extension (with the dot)
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public String getExtension(final String file) throws EEAException {
+    String extension = null;
+    final int location = file.lastIndexOf('.');
+    if (location == -1) {
+      throw new EEAException(EEAErrorMessage.FILE_EXTENSION);
+    }
+    extension = file.substring(location);
+    return extension;
+  }
+
+  /**
    * Delete data schema.
    *
    * @param datasetId the dataset id
