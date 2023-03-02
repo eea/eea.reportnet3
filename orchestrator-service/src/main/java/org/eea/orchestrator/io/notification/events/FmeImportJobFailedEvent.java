@@ -1,36 +1,29 @@
 package org.eea.orchestrator.io.notification.events;
 
+
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
-import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The Class LongRunningImportFailedEvent.
+ * The Class FmeJobFailedEvent.
  */
 @Component
-public class LongRunningImportFailedEvent implements NotificableEventHandler {
-
+public class FmeImportJobFailedEvent implements NotificableEventHandler {
 
     /**
-            * Gets the event type.
-            *
-            * @return the event type
-   */
+     * Gets the event type.
+     *
+     * @return the event type
+     */
     @Override
     public EventType getEventType() {
-        return EventType.LONG_RUNNING_IMPORT_FAILED_EVENT;
+        return EventType.FME_IMPORT_JOB_FAILED_EVENT;
     }
 
     /**

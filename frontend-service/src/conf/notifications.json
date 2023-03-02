@@ -948,6 +948,14 @@
             "parameters": ["dataflowId", "datasetId"],
             "hasQueryString": true
           }
+        },
+        {
+          "key": "FME_IMPORT_JOB_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
         }
       ]
     },

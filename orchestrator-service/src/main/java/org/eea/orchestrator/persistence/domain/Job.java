@@ -1,6 +1,7 @@
 package org.eea.orchestrator.persistence.domain;
 
 import lombok.*;
+import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.utils.HashMapConverter;
@@ -64,4 +65,8 @@ public class Job {
 
     @Column(name = "DATASET_NAME")
     private String datasetName;
+
+    @Column(name = "FME_STATUS")
+    @Enumerated(EnumType.STRING)
+    private FmeJobStatusEnum fmeStatus;
 }
