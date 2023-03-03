@@ -525,7 +525,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         Query recordsTmpExportQueryResult = entityManager.createNativeQuery(
             "SELECT count(id) from dataset_" + datasetId + ".temp_etlexport " + "WHERE filter_value='" + filterChain + "';");
         try {
-          int recordsTmpExport = (int) recordsTmpExportQueryResult.getSingleResult();
+          int recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.getSingleResult()).intValue();
           LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}", recordsTmpExport, filterChain, totalRecords);
 
           while (recordsTmpExport != totalRecords) {
@@ -638,7 +638,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       LOG.info("Exported datta successfully. Import data from snap file to temp_etlexport for datasetId {} with filter_value {}", datasetId, filterChain);
       fileTempEtlImport(datasetId, filterChain);
 
-      records = (int) queryPositionResult.getSingleResult();
+      records = ((BigInteger) queryPositionResult.getSingleResult()).intValue();
       LOG.info("Records imported in temp_etlexport {} for datasetId {} with filter_value {}", records, datasetId, filterChain);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in exportAndImportToEtlExportTable for datasetId {} with filter_value {}", datasetId, filterChain, e);
@@ -1613,7 +1613,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           query.executeUpdate();
           LOG.info("Deleted from table temp_etlexport 100.000 records for datasetId {}", datasetId);
         }
-        totalCountOfRecords = recordsLeft = (int) queryPositionResult.getSingleResult();
+        totalCountOfRecords = recordsLeft = ((BigInteger) queryPositionResult.getSingleResult()).intValue();
       } while (recordsLeft == 0);
       LOG.info("Delete operation of table temp_etlexport for datasetId {} has finished", datasetId);
 
