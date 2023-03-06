@@ -548,23 +548,28 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         // We need to know which is the first position in the temp table to take the results
         // If there's no position that means we have to import the data from that request
         String query = "SELECT count(id) from dataset_" + datasetId + ".temp_etlexport " + "WHERE filter_value='" + filterChain + "';";
-        Query recordsTmpExportQueryResult = entityManager.createNativeQuery(query);
         try {
-          int recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.getSingleResult()).intValue();
+          DriverManagerDataSource dataSource = new DriverManagerDataSource();
+          dataSource.setDriverClassName(connectionDriver);
+          dataSource.setUrl(connectionUrl);
+          dataSource.setUsername(connectionUsername);
+          dataSource.setPassword(connectionPassword);
+          JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+          int recordsTmpExport = jdbcTemplate.queryForObject(query, Integer.class).intValue();
           LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}", recordsTmpExport, filterChain, totalRecords);
 
           while (recordsTmpExport != totalRecords) {
             if (recordsTmpExport != 0) {
               do {
                 LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}. Deleting old records", recordsTmpExport, filterChain, totalRecords);
-                deleteTempEtlExportByFilterValue(datasetId, filterChain, recordsTmpExport);
+                deleteTempEtlExportByFilterValue(datasetId, filterChain, recordsTmpExport, jdbcTemplate);
 
-                recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.getSingleResult()).intValue();
+                recordsTmpExport = jdbcTemplate.queryForObject(query, Integer.class).intValue();
                 LOG.info("Table temp_etlexport has {} rows for filterChain {}. Records stored {}", recordsTmpExport, filterChain, recordsTmpExport);
               } while (recordsTmpExport != 0);
             }
             exportAndImportToEtlExportTable(datasetId, filterChain, stringQuery);
-            recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.getSingleResult()).intValue();
+            recordsTmpExport = jdbcTemplate.queryForObject(query, Integer.class).intValue();
           }
         } catch (Exception e) {
           LOG_ERROR.error("Error creating a file into the temp_etlexport from dataset {}", datasetId, e);
@@ -1622,20 +1627,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param totalCountOfRecords
    */
   @Transactional
-  public void deleteTempEtlExportByFilterValue(Long datasetId, String filterValue, int totalCountOfRecords) {
+  public void deleteTempEtlExportByFilterValue(Long datasetId, String filterValue, int totalCountOfRecords, JdbcTemplate jdbcTemplate) {
     try {
       LOG.info("Delete totalCountOfRecords {} from table temp_etlexport for datasetId {} with filter_value {}", totalCountOfRecords, datasetId, filterValue);
       String datasetName = "dataset_" + datasetId;
       int loops = (int) Math.ceil(totalCountOfRecords / 100000);
       LOG.info("DatasetId loops {}", loops);
-      DriverManagerDataSource dataSource = new DriverManagerDataSource();
-      dataSource.setDriverClassName(connectionDriver);
-      dataSource.setUrl(connectionUrl);
-      dataSource.setUsername(connectionUsername);
-      dataSource.setPassword(connectionPassword);
+
       for (int i = 0; i <= loops; i++) {
         LOG.info("Delete from table temp_etlexport 100.000 records for datasetId {} loop No.: {}", datasetId, i);
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT id FROM ");
         deleteSql.append(datasetName).append(".temp_etlexport where filter_value = '").append(filterValue).append("' LIMIT 100000) ");
         deleteSql.append("DELETE FROM ");
