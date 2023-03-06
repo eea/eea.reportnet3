@@ -1613,7 +1613,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           query.executeUpdate();
           LOG.info("Deleted from table temp_etlexport 100.000 records for datasetId {}", datasetId);
         }
-        recordsLeft = ((BigInteger) queryPositionResult.getSingleResult()).intValue();
+        totalCountOfRecords = recordsLeft = ((BigInteger) queryPositionResult.getSingleResult()).intValue();
         LOG.info("Delete operation of table temp_etlexport for datasetId {} has recordsLeft {}", datasetId, recordsLeft);
       } while (recordsLeft == 0);
       LOG.info("Delete operation of table temp_etlexport for datasetId {} has finished", datasetId);
