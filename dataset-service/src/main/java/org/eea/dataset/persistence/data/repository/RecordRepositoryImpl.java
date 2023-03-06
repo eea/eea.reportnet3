@@ -68,6 +68,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -114,6 +116,29 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
+  /**
+   * The connection url.
+   */
+  @Value("${spring.datasource.url}")
+  private String connectionUrl;
+
+  /**
+   * The connection username.
+   */
+  @Value("${spring.datasource.dataset.username}")
+  private String connectionUsername;
+
+  /**
+   * The connection password.
+   */
+  @Value("${spring.datasource.dataset.password}")
+  private String connectionPassword;
+
+  /**
+   * The connection driver.
+   */
+  @Value("${spring.datasource.driverClassName}")
+  private String connectionDriver;
 
   /** The Constant WHERE_ID_TABLE_SCHEMA: {@value}. */
   private static final String WHERE_ID_TABLE_SCHEMA = "WHERE tv.idTableSchema = :idTableSchema ";
@@ -1603,16 +1628,21 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       String datasetName = "dataset_" + datasetId;
       int loops = (int) Math.ceil(totalCountOfRecords / 100000);
       LOG.info("DatasetId loops {}", loops);
+      DriverManagerDataSource dataSource = new DriverManagerDataSource();
+      dataSource.setDriverClassName(connectionDriver);
+      dataSource.setUrl(connectionUrl);
+      dataSource.setUsername(connectionUsername);
+      dataSource.setPassword(connectionPassword);
       for (int i = 0; i <= loops; i++) {
         LOG.info("Delete from table temp_etlexport 100.000 records for datasetId {} loop No.: {}", datasetId, i);
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
         StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT id FROM ");
         deleteSql.append(datasetName).append(".temp_etlexport where filter_value = '").append(filterValue).append("' LIMIT 100000) ");
         deleteSql.append("DELETE FROM ");
         deleteSql.append(datasetName).append(".temp_etlexport tmp ");
         deleteSql.append("USING rows WHERE tmp.id = rows.id;");
 
-        Query query = entityManager.createNativeQuery(deleteSql.toString());
-        query.executeUpdate();
+        jdbcTemplate.update(deleteSql.toString());
         LOG.info("Deleted from table temp_etlexport 100.000 records for datasetId {}", datasetId);
       }
       LOG.info("Delete operation of table temp_etlexport for datasetId {} has finished", datasetId);
