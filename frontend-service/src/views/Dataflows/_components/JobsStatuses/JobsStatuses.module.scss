@@ -112,6 +112,10 @@ h6 {
   }
 }
 
+.statusBox:hover {
+  cursor: pointer;
+}
+
 .tooltip .tooltiptext {
   visibility: hidden;
   width: 120px;
