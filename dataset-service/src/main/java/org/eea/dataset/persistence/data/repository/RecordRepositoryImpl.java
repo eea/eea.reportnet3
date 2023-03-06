@@ -1600,7 +1600,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       int recordsLeft;
       String datasetName = "dataset_" + datasetId;
       do {
-        int loops = (int) Math.ceil(totalCountOfRecords / 100.000);
+        int loops = (int) Math.ceil(totalCountOfRecords / 100000);
         for (int i = 0; i < loops; i++) {
           LOG.info("Delete from table temp_etlexport 100.000 records for datasetId {} loop No.: {}", datasetId, i);
           StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT id FROM ");
