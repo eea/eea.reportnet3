@@ -522,8 +522,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
         // We need to know which is the first position in the temp table to take the results
         // If there's no position that means we have to import the data from that request
-        Query recordsTmpExportQueryResult = entityManager.createNativeQuery(
-            "SELECT count(id) from dataset_" + datasetId + ".temp_etlexport " + "WHERE filter_value='" + filterChain + "';");
+        String query = "SELECT count(id) from dataset_" + datasetId + ".temp_etlexport " + "WHERE filter_value='" + filterChain + "';";
+        Query recordsTmpExportQueryResult = entityManager.createNativeQuery(query);
         try {
           int recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.setHint(QueryHints.READ_ONLY, true).getSingleResult()).intValue();
           LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}", recordsTmpExport, filterChain, totalRecords);
@@ -531,9 +531,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           while (recordsTmpExport != totalRecords) {
             LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}. Deleting old records", recordsTmpExport, filterChain, totalRecords);
             if (recordsTmpExport > 0) {
-              deleteTempEtlExportByFilterValue(datasetId, filterChain, recordsTmpExport, recordsTmpExportQueryResult);
+              deleteTempEtlExportByFilterValue(datasetId, filterChain, recordsTmpExport, query);
             }
-            recordsTmpExport = exportAndImportToEtlExportTable(datasetId, filterChain, stringQuery, recordsTmpExportQueryResult);
+            recordsTmpExport = exportAndImportToEtlExportTable(datasetId, filterChain, stringQuery, query);
           }
         } catch (Exception e) {
           LOG_ERROR.error("Error creating a file into the temp_etlexport from dataset {}", datasetId, e);
@@ -629,7 +629,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return resultjson.toString();
   }
 
-  private int exportAndImportToEtlExportTable(Long datasetId, String filterChain, StringBuilder stringQuery, Query queryPositionResult) {
+  private int exportAndImportToEtlExportTable(Long datasetId, String filterChain, StringBuilder stringQuery, String queryPositionResult) {
     int records;
     try {
       LOG.info("Export data to snap file for datasetId {} with filter_value {}", datasetId, filterChain);
@@ -638,7 +638,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       LOG.info("Exported datta successfully. Import data from snap file to temp_etlexport for datasetId {} with filter_value {}", datasetId, filterChain);
       fileTempEtlImport(datasetId, filterChain);
 
-      records = ((BigInteger) queryPositionResult.setHint(QueryHints.READ_ONLY, true).getSingleResult()).intValue();
+      Query query = entityManager.createNativeQuery(queryPositionResult);
+      records = ((BigInteger) query.setHint(QueryHints.READ_ONLY, true).getSingleResult()).intValue();
       LOG.info("Records imported in temp_etlexport {} for datasetId {} with filter_value {}", records, datasetId, filterChain);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in exportAndImportToEtlExportTable for datasetId {} with filter_value {}", datasetId, filterChain, e);
@@ -1594,7 +1595,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param totalCountOfRecords
    */
   @Transactional
-  public void deleteTempEtlExportByFilterValue(Long datasetId, String filterValue, int totalCountOfRecords, Query queryPositionResult) {
+  public void deleteTempEtlExportByFilterValue(Long datasetId, String filterValue, int totalCountOfRecords, String queryPositionResult) {
     try {
       LOG.info("Delete totalCountOfRecords {} from table temp_etlexport for datasetId {} with filter_value {}", totalCountOfRecords, datasetId, filterValue);
       int recordsLeft;
@@ -1614,7 +1615,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           query.executeUpdate();
           LOG.info("Deleted from table temp_etlexport 100.000 records for datasetId {}", datasetId);
         }
-        totalCountOfRecords = recordsLeft = ((BigInteger) queryPositionResult.setHint(QueryHints.READ_ONLY, true).getSingleResult()).intValue();
+        Query query = entityManager.createNativeQuery(queryPositionResult);
+        totalCountOfRecords = recordsLeft = ((BigInteger) query.setHint(QueryHints.READ_ONLY, true).getSingleResult()).intValue();
         LOG.info("Delete operation of table temp_etlexport for datasetId {} has recordsLeft {}", datasetId, recordsLeft);
       } while (recordsLeft != 0);
       LOG.info("Delete operation of table temp_etlexport for datasetId {} has finished", datasetId);
