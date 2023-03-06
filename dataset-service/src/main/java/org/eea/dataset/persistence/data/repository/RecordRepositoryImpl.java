@@ -1602,7 +1602,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       do {
         int loops = (int) Math.ceil(totalCountOfRecords / 100.000);
         for (int i = 0; i < loops; i++) {
-          LOG.info("Delete from table temp_etlexport 100.000 records for datasetId {}", datasetId);
+          LOG.info("Delete from table temp_etlexport 100.000 records for datasetId {} loop No.: {}", datasetId, i);
           StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT id FROM ");
           deleteSql.append(datasetName).append(".temp_etlexport where filter_value = '").append(filterValue).append("' LIMIT 100000) ");
           deleteSql.append("DELETE FROM ");
@@ -1613,7 +1613,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           query.executeUpdate();
           LOG.info("Deleted from table temp_etlexport 100.000 records for datasetId {}", datasetId);
         }
-        totalCountOfRecords = recordsLeft = ((BigInteger) queryPositionResult.getSingleResult()).intValue();
+        recordsLeft = ((BigInteger) queryPositionResult.getSingleResult()).intValue();
+        LOG.info("Delete operation of table temp_etlexport for datasetId {} has recordsLeft {}", datasetId, recordsLeft);
       } while (recordsLeft == 0);
       LOG.info("Delete operation of table temp_etlexport for datasetId {} has finished", datasetId);
 
