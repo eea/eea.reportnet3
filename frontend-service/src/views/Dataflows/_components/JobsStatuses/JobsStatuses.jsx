@@ -86,8 +86,10 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         jobId: filterBy.jobId,
         jobType: filterBy.jobType?.join(),
         dataflowId: filterBy.dataflowId,
+        dataflowName: filterBy.dataflowName,
         providerId: filterBy.providerId,
         datasetId: filterBy.datasetId,
+        datasetName: filterBy.datasetName,
         creatorUsername: filterBy.creatorUsername,
         jobStatus: filterBy.jobStatus?.join()
       });
@@ -137,7 +139,9 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       nestedOptions: [
         { key: 'jobId', label: resourcesContext.messages['jobId'], keyfilter: 'pint' },
         { key: 'dataflowId', label: resourcesContext.messages['dataflowId'] },
+        { key: 'dataflowName', label: resourcesContext.messages['dataflowNameTwoWords'] },
         { key: 'datasetId', label: resourcesContext.messages['datasetId'] },
+        { key: 'datasetName', label: resourcesContext.messages['datasetName'] },
         { key: 'providerId', label: resourcesContext.messages['providerId'] },
         { key: 'creatorUsername', label: resourcesContext.messages['creatorUsername'] }
       ],

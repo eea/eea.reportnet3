@@ -27,8 +27,10 @@ public interface JobController {
      * @param jobId
      * @param jobTypes
      * @param dataflowId
+     * @param dataflowName
      * @param providerId
      * @param datasetId
+     * @param datasetName
      * @param creatorUsername
      * @param jobStatuses
      * @return
@@ -42,8 +44,10 @@ public interface JobController {
             @RequestParam(value = "jobId", required = false) Long jobId,
             @RequestParam(value = "jobType", required = false) String jobTypes,
             @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+            @RequestParam(value = "dataflowName", required = false) String dataflowName,
             @RequestParam(value = "providerId", required = false) Long providerId,
             @RequestParam(value = "datasetId", required = false) Long datasetId,
+            @RequestParam(value = "datasetName", required = false) String datasetName,
             @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
             @RequestParam(value = "jobStatus", required = false) String jobStatuses);
 
