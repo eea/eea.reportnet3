@@ -1615,7 +1615,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
         totalCountOfRecords = recordsLeft = ((BigInteger) queryPositionResult.getSingleResult()).intValue();
         LOG.info("Delete operation of table temp_etlexport for datasetId {} has recordsLeft {}", datasetId, recordsLeft);
-      } while (recordsLeft == 0);
+      } while (recordsLeft != 0);
       LOG.info("Delete operation of table temp_etlexport for datasetId {} has finished", datasetId);
 
     } catch (Exception er) {
