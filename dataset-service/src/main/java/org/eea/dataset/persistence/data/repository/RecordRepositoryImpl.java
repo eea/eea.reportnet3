@@ -525,15 +525,21 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         String query = "SELECT count(id) from dataset_" + datasetId + ".temp_etlexport " + "WHERE filter_value='" + filterChain + "';";
         Query recordsTmpExportQueryResult = entityManager.createNativeQuery(query);
         try {
-          int recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.setHint(QueryHints.READ_ONLY, true).getSingleResult()).intValue();
+          int recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.getSingleResult()).intValue();
           LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}", recordsTmpExport, filterChain, totalRecords);
 
           while (recordsTmpExport != totalRecords) {
-            LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}. Deleting old records", recordsTmpExport, filterChain, totalRecords);
-            if (recordsTmpExport > 0) {
-              deleteTempEtlExportByFilterValue(datasetId, filterChain, recordsTmpExport, query);
+            if (recordsTmpExport != 0) {
+              do {
+                LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}. Deleting old records", recordsTmpExport, filterChain, totalRecords);
+                deleteTempEtlExportByFilterValue(datasetId, filterChain, recordsTmpExport);
+
+                recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.getSingleResult()).intValue();
+                LOG.info("Table temp_etlexport has {} rows for filterChain {}. Records stored {}", recordsTmpExport, filterChain, recordsTmpExport);
+              } while (recordsTmpExport != 0);
             }
-            recordsTmpExport = exportAndImportToEtlExportTable(datasetId, filterChain, stringQuery, query);
+            exportAndImportToEtlExportTable(datasetId, filterChain, stringQuery);
+            recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.getSingleResult()).intValue();
           }
         } catch (Exception e) {
           LOG_ERROR.error("Error creating a file into the temp_etlexport from dataset {}", datasetId, e);
@@ -629,23 +635,19 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return resultjson.toString();
   }
 
-  private int exportAndImportToEtlExportTable(Long datasetId, String filterChain, StringBuilder stringQuery, String queryPositionResult) {
-    int records;
+  private void exportAndImportToEtlExportTable(Long datasetId, String filterChain, StringBuilder stringQuery) {
     try {
       LOG.info("Export data to snap file for datasetId {} with filter_value {}", datasetId, filterChain);
       fileTempEtlExport(datasetId, stringQuery.toString(), filterChain);
 
-      LOG.info("Exported datta successfully. Import data from snap file to temp_etlexport for datasetId {} with filter_value {}", datasetId, filterChain);
+      LOG.info("Exported data successfully. Import data from snap file to temp_etlexport for datasetId {} with filter_value {}", datasetId, filterChain);
       fileTempEtlImport(datasetId, filterChain);
 
-      Query query = entityManager.createNativeQuery(queryPositionResult);
-      records = ((BigInteger) query.setHint(QueryHints.READ_ONLY, true).getSingleResult()).intValue();
-      LOG.info("Records imported in temp_etlexport {} for datasetId {} with filter_value {}", records, datasetId, filterChain);
+      LOG.info("Import data has been imported successfully from snap file to temp_etlexport for datasetId {} with filter_value {}", datasetId, filterChain);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in exportAndImportToEtlExportTable for datasetId {} with filter_value {}", datasetId, filterChain, e);
       throw e;
     }
-    return records;
   }
 
   /**
@@ -1595,32 +1597,25 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param totalCountOfRecords
    */
   @Transactional
-  public void deleteTempEtlExportByFilterValue(Long datasetId, String filterValue, int totalCountOfRecords, String queryPositionResult) {
+  public void deleteTempEtlExportByFilterValue(Long datasetId, String filterValue, int totalCountOfRecords) {
     try {
       LOG.info("Delete totalCountOfRecords {} from table temp_etlexport for datasetId {} with filter_value {}", totalCountOfRecords, datasetId, filterValue);
-      int recordsLeft;
       String datasetName = "dataset_" + datasetId;
-      do {
-        int loops = (int) Math.ceil(totalCountOfRecords / 100000);
-        LOG.info("DatasetId loops {}", loops);
-        for (int i = 0; i <= loops; i++) {
-          LOG.info("Delete from table temp_etlexport 100.000 records for datasetId {} loop No.: {}", datasetId, i);
-          StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT id FROM ");
-          deleteSql.append(datasetName).append(".temp_etlexport where filter_value = '").append(filterValue).append("' LIMIT 100000) ");
-          deleteSql.append("DELETE FROM ");
-          deleteSql.append(datasetName).append(".temp_etlexport tmp ");
-          deleteSql.append("USING rows WHERE tmp.id = rows.id;");
+      int loops = (int) Math.ceil(totalCountOfRecords / 100000);
+      LOG.info("DatasetId loops {}", loops);
+      for (int i = 0; i <= loops; i++) {
+        LOG.info("Delete from table temp_etlexport 100.000 records for datasetId {} loop No.: {}", datasetId, i);
+        StringBuilder deleteSql = new StringBuilder("WITH rows AS (SELECT id FROM ");
+        deleteSql.append(datasetName).append(".temp_etlexport where filter_value = '").append(filterValue).append("' LIMIT 100000) ");
+        deleteSql.append("DELETE FROM ");
+        deleteSql.append(datasetName).append(".temp_etlexport tmp ");
+        deleteSql.append("USING rows WHERE tmp.id = rows.id;");
 
-          Query query = entityManager.createNativeQuery(deleteSql.toString());
-          query.executeUpdate();
-          LOG.info("Deleted from table temp_etlexport 100.000 records for datasetId {}", datasetId);
-        }
-        Query query = entityManager.createNativeQuery(queryPositionResult);
-        totalCountOfRecords = recordsLeft = ((BigInteger) query.setHint(QueryHints.READ_ONLY, true).getSingleResult()).intValue();
-        LOG.info("Delete operation of table temp_etlexport for datasetId {} has recordsLeft {}", datasetId, recordsLeft);
-      } while (recordsLeft != 0);
+        Query query = entityManager.createNativeQuery(deleteSql.toString());
+        query.executeUpdate();
+        LOG.info("Deleted from table temp_etlexport 100.000 records for datasetId {}", datasetId);
+      }
       LOG.info("Delete operation of table temp_etlexport for datasetId {} has finished", datasetId);
-
     } catch (Exception er) {
       LOG.error("Error executing delete operation of table temp_etlexport for datasetId {} with filter_value {}", datasetId, filterValue, er);
       throw er;
