@@ -595,7 +595,6 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         <Dialog
           blockScroll={false}
           className="responsiveDialog"
-          footer={dialogFooter}
           header={resourcesContext.messages['info']}
           modal={true}
           onHide={onHideStatusInfoDialog}
