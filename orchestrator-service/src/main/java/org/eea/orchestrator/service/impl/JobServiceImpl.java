@@ -120,14 +120,14 @@ public class JobServiceImpl implements JobService {
     private static final String CANCELED_BY_ADMIN_ERROR = "cancelled by admin";
 
     @Override
-    public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, Long providerId,
-                          Long datasetId, String creatorUsername, String jobStatuses) {
+    public JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
+                          Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
         String sortedTableColumn = jobUtils.getJobColumnNameByObjectName(sortedColumn);
-        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, providerId, datasetId, creatorUsername, jobStatuses);
+        List<Job> jobs = jobRepository.findJobsPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses);
         List<JobVO> jobVOList = jobMapper.entityListToClass(jobs);
         JobsVO jobsVO = new JobsVO();
         jobsVO.setTotalRecords(jobRepository.count());
-        jobsVO.setFilteredRecords(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, providerId, datasetId, creatorUsername, jobStatuses));
+        jobsVO.setFilteredRecords(jobRepository.countJobsPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses));
         jobsVO.setJobsList(jobVOList);
 
         return jobsVO;

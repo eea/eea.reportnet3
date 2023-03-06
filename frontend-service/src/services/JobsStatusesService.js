@@ -12,8 +12,10 @@ export const JobsStatusesService = {
     jobId,
     jobType,
     dataflowId,
+    dataflowName,
     providerId,
     datasetId,
+    datasetName,
     creatorUsername,
     jobStatus
   }) => {
@@ -27,8 +29,10 @@ export const JobsStatusesService = {
       jobId,
       jobType,
       dataflowId,
+      dataflowName,
       providerId,
       datasetId,
+      datasetName,
       creatorUsername,
       jobStatus
     });
