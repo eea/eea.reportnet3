@@ -1,8 +1,6 @@
 package org.eea.validation.persistence.data.metabase.repository;
 
-import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -13,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -180,6 +179,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
           value = "select * from task t where t.id in (select id from task where status in :statuses and task_type= :taskType and process_id= :processId order by date_finish desc limit 1) and (extract(epoch from LOCALTIMESTAMP - t.date_finish) / 60) > :timeInMinutes")
   Task getTaskThatExceedsTimeByStatusesAndType(@Param("processId") String processId, @Param("timeInMinutes") long timeInMinutes,
                                                       @Param("statuses") Set<String> statuses, @Param("taskType") String taskType);
+
+  Optional<Task> findById(Long id);
 }
 
 
