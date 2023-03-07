@@ -128,11 +128,11 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
         query.append((jobId != null) ? " and jobs.id = :jobId " : "");
         query.append(StringUtils.isNotBlank(jobTypes) ? " and jobs.job_type in :jobType " : "");
         query.append((dataflowId != null) ? " and jobs.dataflow_id= :dataflowId " : "");
-        query.append(StringUtils.isNotBlank(dataflowName) ? " and jobs.dataflow_name = :dataflowName " : "");
+        query.append(StringUtils.isNotBlank(dataflowName) ? " and LOWER(jobs.dataflow_name) LIKE LOWER(CONCAT('%',:dataflowName,'%')) " : "");
         query.append((providerId != null) ? " and jobs.provider_id= :providerId " : "");
         query.append((datasetId != null) ? " and jobs.dataset_id= :datasetId " : "");
-        query.append(StringUtils.isNotBlank(datasetName) ? " and jobs.dataset_name = :datasetName " : "");
-        query.append(StringUtils.isNotBlank(creatorUsername) ? " and jobs.creator_username = :creatorUsername " : "");
+        query.append(StringUtils.isNotBlank(datasetName) ? " and LOWER(jobs.dataset_name) LIKE LOWER(CONCAT('%',:datasetName,'%')) " : "");
+        query.append(StringUtils.isNotBlank(creatorUsername) ? " and LOWER(jobs.creator_username) LIKE LOWER(CONCAT('%',:creatorUsername,'%')) " : "");
         query.append(StringUtils.isNotBlank(jobStatuses) ? " and jobs.job_status in :jobStatus " : "");
     }
 
