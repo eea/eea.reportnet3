@@ -1,6 +1,5 @@
 package org.eea.orchestrator.scheduling;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -84,7 +83,8 @@ public class JobForFmeStatusPolling {
     private static final String FME_TOKEN_HEADER="fmetoken token=";
     private static final String MEDIA_TYPE_JSON="application/json";
 
-    private static final String fmeTokenProperty = "";
+    @Value("${integration.fme.polling.token}")
+    private String fmeTokenProperty;
 
     @PostConstruct
     private void init() {
@@ -173,9 +173,7 @@ public class JobForFmeStatusPolling {
 
         HttpGet request = new HttpGet(fmePollingUrl);
         request.addHeader(HttpHeaders.ACCEPT, MEDIA_TYPE_JSON);
-        String credentials = "";
-        String encodedCredentials = new String(Base64.encodeBase64(credentials.getBytes()));
-        request.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + encodedCredentials);
+        request.addHeader(HttpHeaders.AUTHORIZATION, fmeTokenProperty);
         CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse response = httpClient.execute(request);
 
