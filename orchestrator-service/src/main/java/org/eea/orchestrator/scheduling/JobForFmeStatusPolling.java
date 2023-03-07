@@ -91,7 +91,7 @@ public class JobForFmeStatusPolling {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> pollingForFmeJobs(),
-                new CronTrigger("0 */2 * * * *"));
+                new CronTrigger("0 */10 * * * *"));
     }
 
     /**
