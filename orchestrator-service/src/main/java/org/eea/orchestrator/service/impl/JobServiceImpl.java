@@ -447,8 +447,8 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public List<JobVO> getFMEImportJobsForPolling(){
-        //TODO
-        return null;
+        List<Job> jobs = jobRepository.findFmeJobsToPollForStatus();
+        return jobMapper.entityListToClass(jobs);
     }
 
     @Override

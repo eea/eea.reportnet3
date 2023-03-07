@@ -1,5 +1,14 @@
 package org.eea.orchestrator.scheduling;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.eea.exception.FmeIntegrationException;
+import org.springframework.http.*;
+import org.json.JSONObject;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -25,6 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -70,28 +80,35 @@ public class JobForFmeStatusPolling {
     @Autowired
     private JobUtils jobUtils;
 
+    private static final String JSON_STATUS_PARAM="status";
+    private static final String FME_TOKEN_HEADER="fmetoken token=";
+    private static final String MEDIA_TYPE_JSON="application/json";
+
+    private static final String fmeTokenProperty = "";
+
     @PostConstruct
     private void init() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> pollingForFmeJobs(),
-                new CronTrigger("0 */5 * * * *"));
+                new CronTrigger("0 */2 * * * *"));
     }
 
     /**
-     * The job runs every 5 minutes. It finds fme import jobs that have tasks with status=IN_PROGRESS and fme_status not success.
+     * The job runs every 10 minutes. It finds fme import jobs that have tasks with status=IN_PROGRESS and fme_status not success.
      * Then it polls for fme status and updates the value.
      * If fme_status is ABORTED, FME_FAILURE or JOB_FAILURE the job is failed.
      */
     public void pollingForFmeJobs() {
         try {
             List<JobVO> jobsForPolling = jobService.getFMEImportJobsForPolling();
+            if(jobsForPolling == null || jobsForPolling.size() == 0){
+                return;
+            }
+            LOG.info("Running scheduled job pollingForFmeJobs");
             for (JobVO job: jobsForPolling){
                 try {
-                    //TODO
-                    //poll for status
-                    // if response code is 200 get status
-                    String fmeStatus= null;
+                    String fmeStatus = pollFmeForJobStatus(job.getId().toString(), job.getFmeJobId());
                     FmeJobStatusEnum fmeStatusEnum = FmeJobStatusEnum.valueOf(fmeStatus);
                     if(fmeStatusEnum == null) {
                         String exceptionMessage = "Got unknown status when polling fme for jobId " + job.getId() + " and fmeJobId " + job.getFmeJobId()
@@ -99,6 +116,7 @@ public class JobForFmeStatusPolling {
                         throw new Exception(exceptionMessage);
                     }
 
+                    //if job's fme status is empty or job's fme status has been modified, we need to update it
                     if(job.getFmeStatus() == null || (job.getFmeStatus() != null && !job.getFmeStatus().getValue().equals(fmeStatus))){
                         jobService.updateFmeStatus(job.getId(), fmeStatusEnum);
                     }
@@ -118,6 +136,11 @@ public class JobForFmeStatusPolling {
     }
 
     private void failJob(JobVO job){
+        //get job to check if it is still in IN_PROGRESS status
+        JobVO jobToCheckStatus = jobService.findById(job.getId());
+        if(jobToCheckStatus.getJobStatus() != JobStatusEnum.IN_PROGRESS) {
+            LOG.info("Job with id {} has already been modified and now has status {}", job.getId(), job.getJobStatus().getValue());
+        }
         List<String> processIds = jobProcessService.findProcessesByJobId(job.getId());
 
         for(String processId: processIds){
@@ -143,5 +166,42 @@ public class JobForFmeStatusPolling {
 
         jobUtils.sendKafkaImportNotification(job, EventType.FME_IMPORT_JOB_FAILED_EVENT, "Fme job failed");
         LOG.info("Sent notification FME_IMPORT_JOB_FAILED_EVENT for jobId {} and fmeJobId {}", job.getId(), job.getFmeJobId());
+    }
+
+    private String pollFmeForJobStatus(String jobId, String fmeJobId) throws FmeIntegrationException, IOException {
+        String fmePollingUrl = "https://fme.discomap.eea.europa.eu/fmerest/v3/transformations/jobs/id/" + fmeJobId;
+
+        HttpGet request = new HttpGet(fmePollingUrl);
+        request.addHeader(HttpHeaders.ACCEPT, MEDIA_TYPE_JSON);
+        String credentials = "";
+        String encodedCredentials = new String(Base64.encodeBase64(credentials.getBytes()));
+        request.addHeader(HttpHeaders.AUTHORIZATION, "Basic " + encodedCredentials);
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        CloseableHttpResponse response = httpClient.execute(request);
+
+        if (response.getStatusLine().getStatusCode() == HttpStatus.OK.value()) {
+
+            if (response.getEntity() != null) {
+                String strResponse = EntityUtils.toString(response.getEntity());
+                JSONObject jsonResponse = new JSONObject(strResponse);
+
+                if (jsonResponse.get(JSON_STATUS_PARAM) != null) {
+                    FmeJobStatusEnum fmeStatus =  FmeJobStatusEnum.valueOf(jsonResponse.get(JSON_STATUS_PARAM).toString());
+                    LOG.info("When polling for fme status for jobId {} and fmeJobId {} received fme status {}", jobId, fmeJobId, fmeStatus.getValue());
+                    return fmeStatus.toString();
+                } else {
+                    String exceptionMessage = "When polling for fme status, received wrong response status " + jsonResponse.get(JSON_STATUS_PARAM) + " for jobId " + jobId + " and fmeJobId " + fmeJobId;
+                    throw new FmeIntegrationException(exceptionMessage);
+                }
+            }
+            else{
+                String exceptionMessage = "When polling for fme status, received response with null entity for jobId " + jobId + " and fmeJobId " + fmeJobId;
+                throw new FmeIntegrationException(exceptionMessage);
+            }
+        } else {
+            String exceptionMessage = "When polling for fme status for jobId " + jobId + " and fmeJobId " + fmeJobId + " got status code " + response.getStatusLine().getStatusCode() + " and response: " + response;
+            throw new FmeIntegrationException(exceptionMessage);
+        }
+
     }
 }

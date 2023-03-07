@@ -138,6 +138,14 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
     @Query(nativeQuery = true,
             value = "UPDATE jobs SET fme_status= :fmeJobStatus where id= :jobId")
     void updateFmeStatus(@Param("jobId") Long jobId, @Param("fmeJobStatus") String fmeJobStatus);
+
+    /**
+     * Finds import fme jobs in progress that have fme_status not success.
+     * @return
+     */
+    @Query(nativeQuery = true,
+            value = "select * from jobs where job_status= 'IN_PROGRESS' and job_type = 'IMPORT' and fme_job_id is not null and (fme_status is null or fme_status != 'SUCCESS')")
+    List<Job> findFmeJobsToPollForStatus();
 }
 
 
