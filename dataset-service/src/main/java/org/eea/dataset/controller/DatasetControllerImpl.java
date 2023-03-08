@@ -947,7 +947,6 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping("/{id}/updateField")
-  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD', 'TESTDATASET_STEWARD')")
   @ApiOperation(value = "Update field", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated field"),
@@ -955,7 +954,7 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiResponse(code = 400, message = "Error updating field, table is read only")})
   public void updateField(
       @ApiParam(type = "Long", value = "Dataset Id",
-          example = "0") @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
+          example = "0") @PathVariable("id") Long datasetId,
       @ApiParam(value = "Field Object") @RequestBody FieldVO field,
       @ApiParam(type = "boolean", value = "update cascade", example = "true") @RequestParam(
           value = "updateCascadePK", required = false) boolean updateCascadePK) {
