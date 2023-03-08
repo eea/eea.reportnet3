@@ -204,6 +204,14 @@ public interface ValidationController {
    */
   @PutMapping("/private/executeValidation/{datasetId}")
   void executeValidation(@PathVariable("datasetId") Long datasetId, @RequestParam("processId") String processId, @RequestParam("released") boolean released, @RequestParam("updateViews") boolean updateViews) throws Exception;
+
+  /**
+   * Finds task by taskId
+   * @param taskId
+   * @return
+   */
+  @GetMapping("/private/findTaskById/{taskId}")
+  TaskVO findTaskById(@PathVariable("taskId") Long taskId);
 }
 
 

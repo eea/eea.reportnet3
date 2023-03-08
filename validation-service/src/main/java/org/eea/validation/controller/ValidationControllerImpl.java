@@ -32,7 +32,6 @@ import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
-import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.eea.validation.util.ValidationHelper;
@@ -563,6 +562,22 @@ public class ValidationControllerImpl implements ValidationController {
   @PutMapping("/private/executeValidation/{datasetId}")
   public void executeValidation(@PathVariable("datasetId") Long datasetId, @RequestParam("processId") String processId, @RequestParam("released") boolean released, @RequestParam("updateViews") boolean updateViews) throws EEAException {
     validationHelper.executeValidation(datasetId, processId, released, updateViews);
+  }
+
+  /**
+   * Finds task by taskId
+   * @param taskId
+   * @return
+   */
+  @Override
+  @GetMapping("/private/findTaskById/{taskId}")
+  public TaskVO findTaskById(@PathVariable("taskId") Long taskId) {
+    try {
+     return validationHelper.findTaskById(taskId);
+    } catch (Exception e) {
+      LOG.error("Error trying to retrieve task with id {}", taskId);
+      throw e;
+    }
   }
 }
 
