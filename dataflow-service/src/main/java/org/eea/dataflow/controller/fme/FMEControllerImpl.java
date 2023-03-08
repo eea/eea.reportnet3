@@ -147,7 +147,6 @@ public class FMEControllerImpl implements FMEController {
       fmeCommunicationService.updateJobStatus(fmeJob, fmeOperationInfoVO.getStatusNumber());
       if(fmeOperationInfoVO.getStatusNumber() != 0L && fmeJob.getOperation() == IntegrationOperationTypeEnum.IMPORT) {
         updateFailedJobAndProcessStatus(fmeJob.getJobId());
-        LOG.info("Updated fme job, job and process in /operationFinished for fmeJobId {}", fmeJob.getJobId());
       }
     } catch (EEAForbiddenException e) {
       exception = e;
@@ -173,7 +172,10 @@ public class FMEControllerImpl implements FMEController {
   private void updateFailedJobAndProcessStatus(Long fmeJobId){
     try{
       JobVO jobVO = jobControllerZuul.findJobByFmeJobId(fmeJobId.toString());
-      jobControllerZuul.updateJobAndProcess(jobVO.getId(), JobStatusEnum.FAILED, ProcessStatusEnum.CANCELED);
+      if(jobVO.getJobStatus().getValue().equals(JobStatusEnum.IN_PROGRESS.getValue())) {
+        jobControllerZuul.updateJobAndProcess(jobVO.getId(), JobStatusEnum.FAILED, ProcessStatusEnum.CANCELED);
+        LOG.info("Updated fme job, job and process in /operationFinished for jobId {} and fmeJobId {}", jobVO.getId(), fmeJobId);
+      }
     }
     catch (Exception e) {
       LOG.error("Could not update failed job and process for fme job id {} ", fmeJobId, e);

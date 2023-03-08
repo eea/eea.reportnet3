@@ -142,6 +142,11 @@
 			<artifactId>jedis</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20230227</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

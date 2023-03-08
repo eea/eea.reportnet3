@@ -11,6 +11,7 @@ import org.eea.interfaces.controller.recordstore.ProcessController.ProcessContro
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
+import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
@@ -164,7 +165,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release, String fmeJobId, String dataflowName, String datasetName) {
         Timestamp ts = new Timestamp(System.currentTimeMillis());
-        Job job = new Job(null, jobType, jobStatus, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), release, dataflowId, dataProviderId, datasetId, fmeJobId, dataflowName, datasetName, null);
+        Job job = new Job(null, jobType, jobStatus, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), release, dataflowId, dataProviderId, datasetId, fmeJobId, dataflowName, datasetName, null, null);
         job = jobRepository.save(job);
         jobHistoryService.saveJobHistory(job);
         return job.getId();
@@ -449,6 +450,17 @@ public class JobServiceImpl implements JobService {
                 new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
         SecurityContextHolder.getContext().setAuthentication(authentication);
         removeLocksAndSendNotification(jobVO, value, user);
+    }
+
+    @Override
+    public List<JobVO> getFMEImportJobsForPolling(){
+        List<Job> jobs = jobRepository.findFmeJobsToPollForStatus();
+        return jobMapper.entityListToClass(jobs);
+    }
+
+    @Override
+    public void updateFmeStatus(Long jobId, FmeJobStatusEnum fmeStatus){
+        jobRepository.updateFmeStatus(jobId, fmeStatus.getValue());
     }
 
     private void removeLocksAndSendNotification(JobVO jobVO, Map<String, Object> value, String user) throws EEAException {

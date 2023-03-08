@@ -1,6 +1,7 @@
 package org.eea.orchestrator.persistence.domain;
 
 import lombok.*;
+import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.utils.HashMapConverter;
@@ -69,4 +70,8 @@ public class JobHistory {
 
     @Column(name = "JOB_INFO")
     private String jobInfo;
+
+    @Column(name = "FME_STATUS")
+    @Enumerated(EnumType.STRING)
+    private FmeJobStatusEnum fmeStatus;
 }
