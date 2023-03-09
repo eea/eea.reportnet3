@@ -65,7 +65,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const [sort, setSort] = useState({ field: 'dateAdded', order: -1 });
   const [totalRecords, setTotalRecords] = useState(0);
 
-  const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
+  const { getDateTimeFormatByUserPreferences, getDateDifferenceInMinutes } = useDateTimeFormatByUserPreferences();
   const { setData } = useApplyFilters('jobsStatuses');
 
   const { firstRow, numberRows, pageNum } = pagination;
@@ -310,8 +310,9 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     <ActionsColumn
       disabledButtons={
         !(
-          (job.jobStatus === 'IN_PROGRESS' || job.jobStatus === 'QUEUED') &&
-          (job.jobType === 'IMPORT' || job.jobType === 'VALIDATION' || job.jobType === 'RELEASE')
+          job.jobStatus === 'IN_PROGRESS' &&
+          (job.jobType === 'IMPORT' || job.jobType === 'VALIDATION' || job.jobType === 'RELEASE') &&
+          getDateDifferenceInMinutes(job.dateStatusChanged) > 9
         )
       }
       onDeleteClick={() => {
