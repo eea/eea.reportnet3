@@ -14,5 +14,13 @@ export const useDateTimeFormatByUserPreferences = () => {
       } ${hasCET ? 'CET' : ''}`
     );
 
-  return { getDateTimeFormatByUserPreferences };
+  const getDateDifferenceInMinutes = timestamp => {
+    const date1 = dayjs(timestamp);
+    const date2 = dayjs();
+    const dateDifference = date2.diff(date1, 'minute');
+
+    return dateDifference;
+  };
+
+  return { getDateTimeFormatByUserPreferences, getDateDifferenceInMinutes };
 };
