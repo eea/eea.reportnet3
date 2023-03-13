@@ -115,22 +115,34 @@
   --c-growl-info-darker-blue: #5b94d4;
   --c-growl-success-darker-green: #5d854a;
   --c-growl-success-lighter-green: #d5e7cf;
+  --c-growl-success-darker-green-hover: #486839;
+  --c-growl-success-lighter-green-hover: #bacab4;
   --c-growl-warning-darker-yellow: #ceaf33;
   --c-growl-error-darker-red: #ca4b33;
   /* level error statusbox colors */
   --statusBox-blocker-bg: 194, 200, 207;
   --statusBox-blocker-color: 0, 0, 0;
+  --statusBox-blocker-bg-hover: #a2aaa5;
+  --statusBox-blocker-color-hover: #000000;
   --statusBox-error-bg: #ffcdd2;
   --statusBox-error-color: #a6093d;
+  --statusBox-error-bg-hover: #ebbec2;
+  --statusBox-error-color-hover: #920937;
   --statusBox-info-bg: #b3e5fc;
   --statusBox-info-color: #23547b;
+  --statusBox-info-bg-hover: #a2d0e6;
+  --statusBox-info-color-hover: #1f4869;
   --statusBox-warning-bg: #ffec81;
   --statusBox-warning-color: #805b36;
+  --statusBox-warning-bg-hover: #e0d071;
+  --statusBox-warning-color-hover: #6e4f2f;
   /* boolean statusbox colors*/
   --statusBox-true-bg: #c8e6c9;
   --statusBox-true-color: #256029;
   --statusBox-false-bg: #ffcdd2;
   --statusBox-false-color: #c63737;
+  --statusBox-false-bg-hover: #e5babe;
+  --statusBox-false-color-hover: #b33434;
   /* status  statusbox colors*/
   --statusBox-draft-bg: #eccfff;
   --statusBox-draft-color: #694382;
@@ -225,11 +237,11 @@
   --datatable-column-sortable-hightlight-color-hover: var(--c-gray-110);
   --datatable-column-sortable-icon-hightlight-color-hover: var(--c-gray-110);
   --datatable-body-row-toggler-infotable-bg: repeating-linear-gradient(
-                  45deg,
-                  rgba(0, 0, 0, 0),
-                  rgba(0, 0, 0, 0) 10px,
-                  rgba(218, 33, 49, 0.3) 10px,
-                  rgba(218, 33, 49, 0.3) 15px
+    45deg,
+    rgba(0, 0, 0, 0),
+    rgba(0, 0, 0, 0) 10px,
+    rgba(218, 33, 49, 0.3) 10px,
+    rgba(218, 33, 49, 0.3) 15px
   ) !important;
   --datatable-body-row-toggler-infotable-border: 1px solid var(--c-gray-10);
   --datatable-body-row-toggler-color: var(--c-gray-10);
@@ -473,7 +485,7 @@
 
   /* FieldDesigner */
   --field-designer-separator-box-shadow: 1px 1px rgba(var(--c-corporate-blue-rgb), 0.2),
-  2px 2px rgba(var(--c-corporate-blue-rgb), 0.2), 3px 3px rgba(var(--c-corporate-blue-rgb), 0.2);
+    2px 2px rgba(var(--c-corporate-blue-rgb), 0.2), 3px 3px rgba(var(--c-corporate-blue-rgb), 0.2);
   --field-designer-separator-bg: rgba(var(--c-corporate-blue-rgb), 0.2);
   --field-designer-separator-border-color: var(--c-gray-75);
 
@@ -638,7 +650,7 @@
   --step-progress-bar-icon-border: 2px solid var(--c-gray-65);
   --step-progress-bar-link-bg-color: var(--c-gray-65);
   --step-progress-bar-link-box-shadow: 0 2px 3px rgb(70 122 57 / 50%), 0 1px 2px rgb(70 122 57 / 50%),
-  0 -3px 2px rgb(70 122 57 / 4%), 0 -2px 2px rgb(70 122 57 / 50%);
+    0 -3px 2px rgb(70 122 57 / 4%), 0 -2px 2px rgb(70 122 57 / 50%);
   --step-progress-bar-link-done-bg-color: var(--success-color);
   --step-progress-bar-label-color: var(--main-font-color);
   --step-progress-bar-withError-bg-color: var(--errors);

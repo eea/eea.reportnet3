@@ -57,6 +57,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isStatusInfoDialogVisible, setIsStatusInfoDialogVisible] = useState(false);
   const [jobStatus, setJobStatus] = useState(null);
   const [jobStatusHistory, setJobStatusHistory] = useState({});
   const [jobsStatuses, setJobsStatusesList] = useState([]);
@@ -325,7 +326,12 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   );
 
   const getJobStatusTemplate = job => (
-    <div>
+    <div
+      className={styles.statusBox}
+      onClick={() => {
+        setIsStatusInfoDialogVisible(true);
+        setJobStatus(job);
+      }}>
       <LevelError
         className={config.jobRunningStatus[job.jobStatus].label}
         type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
@@ -467,6 +473,11 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     setJobStatus(null);
   };
 
+  const onHideStatusInfoDialog = () => {
+    setIsStatusInfoDialogVisible(false);
+    setJobStatus(null);
+  };
+
   const renderFilters = () => (
     <Filters
       className="lineItems"
@@ -603,6 +614,18 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               }}></p>
           }
         </ConfirmDialog>
+      )}
+
+      {isStatusInfoDialogVisible && (
+        <Dialog
+          blockScroll={false}
+          className="responsiveDialog"
+          header={resourcesContext.messages['info']}
+          modal={true}
+          onHide={onHideStatusInfoDialog}
+          visible={isStatusInfoDialogVisible}>
+          {jobStatus.jobInfo ? jobStatus.jobInfo : resourcesContext.messages['noJobStatusInfo']}
+        </Dialog>
       )}
     </Fragment>
   );
