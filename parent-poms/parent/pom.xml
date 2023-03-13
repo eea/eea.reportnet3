@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.2-etlExport</api-gateway.version>
-    <communication.version>v3.2-etlExport</communication.version>
-    <collaboration.version>v3.2-etlExport</collaboration.version>
-    <dataflow.version>v3.2-etlExport</dataflow.version>
-    <dataset.version>v3.2-etlExport</dataset.version>
-    <document.version>v3.2-etlExport</document.version>
-    <frontend.version>v3.2-etlExport</frontend.version>
-    <indexsearch.version>v3.2-etlExport</indexsearch.version>
-    <inspire.version>v3.2-etlExport</inspire.version>
-    <recordstore.version>v3.2-etlExport</recordstore.version>
-    <ums.version>v3.2-etlExport</ums.version>
-    <validation.version>v3.2-etlExport</validation.version>
-    <common-interfaces.version>v3.2-etlExport</common-interfaces.version>
-    <common-utitlities.version>v3.2-etlExport</common-utitlities.version>
-    <rod.version>v3.2-etlExport</rod.version>
-    <orchestrator.version>v3.2-etlExport</orchestrator.version>
+    <api-gateway.version>v3.2-etlExport-Controllers</api-gateway.version>
+    <communication.version>v3.2-etlExport-Controllers</communication.version>
+    <collaboration.version>v3.2-etlExport-Controllers</collaboration.version>
+    <dataflow.version>v3.2-etlExport-Controllers</dataflow.version>
+    <dataset.version>v3.2-etlExport-Controllers</dataset.version>
+    <document.version>v3.2-etlExport-Controllers</document.version>
+    <frontend.version>v3.2-etlExport-Controllers</frontend.version>
+    <indexsearch.version>v3.2-etlExport-Controllers</indexsearch.version>
+    <inspire.version>v3.2-etlExport-Controllers</inspire.version>
+    <recordstore.version>v3.2-etlExport-Controllers</recordstore.version>
+    <ums.version>v3.2-etlExport-Controllers</ums.version>
+    <validation.version>v3.2-etlExport-Controllers</validation.version>
+    <common-interfaces.version>v3.2-etlExport-Controllers</common-interfaces.version>
+    <common-utitlities.version>v3.2-etlExport-Controllers</common-utitlities.version>
+    <rod.version>v3.2-etlExport-Controllers</rod.version>
+    <orchestrator.version>v3.2-etlExport-Controllers</orchestrator.version>
   </properties>
 </project>
