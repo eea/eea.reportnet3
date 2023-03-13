@@ -141,7 +141,7 @@ export const WebformField = ({
             : conditionalField.value
           : field.value,
         datasetSchemaId,
-        100
+        400
       );
 
       const linkItems = referencedFieldValues
