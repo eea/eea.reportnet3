@@ -459,6 +459,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
     String tableName = "";
 
+    DriverManagerDataSource dataSource = new DriverManagerDataSource();
+    dataSource.setDriverClassName(connectionDriver);
+    dataSource.setUrl(connectionUrl);
+    dataSource.setUsername(connectionUsername);
+    dataSource.setPassword(connectionPassword);
+    JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+
     // create primary json
     JSONObject resultjson = new JSONObject();
     JSONArray tables = new JSONArray();
@@ -475,9 +482,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     // First loop to fill the temporary table according to the filter
     for (TableSchema tableSchema : tableSchemaList) {
 
-      Long totalRecords = getCount(
+      Long totalRecords = jdbcTemplate.queryForObject(totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes), Long.class);
+          /*getCount(
           totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
-          columnName, filterValue);
+          columnName, filterValue);*/
 
       totalRecordsByTableSchema.put(tableSchema.getIdTableSchema().toString(), totalRecords);
 
@@ -550,12 +558,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         String query = "SELECT count(id) from dataset_" + datasetId + ".temp_etlexport " + "WHERE filter_value='" + filterChain + "';";
         Query recordsTmpExportQueryResult = entityManager.createNativeQuery(query);
 
-        DriverManagerDataSource dataSource = new DriverManagerDataSource();
-        dataSource.setDriverClassName(connectionDriver);
-        dataSource.setUrl(connectionUrl);
-        dataSource.setUsername(connectionUsername);
-        dataSource.setPassword(connectionPassword);
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 
         try {
           int recordsTmpExport = jdbcTemplate.queryForObject(query, Integer.class).intValue();
