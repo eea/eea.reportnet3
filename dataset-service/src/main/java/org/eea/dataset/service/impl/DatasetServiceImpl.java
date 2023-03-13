@@ -1243,8 +1243,8 @@ public class DatasetServiceImpl implements DatasetService {
       // the number passed with a max of 100. That will be the results showed on screen.
       if (resultsNumber == null || resultsNumber == 0) {
         resultsNumber = 15;
-      } else if (resultsNumber > 100) {
-        resultsNumber = 100;
+      } else if (resultsNumber > 400) {
+        resultsNumber = 400;
       }
 
       // The query returns the list of fieldsVO ordered by it's type and considering the possible
