@@ -166,7 +166,7 @@ export const WebformField = ({
         });
       }
 
-      if (referencedFieldValues.length > 99) {
+      if (referencedFieldValues.length > 400) {
         linkItems[linkItems.length - 1] = {
           disabled: true,
           itemType: resourcesContext.messages['moreElements'],
