@@ -1579,7 +1579,7 @@
     "visibility": "Visibility",
     "warning": "Warning",
     "webform": "Webform",
-    "webformPaMsTitle": "Beware that, in case of more than one provider, only the last changes made to the webform will be saved",
+    "webformPaMsTitle": "Be aware that, in case of more than one reporter editing in the same table, only the last changes made to the webform will be saved",
     "webformsConfigurationsSelect": "Select a webform type",
     "webformShouldBeAttachment": "The field type should be attachment",
     "webformTableCreation": "Create table",

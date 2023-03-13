@@ -375,7 +375,10 @@ export const PaMsWebform = ({
 
   const renderLayout = children => (
     <Fragment>
-      <h2 className={styles.title}>{resourcesContext.messages['webformPaMsTitle']}</h2>
+      <h2 className={styles.title}>
+        <FontAwesomeIcon icon={AwesomeIcons('exclamationTriangle')} />
+        <strong> {resourcesContext.messages['webformPaMsTitle']}</strong>
+      </h2>
       {children}
     </Fragment>
   );

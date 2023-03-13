@@ -39,6 +39,7 @@ import {
   faDrawPolygon,
   faEdit,
   faExclamationCircle,
+  faExclamationTriangle,
   faExternalLinkAlt,
   faEye,
   faFile,
@@ -130,11 +131,7 @@ import {
   faTimesCircle as farTimesCircle
 } from '@fortawesome/free-regular-svg-icons';
 
-import { 
-  faBuffer,
-  faConnectdevelop,
-  faStaylinked
- } from '@fortawesome/free-brands-svg-icons';
+import { faBuffer, faConnectdevelop, faStaylinked } from '@fortawesome/free-brands-svg-icons';
 
 export const AwesomeIcons = icon => {
   switch (icon) {
@@ -236,6 +233,8 @@ export const AwesomeIcons = icon => {
       return faCube;
     case 'exclamationCircle':
       return faExclamationCircle;
+    case 'exclamationTriangle':
+      return faExclamationTriangle;
     case 'expanded':
       return faCaretDown;
     case 'externalLink':
