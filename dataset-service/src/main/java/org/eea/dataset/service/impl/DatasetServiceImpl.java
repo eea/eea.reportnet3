@@ -1320,7 +1320,6 @@ public class DatasetServiceImpl implements DatasetService {
    * @param dataProviderCodes the data provider codes
    */
   @Override
-  @Transactional
   public void etlExportDataset(@DatasetId Long datasetId, OutputStream outputStream,
       String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
       String dataProviderCodes) {
