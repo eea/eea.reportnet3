@@ -21,4 +21,7 @@ public class JobsVO {
 
     /** The filtered records. */
     private Long filteredRecords;
+
+    /** The remaining jobs. */
+    private Long remainingJobs;
 }

@@ -2,8 +2,22 @@ import { useContext } from 'react';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const PaginatorRecordsCount = ({ dataLength, filteredDataLength, isFiltered, nameRecords = 'records' }) => {
+export const PaginatorRecordsCount = ({
+  dataLength,
+  filteredDataLength,
+  remainingJobsLength,
+  isFiltered,
+  nameRecords = 'records'
+}) => {
   const resourcesContext = useContext(ResourcesContext);
+
+  const getRemainingJobs = () => {
+    if (!remainingJobsLength) {
+      return '';
+    }
+
+    return `${resourcesContext.messages['remainingJobs']}: ${remainingJobsLength} | `;
+  };
 
   const getRecordsDifferentFiltered = () => {
     if (!isFiltered || dataLength === filteredDataLength) {
@@ -25,5 +39,5 @@ export const PaginatorRecordsCount = ({ dataLength, filteredDataLength, isFilter
     nameRecords
   ].toLowerCase()}`;
 
-  return `${getRecordsDifferentFiltered()}${recordsTotal}${getRecordsEqualsFiltered()}`;
+  return `${getRemainingJobs()}${getRecordsDifferentFiltered()}${recordsTotal}${getRecordsEqualsFiltered()}`;
 };

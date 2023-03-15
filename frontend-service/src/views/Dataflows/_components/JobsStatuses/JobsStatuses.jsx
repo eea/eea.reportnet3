@@ -63,6 +63,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const [jobsStatuses, setJobsStatusesList] = useState([]);
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
+  const [remainingJobs, setRemainingJobs] = useState(0);
   const [sort, setSort] = useState({ field: 'dateAdded', order: -1 });
   const [totalRecords, setTotalRecords] = useState(0);
 
@@ -98,6 +99,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       setTotalRecords(data.totalRecords);
       setJobsStatusesList(data.jobsList);
       setFilteredRecords(data.filteredRecords);
+      setRemainingJobs(data.remainingJobs);
       setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
       setData(data.jobsList);
       setLoadingStatus('success');
@@ -564,6 +566,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
             <PaginatorRecordsCount
               dataLength={totalRecords}
               filteredDataLength={filteredRecords}
+              remainingJobsLength={remainingJobs}
               isFiltered={isFiltered}
             />
           }
