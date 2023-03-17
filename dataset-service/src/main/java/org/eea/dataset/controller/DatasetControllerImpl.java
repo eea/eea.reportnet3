@@ -1891,7 +1891,8 @@ public class DatasetControllerImpl implements DatasetController {
    * @param dataProviderId
    * @return
    */
-  @PostMapping("/private/getDatasetData")
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @PostMapping("/getDatasetData")
   @ApiOperation(value = "Get dataset data to be truncated", hidden = true)
   public TruncateDataset getDatasetData(
       @RequestParam(value = "datasetId") Long datasetId,
@@ -1913,7 +1914,8 @@ public class DatasetControllerImpl implements DatasetController {
   }
 
 
-  @DeleteMapping("/private/truncateDataset")
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @DeleteMapping("/truncateDataset")
   @ApiOperation(value = "Truncate dataset by dataset id", hidden = true)
   public Boolean truncateDataset(@RequestParam("datasetId") Long datasetId) {
     LOG.info("Method truncateDataset called for datasetId: {}", datasetId);

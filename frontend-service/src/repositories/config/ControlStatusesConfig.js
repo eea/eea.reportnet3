@@ -1,4 +1,4 @@
 export const ControlStatusesConfig = {
-  getDatasetData: '/dataset/private/getDatasetData?datasetId={:datasetId}&dataProviderId={:dataProviderId}',
-  deleteDatasetData: '/dataset/private/truncateDataset?datasetId={:datasetId}'
+  getDatasetData: '/dataset/getDatasetData?datasetId={:datasetId}&dataProviderId={:dataProviderId}',
+  deleteDatasetData: '/dataset/truncateDataset?datasetId={:datasetId}'
 };
