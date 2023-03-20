@@ -3610,4 +3610,19 @@ public class DatasetServiceImpl implements DatasetService {
     return taskMapper.entityListToClass(tasks);
   }
 
+  @Override
+  public void etlExportDatasetV3(@DatasetId Long datasetId, String tableSchemaId,
+                          Integer limit, Integer offset, String filterValue, String columnName,
+                          String dataProviderCodes) {
+    try {
+      long startTime = System.currentTimeMillis();
+      LOG.info("ETL Export v3 process initiated to datasetId: {}", datasetId);
+      recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+      long endTime = System.currentTimeMillis() - startTime;
+      LOG.info("ETL Export v3 process completed for datasetId: {} in {} seconds", datasetId,
+              endTime / 1000);
+    } catch (EEAException | IOException e) {
+      LOG.error("ETLExport error in  Dataset:", datasetId, e);
+    }
+  }
 }
