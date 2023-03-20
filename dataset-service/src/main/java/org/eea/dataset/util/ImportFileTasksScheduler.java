@@ -57,7 +57,7 @@ public class ImportFileTasksScheduler extends MessageReceiver {
 
   /** The delay. */
   //@Value("${validation.scheduled.consumer}")
-  private Long delay=1000l;
+  private Long delay=5000l;
 
   /** The max running tasks. */
   //@Value("${validation.tasks.parallelism}")
