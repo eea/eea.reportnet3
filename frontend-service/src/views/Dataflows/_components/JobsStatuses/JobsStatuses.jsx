@@ -330,17 +330,17 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   );
 
   const getJobStatusTemplate = job => (
-    <div
-      className={styles.statusBox}
-      onClick={() => {
-        setIsStatusInfoDialogVisible(true);
-        setJobStatus(job);
-      }}>
-      <LevelError
-        className={config.jobRunningStatus[job.jobStatus].label}
-        type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
-      />
-    </div>
+    // <div
+    // className={styles.statusBox}
+    // onClick={() => {
+    //   setIsStatusInfoDialogVisible(true);
+    //   setJobStatus(job);
+    // }}>
+    <LevelError
+      className={config.jobRunningStatus[job.jobStatus].label}
+      type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
+    />
+    // </div>
   );
 
   const getJobIdTemplate = job => <p>{job.id}</p>;
