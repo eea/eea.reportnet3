@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.2-etlExportMain</api-gateway.version>
-    <communication.version>v3.2-etlExportMain</communication.version>
-    <collaboration.version>v3.2-etlExportMain</collaboration.version>
-    <dataflow.version>v3.2-etlExportMain</dataflow.version>
-    <dataset.version>v3.2-etlExportMain</dataset.version>
-    <document.version>v3.2-etlExportMain</document.version>
-    <frontend.version>v3.2-etlExportMain</frontend.version>
-    <indexsearch.version>v3.2-etlExportMain</indexsearch.version>
-    <inspire.version>v3.2-etlExportMain</inspire.version>
-    <recordstore.version>v3.2-etlExportMain</recordstore.version>
-    <ums.version>v3.2-etlExportMain</ums.version>
-    <validation.version>v3.2-etlExportMain</validation.version>
-    <common-interfaces.version>v3.2-etlExportMain</common-interfaces.version>
-    <common-utitlities.version>v3.2-etlExportMain</common-utitlities.version>
-    <rod.version>v3.2-etlExportMain</rod.version>
-    <orchestrator.version>v3.2-etlExportMain</orchestrator.version>
+    <api-gateway.version>v3.2-etlExport-json</api-gateway.version>
+    <communication.version>v3.2-etlExport-json</communication.version>
+    <collaboration.version>v3.2-etlExport-json</collaboration.version>
+    <dataflow.version>v3.2-etlExport-json</dataflow.version>
+    <dataset.version>v3.2-etlExport-json</dataset.version>
+    <document.version>v3.2-etlExport-json</document.version>
+    <frontend.version>v3.2-etlExport-json</frontend.version>
+    <indexsearch.version>v3.2-etlExport-json</indexsearch.version>
+    <inspire.version>v3.2-etlExport-json</inspire.version>
+    <recordstore.version>v3.2-etlExport-json</recordstore.version>
+    <ums.version>v3.2-etlExport-json</ums.version>
+    <validation.version>v3.2-etlExport-json</validation.version>
+    <common-interfaces.version>v3.2-etlExport-json</common-interfaces.version>
+    <common-utitlities.version>v3.2-etlExport-json</common-utitlities.version>
+    <rod.version>v3.2-etlExport-json</rod.version>
+    <orchestrator.version>v3.2-etlExport-json</orchestrator.version>
   </properties>
 </project>
