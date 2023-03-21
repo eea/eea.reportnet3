@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /** The Interface JobController. */
 public interface JobController {
@@ -117,25 +118,43 @@ public interface JobController {
     void addCopyToEUDatasetJob(@PathVariable("dataflowId") Long dataflowId);
 
     /**
+     * Adds a file export job
+     * @param dataflowId
+     */
+    @PostMapping(value = "/addFileExport/{datasetId}")
+    Long addFileExportJob (@PathVariable("datasetId") Long datasetId,
+                                  @RequestParam("dataflowId") Long dataflowId,
+                                  @RequestParam(value = "providerId", required = false) Long providerId,
+                                  @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                                  @RequestParam(value = "limit", defaultValue = "10000") Integer limit,
+                                  @RequestParam(value = "offset",defaultValue = "0") Integer offset,
+                                  @RequestParam(value = "filterValue", required = false) String filterValue,
+                                  @RequestParam(value = "columnName", required = false) String columnName,
+                                  @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
+
+    /**
      * Update job's status
      *
      * @param jobId the job id
      * @param status the job's status
      * @return
      */
-    @PostMapping(value = "/updateJobStatus/{id}/{status}")
+    @PostMapping(value = "/private/updateJobStatus/{id}/{status}")
     void updateJobStatus(@PathVariable("id") Long jobId, @PathVariable("status") JobStatusEnum status);
 
 
-    @PostMapping(value = "/updateFmeJobId/{jobId}/{fmeJobId}")
+    @PostMapping(value = "/private/updateFmeJobId/{jobId}/{fmeJobId}")
     void updateFmeJobId(@PathVariable("jobId") Long jobId, @PathVariable("fmeJobId") String fmeJobId);
+
+    @GetMapping(value = "/pollForJobStatus/{jobId}")
+    Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId);
 
     /**
      * Saves job
      * @param jobVO
      * @return
      */
-    @PostMapping(value = "/saveJob")
+    @PostMapping(value = "/private/saveJob")
     JobVO save(@RequestBody JobVO jobVO);
 
     /**

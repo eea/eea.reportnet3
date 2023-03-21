@@ -2,6 +2,8 @@ package org.eea.interfaces.vo.orchestrator;
 
 import lombok.*;
 
+import java.io.Serializable;
+
 /**
  * The Class JobProcessVO.
  */
@@ -10,7 +12,7 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-public class JobProcessVO {
+public class JobProcessVO implements Serializable {
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -1348263779137653665L;

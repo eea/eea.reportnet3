@@ -15,7 +15,10 @@ public enum JobTypeEnum {
     EXPORT("EXPORT"),
 
     /** The copy to eu dataset type. */
-    COPY_TO_EU_DATASET("COPY_TO_EU_DATASET");
+    COPY_TO_EU_DATASET("COPY_TO_EU_DATASET"),
+
+    /** The file export type. */
+    FILE_EXPORT("FILE_EXPORT"),;
 
     /** The value. */
     private final String value;

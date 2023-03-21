@@ -5,13 +5,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class JobsVO {
+public class JobsVO implements Serializable {
+
+    /** The Constant serialVersionUID. */
+    private static final long serialVersionUID = -1348263779137653665L;
 
     /** The process list. */
     private List<JobVO> jobsList;
