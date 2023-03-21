@@ -3616,10 +3616,10 @@ public class DatasetServiceImpl implements DatasetService {
                           String dataProviderCodes) {
     try {
       long startTime = System.currentTimeMillis();
-      LOG.info("ETL Export v3 process initiated to datasetId: {}", datasetId);
+      LOG.info("FILE_EXPORT process initiated to datasetId: {}", datasetId);
       recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
       long endTime = System.currentTimeMillis() - startTime;
-      LOG.info("ETL Export v3 process completed for datasetId: {} in {} seconds", datasetId,
+      LOG.info("FILE_EXPORT process completed for datasetId: {} in {} seconds", datasetId,
               endTime / 1000);
     } catch (EEAException | IOException e) {
       LOG.error("ETLExport error in  Dataset:", datasetId, e);

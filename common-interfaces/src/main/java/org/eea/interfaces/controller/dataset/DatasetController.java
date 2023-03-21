@@ -657,8 +657,8 @@ public interface DatasetController {
    * @param dataProviderCodes
    * @return
    */
-  @GetMapping("/v3/etlExport/{datasetId}")
-  void etlExportDatasetV3(
+  @GetMapping("/etlExport/createFile/{datasetId}")
+  void createFileForEtlExport(
           @PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
           @RequestParam(value = "providerId", required = false) Long providerId,
           @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
