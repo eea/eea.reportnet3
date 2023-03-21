@@ -1785,11 +1785,11 @@ public class DatasetControllerImpl implements DatasetController {
         throw e;
       }
     } catch (IOException | EEAException e) {
-      LOG_ERROR.error(
+      LOG.error(
           "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",
           datasetId, fileName, e.getMessage());
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error downloading file {} for datasetId {} Message: {}", fileName, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error downloading file {} for datasetId {} Message: {}", fileName, datasetId, e.getMessage());
       throw e;
     }
   }

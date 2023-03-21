@@ -3,7 +3,10 @@ package org.eea.orchestrator.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController;
@@ -21,8 +24,10 @@ import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,6 +36,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -366,6 +376,7 @@ public class JobControllerImpl implements JobController {
         parameters.put("dataProviderId", providerId);
         parameters.put("tableSchemaId", tableSchemaId);
         parameters.put("limit", limit);
+        parameters.put("offset", offset);
         parameters.put("filterValue", filterValue);
         parameters.put("columnName", columnName);
         parameters.put("dataProviderCodes", dataProviderCodes);
@@ -502,11 +513,53 @@ public class JobControllerImpl implements JobController {
         result.put("status", job.getJobStatus().getValue());
         if(job.getJobType() == JobTypeEnum.FILE_EXPORT && job.getJobStatus() == JobStatusEnum.FINISHED){
             //TODO add downloadUrl
+            //String fileName = importPath + ETL_EXPORT + String.format(FILE_PATTERN_NAME_V3, datasetId) + ".zip";
             result.put("downloadUrl", "");
         }
 
         return result;
     }
+
+    @Override
+    @GetMapping(value = "/downloadEtlExportedFile/{jobId}")
+    @PreAuthorize("isAuthenticated()")
+    public void downloadEtlExportedFile(@PathVariable("jobId") Long jobId, @ApiParam(value = "response") HttpServletResponse response) {
+        String fileName = "";
+        Long datasetId = null;
+        try {
+
+            JobVO job = jobService.findById(jobId);
+            datasetId = Long.valueOf((Integer) job.getParameters().get("datasetId"));
+
+            LOG.info("Downloading file generated from v3 etl export. DatasetId {} Filename {}",
+                    datasetId, fileName);
+
+
+            File file = jobService.downloadEtlExportedFile(datasetId, fileName);
+            LOG.info("Successfully downloaded file generated from v3 etl export. DatasetId {} Filename {}",
+                    datasetId, fileName);
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
+            OutputStream out = response.getOutputStream();
+            try (FileInputStream in = new FileInputStream(file)) {
+                // copy from in to out
+                IOUtils.copyLarge(in, out);
+                out.close();
+                in.close();
+                // delete the file after downloading it
+                FileUtils.forceDelete(file);
+            } catch (Exception e) {
+                LOG.error("Unexpected error! Error in copying large etl exported file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage());
+                throw e;
+            }
+        }
+        catch (Exception e) {
+            LOG.error("Unexpected error! Error downloading file {} from v3 etl export for datasetId {} Message: {}", fileName, datasetId, e.getMessage());
+
+        }
+    }
+
+
 }
 
 
