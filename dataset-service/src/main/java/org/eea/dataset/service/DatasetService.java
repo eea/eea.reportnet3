@@ -648,4 +648,18 @@ public interface DatasetService {
    */
   List<TaskVO> findTasksByProcessIdAndStatusIn(String processId, List<ProcessStatusEnum> status);
 
+  /**
+   *
+   * @param datasetId
+   * @param tableSchemaId
+   * @param limit
+   * @param offset
+   * @param filterValue
+   * @param columnName
+   * @param dataProviderCodes
+   */
+  void etlExportDatasetV3(@DatasetId Long datasetId, String tableSchemaId,
+                        Integer limit, Integer offset, String filterValue, String columnName,
+                        String dataProviderCodes);
+
 }

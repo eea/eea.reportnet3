@@ -117,6 +117,10 @@ public class CollaborationServiceImpl implements CollaborationService {
   public MessageVO createMessage(Long dataflowId, MessageVO messageVO, String user, Long jobId)
       throws EEAForbiddenException, EEAIllegalArgumentException {
 
+    if(user == null){
+      user = SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
     Long providerId = messageVO.getProviderId();
     String content = messageVO.getContent();
 

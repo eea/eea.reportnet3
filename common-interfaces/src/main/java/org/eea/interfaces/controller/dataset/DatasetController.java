@@ -670,4 +670,27 @@ public interface DatasetController {
   @GetMapping("/private/findTasksByProcessIdAndStatusIn/{processId}")
   List<TaskVO> findTasksByProcessIdAndStatusIn(@PathVariable("processId") String processId, @RequestParam("status") List<ProcessStatusEnum> status);
 
+  /**
+   * Exports records in zipped file
+   * @param datasetId
+   * @param dataflowId
+   * @param providerId
+   * @param tableSchemaId
+   * @param limit
+   * @param offset
+   * @param filterValue
+   * @param columnName
+   * @param dataProviderCodes
+   * @return
+   */
+  @GetMapping("/etlExport/createFile/{datasetId}")
+  void createFileForEtlExport(
+          @PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
+          @RequestParam(value = "providerId", required = false) Long providerId,
+          @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+          @RequestParam(value = "limit", required = false) Integer limit,
+          @RequestParam(value = "offset", required = false) Integer offset,
+          @RequestParam(value = "filterValue", required = false) String filterValue,
+          @RequestParam(value = "columnName", required = false) String columnName,
+          @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
 }
