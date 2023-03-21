@@ -1,5 +1,6 @@
 package org.eea.dataset.persistence.data.repository;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValue;
@@ -101,4 +102,8 @@ public interface RecordExtendedQueriesRepository {
    * @return
    */
   boolean truncateDataset(Long datasetId);
+
+  void findAndGenerateETLJsonV3(Long datasetId, String tableSchemaId,
+                                Integer limit, Integer offset, String filterValue, String columnName,
+                                String dataProviderCodes) throws EEAException, IOException;
 }

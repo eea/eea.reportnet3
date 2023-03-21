@@ -947,7 +947,6 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @PutMapping("/{id}/updateField")
-  @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD', 'TESTDATASET_STEWARD')")
   @ApiOperation(value = "Update field", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated field"),
@@ -955,7 +954,7 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiResponse(code = 400, message = "Error updating field, table is read only")})
   public void updateField(
       @ApiParam(type = "Long", value = "Dataset Id",
-          example = "0") @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
+          example = "0") @PathVariable("id") Long datasetId,
       @ApiParam(value = "Field Object") @RequestBody FieldVO field,
       @ApiParam(type = "boolean", value = "update cascade", example = "true") @RequestParam(
           value = "updateCascadePK", required = false) boolean updateCascadePK) {
@@ -2088,4 +2087,52 @@ public class DatasetControllerImpl implements DatasetController {
       }
   }
 
+  @Override
+  @GetMapping("/etlExport/createFile/{datasetId}")
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+          name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
+  @ApiOperation(value = "Export data by dataset id",
+          notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD, OBSERVER, REPORTER WRITE, REPORTER READ, LEAD REPORTER, STEWARD SUPPORT \n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE, EDITOR READ\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT\n\n Data collection: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully exported"),
+          @ApiResponse(code = 500, message = "Error exporting data"),
+          @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
+  public void createFileForEtlExport(
+          @ApiParam(type = "Long", value = "Dataset id",
+                  example = "0") @PathVariable("datasetId") Long datasetId,
+          @ApiParam(type = "Long", value = "Dataflow id",
+                  example = "0") @RequestParam("dataflowId") Long dataflowId,
+          @ApiParam(type = "Long", value = "Provider id",
+                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Table schema id",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+                  required = false) String tableSchemaId,
+          @ApiParam(type = "Integer", value = "Limit", example = "0") @RequestParam(value = "limit",
+                  defaultValue = "10000") Integer limit,
+          @ApiParam(type = "Integer", value = "Offset", example = "0") @RequestParam(value = "offset",
+                  defaultValue = "0") Integer offset,
+          @ApiParam(type = "String", value = "Filter value", example = "value") @RequestParam(
+                  value = "filterValue", required = false) String filterValue,
+          @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
+                  value = "columnName", required = false) String columnName,
+          @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
+                  value = "dataProviderCodes", required = false) String dataProviderCodes) {
+
+    if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+      String errorMessage =
+              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
+      LOG_ERROR.error(errorMessage);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+    }
+
+    try {
+      LOG.info("Creating etlExport File for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      datasetService.etlExportDatasetV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+      LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error in createFileForEtlExport for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
+      throw e;
+    }
+  }
 }
