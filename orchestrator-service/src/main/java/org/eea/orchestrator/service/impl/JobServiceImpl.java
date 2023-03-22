@@ -1,6 +1,8 @@
 package org.eea.orchestrator.service.impl;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
@@ -41,6 +43,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.*;
@@ -65,6 +69,9 @@ public class JobServiceImpl implements JobService {
     @Value(value = "${scheduling.inProgress.export.maximum.jobs}")
     private Long maximumNumberOfInProgressExportJobs;
 
+    @Value("${importPath}")
+    private String importPath;
+
     /**
      * The admin user.
      */
@@ -76,6 +83,8 @@ public class JobServiceImpl implements JobService {
      */
     @Value("${eea.keycloak.admin.password}")
     private String adminPass;
+
+    private static final String ETL_EXPORT = "/etlExport/";
 
     @Autowired
     private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
@@ -194,6 +203,9 @@ public class JobServiceImpl implements JobService {
             return true;
         } else if (jobType == JobTypeEnum.EXPORT && numberOfCurrentJobs < maximumNumberOfInProgressExportJobs) {
             return true;
+        } else if (jobType == JobTypeEnum.FILE_EXPORT && numberOfCurrentJobs < maximumNumberOfInProgressExportJobs) {
+            //todo
+            return true;
         }
         return false;
     }
@@ -275,6 +287,23 @@ public class JobServiceImpl implements JobService {
         Map<String, Object> parameters = job.getParameters();
         Long dataflowId = Long.valueOf((Integer) parameters.get("dataflowId"));
         euDatasetControllerZuul.populateDataFromDataCollection(dataflowId, job.getId());
+    }
+
+    @Override
+    public void prepareAndExecuteFileExportJob(JobVO jobVO) {
+        Job job = jobMapper.classToEntity(jobVO);
+        Map<String, Object> parameters = job.getParameters();
+        Long dataflowId = Long.valueOf((Integer) parameters.get("dataflowId"));
+        Long datasetId = Long.valueOf((Integer) parameters.get("datasetId"));
+        Long dataProviderId = (parameters.get("dataProviderId") != null) ? Long.valueOf((Integer) parameters.get("dataProviderId")) : null;
+        String tableSchemaId = (parameters.get("tableSchemaId") != null) ? (String) parameters.get("tableSchemaId") : null;
+        Integer limit = (parameters.get("limit") != null) ? (Integer) parameters.get("limit") : null;
+        Integer offset = (parameters.get("offset") != null) ? (Integer) parameters.get("offset") : null;
+        String filterValue = (parameters.get("filterValue") != null) ? (String) parameters.get("filterValue") : null;
+        String columnName = (parameters.get("columnName") != null) ? (String) parameters.get("columnName") : null;
+        String dataProviderCodes = (parameters.get("dataProviderCodes") != null) ? (String) parameters.get("dataProviderCodes") : null;
+
+        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
     }
 
     @Transactional
@@ -473,5 +502,25 @@ public class JobServiceImpl implements JobService {
                         NotificationVO.builder().dataflowId(jobVO.getDataflowId()).user(user).error(CANCELED_BY_ADMIN_ERROR).build());
                 break;
         }
+    }
+
+    /**
+     * Download etl exported file.
+     *
+     * @param jobId the job id
+     * @param fileName the file name
+     * @return the file
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws EEAException the EEA exception
+     */
+    @Override
+    public File downloadEtlExportedFile(Long jobId, String fileName) throws EEAException {
+        // we compound the route and create the file
+        File file = new File(new File(importPath, ETL_EXPORT), FilenameUtils.getName(fileName));
+        if (!file.exists()) {
+            LOG.error( "Trying to download a file generated during the export dataset data process for jobId {} but the file {} is not found", jobId, fileName);
+            throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+        }
+        return file;
     }
 }

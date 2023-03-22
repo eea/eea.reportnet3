@@ -3,7 +3,10 @@ package org.eea.orchestrator.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.eea.exception.EEAErrorMessage;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController;
@@ -21,8 +24,10 @@ import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,6 +36,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +70,9 @@ public class JobControllerImpl implements JobController {
     /** The valid columns. */
     List<String> validColumns = Arrays.asList("jobId", "creatorUsername", "jobType", "dataflowId", "providerId", "datasetId",
             "jobStatus", "dateAdded", "dateStatusChanged", "fmeJobId", "dataflowName", "datasetName");
+
+    private static final String FILE_PATTERN_NAME_V2 = "etlExport_%s";
+
 
     @Override
     @HystrixCommand
@@ -366,6 +379,7 @@ public class JobControllerImpl implements JobController {
         parameters.put("dataProviderId", providerId);
         parameters.put("tableSchemaId", tableSchemaId);
         parameters.put("limit", limit);
+        parameters.put("offset", offset);
         parameters.put("filterValue", filterValue);
         parameters.put("columnName", columnName);
         parameters.put("dataProviderCodes", dataProviderCodes);
@@ -498,15 +512,66 @@ public class JobControllerImpl implements JobController {
     public Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId){
         Map<String, Object> result = new HashMap<>();
 
-        JobVO job = jobService.findById(jobId);
-        result.put("status", job.getJobStatus().getValue());
-        if(job.getJobType() == JobTypeEnum.FILE_EXPORT && job.getJobStatus() == JobStatusEnum.FINISHED){
-            //TODO add downloadUrl
-            result.put("downloadUrl", "");
+        try {
+            JobVO job = jobService.findById(jobId);
+            if (job == null) {
+                LOG.error("No job found for jobId {}", jobId);
+                result.put("error", "Could not find job with id " + jobId);
+            }
+            else {
+                result.put("status", job.getJobStatus().getValue());
+                if (job.getJobType() == JobTypeEnum.FILE_EXPORT && job.getJobStatus() == JobStatusEnum.FINISHED) {
+                    //TODO add downloadUrl
+                    //String fileName = importPath + ETL_EXPORT + String.format(FILE_PATTERN_NAME_V3, datasetId) + ".zip";
+                    result.put("downloadUrl", "/orchestrator/jobs/downloadEtlExportedFile/" + jobId);
+                }
+            }
+        }
+        catch (Exception e){
+            LOG.error("Unexpected error! There was an error when polling for status of jobId {}", jobId, e);
+            result.put("error", "There was an error when polling for status of job " + jobId);
+        }
+        finally {
+            return result;
         }
 
-        return result;
+
     }
+
+    @Override
+    @GetMapping(value = "/downloadEtlExportedFile/{jobId}")
+    @PreAuthorize("isAuthenticated()")
+    public void downloadEtlExportedFile(@PathVariable("jobId") Long jobId, @ApiParam(value = "response") HttpServletResponse response) throws Exception {
+        String fileName = String.format(FILE_PATTERN_NAME_V2, jobId) + ".zip";
+        try {
+
+            JobVO job = jobService.findById(jobId);
+            LOG.info("Downloading file generated from v3 etl export for jobId {}", jobId);
+            File file = jobService.downloadEtlExportedFile(jobId, fileName);
+            LOG.info("Successfully downloaded file generated from v3 etl export for jobId {}", jobId);
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
+            OutputStream out = response.getOutputStream();
+            try (FileInputStream in = new FileInputStream(file)) {
+                // copy from in to out
+                IOUtils.copyLarge(in, out);
+                // delete the file after downloading it
+                //FileUtils.forceDelete(file); <- do we need this?
+            } catch (Exception e) {
+                LOG.error("Unexpected error! Error in copying large etl exported file {} for jobId {}. Message: {}", fileName, jobId, e.getMessage());
+                throw e;
+            }
+            finally {
+                out.close();
+            }
+        }
+        catch (Exception e) {
+            LOG.error("Unexpected error! Error downloading file {} from v3 etl export for jobId {} Message: {}", fileName, jobId, e.getMessage());
+            throw e;
+        }
+    }
+
+
 }
 
 

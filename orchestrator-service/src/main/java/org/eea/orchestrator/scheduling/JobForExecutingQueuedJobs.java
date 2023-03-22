@@ -89,7 +89,7 @@ public class JobForExecutingQueuedJobs {
                         jobService.prepareAndExecuteReleaseJob(job);
                     } else if (job.getJobType() == JobTypeEnum.FILE_EXPORT) {
                         //call export file mechanism
-                        //todo
+                        jobService.prepareAndExecuteFileExportJob(job);
                     } else if (job.getJobType() == JobTypeEnum.COPY_TO_EU_DATASET) {
                         LOG.info("Job with id {} and of type {} will be executed.", job.getId(), job.getJobType().getValue());
                         jobService.prepareAndExecuteCopyToEUDatasetJob(job);

@@ -9,6 +9,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -148,6 +150,9 @@ public interface JobController {
 
     @GetMapping(value = "/pollForJobStatus/{jobId}")
     Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId);
+
+    @GetMapping(value = "/downloadEtlExportedFile/{jobId}")
+    void downloadEtlExportedFile(@PathVariable("jobId") Long jobId, HttpServletResponse response) throws Exception;
 
     /**
      * Saves job
