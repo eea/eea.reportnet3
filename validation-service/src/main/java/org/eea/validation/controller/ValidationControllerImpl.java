@@ -32,7 +32,6 @@ import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
-import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.eea.validation.util.ValidationHelper;
@@ -489,16 +488,6 @@ public class ValidationControllerImpl implements ValidationController {
   @GetMapping(value = "/private/findTasksByProcessId/{processId}")
   public List<BigInteger> findTasksByProcessId(@PathVariable("processId") String processId) {
     return validationHelper.findTasksByProcessId(processId);
-  }
-
-  /**
-   * cancel process tasks
-   * @param processId
-   */
-  @Override
-  @PutMapping(value = "/private/cancelProcessTasks/{processId}")
-  public void cancelRunningProcessTasks(@PathVariable("processId") String processId) {
-    validationHelper.cancelRunningProcessTasks(processId);
   }
 
   /**

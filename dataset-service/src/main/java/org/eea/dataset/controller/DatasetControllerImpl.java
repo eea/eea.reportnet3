@@ -2116,7 +2116,17 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
                   value = "columnName", required = false) String columnName,
           @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
-                  value = "dataProviderCodes", required = false) String dataProviderCodes) {
+                  value = "dataProviderCodes", required = false) String dataProviderCodes,
+          @ApiParam(type = "Long", value = "Job id", example = "1") @RequestParam(
+                  name = "jobId", required = false) Long jobId) {
+
+    JobVO jobVO = null;
+    if (jobId!=null) {
+      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
+      jobVO = jobControllerZuul.findJobById(jobId);
+    }
+
+    String user = jobVO!=null ? jobVO.getCreatorUsername() : SecurityContextHolder.getContext().getAuthentication().getName();
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -2128,7 +2138,7 @@ public class DatasetControllerImpl implements DatasetController {
 
     try {
       LOG.info("Creating etlExport File for dataflowId {} and datasetId {}", dataflowId, datasetId);
-      datasetService.etlExportDatasetV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+      datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user);
       LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error in createFileForEtlExport for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());

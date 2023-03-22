@@ -5,7 +5,6 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -147,13 +146,6 @@ public interface ValidationController {
    */
   @GetMapping(value = "/private/findTasksByProcessId/{processId}")
   List<BigInteger> findTasksByProcessId(@PathVariable("processId") String processId);
-
-  /**
-   * cancel process tasks
-   * @param processId
-   */
-  @PutMapping(value = "/private/cancelProcessTasks/{processId}")
-  void cancelRunningProcessTasks(@PathVariable("processId") String processId);
 
   /**
    * Finds if tasks exist by processId and status
