@@ -71,6 +71,9 @@ public class JobControllerImpl implements JobController {
     List<String> validColumns = Arrays.asList("jobId", "creatorUsername", "jobType", "dataflowId", "providerId", "datasetId",
             "jobStatus", "dateAdded", "dateStatusChanged", "fmeJobId", "dataflowName", "datasetName");
 
+    private static final String FILE_PATTERN_NAME_V2 = "etlExport_%s";
+
+
     @Override
     @HystrixCommand
     @GetMapping
@@ -509,53 +512,62 @@ public class JobControllerImpl implements JobController {
     public Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId){
         Map<String, Object> result = new HashMap<>();
 
-        JobVO job = jobService.findById(jobId);
-        result.put("status", job.getJobStatus().getValue());
-        if(job.getJobType() == JobTypeEnum.FILE_EXPORT && job.getJobStatus() == JobStatusEnum.FINISHED){
-            //TODO add downloadUrl
-            //String fileName = importPath + ETL_EXPORT + String.format(FILE_PATTERN_NAME_V3, datasetId) + ".zip";
-            result.put("downloadUrl", "");
+        try {
+            JobVO job = jobService.findById(jobId);
+            if (job == null) {
+                LOG.error("No job found for jobId {}", jobId);
+                result.put("error", "Could not find job with id " + jobId);
+            }
+            else {
+                result.put("status", job.getJobStatus().getValue());
+                if (job.getJobType() == JobTypeEnum.FILE_EXPORT && job.getJobStatus() == JobStatusEnum.FINISHED) {
+                    //TODO add downloadUrl
+                    //String fileName = importPath + ETL_EXPORT + String.format(FILE_PATTERN_NAME_V3, datasetId) + ".zip";
+                    result.put("downloadUrl", "/orchestrator/jobs/downloadEtlExportedFile/" + jobId);
+                }
+            }
+        }
+        catch (Exception e){
+            LOG.error("Unexpected error! There was an error when polling for status of jobId {}", jobId, e);
+            result.put("error", "There was an error when polling for status of job " + jobId);
+        }
+        finally {
+            return result;
         }
 
-        return result;
+
     }
 
     @Override
     @GetMapping(value = "/downloadEtlExportedFile/{jobId}")
     @PreAuthorize("isAuthenticated()")
-    public void downloadEtlExportedFile(@PathVariable("jobId") Long jobId, @ApiParam(value = "response") HttpServletResponse response) {
-        String fileName = "";
-        Long datasetId = null;
+    public void downloadEtlExportedFile(@PathVariable("jobId") Long jobId, @ApiParam(value = "response") HttpServletResponse response) throws Exception {
+        String fileName = String.format(FILE_PATTERN_NAME_V2, jobId) + ".zip";
         try {
 
             JobVO job = jobService.findById(jobId);
-            datasetId = Long.valueOf((Integer) job.getParameters().get("datasetId"));
-
-            LOG.info("Downloading file generated from v3 etl export. DatasetId {} Filename {}",
-                    datasetId, fileName);
-
-
-            File file = jobService.downloadEtlExportedFile(datasetId, fileName);
-            LOG.info("Successfully downloaded file generated from v3 etl export. DatasetId {} Filename {}",
-                    datasetId, fileName);
+            LOG.info("Downloading file generated from v3 etl export for jobId {}", jobId);
+            File file = jobService.downloadEtlExportedFile(jobId, fileName);
+            LOG.info("Successfully downloaded file generated from v3 etl export for jobId {}", jobId);
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
             OutputStream out = response.getOutputStream();
             try (FileInputStream in = new FileInputStream(file)) {
                 // copy from in to out
                 IOUtils.copyLarge(in, out);
-                out.close();
-                in.close();
                 // delete the file after downloading it
-                FileUtils.forceDelete(file);
+                //FileUtils.forceDelete(file); <- do we need this?
             } catch (Exception e) {
-                LOG.error("Unexpected error! Error in copying large etl exported file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage());
+                LOG.error("Unexpected error! Error in copying large etl exported file {} for jobId {}. Message: {}", fileName, jobId, e.getMessage());
                 throw e;
+            }
+            finally {
+                out.close();
             }
         }
         catch (Exception e) {
-            LOG.error("Unexpected error! Error downloading file {} from v3 etl export for datasetId {} Message: {}", fileName, datasetId, e.getMessage());
-
+            LOG.error("Unexpected error! Error downloading file {} from v3 etl export for jobId {} Message: {}", fileName, jobId, e.getMessage());
+            throw e;
         }
     }
 

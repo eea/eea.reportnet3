@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -151,7 +152,7 @@ public interface JobController {
     Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId);
 
     @GetMapping(value = "/downloadEtlExportedFile/{jobId}")
-    void downloadEtlExportedFile(@PathVariable("jobId") Long jobId, HttpServletResponse response);
+    void downloadEtlExportedFile(@PathVariable("jobId") Long jobId, HttpServletResponse response) throws Exception;
 
     /**
      * Saves job

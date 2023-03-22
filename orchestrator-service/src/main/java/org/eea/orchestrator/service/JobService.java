@@ -72,5 +72,5 @@ public interface JobService {
 
     void cancelJob(Long jobId) throws EEAException;
 
-    File downloadEtlExportedFile(Long datasetId, String fileName) throws IOException, EEAException;
+    File downloadEtlExportedFile(Long jobId, String fileName) throws EEAException;
 }

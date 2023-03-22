@@ -1396,7 +1396,7 @@
     "value": "JHtTTkFQU0hPVF9UQVNLX1BBUkFMTEVMSVNNOjR9"
   },
   {
-    "key": "config/dataset/importPath",
+    "key": "config/application/importPath",
     "value": "JHtEQVRBU0VUX1BBVEg6QzpcaW1wb3J0XH0="
   },
   {
@@ -1404,7 +1404,7 @@
     "value": "JHtEQVRBU0VUX1BBVEg6L2hvbWUvbWFyaWEvRG93bmxvYWRzL3JlcG9ydG5ldDMvcGF0aHMvaW1wb3J0RmlsZXN9"
   },
   {
-    "key": "config/application/pathPublicFile",
+    "key": "config/dataset/pathPublicFile",
     "value": "JHtEQVRBU0VUX1BVQkxJQ19GSUxFX1BBVEg6QzpcaW1wb3J0RmlsZXNQdWJsaWNcfQ=="
   },
   {

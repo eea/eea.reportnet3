@@ -69,8 +69,8 @@ public class JobServiceImpl implements JobService {
     @Value(value = "${scheduling.inProgress.export.maximum.jobs}")
     private Long maximumNumberOfInProgressExportJobs;
 
-    @Value("${pathPublicFile}")
-    private String pathPublicFile;
+    @Value("${importPath}")
+    private String importPath;
 
     /**
      * The admin user.
@@ -83,6 +83,8 @@ public class JobServiceImpl implements JobService {
      */
     @Value("${eea.keycloak.admin.password}")
     private String adminPass;
+
+    private static final String ETL_EXPORT = "/etlExport/";
 
     @Autowired
     private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
@@ -200,6 +202,9 @@ public class JobServiceImpl implements JobService {
         } else if (jobType == JobTypeEnum.COPY_TO_EU_DATASET && numberOfCurrentJobs < maximumNumberOfInProgressCopyToEuDatasetJobs) {
             return true;
         } else if (jobType == JobTypeEnum.EXPORT && numberOfCurrentJobs < maximumNumberOfInProgressExportJobs) {
+            return true;
+        } else if (jobType == JobTypeEnum.FILE_EXPORT && numberOfCurrentJobs < maximumNumberOfInProgressExportJobs) {
+            //todo
             return true;
         }
         return false;
@@ -502,18 +507,18 @@ public class JobServiceImpl implements JobService {
     /**
      * Download etl exported file.
      *
-     * @param datasetId the dataset id
+     * @param jobId the job id
      * @param fileName the file name
      * @return the file
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws EEAException the EEA exception
      */
     @Override
-    public File downloadEtlExportedFile(Long datasetId, String fileName) throws IOException, EEAException {
+    public File downloadEtlExportedFile(Long jobId, String fileName) throws EEAException {
         // we compound the route and create the file
-        File file = new File(new File(pathPublicFile, "dataset-" + datasetId), FilenameUtils.getName(fileName));
+        File file = new File(new File(importPath, ETL_EXPORT), FilenameUtils.getName(fileName));
         if (!file.exists()) {
-            LOG.error( "Trying to download a file generated during the export dataset data process for datasetId {} but the file {} is not found", datasetId, fileName);
+            LOG.error( "Trying to download a file generated during the export dataset data process for jobId {} but the file {} is not found", jobId, fileName);
             throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
         }
         return file;
