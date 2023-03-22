@@ -3611,18 +3611,18 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   @Override
-  public void etlExportDatasetV3(@DatasetId Long datasetId, String tableSchemaId,
-                          Integer limit, Integer offset, String filterValue, String columnName,
-                          String dataProviderCodes) {
+  public void createFileForEtlExport(@DatasetId Long datasetId, String tableSchemaId,
+                                     Integer limit, Integer offset, String filterValue, String columnName,
+                                     String dataProviderCodes, Long jobId, Long dataflowId, String user) {
     try {
       long startTime = System.currentTimeMillis();
       LOG.info("FILE_EXPORT process initiated to datasetId: {}", datasetId);
-      recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+      recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user);
       long endTime = System.currentTimeMillis() - startTime;
       LOG.info("FILE_EXPORT process completed for datasetId: {} in {} seconds", datasetId,
               endTime / 1000);
     } catch (EEAException | IOException e) {
-      LOG.error("ETLExport error in  Dataset:", datasetId, e);
+      LOG.error("FILE_EXPORT process error in  Dataset:", datasetId, e);
     }
   }
 }

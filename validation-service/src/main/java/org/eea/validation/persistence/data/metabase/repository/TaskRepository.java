@@ -148,17 +148,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
                                                    @Param("processId") String processId, @Param("statuses") Set<String> statuses);
 
   /**
-   * Cancels tasks by processId and status
-   * @param processId
-   * @param dateFinish
-   */
-  @Modifying
-  @Transactional
-  @Query(nativeQuery = true,
-          value = "update task set status='CANCELED', date_finish= :dateFinish where process_id=:processId and status in ('IN_QUEUE','IN_PROGRESS')")
-  void cancelRunningProcessTasks(@Param("processId") String processId, @Param("dateFinish") Date dateFinish);
-
-  /**
    * Finds tasks by processId and status
    * @param processId
    * @param status

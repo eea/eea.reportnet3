@@ -658,8 +658,8 @@ public interface DatasetService {
    * @param columnName
    * @param dataProviderCodes
    */
-  void etlExportDatasetV3(@DatasetId Long datasetId, String tableSchemaId,
-                        Integer limit, Integer offset, String filterValue, String columnName,
-                        String dataProviderCodes);
+  void createFileForEtlExport(@DatasetId Long datasetId, String tableSchemaId,
+                              Integer limit, Integer offset, String filterValue, String columnName,
+                              String dataProviderCodes, Long jobId, Long dataflowId, String user);
 
 }

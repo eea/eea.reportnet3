@@ -29,10 +29,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class JobForCancellingValidationsAndReleasesWithoutTasks {
@@ -97,7 +94,7 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
                         if (tasks.size()==0) {
                             Long jobId = jobProcessService.findJobIdByProcessId(processVO.getProcessId());
                             JobVO jobVO = jobService.findById(jobId);
-                            if (jobVO.getJobStatus().equals(JobStatusEnum.CANCELED)) {
+                            if (jobVO!=null && jobVO.getJobStatus().equals(JobStatusEnum.CANCELED)) {
                                 continue;
                             }
                             LOG.info("Cancelling process {}", processVO.getProcessId());
@@ -123,7 +120,7 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
                                     if (!process.getStatus().equals(ProcessStatusEnum.FINISHED.toString()) && !process.getStatus().equals(ProcessStatusEnum.CANCELED.toString())) {
                                         LOG.info("Cancelling process {}", processVO.getProcessId());
                                         LOG.info("Cancelling running tasks for process {}", process.getProcessId());
-                                        validationControllerZuul.cancelRunningProcessTasks(process.getProcessId());
+                                        validationControllerZuul.updateTaskStatusByProcessIdAndCurrentStatuses(process.getProcessId(), ProcessStatusEnum.CANCELED, new HashSet<>(Arrays.asList(ProcessStatusEnum.IN_QUEUE.toString(), ProcessStatusEnum.IN_PROGRESS.toString())));
                                         LOG.info("Cancelled running tasks for process {}", process.getProcessId());
                                         LOG.info("Updating process to status CANCELED for processId {}", processId);
                                         processControllerZuul.updateProcess(process.getDatasetId(), process.getDataflowId(),

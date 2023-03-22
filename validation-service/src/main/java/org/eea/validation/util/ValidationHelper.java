@@ -66,7 +66,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
@@ -1175,11 +1174,6 @@ public class ValidationHelper implements DisposableBean {
 
   public List<BigInteger> findTasksByProcessId(String processId) {
      return taskRepository.findByProcessId(processId);
-  }
-
-  @Transactional
-  public void cancelRunningProcessTasks(String processId) {
-    taskRepository.cancelRunningProcessTasks(processId, new Date());
   }
 
   public Boolean findIfTasksExistByProcessIdAndStatusAndDuration(String processId, ProcessStatusEnum status, Long maxDuration) {

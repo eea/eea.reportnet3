@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.dataset.exception.InvalidJsonException;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
@@ -17,13 +18,20 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.orchestrator.JobProcessVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.hibernate.HibernateException;
@@ -104,6 +112,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   /** The record store controller zuul. */
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
+
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
+  @Autowired
+  private JobProcessControllerZuul jobProcessControllerZuul;
+
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
 
   /**
    * The connection url.
@@ -300,6 +317,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   private static final String ZIP = ".zip";
   private static final String JSON = ".json";
+
+  private int defaultFileExportProcessPriority = 20;
 
   /**
    * Find by table value with order.
@@ -1597,12 +1616,26 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public void findAndGenerateETLJsonV3(Long datasetId, String tableSchemaId,
                                   Integer limit, Integer offset, String filterValue, String columnName,
-                                  String dataProviderCodes) throws EEAException, IOException {
+                                  String dataProviderCodes, Long jobId, Long dataflowId, String user) throws EEAException, IOException {
+
+    String processUUID = UUID.randomUUID().toString();
+    processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.FILE_EXPORT,
+              processUUID, user, defaultFileExportProcessPriority, false);
+
+    if (jobId!=null) {
+      JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
+      jobProcessControllerZuul.save(jobProcessVO);
+    }
+
+    processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.FILE_EXPORT,
+            processUUID, user, defaultFileExportProcessPriority, false);
+
     checkSql(filterValue);
     checkSql(columnName);
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
     DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
             .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
+
     List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
     String tableName = "";
 
@@ -1666,7 +1699,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     System.gc();
 
     if (!JsonValidator.isValidJson(resultjson.toJSONString())) {
-
+      LOG.error("Error creating export file for datasetId {}, json created is not valid", datasetId);
+      processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
+              processUUID, user, defaultFileExportProcessPriority, false);
+      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      throw new InvalidJsonException();
     }
 
     String fileName =importPath + ETL_EXPORT
@@ -1681,8 +1718,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       out.putNextEntry(entry);
       out.write(resultString.toString().getBytes(), 0, resultString.toString().getBytes().length);
       out.closeEntry();
+
+      processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
+              processUUID, user, defaultFileExportProcessPriority, false);
+      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
     } catch (Exception e) {
       LOG.error("Error writing file {} for datasetId {}", fileName, datasetId);
+      processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
+              processUUID, user, defaultFileExportProcessPriority, false);
+      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
       throw e;
     }
   }
