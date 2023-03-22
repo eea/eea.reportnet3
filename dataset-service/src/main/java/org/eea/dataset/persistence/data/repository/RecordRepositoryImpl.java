@@ -313,8 +313,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   /** The Constant FILE_PATTERN_NAME: {@value}. */
   private static final String FILE_PATTERN_NAME = "etlExport_%s%s";
-  private static final String FILE_PATTERN_NAME_V3 = "etlExport_%s";
-
+  private static final String FILE_PATTERN_NAME_V2 = "etlExport_%s";
   private static final String ZIP = ".zip";
   private static final String JSON = ".json";
 
@@ -1706,22 +1705,25 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       throw new InvalidJsonException();
     }
 
-    String fileName =importPath + ETL_EXPORT
-            + String.format(FILE_PATTERN_NAME_V3, datasetId);
-    File fileZip = new File(fileName);
+    String fileName = String.format(FILE_PATTERN_NAME_V2, jobId);
+    String filePath =importPath + ETL_EXPORT + fileName;
+    File fileZip = new File(filePath);
 
     try (ZipOutputStream out =
                  new ZipOutputStream(new FileOutputStream(fileZip + ZIP))) {
-      ZipEntry entry = new ZipEntry(fileName + JSON);
+      ZipEntry entry = new ZipEntry(filePath + JSON);
       ObjectMapper mapper = new ObjectMapper();
       String resultString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(resultjson.toString()));
       out.putNextEntry(entry);
       out.write(resultString.toString().getBytes(), 0, resultString.toString().getBytes().length);
       out.closeEntry();
 
+      LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", fileName+ZIP, datasetId, jobId);
       processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
               processUUID, user, defaultFileExportProcessPriority, false);
-      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+      if (jobId!=null) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+      }
     } catch (Exception e) {
       LOG.error("Error writing file {} for datasetId {}", fileName, datasetId);
       processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
