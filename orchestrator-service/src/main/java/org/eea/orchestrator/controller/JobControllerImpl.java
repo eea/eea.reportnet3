@@ -370,8 +370,9 @@ public class JobControllerImpl implements JobController {
                                   @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
                                           value = "dataProviderCodes", required = false) String dataProviderCodes) {
 
-        ThreadPropertiesManager.setVariable("user",
-                SecurityContextHolder.getContext().getAuthentication().getName());
+        ThreadPropertiesManager.setVariable("user", SecurityContextHolder.getContext().getAuthentication().getName());
+        String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
+
 
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("dataflowId", dataflowId);
@@ -383,6 +384,7 @@ public class JobControllerImpl implements JobController {
         parameters.put("filterValue", filterValue);
         parameters.put("columnName", columnName);
         parameters.put("dataProviderCodes", dataProviderCodes);
+        parameters.put("userId", userId);
         JobStatusEnum statusToInsert = JobStatusEnum.QUEUED;
 
         String dataflowName = null;
@@ -544,8 +546,6 @@ public class JobControllerImpl implements JobController {
     public void downloadEtlExportedFile(@PathVariable("jobId") Long jobId, @ApiParam(value = "response") HttpServletResponse response) throws Exception {
         String fileName = String.format(FILE_PATTERN_NAME_V2, jobId) + ".zip";
         try {
-
-            JobVO job = jobService.findById(jobId);
             LOG.info("Downloading file generated from v3 etl export for jobId {}", jobId);
             File file = jobService.downloadEtlExportedFile(jobId, fileName);
             LOG.info("Successfully downloaded file generated from v3 etl export for jobId {}", jobId);
@@ -555,8 +555,8 @@ public class JobControllerImpl implements JobController {
             try (FileInputStream in = new FileInputStream(file)) {
                 // copy from in to out
                 IOUtils.copyLarge(in, out);
-                // delete the file after downloading it
-                //FileUtils.forceDelete(file); <- do we need this?
+                // delete the file after downloading it ?
+                //FileUtils.forceDelete(file);
             } catch (Exception e) {
                 LOG.error("Unexpected error! Error in copying large etl exported file {} for jobId {}. Message: {}", fileName, jobId, e.getMessage());
                 throw e;
