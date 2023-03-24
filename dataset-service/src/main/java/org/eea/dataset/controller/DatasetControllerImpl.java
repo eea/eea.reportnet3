@@ -2022,4 +2022,9 @@ public class DatasetControllerImpl implements DatasetController {
       }
   }
 
+  @ExceptionHandler(Exception.class)
+  public Exception handleGenericException(Exception exception) throws Exception {
+    LOG.error("Exception:",exception);
+    throw exception;
+  }
 }
