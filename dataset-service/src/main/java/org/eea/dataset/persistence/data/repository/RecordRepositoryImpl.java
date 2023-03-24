@@ -1639,8 +1639,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     String tableName = "";
 
     // create primary json
-    JSONObject resultjson = new JSONObject();
-    JSONArray tables = new JSONArray();
     if (tableSchemaId != null) {
       tableSchemaList = tableSchemaList.stream()
               .filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
@@ -1651,12 +1649,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
 
     GsonJsonParser gsonparser = new GsonJsonParser();
-    Object result = null;
+    List<String> result = new ArrayList<>();
+    String fileName = String.format(FILE_PATTERN_NAME_V2, jobId);
+    String filePath =importPath + ETL_EXPORT + fileName;
+    String jsonFile = filePath + JSON;
+    Integer tableCount = 0;
     for (TableSchema tableSchema : tableSchemaList) {
-      JSONObject resultTable = new JSONObject();
+      tableCount++;
       tableName = tableSchema.getNameTableSchema();
-      resultTable.put("tableName", tableName);
-      JSONArray tableRecords = new JSONArray();
       Long totalRecords = getCount(
               totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
               columnName, filterValue);
@@ -1670,11 +1670,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       }
 
       if (totalRecords != null && totalRecords > 0L) {
-        if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
-                || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-          resultTable.put("totalRecords", totalRecords);
-        }
-
         StringBuilder stringQuery = createEtlExportQuery(false, limit, offset, datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchema, filterChain);
         Query queryResult = entityManager.createNativeQuery(stringQuery.toString());
         try {
@@ -1683,41 +1678,53 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         } catch (NoResultException nre) {
           LOG.info("no result, ignore message");
         }
-        // add to table's records list
-        if (result != null) {
-          tableRecords.addAll(gsonparser.parseList(result.toString()));
-        }
-        result = null;
-        System.gc();
       }
-      resultTable.put("records", tableRecords);
-      // add table to resultjson tables list
-      tables.add(resultTable);
+      ObjectMapper mapper = new ObjectMapper();
+      try (FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
+          if (tableCount==1) {
+            fos.write(("{\n\"tables\": [\n{").getBytes());
+          }
+          if (totalRecords > 0) {
+            if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
+                    || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
+              fos.write("\"totalRecords\":".getBytes());
+              fos.write(totalRecords.toString().getBytes());
+              fos.write(",\n".getBytes());
+            }
+            fos.write("\"records\": [\n".getBytes());
+            if (result.size()>0) {
+              for (String record : result) {
+                if (!JsonValidator.isValidJson(record)) {
+                  LOG.error("Error creating export file for datasetId {}, json created is not valid", datasetId);
+                  processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
+                          processUUID, user, defaultFileExportProcessPriority, false);
+                  if (jobId!=null) {
+                    jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+                  }
+                  throw new InvalidJsonException();
+                }
+                String recordFormatted = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(record));
+                fos.write(recordFormatted.getBytes());
+                fos.write("\n".getBytes());
+              }
+              fos.write(("],\n"+"\"tableName\":").getBytes());
+              fos.write(tableName.getBytes());
+              fos.write(("}\n"+"]\n"+"}").getBytes());
+            }
+          }
+      }
     }
-    resultjson.put("tables", tables);
-    System.gc();
 
-    if (!JsonValidator.isValidJson(resultjson.toJSONString())) {
-      LOG.error("Error creating export file for datasetId {}, json created is not valid", datasetId);
-      processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
-              processUUID, user, defaultFileExportProcessPriority, false);
-      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
-      throw new InvalidJsonException();
-    }
-
-    String fileName = String.format(FILE_PATTERN_NAME_V2, jobId);
-    String filePath =importPath + ETL_EXPORT + fileName;
     File fileZip = new File(filePath);
-
     try (ZipOutputStream out =
                  new ZipOutputStream(new FileOutputStream(fileZip + ZIP))) {
-      ZipEntry entry = new ZipEntry(filePath + JSON);
-      ObjectMapper mapper = new ObjectMapper();
-      String resultString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(resultjson.toString()));
+      ZipEntry entry = new ZipEntry(jsonFile);
       out.putNextEntry(entry);
-      out.write(resultString.toString().getBytes(), 0, resultString.toString().getBytes().length);
+      Path path = Paths.get(jsonFile);
+      byte[] bytes = Files.readAllBytes(path);
+      out.write(bytes, 0, bytes.length);
       out.closeEntry();
-
+      Files.delete(path);
       LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", fileName+ZIP, datasetId, jobId);
       processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
               processUUID, user, defaultFileExportProcessPriority, false);
@@ -1728,7 +1735,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       LOG.error("Error writing file {} for datasetId {}", fileName, datasetId);
       processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
               processUUID, user, defaultFileExportProcessPriority, false);
-      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      if (jobId!=null) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      }
       throw e;
     }
   }
