@@ -115,8 +115,8 @@ export const ActionsToolbar = ({
   }));
 
   const onExportTableData = async type => {
-    const testCase = 'TABLE_EXPORT';
-    actionsContext.testProcess(datasetId, testCase);
+    const action = 'TABLE_EXPORT';
+    actionsContext.testProcess(datasetId, action);
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
       const isExportFilteredCsv = TextUtils.areEquals(type.key, 'exportFilteredCsv');

@@ -32,7 +32,6 @@ import { QCGenericHistory } from './_components/QCGenericHistory';
 import { ShowValidationsList } from 'views/_components/ShowValidationsList';
 import { Snapshots } from 'views/_components/Snapshots';
 import { Spinner } from 'views/_components/Spinner';
-// import { StepProgressBar } from 'views/_components/StepProgressBar';
 import { TabsDesigner } from './_components/TabsDesigner';
 import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
@@ -47,6 +46,7 @@ import { IntegrationService } from 'services/IntegrationService';
 import { ValidationService } from 'services/ValidationService';
 import { WebformService } from 'services/WebformService';
 
+import { ActionsContext } from 'views/_functions/Contexts/ActionsContext';
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -70,6 +70,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const { dataflowId, datasetId } = useParams();
 
+  const actionsContext = useContext(ActionsContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -88,8 +89,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     QuerystringUtils.getUrlParamValue('view') !== '' ? QuerystringUtils.getUrlParamValue('view') : 'design'
   );
 
-  const [importProcessing, setImportProcessing] = useState(false);
-  const [importProcessingMessage, setImportProcessingMessage] = useState(null);
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
     arePrefilledTablesDeleted: false,
@@ -197,8 +196,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const {
     arePrefilledTablesDeleted,
     datasetDescription,
-    // datasetProgressBarCurrentStep,
-    // datasetProgressBarSteps,
     datasetSchemaAllTables,
     dataViewerOptions,
     isDataflowOpen,
@@ -286,7 +283,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   }, [designerState.externalOperationsList]);
 
   useEffect(() => {
-    testImport();
+    actionsContext.testProcess(datasetId);
   }, [datasetId]);
 
   useEffect(() => {
@@ -311,7 +308,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   useEffect(() => {
     if (notificationContext.hidden.some(notification => notification.key === 'EXPORT_DATASET_FAILED_EVENT')) {
-      setIsLoadingFile(false);
+      actionsContext.changeExportDatasetState(false);
     }
 
     if (notificationContext.hidden.some(notification => notification.key === 'DOWNLOAD_VALIDATIONS_FAILED_EVENT')) {
@@ -607,6 +604,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onCloseConfigureWebformModal = () => manageDialogs('isConfigureWebformDialogVisible', false);
 
   const onConfirmValidate = async () => {
+    const action = 'DATASET_VALIDATE';
+    actionsContext.testProcess(datasetId, action);
     try {
       await DatasetService.validate(datasetId);
       notificationContext.add(
@@ -647,6 +646,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const onConfirmDelete = async () => {
+    const action = 'DATASET_DELETE';
+    actionsContext.testProcess(datasetId, action);
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
       await DatasetService.deleteData(datasetId, arePrefilledTablesDeleted);
@@ -692,7 +693,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const onExportDataExternalIntegration = async integrationId => {
-    setIsLoadingFile(true);
+    const action = 'DATASET_EXPORT';
+    actionsContext.testProcess(datasetId, action);
     notificationContext.add({ type: 'EXTERNAL_EXPORT_DESIGN_INIT' });
 
     try {
@@ -710,7 +712,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const onExportDataInternalExtension = async fileType => {
-    setIsLoadingFile(true);
+    const action = 'DATASET_EXPORT';
+    actionsContext.testProcess(datasetId, action);
     notificationContext.add({ type: 'EXTERNAL_EXPORT_DESIGN_INIT' });
 
     try {
@@ -800,7 +803,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       'EXTERNAL_EXPORT_DESIGN_FAILED_EVENT',
       'DOWNLOAD_EXPORT_TABLE_DATA_FILE_ERROR'
     ],
-    setIsLoadingFile,
+    actionsContext.changeExportDatasetState,
     false
   );
 
@@ -973,28 +976,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onUpdateSchema = schema => designerDispatch({ type: 'ON_UPDATE_SCHEMA', payload: { schema } });
 
-  const testImport = () => {
-    const timeout = ms => {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    };
-    const testImportTimer = async () => {
-      const importStatus = await DatasetService.testImportProcess(datasetId);
-
-      if (importStatus?.data && !importStatus?.data?.importInProgress) {
-        setImportProcessing(false);
-        setImportProcessingMessage(null);
-      } else {
-        setImportProcessingMessage(importStatus?.data?.message);
-        await timeout(5000);
-        testImportTimer();
-      }
-    };
-    setImportProcessing(true);
-    testImportTimer();
-  };
-
   const onUpload = async () => {
-    testImport();
+    const action = 'DATASET_IMPORT';
+    actionsContext.testProcess(datasetId, action);
     manageDialogs('isImportDatasetDialogVisible', false);
     setSelectedCustomImportIntegration({ id: null, name: null });
     try {
@@ -1274,18 +1258,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const renderSwitchView = () => {
-    const renderStepProgressBar = () => {
-      // if (!isDesignDatasetEditorRead) {
-      //   return (
-      //     <StepProgressBar
-      //       className={styles.stepProgressBar}
-      //       currentStep={datasetProgressBarCurrentStep}
-      //       steps={datasetProgressBarSteps}
-      //     />
-      //   );
-      // }
-    };
-
     const viewModes = [
       { key: 'design', label: resourcesContext.messages['designView'] },
       { key: 'tabularData', label: resourcesContext.messages['tabularDataView'] }
@@ -1297,7 +1269,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
     return (
       <div className={styles.switchDivInput}>
-        {renderStepProgressBar()}
         <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
           <TabularSwitch
             elements={viewModes}
@@ -1616,9 +1587,23 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 className={`p-button-rounded p-button-secondary ${
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
-                disabled={isDataflowOpen || isDesignDatasetEditorRead || importProcessing}
-                icon={importProcessing ? 'spinnerAnimate' : 'import'}
-                label={importProcessingMessage ? importProcessingMessage : resourcesContext.messages['importDataset']}
+                disabled={
+                  isDataflowOpen ||
+                  isDesignDatasetEditorRead ||
+                  actionsContext.importDatasetProcessing ||
+                  actionsContext.exportDatasetProcessing ||
+                  actionsContext.deleteDatasetProcessing ||
+                  actionsContext.importTableProcessing ||
+                  actionsContext.exportTableProcessing ||
+                  actionsContext.deleteTableProcessing ||
+                  actionsContext.validateDatasetProcessing
+                }
+                icon={actionsContext.importDatasetProcessing ? 'spinnerAnimate' : 'import'}
+                label={
+                  actionsContext.importDatasetProcessing
+                    ? resourcesContext.messages['importInProgress']
+                    : resourcesContext.messages['importDataset']
+                }
                 onClick={event => importMenuRef.current.show(event)}
               />
               <Menu
@@ -1632,10 +1617,24 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 className={`p-button-rounded p-button-secondary-transparent ${
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
-                disabled={isDataflowOpen || isDesignDatasetEditorRead}
-                icon={designerState.isLoadingFile ? 'spinnerAnimate' : 'export'}
+                disabled={
+                  isDataflowOpen ||
+                  isDesignDatasetEditorRead ||
+                  actionsContext.importDatasetProcessing ||
+                  actionsContext.exportDatasetProcessing ||
+                  actionsContext.deleteDatasetProcessing ||
+                  actionsContext.importTableProcessing ||
+                  actionsContext.exportTableProcessing ||
+                  actionsContext.deleteTableProcessing ||
+                  actionsContext.validateDatasetProcessing
+                }
+                icon={actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'}
                 id="buttonExportDataset"
-                label={resourcesContext.messages['exportDataset']}
+                label={
+                  actionsContext.exportDatasetProcessing
+                    ? resourcesContext.messages['exportInProgress']
+                    : resourcesContext.messages['exportDataset']
+                }
                 onClick={event => exportMenuRef.current.show(event)}
               />
               <Menu
@@ -1646,8 +1645,21 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 ref={exportMenuRef}
               />
               <DatasetDeleteDataDialog
-                icon="trash"
-                label={resourcesContext.messages['deleteDatasetData']}
+                disabled={
+                  actionsContext.importDatasetProcessing ||
+                  actionsContext.exportDatasetProcessing ||
+                  actionsContext.deleteDatasetProcessing ||
+                  actionsContext.importTableProcessing ||
+                  actionsContext.exportTableProcessing ||
+                  actionsContext.deleteTableProcessing ||
+                  actionsContext.validateDatasetProcessing
+                }
+                icon={actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'}
+                label={
+                  actionsContext.deleteDatasetProcessing
+                    ? resourcesContext.messages['deleteInProgress']
+                    : resourcesContext.messages['deleteDatasetData']
+                }
                 onConfirmDelete={onConfirmDelete}
                 onHideDelete={onHideDelete}>
                 {deletePrefilledDataCheckbox}
@@ -1655,9 +1667,22 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             </div>
             <div className="p-toolbar-group-right">
               <DatasetValidateDialog
-                disabled={isDesignDatasetEditorRead}
-                icon="validate"
-                label={resourcesContext.messages['validate']}
+                disabled={
+                  isDesignDatasetEditorRead ||
+                  actionsContext.importDatasetProcessing ||
+                  actionsContext.exportDatasetProcessing ||
+                  actionsContext.deleteDatasetProcessing ||
+                  actionsContext.importTableProcessing ||
+                  actionsContext.exportTableProcessing ||
+                  actionsContext.deleteTableProcessing ||
+                  actionsContext.validateDatasetProcessing
+                }
+                icon={actionsContext.validateDatasetProcessing ? 'spinnerAnimate' : 'validate'}
+                label={
+                  actionsContext.validateDatasetProcessing
+                    ? resourcesContext.messages['validationInProgress']
+                    : resourcesContext.messages['validate']
+                }
                 onConfirmValidate={onConfirmValidate}
               />
               <Button
