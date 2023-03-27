@@ -1,5 +1,6 @@
 package org.eea.orchestrator.persistence.repository;
 
+import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.orchestrator.persistence.domain.Job;
@@ -125,6 +126,26 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
     @Query(nativeQuery = true,
             value = "select id from jobs where job_status= :status and (extract(epoch from LOCALTIMESTAMP - date_status_changed) / 60) > :timeInMinutes")
     List<BigInteger> findJobsThatExceedTimeWithSpecificStatus(@Param("status") String status, @Param("timeInMinutes") long timeInMinutes);
+
+    /**
+     *
+     * Updates fme job status column based on job id
+     * @param jobId the id
+     * @param fmeJobStatus the fme_status value
+     */
+    @Transactional
+    @Modifying
+    @Query(nativeQuery = true,
+            value = "UPDATE jobs SET fme_status= :fmeJobStatus where id= :jobId")
+    void updateFmeStatus(@Param("jobId") Long jobId, @Param("fmeJobStatus") String fmeJobStatus);
+
+    /**
+     * Finds import fme jobs in progress that have fme_status not success.
+     * @return
+     */
+    @Query(nativeQuery = true,
+            value = "select * from jobs where job_status= 'IN_PROGRESS' and job_type = 'IMPORT' and fme_job_id is not null and (fme_status is null or fme_status != 'SUCCESS')")
+    List<Job> findFmeJobsToPollForStatus();
 }
 
 

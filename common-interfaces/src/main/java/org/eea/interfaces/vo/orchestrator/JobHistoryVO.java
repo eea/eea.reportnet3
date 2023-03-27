@@ -1,6 +1,7 @@
 package org.eea.interfaces.vo.orchestrator;
 
 import lombok.*;
+import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 
@@ -64,4 +65,7 @@ public class JobHistoryVO {
 
     /** The dataset name */
     private String datasetName;
+
+    /** The fme status */
+    private FmeJobStatusEnum fmeStatus;
 }

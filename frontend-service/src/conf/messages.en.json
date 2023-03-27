@@ -1602,6 +1602,7 @@
     "releaseCanceledEvent": "Release canceled for <strong>{:dataProviderName}</strong> (<a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>), {:error}",
     "importCanceledEvent": "Import canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>, {:error}",
     "longRunningImportFailedEvent": "Long running import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "fmeImportJobFailedEvent": "Fme import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>, {:error}",
     "disableRulesErrorEvent": "SQL rules containing errors were found in the Data Collection creation process",
     "canceled_by_admin": "Canceled by admin"

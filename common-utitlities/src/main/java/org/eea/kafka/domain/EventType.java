@@ -569,7 +569,11 @@ public enum EventType {
 
   /** The long running import failed event */
   LONG_RUNNING_IMPORT_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-          "long_running_import_failed_event", true);
+          "long_running_import_failed_event", true),
+
+  /** The fme import job failed event */
+  FME_IMPORT_JOB_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "fme_import_job_failed_event", true);
 
 
   /** The topic. */
