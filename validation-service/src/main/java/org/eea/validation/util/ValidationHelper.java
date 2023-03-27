@@ -66,7 +66,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
@@ -1210,5 +1209,13 @@ public class ValidationHelper implements DisposableBean {
       return null;
     }
     return taskMapper.entityToClass(task);
+  }
+
+  public TaskVO findTaskById(Long taskId) {
+     Optional<Task> task = taskRepository.findById(taskId);
+     if (task.isPresent()) {
+       return taskMapper.entityToClass(task.get());
+     }
+     return null;
   }
 }

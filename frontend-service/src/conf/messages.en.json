@@ -1217,6 +1217,7 @@
     "releaseProviderCompletedEvent": "<strong>{:dataProviderName}</strong> released <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> successfully",
     "releaseStartEvent": "Releasing data to data collection",
     "releasingLeftSideBarButton": "Releasing status",
+    "remainingJobs": "Remaining jobs",
     "rename": "Rename",
     "replaceData": "Replace data",
     "replaceDataPKInUse": "It's not possible to replace a PK in use",

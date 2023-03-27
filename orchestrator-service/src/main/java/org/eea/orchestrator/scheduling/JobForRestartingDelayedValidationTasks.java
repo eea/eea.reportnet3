@@ -1,8 +1,11 @@
 package org.eea.orchestrator.scheduling;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.ums.TokenVO;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,8 @@ public class JobForRestartingDelayedValidationTasks {
 
 
     private static final String BEARER = "Bearer ";
+    private static final String EVENT_TYPE = "eventType";
+    private static final String COMMAND_VALIDATE_TABLE = "COMMAND_VALIDATE_TABLE";
 
     /**
      * The Constant LOG.
@@ -65,21 +70,29 @@ public class JobForRestartingDelayedValidationTasks {
         try {
             List<BigInteger> tasksInProgress = validationControllerZuul.listInProgressValidationTasksThatExceedTime(maxTimeInMinutesForInProgressTasks);
             if (tasksInProgress.size() > 0) {
-                LOG.info("Restarting tasks " + tasksInProgress);
                 TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 tasksInProgress.stream().forEach(taskId -> {
                     try {
-                        validationControllerZuul.restartTask(taskId.longValue());
+                        TaskVO taskVO = validationControllerZuul.findTaskById(taskId.longValue());
+                        if (taskVO!=null) {
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            JsonNode jsonNode = objectMapper.readTree(taskVO.getJson());
+                            String eventType = jsonNode.get(EVENT_TYPE).asText();
+                            if (!eventType.equals(COMMAND_VALIDATE_TABLE)) {
+                                LOG.info("Restarting task {}", taskId);
+                                validationControllerZuul.restartTask(taskId.longValue());
+                            }
+                        }
                     } catch (Exception e) {
-                        LOG.error("Error while running scheduled task restartDelayedTasks for task " + taskId);
+                        LOG.error("Error while running scheduled task restartDelayedTasks for task {}", taskId);
                     }
                 });
             }
         } catch (Exception e) {
-            LOG.error("Error while running scheduled task restartDelayedTasks ", e);
+            LOG.error("Error while running scheduled task restartDelayedTasks {}", e);
         }
     }
 }
