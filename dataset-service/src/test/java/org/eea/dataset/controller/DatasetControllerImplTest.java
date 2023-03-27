@@ -917,7 +917,6 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getFieldById(Mockito.anyLong(), Mockito.any())).thenReturn(fieldVO);
     Mockito.when(datasetSchemaService.getFieldSchema(Mockito.any(), Mockito.any()))
         .thenReturn(fieldSchemaVO);
-    Mockito.when(datasetService.getMimetype(Mockito.any())).thenReturn(FileTypeEnum.CSV.getValue());
     try {
       datasetControllerImpl.updateAttachment(1L, 0L, 0L, "600B66C6483EA7C8B55891DA171A3E7F", file);
     } catch (ResponseStatusException e) {

@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface JobService {
-    JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, Long providerId,
-                   Long datasetId, String creatorUsername, String jobStatuses);
+    JobsVO getJobs(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
+                   Long datasetId, String datasetName, String creatorUsername, String jobStatuses);
 
     List<JobVO> getJobsByStatus(JobStatusEnum status);
 

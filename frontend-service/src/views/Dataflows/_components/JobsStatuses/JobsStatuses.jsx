@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Column } from 'primereact/column';
 
@@ -43,6 +44,8 @@ const { permissions } = config;
 export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const filterBy = useRecoilValue(filterByCustomFilterStore('jobsStatuses'));
 
+  const navigate = useNavigate();
+
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
   const userContext = useContext(UserContext);
@@ -83,8 +86,10 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         jobId: filterBy.jobId,
         jobType: filterBy.jobType?.join(),
         dataflowId: filterBy.dataflowId,
+        dataflowName: filterBy.dataflowName,
         providerId: filterBy.providerId,
         datasetId: filterBy.datasetId,
+        datasetName: filterBy.datasetName,
         creatorUsername: filterBy.creatorUsername,
         jobStatus: filterBy.jobStatus?.join()
       });
@@ -134,7 +139,9 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       nestedOptions: [
         { key: 'jobId', label: resourcesContext.messages['jobId'], keyfilter: 'pint' },
         { key: 'dataflowId', label: resourcesContext.messages['dataflowId'] },
+        { key: 'dataflowName', label: resourcesContext.messages['dataflowNameTwoWords'] },
         { key: 'datasetId', label: resourcesContext.messages['datasetId'] },
+        { key: 'datasetName', label: resourcesContext.messages['datasetName'] },
         { key: 'providerId', label: resourcesContext.messages['providerId'] },
         { key: 'creatorUsername', label: resourcesContext.messages['creatorUsername'] }
       ],
@@ -231,24 +238,12 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         template: getDataflowIdTemplate,
         className: styles.middleColumn
       },
-      // {
-      //   key: 'dataflowName',
-      //   header: resourcesContext.messages['dataflowNameTwoWords'],
-      //   template: getDataflowNameTemplate,
-      //   className: styles.largeColumn
-      // },
       {
         key: 'datasetId',
         header: resourcesContext.messages['datasetId'],
         template: getDatasetIdTemplate,
         className: styles.middleColumn
       },
-      // {
-      //   key: 'datasetName',
-      //   header: resourcesContext.messages['datasetName'],
-      //   template: getDatasetNameTemplate,
-      //   className: styles.largeColumn
-      // },
       {
         key: 'providerId',
         header: resourcesContext.messages['providerId'],
@@ -315,7 +310,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     <ActionsColumn
       disabledButtons={
         !(
-          job.jobStatus === 'IN_PROGRESS' &&
+          (job.jobStatus === 'IN_PROGRESS' || job.jobStatus === 'QUEUED') &&
           (job.jobType === 'IMPORT' || job.jobType === 'VALIDATION' || job.jobType === 'RELEASE')
         )
       }
@@ -369,13 +364,42 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getJobCreatorUsernameTemplate = job => <p>{job.creatorUsername}</p>;
 
-  const getDataflowIdTemplate = job => <p>{job.dataflowId}</p>;
+  const getDataflowIdTemplate = job => {
+    const dataflowId = job.dataflowId;
+    return (
+      <div className={styles.tooltip}>
+        <p>
+          <a
+            href=""
+            onClick={() => {
+              navigate(getUrl(routes.DATAFLOW, { dataflowId }, true));
+            }}>
+            {dataflowId}
+            <span className={styles.tooltiptext}> {job.dataflowName} </span>
+          </a>
+        </p>
+      </div>
+    );
+  };
 
-  const getDataflowNameTemplate = job => <p>{job.dataflowName}</p>;
-
-  const getDatasetIdTemplate = job => <p>{job.datasetId}</p>;
-
-  const getDatasetNameTemplate = job => <p>{job.datasetName}</p>;
+  const getDatasetIdTemplate = job => {
+    const dataflowId = job.dataflowId;
+    const datasetId = job.datasetId;
+    return (
+      <div className={styles.tooltip}>
+        <p>
+          <a
+            href=""
+            onClick={() => {
+              navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
+            }}>
+            {job.datasetId}
+            <span className={styles.tooltiptext}> {job.datasetName} </span>
+          </a>
+        </p>
+      </div>
+    );
+  };
 
   const getProviderIdTemplate = job => <p>{job.providerId}</p>;
 

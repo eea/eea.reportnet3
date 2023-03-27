@@ -15,14 +15,16 @@ public interface JobExtendedRepository {
      * @param jobId
      * @param jobTypes
      * @param dataflowId
+     * @param dataflowName
      * @param providerId
      * @param datasetId
+     * @param datasetName
      * @param creatorUsername
      * @param jobStatuses
      * @return
      */
-    List<Job> findJobsPaginated(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, Long providerId,
-                                Long datasetId, String creatorUsername, String jobStatuses);
+    List<Job> findJobsPaginated(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
+                                Long datasetId, String datasetName, String creatorUsername, String jobStatuses);
 
     /**
      * Count jobs paginated.
@@ -31,11 +33,13 @@ public interface JobExtendedRepository {
      * @param jobId
      * @param jobTypes
      * @param dataflowId
+     * @param dataflowName
      * @param providerId
      * @param datasetId
+     * @param datasetName
      * @param creatorUsername
      * @param jobStatuses
      * @return
      */
-    Long countJobsPaginated(boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, Long providerId, Long datasetId, String creatorUsername, String jobStatuses);
+    Long countJobsPaginated(boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses);
 }

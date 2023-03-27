@@ -11,8 +11,10 @@ export const JobsStatusesRepository = {
     jobId,
     jobType,
     dataflowId,
+    dataflowName,
     providerId,
     datasetId,
+    datasetName,
     creatorUsername,
     jobStatus
   }) =>
@@ -25,8 +27,10 @@ export const JobsStatusesRepository = {
         jobId,
         jobType,
         dataflowId,
+        dataflowName,
         providerId,
         datasetId,
+        datasetName,
         creatorUsername,
         jobStatus
       })

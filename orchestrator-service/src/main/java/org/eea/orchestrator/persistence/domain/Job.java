@@ -66,6 +66,9 @@ public class Job {
     @Column(name = "DATASET_NAME")
     private String datasetName;
 
+    @Column(name = "JOB_INFO")
+    private String jobInfo;
+
     @Column(name = "FME_STATUS")
     @Enumerated(EnumType.STRING)
     private FmeJobStatusEnum fmeStatus;
