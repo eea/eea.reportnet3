@@ -57,6 +57,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isStatusInfoDialogVisible, setIsStatusInfoDialogVisible] = useState(false);
   const [jobStatus, setJobStatus] = useState(null);
   const [jobStatusHistory, setJobStatusHistory] = useState({});
   const [jobsStatuses, setJobsStatusesList] = useState([]);
@@ -324,12 +325,17 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   );
 
   const getJobStatusTemplate = job => (
-    <div>
-      <LevelError
-        className={config.jobRunningStatus[job.jobStatus].label}
-        type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
-      />
-    </div>
+    // <div
+    // className={styles.statusBox}
+    // onClick={() => {
+    //   setIsStatusInfoDialogVisible(true);
+    //   setJobStatus(job);
+    // }}>
+    <LevelError
+      className={config.jobRunningStatus[job.jobStatus].label}
+      type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
+    />
+    // </div>
   );
 
   const getJobIdTemplate = job => <p>{job.id}</p>;
@@ -463,6 +469,11 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const onHideDeleteDialog = () => {
     setIsDeleteDialogVisible(false);
+    setJobStatus(null);
+  };
+
+  const onHideStatusInfoDialog = () => {
+    setIsStatusInfoDialogVisible(false);
     setJobStatus(null);
   };
 
@@ -602,6 +613,18 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               }}></p>
           }
         </ConfirmDialog>
+      )}
+
+      {isStatusInfoDialogVisible && (
+        <Dialog
+          blockScroll={false}
+          className="responsiveDialog"
+          header={resourcesContext.messages['info']}
+          modal={true}
+          onHide={onHideStatusInfoDialog}
+          visible={isStatusInfoDialogVisible}>
+          {jobStatus.jobInfo ? jobStatus.jobInfo : resourcesContext.messages['noJobStatusInfo']}
+        </Dialog>
       )}
     </Fragment>
   );
