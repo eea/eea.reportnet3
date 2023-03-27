@@ -1654,6 +1654,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     String filePath =importPath + ETL_EXPORT + fileName;
     String jsonFile = filePath + JSON;
     Integer tableCount = 0;
+    ObjectMapper mapper = new ObjectMapper();
     for (TableSchema tableSchema : tableSchemaList) {
       tableCount++;
       tableName = tableSchema.getNameTableSchema();
@@ -1679,10 +1680,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           LOG.info("no result, ignore message");
         }
       }
-      ObjectMapper mapper = new ObjectMapper();
       try (FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
           if (tableCount==1) {
-            fos.write(("{\n\"tables\": [\n{").getBytes());
+            fos.write(("{\n\"tables\": [\n").getBytes());
           }
           if (totalRecords > 0) {
             if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
@@ -1691,9 +1691,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
               fos.write(totalRecords.toString().getBytes());
               fos.write(",\n".getBytes());
             }
+            fos.write("{".getBytes());
             fos.write("\"records\": [\n".getBytes());
             if (result.size()>0) {
+              Integer recordCount=0;
               for (String record : result) {
+                recordCount++;
                 if (!JsonValidator.isValidJson(record)) {
                   LOG.error("Error creating export file for datasetId {}, json created is not valid", datasetId);
                   processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
@@ -1705,13 +1708,31 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                 }
                 String recordFormatted = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(record));
                 fos.write(recordFormatted.getBytes());
+                if (recordCount!=result.size()) {
+                  fos.write(",".getBytes());
+                }
                 fos.write("\n".getBytes());
               }
               fos.write(("],\n"+"\"tableName\":").getBytes());
-              fos.write(tableName.getBytes());
-              fos.write(("}\n"+"]\n"+"}").getBytes());
+              fos.write(("\""+tableName+"\"").getBytes());
+              fos.write(("\n}").getBytes());
+              if (tableCount < tableSchemaList.size()) {
+                fos.write(",".getBytes());
+              }
+              fos.write("\n".getBytes());
+              if (tableCount==tableSchemaList.size()) {
+                fos.write(("]\n"+"}").getBytes());
+              }
             }
           }
+      } catch (Exception e) {
+        LOG.error("Error writing file {} for datasetId {}", fileName, datasetId);
+        processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
+                processUUID, user, defaultFileExportProcessPriority, false);
+        if (jobId!=null) {
+          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        }
+        throw e;
       }
     }
 
