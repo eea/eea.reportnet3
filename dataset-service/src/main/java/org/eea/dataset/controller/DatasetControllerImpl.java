@@ -52,10 +52,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.DefaultMultipartHttpServletRequest;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
@@ -2022,9 +2026,21 @@ public class DatasetControllerImpl implements DatasetController {
       }
   }
 
-  @ExceptionHandler(Exception.class)
-  public Exception handleGenericException(Exception exception) throws Exception {
-    LOG.error("Exception:",exception);
-    throw exception;
-  }
+    @ExceptionHandler(Exception.class)
+    public void handleGenericException(Exception exception, WebRequest webRequest) throws Exception {
+        HttpServletRequest request = ((ServletWebRequest) webRequest).getRequest();
+        String requestUri = request.getRequestURI();
+        LOG.error("For request {} ", requestUri);
+        request.getParameterMap().forEach((k, v) -> LOG.error("parameter:{}={}", k, v));
+        if (requestUri.contains("importFileData")) {
+          try {
+            DefaultMultipartHttpServletRequest multipartRequest = (DefaultMultipartHttpServletRequest) ((ServletWebRequest) webRequest).getRequest();
+            multipartRequest.getMultiFileMap().forEach((k, v) -> LOG.error("multipart parameter:{}={}", k, v.get(0).getOriginalFilename()));
+          } catch (Exception e1) {
+            LOG.error("Error while extracting multipart parameters: ", e1);
+          }
+        }
+        LOG.error("the following exception occurred: ", exception);
+        throw exception;
+    }
 }
