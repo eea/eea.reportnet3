@@ -681,9 +681,10 @@ public interface DatasetController {
    * @param filterValue
    * @param columnName
    * @param dataProviderCodes
+   * @param jobId
    * @return
    */
-  @GetMapping("/etlExport/createFile/{datasetId}")
+  @GetMapping("/private/etlExport/createFile/{datasetId}")
   void createFileForEtlExport(
           @PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
           @RequestParam(value = "providerId", required = false) Long providerId,

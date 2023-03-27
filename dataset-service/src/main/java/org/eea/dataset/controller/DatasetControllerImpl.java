@@ -1229,7 +1229,6 @@ public class DatasetControllerImpl implements DatasetController {
     try {
      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
      Map<String, Object> result = new HashMap<>();
-     //TODO add start for polling url
      result.put("pollingUrl", "/orchestrator/jobs/pollForJobStatus/" + jobId);
      result.put("status", "Preparing file");
      return result;
