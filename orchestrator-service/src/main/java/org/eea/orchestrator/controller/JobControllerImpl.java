@@ -385,7 +385,6 @@ public class JobControllerImpl implements JobController {
         parameters.put("columnName", columnName);
         parameters.put("dataProviderCodes", dataProviderCodes);
         parameters.put("userId", userId);
-        JobStatusEnum statusToInsert = JobStatusEnum.QUEUED;
 
         String dataflowName = null;
         try{
@@ -403,11 +402,11 @@ public class JobControllerImpl implements JobController {
             LOG.error("Error when trying to receive dataset name for datasetId {} ", datasetId, e);
         }
 
-        //TODO checkEligibility
+        JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.FILE_EXPORT.toString(), dataflowId, providerId, Arrays.asList(datasetId), false);
 
-        LOG.info("Adding file export job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName());
+        LOG.info("Adding file export job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
         Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.FILE_EXPORT, statusToInsert, false, null, dataflowName, datasetName);
-        LOG.info("Successfully added file export job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName());
+        LOG.info("Successfully added file export job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
         return jobId;
     }
 
@@ -510,8 +509,14 @@ public class JobControllerImpl implements JobController {
 
     @Override
     @GetMapping(value = "/pollForJobStatus/{jobId}")
-    @PreAuthorize("isAuthenticated()")
-    public Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId){
+    @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
+    public Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId,
+                                                @ApiParam(type = "Long", value = "Dataset id",
+                                                        example = "0") @RequestParam("datasetId") Long datasetId,
+                                                @ApiParam(type = "Long", value = "Dataflow id",
+                                                        example = "0") @RequestParam("dataflowId") Long dataflowId,
+                                                @ApiParam(type = "Long", value = "Provider id",
+                                                        example = "0") @RequestParam(value = "providerId", required = false) Long providerId){
         Map<String, Object> result = new HashMap<>();
 
         try {
@@ -523,9 +528,11 @@ public class JobControllerImpl implements JobController {
             else {
                 result.put("status", job.getJobStatus().getValue());
                 if (job.getJobType() == JobTypeEnum.FILE_EXPORT && job.getJobStatus() == JobStatusEnum.FINISHED) {
-                    //TODO add downloadUrl
-                    //String fileName = importPath + ETL_EXPORT + String.format(FILE_PATTERN_NAME_V3, datasetId) + ".zip";
-                    result.put("downloadUrl", "/orchestrator/jobs/downloadEtlExportedFile/" + jobId);
+                    String downloadUrl = "/orchestrator/jobs/downloadEtlExportedFile/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+                    if(providerId != null){
+                        downloadUrl+= "&providerId=" + providerId;
+                    }
+                    result.put("downloadUrl", downloadUrl);
                 }
             }
         }
@@ -542,8 +549,15 @@ public class JobControllerImpl implements JobController {
 
     @Override
     @GetMapping(value = "/downloadEtlExportedFile/{jobId}")
-    @PreAuthorize("isAuthenticated()")
-    public void downloadEtlExportedFile(@PathVariable("jobId") Long jobId, @ApiParam(value = "response") HttpServletResponse response) throws Exception {
+    @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
+    public void downloadEtlExportedFile(@PathVariable("jobId") Long jobId,
+                                        @ApiParam(type = "Long", value = "Dataset id",
+                                                example = "0") @RequestParam("datasetId") Long datasetId,
+                                        @ApiParam(type = "Long", value = "Dataflow id",
+                                                example = "0") @RequestParam("dataflowId") Long dataflowId,
+                                        @ApiParam(type = "Long", value = "Provider id",
+                                                example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+                                        @ApiParam(value = "response") HttpServletResponse response) throws Exception {
         String fileName = String.format(FILE_PATTERN_NAME_V2, jobId) + ".zip";
         try {
             LOG.info("Downloading file generated from v3 etl export for jobId {}", jobId);

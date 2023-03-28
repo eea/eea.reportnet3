@@ -204,7 +204,11 @@ public class JobServiceImpl implements JobService {
         } else if (jobType == JobTypeEnum.EXPORT && numberOfCurrentJobs < maximumNumberOfInProgressExportJobs) {
             return true;
         } else if (jobType == JobTypeEnum.FILE_EXPORT && numberOfCurrentJobs < maximumNumberOfInProgressExportJobs) {
-            //todo
+            //if there is a file_export for the same dataset id and is IN_PROGRESS the job should remain in status QUEUED
+            List<Job> fileExports = jobRepository.findByJobStatusInAndJobTypeInAndDatasetId(Arrays.asList(JobStatusEnum.IN_PROGRESS), Arrays.asList(JobTypeEnum.FILE_EXPORT), job.getDatasetId());
+            if(fileExports != null && fileExports.size() > 0){
+                return false;
+            }
             return true;
         }
         return false;
@@ -232,6 +236,7 @@ public class JobServiceImpl implements JobService {
                 }
             }
         } else if (jobType.equals(JobTypeEnum.COPY_TO_EU_DATASET.toString())) {
+            //we shouldn't add the job if there is another queued or in progress copy to eu dataset for the same dataflow id
             List<Job> jobList = jobRepository.findByJobTypeInAndJobStatusIn(Arrays.asList(JobTypeEnum.COPY_TO_EU_DATASET), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
             for (Job job : jobList) {
                 Map<String, Object> insertedParameters = job.getParameters();
@@ -241,6 +246,7 @@ public class JobServiceImpl implements JobService {
                 }
             }
         } else if (jobType.equals(JobTypeEnum.IMPORT.toString())) {
+            //we shouldn't add the job if there is another queued or in progress import, validation or release for the same datasetId
             List<Job> jobList = jobRepository.findByJobStatusInAndJobTypeInAndDatasetId(Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), Arrays.asList(JobTypeEnum.IMPORT, JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), datasetIds.get(0));
             if (jobList != null && jobList.size() > 0) {
                 return JobStatusEnum.REFUSED;
@@ -256,6 +262,25 @@ public class JobServiceImpl implements JobService {
                     }
                 }
                 return JobStatusEnum.IN_PROGRESS;
+            }
+        }
+        else if (jobType.equals(JobTypeEnum.FILE_EXPORT.toString())){
+            //we shouldn't add the job if there is another queued or in progress import or release for the same datasetId
+            List<Job> jobList = jobRepository.findByJobStatusInAndJobTypeInAndDatasetId(Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), Arrays.asList(JobTypeEnum.IMPORT), datasetIds.get(0));
+            if (jobList != null && jobList.size() > 0) {
+                return JobStatusEnum.REFUSED;
+            } else {
+                List<Job> releasesAndValidations = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), true);
+                for (Job job : releasesAndValidations) {
+                    Map<String, Object> insertedParameters = job.getParameters();
+                    if (insertedParameters.get("datasetId") != null) {
+                        List<Long> insertedDatasetIds = (List<Long>) insertedParameters.get("datasetId");
+                        if (insertedDatasetIds.contains(datasetIds.get(0).intValue())) {
+                            return JobStatusEnum.REFUSED;
+                        }
+                    }
+                }
+                return JobStatusEnum.QUEUED;
             }
         }
         return JobStatusEnum.QUEUED;
