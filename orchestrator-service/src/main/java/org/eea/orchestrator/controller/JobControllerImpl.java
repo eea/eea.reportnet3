@@ -510,7 +510,13 @@ public class JobControllerImpl implements JobController {
     @Override
     @GetMapping(value = "/pollForJobStatus/{jobId}")
     @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
-    public Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId){
+    public Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId,
+                                                @ApiParam(type = "Long", value = "Dataset id",
+                                                        example = "0") @RequestParam("datasetId") Long datasetId,
+                                                @ApiParam(type = "Long", value = "Dataflow id",
+                                                        example = "0") @RequestParam("dataflowId") Long dataflowId,
+                                                @ApiParam(type = "Long", value = "Provider id",
+                                                        example = "0") @RequestParam(value = "providerId", required = false) Long providerId){
         Map<String, Object> result = new HashMap<>();
 
         try {
@@ -522,7 +528,11 @@ public class JobControllerImpl implements JobController {
             else {
                 result.put("status", job.getJobStatus().getValue());
                 if (job.getJobType() == JobTypeEnum.FILE_EXPORT && job.getJobStatus() == JobStatusEnum.FINISHED) {
-                    result.put("downloadUrl", "/orchestrator/jobs/downloadEtlExportedFile/" + jobId);
+                    String downloadUrl = "/orchestrator/jobs/downloadEtlExportedFile/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+                    if(providerId != null){
+                        downloadUrl+= "&providerId=" + providerId;
+                    }
+                    result.put("downloadUrl", downloadUrl);
                 }
             }
         }
@@ -540,7 +550,14 @@ public class JobControllerImpl implements JobController {
     @Override
     @GetMapping(value = "/downloadEtlExportedFile/{jobId}")
     @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
-    public void downloadEtlExportedFile(@PathVariable("jobId") Long jobId, @ApiParam(value = "response") HttpServletResponse response) throws Exception {
+    public void downloadEtlExportedFile(@PathVariable("jobId") Long jobId,
+                                        @ApiParam(type = "Long", value = "Dataset id",
+                                                example = "0") @RequestParam("datasetId") Long datasetId,
+                                        @ApiParam(type = "Long", value = "Dataflow id",
+                                                example = "0") @RequestParam("dataflowId") Long dataflowId,
+                                        @ApiParam(type = "Long", value = "Provider id",
+                                                example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+                                        @ApiParam(value = "response") HttpServletResponse response) throws Exception {
         String fileName = String.format(FILE_PATTERN_NAME_V2, jobId) + ".zip";
         try {
             LOG.info("Downloading file generated from v3 etl export for jobId {}", jobId);

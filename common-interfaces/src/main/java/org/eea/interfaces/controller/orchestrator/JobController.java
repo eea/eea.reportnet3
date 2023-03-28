@@ -149,10 +149,14 @@ public interface JobController {
     void updateFmeJobId(@PathVariable("jobId") Long jobId, @PathVariable("fmeJobId") String fmeJobId);
 
     @GetMapping(value = "/pollForJobStatus/{jobId}")
-    Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId);
+    Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId, @RequestParam("datasetId") Long datasetId,
+                                        @RequestParam("dataflowId") Long dataflowId,
+                                        @RequestParam(value = "providerId", required = false) Long providerId);
 
     @GetMapping(value = "/downloadEtlExportedFile/{jobId}")
-    void downloadEtlExportedFile(@PathVariable("jobId") Long jobId, HttpServletResponse response) throws Exception;
+    void downloadEtlExportedFile(@PathVariable("jobId") Long jobId, @RequestParam("datasetId") Long datasetId,
+                                 @RequestParam("dataflowId") Long dataflowId,
+                                 @RequestParam(value = "providerId", required = false) Long providerId, HttpServletResponse response) throws Exception;
 
     /**
      * Saves job
