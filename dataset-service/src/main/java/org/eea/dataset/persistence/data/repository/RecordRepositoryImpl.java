@@ -1652,6 +1652,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       String fileName = String.format(FILE_PATTERN_NAME_V2, jobId);
       String filePath =importPath + ETL_EXPORT + fileName;
       String jsonFile = filePath + JSON;
+      Path path = Paths.get(jsonFile);
       Integer tableCount = 0;
       for (TableSchema tableSchema : tableSchemaList) {
         tableCount++;
@@ -1690,12 +1691,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       File fileZip = new File(filePath);
       try (ZipOutputStream out =
                    new ZipOutputStream(new FileOutputStream(fileZip + ZIP))) {
-        createZipFromJson(jsonFile, out);
+        createZipFromJson(jsonFile, out, path);
         LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", fileName+ZIP, datasetId, jobId);
       } catch (Exception e) {
         LOG.error("Error writing file {} for datasetId {}", fileName, datasetId);
         errorOccurred = true;
         throw e;
+      } finally {
+        Files.delete(path);
       }
     } catch (Exception er) {
         LOG.error("Error creating FILE_EXPORT file for datasetId {} and jobId {}", datasetId, jobId);
@@ -1715,16 +1718,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
   }
 
-  private static void createZipFromJson(String jsonFile, ZipOutputStream out) throws IOException {
+  private static void createZipFromJson(String jsonFile, ZipOutputStream out, Path path) throws IOException {
     ZipEntry entry = new ZipEntry(jsonFile);
     out.putNextEntry(entry);
-    Path path = Paths.get(jsonFile);
     byte[] bytes = Files.readAllBytes(path);
     ObjectMapper mapper = new ObjectMapper();
     String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(bytes));
     out.write(res.getBytes(), 0, res.getBytes().length);
     out.closeEntry();
-    Files.delete(path);
   }
 
   private static void createJsonRecordsForTable(Long datasetId, String tableSchemaId, String filterValue, String columnName, String dataProviderCodes, List<TableSchema> tableSchemaList, String tableName, List<String> result, Integer tableCount, Long totalRecords, FileOutputStream fos) throws IOException, InvalidJsonException {
