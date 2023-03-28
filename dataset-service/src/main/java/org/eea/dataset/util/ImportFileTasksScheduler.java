@@ -56,11 +56,9 @@ public class ImportFileTasksScheduler extends MessageReceiver {
   private JobScheduler scheduler;
 
   /** The delay. */
-  //@Value("${validation.scheduled.consumer}")
-  private Long delay=1000l;
+  private Long delay=5000l;
 
   /** The max running tasks. */
-  //@Value("${validation.tasks.parallelism}")
   private int maxRunningTasks=4;
 
   /** The service instance id. */
@@ -68,7 +66,6 @@ public class ImportFileTasksScheduler extends MessageReceiver {
   private String serviceInstanceId;
 
   /** The instance priority. */
-  //@Value("${validation.instance.priority}")
   private String instancePriority="HIGH";
 
 
