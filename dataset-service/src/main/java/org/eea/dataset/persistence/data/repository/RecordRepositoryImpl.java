@@ -1685,13 +1685,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             fos.write(("{\n\"tables\": [\n").getBytes());
           }
           if (totalRecords > 0) {
+            fos.write("{".getBytes());
             if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
                     || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
               fos.write("\"totalRecords\":".getBytes());
               fos.write(totalRecords.toString().getBytes());
               fos.write(",\n".getBytes());
             }
-            fos.write("{".getBytes());
             fos.write("\"records\": [\n".getBytes());
             if (result.size()>0) {
               Integer recordCount=0;
