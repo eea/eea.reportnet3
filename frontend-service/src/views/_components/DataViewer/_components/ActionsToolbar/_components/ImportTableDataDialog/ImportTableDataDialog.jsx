@@ -60,8 +60,8 @@ export const ImportTableDataDialog = ({
   };
 
   const onUpload = async () => {
-    const testCase = 'TABLE_IMPORT';
-    actionsContext.testProcess(datasetId, testCase);
+    const action = 'TABLE_IMPORT';
+    actionsContext.testProcess(datasetId, action);
     setImportTableDialogVisible(false);
     const {
       dataflow: { name: dataflowName },

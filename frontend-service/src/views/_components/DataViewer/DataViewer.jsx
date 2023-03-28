@@ -547,8 +547,8 @@ export const DataViewer = ({
   };
 
   const onConfirmDeleteTable = async () => {
-    const testCase = 'TABLE_DELETE';
-    actionsContext.testProcess(datasetId, testCase);
+    const action = 'TABLE_DELETE';
+    actionsContext.testProcess(datasetId, action);
     try {
       notificationContext.add({ type: 'DELETE_TABLE_DATA_INIT' });
       await DatasetService.deleteTableData(datasetId, tableId);

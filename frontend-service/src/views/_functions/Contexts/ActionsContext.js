@@ -10,5 +10,5 @@ export const ActionsContext = createContext({
   validateDatasetProcessing: false,
   changeExportDatasetState: isLoading => {},
   changeExportTableState: isTableLoading => {},
-  testProcess: (datasetId, testCase) => {}
+  testProcess: (datasetId, action) => {}
 });
