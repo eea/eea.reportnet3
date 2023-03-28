@@ -1638,7 +1638,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
       String tableName = "";
 
-      // create primary json
       if (tableSchemaId != null) {
         tableSchemaList = tableSchemaList.stream()
                 .filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
