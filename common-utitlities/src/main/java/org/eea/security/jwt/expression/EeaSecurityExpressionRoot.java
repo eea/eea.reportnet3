@@ -101,8 +101,6 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
       log.warn("Invocation was made from a feign client with a due token. Letting it go");
       canAccess = true;
     } else {
-      log.info("Checking available authorities for user {}",
-          SecurityContextHolder.getContext().getAuthentication().getName());
       Collection<String> authorities = SecurityContextHolder.getContext().getAuthentication()
           .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
           .collect(Collectors.toList());

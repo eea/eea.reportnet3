@@ -115,7 +115,6 @@ public class ObligationServiceImpl implements ObligationService {
       }
     } else {
       filteredObligations = obligations;
-      LOG.info("No date range detected");
     }
 
     List<ObligationVO> obligationVOS = obligationMapper.entityListToClass(filteredObligations);

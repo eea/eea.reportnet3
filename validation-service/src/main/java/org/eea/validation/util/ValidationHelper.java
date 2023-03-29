@@ -861,7 +861,6 @@ public class ValidationHelper implements DisposableBean {
   public void addValidationTaskToProcess(final String processId, final EventType eventType,
       final Map<String, Object> value) {
     if (checkStartedProcess(processId)) {
-      LOG.info("Adding validation task for process {}", processId);
       EEAEventVO eeaEventVO = new EEAEventVO();
       eeaEventVO.setEventType(eventType);
       value.put("processId", processId);
@@ -879,7 +878,6 @@ public class ValidationHelper implements DisposableBean {
       Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.VALIDATION_TASK, new Date(), null, null,
           json, 0, null);
       taskRepository.save(task);
-      LOG.info("Added validation task {} for process {}",task.getId(), processId);
     }
   }
 

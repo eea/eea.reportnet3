@@ -49,8 +49,6 @@ public class FieldValueIdGenerator implements IdentifierGenerator {
       } else {
         prefix = "FIELD" + field.getRecord().getDataProviderCode();
       }
-    } else {
-      LOG_ERROR.error("Error generating field serial id number. Field {}", field);
     }
     String idcompose = datasetId + prefix + UUID.randomUUID();
     return DigestUtils.md5Hex(idcompose).toUpperCase();
