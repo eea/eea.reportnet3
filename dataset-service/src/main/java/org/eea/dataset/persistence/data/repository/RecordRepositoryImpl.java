@@ -1681,18 +1681,18 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       File fileZip = new File(filePath);
       try (ZipOutputStream out =
                      new ZipOutputStream(new FileOutputStream(fileZip + ZIP))) {
-          createZipFromJson(jsonFile, out, path);
-          LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", fileName+ZIP, datasetId, jobId);
-      } catch (Exception e) {
-          LOG.error("Error writing file {} for datasetId {}", fileName, datasetId);
-          throw e;
-      } finally {
-          Files.delete(path);
-        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
+         createZipFromJson(jsonFile, out, path);
+         processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
                 processUUID, user, defaultFileExportProcessPriority, false);
-        if (jobId !=null) {
-          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
-        }
+         if (jobId !=null) {
+           jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+         }
+         LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", fileName+ZIP, datasetId, jobId);
+      } catch (Exception e) {
+         LOG.error("Error writing file {} for datasetId {}", fileName, datasetId);
+         throw e;
+      } finally {
+        Files.delete(path);
       }
   }
 
