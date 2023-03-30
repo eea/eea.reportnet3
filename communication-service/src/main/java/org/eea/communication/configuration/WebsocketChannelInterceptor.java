@@ -56,7 +56,7 @@ public class WebsocketChannelInterceptor implements ChannelInterceptor {
     Assert.notNull(accessor, "Cannot get accessor from message");
 
     if (isLogged(accessor)) {
-      logMessage(accessor);
+      //logMessage(accessor);
       return message;
     }
 
@@ -105,8 +105,6 @@ public class WebsocketChannelInterceptor implements ChannelInterceptor {
     try {
       accessor.setUser(new StompPrincipal(jwtTokenProvider
           .retrieveToken(accessor.getFirstNativeHeader("token")).getPreferredUsername()));
-      logger.info("Message received: User={}, SessionId={}, Command={}", accessor.getUser(),
-          accessor.getSessionId(), accessor.getCommand());
     } catch (VerificationException e) {
       logger.error("Security token not valid; {}", e.getMessage());
       sendErrorCommand(accessor.getSessionId(), "Token validation failed");
