@@ -801,7 +801,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     // Find and remove old key
     if (!apiKeys.isEmpty()) {
       for (String keyString : apiKeys) {
-        if (keyString.contains(newValueAttribute)) {
+        if (keyString.contentEquals(newValueAttribute)) {
           apiKeys.remove(keyString);
           break;
         }
@@ -840,7 +840,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     String findValue = "," + dataflowId + "," + dataProvider;
     if (!apiKeys.isEmpty()) {
       for (String keyString : apiKeys) {
-        if (keyString.contains(findValue)) {
+        if (keyString.contentEquals(findValue)) {
           result = keyString.replace(findValue, "");
           break;
         }
