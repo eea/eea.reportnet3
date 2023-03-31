@@ -17,20 +17,47 @@ export const ActionsProvider = ({ children }) => {
 
   const inProgressRef = useRef();
   const jobTypeRef = useRef();
+  const timer = useRef();
 
   inProgressRef.current = isInProgress;
   jobTypeRef.current = jobTypeInProgress;
 
   const testProcess = (datasetId, action) => {
-    setJobTypeInProgress('');
+    clearInterval(timer.current);
 
-    const timeout = ms => {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    };
+    setImportDatasetProcessing(false);
+    setImportTableProcessing(false);
+    setValidateDatasetProcessing(false);
+    setJobTypeInProgress('');
+    setIsInProgress(false);
 
     let pageRefresh = false;
 
-    const testProcessTimer = async () => {
+    switch (action) {
+      case 'DATASET_IMPORT':
+        setImportDatasetProcessing(true);
+        break;
+      case 'TABLE_IMPORT':
+        setImportTableProcessing(true);
+        break;
+      case 'DATASET_EXPORT':
+        setExportDatasetProcessing(true);
+        break;
+      case 'TABLE_EXPORT':
+        setExportTableProcessing(true);
+        break;
+      case 'DATASET_DELETE':
+        setDeleteDatasetProcessing(true);
+        break;
+      case 'TABLE_DELETE':
+        setDeleteTableProcessing(true);
+        break;
+      case 'DATASET_VALIDATE':
+        setValidateDatasetProcessing(true);
+        break;
+    }
+
+    timer.current = setInterval(async () => {
       setIsInProgress(false);
 
       const datasetJobs = await JobsStatusesService.getJobsStatuses({
@@ -51,86 +78,50 @@ export const ActionsProvider = ({ children }) => {
 
       if (!pageRefresh && !action && jobTypeRef.current === 'IMPORT') {
         pageRefresh = true;
-        actionInProgress('IMPORT');
+        setImportDatasetProcessing(true);
       } else if (!pageRefresh && !action && jobTypeRef.current === 'VALIDATION') {
         pageRefresh = true;
-        actionInProgress('VALIDATION');
+        setValidateDatasetProcessing(true);
       }
 
       if (!inProgressRef.current) {
         switch (action) {
           case 'DATASET_IMPORT':
+            console.log('importDatasetProcessing' + importDatasetProcessing);
             setImportDatasetProcessing(false);
+            clearInterval(timer.current);
             break;
           case 'TABLE_IMPORT':
             setImportTableProcessing(false);
+            clearInterval(timer.current);
             break;
           case 'DATASET_EXPORT':
             setExportDatasetProcessing(false);
+            clearInterval(timer.current);
             break;
           case 'TABLE_EXPORT':
             setExportTableProcessing(false);
+            clearInterval(timer.current);
             break;
           case 'DATASET_DELETE':
             setDeleteDatasetProcessing(false);
+            clearInterval(timer.current);
             break;
           case 'TABLE_DELETE':
             setDeleteTableProcessing(false);
+            clearInterval(timer.current);
             break;
           default:
             if (jobTypeRef.current === 'IMPORT') {
               setImportDatasetProcessing(false);
+              clearInterval(timer.current);
             } else {
               setValidateDatasetProcessing(false);
+              clearInterval(timer.current);
             }
         }
-      } else {
-        await timeout(5000);
-        testProcessTimer();
       }
-    };
-
-    const actionInProgress = async action => {
-      switch (action) {
-        case 'IMPORT':
-          setImportDatasetProcessing(true);
-          break;
-        case 'VALIDATION':
-          setValidateDatasetProcessing(true);
-          break;
-        case 'DATASET_IMPORT':
-          setImportDatasetProcessing(true);
-          break;
-        case 'TABLE_IMPORT':
-          setImportTableProcessing(true);
-          break;
-        case 'DATASET_EXPORT':
-          setExportDatasetProcessing(true);
-          break;
-        case 'TABLE_EXPORT':
-          setExportTableProcessing(true);
-          break;
-        case 'DATASET_DELETE':
-          setDeleteDatasetProcessing(true);
-          break;
-        case 'TABLE_DELETE':
-          setDeleteTableProcessing(true);
-          break;
-        default:
-          setValidateDatasetProcessing(true);
-          await timeout(5000);
-      }
-
-      if (!(action === 'IMPORT' || action === 'VALIDATION')) {
-        testProcessTimer();
-      }
-    };
-
-    if (!action) {
-      testProcessTimer();
-    } else {
-      actionInProgress(action);
-    }
+    }, 1000);
   };
 
   const changeExportDatasetState = isLoading => {
