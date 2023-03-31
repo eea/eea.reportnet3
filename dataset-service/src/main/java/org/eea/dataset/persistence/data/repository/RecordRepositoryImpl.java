@@ -1615,121 +1615,137 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public void findAndGenerateETLJsonV3(Long datasetId, String tableSchemaId,
                                   Integer limit, Integer offset, String filterValue, String columnName,
-                                  String dataProviderCodes, Long jobId, Long dataflowId, String user) throws EEAException, IOException {
+                                  String dataProviderCodes, Long jobId, Long dataflowId, String user, String processUUID) throws EEAException, IOException {
 
-    String processUUID = UUID.randomUUID().toString();
-    processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.FILE_EXPORT,
-              processUUID, user, defaultFileExportProcessPriority, false);
+      processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.FILE_EXPORT,
+                processUUID, user, defaultFileExportProcessPriority, false);
+      if (jobId!=null) {
+        JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
+        jobProcessControllerZuul.save(jobProcessVO);
+      }
+      processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.FILE_EXPORT,
+                processUUID, user, defaultFileExportProcessPriority, false);
 
-    if (jobId!=null) {
-      JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
-      jobProcessControllerZuul.save(jobProcessVO);
+      checkSql(filterValue);
+      checkSql(columnName);
+      String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+      DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId)).orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
+
+      List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+      String tableName = "";
+
+      if (tableSchemaId != null) {
+         tableSchemaList = tableSchemaList.stream().filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
+                  .collect(Collectors.toList());
+      }
+      if (offset == 0) {
+         offset = 1;
+      }
+
+      List<String> result = new ArrayList<>();
+      String fileName = String.format(FILE_PATTERN_NAME_V2, jobId);
+      String filePath =importPath + ETL_EXPORT + fileName;
+      String jsonFile = filePath + JSON;
+      Path path = Paths.get(jsonFile);
+      Integer tableCount = 0;
+      for (TableSchema tableSchema : tableSchemaList) {
+         tableCount++;
+         tableName = tableSchema.getNameTableSchema();
+         Long totalRecords = getCount(totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes), columnName, filterValue);
+
+         String filterChain = tableSchema.getIdTableSchema().toString();
+         if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
+                  || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
+             filterChain = filterChain + "_" + Stream.of(tableSchemaId, columnName, filterValue, dataProviderCodes)
+                     .filter(s -> StringUtils.isNotBlank(s)).collect(Collectors.joining(","));
+          }
+
+         if (totalRecords != null && totalRecords > 0L) {
+              StringBuilder stringQuery = createEtlExportQuery(false, limit, offset, datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchema, filterChain);
+              Query queryResult = entityManager.createNativeQuery(stringQuery.toString());
+            try {
+               result = queryResult.getResultList();
+               System.gc();
+            } catch (NoResultException nre) {
+               LOG.info("no result, ignore message");
+            }
+          }
+         try (FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
+             createJsonRecordsForTable(datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchemaList, tableName, result, tableCount, totalRecords, fos);
+         } catch (Exception e) {
+             LOG.error("Error writing file {} for datasetId {}", fileName, datasetId);
+             throw e;
+         }
+      }
+
+      File fileZip = new File(filePath);
+      try (ZipOutputStream out =
+                     new ZipOutputStream(new FileOutputStream(fileZip + ZIP))) {
+         createZipFromJson(jsonFile, out, path);
+         processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
+                processUUID, user, defaultFileExportProcessPriority, false);
+         if (jobId !=null) {
+           jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+         }
+         LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", fileName+ZIP, datasetId, jobId);
+      } catch (Exception e) {
+         LOG.error("Error writing file {} for datasetId {}", fileName, datasetId);
+         throw e;
+      } finally {
+        Files.delete(path);
+      }
+  }
+
+  private static void createZipFromJson(String jsonFile, ZipOutputStream out, Path path) throws IOException {
+    ZipEntry entry = new ZipEntry(jsonFile);
+    out.putNextEntry(entry);
+    byte[] bytes = Files.readAllBytes(path);
+    ObjectMapper mapper = new ObjectMapper();
+    String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(bytes));
+    out.write(res.getBytes(), 0, res.getBytes().length);
+    out.closeEntry();
+  }
+
+  private static void createJsonRecordsForTable(Long datasetId, String tableSchemaId, String filterValue, String columnName, String dataProviderCodes, List<TableSchema> tableSchemaList, String tableName, List<String> result, Integer tableCount, Long totalRecords, FileOutputStream fos) throws IOException, InvalidJsonException {
+    if (tableCount ==1) {
+      fos.write(("{\n\"tables\": [\n").getBytes());
     }
-
-    processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.FILE_EXPORT,
-            processUUID, user, defaultFileExportProcessPriority, false);
-
-    checkSql(filterValue);
-    checkSql(columnName);
-    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
-    DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
-            .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
-
-    List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-    String tableName = "";
-
-    // create primary json
-    JSONObject resultjson = new JSONObject();
-    JSONArray tables = new JSONArray();
-    if (tableSchemaId != null) {
-      tableSchemaList = tableSchemaList.stream()
-              .filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
-              .collect(Collectors.toList());
-    }
-    if (offset == 0) {
-      offset = 1;
-    }
-
-    GsonJsonParser gsonparser = new GsonJsonParser();
-    Object result = null;
-    for (TableSchema tableSchema : tableSchemaList) {
-      JSONObject resultTable = new JSONObject();
-      tableName = tableSchema.getNameTableSchema();
-      resultTable.put("tableName", tableName);
-      JSONArray tableRecords = new JSONArray();
-      Long totalRecords = getCount(
-              totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
-              columnName, filterValue);
-
-      String filterChain = tableSchema.getIdTableSchema().toString();
+    if (totalRecords > 0) {
+      fos.write("{".getBytes());
       if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
               || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-        filterChain =
-                filterChain + "_" + Stream.of(tableSchemaId, columnName, filterValue, dataProviderCodes)
-                        .filter(s -> StringUtils.isNotBlank(s)).collect(Collectors.joining(","));
+        fos.write("\"totalRecords\":".getBytes());
+        fos.write(totalRecords.toString().getBytes());
+        fos.write(",\n".getBytes());
       }
-
-      if (totalRecords != null && totalRecords > 0L) {
-        if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
-                || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-          resultTable.put("totalRecords", totalRecords);
+      fos.write(("\"tableName\":").getBytes());
+      fos.write(("\""+ tableName +"\"").getBytes());
+      fos.write(",\n".getBytes());
+      fos.write("\"records\": [\n".getBytes());
+      if (result.size()>0) {
+        Integer recordCount=0;
+        for (String record : result) {
+          recordCount++;
+          if (!JsonValidator.isValidJson(record)) {
+            LOG.error("Error creating export file for datasetId {}, json created is not valid", datasetId);
+            throw new InvalidJsonException();
+          }
+          fos.write(record.getBytes());
+          if (recordCount!= result.size()) {
+            fos.write(",".getBytes());
+          }
+          fos.write("\n".getBytes());
         }
-
-        StringBuilder stringQuery = createEtlExportQuery(false, limit, offset, datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchema, filterChain);
-        Query queryResult = entityManager.createNativeQuery(stringQuery.toString());
-        try {
-          result = queryResult.getResultList();
-          System.gc();
-        } catch (NoResultException nre) {
-          LOG.info("no result, ignore message");
+        fos.write(("]\n").getBytes());
+        fos.write(("\n}").getBytes());
+        if (tableCount < tableSchemaList.size()) {
+          fos.write(",".getBytes());
         }
-        // add to table's records list
-        if (result != null) {
-          tableRecords.addAll(gsonparser.parseList(result.toString()));
+        fos.write("\n".getBytes());
+        if (tableCount == tableSchemaList.size()) {
+          fos.write(("]\n"+"}").getBytes());
         }
-        result = null;
-        System.gc();
       }
-      resultTable.put("records", tableRecords);
-      // add table to resultjson tables list
-      tables.add(resultTable);
-    }
-    resultjson.put("tables", tables);
-    System.gc();
-
-    if (!JsonValidator.isValidJson(resultjson.toJSONString())) {
-      LOG.error("Error creating export file for datasetId {}, json created is not valid", datasetId);
-      processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
-              processUUID, user, defaultFileExportProcessPriority, false);
-      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
-      throw new InvalidJsonException();
-    }
-
-    String fileName = String.format(FILE_PATTERN_NAME_V2, jobId);
-    String filePath =importPath + ETL_EXPORT + fileName;
-    File fileZip = new File(filePath);
-
-    try (ZipOutputStream out =
-                 new ZipOutputStream(new FileOutputStream(fileZip + ZIP))) {
-      ZipEntry entry = new ZipEntry(filePath + JSON);
-      ObjectMapper mapper = new ObjectMapper();
-      String resultString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(resultjson.toString()));
-      out.putNextEntry(entry);
-      out.write(resultString.toString().getBytes(), 0, resultString.toString().getBytes().length);
-      out.closeEntry();
-
-      LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", fileName+ZIP, datasetId, jobId);
-      processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
-              processUUID, user, defaultFileExportProcessPriority, false);
-      if (jobId!=null) {
-        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
-      }
-    } catch (Exception e) {
-      LOG.error("Error writing file {} for datasetId {}", fileName, datasetId);
-      processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
-              processUUID, user, defaultFileExportProcessPriority, false);
-      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
-      throw e;
     }
   }
 
