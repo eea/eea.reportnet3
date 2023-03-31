@@ -87,7 +87,6 @@ export const ActionsProvider = ({ children }) => {
       if (!inProgressRef.current) {
         switch (action) {
           case 'DATASET_IMPORT':
-            console.log('importDatasetProcessing' + importDatasetProcessing);
             setImportDatasetProcessing(false);
             clearInterval(timer.current);
             break;
