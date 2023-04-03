@@ -346,7 +346,7 @@ public interface DatasetController {
    * @param dataProviderCodes the data provider codes
    * @return the a hashmap
    */
-  @GetMapping("/v3/{datasetId}/etlExport")
+  @GetMapping("/v3/etlExport/{datasetId}")
   Map<String, Object> etlExportDatasetWithJob(@PathVariable("datasetId") Long datasetId,
                                               @RequestParam("dataflowId") Long dataflowId,
                                               @RequestParam(value = "providerId", required = false) Long providerId,
