@@ -32,7 +32,7 @@ import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
 import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
-// import { StepProgressBar } from 'views/_components/StepProgressBar';
+
 import { Webforms } from 'views/Webforms';
 
 import { DataflowService } from 'services/DataflowService';
@@ -114,8 +114,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     id: null,
     name: ''
   });
-
-  // const [exportProcessingMessage, setExportProcessingMessage] = useState(null);
 
   const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -282,7 +280,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   } = useReporterDataset(datasetId, dataflowId);
 
   useEffect(() => {
-    actionsContext.testProcess(datasetId, 'DATASET_IMPORT');
+    actionsContext.testProcess(datasetId);
   }, [datasetId]);
 
   useEffect(() => {
@@ -457,8 +455,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onConfirmDelete = async () => {
-    const testCase = 'DATASET_DELETE';
-    actionsContext.testProcess(datasetId, testCase);
+    const action = 'DATASET_DELETE';
+    actionsContext.testProcess(datasetId, action);
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
       await DatasetService.deleteData(datasetId);
@@ -483,8 +481,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onConfirmValidate = async () => {
-    const testCase = 'DATASET_VALIDATE';
-    actionsContext.testProcess(datasetId, testCase);
+    const action = 'DATASET_VALIDATE';
+    actionsContext.testProcess(datasetId, action);
     try {
       await DatasetService.validate(datasetId);
       notificationContext.add(
@@ -689,8 +687,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onExportDataExternalIntegration = async integrationId => {
-    const testCase = 'DATASET_EXPORT';
-    actionsContext.testProcess(datasetId, testCase);
+    const action = 'DATASET_EXPORT';
+    actionsContext.testProcess(datasetId, action);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
       await DatasetService.exportDatasetDataExternal(datasetId, integrationId);
@@ -707,8 +705,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onExportDataInternalExtension = async fileType => {
-    const testCase = 'DATASET_EXPORT';
-    actionsContext.testProcess(datasetId, testCase);
+    const action = 'DATASET_EXPORT';
+    actionsContext.testProcess(datasetId, action);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
       await DatasetService.exportDatasetData(datasetId, fileType);
@@ -988,8 +986,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onUpload = async () => {
-    const testCase = 'DATASET_IMPORT';
-    actionsContext.testProcess(datasetId, testCase);
+    const action = 'DATASET_IMPORT';
+    actionsContext.testProcess(datasetId, action);
     setIsImportDatasetDialogVisible(false);
     setSelectedCustomImportIntegration({ id: null, name: null });
     const {
@@ -1099,18 +1097,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       />
     </div>
   );
-
-  const renderStepProgressBar = () => {
-    // if (hasWritePermissions) {
-    //   return (
-    //     <StepProgressBar
-    //       className={styles.stepProgressBar}
-    //       currentStep={datasetProgressBarSteps.currentStep}
-    //       steps={datasetProgressBarSteps.steps}
-    //     />
-    //   );
-    // }
-  };
 
   const renderTableWebformView = () => {
     if (selectedView === 'webform') {
@@ -1321,10 +1307,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           </div>
         </Toolbar>
       </div>
-      <div className={styles.progressSwitchWrapper}>
-        {renderStepProgressBar()}
-        {renderSwitchView()}
-      </div>
+      <div className={styles.progressSwitchWrapper}>{renderSwitchView()}</div>
       {renderTableWebformView()}
       {validationsVisible && (
         <Dialog

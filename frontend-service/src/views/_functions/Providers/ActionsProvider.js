@@ -1,54 +1,39 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 import { ActionsContext } from '../Contexts/ActionsContext';
 
-import { DatasetService } from 'services/DatasetService';
+import { JobsStatusesService } from 'services/JobsStatusesService';
 
 export const ActionsProvider = ({ children }) => {
-  const [importDatasetProcessing, setImportDatasetProcessing] = useState(false);
-  const [importTableProcessing, setImportTableProcessing] = useState(false);
-  const [exportDatasetProcessing, setExportDatasetProcessing] = useState(false);
-  const [exportTableProcessing, setExportTableProcessing] = useState(false);
   const [deleteDatasetProcessing, setDeleteDatasetProcessing] = useState(false);
   const [deleteTableProcessing, setDeleteTableProcessing] = useState(false);
+  const [exportDatasetProcessing, setExportDatasetProcessing] = useState(false);
+  const [exportTableProcessing, setExportTableProcessing] = useState(false);
+  const [importDatasetProcessing, setImportDatasetProcessing] = useState(false);
+  const [importTableProcessing, setImportTableProcessing] = useState(false);
+  const [isInProgress, setIsInProgress] = useState(false);
+  const [jobTypeInProgress, setJobTypeInProgress] = useState('');
   const [validateDatasetProcessing, setValidateDatasetProcessing] = useState(false);
 
-  const testProcess = (datasetId, testCase) => {
-    const timeout = ms => {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    };
-    const testProcessTimer = async () => {
-      const processStatus = await DatasetService.testImportProcess(datasetId);
+  const inProgressRef = useRef();
+  const jobTypeRef = useRef();
+  const timer = useRef();
 
-      if (processStatus?.data && !processStatus?.data?.importInProgress) {
-        switch (testCase) {
-          case 'DATASET_IMPORT':
-            setImportDatasetProcessing(false);
-            break;
-          case 'TABLE_IMPORT':
-            setImportTableProcessing(false);
-            break;
-          case 'DATASET_EXPORT':
-            setExportDatasetProcessing(false);
-            break;
-          case 'TABLE_EXPORT':
-            setExportTableProcessing(false);
-            break;
-          case 'DATASET_DELETE':
-            setDeleteDatasetProcessing(false);
-            break;
-          case 'TABLE_DELETE':
-            setDeleteTableProcessing(false);
-            break;
-          default:
-            setValidateDatasetProcessing(false);
-        }
-      } else {
-        await timeout(5000);
-        testProcessTimer();
-      }
-    };
-    switch (testCase) {
+  inProgressRef.current = isInProgress;
+  jobTypeRef.current = jobTypeInProgress;
+
+  const testProcess = (datasetId, action) => {
+    clearInterval(timer.current);
+
+    setImportDatasetProcessing(false);
+    setImportTableProcessing(false);
+    setValidateDatasetProcessing(false);
+    setJobTypeInProgress('');
+    setIsInProgress(false);
+
+    let pageRefresh = false;
+
+    switch (action) {
       case 'DATASET_IMPORT':
         setImportDatasetProcessing(true);
         break;
@@ -67,10 +52,75 @@ export const ActionsProvider = ({ children }) => {
       case 'TABLE_DELETE':
         setDeleteTableProcessing(true);
         break;
-      default:
+      case 'DATASET_VALIDATE':
         setValidateDatasetProcessing(true);
+        break;
     }
-    testProcessTimer();
+
+    timer.current = setInterval(async () => {
+      setIsInProgress(false);
+
+      const datasetJobs = await JobsStatusesService.getJobsStatuses({
+        datasetId: datasetId,
+        numberRows: 1000
+      });
+
+      for (let i = datasetJobs.jobsList.length - 1; i >= 0; i--) {
+        if (
+          (datasetJobs.jobsList[i].jobStatus === 'IN_PROGRESS' || datasetJobs.jobsList[i].jobStatus === 'QUEUED') &&
+          (datasetJobs.jobsList[i].jobType === 'IMPORT' || datasetJobs.jobsList[i].jobType === 'VALIDATION')
+        ) {
+          setIsInProgress(true);
+          setJobTypeInProgress(datasetJobs.jobsList[i].jobType);
+          break;
+        }
+      }
+
+      if (!pageRefresh && !action && jobTypeRef.current === 'IMPORT') {
+        pageRefresh = true;
+        setImportDatasetProcessing(true);
+      } else if (!pageRefresh && !action && jobTypeRef.current === 'VALIDATION') {
+        pageRefresh = true;
+        setValidateDatasetProcessing(true);
+      }
+
+      if (!inProgressRef.current) {
+        switch (action) {
+          case 'DATASET_IMPORT':
+            setImportDatasetProcessing(false);
+            clearInterval(timer.current);
+            break;
+          case 'TABLE_IMPORT':
+            setImportTableProcessing(false);
+            clearInterval(timer.current);
+            break;
+          case 'DATASET_EXPORT':
+            setExportDatasetProcessing(false);
+            clearInterval(timer.current);
+            break;
+          case 'TABLE_EXPORT':
+            setExportTableProcessing(false);
+            clearInterval(timer.current);
+            break;
+          case 'DATASET_DELETE':
+            setDeleteDatasetProcessing(false);
+            clearInterval(timer.current);
+            break;
+          case 'TABLE_DELETE':
+            setDeleteTableProcessing(false);
+            clearInterval(timer.current);
+            break;
+          default:
+            if (jobTypeRef.current === 'IMPORT') {
+              setImportDatasetProcessing(false);
+              clearInterval(timer.current);
+            } else {
+              setValidateDatasetProcessing(false);
+              clearInterval(timer.current);
+            }
+        }
+      }
+    }, 1000);
   };
 
   const changeExportDatasetState = isLoading => {
