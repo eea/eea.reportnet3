@@ -1916,10 +1916,42 @@ public class DatasetControllerImpl implements DatasetController {
     return datasetDataToBeDeleted;
   }
 
+  @PostMapping("/v2/getDatasetData")
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Get dataset data to be truncated", hidden = true)
+  public TruncateDataset getDatasetDataV2(
+          @RequestParam(value = "datasetId") Long datasetId,
+          @RequestParam(value = "dataProviderId") Long dataProviderId) {
+    LOG.info("Method getDatasetData called for datasetId: {} and dataProviderId {}", datasetId, dataProviderId);
+    if (datasetId == null || dataProviderId == null) {
+      return null;
+    }
+
+    TruncateDataset datasetDataToBeDeleted = new TruncateDataset();
+    try {
+      datasetDataToBeDeleted = datasetService.getDatasetDataToBeDeleted(datasetId, dataProviderId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error while executing method getDatasetData for datasetId: {}, dataProviderId: {}", datasetId, dataProviderId, e);
+    }
+
+    LOG.info("Method getDatasetData returns truncateDataset: {}", datasetDataToBeDeleted);
+    return datasetDataToBeDeleted;
+  }
 
   @DeleteMapping("/private/truncateDataset")
   @ApiOperation(value = "Truncate dataset by dataset id", hidden = true)
   public Boolean truncateDataset(@RequestParam("datasetId") Long datasetId) {
+    LOG.info("Method truncateDataset called for datasetId: {}", datasetId);
+    if (datasetId == null) {
+      return null;
+    }
+    return datasetService.truncateDataset(datasetId);
+  }
+
+  @DeleteMapping("/v2/truncateDataset")
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Truncate dataset by dataset id", hidden = true)
+  public Boolean truncateDatasetV2(@RequestParam("datasetId") Long datasetId) {
     LOG.info("Method truncateDataset called for datasetId: {}", datasetId);
     if (datasetId == null) {
       return null;

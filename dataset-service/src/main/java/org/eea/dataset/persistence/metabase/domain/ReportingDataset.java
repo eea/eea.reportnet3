@@ -27,6 +27,7 @@ public class ReportingDataset extends DataSetMetabase {
   @Column(name = "ID", columnDefinition = "serial")
   private Long id;
 
+  @ToString.Exclude
   @OneToMany(mappedBy = "reportingDataset", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Snapshot> snapshots;
 
