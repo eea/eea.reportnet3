@@ -361,7 +361,6 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
 
     String uri = uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
         .path(GET_GROUPS_BY_USER).buildAndExpand(uriParams).toString();
-    LOG.info("Invoking keycloak url {}", uri);
     ResponseEntity<GroupInfo[]> responseEntity =
         this.restTemplate.exchange(uri, HttpMethod.GET, request, GroupInfo[].class);
 
