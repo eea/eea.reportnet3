@@ -361,7 +361,12 @@ public class ExcelWriterStrategy implements WriterStrategy {
    */
   private Sheet createSheetAndHeaders(Workbook workbook, TableSchemaVO table,
       String includeCountryCode, boolean includeValidations, String nameSheet) {
-    Sheet sheet = workbook.createSheet(nameSheet);
+    Sheet sheet;
+    if (nameSheet.length() > 31) {
+      sheet = workbook.createSheet();
+    } else {
+      sheet = workbook.createSheet(nameSheet);
+    }
     List<FieldSchemaVO> fieldSchemas = table.getRecordSchema().getFieldSchema();
     // Set headers
     int nHeaders = 0;
