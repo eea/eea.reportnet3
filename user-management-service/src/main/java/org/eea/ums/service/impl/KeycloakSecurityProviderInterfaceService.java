@@ -1,20 +1,6 @@
 package org.eea.ums.service.impl;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -46,6 +32,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * The Class KeycloakSecurityProviderInterfaceService.
@@ -801,9 +794,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     // Find and remove old key
     if (!apiKeys.isEmpty()) {
       for (String keyString : apiKeys) {
-        if (keyString.contains(newValueAttribute)) {
-          apiKeys.remove(keyString);
-          break;
+        int index = keyString.indexOf(",");
+        if (index!=-1) {
+          String keySubstring = keyString.substring(index+1);
+          if (keySubstring.equals(newValueAttribute)) {
+            apiKeys.remove(keyString);
+            break;
+          }
         }
       }
     }
@@ -840,9 +837,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
     String findValue = "," + dataflowId + "," + dataProvider;
     if (!apiKeys.isEmpty()) {
       for (String keyString : apiKeys) {
-        if (keyString.contains(findValue)) {
-          result = keyString.replace(findValue, "");
-          break;
+        int index = keyString.indexOf(",");
+        if (index!=-1) {
+          String keySubstring = keyString.substring(index);
+          if (keySubstring.equals(findValue)) {
+            result = keyString.replace(findValue, "");
+            break;
+          }
         }
       }
     }
