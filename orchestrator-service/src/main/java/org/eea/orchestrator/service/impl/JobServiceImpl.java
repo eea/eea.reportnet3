@@ -495,4 +495,15 @@ public class JobServiceImpl implements JobService {
                 break;
         }
     }
+
+    @Transactional
+    @Override
+    public void updateFmeCallbackJobParameter(String fmeJobId, Boolean fmeCallback){
+        Optional<Job> job = jobRepository.findJobByFmeJobId(fmeJobId);
+        if(job.isPresent()){
+            Map<String, Object> insertedParameters = job.get().getParameters();
+            insertedParameters.put("fmeCallback", fmeCallback);
+            jobRepository.save(job.get());
+        }
+    }
 }

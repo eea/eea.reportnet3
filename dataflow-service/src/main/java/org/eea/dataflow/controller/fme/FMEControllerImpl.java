@@ -145,8 +145,8 @@ public class FMEControllerImpl implements FMEController {
       fmeCommunicationService.releaseNotifications(fmeJob, fmeOperationInfoVO.getStatusNumber(),
           fmeOperationInfoVO.isNotificationRequired());
       fmeCommunicationService.updateJobStatus(fmeJob, fmeOperationInfoVO.getStatusNumber());
-      if(fmeOperationInfoVO.getStatusNumber() != 0L && fmeJob.getOperation() == IntegrationOperationTypeEnum.IMPORT) {
-        updateFailedJobAndProcessStatus(fmeJob.getJobId());
+      if(fmeJob.getOperation() == IntegrationOperationTypeEnum.IMPORT) {
+        updateFailedJobAndProcessStatus(fmeJob.getJobId(), fmeOperationInfoVO.getStatusNumber());
       }
     } catch (EEAForbiddenException e) {
       exception = e;
@@ -169,10 +169,17 @@ public class FMEControllerImpl implements FMEController {
     }
   }
 
-  private void updateFailedJobAndProcessStatus(Long fmeJobId){
+  private void updateFailedJobAndProcessStatus(Long fmeJobId, Long fmeStatusNum){
     try{
       JobVO jobVO = jobControllerZuul.findJobByFmeJobId(fmeJobId.toString());
+      if(fmeStatusNum == 0L){
+        Map<String, Object> insertedParameters = jobVO.getParameters();
+        if(insertedParameters.get("fmeCallback") == null || (Boolean) insertedParameters.get("fmeCallback") == true){
+          LOG.info("Fme job with jobId {} and fmeJobId {} is successful and a callback has been made with a file", jobVO.getId(), fmeJobId);
+        }
+      }
       if(jobVO.getJobStatus().getValue().equals(JobStatusEnum.IN_PROGRESS.getValue())) {
+        //if the job is in progress and the job either failed in fme or was successful but no file was sent to Reportnet3, the job will be failed.
         jobControllerZuul.updateJobAndProcess(jobVO.getId(), JobStatusEnum.FAILED, ProcessStatusEnum.CANCELED);
         LOG.info("Updated fme job, job and process in /operationFinished for jobId {} and fmeJobId {}", jobVO.getId(), fmeJobId);
       }

@@ -73,4 +73,6 @@ public interface JobService {
     List<JobVO> getFMEImportJobsForPolling();
 
     void updateFmeStatus(Long jobId, FmeJobStatusEnum fmeStatus);
+
+    void updateFmeCallbackJobParameter(String fmeJobId, Boolean fmeCallback);
 }
