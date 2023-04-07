@@ -183,6 +183,17 @@ public interface JobController {
      */
     @PutMapping(value = "/cancelJob/{jobId}")
     void cancelJob(@PathVariable("jobId") Long jobId) throws Exception;
+
+
+    /**
+     * Update the fmeCallback job parameter
+     *
+     * @param fmeJobId the fme job id
+     * @param fmeCallback true or false
+     * @return
+     */
+    @PostMapping(value = "/private/updateFmeCallbackJobParameter/{fmeJobId}")
+    void updateFmeCallbackJobParameter(@PathVariable("fmeJobId") String fmeJobId, @RequestParam(value = "fmeCallback") Boolean fmeCallback);
 }
 
 

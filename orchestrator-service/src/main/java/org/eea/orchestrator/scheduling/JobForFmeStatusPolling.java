@@ -35,7 +35,9 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Component
 
@@ -80,24 +82,28 @@ public class JobForFmeStatusPolling {
     private JobUtils jobUtils;
 
     private static final String JSON_STATUS_PARAM="status";
-    private static final String FME_TOKEN_HEADER="fmetoken token=";
     private static final String MEDIA_TYPE_JSON="application/json";
 
     @Value("${integration.fme.polling.token}")
     private String fmeTokenProperty;
+
+    /* The maximum time in milliseconds for which an import fme job that is successfully finished in fme can have no callback with a file */
+    @Value(value = "${scheduling.inProgress.import.fme.jobs.without.callback.max.time}")
+    private Long maxTimeInMsForInProgressImportJobsWithoutTasks;
 
     @PostConstruct
     private void init() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> pollingForFmeJobs(),
-                new CronTrigger("0 */10 * * * *"));
+                new CronTrigger("0 */2 * * * *"));
     }
 
     /**
-     * The job runs every 10 minutes. It finds fme import jobs that have tasks with status=IN_PROGRESS and fme_status not success.
+     * The job runs every 10 minutes. It finds fme import jobs that have tasks with status=IN_PROGRESS
      * Then it polls for fme status and updates the value.
      * If fme_status is ABORTED, FME_FAILURE or JOB_FAILURE the job is failed.
+     * If fme_status is SUCCESS but we haven't received a callback from fme for 30 minutes the job will be failed.
      */
     public void pollingForFmeJobs() {
         try {
@@ -125,6 +131,21 @@ public class JobForFmeStatusPolling {
                     if ( Arrays.stream(failedStatuses).anyMatch(fmeStatusEnum.getValue()::equals)){
                         failJob(job);
                     }
+                    /*else{
+                        if(fmeStatusEnum.getValue().equals(FmeJobStatusEnum.SUCCESS.getValue())){
+                            //check for fme callback and if thirty minutes have passed since dateStatusChanged
+                            Map<String, Object> insertedParameters = job.getParameters();
+                            if(insertedParameters.get("fmeCallback") != null && (Boolean) insertedParameters.get("fmeCallback") == false){
+                                //instead of date status changed, use timeFinished from endpoint but check for timezone
+                                Long durationOfJob = new Date().getTime() - job.getDateStatusChanged().getTime();
+                                if(durationOfJob > maxTimeInMsForInProgressImportJobsWithoutTasks)
+                                {
+                                    failJob(job);
+                                }
+                            }
+
+                        }
+                    }*/
                 }
                 catch (Exception e){
                     LOG.error("Error when polling for status for job with id {} and fmeJobId {} ", job.getId(), job.getFmeJobId(), e);

@@ -258,6 +258,7 @@ public class JobControllerImpl implements JobController {
         parameters.put("replace", replace);
         parameters.put("integrationId", integrationId);
         parameters.put("delimiter", delimiter);
+        parameters.put("fmeCallback", false);
         JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
         if(jobStatus != null){
             statusToInsert = jobStatus;
@@ -424,6 +425,19 @@ public class JobControllerImpl implements JobController {
             LOG.error("Error while cancelling job with id {}, error is {}", jobId, e.getMessage());
             throw e;
         }
+    }
+
+    /**
+     * Update the fmeCallback job parameter
+     *
+     * @param fmeJobId the fme job id
+     * @param fmeCallback true or false
+     * @return
+     */
+    @Override
+    @PostMapping(value = "/private/updateFmeCallbackJobParameter/{fmeJobId}")
+    public void updateFmeCallbackJobParameter(@PathVariable("fmeJobId") String fmeJobId, @RequestParam(value = "fmeCallback") Boolean fmeCallback){
+        jobService.updateFmeCallbackJobParameter(fmeJobId, fmeCallback);
     }
 }
 

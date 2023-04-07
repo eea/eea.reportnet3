@@ -270,6 +270,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       JobVO job = null;
       if (fmeJobId!=null) {
+        jobControllerZuul.updateFmeCallbackJobParameter(fmeJobId, true);
         job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
       }
       if(job!=null){
