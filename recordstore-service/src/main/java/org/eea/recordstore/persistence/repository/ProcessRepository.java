@@ -76,4 +76,16 @@ public interface ProcessRepository
   @Query(nativeQuery = true,
           value = "select * from process where process_type in :processType and status= :status and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
   List<EEAProcess> findProcessIdsByProcessTypeInAndStatus(@Param("processType") List<String> processType, @Param("status") String status, @Param("timeInMinutes") long timeInMinutes);
+
+
+  /**
+   * Finds process ids of processes with type and status and taskStatus
+   * @param processType
+   * @param status
+   * @param taskStatus
+   * @return
+   */
+  @Query(nativeQuery = true,
+          value = "select distinct p.process_id from process p join task t on p.process_id=t.process_id where p.process_type= :processType and p.status= :status and t.status=:taskStatus")
+  List<String> findProcessIdsByTypeAndStatusAndTaskStatus(@Param("processType") String processType, @Param("status") String status, @Param("taskStatus") String taskStatus);
 }

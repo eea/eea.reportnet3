@@ -248,4 +248,15 @@ public class ProcessServiceImpl implements ProcessService {
     return processMapper.entityListToClass(eeaProcesses);
   }
 
+  /**
+   * Finds process ids of processes with type and status and taskStatus
+   * @param type
+   * @param status
+   * @param taskStatus
+   * @return
+   */
+  @Override
+  public List<String> findProcessIdsByTypeAndStatusAndTaskStatus(String type, String status, String taskStatus) {
+      return processRepository.findProcessIdsByTypeAndStatusAndTaskStatus(type, status, taskStatus);
+  }
 }

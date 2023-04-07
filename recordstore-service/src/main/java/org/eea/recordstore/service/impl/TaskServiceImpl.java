@@ -70,17 +70,6 @@ public class TaskServiceImpl implements TaskService {
     }
 
     /**
-     * Updates start date of task
-     * @param taskVO
-     * @return
-     */
-    @Transactional
-    @Override
-    public void updateTaskStartingDate(TaskVO taskVO) {
-        taskRepository.updateStatusAndSAndStartingDate(taskVO.getId(), taskVO.getStatus().toString(), taskVO.getStartingDate());
-    }
-
-    /**
      * Finds tasks with type IMPORT_TASK and status IN_PROGRESS
      * @return the tasks
      */
@@ -88,11 +77,5 @@ public class TaskServiceImpl implements TaskService {
     public List<TaskVO> findImportTasksInProgress(){
         List<Task> tasks = taskRepository.findByTaskTypeAndStatus(TaskType.IMPORT_TASK, ProcessStatusEnum.IN_PROGRESS);
         return taskMapper.entityListToClass(tasks);
-    }
-
-    @Transactional
-    @Override
-    public void restartTask(Long taskId) {
-        taskRepository.updateStatusAndSAndStartingDate(taskId, ProcessStatusEnum.IN_QUEUE.toString(), new Date());
     }
 }

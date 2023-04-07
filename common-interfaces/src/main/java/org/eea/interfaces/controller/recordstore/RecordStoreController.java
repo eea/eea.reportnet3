@@ -253,9 +253,9 @@ public interface RecordStoreController {
   List<TaskVO> findImportTasksInProgress();
 
   /**
-   * Restarts a task
-   * @return
+   * saves task
+   * @param task
    */
-  @PostMapping(value = "/private/restartTask")
-  void restartTask(@RequestParam Long taskId);
+  @PostMapping(value = "/private/task/save")
+  void saveTask(@RequestBody TaskVO task);
 }
