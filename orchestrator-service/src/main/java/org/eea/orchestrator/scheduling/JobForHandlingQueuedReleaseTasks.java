@@ -65,7 +65,7 @@ public class JobForHandlingQueuedReleaseTasks {
                             }
                         }
                     } catch (Exception e) {
-                        LOG.error("Error handling queued release task for process {}, {}", process, e);
+                        LOG.error("Error handling queued release task for process {}", process, e);
                     }
                 });
             }
