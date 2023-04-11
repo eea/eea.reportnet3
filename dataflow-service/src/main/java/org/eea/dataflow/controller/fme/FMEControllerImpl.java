@@ -176,6 +176,7 @@ public class FMEControllerImpl implements FMEController {
         Map<String, Object> insertedParameters = jobVO.getParameters();
         if(insertedParameters.get("fmeCallback") == null || (Boolean) insertedParameters.get("fmeCallback") == true){
           LOG.info("Fme job with jobId {} and fmeJobId {} is successful and a callback has been made with a file", jobVO.getId(), fmeJobId);
+          return;
         }
       }
       if(jobVO.getJobStatus().getValue().equals(JobStatusEnum.IN_PROGRESS.getValue())) {
