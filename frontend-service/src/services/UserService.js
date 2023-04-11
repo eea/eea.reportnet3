@@ -71,6 +71,7 @@ export const UserService = {
 
   getConfiguration: async () => {
     const userConfigurationDTO = await UserRepository.getConfiguration();
+    console.log(userConfigurationDTO);
     return UserUtils.parseConfigurationDTO(userConfigurationDTO);
   },
 

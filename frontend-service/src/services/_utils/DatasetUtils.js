@@ -1,9 +1,9 @@
-import dayjs from 'dayjs';
-
 import cloneDeep from 'lodash/cloneDeep';
 import isNil from 'lodash/isNil';
 
 import { config } from 'conf';
+
+import { DateTimeUtils } from './DateTimeUtils';
 
 import { Dataset } from 'entities/Dataset';
 
@@ -17,8 +17,10 @@ const sortDatasetTypeByName = (a, b) => {
 
 const parseDatasetListDTO = datasetsDTO => datasetsDTO?.map(datasetDTO => parseDatasetDTO(datasetDTO));
 
-const parseDatasetDTO = datasetDTO =>
-  new Dataset({
+const parseDatasetDTO = datasetDTO => {
+  const releaseDate = DateTimeUtils.getUserDateTime(datasetDTO.dateReleased);
+
+  return new Dataset({
     availableInPublic: datasetDTO.availableInPublic,
     dataProviderId: datasetDTO.dataProviderId,
     datasetId: datasetDTO.id,
@@ -29,11 +31,12 @@ const parseDatasetDTO = datasetDTO =>
     name: datasetDTO.nameDatasetSchema,
     publicFileName: datasetDTO.publicFileName,
     referenceDataset: datasetDTO.referenceDataset,
-    releaseDate: datasetDTO.dateReleased > 0 ? dayjs(datasetDTO.dateReleased).format('YYYY-MM-DD HH:mm') : '-',
+    releaseDate: datasetDTO.dateReleased > 0 ? releaseDate.format('YYYY-MM-DD HH:mm') : '-',
     restrictFromPublic: datasetDTO.restrictFromPublic,
     status: datasetDTO.status,
     updatable: datasetDTO.updatable
   });
+};
 
 const getAllLevelErrorsFromRuleValidations = rulesDTO =>
   CoreUtils.orderLevelErrors([

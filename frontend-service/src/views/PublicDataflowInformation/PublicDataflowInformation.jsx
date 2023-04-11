@@ -7,6 +7,9 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniq from 'lodash/uniq';
@@ -35,6 +38,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
+import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
@@ -56,6 +60,8 @@ export const PublicDataflowInformation = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
   const [representatives, setRepresentatives] = useState({});
+
+  const { getDateTimeFormatByUserPreferences, getDateDifferenceInMinutes } = useDateTimeFormatByUserPreferences();
 
   const { documents, referenceDatasets, type: dataflowType, webLinks } = dataflowData;
 

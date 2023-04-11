@@ -1,7 +1,13 @@
 import { useContext, useReducer } from 'react';
 
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
 import isNil from 'lodash/isNil';
 import isUndefined from 'lodash/isUndefined';
+
+import { DateTimeUtils } from 'services/_utils/DateTimeUtils';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
@@ -10,6 +16,9 @@ import { userReducer } from 'views/_functions/Reducers/userReducer';
 
 import { SystemNotificationService } from 'services/SystemNotificationService';
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 const userSettingsDefaultState = {
   currentDataflowType: undefined,
   userProps: {
@@ -17,11 +26,13 @@ const userSettingsDefaultState = {
     basemapLayer: 'Topographic',
     dateFormat: 'YYYY-MM-DD',
     listView: true,
+    localTimezone: true,
     notificationSound: false,
     pushNotifications: false,
     pinnedDataflows: [],
     rowsPerPage: 10,
     showLogoutConfirmation: true,
+    timezone: DateTimeUtils.convertTimeZoneName(dayjs.tz.guess()),
     userImage: [],
     visualTheme: 'light'
   },
@@ -89,6 +100,25 @@ export const UserProvider = ({ children }) => {
         onLogout: () => {
           notificationContext.deleteAll();
           userDispatcher({ type: 'LOGOUT', payload: userSettingsDefaultState });
+        },
+
+        onChangeTimezone: timezone => {
+          userDispatcher({ type: 'TIME_ZONE', payload: timezone });
+          if (timezone === DateTimeUtils.convertTimeZoneName(dayjs.tz.guess())) {
+            userDispatcher({ type: 'TOGGLE_TIME_ZONE', payload: true });
+          } else {
+            userDispatcher({ type: 'TOGGLE_TIME_ZONE', payload: false });
+          }
+        },
+
+        onToggleTimezone: async localTimezone => {
+          userDispatcher({ type: 'TOGGLE_TIME_ZONE', payload: localTimezone });
+          if (localTimezone) {
+            userDispatcher({
+              type: 'TIME_ZONE',
+              payload: DateTimeUtils.convertTimeZoneName(dayjs.tz.guess())
+            });
+          }
         },
 
         onToggleAmPm24hFormat: hoursFormat => {

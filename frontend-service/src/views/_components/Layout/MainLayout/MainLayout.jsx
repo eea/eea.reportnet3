@@ -120,12 +120,14 @@ export const MainLayout = ({ children, isPublic = false }) => {
       const userConfiguration = await UserService.getConfiguration();
       userContext.onChangeBasemapLayer(userConfiguration.basemapLayer);
       userContext.onChangeDateFormat(userConfiguration.dateFormat);
+      userContext.onChangeTimezone(userConfiguration.timezone);
       userContext.onChangePinnedDataflows(userConfiguration.pinnedDataflows);
       userContext.onChangeRowsPerPage(parseInt(userConfiguration.rowsPerPage));
       userContext.onToggleNotificationSound(userConfiguration.notificationSound);
       userContext.onTogglePushNotifications(userConfiguration.pushNotifications);
       userContext.onToggleLogoutConfirm(userConfiguration.showLogoutConfirmation);
       userContext.onToggleVisualTheme(userConfiguration.visualTheme);
+      userContext.onToggleTimezone(userConfiguration.localTimezone);
       userContext.onUserFileUpload(userConfiguration.userImage);
       userContext.onToggleAmPm24hFormat(userConfiguration.amPm24h);
       themeContext.onToggleTheme(userConfiguration.visualTheme);

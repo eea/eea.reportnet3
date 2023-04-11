@@ -51,6 +51,7 @@ export const Tab = ({
   initialTabIndexDrag,
   isNavigationHidden,
   leftIcon,
+  maxLength,
   newTab,
   notEmpty = true,
   numberOfFields,
@@ -559,7 +560,7 @@ export const Tab = ({
               id="editTableName"
               key={index}
               keyfilter="schemaTableFields"
-              maxLength={60}
+              maxLength={maxLength}
               onBlur={e => {
                 //Check for empty table name
                 if (titleHeader.trim() !== '') {
