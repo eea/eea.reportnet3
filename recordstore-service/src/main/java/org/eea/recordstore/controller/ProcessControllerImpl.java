@@ -229,4 +229,17 @@ public class ProcessControllerImpl implements ProcessController {
       return new ArrayList<>();
     }
   }
+
+  /**
+   * Finds process ids of processes with type and status and taskStatus
+   * @param type
+   * @param status
+   * @param taskStatus
+   * @return
+   */
+  @GetMapping(value = "/private/findProcessIdsByTypeAndStatusAndTaskStatus")
+  @Override
+  public List<String> findProcessIdsByTypeAndStatusAndTaskStatus(String type, String status, String taskStatus) {
+    return processService.findProcessIdsByTypeAndStatusAndTaskStatus(type, status, taskStatus);
+  }
 }

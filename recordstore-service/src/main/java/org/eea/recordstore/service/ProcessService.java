@@ -92,6 +92,15 @@ public interface ProcessService {
    * @return
    */
   List<ProcessVO> findProcessIdByTypeInAndStatusThatExceedTime(List<String> type, String status, long timeInMinutes);
+
+  /**
+   * Finds process ids of processes with type and status and taskStatus
+   * @param type
+   * @param status
+   * @param taskStatus
+   * @return
+   */
+  List<String> findProcessIdsByTypeAndStatusAndTaskStatus(String type, String status, String taskStatus);
 }
 
 

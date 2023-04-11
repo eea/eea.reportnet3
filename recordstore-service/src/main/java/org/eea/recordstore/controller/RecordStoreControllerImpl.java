@@ -660,14 +660,13 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   }
 
   /**
-   * Saves or updates a task
-   * @return
+   * saves task
+   * @param task
    */
   @Override
   @HystrixCommand
-  @PostMapping(value = "/private/restartTask")
-  @ApiOperation(value = "Restarts a task", hidden = true)
-  public void restartTask(@RequestParam Long taskId){
-    taskService.restartTask(taskId);
+  @PostMapping(value = "/private/task/save")
+  public void saveTask(@RequestBody TaskVO task) {
+    taskService.saveTask(task);
   }
 }
