@@ -248,4 +248,14 @@ public class ProcessServiceImpl implements ProcessService {
     return processMapper.entityListToClass(eeaProcesses);
   }
 
+  /**
+   * Deletes process by processId
+   * @param processId
+   * @return
+   */
+  @Override
+  public void deleteProcessByProcessId(String processId){
+    processRepository.deleteByProcessId(processId);
+  }
+
 }

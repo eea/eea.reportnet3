@@ -1,10 +1,12 @@
 package org.eea.recordstore.persistence.repository;
 
 import org.eea.recordstore.persistence.domain.EEAProcess;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -76,4 +78,9 @@ public interface ProcessRepository
   @Query(nativeQuery = true,
           value = "select * from process where process_type in :processType and status= :status and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
   List<EEAProcess> findProcessIdsByProcessTypeInAndStatus(@Param("processType") List<String> processType, @Param("status") String status, @Param("timeInMinutes") long timeInMinutes);
+
+  @Transactional
+  @Modifying
+  @Query(nativeQuery = true, value = "delete from process where process_id = :processId")
+  void deleteByProcessId(String processId);
 }

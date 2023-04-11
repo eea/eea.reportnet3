@@ -92,6 +92,13 @@ public interface ProcessService {
    * @return
    */
   List<ProcessVO> findProcessIdByTypeInAndStatusThatExceedTime(List<String> type, String status, long timeInMinutes);
+
+  /**
+   * Deletes process by processId
+   * @param processId
+   * @return
+   */
+  void deleteProcessByProcessId(String processId);
 }
 
 

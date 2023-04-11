@@ -6,10 +6,7 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -134,4 +131,13 @@ public interface ProcessController {
    */
   @GetMapping(value = "/private/listProcessesExceedingTime")
   List<ProcessVO> listProcessesThatExceedTime(@RequestParam("type") List<String> type, @RequestParam("status") String status, @RequestParam("timeInMinutes") long timeInMinutes);
+
+  /**
+   * Deletes process by processId
+   * @param processId
+   * @return
+   */
+  @DeleteMapping(value = "/private/deleteProcess")
+  void deleteProcessByProcessId(@RequestParam("processId") String processId);
+
 }

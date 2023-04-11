@@ -229,4 +229,16 @@ public class ProcessControllerImpl implements ProcessController {
       return new ArrayList<>();
     }
   }
+
+  /**
+   * Deletes process by processId
+   * @param processId
+   * @return
+   */
+  @Override
+  @DeleteMapping(value = "/private/deleteProcess")
+  public void deleteProcessByProcessId(@RequestParam("processId") String processId){
+    processService.deleteProcessByProcessId(processId);
+  }
+
 }

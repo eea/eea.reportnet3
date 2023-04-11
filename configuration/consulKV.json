@@ -1946,5 +1946,9 @@
   {
     "key": "config/orchestrator/integration.fme.polling.token",
     "value": "JHtGTUVfVE9LRU46QmFzaWMgVW1Wd2IzSjBibVYwTXpwU1pYQnZjblJ1WlhRelh6SXdNakFofQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inQueue.process.inProgress.job.max.ms",
+    "value": "JHtGTUVfVE9LRU46QmFzaWMgVW1Wd2IzSjBibVYwTXpwU1pYQnZjblJ1WlhRelh6SXdNakFofQ=="
   }
 ]
