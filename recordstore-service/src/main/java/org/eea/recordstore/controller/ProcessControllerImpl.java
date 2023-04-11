@@ -242,4 +242,16 @@ public class ProcessControllerImpl implements ProcessController {
   public List<String> findProcessIdsByTypeAndStatusAndTaskStatus(String type, String status, String taskStatus) {
     return processService.findProcessIdsByTypeAndStatusAndTaskStatus(type, status, taskStatus);
   }
+
+  /**
+   * Deletes process by processId
+   * @param processId
+   * @return
+   */
+  @Override
+  @DeleteMapping(value = "/private/deleteProcess")
+  public void deleteProcessByProcessId(@RequestParam("processId") String processId){
+    processService.deleteProcessByProcessId(processId);
+  }
+
 }

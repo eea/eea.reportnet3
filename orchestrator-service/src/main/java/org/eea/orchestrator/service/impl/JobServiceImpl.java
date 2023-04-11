@@ -465,6 +465,12 @@ public class JobServiceImpl implements JobService {
         jobRepository.updateFmeStatus(jobId, fmeStatus.getValue());
     }
 
+    @Override
+    public List<JobVO> findByJobTypeInAndJobStatusInAndRelease(List<JobTypeEnum> jobType, List<JobStatusEnum> jobStatus, boolean release){
+        List<Job> jobList = jobRepository.findByJobTypeInAndJobStatusInAndRelease(jobType, jobStatus, release);
+        return jobMapper.entityListToClass(jobList);
+    }
+
     private void removeLocksAndSendNotification(JobVO jobVO, Map<String, Object> value, String user) throws EEAException {
         switch (jobVO.getJobType()) {
             case IMPORT:

@@ -259,4 +259,14 @@ public class ProcessServiceImpl implements ProcessService {
   public List<String> findProcessIdsByTypeAndStatusAndTaskStatus(String type, String status, String taskStatus) {
       return processRepository.findProcessIdsByTypeAndStatusAndTaskStatus(type, status, taskStatus);
   }
+  /**
+   * Deletes process by processId
+   * @param processId
+   * @return
+   */
+  @Override
+  public void deleteProcessByProcessId(String processId){
+    processRepository.deleteByProcessId(processId);
+  }
+
 }

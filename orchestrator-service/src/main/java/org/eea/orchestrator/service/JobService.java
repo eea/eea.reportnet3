@@ -74,5 +74,7 @@ public interface JobService {
 
     void updateFmeStatus(Long jobId, FmeJobStatusEnum fmeStatus);
 
+    List<JobVO> findByJobTypeInAndJobStatusInAndRelease(List<JobTypeEnum> jobType, List<JobStatusEnum> jobStatus, boolean release);
+
     void updateFmeCallbackJobParameter(String fmeJobId, Boolean fmeCallback);
 }
