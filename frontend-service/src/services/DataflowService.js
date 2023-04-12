@@ -285,7 +285,6 @@ export const DataflowService = {
                                         required: DataTableFieldDTO.required,
                                         type: DataTableFieldDTO.type
                                     })
-                                    // console.log("DataTableFieldDTO", DataTableFieldDTO, index, datasetTable)
                                     return datasetTable
                                 }
                             )

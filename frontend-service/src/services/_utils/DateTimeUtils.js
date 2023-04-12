@@ -11,8 +11,7 @@ const getUserDateTime = timestamp => {
 
   const cetUtcHourDiff = dateInCet.diff(dateInUtc, 'hours', true);
 
-  let utcDate = dayjs(timestamp).subtract(cetUtcHourDiff, 'hours');
-  console.log(cetUtcHourDiff);
+  const utcDate = dayjs(timestamp).subtract(cetUtcHourDiff, 'hours');
   const userTimezone = dayjs.tz.guess();
   return dayjs(utcDate).tz(userTimezone);
 };
