@@ -2,6 +2,10 @@ import { Fragment, useContext } from 'react';
 
 import styles from './userConfiguration.module.scss';
 
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
 import uniqueId from 'lodash/uniqueId';
 
 import DarkGray from 'views/_assets/images/layers/DarkGray.png';
@@ -14,6 +18,8 @@ import Oceans from 'views/_assets/images/layers/Oceans.png';
 import ShadedRelief from 'views/_assets/images/layers/ShadedRelief.png';
 import Streets from 'views/_assets/images/layers/Streets.png';
 import Topographic from 'views/_assets/images/layers/Topographic.png';
+
+import { DateTimeUtils } from 'services/_utils/DateTimeUtils';
 
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputSwitch } from 'views/_components/InputSwitch';
@@ -31,6 +37,9 @@ export const UserConfiguration = () => {
   const userContext = useContext(UserContext);
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
+
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
 
   const loadImage = layer => {
     switch (layer) {
@@ -212,6 +221,32 @@ export const UserConfiguration = () => {
     </Fragment>
   );
 
+  const localTimezoneSwitch = (
+    <Fragment>
+      <span className={styles.switchTextInput}>{resourcesContext.messages['localTimeZoneSwitch']}</span>
+      <InputSwitch
+        aria-label="localTimezone"
+        checked={userContext.userProps.localTimezone}
+        disabled={userContext.userProps.localTimezone}
+        onChange={async e => {
+          userContext.onToggleTimezone(e.value);
+          const inmUserProperties = { ...userContext.userProps };
+          inmUserProperties.localTimezone = e.value;
+          if (e.value) {
+            inmUserProperties.timezone = DateTimeUtils.convertTimeZoneName(dayjs.tz.guess());
+          }
+          const response = await changeUserProperties(inmUserProperties);
+          if (response.status < 200 || response.status > 299) {
+            userContext.onToggleTimezone(!e.value);
+          }
+        }}
+        tooltip={
+          userContext.userProps.localTimezone === false ? resourcesContext.messages['toggleLocalTimezoneOn'] : ''
+        }
+      />
+    </Fragment>
+  );
+
   const pushNotificationsSwitch = (
     <Fragment>
       <span className={styles.switchTextInput}>{resourcesContext.messages['noPushNotifications']}</span>
@@ -301,6 +336,27 @@ export const UserConfiguration = () => {
     />
   );
 
+  const timezoneDropdown = (
+    <Dropdown
+      ariaLabel="timezone"
+      name="timezone"
+      onChange={async e => {
+        const inmUserProperties = { ...userContext.userProps };
+        inmUserProperties.timezone = e.target.value;
+        if (e.target.value === DateTimeUtils.convertTimeZoneName(dayjs.tz.guess())) {
+          inmUserProperties.localTimezone = true;
+        } else {
+          inmUserProperties.localTimezone = false;
+        }
+        await changeUserProperties(inmUserProperties);
+        userContext.onChangeTimezone(e.target.value);
+      }}
+      options={resourcesContext.userParameters['timezone']}
+      placeholder="select"
+      value={userContext.userProps.timezone}
+    />
+  );
+
   const basemapLayerConfiguration = (
     <TitleWithItem
       icon="map"
@@ -380,6 +436,13 @@ export const UserConfiguration = () => {
     </Fragment>
   );
 
+  const dateTimezoneSubtitle = (
+    <Fragment>
+      <div>{resourcesContext.messages['dateTimezoneSubtitle']}</div>
+      <div className={styles.dateFormatWarning}>{resourcesContext.messages['dateFormatWarning']}</div>
+    </Fragment>
+  );
+
   const dateFormatConfiguration = (
     <TitleWithItem
       icon="calendar"
@@ -390,10 +453,21 @@ export const UserConfiguration = () => {
     />
   );
 
+  const dateTimezoneConfiguration = (
+    <TitleWithItem
+      icon="url"
+      iconSize="2rem"
+      items={[timezoneDropdown, localTimezoneSwitch]}
+      subtitle={dateTimezoneSubtitle}
+      title={resourcesContext.messages['timezone']}
+    />
+  );
+
   return (
     <div className={styles.userConfiguration}>
       {rowsInPaginationConfiguration}
       {dateFormatConfiguration}
+      {dateTimezoneConfiguration}
       {themeConfiguration}
       {viewConfiguration}
       {logoutConfiguration}

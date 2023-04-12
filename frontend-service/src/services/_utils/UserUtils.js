@@ -1,7 +1,15 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+import { DateTimeUtils } from 'services/_utils/DateTimeUtils';
+
 const parseConfigurationDTO = userConfigurationDTO => {
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
   const userConfiguration = {};
 
   const userDefaultConfiguration = {
@@ -9,11 +17,13 @@ const parseConfigurationDTO = userConfigurationDTO => {
     basemapLayer: 'Topographic',
     dateFormat: 'YYYY-MM-DD',
     listView: true,
+    localTimezone: true,
     notificationSound: false,
     pinnedDataflows: [],
     pushNotifications: true,
     rowsPerPage: 10,
     showLogoutConfirmation: true,
+    timezone: DateTimeUtils.convertTimeZoneName(dayjs.tz.guess()),
     userImage: [],
     visualTheme: 'light'
   };
@@ -30,6 +40,8 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.amPm24h = userDefaultConfiguration.amPm24h;
     userConfiguration.listView = userDefaultConfiguration.listView;
     userConfiguration.pinnedDataflows = userDefaultConfiguration.pinnedDataflows;
+    userConfiguration.timezone = userDefaultConfiguration.timezone;
+    userConfiguration.localTimezone = userDefaultConfiguration.localTimezone;
   } else {
     userConfiguration.basemapLayer = !isNil(userConfigurationDTO.basemapLayer)
       ? userConfigurationDTO.basemapLayer[0]
@@ -42,6 +54,16 @@ const parseConfigurationDTO = userConfigurationDTO => {
     userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
       ? userConfigurationDTO.dateFormat[0]
       : userDefaultConfiguration.dateFormat;
+
+    userConfiguration.timezone = !isNil(userConfigurationDTO.timezone[0])
+      ? userConfigurationDTO.timezone[0]
+      : userDefaultConfiguration.timezone;
+
+    userConfiguration.localTimezone = isNil(userConfigurationDTO.localTimezone)
+      ? userDefaultConfiguration.localTimezone
+      : userConfigurationDTO.timezone[0] === DateTimeUtils.convertTimeZoneName(dayjs.tz.guess())
+      ? (userConfiguration.localTimezone = true)
+      : (userConfiguration.localTimezone = false);
 
     userConfiguration.notificationSound = isNil(userConfigurationDTO.notificationSound)
       ? userDefaultConfiguration.notificationSound

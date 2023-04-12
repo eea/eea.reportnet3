@@ -705,7 +705,6 @@ export const FieldDesigner = ({
                             ignoreCaseInLinks,
                             pkMustBeUsed
                         }) => {
-        console.log("onSaveLink", pkHasMultipleValues, ignoreCaseInLinks)
         const inmReferencedField = {...link.referencedField};
         if (linkedTableConditional !== '') {
             inmReferencedField.linkedTableConditional = linkedTableConditional;
@@ -801,7 +800,6 @@ export const FieldDesigner = ({
                                    type = parseGeospatialTypes(fieldDesignerState.fieldTypeValue.fieldType),
                                    validExtensions = fieldDesignerState.fieldFileProperties.validExtensions
                                }) => {
-        console.log("DatasetService.updateFieldDesign", pkHasMultipleValues, ignoreCaseInLinks)
         try {
             await DatasetService.updateFieldDesign(datasetId, {
                 codelistItems,

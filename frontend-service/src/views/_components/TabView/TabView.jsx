@@ -25,6 +25,7 @@ export const TabView = ({
   className = null,
   designMode = false,
   hasQueryString = true,
+  maxLength,
   name,
   initialTabIndexDrag,
   isErrorDialogVisible,
@@ -232,6 +233,7 @@ export const TabView = ({
           isNavigationHidden={isNavigationHidden}
           key={id}
           leftIcon={tab.props.leftIcon}
+          maxLength={maxLength}
           newTab={tab.props.newTab}
           notEmpty={tab.props.notEmpty}
           numberOfFields={tab.props.numberOfFields}

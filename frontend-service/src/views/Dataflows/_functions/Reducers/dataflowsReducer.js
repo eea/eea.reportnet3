@@ -1,7 +1,6 @@
 import isNil from 'lodash/isNil';
 
 export const dataflowsReducer = (state, {type, payload}) => {
-    // console.log("dataflowsReducer", state, type, payload)
     switch (type) {
         case 'SET_DATAFLOWS':
             const getIndex = () => {

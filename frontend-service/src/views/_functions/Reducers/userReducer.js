@@ -1,58 +1,63 @@
-export const userReducer = (state, {type, payload}) => {
-    // console.log("USer", state)
-    switch (type) {
-        case 'LOGIN':
-            return {...state, ...payload.user, isLoggedOut: false};
+export const userReducer = (state, { type, payload }) => {
+  switch (type) {
+    case 'LOGIN':
+      return { ...state, ...payload.user, isLoggedOut: false };
 
-        case 'LOGOUT':
-            return {...payload, isLoggedOut: true};
+    case 'LOGOUT':
+      return { ...payload, isLoggedOut: true };
 
-        case 'ADD_SOCKET':
-            return {...state, socket: payload};
+    case 'ADD_SOCKET':
+      return { ...state, socket: payload };
 
-        case 'REFRESH_TOKEN':
-            return {...state, ...payload.user};
+    case 'REFRESH_TOKEN':
+      return { ...state, ...payload.user };
 
-        case 'TOGGLE_NOTIFICATION_SOUND':
-            return {...state, userProps: {...state.userProps, notificationSound: payload}};
+    case 'TOGGLE_NOTIFICATION_SOUND':
+      return { ...state, userProps: { ...state.userProps, notificationSound: payload } };
 
-        case 'TOGGLE_PUSH_NOTIFICATIONS':
-            return {...state, userProps: {...state.userProps, pushNotifications: payload}};
+    case 'TOGGLE_TIME_ZONE':
+      return { ...state, userProps: { ...state.userProps, localTimezone: payload } };
 
-        case 'TOGGLE_LOGOUT_CONFIRM':
-            return {...state, userProps: {...state.userProps, showLogoutConfirmation: payload}};
+    case 'TOGGLE_PUSH_NOTIFICATIONS':
+      return { ...state, userProps: { ...state.userProps, pushNotifications: payload } };
 
-        case 'BASEMAP_LAYER':
-            return {...state, userProps: {...state.userProps, basemapLayer: payload}};
+    case 'TOGGLE_LOGOUT_CONFIRM':
+      return { ...state, userProps: { ...state.userProps, showLogoutConfirmation: payload } };
 
-        case 'DEFAULT_ROW_SELECTED':
-            return {...state, userProps: {...state.userProps, rowsPerPage: payload}};
+    case 'BASEMAP_LAYER':
+      return { ...state, userProps: { ...state.userProps, basemapLayer: payload } };
 
-        case 'DATE_FORMAT':
-            return {...state, userProps: {...state.userProps, dateFormat: payload}};
+    case 'DEFAULT_ROW_SELECTED':
+      return { ...state, userProps: { ...state.userProps, rowsPerPage: payload } };
 
-        case 'TOGGLE_DATE_FORMAT_AM_PM_24H':
-            return {...state, userProps: {...state.userProps, amPm24h: payload}};
+    case 'DATE_FORMAT':
+      return { ...state, userProps: { ...state.userProps, dateFormat: payload } };
 
-        case 'DEFAULT_VISUAL_THEME':
-            return {...state, userProps: {...state.userProps, visualTheme: payload}};
+    case 'TIME_ZONE':
+      return { ...state, userProps: { ...state.userProps, timezone: payload } };
 
-        case 'DEFAULT_VISUAL_TYPE':
-            return {...state, userProps: {...state.userProps, listView: payload}};
+    case 'TOGGLE_DATE_FORMAT_AM_PM_24H':
+      return { ...state, userProps: { ...state.userProps, amPm24h: payload } };
 
-        case 'SETTINGS_LOADED':
-            return {...state, userProps: {...state.userProps, settingsLoaded: payload}};
+    case 'DEFAULT_VISUAL_THEME':
+      return { ...state, userProps: { ...state.userProps, visualTheme: payload } };
 
-        case 'SET_CURRENT_DATAFLOW_TYPE':
-            return {...state, currentDataflowType: payload.currentDataflowType};
+    case 'DEFAULT_VISUAL_TYPE':
+      return { ...state, userProps: { ...state.userProps, listView: payload } };
 
-        case 'USER_AVATAR_IMAGE':
-            return {...state, userProps: {...state.userProps, userImage: payload}};
+    case 'SETTINGS_LOADED':
+      return { ...state, userProps: { ...state.userProps, settingsLoaded: payload } };
 
-        case 'USER_PINNED_DATAFLOWS':
-            return {...state, userProps: {...state.userProps, pinnedDataflows: payload}};
+    case 'SET_CURRENT_DATAFLOW_TYPE':
+      return { ...state, currentDataflowType: payload.currentDataflowType };
 
-        default:
-            return state;
-    }
+    case 'USER_AVATAR_IMAGE':
+      return { ...state, userProps: { ...state.userProps, userImage: payload } };
+
+    case 'USER_PINNED_DATAFLOWS':
+      return { ...state, userProps: { ...state.userProps, pinnedDataflows: payload } };
+
+    default:
+      return state;
+  }
 };

@@ -491,7 +491,6 @@ export const DatasetService = {
         datasetTableFieldDesign.type = record.type;
         datasetTableFieldDesign.validExtensions = record.validExtensions;
 
-        console.log("datasetTableFieldDesign", datasetTableFieldDesign)
         return await DatasetRepository.updateFieldDesign(datasetId, datasetTableFieldDesign);
     },
 
