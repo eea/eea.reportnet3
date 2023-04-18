@@ -1208,9 +1208,8 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Table schema id",
                   example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
                   required = false) String tableSchemaId,
-          @ApiParam(type = "Integer", value = "Limit", example = "0") @RequestParam(value = "limit",
-                  defaultValue = "10000") Integer limit,
-          @ApiParam(type = "Integer", value = "Offset", example = "0") @RequestParam(value = "offset",
+          @ApiParam(type = "Integer", value = "Limit", example = "0") @RequestParam(value = "limit", required = false) Integer limit,
+          @ApiParam(type = "Integer", value = "Offset", example = "0") @RequestParam(value = "offset", required = false,
                   defaultValue = "0") Integer offset,
           @ApiParam(type = "String", value = "Filter value", example = "value") @RequestParam(
                   value = "filterValue", required = false) String filterValue,
@@ -2109,9 +2108,8 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Table schema id",
                   example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
                   required = false) String tableSchemaId,
-          @ApiParam(type = "Integer", value = "Limit", example = "0") @RequestParam(value = "limit",
-                  defaultValue = "10000") Integer limit,
-          @ApiParam(type = "Integer", value = "Offset", example = "0") @RequestParam(value = "offset",
+          @ApiParam(type = "Integer", value = "Limit", example = "0") @RequestParam(value = "limit", required = false) Integer limit,
+          @ApiParam(type = "Integer", value = "Offset", example = "0") @RequestParam(value = "offset", required = false,
                   defaultValue = "0") Integer offset,
           @ApiParam(type = "String", value = "Filter value", example = "value") @RequestParam(
                   value = "filterValue", required = false) String filterValue,

@@ -128,8 +128,8 @@ public interface JobController {
                                   @RequestParam("dataflowId") Long dataflowId,
                                   @RequestParam(value = "providerId", required = false) Long providerId,
                                   @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-                                  @RequestParam(value = "limit", defaultValue = "10000") Integer limit,
-                                  @RequestParam(value = "offset",defaultValue = "0") Integer offset,
+                                  @RequestParam(value = "limit", required = false) Integer limit,
+                                  @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
                                   @RequestParam(value = "filterValue", required = false) String filterValue,
                                   @RequestParam(value = "columnName", required = false) String columnName,
                                   @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
