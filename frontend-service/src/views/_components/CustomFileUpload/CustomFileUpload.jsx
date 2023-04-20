@@ -24,6 +24,7 @@ import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { customFileUploadReducer } from './_functions/Reducers/customFileUploadReducer';
+import { clearConfig } from 'dompurify';
 
 export const CustomFileUpload = ({
   accept = undefined,
@@ -45,6 +46,7 @@ export const CustomFileUpload = ({
   invalidFileSizeMessageSummary = '{0}= Invalid file size, ',
   invalidNumberOfFilesMessageSummary = 'You can only upload {0} {1}.',
   isDialog = false,
+  isImportDatasetDesignerSchema = false,
   maxFileSize = null,
   mode = 'advanced',
   multiple = false,
@@ -256,6 +258,7 @@ export const CustomFileUpload = ({
   };
 
   const upload = () => {
+    console.log('inside upload');
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
     let xhr = new XMLHttpRequest();
     let formData = new FormData();
@@ -377,6 +380,7 @@ export const CustomFileUpload = ({
   };
 
   const onSimpleUploaderClick = () => {
+    console.log('inside onSimpleUploaderClick');
     if (hasFiles()) upload();
   };
 
@@ -551,7 +555,8 @@ export const CustomFileUpload = ({
             disabled={disabled || !hasFiles() || checkValidExtension() || state.isUploading || isValidating}
             icon={state.isUploading || isValidating ? 'spinnerAnimate' : 'upload'}
             label={getButtonLabel()}
-            onClick={upload}
+            // onClick={upload}
+            onClick={isImportDatasetDesignerSchema ? console.log('') : upload}
           />
         </span>
       );
