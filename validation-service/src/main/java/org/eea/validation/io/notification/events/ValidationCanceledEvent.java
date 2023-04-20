@@ -92,7 +92,6 @@ public class ValidationCanceledEvent implements NotificableEventHandler {
     notification.put("dataProviderName", dataProviderName);
     notification.put("type", type);
     notification.put("typeStatus", dataFlowVO.getStatus().toString());
-    notification.put("error", notificationVO.getError());
     return notification;
   }
 }
