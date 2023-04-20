@@ -38,7 +38,6 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { ThemeContext } from 'views/_functions/Contexts/ThemeContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
-import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { DataflowUtils } from 'services/_utils/DataflowUtils';
@@ -60,8 +59,6 @@ export const PublicDataflowInformation = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isWrongUrlDataflowId, setIsWrongUrlDataflowId] = useState(false);
   const [representatives, setRepresentatives] = useState({});
-
-  const { getDateTimeFormatByUserPreferences, getDateDifferenceInMinutes } = useDateTimeFormatByUserPreferences();
 
   const { documents, referenceDatasets, type: dataflowType, webLinks } = dataflowData;
 

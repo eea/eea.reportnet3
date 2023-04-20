@@ -25,10 +25,13 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { HistoricReleaseService } from 'services/HistoricReleaseService';
 
+import { DateTimeUtils } from 'services/_utils/DateTimeUtils';
+
 import { historicReleasesReducer } from './_functions/Reducers/historicReleasesReducer';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 
+import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { ColumnTemplateUtils } from 'views/_functions/Utils/ColumnTemplateUtils';
@@ -38,6 +41,8 @@ import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTy
 export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+
+  const { getDateTimeFormatByUserPreferences } = useDateTimeFormatByUserPreferences();
 
   const [historicReleasesState, historicReleasesDispatch] = useReducer(historicReleasesReducer, {
     data: [],
@@ -164,9 +169,9 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
 
   const renderReleaseDateTemplate = rowData => {
     dayjs.extend(utc);
-    return (
-      <div className={styles.checkedValueColumn}>{dayjs(rowData.releaseDate).utc().format('YYYY-MM-DD HH:mm:ss')}</div>
-    );
+    const releaseDate = DateTimeUtils.getUserDateTime(rowData.releaseDate);
+
+    return <div className={styles.checkedValueColumn}>{getDateTimeFormatByUserPreferences(releaseDate)}</div>;
   };
 
   const renderDataProviderLinkBodyColumn = rowData => (
