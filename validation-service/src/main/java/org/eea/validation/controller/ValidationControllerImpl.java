@@ -32,6 +32,7 @@ import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
 import org.eea.validation.util.ValidationHelper;
@@ -106,6 +107,9 @@ public class ValidationControllerImpl implements ValidationController {
   @Autowired
   private JobProcessControllerZuul jobProcessControllerZuul;
 
+  /** The task repository. */
+  @Autowired
+  private TaskRepository taskRepository;
 
   /**
    * Executes the validation job
@@ -578,6 +582,12 @@ public class ValidationControllerImpl implements ValidationController {
       LOG.error("Error trying to retrieve task with id {}", taskId);
       throw e;
     }
+  }
+
+  @Override
+  @GetMapping("/private/hasProcessCanceledTasks/{processId}")
+  public boolean hasProcessCanceledTasks(@PathVariable("processId") String processId) {
+    return taskRepository.hasProcessCanceledTasks(processId);
   }
 }
 

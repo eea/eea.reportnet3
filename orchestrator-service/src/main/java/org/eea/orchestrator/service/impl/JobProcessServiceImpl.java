@@ -4,6 +4,7 @@ import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.orchestrator.mapper.JobProcessMapper;
 import org.eea.orchestrator.persistence.domain.JobProcess;
 import org.eea.orchestrator.persistence.repository.JobProcessRepository;
+import org.eea.orchestrator.persistence.repository.JobRepository;
 import org.eea.orchestrator.service.JobProcessService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ public class JobProcessServiceImpl implements JobProcessService {
 
     private JobProcessRepository jobProcessRepository;
     private JobProcessMapper jobProcessMapper;
+    private JobRepository jobRepository;
 
     @Autowired
     public JobProcessServiceImpl(JobProcessRepository jobProcessRepository, JobProcessMapper jobProcessMapper) {
@@ -50,5 +52,10 @@ public class JobProcessServiceImpl implements JobProcessService {
     @Override
     public List<String> findProcessesByJobId(Long jobId) {
         return jobProcessRepository.findProcessesByJobId(jobId);
+    }
+
+    @Override
+    public String findStatusByJobId(Long jobId) {
+        return jobRepository.findStatusByJobId(jobId);
     }
 }

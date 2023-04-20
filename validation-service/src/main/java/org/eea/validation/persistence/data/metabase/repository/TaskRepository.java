@@ -181,6 +181,16 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
                                                       @Param("statuses") Set<String> statuses, @Param("taskType") String taskType);
 
   Optional<Task> findById(Long id);
+
+  /**
+   * Checks if is process ending.
+   *
+   * @param processId the process id
+   * @return true, if is process ending
+   */
+  @Query(nativeQuery = true,
+      value = "select case when (exists (select id from task where process_id=:processId and status ='CANCELED' and task_type='VALIDATION_TASK' limit 1)) then TRUE else FALSE end")
+  boolean hasProcessCanceledTasks(@Param("processId") String processId);
 }
 
 
