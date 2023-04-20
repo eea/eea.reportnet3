@@ -1142,7 +1142,7 @@ public class ValidationHelper implements DisposableBean {
                 if (taskRepository.hasProcessCanceledTasks(processId)) {
                   value.put("error", "Tasks have canceled status");
                   LOG.info("Tasks have canceled status");
-                  kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_FINISHED_EVENT, value);
+                  kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_CANCELED_EVENT, value);
                 }
               }
 
@@ -1158,8 +1158,8 @@ public class ValidationHelper implements DisposableBean {
                   NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
               if (taskRepository.hasProcessCanceledTasks(processId)) {
                 value.put("error", "Tasks have canceled status");
-                LOG.info("Tasks have canceled statuss");
-                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
+                LOG.info("Tasks have canceled status");
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT,
                     value,
                     NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
               }
