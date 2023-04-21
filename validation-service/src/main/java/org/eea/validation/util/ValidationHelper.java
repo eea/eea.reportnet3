@@ -8,12 +8,14 @@ import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -183,6 +185,10 @@ public class ValidationHelper implements DisposableBean {
   /** The data set mapper. */
   @Autowired
   private TaskMapper taskMapper;
+
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationController.NotificationControllerZuul notificationControllerZuul;
 
 
   /**
@@ -1142,7 +1148,13 @@ public class ValidationHelper implements DisposableBean {
                 if (taskRepository.hasProcessCanceledTasks(processId)) {
                   value.put("error", "Tasks have canceled status");
                   LOG.info("Tasks have canceled status");
-                  kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_CANCELED_EVENT, value);
+                  //kafkaSenderUtils.releaseKafkaEvent("FINISHED_VALIDATION_WITH_CANCELED_TASKS", value);
+
+                  UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+                  userNotificationContentVO.setDatasetId(datasetId);
+                  userNotificationContentVO.setUserId(process.getUser());
+                  notificationControllerZuul.createUserNotificationPrivate("FINISHED_VALIDATION_WITH_CANCELED_TASKS",
+                      userNotificationContentVO);
                 }
               }
 
@@ -1159,9 +1171,11 @@ public class ValidationHelper implements DisposableBean {
               if (taskRepository.hasProcessCanceledTasks(processId)) {
                 value.put("error", "Tasks have canceled status");
                 LOG.info("Tasks have canceled status");
-                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT,
-                    value,
-                    NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
+                UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+                userNotificationContentVO.setDatasetId(datasetId);
+                userNotificationContentVO.setUserId(process.getUser());
+                notificationControllerZuul.createUserNotificationPrivate("FINISHED_VALIDATION_WITH_CANCELED_TASKS",
+                    userNotificationContentVO);
               }
             }
           }
