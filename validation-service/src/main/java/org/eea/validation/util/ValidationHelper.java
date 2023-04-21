@@ -1148,13 +1148,12 @@ public class ValidationHelper implements DisposableBean {
                 if (taskRepository.hasProcessCanceledTasks(processId)) {
                   value.put("error", "Tasks have canceled status");
                   LOG.info("Tasks have canceled status");
-                  //kafkaSenderUtils.releaseKafkaEvent("FINISHED_VALIDATION_WITH_CANCELED_TASKS", value);
-
-                  UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+                  kafkaSenderUtils.releaseKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS, value);
+                  /*UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
                   userNotificationContentVO.setDatasetId(datasetId);
                   userNotificationContentVO.setUserId(process.getUser());
                   notificationControllerZuul.createUserNotificationPrivate("FINISHED_VALIDATION_WITH_CANCELED_TASKS",
-                      userNotificationContentVO);
+                      userNotificationContentVO);*/
                 }
               }
 
@@ -1171,11 +1170,14 @@ public class ValidationHelper implements DisposableBean {
               if (taskRepository.hasProcessCanceledTasks(processId)) {
                 value.put("error", "Tasks have canceled status");
                 LOG.info("Tasks have canceled status");
-                UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS,
+                    value,
+                    NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
+                /*UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
                 userNotificationContentVO.setDatasetId(datasetId);
                 userNotificationContentVO.setUserId(process.getUser());
                 notificationControllerZuul.createUserNotificationPrivate("FINISHED_VALIDATION_WITH_CANCELED_TASKS",
-                    userNotificationContentVO);
+                    userNotificationContentVO);*/
               }
             }
           }

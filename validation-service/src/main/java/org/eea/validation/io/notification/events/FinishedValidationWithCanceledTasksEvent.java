@@ -21,7 +21,7 @@ import java.util.Map;
  * The Class ValidationFinishedEvent.
  */
 @Component
-public class ValidationCanceledEvent implements NotificableEventHandler {
+public class FinishedValidationWithCanceledTasksEvent implements NotificableEventHandler {
 
 
   /**
@@ -43,7 +43,7 @@ public class ValidationCanceledEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.VALIDATION_CANCELED_EVENT;
+    return EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS;
   }
 
   /**
