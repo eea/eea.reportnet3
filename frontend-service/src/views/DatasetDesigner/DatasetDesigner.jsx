@@ -93,7 +93,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     areLoadedSchemas: false,
     arePrefilledTablesDeleted: false,
     areUpdatingTables: false,
-    availableInPublic: false,
+    availableInPublic: true,
     constraintManagingId: '',
     dashDialogVisible: false,
     dataflowName: '',

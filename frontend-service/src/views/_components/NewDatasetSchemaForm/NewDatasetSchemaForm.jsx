@@ -1,10 +1,11 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 
 import styles from './NewDatasetSchemaForm.module.scss';
 
 import { Button } from 'views/_components/Button';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { ErrorMessage } from 'views/_components/ErrorMessage';
 
 import { DataflowService } from 'services/DataflowService';
@@ -34,6 +35,7 @@ export const NewDatasetSchemaForm = ({
   const [datasetSchemaName, setDatasetSchemaName] = useState('');
   const [errorMessage, setErrorMessage] = useState({ datasetSchemaName: '' });
   const [hasErrors, setHasErrors] = useState(false);
+  const [isCreateDatasetSchemaConfirmDialogVisible, setIsCreateDatasetSchemaConfirmDialogVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const inputRef = useRef(null);
@@ -74,8 +76,8 @@ export const NewDatasetSchemaForm = ({
     return !checkIsDuplicateSchemaName() && !checkIsEmptyInput() && !checkIsInvalidName();
   };
 
-  const onConfirm = async event => {
-    event.preventDefault();
+  const onConfirm = async () => {
+    setIsCreateDatasetSchemaConfirmDialogVisible(false);
 
     if (checkInput()) {
       setIsSubmitting(true);
@@ -123,53 +125,81 @@ export const NewDatasetSchemaForm = ({
   };
 
   return (
-    <form>
-      <fieldset>
-        <div className="formField">
-          <input
-            className={`${hasErrors ? styles.hasErrors : ''}`}
-            id={'datasetSchemaName'}
-            maxLength={250}
-            name="datasetSchemaName"
-            onBlur={() => checkInput()}
-            onChange={e => setDatasetSchemaName(e.target.value)}
-            onKeyPress={e => {
-              if (e.key === 'Enter') onConfirm(e);
-              else if (!validCharsRegex.test(e.key) || e.key === 'Dead') {
-                e.preventDefault();
-                return false;
-              }
-            }}
-            placeholder={resourcesContext.messages['createDatasetSchemaName']}
-            ref={inputRef}
-            type="text"
-            value={datasetSchemaName}
-          />
-          <label className="srOnly" htmlFor="datasetSchemaName">
-            {resourcesContext.messages['createDatasetSchemaName']}
-          </label>
-          {errorMessage['datasetSchemaName'] !== '' && <ErrorMessage message={errorMessage['datasetSchemaName']} />}
-        </div>
-      </fieldset>
+    <Fragment>
+      <form>
+        <fieldset>
+          <div className="formField">
+            <input
+              className={`${hasErrors ? styles.hasErrors : ''}`}
+              id={'datasetSchemaName'}
+              maxLength={250}
+              name="datasetSchemaName"
+              onBlur={() => checkInput()}
+              onChange={e => setDatasetSchemaName(e.target.value)}
+              onKeyPress={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (checkInput()) {
+                    setIsCreateDatasetSchemaConfirmDialogVisible(true);
+                  }
+                } else if (!validCharsRegex.test(e.key) || e.key === 'Dead') {
+                  e.preventDefault();
+                  return false;
+                }
+              }}
+              placeholder={resourcesContext.messages['createDatasetSchemaName']}
+              ref={inputRef}
+              type="text"
+              value={datasetSchemaName}
+            />
+            <label className="srOnly" htmlFor="datasetSchemaName">
+              {resourcesContext.messages['createDatasetSchemaName']}
+            </label>
+            {errorMessage['datasetSchemaName'] !== '' && <ErrorMessage message={errorMessage['datasetSchemaName']} />}
+          </div>
+        </fieldset>
 
-      <fieldset>
-        <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
-          <Button
-            className="p-button-primary"
-            disabled={isSubmitting}
-            icon="add"
-            label={resourcesContext.messages['create']}
-            onClick={e => onConfirm(e)}
-            type="subscribe"
-          />
-          <Button
-            className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
-            icon="cancel"
-            label={resourcesContext.messages['cancel']}
-            onClick={() => setNewDatasetDialog(false)}
-          />
-        </div>
-      </fieldset>
-    </form>
+        <fieldset>
+          <div className={`${styles.buttonWrap} ui-dialog-buttonpane p-clearfix`}>
+            <Button
+              className="p-button-primary"
+              disabled={isSubmitting}
+              icon="add"
+              label={resourcesContext.messages['create']}
+              onClick={e => {
+                e.preventDefault();
+                if (checkInput()) {
+                  setIsCreateDatasetSchemaConfirmDialogVisible(true);
+                }
+              }}
+              type="subscribe"
+            />
+            <Button
+              className={`${styles.cancelButton} p-button-secondary button-right-aligned`}
+              icon="cancel"
+              label={resourcesContext.messages['cancel']}
+              onClick={() => setNewDatasetDialog(false)}
+            />
+          </div>
+        </fieldset>
+      </form>
+
+      {isCreateDatasetSchemaConfirmDialogVisible && (
+        <ConfirmDialog
+          header={resourcesContext.messages['confirmNewDatasetSchemaCreationHeader']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onConfirm}
+          onHide={() => {
+            setIsCreateDatasetSchemaConfirmDialogVisible(false);
+          }}
+          visible={isCreateDatasetSchemaConfirmDialogVisible}>
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['confirmNewDatasetSchemaCreationBody'])
+            }}></p>
+        </ConfirmDialog>
+      )}
+    </Fragment>
   );
 };
