@@ -14,6 +14,7 @@ import styles from './CustomFileUpload.module.scss';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { Button } from 'views/_components/Button';
 import { Checkbox } from 'views/_components/Checkbox';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -24,7 +25,8 @@ import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { customFileUploadReducer } from './_functions/Reducers/customFileUploadReducer';
-import { clearConfig } from 'dompurify';
+
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const CustomFileUpload = ({
   accept = undefined,
@@ -74,6 +76,7 @@ export const CustomFileUpload = ({
 
   const [state, dispatch] = useReducer(customFileUploadReducer, {
     files: [],
+    isUploadClicked: false,
     isUploading: false,
     isValid: true,
     msgs: [],
@@ -81,6 +84,7 @@ export const CustomFileUpload = ({
   });
 
   const [isValidating, setIsValidating] = useState(false);
+  const [isCreateDatasetSchemaConfirmDialogVisible, setIsCreateDatasetSchemaConfirmDialogVisible] = useState(false);
 
   const _files = useRef([]);
   const content = useRef(null);
@@ -90,6 +94,10 @@ export const CustomFileUpload = ({
   useEffect(() => {
     if (hasFiles() && auto) upload();
   }, [state]);
+
+  useEffect(() => {
+    if (state.isUploadClicked) upload();
+  }, [state.isUploadClicked]);
 
   useEffect(() => {
     if (!isNil(draggedFiles)) {
@@ -258,7 +266,6 @@ export const CustomFileUpload = ({
   };
 
   const upload = () => {
-    console.log('inside upload');
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
     let xhr = new XMLHttpRequest();
     let formData = new FormData();
@@ -317,6 +324,8 @@ export const CustomFileUpload = ({
     xhr.withCredentials = withCredentials;
 
     xhr.send(formData);
+
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
   };
 
   const clear = () => {
@@ -380,7 +389,6 @@ export const CustomFileUpload = ({
   };
 
   const onSimpleUploaderClick = () => {
-    console.log('inside onSimpleUploaderClick');
     if (hasFiles()) upload();
   };
 
@@ -555,8 +563,13 @@ export const CustomFileUpload = ({
             disabled={disabled || !hasFiles() || checkValidExtension() || state.isUploading || isValidating}
             icon={state.isUploading || isValidating ? 'spinnerAnimate' : 'upload'}
             label={getButtonLabel()}
-            // onClick={upload}
-            onClick={isImportDatasetDesignerSchema ? console.log('') : upload}
+            onClick={() => {
+              if (isImportDatasetDesignerSchema) {
+                setIsCreateDatasetSchemaConfirmDialogVisible(true);
+              } else {
+                upload();
+              }
+            }}
           />
         </span>
       );
@@ -577,18 +590,40 @@ export const CustomFileUpload = ({
     }
 
     return (
-      <div className={styles.dialogFooter}>
-        <div className={styles.secondaryZone}>{cancelButton}</div>
-        <div className={styles.primaryZone}>
-          {uploadButton}
-          <Button
-            className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-            icon="cancel"
-            label={resourcesContext.messages['close']}
-            onClick={() => dialogOnHide()}
-          />
+      <Fragment>
+        <div className={styles.dialogFooter}>
+          <div className={styles.secondaryZone}>{cancelButton}</div>
+          <div className={styles.primaryZone}>
+            {uploadButton}
+            <Button
+              className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+              icon="cancel"
+              label={resourcesContext.messages['close']}
+              onClick={() => dialogOnHide()}
+            />
+          </div>
         </div>
-      </div>
+
+        {isCreateDatasetSchemaConfirmDialogVisible && (
+          <ConfirmDialog
+            header={resourcesContext.messages['confirmNewDatasetSchemaCreationHeader']}
+            labelCancel={resourcesContext.messages['no']}
+            labelConfirm={resourcesContext.messages['yes']}
+            onConfirm={() => {
+              dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: true } });
+              setIsCreateDatasetSchemaConfirmDialogVisible(false);
+            }}
+            onHide={() => {
+              setIsCreateDatasetSchemaConfirmDialogVisible(false);
+            }}
+            visible={isCreateDatasetSchemaConfirmDialogVisible}>
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['confirmNewDatasetSchemaCreationBody'])
+              }}></p>
+          </ConfirmDialog>
+        )}
+      </Fragment>
     );
   };
 

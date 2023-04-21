@@ -194,7 +194,10 @@ export const NewDatasetSchemaForm = ({
             setIsCreateDatasetSchemaConfirmDialogVisible(false);
           }}
           visible={isCreateDatasetSchemaConfirmDialogVisible}>
-          {resourcesContext.messages['confirmNewDatasetSchemaCreationBody']}
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['confirmNewDatasetSchemaCreationBody'])
+            }}></p>
         </ConfirmDialog>
       )}
     </Fragment>
