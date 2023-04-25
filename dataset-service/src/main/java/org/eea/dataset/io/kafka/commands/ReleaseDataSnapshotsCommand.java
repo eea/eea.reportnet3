@@ -196,10 +196,10 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
           try {
             fileTreatmentHelper.savePublicFiles(dataflowVO.getId(), dataset.getDataProviderId());
           } catch (IOException e) {
-            LOG_ERROR.error("Folder not created in dataflow {} with dataprovider {} and datasetId {} message {}",
+            LOG.error("Folder not created in dataflow {} with dataprovider {} and datasetId {} message {}",
                 dataset.getDataflowId(), dataset.getDataProviderId(), datasetId, e.getMessage(), e);
           } catch (Exception e) {
-            LOG_ERROR.error("Unexpected error! Error creating folder for dataflow {} with dataprovider {}. Message {}",
+            LOG.error("Unexpected error! Error creating folder for dataflow {} with dataprovider {}. Message {}",
                     dataset.getDataflowId(), dataset.getDataProviderId(), e.getMessage());
           }
         }

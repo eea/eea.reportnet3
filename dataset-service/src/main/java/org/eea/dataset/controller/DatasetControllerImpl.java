@@ -17,9 +17,11 @@ import org.eea.dataset.service.model.TruncateDataset;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -114,6 +116,11 @@ public class DatasetControllerImpl implements DatasetController {
   /** The job controller zuul */
   @Autowired
   private JobControllerZuul jobControllerZuul;
+
+
+  /** The dataflow controller zuul */
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
 
   /**
    * Gets the data tables values.
@@ -2057,6 +2064,30 @@ public class DatasetControllerImpl implements DatasetController {
         LOG.error("Error while finding tasks for processId {}, error is {}", processId, e.getMessage());
         throw e;
       }
+  }
+
+  /**
+   * Creates public files
+   *
+   * @param dataflowId the dataset id
+   * @param providerId the provider id
+   */
+  @Override
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @PostMapping("/createPublicFiles")
+  public void createPublicFiles(@RequestParam(value = "dataflowId", required=true) Long dataflowId, @RequestParam(value = "providerId", required=true) Long providerId){
+    DataFlowVO dataflowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
+    if (dataflowVO.isShowPublicInfo()) {
+      try {
+        fileTreatmentHelper.savePublicFiles(dataflowId, providerId);
+        LOG.info("Successfully created public files for for dataflow {} with dataprovider {}", dataflowId, providerId);
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error creating folder for dataflow {} with dataprovider {}", dataflowId, providerId, e);
+      }
+    }
+    else{
+      LOG.info("Could not create public files because show public info is false for dataflow with id {}", dataflowId);
+    }
   }
 
     @ExceptionHandler(Exception.class)
