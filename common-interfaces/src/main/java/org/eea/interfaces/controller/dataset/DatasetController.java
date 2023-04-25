@@ -644,4 +644,13 @@ public interface DatasetController {
   @GetMapping("/private/findTasksByProcessIdAndStatusIn/{processId}")
   List<TaskVO> findTasksByProcessIdAndStatusIn(@PathVariable("processId") String processId, @RequestParam("status") List<ProcessStatusEnum> status);
 
+  /**
+   * Creates public files
+   *
+   * @param dataflowId the dataset id
+   * @param providerId the provider id
+   */
+  @PostMapping("/createPublicFiles")
+  void createPublicFiles(@RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId);
+
 }
