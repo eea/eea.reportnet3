@@ -377,7 +377,7 @@ public class DatasetServiceImpl implements DatasetService {
     if (location == -1) {
       throw new EEAException(EEAErrorMessage.FILE_EXTENSION);
     }
-    extension = file.substring(location);
+    extension = file.substring(location+1);
     return extension;
   }
 
