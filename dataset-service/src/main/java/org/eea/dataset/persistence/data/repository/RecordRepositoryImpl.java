@@ -1678,9 +1678,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
          }
       }
 
-      File fileZip = new File(filePath);
       try (ZipOutputStream out =
-                     new ZipOutputStream(new FileOutputStream(fileZip + ZIP))) {
+                     new ZipOutputStream(new FileOutputStream(filePath+ZIP))) {
         createZipFromJson(jsonFile, out, path);
         LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", fileName+ZIP, datasetId, jobId);
         processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
@@ -1751,7 +1750,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
       }
     }
-    fos.close();
   }
 
   private static StringBuilder createEtlExportQuery(boolean useTempTable,  Integer limit, Integer offset, Long datasetId, String tableSchemaId, String filterValue,
