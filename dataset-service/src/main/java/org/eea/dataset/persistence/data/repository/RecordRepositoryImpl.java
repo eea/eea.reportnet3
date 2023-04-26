@@ -1673,7 +1673,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
          try (FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
              createJsonRecordsForTable(datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchemaList, tableName, result, tableCount, totalRecords, fos);
          } catch (Exception e) {
-             LOG.error("Error writing file {} for datasetId {}", fileName, datasetId);
+             LOG.error("Error writing file {} for datasetId {}", fileName, datasetId, e);
              throw e;
          }
       }
@@ -1681,18 +1681,22 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       File fileZip = new File(filePath);
       try (ZipOutputStream out =
                      new ZipOutputStream(new FileOutputStream(fileZip + ZIP))) {
-         createZipFromJson(jsonFile, out, path);
-         processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
+        createZipFromJson(jsonFile, out, path);
+        LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", fileName+ZIP, datasetId, jobId);
+        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
                 processUUID, user, defaultFileExportProcessPriority, false);
-         if (jobId !=null) {
+        if (jobId !=null) {
            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
          }
-         LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", fileName+ZIP, datasetId, jobId);
       } catch (Exception e) {
-         LOG.error("Error writing file {} for datasetId {}", fileName, datasetId);
+         LOG.error("Error creating file {} or updating tables for datasetId {}", fileName, datasetId, e);
          throw e;
       } finally {
-        Files.delete(path);
+        try {
+          Files.deleteIfExists(path);
+        } catch (Exception er) {
+          LOG.error("Error while deleting file " + path, er);
+        }
       }
   }
 
@@ -1747,6 +1751,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
       }
     }
+    fos.close();
   }
 
   private static StringBuilder createEtlExportQuery(boolean useTempTable,  Integer limit, Integer offset, Long datasetId, String tableSchemaId, String filterValue,
