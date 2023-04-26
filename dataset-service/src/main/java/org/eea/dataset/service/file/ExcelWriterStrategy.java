@@ -1,17 +1,7 @@
 package org.eea.dataset.service.file;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
@@ -30,6 +20,14 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * The Class ExcelWriterStrategy.
@@ -53,6 +51,11 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
   /** The Constant NO_GEOMETRY. */
   private static final String NO_GEOMETRY = "<<GEOMETRIES ARE NOT EXPORTED>>";
+
+  private static final String TABLE_NAME = "Table name";
+  private static final String SHEET_TABLE_NAME = "Sheet name";
+  private static final String SHEET_NAME = "TableMapping";
+
 
   /** The parse common. */
   private FileCommonUtils fileCommon;
@@ -129,6 +132,22 @@ public class ExcelWriterStrategy implements WriterStrategy {
       for (TableSchemaVO tableSchema : tables) {
         writeSheet(workbook, tableSchema, datasetId, includeCountryCode, includeValidations,
             dataset, filters);
+      }
+
+      List<String> tableNames = tables.stream().map(tableSchemaVO -> tableSchemaVO.getNameTableSchema()).collect(Collectors.toList());
+      boolean createMapSheet = tableNames.stream().anyMatch(name -> name.length() > 31);
+      if (createMapSheet) {
+        Sheet sheet = workbook.createSheet(SHEET_NAME);
+        int rowNum = 0;
+        Row rowhead = sheet.createRow(rowNum);
+        rowhead.createCell(0).setCellValue(TABLE_NAME);
+        rowhead.createCell(1).setCellValue(SHEET_TABLE_NAME);
+        for (String name : tableNames) {
+          int sheetNo=rowNum++;
+          Row row = sheet.createRow(rowNum);
+          row.createCell(0).setCellValue(name);
+          row.createCell(1).setCellValue(workbook.getSheetName(sheetNo));
+        }
       }
 
       workbook.write(out);
