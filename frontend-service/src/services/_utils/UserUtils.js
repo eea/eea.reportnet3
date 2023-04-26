@@ -51,19 +51,21 @@ const parseConfigurationDTO = userConfigurationDTO => {
       ? userConfigurationDTO.pinnedDataflows
       : userDefaultConfiguration.pinnedDataflows;
 
-    userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat[0])
+    userConfiguration.dateFormat = !isNil(userConfigurationDTO.dateFormat)
       ? userConfigurationDTO.dateFormat[0]
       : userDefaultConfiguration.dateFormat;
 
-    userConfiguration.timezone = !isNil(userConfigurationDTO.timezone[0])
+    userConfiguration.timezone = !isNil(userConfigurationDTO.timezone)
       ? userConfigurationDTO.timezone[0]
       : userDefaultConfiguration.timezone;
 
     userConfiguration.localTimezone = isNil(userConfigurationDTO.localTimezone)
       ? userDefaultConfiguration.localTimezone
-      : userConfigurationDTO.timezone[0] === DateTimeUtils.convertTimeZoneName(dayjs.tz.guess())
-      ? (userConfiguration.localTimezone = true)
-      : (userConfiguration.localTimezone = false);
+      : !isNil(userConfigurationDTO.timezone)
+      ? userConfigurationDTO.timezone[0] === DateTimeUtils.convertTimeZoneName(dayjs.tz.guess())
+        ? (userConfiguration.localTimezone = true)
+        : (userConfiguration.localTimezone = false)
+      : userDefaultConfiguration.localTimezone;
 
     userConfiguration.notificationSound = isNil(userConfigurationDTO.notificationSound)
       ? userDefaultConfiguration.notificationSound
