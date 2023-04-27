@@ -314,6 +314,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (dataflow != null && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
       dataSetSchema.setReferenceDataset(true);
     }
+    if (dataflow != null && (TypeDataflowEnum.REPORTING.equals(dataflow.getType())
+        || TypeDataflowEnum.CITIZEN_SCIENCE.equals(dataflow.getType()))) {
+      dataSetSchema.setAvailableInPublic(true);
+    }
 
     schemasRepository.save(dataSetSchema);
     schemasRepository.updateDatasetSchemaWebForm(idDataSetSchema.toString(), new Webform());
