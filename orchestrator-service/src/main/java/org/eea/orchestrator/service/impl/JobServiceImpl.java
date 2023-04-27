@@ -315,7 +315,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public void prepareAndExecuteFileExportJob(JobVO jobVO) {
+    public void prepareAndExecuteFileExportJob(JobVO jobVO) throws Exception {
         Job job = jobMapper.classToEntity(jobVO);
         Map<String, Object> parameters = job.getParameters();
         Long dataflowId = Long.valueOf((Integer) parameters.get("dataflowId"));

@@ -40,7 +40,7 @@ public interface JobService {
 
     void prepareAndExecuteCopyToEUDatasetJob(JobVO jobVO);
 
-    void prepareAndExecuteFileExportJob(JobVO jobVO);
+    void prepareAndExecuteFileExportJob(JobVO jobVO) throws Exception;
 
     void deleteFinishedJobsBasedOnDuration();
 
