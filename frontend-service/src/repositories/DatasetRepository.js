@@ -203,10 +203,6 @@ export const DatasetRepository = {
 
     getSchema: async datasetId => {
         const response = await HTTPRequester.get({url: getUrl(DatasetConfig.getSchema, {datasetId})})
-        // if (datasetId === "8495") {
-        //     response.data = dataschema_getSchemas_dataset_8495
-        // }
-        // console.log("Dataset getSchemas datasetId", datasetId, response, typeof (response))
         return response
     },
 

@@ -43,6 +43,7 @@ export const TabsDesigner = ({
   isReferenceDataset,
   manageDialogs,
   manageUniqueConstraint,
+  maxLength,
   onChangeReference,
   onHideSelectGroupedValidation,
   onLoadTableData,
@@ -364,6 +365,7 @@ export const TabsDesigner = ({
         isDataflowOpen={isDataflowOpen}
         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
         isErrorDialogVisible={isErrorDialogVisible}
+        maxLength={maxLength}
         name="TabsDesigner"
         onTabAdd={onTabAdd}
         onTabAddCancel={onTabAddCancel}

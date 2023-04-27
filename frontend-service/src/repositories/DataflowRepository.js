@@ -17,11 +17,6 @@ export const DataflowRepository = {
     getSchemas: async dataflowId => {
 
         const response = await HTTPRequester.get({url: getUrl(DataflowConfig.getSchemas, {dataflowId})})
-        // Mocking part
-        // if (dataflowId === "8067") {
-        //     response.data = dataschema_getSchemas_dataflow_8067
-        // }
-        // console.log("Dataflow getSchemas dataflowId", dataflowId, response, typeof (response))
         return response
     },
 

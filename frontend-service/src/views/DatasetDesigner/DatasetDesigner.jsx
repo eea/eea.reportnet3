@@ -1782,6 +1782,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             isReferenceDataset={designerState.referenceDataset}
             manageDialogs={manageDialogs}
             manageUniqueConstraint={manageUniqueConstraint}
+            maxLength={30}
             onChangeReference={onChangeReference}
             onHideSelectGroupedValidation={onHideSelectGroupedValidation}
             onLoadTableData={onLoadTableData}
