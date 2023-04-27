@@ -616,6 +616,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
         // This method will release the lock and the notification
         restoreSnapshot(idDataCollection, idSnapshot, false, processId);
+
+        //---
         // Mark the snapshot released
         snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
         // Add the date of the release
@@ -625,6 +627,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           snapshot.get().setDateReleased(dateRelease);
           snapshotRepository.save(snapshot.get());
         }
+
+        //------
 
         LOG.info("Snapshot {} of processId {} released", idSnapshot, processId);
       } catch (EEAException e) {

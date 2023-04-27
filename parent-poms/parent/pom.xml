@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.2</api-gateway.version>
-    <communication.version>v3.2</communication.version>
-    <collaboration.version>v3.2</collaboration.version>
-    <dataflow.version>v3.2</dataflow.version>
-    <dataset.version>v3.2</dataset.version>
-    <document.version>v3.2</document.version>
-    <frontend.version>v3.2</frontend.version>
-    <indexsearch.version>v3.2</indexsearch.version>
-    <inspire.version>v3.2</inspire.version>
-    <recordstore.version>v3.2</recordstore.version>
-    <ums.version>v3.2</ums.version>
-    <validation.version>v3.2</validation.version>
-    <common-interfaces.version>v3.2</common-interfaces.version>
-    <common-utitlities.version>v3.2</common-utitlities.version>
-    <rod.version>v3.2</rod.version>
-    <orchestrator.version>v3.2</orchestrator.version>
+    <api-gateway.version>v3.2-SILENT_RELEASE</api-gateway.version>
+    <communication.version>v3.2-SILENT_RELEASE</communication.version>
+    <collaboration.version>v3.2-SILENT_RELEASE</collaboration.version>
+    <dataflow.version>v3.2-SILENT_RELEASE</dataflow.version>
+    <dataset.version>v3.2-SILENT_RELEASE</dataset.version>
+    <document.version>v3.2-SILENT_RELEASE</document.version>
+    <frontend.version>v3.2-SILENT_RELEASE</frontend.version>
+    <indexsearch.version>v3.2-SILENT_RELEASE</indexsearch.version>
+    <inspire.version>v3.2-SILENT_RELEASE</inspire.version>
+    <recordstore.version>v3.2-SILENT_RELEASE</recordstore.version>
+    <ums.version>v3.2-SILENT_RELEASE</ums.version>
+    <validation.version>v3.2-SILENT_RELEASE</validation.version>
+    <common-interfaces.version>v3.2-SILENT_RELEASE</common-interfaces.version>
+    <common-utitlities.version>v3.2-SILENT_RELEASE</common-utitlities.version>
+    <rod.version>v3.2-SILENT_RELEASE</rod.version>
+    <orchestrator.version>v3.2-SILENT_RELEASE</orchestrator.version>
   </properties>
 </project>
