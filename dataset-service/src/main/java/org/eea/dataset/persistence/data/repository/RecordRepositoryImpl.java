@@ -1678,10 +1678,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
          }
       }
 
-      File fileZip = new File(filePath);
       try (ZipOutputStream out =
-                     new ZipOutputStream(new FileOutputStream(fileZip + ZIP))) {
-        createZipFromJson(jsonFile, out, path);
+                     new ZipOutputStream(new FileOutputStream(filePath+ZIP))) {
+        createZipFromJson(jsonFile, out);
         LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", fileName+ZIP, datasetId, jobId);
         processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
                 processUUID, user, defaultFileExportProcessPriority, false);
@@ -1700,10 +1699,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       }
   }
 
-  private static void createZipFromJson(String jsonFile, ZipOutputStream out, Path path) throws IOException {
+  private static void createZipFromJson(String jsonFile, ZipOutputStream out) throws IOException {
     ZipEntry entry = new ZipEntry(jsonFile);
     out.putNextEntry(entry);
-    byte[] bytes = Files.readAllBytes(path);
+    File file = new File(jsonFile);
+    byte[] bytes = Files.readAllBytes(file.toPath());
     ObjectMapper mapper = new ObjectMapper();
     String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(bytes));
     out.write(res.getBytes(), 0, res.getBytes().length);
@@ -1751,7 +1751,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
       }
     }
-    fos.close();
   }
 
   private static StringBuilder createEtlExportQuery(boolean useTempTable,  Integer limit, Integer offset, Long datasetId, String tableSchemaId, String filterValue,
