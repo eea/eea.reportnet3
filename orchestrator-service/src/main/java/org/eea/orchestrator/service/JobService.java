@@ -73,4 +73,6 @@ public interface JobService {
     List<JobVO> getFMEImportJobsForPolling();
 
     void updateFmeStatus(Long jobId, FmeJobStatusEnum fmeStatus);
+
+    List<JobVO> findByJobTypeInAndJobStatusInAndRelease(List<JobTypeEnum> jobType, List<JobStatusEnum> jobStatus, boolean release);
 }

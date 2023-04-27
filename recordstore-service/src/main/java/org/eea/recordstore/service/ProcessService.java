@@ -101,6 +101,13 @@ public interface ProcessService {
    * @return
    */
   List<String> findProcessIdsByTypeAndStatusAndTaskStatus(String type, String status, String taskStatus);
+
+  /**
+   * Deletes process by processId
+   * @param processId
+   * @return
+   */
+  void deleteProcessByProcessId(String processId);
 }
 
 

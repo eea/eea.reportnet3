@@ -51,4 +51,9 @@ public class JobProcessServiceImpl implements JobProcessService {
     public List<String> findProcessesByJobId(Long jobId) {
         return jobProcessRepository.findProcessesByJobId(jobId);
     }
+
+    @Override
+    public void deleteJobProcessByProcessId(String processId){
+        jobProcessRepository.deleteJobProcessByProcessId(processId);
+    }
 }

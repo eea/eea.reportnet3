@@ -1,10 +1,12 @@
 package org.eea.recordstore.persistence.repository;
 
 import org.eea.recordstore.persistence.domain.EEAProcess;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -88,4 +90,9 @@ public interface ProcessRepository
   @Query(nativeQuery = true,
           value = "select distinct p.process_id from process p join task t on p.process_id=t.process_id where p.process_type= :processType and p.status= :status and t.status=:taskStatus")
   List<String> findProcessIdsByTypeAndStatusAndTaskStatus(@Param("processType") String processType, @Param("status") String status, @Param("taskStatus") String taskStatus);
+
+  @Transactional
+  @Modifying
+  @Query(nativeQuery = true, value = "delete from process where process_id = :processId")
+  void deleteByProcessId(String processId);
 }
