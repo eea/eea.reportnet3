@@ -2141,7 +2141,7 @@ public class DatasetControllerImpl implements DatasetController {
       datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user);
       LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error in createFileForEtlExport for datasetId {} and jobId {} Message: {}", datasetId, jobId, e.getMessage());
+      LOG.error("Unexpected error! Error in createFileForEtlExport for datasetId {} and jobId {} Message: ", datasetId, jobId, e.getMessage());
       throw e;
     }
   }

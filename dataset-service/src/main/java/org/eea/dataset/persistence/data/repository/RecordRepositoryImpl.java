@@ -1675,7 +1675,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         try (FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
           createJsonRecordsForTable(datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchemaList, tableName, result, tableCount, totalRecords, fos);
         } catch (Exception e) {
-          LOG.error("Error writing file {} for datasetId {}. Message: {}", fileName, datasetId, e);
+          LOG.error("Error writing file {} for datasetId {}. Message: ", fileName, datasetId, e);
           throw e;
         }
       }
@@ -1690,7 +1690,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
         }
       } catch (Exception e) {
-        LOG.error("Error creating file {} or updating tables for datasetId {}. Message: {}", fileName, datasetId, e);
+        LOG.error("Error creating file {} or updating tables for datasetId {}. Message: ", fileName, datasetId, e);
         throw e;
       } finally {
         try {
