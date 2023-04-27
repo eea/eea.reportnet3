@@ -1146,14 +1146,7 @@ public class ValidationHelper implements DisposableBean {
                 }
                 kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
                 if (taskRepository.hasProcessCanceledTasks(processId)) {
-                  value.put("error", "Tasks have canceled status");
-                  LOG.info("Tasks have canceled status");
                   kafkaSenderUtils.releaseKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS, value);
-                  /*UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-                  userNotificationContentVO.setDatasetId(datasetId);
-                  userNotificationContentVO.setUserId(process.getUser());
-                  notificationControllerZuul.createUserNotificationPrivate("FINISHED_VALIDATION_WITH_CANCELED_TASKS",
-                      userNotificationContentVO);*/
                 }
               }
 
@@ -1168,16 +1161,9 @@ public class ValidationHelper implements DisposableBean {
                   value,
                   NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
               if (taskRepository.hasProcessCanceledTasks(processId)) {
-                value.put("error", "Tasks have canceled status");
-                LOG.info("Tasks have canceled status");
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS,
                     value,
                     NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
-                /*UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-                userNotificationContentVO.setDatasetId(datasetId);
-                userNotificationContentVO.setUserId(process.getUser());
-                notificationControllerZuul.createUserNotificationPrivate("FINISHED_VALIDATION_WITH_CANCELED_TASKS",
-                    userNotificationContentVO);*/
               }
             }
           }

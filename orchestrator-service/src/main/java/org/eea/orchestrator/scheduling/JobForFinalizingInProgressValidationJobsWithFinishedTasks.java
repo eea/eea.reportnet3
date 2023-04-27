@@ -159,8 +159,6 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
                                     NotificationVO.builder().user(user).datasetId(datasetId).build());
 
                             if (validationControllerZuul.hasProcessCanceledTasks(processId)) {
-                                value.put("error", "Tasks have canceled status");
-                                LOG.info("Tasks have canceled status");
                                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT,
                                     value,
                                     NotificationVO.builder().user(user).datasetId(datasetId).build());
