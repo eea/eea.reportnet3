@@ -8,12 +8,14 @@ import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -183,6 +185,10 @@ public class ValidationHelper implements DisposableBean {
   /** The data set mapper. */
   @Autowired
   private TaskMapper taskMapper;
+
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationController.NotificationControllerZuul notificationControllerZuul;
 
 
   /**
@@ -1138,8 +1144,10 @@ public class ValidationHelper implements DisposableBean {
                 if (jobId!=null) {
                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
                 }
-                kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
-                    value);
+                kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
+                if (taskRepository.hasProcessCanceledTasks(processId)) {
+                  kafkaSenderUtils.releaseKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS, value);
+                }
               }
 
             } else {
@@ -1152,6 +1160,11 @@ public class ValidationHelper implements DisposableBean {
               kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
                   value,
                   NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
+              if (taskRepository.hasProcessCanceledTasks(processId)) {
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS,
+                    value,
+                    NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
+              }
             }
           }
           isFinished = true;

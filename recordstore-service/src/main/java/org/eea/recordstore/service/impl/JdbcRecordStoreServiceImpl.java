@@ -1698,6 +1698,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         dataSetSnapshotControllerZuul.updateSnapshotEURelease(datasetIdFromSnapshot);
         dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
       }
+
+      if (JobStatusEnum.FAILED.equals(jobProcessControllerZuul.findStatusByJobId(jobId))) {
+        LOG.info("Release job {} failed with snapshot {} and processId {},", jobId, idSnapshot, processId);
+        dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(dataset.getDataflowId(), dataset.getDataflowId());
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_FAILED_EVENT, value,
+            NotificationVO.builder().dataflowId(dataset.getDataflowId()).providerId(dataset.getDataflowId()).user(user).error("Release Failed").build());
+      }
+
       LOG.info("Snapshot {} restored for processId {}", idSnapshot, processId);
     } catch (Exception e) {
       if (!prefillingReference) {
@@ -1985,7 +1993,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             processVO.getUser(), processVO.getPriority(), processVO.isReleased());
         LOG.info("Updated copyProcessSpecificSnapshot release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}", processId, datasetId);
     }
-  
+
   /**
    * Compose delete sql.
    *

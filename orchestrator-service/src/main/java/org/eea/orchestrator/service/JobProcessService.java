@@ -13,4 +13,6 @@ public interface JobProcessService {
     List<String> findProcessesByJobId(Long jobId);
 
     void deleteJobProcessByProcessId(String processId);
+
+    String findStatusByJobId(Long jobId);
 }

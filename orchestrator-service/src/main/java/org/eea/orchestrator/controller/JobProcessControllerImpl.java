@@ -52,4 +52,10 @@ public class JobProcessControllerImpl implements JobProcessController {
     public List<String> findProcessesByJobId(@PathVariable("jobId") Long jobId) {
         return jobProcessService.findProcessesByJobId(jobId);
     }
+
+    @Override
+    @GetMapping(value = "/findStatusByJobId/{jobId}")
+    public String findStatusByJobId(@PathVariable("jobId") Long jobId) {
+        return jobProcessService.findStatusByJobId(jobId);
+    }
 }

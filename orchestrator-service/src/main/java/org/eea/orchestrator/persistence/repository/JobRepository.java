@@ -146,6 +146,13 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
     @Query(nativeQuery = true,
             value = "select * from jobs where job_status= 'IN_PROGRESS' and job_type = 'IMPORT' and fme_job_id is not null")
     List<Job> findFmeJobsToPollForStatus();
+
+    /**
+     * Find job status by job id
+     * @return
+     */
+    @Query(nativeQuery = true, value = "select j.job_status from jobs j where j.id= :jobId")
+    String findStatusByJobId(Long jobId);
 }
 
 
