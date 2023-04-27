@@ -134,4 +134,14 @@ public interface ProcessController {
    */
   @GetMapping(value = "/private/listProcessesExceedingTime")
   List<ProcessVO> listProcessesThatExceedTime(@RequestParam("type") List<String> type, @RequestParam("status") String status, @RequestParam("timeInMinutes") long timeInMinutes);
+
+  /**
+   * Finds process ids of processes with type and status and taskStatus
+   * @param type
+   * @param status
+   * @param taskStatus
+   * @return
+   */
+  @GetMapping(value = "/private/findProcessIdsByTypeAndStatusAndTaskStatus")
+  List<String> findProcessIdsByTypeAndStatusAndTaskStatus(@RequestParam("type") String type, @RequestParam("status") String status, @RequestParam("taskStatus") String taskStatus);
 }
