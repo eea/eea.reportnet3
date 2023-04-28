@@ -5,6 +5,7 @@ import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Map;
 
@@ -16,7 +17,7 @@ import java.util.Map;
 @Getter
 @Setter
 @ToString
-public class JobHistoryVO {
+public class JobHistoryVO implements Serializable {
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = -1348263779137653665L;

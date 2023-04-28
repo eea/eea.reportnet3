@@ -495,16 +495,6 @@ public class ValidationControllerImpl implements ValidationController {
   }
 
   /**
-   * cancel process tasks
-   * @param processId
-   */
-  @Override
-  @PutMapping(value = "/private/cancelProcessTasks/{processId}")
-  public void cancelRunningProcessTasks(@PathVariable("processId") String processId) {
-    validationHelper.cancelRunningProcessTasks(processId);
-  }
-
-  /**
    * Finds if tasks exist by processId and status and duration
    * @param processId
    * @param status

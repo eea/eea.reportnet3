@@ -1,6 +1,8 @@
 package org.eea.orchestrator.service.impl;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
@@ -42,6 +44,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.*;
@@ -66,6 +70,9 @@ public class JobServiceImpl implements JobService {
     @Value(value = "${scheduling.inProgress.export.maximum.jobs}")
     private Long maximumNumberOfInProgressExportJobs;
 
+    @Value("${importPath}")
+    private String importPath;
+
     /**
      * The admin user.
      */
@@ -77,6 +84,8 @@ public class JobServiceImpl implements JobService {
      */
     @Value("${eea.keycloak.admin.password}")
     private String adminPass;
+
+    private static final String ETL_EXPORT = "/etlExport/";
 
     @Autowired
     private DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
@@ -197,6 +206,13 @@ public class JobServiceImpl implements JobService {
             return true;
         } else if (jobType == JobTypeEnum.EXPORT && numberOfCurrentJobs < maximumNumberOfInProgressExportJobs) {
             return true;
+        } else if (jobType == JobTypeEnum.FILE_EXPORT && numberOfCurrentJobs < maximumNumberOfInProgressExportJobs) {
+            //if there is a file_export for the same dataset id and is IN_PROGRESS the job should remain in status QUEUED
+            List<Job> fileExports = jobRepository.findByJobStatusInAndJobTypeInAndDatasetId(Arrays.asList(JobStatusEnum.IN_PROGRESS), Arrays.asList(JobTypeEnum.FILE_EXPORT), job.getDatasetId());
+            if(fileExports != null && fileExports.size() > 0){
+                return false;
+            }
+            return true;
         }
         return false;
     }
@@ -223,6 +239,7 @@ public class JobServiceImpl implements JobService {
                 }
             }
         } else if (jobType.equals(JobTypeEnum.COPY_TO_EU_DATASET.toString())) {
+            //we shouldn't add the job if there is another queued or in progress copy to eu dataset for the same dataflow id
             List<Job> jobList = jobRepository.findByJobTypeInAndJobStatusIn(Arrays.asList(JobTypeEnum.COPY_TO_EU_DATASET), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
             for (Job job : jobList) {
                 Map<String, Object> insertedParameters = job.getParameters();
@@ -232,6 +249,7 @@ public class JobServiceImpl implements JobService {
                 }
             }
         } else if (jobType.equals(JobTypeEnum.IMPORT.toString())) {
+            //we shouldn't add the job if there is another queued or in progress import, validation or release for the same datasetId
             List<Job> jobList = jobRepository.findByJobStatusInAndJobTypeInAndDatasetId(Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), Arrays.asList(JobTypeEnum.IMPORT, JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), datasetIds.get(0));
             if (jobList != null && jobList.size() > 0) {
                 return JobStatusEnum.REFUSED;
@@ -247,6 +265,25 @@ public class JobServiceImpl implements JobService {
                     }
                 }
                 return JobStatusEnum.IN_PROGRESS;
+            }
+        }
+        else if (jobType.equals(JobTypeEnum.FILE_EXPORT.toString())){
+            //we shouldn't add the job if there is another queued or in progress import or release for the same datasetId
+            List<Job> jobList = jobRepository.findByJobStatusInAndJobTypeInAndDatasetId(Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), Arrays.asList(JobTypeEnum.IMPORT), datasetIds.get(0));
+            if (jobList != null && jobList.size() > 0) {
+                return JobStatusEnum.REFUSED;
+            } else {
+                List<Job> releasesAndValidations = jobRepository.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.RELEASE, JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS), true);
+                for (Job job : releasesAndValidations) {
+                    Map<String, Object> insertedParameters = job.getParameters();
+                    if (insertedParameters.get("datasetId") != null) {
+                        List<Long> insertedDatasetIds = (List<Long>) insertedParameters.get("datasetId");
+                        if (insertedDatasetIds.contains(datasetIds.get(0).intValue())) {
+                            return JobStatusEnum.REFUSED;
+                        }
+                    }
+                }
+                return JobStatusEnum.QUEUED;
             }
         }
         return JobStatusEnum.QUEUED;
@@ -278,6 +315,23 @@ public class JobServiceImpl implements JobService {
         Map<String, Object> parameters = job.getParameters();
         Long dataflowId = Long.valueOf((Integer) parameters.get("dataflowId"));
         euDatasetControllerZuul.populateDataFromDataCollection(dataflowId, job.getId());
+    }
+
+    @Override
+    public void prepareAndExecuteFileExportJob(JobVO jobVO) throws Exception {
+        Job job = jobMapper.classToEntity(jobVO);
+        Map<String, Object> parameters = job.getParameters();
+        Long dataflowId = Long.valueOf((Integer) parameters.get("dataflowId"));
+        Long datasetId = Long.valueOf((Integer) parameters.get("datasetId"));
+        Long dataProviderId = (parameters.get("dataProviderId") != null) ? Long.valueOf((Integer) parameters.get("dataProviderId")) : null;
+        String tableSchemaId = (parameters.get("tableSchemaId") != null) ? (String) parameters.get("tableSchemaId") : null;
+        Integer limit = (parameters.get("limit") != null) ? (Integer) parameters.get("limit") : null;
+        Integer offset = (parameters.get("offset") != null) ? (Integer) parameters.get("offset") : null;
+        String filterValue = (parameters.get("filterValue") != null) ? (String) parameters.get("filterValue") : null;
+        String columnName = (parameters.get("columnName") != null) ? (String) parameters.get("columnName") : null;
+        String dataProviderCodes = (parameters.get("dataProviderCodes") != null) ? (String) parameters.get("dataProviderCodes") : null;
+
+        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobVO.getId());
     }
 
     @Transactional
@@ -511,5 +565,25 @@ public class JobServiceImpl implements JobService {
             insertedParameters.put("fmeCallback", fmeCallback);
             jobRepository.save(job.get());
         }
+    }
+
+    /**
+     * Download etl exported file.
+     *
+     * @param jobId the job id
+     * @param fileName the file name
+     * @return the file
+     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws EEAException the EEA exception
+     */
+    @Override
+    public File downloadEtlExportedFile(Long jobId, String fileName) throws EEAException {
+        // we compound the route and create the file
+        File file = new File(new File(importPath, ETL_EXPORT), FilenameUtils.getName(fileName));
+        if (!file.exists()) {
+            LOG.error( "Trying to download a file generated during the export dataset data process for jobId {} but the file {} is not found", jobId, fileName);
+            throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+        }
+        return file;
     }
 }

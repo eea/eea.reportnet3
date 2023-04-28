@@ -18,7 +18,7 @@ public interface JobProcessController {
      * @param jobProcessVO
      * @return
      */
-    @PostMapping(value = "/saveJobProcess")
+    @PostMapping(value = "/private/saveJobProcess")
     JobProcessVO save(@RequestBody JobProcessVO jobProcessVO);
 
     /**

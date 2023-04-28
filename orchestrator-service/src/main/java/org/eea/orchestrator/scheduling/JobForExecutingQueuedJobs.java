@@ -79,8 +79,6 @@ public class JobForExecutingQueuedJobs {
                         LOG.info("Job with id {} and of type {} will be executed.", job.getId(), job.getJobType().getValue());
                         //call validation mechanism
                         jobService.prepareAndExecuteValidationJob(job);
-                    } else if (job.getJobType() == JobTypeEnum.IMPORT) {
-                        //call import mechanism
                     } else if (job.getJobType() == JobTypeEnum.VALIDATION && job.isRelease()) {
                         //check if another release is already running for the dataflow, but for another provider
                         if (!jobService.canExecuteReleaseOnDataflow(job.getDataflowId())) {
@@ -89,8 +87,9 @@ public class JobForExecutingQueuedJobs {
                         LOG.info("Job with id {} and of type {} will be executed.", job.getId(), job.getJobType().getValue());
                         //call release mechanism
                         jobService.prepareAndExecuteReleaseJob(job);
-                    } else if (job.getJobType() == JobTypeEnum.EXPORT) {
-                        //call export mechanism
+                    } else if (job.getJobType() == JobTypeEnum.FILE_EXPORT) {
+                        //call export file mechanism
+                        jobService.prepareAndExecuteFileExportJob(job);
                     } else if (job.getJobType() == JobTypeEnum.COPY_TO_EU_DATASET) {
                         LOG.info("Job with id {} and of type {} will be executed.", job.getId(), job.getJobType().getValue());
                         jobService.prepareAndExecuteCopyToEUDatasetJob(job);

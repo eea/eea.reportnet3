@@ -657,4 +657,18 @@ public interface DatasetService {
    */
   List<TaskVO> findTasksByProcessIdAndStatusIn(String processId, List<ProcessStatusEnum> status);
 
+  /**
+   *
+   * @param datasetId
+   * @param tableSchemaId
+   * @param limit
+   * @param offset
+   * @param filterValue
+   * @param columnName
+   * @param dataProviderCodes
+   */
+  void createFileForEtlExport(@DatasetId Long datasetId, String tableSchemaId,
+                              Integer limit, Integer offset, String filterValue, String columnName,
+                              String dataProviderCodes, Long jobId, Long dataflowId, String user) throws EEAException, IOException;
+
 }

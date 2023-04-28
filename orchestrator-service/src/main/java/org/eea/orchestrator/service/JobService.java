@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,8 @@ public interface JobService {
     void prepareAndExecuteReleaseJob(JobVO jobVO);
 
     void prepareAndExecuteCopyToEUDatasetJob(JobVO jobVO);
+
+    void prepareAndExecuteFileExportJob(JobVO jobVO) throws Exception;
 
     void deleteFinishedJobsBasedOnDuration();
 
@@ -77,4 +81,6 @@ public interface JobService {
     List<JobVO> findByJobTypeInAndJobStatusInAndRelease(List<JobTypeEnum> jobType, List<JobStatusEnum> jobStatus, boolean release);
 
     void updateFmeCallbackJobParameter(String fmeJobId, Boolean fmeCallback);
+
+    File downloadEtlExportedFile(Long jobId, String fileName) throws EEAException;
 }

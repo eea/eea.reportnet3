@@ -27,7 +27,7 @@ public class JobProcessControllerImpl implements JobProcessController {
      * @return
      */
     @Override
-    @PostMapping(value = "/saveJobProcess")
+    @PostMapping(value = "/private/saveJobProcess")
     public JobProcessVO save(@RequestBody JobProcessVO jobProcessVO) {
         return jobProcessService.saveJobProcess(jobProcessVO);
     }

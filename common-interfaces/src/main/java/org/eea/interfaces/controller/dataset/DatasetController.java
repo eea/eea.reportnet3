@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The Interface DatasetController.
@@ -330,6 +331,31 @@ public interface DatasetController {
       @RequestParam(value = "offset", required = false) Integer offset,
       @RequestParam(value = "filterValue", required = false) String filterValue,
       @RequestParam(value = "columnName", required = false) String columnName);
+
+  /**
+   * Etl export dataset.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param limit the limit
+   * @param offset the offset
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
+   * @return the a hashmap
+   */
+  @GetMapping("/v3/etlExport/{datasetId}")
+  Map<String, Object> etlExportDatasetWithJob(@PathVariable("datasetId") Long datasetId,
+                                              @RequestParam("dataflowId") Long dataflowId,
+                                              @RequestParam(value = "providerId", required = false) Long providerId,
+                                              @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                                              @RequestParam(value = "limit", required = false) Integer limit,
+                                              @RequestParam(value = "offset", required = false) Integer offset,
+                                              @RequestParam(value = "filterValue", required = false) String filterValue,
+                                              @RequestParam(value = "columnName", required = false) String columnName,
+                                              @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
 
   /**
    * Etl import dataset.
@@ -653,4 +679,29 @@ public interface DatasetController {
   @PostMapping("/createPublicFiles")
   void createPublicFiles(@RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId);
 
+  /**
+   * Exports records in zipped file
+   * @param datasetId
+   * @param dataflowId
+   * @param providerId
+   * @param tableSchemaId
+   * @param limit
+   * @param offset
+   * @param filterValue
+   * @param columnName
+   * @param dataProviderCodes
+   * @param jobId
+   * @return
+   */
+  @GetMapping("/private/etlExport/createFile/{datasetId}")
+  void createFileForEtlExport(
+          @PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
+          @RequestParam(value = "providerId", required = false) Long providerId,
+          @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+          @RequestParam(value = "limit", required = false) Integer limit,
+          @RequestParam(value = "offset", required = false) Integer offset,
+          @RequestParam(value = "filterValue", required = false) String filterValue,
+          @RequestParam(value = "columnName", required = false) String columnName,
+          @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
+          @RequestParam(name = "jobId", required = false) Long jobId) throws Exception;
 }

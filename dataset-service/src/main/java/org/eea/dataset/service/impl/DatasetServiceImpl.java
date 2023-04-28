@@ -139,6 +139,8 @@ public class DatasetServiceImpl implements DatasetService {
   /** The Constant NUMBER_ERROR_RETRIEVING_STATS. */
   private static final Integer NUMBER_ERROR_RETRIEVING_STATS = 100000;
 
+  private int defaultFileExportProcessPriority = 20;
+
   /** The field max length. */
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
@@ -3627,4 +3629,18 @@ public class DatasetServiceImpl implements DatasetService {
     return taskMapper.entityListToClass(tasks);
   }
 
+  @Override
+  public void createFileForEtlExport(@DatasetId Long datasetId, String tableSchemaId,
+                                     Integer limit, Integer offset, String filterValue, String columnName,
+                                     String dataProviderCodes, Long jobId, Long dataflowId, String user) throws EEAException, IOException {
+    String processUUID = UUID.randomUUID().toString();
+    try {
+      LOG.info("Initiating FILE_EXPORT process for datasetId: {}", datasetId);
+      recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, processUUID);
+      LOG.info("FILE_EXPORT process submitted for datasetId: {}", datasetId);
+    } catch (Exception e) {
+      LOG.error("FILE_EXPORT process error in  Dataset {} and jobId {}. Message: {}", datasetId, jobId, e);
+      throw e;
+    }
+  }
 }
