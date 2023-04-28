@@ -52,6 +52,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityManager;
@@ -1612,19 +1613,20 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
   }
 
+  @Async
   @Override
   public void findAndGenerateETLJsonV3(Long datasetId, String tableSchemaId,
                                   Integer limit, Integer offset, String filterValue, String columnName,
                                   String dataProviderCodes, Long jobId, Long dataflowId, String user, String processUUID) throws EEAException, IOException {
-
+    try {
       processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.FILE_EXPORT,
-                processUUID, user, defaultFileExportProcessPriority, false);
+              processUUID, user, defaultFileExportProcessPriority, false);
       if (jobId!=null) {
         JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
         jobProcessControllerZuul.save(jobProcessVO);
       }
       processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.FILE_EXPORT,
-                processUUID, user, defaultFileExportProcessPriority, false);
+              processUUID, user, defaultFileExportProcessPriority, false);
 
       checkSql(filterValue);
       checkSql(columnName);
@@ -1635,11 +1637,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       String tableName = "";
 
       if (tableSchemaId != null) {
-         tableSchemaList = tableSchemaList.stream().filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
-                  .collect(Collectors.toList());
+        tableSchemaList = tableSchemaList.stream().filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
+                .collect(Collectors.toList());
       }
       if (offset == 0) {
-         offset = 1;
+        offset = 1;
       }
 
       List<String> result = new ArrayList<>();
@@ -1649,47 +1651,47 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       Path path = Paths.get(jsonFile);
       Integer tableCount = 0;
       for (TableSchema tableSchema : tableSchemaList) {
-         tableCount++;
-         tableName = tableSchema.getNameTableSchema();
-         Long totalRecords = getCount(totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes), columnName, filterValue);
+        tableCount++;
+        tableName = tableSchema.getNameTableSchema();
+        Long totalRecords = getCount(totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes), columnName, filterValue);
 
-         String filterChain = tableSchema.getIdTableSchema().toString();
-         if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
-                  || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-             filterChain = filterChain + "_" + Stream.of(tableSchemaId, columnName, filterValue, dataProviderCodes)
-                     .filter(s -> StringUtils.isNotBlank(s)).collect(Collectors.joining(","));
-          }
+        String filterChain = tableSchema.getIdTableSchema().toString();
+        if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
+                || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
+          filterChain = filterChain + "_" + Stream.of(tableSchemaId, columnName, filterValue, dataProviderCodes)
+                  .filter(s -> StringUtils.isNotBlank(s)).collect(Collectors.joining(","));
+        }
 
-         if (totalRecords != null && totalRecords > 0L) {
-              StringBuilder stringQuery = createEtlExportQuery(false, limit, offset, datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchema, filterChain);
-              Query queryResult = entityManager.createNativeQuery(stringQuery.toString());
-            try {
-               result = queryResult.getResultList();
-               System.gc();
-            } catch (NoResultException nre) {
-               LOG.info("no result, ignore message");
-            }
+        if (totalRecords != null && totalRecords > 0L) {
+          StringBuilder stringQuery = createEtlExportQuery(false, limit, offset, datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchema, filterChain);
+          Query queryResult = entityManager.createNativeQuery(stringQuery.toString());
+          try {
+            result = queryResult.getResultList();
+            System.gc();
+          } catch (NoResultException nre) {
+            LOG.info("no result, ignore message");
           }
-         try (FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
-             createJsonRecordsForTable(datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchemaList, tableName, result, tableCount, totalRecords, fos);
-         } catch (Exception e) {
-             LOG.error("Error writing file {} for datasetId {}", fileName, datasetId, e);
-             throw e;
-         }
+        }
+        try (FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
+          createJsonRecordsForTable(datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchemaList, tableName, result, tableCount, totalRecords, fos);
+        } catch (Exception e) {
+          LOG.error("Error writing file {} for datasetId {}. Message: ", fileName, datasetId, e);
+          throw e;
+        }
       }
 
       try (ZipOutputStream out =
-                     new ZipOutputStream(new FileOutputStream(filePath+ZIP))) {
+                   new ZipOutputStream(new FileOutputStream(filePath+ZIP))) {
         createZipFromJson(jsonFile, out);
         LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", fileName+ZIP, datasetId, jobId);
         processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
                 processUUID, user, defaultFileExportProcessPriority, false);
         if (jobId !=null) {
-           jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
-         }
+          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+        }
       } catch (Exception e) {
-         LOG.error("Error creating file {} or updating tables for datasetId {}", fileName, datasetId, e);
-         throw e;
+        LOG.error("Error creating file {} or updating tables for datasetId {}. Message: ", fileName, datasetId, e);
+        throw e;
       } finally {
         try {
           Files.deleteIfExists(path);
@@ -1697,6 +1699,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           LOG.error("Error while deleting file " + path, er);
         }
       }
+    } catch (Exception er) {
+      processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
+              processUUID, user, defaultFileExportProcessPriority, false);
+      if (jobId !=null) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      }
+      throw er;
+    }
   }
 
   private static void createZipFromJson(String jsonFile, ZipOutputStream out) throws IOException {

@@ -34,7 +34,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -54,7 +53,6 @@ import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
-import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
@@ -302,9 +300,6 @@ public class DatasetServiceImpl implements DatasetService {
   /** The process controller zuul */
   @Autowired
   private ProcessControllerZuul processControllerZuul;
-
-  @Autowired
-  private JobControllerZuul jobControllerZuul;
 
   @Autowired
   private TaskRepository taskRepository;
@@ -3620,22 +3615,15 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public void createFileForEtlExport(@DatasetId Long datasetId, String tableSchemaId,
                                      Integer limit, Integer offset, String filterValue, String columnName,
-                                     String dataProviderCodes, Long jobId, Long dataflowId, String user) {
+                                     String dataProviderCodes, Long jobId, Long dataflowId, String user) throws EEAException, IOException {
     String processUUID = UUID.randomUUID().toString();
     try {
-      long startTime = System.currentTimeMillis();
-      LOG.info("FILE_EXPORT process initiated to datasetId: {}", datasetId);
+      LOG.info("Initiating FILE_EXPORT process for datasetId: {}", datasetId);
       recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, processUUID);
-      long endTime = System.currentTimeMillis() - startTime;
-      LOG.info("FILE_EXPORT process completed for datasetId: {} in {} seconds", datasetId,
-              endTime / 1000);
+      LOG.info("FILE_EXPORT process submitted for datasetId: {}", datasetId);
     } catch (Exception e) {
-      LOG.error("FILE_EXPORT process error in  Dataset {}:", datasetId, e);
-      processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
-              processUUID, user, defaultFileExportProcessPriority, false);
-      if (jobId !=null) {
-        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
-      }
+      LOG.error("FILE_EXPORT process error in  Dataset {} and jobId {}. Message: {}", datasetId, jobId, e);
+      throw e;
     }
   }
 }

@@ -694,5 +694,5 @@ public interface DatasetController {
           @RequestParam(value = "filterValue", required = false) String filterValue,
           @RequestParam(value = "columnName", required = false) String columnName,
           @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
-          @RequestParam(name = "jobId", required = false) Long jobId);
+          @RequestParam(name = "jobId", required = false) Long jobId) throws Exception;
 }

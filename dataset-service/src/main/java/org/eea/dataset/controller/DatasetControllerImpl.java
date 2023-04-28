@@ -2118,7 +2118,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
                   value = "dataProviderCodes", required = false) String dataProviderCodes,
           @ApiParam(type = "Long", value = "Job id", example = "1") @RequestParam(
-                  name = "jobId", required = false) Long jobId) {
+                  name = "jobId", required = false) Long jobId) throws Exception {
 
     JobVO jobVO = null;
     if (jobId!=null) {
@@ -2131,7 +2131,7 @@ public class DatasetControllerImpl implements DatasetController {
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
-      LOG_ERROR.error(errorMessage);
+      LOG.error(errorMessage);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
@@ -2141,7 +2141,7 @@ public class DatasetControllerImpl implements DatasetController {
       datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user);
       LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error in createFileForEtlExport for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error in createFileForEtlExport for datasetId {} and jobId {} Message: ", datasetId, jobId, e.getMessage());
       throw e;
     }
   }
