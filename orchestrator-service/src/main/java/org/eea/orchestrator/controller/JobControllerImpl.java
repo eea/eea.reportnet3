@@ -14,8 +14,10 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.kafka.domain.EventType;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.orchestrator.service.JobService;
+import org.eea.orchestrator.utils.JobUtils;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
@@ -56,6 +58,9 @@ public class JobControllerImpl implements JobController {
     /** The dataset metabase controller zuul */
     @Autowired
     private DataFlowControllerZuul dataFlowControllerZuul;
+
+    @Autowired
+    private JobUtils jobUtils;
 
     /** The valid columns. */
     List<String> validColumns = Arrays.asList("jobId", "creatorUsername", "jobType", "dataflowId", "providerId", "datasetId",
@@ -438,6 +443,19 @@ public class JobControllerImpl implements JobController {
     @PostMapping(value = "/private/updateFmeCallbackJobParameter/{fmeJobId}")
     public void updateFmeCallbackJobParameter(@PathVariable("fmeJobId") String fmeJobId, @RequestParam(value = "fmeCallback") Boolean fmeCallback){
         jobService.updateFmeCallbackJobParameter(fmeJobId, fmeCallback);
+    }
+
+    /**
+     * Sends a fme import failed notification
+     *
+     * @param jobVO the job object
+     * @return
+     */
+    @Override
+    @PostMapping(value = "/private/sendFmeImportFailedNotification")
+    public void sendFmeImportFailedNotification(@RequestBody JobVO jobVO){
+        jobUtils.sendKafkaImportNotification(jobVO, EventType.FME_IMPORT_JOB_FAILED_EVENT, "Fme job failed");
+        LOG.info("Sent notification FME_IMPORT_JOB_FAILED_EVENT for jobId {} and fmeJobId {}", jobVO.getId(), jobVO.getFmeJobId());
     }
 }
 
