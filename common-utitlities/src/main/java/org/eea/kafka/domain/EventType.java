@@ -556,6 +556,9 @@ public enum EventType {
 
   /** Validation failed event */
   VALIDATION_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_canceled_event", true),
+  
+  /** Validation failed event */
+  FINISHED_VALIDATION_WITH_CANCELED_TASKS(LiteralConstants.DATA_REPORTING_TOPIC, "finished_validation_with_canceled_tasks_event", true),
 
   /** The release canceled event. */
   RELEASE_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "release_canceled_event", true),

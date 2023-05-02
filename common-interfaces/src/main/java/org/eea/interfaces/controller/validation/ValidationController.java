@@ -212,6 +212,14 @@ public interface ValidationController {
    */
   @GetMapping("/private/findTaskById/{taskId}")
   TaskVO findTaskById(@PathVariable("taskId") Long taskId);
+
+  /**
+   * Finds task by processId
+   * @param processId
+   * @return
+   */
+  @GetMapping("/private/hasProcessCanceledTasks/{processId}")
+  boolean hasProcessCanceledTasks(@PathVariable("processId") String processId);
 }
 
 

@@ -1250,7 +1250,15 @@
         { "key": "DOWNLOAD_USERS_BY_COUNTRY_START" },
         { "key": "EXPORT_TABLE_DATA_START" },
         { "key": "DOWNLOAD_SCHEMAS_INFO_START" },
-        { "key": "EXTERNAL_EXPORT_DESIGN_INIT" }
+        { "key": "EXTERNAL_EXPORT_DESIGN_INIT" },
+        {
+          "key": "FINISHED_VALIDATION_WITH_CANCELED_TASKS",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        }
       ]
     },
     {
