@@ -308,9 +308,9 @@ public class DatasetSnapshotControllerImplTest {
   public void testReleaseSnapshot() throws Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    datasetSnapshotControllerImpl.releaseSnapshot(1L, 1L, new Date().toString(), null);
+    datasetSnapshotControllerImpl.releaseSnapshot(1L, 1L, new Date().toString(), null, false);
     Mockito.verify(datasetSnapshotService, times(1)).releaseSnapshot(Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -323,7 +323,7 @@ public class DatasetSnapshotControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     try {
-      datasetSnapshotControllerImpl.releaseSnapshot(null, 1L, new Date().toString(), null);
+      datasetSnapshotControllerImpl.releaseSnapshot(null, 1L, new Date().toString(), null, false);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.DATASET_INCORRECT_ID, e.getReason());
@@ -341,9 +341,9 @@ public class DatasetSnapshotControllerImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException(EEAErrorMessage.EXECUTION_ERROR)).when(datasetSnapshotService)
-        .releaseSnapshot(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        .releaseSnapshot(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     try {
-      datasetSnapshotControllerImpl.releaseSnapshot(1L, 1L, new Date().toString(), null);
+      datasetSnapshotControllerImpl.releaseSnapshot(1L, 1L, new Date().toString(), null, false);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
       assertEquals(EEAErrorMessage.EXECUTION_ERROR, e.getReason());

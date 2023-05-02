@@ -456,7 +456,7 @@ public class DatasetSnapshotServiceTest {
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(snapshotRepository).releaseSnaphot(Mockito.any(), Mockito.any());
     datasetSnapshotService.releaseSnapshot(1L, 1L,
-        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), null);
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), null, false);
     Mockito.verify(snapshotRepository, times(1)).releaseSnaphot(Mockito.any(), Mockito.any());
   }
 
@@ -497,7 +497,7 @@ public class DatasetSnapshotServiceTest {
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(snapshotRepository).releaseSnaphot(Mockito.any(), Mockito.any());
     datasetSnapshotService.releaseSnapshot(1L, 1L,
-        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), null);
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), null, false);
     Mockito.verify(snapshotRepository, times(1)).releaseSnaphot(Mockito.any(), Mockito.any());
   }
 
@@ -525,7 +525,7 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(dataCollectionRepository.findFirstByDatasetSchema(Mockito.any()))
         .thenReturn(Optional.of(dataCollection));
     datasetSnapshotService.releaseSnapshot(1L, 1L,
-        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), null);
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), null, false);
     Mockito.verify(lockService, times(3)).removeLockByCriteria(Mockito.any());
   }
 
@@ -545,7 +545,7 @@ public class DatasetSnapshotServiceTest {
     Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.any()))
         .thenReturn(new DataProviderVO());
     datasetSnapshotService.releaseSnapshot(1L, 1L,
-        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), null);
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), null, false);
     Mockito.verify(lockService, times(3)).removeLockByCriteria(Mockito.any());
   }
 
@@ -576,7 +576,7 @@ public class DatasetSnapshotServiceTest {
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(snapshotRepository).releaseSnaphot(Mockito.any(), Mockito.any());
     datasetSnapshotService.releaseSnapshot(1L, 1L,
-        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), null);
+        java.sql.Timestamp.valueOf(LocalDateTime.now()).toString(), null, false);
     Mockito.verify(snapshotRepository, times(1)).releaseSnaphot(Mockito.any(), Mockito.any());
   }
 

@@ -13,6 +13,7 @@ import org.eea.interfaces.controller.collaboration.CollaborationController.Colla
 import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -23,6 +24,7 @@ import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
@@ -100,6 +102,10 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   @Autowired
   private JobProcessControllerZuul jobProcessControllerZuul;
 
+  /** The job controller zuul */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
+
   /**
    * The Constant LOG.
    */
@@ -139,9 +145,19 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       String processId = String.valueOf(eeaEventVO.getData().get("process_id"));
       Long jobId = null;
       ProcessVO processVO = null;
+      Boolean silentRelease = false;
+
       if (processId!=null) {
         jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
         processVO = processControllerZuul.findById(processId);
+
+        if(jobId != null){
+          JobVO jobVO = jobControllerZuul.findJobById(jobId);
+          Map<String, Object> parameters = jobVO.getParameters();
+          if(parameters.containsKey("silentRelease")){
+            silentRelease = (Boolean) parameters.get("silentRelease");
+          }
+        }
       }
 
       String user = processVO!=null ? processVO.getUser() : SecurityContextHolder.getContext().getAuthentication().getName();
@@ -209,8 +225,10 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
             dataset.getDataProviderId());
 
-        // Send email to requesters
-        sendMail(dateRelease, dataset, dataflowVO);
+        if(!silentRelease) {
+          // Send email to requesters
+          sendMail(dateRelease, dataset, dataflowVO);
+        }
 
         LOG.info("Releasing datasets process ends. DataflowId: {} DataProviderId: {} DatasetId: {}, JobId: {}",
             dataset.getDataflowId(), dataset.getDataProviderId(), datasetId, jobId);
@@ -219,35 +237,37 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
                 dataset.getDataProviderId());
 
 
-        // we send different notification if we have more than one dataset or have only one to redirect
-        if (!Collections.isEmpty(datasetMetabaseListIds) && datasetMetabaseListIds.size() > 1) {
-          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_PROVIDER_COMPLETED_EVENT,
-              null,
-              NotificationVO.builder()
-                  .user(user)
-                  .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
-                  .providerId(dataset.getDataProviderId()).build());
+        if(!silentRelease) {
+          // we send different notification if we have more than one dataset or have only one to redirect
+          if (!Collections.isEmpty(datasetMetabaseListIds) && datasetMetabaseListIds.size() > 1) {
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_PROVIDER_COMPLETED_EVENT,
+                    null,
+                    NotificationVO.builder()
+                            .user(user)
+                            .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
+                            .providerId(dataset.getDataProviderId()).build());
 
 
-        } else {
-          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
-              NotificationVO.builder()
-                  .user(user)
-                  .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
-                  .providerId(dataset.getDataProviderId()).build());
+          } else {
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
+                    NotificationVO.builder()
+                            .user(user)
+                            .dataflowId(dataset.getDataflowId()).dataflowName(dataflowVO.getName())
+                            .providerId(dataset.getDataProviderId()).build());
+          }
+
+          // send feedback message
+          String country = dataset.getDataSetName();
+          String dataflowName = dataflowVO.getName();
+
+          MessageVO messageVO = new MessageVO();
+          messageVO.setProviderId(dataset.getDataProviderId());
+          messageVO.setContent(country + " released " + dataflowName + " successfully");
+          messageVO.setAutomatic(true);
+          collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO, user, jobId);
+          LOG.info("Automatic feedback message created of dataflow {}, datasetId {} and jobId {}. Message: {}", dataflowVO.getId(), datasetId, jobId,
+                  messageVO.getContent());
         }
-
-        // send feedback message
-        String country = dataset.getDataSetName();
-        String dataflowName = dataflowVO.getName();
-
-        MessageVO messageVO = new MessageVO();
-        messageVO.setProviderId(dataset.getDataProviderId());
-        messageVO.setContent(country + " released " + dataflowName + " successfully");
-        messageVO.setAutomatic(true);
-        collaborationControllerZuul.createMessage(dataflowVO.getId(), messageVO, user, jobId);
-        LOG.info("Automatic feedback message created of dataflow {}, datasetId {} and jobId {}. Message: {}", dataflowVO.getId(), datasetId, jobId,
-            messageVO.getContent());
       }
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());

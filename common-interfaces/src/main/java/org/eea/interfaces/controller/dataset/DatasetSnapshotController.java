@@ -109,7 +109,8 @@ public interface DatasetSnapshotController {
       produces = MediaType.APPLICATION_JSON_VALUE)
   void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot, @RequestParam("dateRelease") String dateRelease,
-                       @RequestParam("processId") String processId);
+                       @RequestParam("processId") String processId,
+                       @RequestParam(name = "silentRelease", required = false, defaultValue = "false") boolean silentRelease);
 
 
 

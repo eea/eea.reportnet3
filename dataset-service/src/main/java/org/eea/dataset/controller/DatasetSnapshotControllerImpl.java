@@ -357,6 +357,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
    * @param dateRelease the date release
+   * @param silentRelease
    */
   @Override
   @HystrixCommand
@@ -374,7 +375,8 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       @ApiParam(type = "String",
           value = "Date release") @RequestParam("dateRelease") String dateRelease,
       @ApiParam(type = "String",
-              value = "Process Id") @RequestParam("processId") String processId) {
+              value = "Process Id") @RequestParam("processId") String processId,
+      @RequestParam(name = "silentRelease", required = false, defaultValue = "false") boolean silentRelease) {
 
     ProcessVO processVO = null;
     if (processId!=null) {
@@ -394,7 +396,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     }
     try {
       LOG.info("FME_Historic_Releases: Releasing snapshot with id {} for datasetId {} processId {} and dateRelease {}", idSnapshot, datasetId, processId, dateRelease);
-      datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot, dateRelease, processId);
+      datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot, dateRelease, processId, silentRelease);
       LOG.info("Successfully released snapshot with id {} for datasetId {} processId {}", idSnapshot, datasetId, processId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error releasing a snapshot with id {} for datasetId {} processId {}. Error Message: {}",  idSnapshot, datasetId, processId, e.getMessage(), e);
