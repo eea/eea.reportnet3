@@ -17,39 +17,39 @@ public interface ProcessService {
   /**
    * Gets the processes.
    *
-   * @param pageable the pageable
-   * @param asc the asc
-   * @param status the status
+   * @param pageable   the pageable
+   * @param asc        the asc
+   * @param status     the status
    * @param dataflowId the dataflow id
-   * @param user the user
-   * @param type the type
-   * @param header the header
+   * @param user       the user
+   * @param type       the type
+   * @param header     the header
    * @return the processes
    */
   ProcessesVO getProcesses(Pageable pageable, boolean asc, String status, Long dataflowId,
-      String user, ProcessTypeEnum type, String header);
+                           String user, ProcessTypeEnum type, String header);
 
   /**
    * Update process.
    *
-   * @param datasetId the dataset id
+   * @param datasetId  the dataset id
    * @param dataflowId the dataflow id
-   * @param status the status
-   * @param type the type
-   * @param processId the process id
-   * @param user the user
-   * @param priority the priority
-   * @param released the released
+   * @param status     the status
+   * @param type       the type
+   * @param processId  the process id
+   * @param user       the user
+   * @param priority   the priority
+   * @param released   the released
    * @return true, if successful
    */
   boolean updateProcess(Long datasetId, Long dataflowId, ProcessStatusEnum status,
-      ProcessTypeEnum type, String processId, String user, int priority, Boolean released);
+                        ProcessTypeEnum type, String processId, String user, int priority, Boolean released);
 
   /**
    * Update priority.
    *
    * @param processId the process id
-   * @param priority the priority
+   * @param priority  the priority
    */
   void updatePriority(Long processId, int priority);
 
@@ -79,6 +79,7 @@ public interface ProcessService {
 
   /**
    * Finds processId by datasetId and status
+   *
    * @param datasetId
    * @param status
    * @return
@@ -87,6 +88,7 @@ public interface ProcessService {
 
   /**
    * Finds processId by type and status
+   *
    * @param type
    * @param status
    * @return
@@ -95,6 +97,7 @@ public interface ProcessService {
 
   /**
    * Deletes process by processId
+   *
    * @param processId
    * @return
    */
@@ -102,6 +105,7 @@ public interface ProcessService {
 
   /**
    * Finds process ids of processes with type and status and taskStatus
+   *
    * @param type
    * @param status
    * @param taskStatus
