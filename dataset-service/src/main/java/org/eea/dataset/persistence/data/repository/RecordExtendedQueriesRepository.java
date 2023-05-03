@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -106,5 +107,5 @@ public interface RecordExtendedQueriesRepository {
 
   void findAndGenerateETLJsonV3(Long datasetId, String tableSchemaId,
                                 Integer limit, Integer offset, String filterValue, String columnName,
-                                String dataProviderCodes, Long jobId, Long dataflowId, String user, String processUUID) throws EEAException, IOException;
+                                String dataProviderCodes, Long jobId, Long dataflowId, String user, String processUUID) throws EEAException, IOException, SQLException;
 }

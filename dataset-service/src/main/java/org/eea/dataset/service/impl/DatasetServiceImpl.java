@@ -76,6 +76,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -3613,14 +3614,15 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   @Override
+  @Async
   public void createFileForEtlExport(@DatasetId Long datasetId, String tableSchemaId,
                                      Integer limit, Integer offset, String filterValue, String columnName,
-                                     String dataProviderCodes, Long jobId, Long dataflowId, String user) throws EEAException, IOException {
+                                     String dataProviderCodes, Long jobId, Long dataflowId, String user) throws EEAException, IOException, SQLException {
     String processUUID = UUID.randomUUID().toString();
     try {
-      LOG.info("Initiating FILE_EXPORT process for datasetId: {}", datasetId);
+      LOG.info("Initiating FILE_EXPORT process for datasetId: {} and jobId {}", datasetId, jobId);
       recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, processUUID);
-      LOG.info("FILE_EXPORT process submitted for datasetId: {}", datasetId);
+      LOG.info("FILE_EXPORT process completed for datasetId: {} and jobId {}", datasetId, jobId);
     } catch (Exception e) {
       LOG.error("FILE_EXPORT process error in  Dataset {} and jobId {}. Message: {}", datasetId, jobId, e);
       throw e;
