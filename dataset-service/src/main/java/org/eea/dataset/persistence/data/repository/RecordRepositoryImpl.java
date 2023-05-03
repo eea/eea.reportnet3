@@ -1729,45 +1729,43 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     if (tableCount == 1) {
       fos.write(("{\n\"tables\": [\n").getBytes());
     }
-    if (totalRecords > 0) {
-      fos.write("{".getBytes());
-      if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
-              || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-        fos.write("\"totalRecords\":".getBytes());
-        fos.write(totalRecords.toString().getBytes());
-        fos.write(",\n".getBytes());
-      }
-      fos.write(("\"tableName\":").getBytes());
-      fos.write(("\"" + tableName + "\"").getBytes());
+    fos.write("{".getBytes());
+    if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
+            || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
+      fos.write("\"totalRecords\":".getBytes());
+      fos.write(totalRecords.toString().getBytes());
       fos.write(",\n".getBytes());
-      fos.write("\"records\": [\n".getBytes());
-      if (totalRecords!=0) {
-        byte[] buffer;
-        CopyOut copyOut = copyManager.copyOut(query);
-        Integer recordCount=0;
-        while ((buffer = copyOut.readFromCopy()) != null) {
-          if (recordCount!=0) {
-            fos.write(",".getBytes());
-          }
-          fos.write("\n".getBytes());
-          recordCount++;
-          if (!JsonValidator.isValidJson(new String(buffer, StandardCharsets.UTF_8))) {
-            LOG.error("Error creating export file for datasetId {}, json created is not valid", datasetId);
-            throw new InvalidJsonException();
-          }
-          fos.write(buffer);
+    }
+    fos.write(("\"tableName\":").getBytes());
+    fos.write(("\"" + tableName + "\"").getBytes());
+    fos.write(",\n".getBytes());
+    fos.write("\"records\": [\n".getBytes());
+    if (totalRecords > 0) {
+      byte[] buffer;
+      CopyOut copyOut = copyManager.copyOut(query);
+      Integer recordCount = 0;
+      while ((buffer = copyOut.readFromCopy()) != null) {
+        if (recordCount != 0) {
+          fos.write(",".getBytes());
         }
+        fos.write("\n".getBytes());
+        recordCount++;
+        if (!JsonValidator.isValidJson(new String(buffer, StandardCharsets.UTF_8))) {
+          LOG.error("Error creating export file for datasetId {}, json created is not valid", datasetId);
+          throw new InvalidJsonException();
+        }
+        fos.write(buffer);
       }
-      fos.write("\n".getBytes());
-      fos.write(("]\n").getBytes());
-      fos.write(("\n}").getBytes());
-      if (tableCount < tableSchemaList.size()) {
-        fos.write(",".getBytes());
-      }
-      fos.write("\n".getBytes());
-      if (tableCount == tableSchemaList.size()) {
-        fos.write(("]\n" + "}").getBytes());
-      }
+    }
+    fos.write("\n".getBytes());
+    fos.write(("]\n").getBytes());
+    fos.write(("\n}").getBytes());
+    if (tableCount < tableSchemaList.size()) {
+      fos.write(",".getBytes());
+    }
+    fos.write("\n".getBytes());
+    if (tableCount == tableSchemaList.size()) {
+      fos.write(("]\n" + "}").getBytes());
     }
   }
 
