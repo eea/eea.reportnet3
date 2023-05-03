@@ -1675,6 +1675,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             CopyManager cm = new CopyManager((BaseConnection) con);
             try (FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
               createJsonRecordsForTable(datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchemaList, tableName, copyQueryDataset, tableCount, totalRecords, fos, cm);
+              LOG.info("Created json file {} for datasetId {} and jobId {}", fileName+JSON, datasetId, jobId);
             } catch (Exception e) {
               LOG.error("Error writing file {} for datasetId {}. Message: ", fileName, datasetId, e);
               throw e;
