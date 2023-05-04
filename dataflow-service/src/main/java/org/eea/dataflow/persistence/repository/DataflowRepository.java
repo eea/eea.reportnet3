@@ -316,7 +316,7 @@ public interface DataflowRepository
    * @param dataflowId the dataflow id
    * @return the public info
    */
-  @Query("select d.showPublicInfo from Dataflow d where d.id=:dataflowId")
+  @Query("select case when (select d.showPublicInfo from Dataflow d where d.id=:dataflowId) = true then true else false end")
   boolean getPublicInfoByDataflowId(@Param("dataflowId") Long dataflowId);
 
 
