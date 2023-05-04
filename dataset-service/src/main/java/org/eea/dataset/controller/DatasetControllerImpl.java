@@ -271,6 +271,10 @@ public class DatasetControllerImpl implements DatasetController {
       JobVO job = null;
       if (fmeJobId!=null) {
         job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+        if (job!=null && (job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN))) {
+          LOG.info("Job {} is cancelled. Exiting import!", job.getId());
+          return;
+        }
       }
       if(job!=null){
         jobId = job.getId();
