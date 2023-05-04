@@ -309,6 +309,17 @@ public interface DataflowRepository
   void updateAutomaticReportingDeletion(@Param("dataflowId") Long dataflowId,
       @Param("automaticReportingDeletion") Boolean automaticReportingDeletion);
 
+
+  /**
+   * Get public info by dataflow id
+   *
+   * @param dataflowId the dataflow id
+   * @return the public info
+   */
+  @Query("select d.showPublicInfo from Dataflow d where d.id=:dataflowId")
+  boolean getPublicInfoByDataflowId(@Param("dataflowId") Long dataflowId);
+
+
   /**
    * The Interface IDatasetStatus.
    */

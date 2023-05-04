@@ -314,13 +314,21 @@ public class DataflowServiceImpl implements DataflowService {
             .getResourcesByUser(ResourceTypeEnum.DATAFLOW,
                 SecurityRoleEnum.fromValue(filters.get("role")))
             .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+        LOG.info("idsResources {}", idsResources);
         idsResourcesWithoutRole =
             userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
                 .map(ResourceAccessVO::getId).collect(Collectors.toList());
+        LOG.info("idsResourcesWithoutRole {}", idsResourcesWithoutRole);
         filters.remove("role");
       } else {
-        idsResources = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
-            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+        List<ResourceAccessVO> resourcesByUser = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
+        LOG.info("resourcesByUser {}", resourcesByUser);
+        resourcesByUser.removeIf(
+            resourceAccessVO -> resourceAccessVO.getRole().equals("DATAFLOW_NATIONAL_COORDINATOR")
+                && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
+        LOG.info("resourcesByUser after deletion {}", resourcesByUser);
+        idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+        LOG.info("idsResources {}", idsResources);
       }
 
       Map<String, List<String>> attributes = userManagementControllerZull.getUserAttributes();
