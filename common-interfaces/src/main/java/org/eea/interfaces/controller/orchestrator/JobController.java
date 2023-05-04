@@ -86,7 +86,8 @@ public interface JobController {
                        @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,
                        @RequestParam(name = "restrictFromPublic", required = true,
                                defaultValue = "false") boolean restrictFromPublic,
-                       @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate);
+                       @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate,
+                       @RequestParam(name = "silentRelease", required = false, defaultValue = "false") boolean silentRelease);
 
     /**
      * Adds an import job
