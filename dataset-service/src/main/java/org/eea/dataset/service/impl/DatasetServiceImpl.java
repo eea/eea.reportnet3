@@ -76,7 +76,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -3614,7 +3613,6 @@ public class DatasetServiceImpl implements DatasetService {
   }
 
   @Override
-  @Async
   public void createFileForEtlExport(@DatasetId Long datasetId, String tableSchemaId,
                                      Integer limit, Integer offset, String filterValue, String columnName,
                                      String dataProviderCodes, Long jobId, Long dataflowId, String user) throws EEAException, IOException, SQLException {
