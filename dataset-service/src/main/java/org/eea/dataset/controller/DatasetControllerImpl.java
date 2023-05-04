@@ -279,6 +279,10 @@ public class DatasetControllerImpl implements DatasetController {
       if (fmeJobId!=null) {
         jobControllerZuul.updateFmeCallbackJobParameter(fmeJobId, true);
         job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+        if (job!=null && (job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN))) {
+          LOG.info("Job {} is cancelled. Exiting import!", job.getId());
+          return;
+        }
       }
       if(job!=null){
         jobId = job.getId();
