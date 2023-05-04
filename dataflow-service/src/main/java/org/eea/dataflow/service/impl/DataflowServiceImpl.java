@@ -427,6 +427,9 @@ public class DataflowServiceImpl implements DataflowService {
       paginatedDataflowVO.setDataflows(dataflowVOs);
       return paginatedDataflowVO;
     } catch (Exception e) {
+      LOG_ERROR.error(
+          "Error retrieving dataflows {} due to reason {}", userId,
+          e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
     }
   }
@@ -1590,6 +1593,15 @@ public class DataflowServiceImpl implements DataflowService {
     List<Long> idsResources =
         userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
             .map(ResourceAccessVO::getId).collect(Collectors.toList());
+
+    /*List<ResourceAccessVO> resourcesByUser = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
+    LOG.info("resourcesByUser {}", resourcesByUser);
+    resourcesByUser.removeIf(
+        resourceAccessVO -> resourceAccessVO.getRole().equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
+            && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
+    LOG.info("resourcesByUser after deletion {}", resourcesByUser);
+    List<Long>  idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+    LOG.info("idsResources {}", idsResources);*/
 
     List<IDataflowCount> dataflowCountList = new ArrayList<>();
 
