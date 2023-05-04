@@ -324,7 +324,7 @@ public class DataflowServiceImpl implements DataflowService {
         List<ResourceAccessVO> resourcesByUser = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
         LOG.info("resourcesByUser {}", resourcesByUser);
         resourcesByUser.removeIf(
-            resourceAccessVO -> resourceAccessVO.getRole().equals("DATAFLOW_NATIONAL_COORDINATOR")
+            resourceAccessVO -> resourceAccessVO.getRole().equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
                 && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
         LOG.info("resourcesByUser after deletion {}", resourcesByUser);
         idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
