@@ -669,6 +669,6 @@ public interface DatasetService {
    */
   void createFileForEtlExport(@DatasetId Long datasetId, String tableSchemaId,
                               Integer limit, Integer offset, String filterValue, String columnName,
-                              String dataProviderCodes, Long jobId, Long dataflowId, String user) throws EEAException, IOException;
+                              String dataProviderCodes, Long jobId, Long dataflowId, String user) throws EEAException, IOException, SQLException;
 
 }
