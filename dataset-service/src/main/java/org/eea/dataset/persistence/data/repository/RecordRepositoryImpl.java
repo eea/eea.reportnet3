@@ -1668,10 +1668,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             StringBuilder stringQuery = createEtlExportQuery(false, limit, offset, datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchema, filterChain);
             copyQueryDataset = "COPY (" + stringQuery + ") to STDOUT";
         }
-        createJsonRecordsForTable(datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchemaList, tableName, copyQueryDataset, tableCount, totalRecords, jsonFile, fileName, jobId);
+        createJsonRecordsForTable(datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchemaList, tableName, copyQueryDataset, tableCount, totalRecords, jsonFile, jobId);
       }
 
-      createZipFromJson(filePath, fileName, datasetId, jobId);
+      createZipFromJson(filePath, datasetId, jobId);
       processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
               processUUID, user, defaultFileExportProcessPriority, false);
       if (jobId !=null) {
@@ -1687,11 +1687,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
   }
 
-  private void createZipFromJson(String filePath, String fileName, Long datasetId, Long jobId) throws IOException {
+  private void createZipFromJson(String filePath, Long datasetId, Long jobId) throws IOException {
     String jsonFile = filePath+JSON;
     Path path = Paths.get(jsonFile);
+    String zipFile = filePath+ZIP;
     try (ZipOutputStream out =
-                 new ZipOutputStream(new FileOutputStream(filePath+ZIP));
+                 new ZipOutputStream(new FileOutputStream(zipFile));
          FileInputStream fis = new FileInputStream(jsonFile)) {
       ZipEntry entry = new ZipEntry(jsonFile);
       out.putNextEntry(entry);
@@ -1700,9 +1701,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       while ((len = fis.read(buffer)) != -1) {
         out.write(buffer, 0, len);
       }
-      LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", fileName+ZIP, datasetId, jobId);
+      LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", zipFile, datasetId, jobId);
     } catch (Exception e) {
-      LOG.error("Error creating file {} for datasetId {} and jobId {}. Message: ", fileName, datasetId, jobId, e);
+      LOG.error("Error creating file {} for datasetId {} and jobId {}. Message: ", zipFile, datasetId, jobId, e);
       throw e;
     } finally {
       try {
@@ -1714,7 +1715,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   }
 
   private void createJsonRecordsForTable(Long datasetId, String tableSchemaId, String filterValue, String columnName, String dataProviderCodes, List<TableSchema> tableSchemaList, String tableName, String query,
-                                                Integer tableCount, Long totalRecords, String jsonFile, String fileName, Long jobId) throws IOException, InvalidJsonException, SQLException {
+                                                Integer tableCount, Long totalRecords, String jsonFile, Long jobId) throws IOException, InvalidJsonException, SQLException {
     ConnectionDataVO connectionDataVO = recordStoreControllerZuul
             .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
     try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
@@ -1765,9 +1766,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       if (tableCount == tableSchemaList.size()) {
         fos.write(("]\n" + "}").getBytes());
       }
-      LOG.info("Created json file {} for datasetId {} and jobId {}", fileName + JSON, datasetId, jobId);
+      LOG.info("Created json file {} for datasetId {} and jobId {}", jsonFile, datasetId, jobId);
     } catch (Exception e) {
-      LOG.error("Error writing file {} for datasetId {} and jobId {}. Message: ", fileName, datasetId, jobId, e);
+      LOG.error("Error writing file {} for datasetId {} and jobId {}. Message: ", jsonFile, datasetId, jobId, e);
       throw e;
     }
   }
