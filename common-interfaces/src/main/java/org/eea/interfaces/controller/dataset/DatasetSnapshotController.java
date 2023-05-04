@@ -104,13 +104,13 @@ public interface DatasetSnapshotController {
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
    * @param dateRelease the date release
+   * @param processId the process id
    */
   @PutMapping(value = "/private/{idSnapshot}/dataset/{idDataset}/release",
       produces = MediaType.APPLICATION_JSON_VALUE)
   void releaseSnapshot(@PathVariable("idDataset") Long datasetId,
       @PathVariable("idSnapshot") Long idSnapshot, @RequestParam("dateRelease") String dateRelease,
-                       @RequestParam("processId") String processId,
-                       @RequestParam(name = "silentRelease", required = false, defaultValue = "false") boolean silentRelease);
+                       @RequestParam("processId") String processId);
 
 
 

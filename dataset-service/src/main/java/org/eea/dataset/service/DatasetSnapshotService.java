@@ -106,10 +106,9 @@ public interface DatasetSnapshotService {
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
    * @param dateRelease the date release
-   * @param silentRelease
    * @throws EEAException the EEA exception
    */
-  void releaseSnapshot(Long idDataset, Long idSnapshot, String dateRelease, String processId, Boolean silentRelease) throws EEAException;
+  void releaseSnapshot(Long idDataset, Long idSnapshot, String dateRelease, String processId) throws EEAException;
 
 
   /**

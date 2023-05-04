@@ -153,9 +153,11 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
         if(jobId != null){
           JobVO jobVO = jobControllerZuul.findJobById(jobId);
-          Map<String, Object> parameters = jobVO.getParameters();
-          if(parameters.containsKey("silentRelease")){
-            silentRelease = (Boolean) parameters.get("silentRelease");
+          if(jobVO != null) {
+            Map<String, Object> parameters = jobVO.getParameters();
+            if (parameters.containsKey("silentRelease")) {
+              silentRelease = (Boolean) parameters.get("silentRelease");
+            }
           }
         }
       }

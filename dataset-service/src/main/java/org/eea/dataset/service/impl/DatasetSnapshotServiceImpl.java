@@ -507,12 +507,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idDataset the id dataset
    * @param idSnapshot the id snapshot
    * @param dateRelease the date release
-   * @param silentRelease
    * @throws EEAException the EEA exception
    */
   @Override
   @Async
-  public void releaseSnapshot(Long idDataset, Long idSnapshot, String dateRelease, String processId, Boolean silentRelease)
+  public void releaseSnapshot(Long idDataset, Long idSnapshot, String dateRelease, String processId)
       throws EEAException {
 
     Long providerId = 0L;
@@ -555,7 +554,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
     }
     deleteDataProvider(idDataset, idSnapshot, idDataProvider, provider, idDataCollection,
-        dateReleasing, processId, silentRelease);
+        dateReleasing, processId);
 
     ProcessVO processVO = null;
     if (processId!=null) {
@@ -563,16 +562,15 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     }
     String user = processVO!=null ? processVO.getUser() : SecurityContextHolder.getContext().getAuthentication().getName();
 
-    if(!silentRelease) {
-      Map<String, Object> value = new HashMap<>();
-      value.put(LiteralConstants.DATASET_ID, idDataset);
-      value.put(LiteralConstants.USER, user);
-      value.put("dateRelease", dateRelease);
-      value.put("process_id", processId);
-      LOG.info("The user releasing kafka event on DatasetSnapshotServiceImpl.releaseSnapshot for snapshotId {} and datasetId {} of processId {} is {}",
-              idSnapshot, idDataset, processId, SecurityContextHolder.getContext().getAuthentication().getName());
-      kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
-    }
+    Map<String, Object> value = new HashMap<>();
+    value.put(LiteralConstants.DATASET_ID, idDataset);
+    value.put(LiteralConstants.USER, user);
+    value.put("dateRelease", dateRelease);
+    value.put("process_id", processId);
+    LOG.info("The user releasing kafka event on DatasetSnapshotServiceImpl.releaseSnapshot for snapshotId {} and datasetId {} of processId {} is {}",
+            idSnapshot, idDataset, processId, SecurityContextHolder.getContext().getAuthentication().getName());
+    kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
+
     LOG.info("FME_Historic_Releases: Successfully released snapshot with id {} for datasetId {} processId {} and dateRelease {}", idSnapshot, idDataset, processId, dateRelease);
   }
 
@@ -584,17 +582,28 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param idDataProvider the id data provider
    * @param provider the provider
    * @param idDataCollection the id data collection
-   * @param silentRelease
    * @throws EEAException the EEA exception
    */
   private void deleteDataProvider(Long idDataset, Long idSnapshot, final Long idDataProvider,
-      DataProviderVO provider, Long idDataCollection, Date dateRelease, String processId, Boolean silentRelease) throws EEAException {
+      DataProviderVO provider, Long idDataCollection, Date dateRelease, String processId) throws EEAException {
 
     Map<String, Object> value = new HashMap<>();
+    Boolean silentRelease = false;
     ProcessVO processVO = null;
     if (processId!=null) {
       processVO = processControllerZuul.findById(processId);
       value.put(LiteralConstants.USER, processVO.getUser());
+
+      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      if(jobId != null){
+        JobVO jobVO = jobControllerZuul.findJobById(jobId);
+        if (jobVO != null) {
+          Map<String, Object> parameters = jobVO.getParameters();
+          if(parameters.containsKey("silentRelease")){
+            silentRelease = (Boolean) parameters.get("silentRelease");
+          }
+        }
+      }
     }
 
     Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();

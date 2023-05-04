@@ -357,7 +357,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
    * @param datasetId the dataset id
    * @param idSnapshot the id snapshot
    * @param dateRelease the date release
-   * @param silentRelease
+   * @param processId the process id
    */
   @Override
   @HystrixCommand
@@ -375,8 +375,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       @ApiParam(type = "String",
           value = "Date release") @RequestParam("dateRelease") String dateRelease,
       @ApiParam(type = "String",
-              value = "Process Id") @RequestParam("processId") String processId,
-      @RequestParam(name = "silentRelease", required = false, defaultValue = "false") boolean silentRelease) {
+              value = "Process Id") @RequestParam("processId") String processId) {
 
     ProcessVO processVO = null;
     if (processId!=null) {
@@ -384,7 +383,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     }
     String user = processVO!=null ? processVO.getUser() : SecurityContextHolder.getContext().getAuthentication().getName();
 
-    LOG.info("The user invoking DataSetSnaphotControllerImpl.releaseSnapshot is {} for datasetId {} and snapshotId {} of processId {}",
+    LOG.info("The user invoking DataSetSnapshotControllerImpl.releaseSnapshot is {} for datasetId {} and snapshotId {} of processId {}",
        user, datasetId, idSnapshot, processId);
 
     // Set the user name on the thread
@@ -396,7 +395,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     }
     try {
       LOG.info("FME_Historic_Releases: Releasing snapshot with id {} for datasetId {} processId {} and dateRelease {}", idSnapshot, datasetId, processId, dateRelease);
-      datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot, dateRelease, processId, silentRelease);
+      datasetSnapshotService.releaseSnapshot(datasetId, idSnapshot, dateRelease, processId);
       LOG.info("Successfully released snapshot with id {} for datasetId {} processId {}", idSnapshot, datasetId, processId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error releasing a snapshot with id {} for datasetId {} processId {}. Error Message: {}",  idSnapshot, datasetId, processId, e.getMessage(), e);
@@ -776,20 +775,29 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       @ApiParam(type = "Long", value = "Job id", example = "1") @RequestParam(
               name = "jobId", required = false) Long jobId) {
 
+    Boolean silentRelease = false;
     JobVO jobVO = null;
     if (jobId!=null) {
       jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
       jobVO = jobControllerZuul.findJobById(jobId);
+      if(jobVO != null) {
+        Map<String, Object> parameters = jobVO.getParameters();
+        if (parameters.containsKey("silentRelease")) {
+          silentRelease = (Boolean) parameters.get("silentRelease");
+        }
+      }
     }
 
     String user = jobVO!=null ? jobVO.getCreatorUsername() : SecurityContextHolder.getContext().getAuthentication().getName();
 
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDataflowId(dataflowId);
-    userNotificationContentVO.setProviderId(dataProviderId);
-    userNotificationContentVO.setUserId(user);
-    notificationControllerZuul.createUserNotificationPrivate("RELEASE_START_EVENT",
-        userNotificationContentVO);
+    if(!silentRelease) {
+      UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+      userNotificationContentVO.setDataflowId(dataflowId);
+      userNotificationContentVO.setProviderId(dataProviderId);
+      userNotificationContentVO.setUserId(user);
+      notificationControllerZuul.createUserNotificationPrivate("RELEASE_START_EVENT",
+              userNotificationContentVO);
+    }
 
     ThreadPropertiesManager.setVariable("user", user);
 
