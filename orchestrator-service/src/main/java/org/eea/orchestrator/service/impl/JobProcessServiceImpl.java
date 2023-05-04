@@ -19,9 +19,10 @@ public class JobProcessServiceImpl implements JobProcessService {
     private JobRepository jobRepository;
 
     @Autowired
-    public JobProcessServiceImpl(JobProcessRepository jobProcessRepository, JobProcessMapper jobProcessMapper) {
+    public JobProcessServiceImpl(JobProcessRepository jobProcessRepository, JobProcessMapper jobProcessMapper, JobRepository jobRepository) {
         this.jobProcessRepository = jobProcessRepository;
         this.jobProcessMapper = jobProcessMapper;
+        this.jobRepository = jobRepository;
     }
 
     /**
