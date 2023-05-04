@@ -1716,10 +1716,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   private void createJsonRecordsForTable(Long datasetId, String tableSchemaId, String filterValue, String columnName, String dataProviderCodes, List<TableSchema> tableSchemaList, String tableName, String query,
                                                 Integer tableCount, Long totalRecords, String jsonFile, Long jobId) throws IOException, InvalidJsonException, SQLException {
-    ConnectionDataVO connectionDataVO = recordStoreControllerZuul
-            .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
-    try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
-            connectionDataVO.getUser(), connectionDataVO.getPassword());
+    try (Connection con = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
          FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
 
       CopyManager copyManager = new CopyManager((BaseConnection) con);
