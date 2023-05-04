@@ -209,7 +209,9 @@ public class JobControllerImpl implements JobController {
             if (statusToInsert == JobStatusEnum.REFUSED) {
                 //send Refused notification
                 LOG.info("Added release job with id {} for dataflowId {} and providerId {} with status REFUSED", jobId, dataflowId, dataProviderId);
-                jobService.releaseReleaseRefusedNotification(jobId, username, dataflowId, dataProviderId);
+                if(!silentRelease){
+                    jobService.releaseReleaseRefusedNotification(jobId, username, dataflowId, dataProviderId);
+                }
                 throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DUPLICATE_RELEASE_JOB);
             }
         } catch (Exception e) {
