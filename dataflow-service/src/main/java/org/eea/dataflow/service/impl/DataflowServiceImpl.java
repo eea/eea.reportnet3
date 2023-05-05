@@ -310,17 +310,34 @@ public class DataflowServiceImpl implements DataflowService {
       List<Long> idsResources = null;
       List<Long> idsResourcesWithoutRole = null;
       if (MapUtils.isNotEmpty(filters) && filters.containsKey("role")) {
-        idsResources = userManagementControllerZull
-            .getResourcesByUser(ResourceTypeEnum.DATAFLOW,
-                SecurityRoleEnum.fromValue(filters.get("role")))
-            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
-        idsResourcesWithoutRole =
-            userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
-                .map(ResourceAccessVO::getId).collect(Collectors.toList());
+        List<ResourceAccessVO> resourcesByUser = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW,
+                SecurityRoleEnum.fromValue(filters.get("role")));
+        LOG.info("idsResources {}", resourcesByUser);
+        resourcesByUser.removeIf(
+            resourceAccessVO -> resourceAccessVO.getRole().equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
+                && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
+        LOG.info("resourcesByUser after deletion {}", resourcesByUser);
+        idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+        LOG.info("idsResources {}", idsResources);
+
+        List<ResourceAccessVO> resourcesByUserWithoutRole = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
+        LOG.info("resourcesByUser {}", resourcesByUserWithoutRole);
+        resourcesByUserWithoutRole.removeIf(
+            resourceAccessVO -> resourceAccessVO.getRole().equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
+                && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
+        LOG.info("resourcesByUserWithoutRole after deletion {}", resourcesByUserWithoutRole);
+        idsResourcesWithoutRole = resourcesByUserWithoutRole.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+        LOG.info("idsResourcesWithoutRole {}", idsResourcesWithoutRole);
         filters.remove("role");
       } else {
-        idsResources = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
-            .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+        List<ResourceAccessVO> resourcesByUser = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
+        LOG.info("resourcesByUser {}", resourcesByUser);
+        resourcesByUser.removeIf(
+            resourceAccessVO -> resourceAccessVO.getRole().equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
+                && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
+        LOG.info("resourcesByUser after deletion {}", resourcesByUser);
+        idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+        LOG.info("idsResources {}", idsResources);
       }
 
       Map<String, List<String>> attributes = userManagementControllerZull.getUserAttributes();
@@ -419,6 +436,9 @@ public class DataflowServiceImpl implements DataflowService {
       paginatedDataflowVO.setDataflows(dataflowVOs);
       return paginatedDataflowVO;
     } catch (Exception e) {
+      LOG_ERROR.error(
+          "Error retrieving dataflows {} due to reason {}", userId,
+          e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
     }
   }
@@ -1578,10 +1598,15 @@ public class DataflowServiceImpl implements DataflowService {
   public List<DataflowCountVO> getDataflowsCount() {
 
     boolean isAdmin = isAdmin();
-
-    List<Long> idsResources =
-        userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW).stream()
-            .map(ResourceAccessVO::getId).collect(Collectors.toList());
+    
+    List<ResourceAccessVO> resourcesByUser = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
+    LOG.info("resourcesByUser {}", resourcesByUser);
+    resourcesByUser.removeIf(
+        resourceAccessVO -> resourceAccessVO.getRole().equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
+            && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
+    LOG.info("resourcesByUser after deletion {}", resourcesByUser);
+    List<Long>  idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+    LOG.info("idsResources {}", idsResources);
 
     List<IDataflowCount> dataflowCountList = new ArrayList<>();
 
