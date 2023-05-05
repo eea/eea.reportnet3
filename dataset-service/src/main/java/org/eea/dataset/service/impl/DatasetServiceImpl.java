@@ -34,6 +34,8 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -53,7 +55,10 @@ import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
@@ -300,6 +305,14 @@ public class DatasetServiceImpl implements DatasetService {
   /** The process controller zuul */
   @Autowired
   private ProcessControllerZuul processControllerZuul;
+
+  /** The job controller zuul */
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
+
+  /** The job process controller zuul */
+  @Autowired
+  private JobProcessControllerZuul jobProcessControllerZuul;
 
   @Autowired
   private TaskRepository taskRepository;
@@ -3617,6 +3630,35 @@ public class DatasetServiceImpl implements DatasetService {
     }
   }
 
+  @Override
+  public void releaseImportFailedNotification(Long datasetId, String tableSchemaId, String originalFileName, EventType eventType){
+    try {
+
+      DataSetSchema datasetSchema = getSchemaIfReportable(datasetId, tableSchemaId);
+      if(datasetSchema == null){
+        throw new Exception("Schema is not reportable for datasetId " + datasetId + " and tableSchemaId " + tableSchemaId);
+      }
+      boolean guessTableName = null == tableSchemaId;
+      if (guessTableName) {
+        tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(datasetSchema, originalFileName);
+      }
+
+      Map<String, Object> value = new HashMap<>();
+      value.put(LiteralConstants.DATASET_ID, datasetId);
+      value.put(LiteralConstants.USER,
+              SecurityContextHolder.getContext().getAuthentication().getName());
+      NotificationVO notificationVO = NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .datasetId(datasetId).tableSchemaId(tableSchemaId).fileName(originalFileName).error(EEAErrorMessage.ERROR_FILE_NAME_MATCHING)
+              .build();
+      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
+    }
+    catch(Exception e){
+      LOG.error("Unexpected error! Could not send import failed notification for for datasetId {}  tableSchemaId {} and file {}. Message {}",
+              datasetId, tableSchemaId, originalFileName, e.getMessage());
+    }
+  }
+
   /**
    * Finds tasks by processId and status
    * @param processId
@@ -3643,4 +3685,20 @@ public class DatasetServiceImpl implements DatasetService {
       throw e;
     }
   }
+  @Override
+  public void failImportJobAndProcess(String processId, Long datasetId, String tableSchemaId, String fileName, EventType eventType){
+    ProcessVO process = processControllerZuul.findById(processId);
+    Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+    jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+    processControllerZuul.updateProcess(process.getDatasetId(), process.getDataflowId(),
+            ProcessStatusEnum.CANCELED, ProcessTypeEnum.valueOf(process.getProcessType()), process.getProcessId(),
+            process.getUser(), process.getPriority(), process.isReleased());
+    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME);
+    Map<String, Object> importFileData = new HashMap<>();
+    importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+    importFileData.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(importFileData);
+    releaseImportFailedNotification(datasetId, tableSchemaId, fileName, eventType);
+  }
+
 }

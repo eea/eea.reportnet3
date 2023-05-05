@@ -2,6 +2,7 @@ package org.eea.interfaces.controller.orchestrator;
 
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -231,6 +232,14 @@ public interface JobController {
      */
     @PostMapping(value = "/private/sendFmeImportFailedNotification")
     void sendFmeImportFailedNotification(@RequestBody JobVO jobVO);
+
+    /**
+     * Updates job info value
+     * @param jobId
+     * @param jobInfo
+     */
+    @PostMapping(value = "/private/updateJobInfo/{jobId}")
+    void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo);
 }
 
 

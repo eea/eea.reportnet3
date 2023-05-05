@@ -4,6 +4,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -83,4 +84,6 @@ public interface JobService {
     void updateFmeCallbackJobParameter(String fmeJobId, Boolean fmeCallback);
 
     File downloadEtlExportedFile(Long jobId, String fileName) throws EEAException;
+
+    void updateJobInfo(Long jobId, JobInfoEnum jobInfo);
 }

@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.kafka.domain.EventType;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
 
@@ -650,6 +651,16 @@ public interface DatasetService {
   void releaseImportRefusedNotification(Long datasetId, Long dataflowId, String tableSchemaId, String originalFileName);
 
   /**
+   * Releases notification regarding failed import job
+   * @param datasetId
+   * @param tableSchemaId
+   * @param originalFileName
+   * @param eventType
+   * @return
+   */
+  void releaseImportFailedNotification(Long datasetId, String tableSchemaId, String originalFileName, EventType eventType);
+
+  /**
    * Finds tasks by processId and status
    * @param processId
    * @param status
@@ -670,5 +681,16 @@ public interface DatasetService {
   void createFileForEtlExport(@DatasetId Long datasetId, String tableSchemaId,
                               Integer limit, Integer offset, String filterValue, String columnName,
                               String dataProviderCodes, Long jobId, Long dataflowId, String user) throws EEAException, IOException, SQLException;
+
+  /**
+   * Fails import job
+   * @param processId
+   * @param datasetId
+   * @param tableSchemaId
+   * @param fileName
+   * @param eventType
+   * @return
+   */
+  void failImportJobAndProcess(String processId, Long datasetId, String tableSchemaId, String fileName, EventType eventType);
 
 }

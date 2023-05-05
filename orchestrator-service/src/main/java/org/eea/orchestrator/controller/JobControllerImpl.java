@@ -13,6 +13,7 @@ import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -622,6 +623,22 @@ public class JobControllerImpl implements JobController {
     public void sendFmeImportFailedNotification(@RequestBody JobVO jobVO){
         jobUtils.sendKafkaImportNotification(jobVO, EventType.FME_IMPORT_JOB_FAILED_EVENT, "Fme job failed");
         LOG.info("Sent notification FME_IMPORT_JOB_FAILED_EVENT for jobId {} and fmeJobId {}", jobVO.getId(), jobVO.getFmeJobId());
+    }
+
+    /**
+     * Updates job info value
+     * @param jobId
+     * @param jobInfo
+     */
+    @Override
+    @PostMapping(value = "/private/updateJobInfo/{jobId}")
+    public void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo){
+        try {
+            jobService.updateJobInfo(jobId, jobInfo);
+        } catch (Exception e) {
+            LOG.error("Error while updating job info for jobId {} and jobInfo {}", jobId, jobInfo.getValue(), e);
+            throw e;
+        }
     }
 }
 

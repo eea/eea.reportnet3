@@ -14,6 +14,7 @@ import org.eea.interfaces.controller.validation.ValidationController.ValidationC
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
@@ -523,6 +524,12 @@ public class JobServiceImpl implements JobService {
     public List<JobVO> findByJobTypeInAndJobStatusInAndRelease(List<JobTypeEnum> jobType, List<JobStatusEnum> jobStatus, boolean release){
         List<Job> jobList = jobRepository.findByJobTypeInAndJobStatusInAndRelease(jobType, jobStatus, release);
         return jobMapper.entityListToClass(jobList);
+    }
+
+    @Override
+    public void updateJobInfo(Long jobId, JobInfoEnum jobInfo){
+        jobRepository.updateJobInfo(jobId, jobInfo.getValue());
+        jobHistoryService.updateJobInfoOfLastHistoryEntry(jobId, jobInfo);
     }
 
     private void removeLocksAndSendNotification(JobVO jobVO, Map<String, Object> value, String user) throws EEAException {

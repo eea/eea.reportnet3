@@ -153,6 +153,19 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
      */
     @Query(nativeQuery = true, value = "select j.job_status from jobs j where j.id= :jobId")
     String findStatusByJobId(Long jobId);
+
+
+    /**
+     *
+     * Updates job info column based on job id
+     * @param jobId the id
+     * @param jobInfo the job_info value
+     */
+    @Transactional
+    @Modifying
+    @Query(nativeQuery = true,
+            value = "UPDATE jobs SET job_info= :jobInfo where id= :jobId")
+    void updateJobInfo(@Param("jobId") Long jobId, @Param("jobInfo") String jobInfo);
 }
 
 
