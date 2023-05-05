@@ -1293,18 +1293,13 @@ public class FileTreatmentHelper implements DisposableBean {
                         numberOfWrongFiles++;
                         if (numberOfWrongFiles == files.size()) {
                             errorWrongFilename = false;
-                            Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
-                            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
-                            jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME);
-                            Map<String, Object> importFileData = new HashMap<>();
-                            importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
-                            importFileData.put(LiteralConstants.DATASETID, datasetId);
-                            lockService.removeLockByCriteria(importFileData);
-                            jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME);
                             DatasetTypeEnum type = datasetService.getDatasetType(datasetId);
                             EventType eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                                     ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
                                     : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
+
+                            datasetService.failImportJobAndProcess(processId, datasetId, tableSchemaId, fileName, eventType);
+
                             datasetService.releaseImportFailedNotification(datasetId, tableSchemaId, fileName, eventType);
                             throw new EEAException(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
                         }

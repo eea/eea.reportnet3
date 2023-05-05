@@ -668,4 +668,15 @@ public interface DatasetService {
    */
   List<TaskVO> findTasksByProcessIdAndStatusIn(String processId, List<ProcessStatusEnum> status);
 
+  /**
+   * Fails import job
+   * @param processId
+   * @param datasetId
+   * @param tableSchemaId
+   * @param fileName
+   * @param eventType
+   * @return
+   */
+  void failImportJobAndProcess(String processId, Long datasetId, String tableSchemaId, String fileName, EventType eventType);
+
 }
