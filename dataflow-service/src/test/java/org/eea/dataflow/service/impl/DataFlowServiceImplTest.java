@@ -1264,6 +1264,7 @@ public class DataFlowServiceImplTest {
 
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
     resourceAccessVO.setId(0L);
+    resourceAccessVO.setRole(SecurityRoleEnum.DATA_CUSTODIAN);
     List<ResourceAccessVO> idResources = new ArrayList<>();
     idResources.add(resourceAccessVO);
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
