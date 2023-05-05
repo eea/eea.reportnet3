@@ -1298,9 +1298,7 @@ public class FileTreatmentHelper implements DisposableBean {
                                     ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
                                     : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
 
-                            datasetService.failImportJobAndProcess(processId, datasetId, tableSchemaId, fileName, eventType);
-
-                            datasetService.releaseImportFailedNotification(datasetId, tableSchemaId, fileName, eventType);
+                            datasetService.failImportJobAndProcess(processId, datasetId, tableSchemaId, fileName, eventType, JobInfoEnum.ERROR_WRONG_FILE_NAME);
                             throw new EEAException(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
                         }
                     }

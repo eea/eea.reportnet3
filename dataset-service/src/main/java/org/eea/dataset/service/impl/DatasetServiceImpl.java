@@ -3677,14 +3677,14 @@ public class DatasetServiceImpl implements DatasetService {
     }
   }
   @Override
-  public void failImportJobAndProcess(String processId, Long datasetId, String tableSchemaId, String fileName, EventType eventType){
+  public void failImportJobAndProcess(String processId, Long datasetId, String tableSchemaId, String fileName, EventType eventType, JobInfoEnum jobInfo){
     ProcessVO process = processControllerZuul.findById(processId);
     Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
     jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
     processControllerZuul.updateProcess(process.getDatasetId(), process.getDataflowId(),
             ProcessStatusEnum.CANCELED, ProcessTypeEnum.valueOf(process.getProcessType()), process.getProcessId(),
             process.getUser(), process.getPriority(), process.isReleased());
-    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME);
+    jobControllerZuul.updateJobInfo(jobId, jobInfo);
     Map<String, Object> importFileData = new HashMap<>();
     importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
     importFileData.put(LiteralConstants.DATASETID, datasetId);

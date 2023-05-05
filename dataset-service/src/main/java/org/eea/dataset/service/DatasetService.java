@@ -15,6 +15,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
@@ -689,8 +690,9 @@ public interface DatasetService {
    * @param tableSchemaId
    * @param fileName
    * @param eventType
+   * @param jobInfo
    * @return
    */
-  void failImportJobAndProcess(String processId, Long datasetId, String tableSchemaId, String fileName, EventType eventType);
+  void failImportJobAndProcess(String processId, Long datasetId, String tableSchemaId, String fileName, EventType eventType, JobInfoEnum jobInfo);
 
 }
