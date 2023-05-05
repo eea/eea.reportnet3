@@ -9,11 +9,15 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.CsvFileChunkRecoveryDetails;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
@@ -57,6 +61,12 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
 
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
+
+  @Autowired
+  private JobControllerZuul jobControllerZuul;
+
+  @Autowired
+  private JobProcessControllerZuul jobProcessControllerZuul;
 
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
@@ -157,6 +167,10 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
       Optional<Task> task = taskRepository.findById(taskId);
       if(task.isPresent()){
         taskRepository.updateStatusAndFinishDate(task.get().getId(), ProcessStatusEnum.CANCELED.toString(), new Date());
+        if(e.getMessage().equals(EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING)){
+          Long jobId = jobProcessControllerZuul.findJobIdByProcessId(task.get().getProcessId());
+          jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_NO_HEADERS_MATCHING);
+        }
       }
       else{
         LOG.error("Could not update task with id {} and datasetId {} because task is not present.", taskIdStr, datasetId);

@@ -57,6 +57,7 @@ import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -1292,6 +1293,19 @@ public class FileTreatmentHelper implements DisposableBean {
                         numberOfWrongFiles++;
                         if (numberOfWrongFiles == files.size()) {
                             errorWrongFilename = false;
+                            Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+                            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+                            jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME);
+                            Map<String, Object> importFileData = new HashMap<>();
+                            importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+                            importFileData.put(LiteralConstants.DATASETID, datasetId);
+                            lockService.removeLockByCriteria(importFileData);
+                            jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME);
+                            DatasetTypeEnum type = datasetService.getDatasetType(datasetId);
+                            EventType eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                                    ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
+                                    : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
+                            datasetService.releaseImportFailedNotification(datasetId, tableSchemaId, fileName, eventType);
                             throw new EEAException(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
                         }
                     }
@@ -1442,10 +1456,12 @@ public class FileTreatmentHelper implements DisposableBean {
             JobStatusEnum jobStatus;
             if (null != error) {
                 if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(error)) {
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME);
                     eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                             ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
                             : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
                 } else if (EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING.equals(error)) {
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_NO_HEADERS_MATCHING);
                     eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                             ? EventType.IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT
                             : EventType.IMPORT_DESIGN_FAILED_NO_HEADERS_MATCHING_EVENT;

@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.kafka.domain.EventType;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
 
@@ -648,6 +649,16 @@ public interface DatasetService {
    * @return
    */
   void releaseImportRefusedNotification(Long datasetId, Long dataflowId, String tableSchemaId, String originalFileName);
+
+  /**
+   * Releases notification regarding failed import job
+   * @param datasetId
+   * @param tableSchemaId
+   * @param originalFileName
+   * @param eventType
+   * @return
+   */
+  void releaseImportFailedNotification(Long datasetId, String tableSchemaId, String originalFileName, EventType eventType);
 
   /**
    * Finds tasks by processId and status

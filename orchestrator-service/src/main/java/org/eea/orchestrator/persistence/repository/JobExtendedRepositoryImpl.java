@@ -40,9 +40,6 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
 
         try {
             jobList = (List<Job>) query.getResultList();
-            LOG.info(String.format(
-                    "Retrieved job list with provided filters: jobId = %s, jobType = %s, dataflowId = %s, dataflowName = %s, providerId = %s, datasetId = %s, datasetName = %s, creatorUsername = %s, jobStatus = %s",
-                    jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses));
         } catch (NoResultException e) {
             LOG.info(String.format(
                     "No processes found with provided filters: obId = %s, jobType = %s, dataflowId = %s, dataflowName = %s, providerId = %s, datasetId = %s, datasetName = %s, creatorUsername = %s, jobStatus = %s. Error message: %s",
