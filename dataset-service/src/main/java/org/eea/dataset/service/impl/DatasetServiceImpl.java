@@ -3632,15 +3632,6 @@ public class DatasetServiceImpl implements DatasetService {
   public void releaseImportFailedNotification(Long datasetId, String tableSchemaId, String originalFileName, EventType eventType){
     try {
 
-      DataSetSchema datasetSchema = getSchemaIfReportable(datasetId, tableSchemaId);
-      if(datasetSchema == null){
-        throw new Exception("Schema is not reportable for datasetId " + datasetId + " and tableSchemaId " + tableSchemaId);
-      }
-      boolean guessTableName = null == tableSchemaId;
-      if (guessTableName) {
-        tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(datasetSchema, originalFileName);
-      }
-
       Map<String, Object> value = new HashMap<>();
       value.put(LiteralConstants.DATASET_ID, datasetId);
       value.put(LiteralConstants.USER,
@@ -3652,7 +3643,7 @@ public class DatasetServiceImpl implements DatasetService {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     }
     catch(Exception e){
-      LOG.error("Unexpected error! Could not send import failed notification for for datasetId {}  tableSchemaId {} and file {}. Message {}",
+      LOG.error("Unexpected error! Could not send import failed notification for datasetId {}  tableSchemaId {} and file {}. Message {}",
               datasetId, tableSchemaId, originalFileName, e.getMessage());
     }
   }
