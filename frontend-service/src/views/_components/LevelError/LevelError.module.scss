@@ -11,11 +11,6 @@
   color: rgba(var(--statusBox-blocker-color), 0.8);
 }
 
-// .refused:hover {
-//   background-color: var(--statusBox-blocker-bg-hover);
-//   color: var(--statusBox-blocker-color-hover);
-// }
-
 .closed {
   background-color: var(--c-gray-75);
   color: var(--c-white-color);
@@ -31,21 +26,11 @@
   color: rgb(185, 67, 24);
 }
 
-// .canceled_by_admin:hover {
-//   background-color: rgb(233, 184, 93);
-//   color: rgb(165, 47, 14);
-// }
-
 .disabled,
 .failed {
   background-color: var(--statusBox-false-bg);
   color: var(--statusBox-false-color);
 }
-
-// .failed:hover {
-//   background-color: var(--statusBox-false-bg-hover);
-//   color: var(--statusBox-false-color-hover);
-// }
 
 .open,
 .draft {
@@ -61,11 +46,6 @@
   color: var(--statusBox-error-color);
 }
 
-// .canceled:hover {
-//   background-color: var(--statusBox-error-bg-hover);
-//   color: var(--statusBox-error-color-hover);
-// }
-
 .info,
 .inQueue,
 .queued {
@@ -73,21 +53,11 @@
   color: var(--statusBox-info-color);
 }
 
-// .queued:hover {
-//   background-color: var(--statusBox-info-bg-hover);
-//   color: var(--statusBox-info-color-hover);
-// }
-
 .success,
 .finished {
   background-color: var(--c-growl-success-lighter-green);
   color: var(--c-growl-success-darker-green);
 }
-
-// .finished:hover {
-//   background-color: var(--c-growl-success-lighter-green-hover);
-//   color: var(--c-growl-success-darker-green-hover);
-// }
 
 .valid,
 .enabled,
@@ -102,8 +72,3 @@
   background-color: var(--statusBox-warning-bg);
   color: var(--statusBox-warning-color);
 }
-
-// .inProgress:hover {
-//   background-color: var(--statusBox-warning-bg-hover);
-//   color: var(--statusBox-warning-color-hover);
-// }
