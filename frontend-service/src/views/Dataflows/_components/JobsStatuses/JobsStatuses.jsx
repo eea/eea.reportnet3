@@ -173,6 +173,10 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         {
           type: resourcesContext.messages[config.jobType.COPY_TO_EU_DATASET.label].toUpperCase(),
           value: config.jobType.COPY_TO_EU_DATASET.key
+        },
+        {
+          type: resourcesContext.messages[config.jobType.FILE_EXPORT.label].toUpperCase(),
+          value: config.jobType.FILE_EXPORT.key
         }
       ],
       template: 'jobType',
@@ -314,7 +318,10 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       disabledButtons={
         !(
           job.jobStatus === 'IN_PROGRESS' &&
-          (job.jobType === 'IMPORT' || job.jobType === 'VALIDATION' || job.jobType === 'RELEASE') &&
+          (job.jobType === 'IMPORT' ||
+            job.jobType === 'VALIDATION' ||
+            job.jobType === 'RELEASE' ||
+            job.jobType === 'FILE_EXPORT') &&
           getDateDifferenceInMinutes(job.dateStatusChanged) > 9
         )
       }
