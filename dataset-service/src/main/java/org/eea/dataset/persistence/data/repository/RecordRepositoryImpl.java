@@ -309,13 +309,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private static final String FILE_PATTERN_NAME = "etlExport_%s%s";
 
   /** The Constant RECORD_COUNT_QUERY: {@value}. */
-  private static final String RECORD_COUNT_QUERY = "SELECT count(id) AS recordCount from dataset_?.temp_etlexport WHERE filter_value= ?";
+  private static final String RECORD_COUNT_QUERY = "SELECT count(id) AS recordCount from dataset_%s.temp_etlexport"
+      + " WHERE filter_value= ?";
 
   /** The Constant POSITION_QUERY: {@value}. */
-  private static final String POSITION_QUERY = "SELECT id from dataset_?.temp_etlexport WHERE filter_value= ? order by id limit 1";
+  private static final String POSITION_QUERY = "SELECT id from ? WHERE filter_value= dataset_%s.temp_etlexport"
+      + " order by id limit 1";
 
   /** The Constant RECORD_JSON_QUERY: {@value}. */
-  private static final String RECORD_JSON_QUERY = "SELECT record_json from dataset_?.temp_etlexport "
+  private static final String RECORD_JSON_QUERY = "SELECT record_json from dataset_%s.temp_etlexport "
       + "WHERE filter_value= ? and id>= ? and id< ?";
 
   /**
@@ -659,11 +661,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     PreparedStatement pstmt = null;
     ResultSet rs = null;
     try {
-      connection =
-          DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
+      connection = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
+      String.format(query, datasetId);
       pstmt = connection.prepareStatement(query);
-      pstmt.setString(1, datasetId.toString());
-      pstmt.setString(2, filterChain);
+      pstmt.setString(1, filterChain);
       rs = pstmt.executeQuery();
       rs.next();
 
@@ -694,13 +695,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     ResultSet rs = null;
     List list = new ArrayList<>();
     try {
-      connection =
-          DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
+      connection = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
+      String.format(query, datasetId);
       pstmt = connection.prepareStatement(query);
-      pstmt.setString(1, datasetId.toString());
-      pstmt.setString(2, filterChain);
-      pstmt.setLong(3, offsetAux2);
-      pstmt.setLong(4, offsetAux2 + limitAux);
+      pstmt.setString(1, filterChain);
+      pstmt.setLong(2, offsetAux2);
+      pstmt.setLong(3, offsetAux2 + limitAux);
       rs = pstmt.executeQuery();
       while (rs.next()) {
         list.add(rs.getString("record_json"));
