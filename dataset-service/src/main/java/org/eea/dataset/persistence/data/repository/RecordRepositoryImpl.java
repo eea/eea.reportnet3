@@ -313,7 +313,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       + " WHERE filter_value= ?";
 
   /** The Constant POSITION_QUERY: {@value}. */
-  private static final String POSITION_QUERY = "SELECT id from dataset_%s.temp_etlexport WHERE filter_value= dataset_%s.temp_etlexport"
+  private static final String POSITION_QUERY = "SELECT id from dataset_%s.temp_etlexport WHERE filter_value= ?"
       + " order by id limit 1";
 
   /** The Constant RECORD_JSON_QUERY: {@value}. */
