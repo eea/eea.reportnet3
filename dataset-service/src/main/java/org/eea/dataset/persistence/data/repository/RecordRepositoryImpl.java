@@ -667,6 +667,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
       pstmt = connection.prepareStatement(query);
       pstmt.setString(1, filterChain);
+      LOG.info("Partial query from the temp_etlexport table: {}", pstmt);
+
       rs = pstmt.executeQuery();
       rs.next();
 
@@ -698,12 +700,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     try {
       connection = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
       query = String.format(query, datasetId);
-      LOG.info("Partial query from the temp_etlexport table: {}", query);
 
       pstmt = connection.prepareStatement(query);
       pstmt.setString(1, filterChain);
       pstmt.setLong(2, offsetAux2);
       pstmt.setLong(3, offsetAux2 + limitAux);
+      LOG.info("Partial query from the temp_etlexport table: {}", pstmt);
+
       rs = pstmt.executeQuery();
       while (rs.next()) {
         list.add(rs.getString("record_json"));
