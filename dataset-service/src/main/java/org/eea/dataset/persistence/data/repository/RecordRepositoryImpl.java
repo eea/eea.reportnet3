@@ -662,7 +662,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     ResultSet rs = null;
     try {
       connection = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
-      String.format(query, datasetId);
+      query = String.format(query, datasetId);
+      LOG.info("Partial query from the temp_etlexport table: {}", query);
+
       pstmt = connection.prepareStatement(query);
       pstmt.setString(1, filterChain);
       rs = pstmt.executeQuery();
