@@ -670,7 +670,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       rs = pstmt.executeQuery();
       rs.next();
 
-      return rs.getInt(0);
+      return rs.getInt(1);
     } catch (Exception e) {
       LOG.error(
           "Unexpected error! Error in queryGetRecordCountbyFilterChain for datasetId {} with filter_value {}",
