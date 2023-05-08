@@ -533,7 +533,7 @@ export const DataViewer = ({
     );
   };
 
-  const onConditionalChange = field => {
+  const onConditionalChange = (field, enteredValue) => {
     dispatchRecords({
       type: 'RESET_CONDITIONAL_FIELDS',
       payload: {
@@ -541,7 +541,8 @@ export const DataViewer = ({
         isNewRecord,
         referencedFields: colsSchema.filter(
           col => !isNil(col.referencedField) && col.referencedField.masterConditionalFieldId === field
-        )
+        ),
+        enteredValue
       }
     });
   };
