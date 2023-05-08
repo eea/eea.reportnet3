@@ -619,7 +619,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       if (totalRecords != null && totalRecords > 0L) {
 
         Object resultPosition = null;
-        Object result = null;
 
 
         // We need to know which is the first position in the temp table to take the results
@@ -638,10 +637,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           List recordJsons = queryGetRecordJSONbyFilterChain(RECORD_JSON_QUERY, datasetId, filterChain, offsetAux2, limitAux);
 
           // add to table's records list
-          if (result != null) {
+          if (recordJsons != null) {
             tableRecords.addAll(gsonparser.parseList(recordJsons.toString()));
           }
-          result = null;
           System.gc();
         }
       }
