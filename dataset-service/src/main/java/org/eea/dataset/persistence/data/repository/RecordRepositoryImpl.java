@@ -690,7 +690,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private List queryGetRecordJSONbyFilterChain(String query, Long datasetId, String filterChain,
       Long offsetAux2, Long limitAux)
       throws SQLException {
-    LOG.info("Partial query from the temp_etlexport table: {}", query);
 
     Connection connection = null;
     PreparedStatement pstmt = null;
@@ -698,7 +697,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     List list = new ArrayList<>();
     try {
       connection = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
-      String.format(query, datasetId);
+      query = String.format(query, datasetId);
+      LOG.info("Partial query from the temp_etlexport table: {}", query);
+
       pstmt = connection.prepareStatement(query);
       pstmt.setString(1, filterChain);
       pstmt.setLong(2, offsetAux2);
