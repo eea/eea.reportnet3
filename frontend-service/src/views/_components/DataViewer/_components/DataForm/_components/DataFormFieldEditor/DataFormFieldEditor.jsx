@@ -38,6 +38,7 @@ export const DataFormFieldEditor = ({
   datasetId,
   datasetSchemaId,
   editing = false,
+  enteredValue,
   field,
   fieldValue = '',
   isConditional = false,
@@ -114,13 +115,13 @@ export const DataFormFieldEditor = ({
   useEffect(() => {
     if (isConditionalChanged) {
       if (isConditional) {
-        onConditionalChange(field);
+        onConditionalChange(field, enteredValue);
       }
       if (!isNil(linkDropdownRef.current)) {
         linkDropdownRef.current.clearFilter();
       }
     }
-  }, [records.editedRecord, records.newRecord, isConditionalChanged]);
+  }, [records.editedRecord, records.newRecord, isConditionalChanged, enteredValue]);
 
   useEffect(() => {
     if (isVisible && autoFocus) {

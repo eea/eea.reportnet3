@@ -34,6 +34,7 @@ export const DataForm = ({
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
+  const [enteredValue, setEnteredValue] = useState('');
   const [fieldsWithError, setFieldsWithError] = useState([]);
   const [isConditionalChanged, setIsConditionalChanged] = useState(false);
 
@@ -126,6 +127,7 @@ export const DataForm = ({
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
                       editing={true}
+                      enteredValue={enteredValue}
                       field={column.field}
                       fieldValue={
                         isNil(field.fieldData[column.field])
@@ -145,6 +147,7 @@ export const DataForm = ({
                       isSaving={isSaving}
                       isVisible={editDialogVisible}
                       onChangeForm={(property, value, conditionalChanged = false) => {
+                        setEnteredValue(property);
                         if (isConditionalChanged !== conditionalChanged) {
                           setIsConditionalChanged(conditionalChanged);
                         }
@@ -217,6 +220,7 @@ export const DataForm = ({
                       column={column}
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
+                      enteredValue={enteredValue}
                       field={column.field}
                       fieldValue={isNil(field.fieldData[column.field]) ? '' : field.fieldData[column.field]}
                       hasWritePermissions={hasWritePermissions}
@@ -230,6 +234,7 @@ export const DataForm = ({
                       isSaving={isSaving}
                       isVisible={addDialogVisible}
                       onChangeForm={(property, value, conditionalChanged = false) => {
+                        setEnteredValue(property);
                         if (isConditionalChanged !== conditionalChanged) {
                           setIsConditionalChanged(conditionalChanged);
                         }
