@@ -97,7 +97,6 @@ public class ImportFileTasksScheduler extends MessageReceiver {
         try {
           inputStream = Files.newInputStream(Path.of(filePath));
         } catch (IOException er) {
-          newDelay = 1L;
           return;
         } finally {
           if (inputStream != null) {
