@@ -147,10 +147,16 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       }
       JobVO valJobVo = null;
       List<LinkedHashMap<String, String>> authorities = new ArrayList<>();
+      Boolean silentRelease = false;
       if (validationJobId!=null) {
         valJobVo = jobControllerZuul.findJobById(validationJobId);
         TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
         adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, valJobVo);
+
+        Map<String, Object> parameters = valJobVo.getParameters();
+        if(parameters.containsKey("silentRelease")){
+          silentRelease = (Boolean) parameters.get("silentRelease");
+        }
       }
       String user = valJobVo!=null ? valJobVo.getCreatorUsername() : SecurityContextHolder.getContext().getAuthentication().getName();
       LOG.info("The user on CheckBlockersDataSnapshotCommand.execute is {} and datasetId {}", user, datasetId);
@@ -178,6 +184,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       parameters.put("dataProviderId", dataset.getDataProviderId());
       parameters.put("userId", userId);
       parameters.put("datasetId", datasets);
+      parameters.put("silentRelease", silentRelease);
       JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, user,true, dataset.getDataflowId(), dataset.getDataProviderId(), null,null, dataflowName,null, null, null);
 
       JobStatusEnum statusToInsert = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), true, dataset.getDataflowId(), dataset.getDataProviderId(), datasets);
@@ -185,14 +192,16 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         releaseJob.setJobStatus(JobStatusEnum.REFUSED);
         addReleaseJob(user, dataset, releaseJob, statusToInsert);
         datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(), dataset.getDataProviderId());
-        //send Refused notification
-        Map<String, Object> value = new HashMap<>();
-        value.put(LiteralConstants.USER, user);
-        value.put("release_job_id", releaseJob.getId());
+        if(!silentRelease) {
+          //send Refused notification
+          Map<String, Object> value = new HashMap<>();
+          value.put(LiteralConstants.USER, user);
+          value.put("release_job_id", releaseJob.getId());
           kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_REFUSED_EVENT, value,
                   NotificationVO.builder().user(user).dataflowId(dataset.getDataflowId()).providerId(dataset.getDataProviderId())
                           .error("There is another job with status QUEUED or IN_PROGRESS for dataflowId " + dataset.getDataflowId() + " and providerId " + dataset.getDataProviderId()).build());
-        return;
+          return;
+        }
       }
       releaseJob = addReleaseJob(user, dataset, releaseJob, statusToInsert);
 

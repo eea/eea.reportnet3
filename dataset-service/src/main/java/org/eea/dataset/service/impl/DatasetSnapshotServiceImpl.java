@@ -30,6 +30,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -241,6 +242,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
   @Autowired
   private RecordRepository recordRepository;
+
+  @Autowired
+  private JobProcessControllerZuul jobProcessControllerZuul;
 
   /**
    * Gets the by id.
@@ -564,8 +568,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     value.put("dateRelease", dateRelease);
     value.put("process_id", processId);
     LOG.info("The user releasing kafka event on DatasetSnapshotServiceImpl.releaseSnapshot for snapshotId {} and datasetId {} of processId {} is {}",
-        idSnapshot, idDataset, processId, SecurityContextHolder.getContext().getAuthentication().getName());
+            idSnapshot, idDataset, processId, SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
+
     LOG.info("FME_Historic_Releases: Successfully released snapshot with id {} for datasetId {} processId {} and dateRelease {}", idSnapshot, idDataset, processId, dateRelease);
   }
 
@@ -583,10 +588,22 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       DataProviderVO provider, Long idDataCollection, Date dateRelease, String processId) throws EEAException {
 
     Map<String, Object> value = new HashMap<>();
+    Boolean silentRelease = false;
     ProcessVO processVO = null;
     if (processId!=null) {
       processVO = processControllerZuul.findById(processId);
       value.put(LiteralConstants.USER, processVO.getUser());
+
+      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      if(jobId != null){
+        JobVO jobVO = jobControllerZuul.findJobById(jobId);
+        if (jobVO != null) {
+          Map<String, Object> parameters = jobVO.getParameters();
+          if(parameters.containsKey("silentRelease")){
+            silentRelease = (Boolean) parameters.get("silentRelease");
+          }
+        }
+      }
     }
 
     Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
@@ -616,26 +633,33 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
         // This method will release the lock and the notification
         restoreSnapshot(idDataCollection, idSnapshot, false, processId);
-        // Mark the snapshot released
-        snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
-        // Add the date of the release
-        Optional<Snapshot> snapshot = snapshotRepository.findById(idSnapshot);
-        if (snapshot.isPresent()) {
-          // snapshot.get().setDateReleased(java.sql.Timestamp.valueOf(LocalDateTime.now()));
-          snapshot.get().setDateReleased(dateRelease);
-          snapshotRepository.save(snapshot.get());
+
+        if(!silentRelease) {
+          // Mark the snapshot released
+          snapshotRepository.releaseSnaphot(idDataset, idSnapshot);
+          // Add the date of the release
+          Optional<Snapshot> snapshot = snapshotRepository.findById(idSnapshot);
+          if (snapshot.isPresent()) {
+            // snapshot.get().setDateReleased(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+            snapshot.get().setDateReleased(dateRelease);
+            snapshotRepository.save(snapshot.get());
+          }
         }
 
         LOG.info("Snapshot {} of processId {} released", idSnapshot, processId);
       } catch (EEAException e) {
         LOG_ERROR.error("Error releasing snapshot {} of processId {},", idSnapshot, processId, e);
-        releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, e.getMessage(), value);
+        if(!silentRelease) {
+          releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, e.getMessage(), value);
+        }
         removeLockRelatedToCopyDataToEUDataset(idDataflow);
         releaseLocksRelatedToRelease(idDataflow, idDataProvider);
       }
     } else {
       LOG_ERROR.error("Error in release snapshot {} of processId {}", idSnapshot, processId);
-      releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot", value);
+      if(!silentRelease) {
+        releaseEvent(EventType.RELEASE_FAILED_EVENT, idSnapshot, "Error in release snapshot", value);
+      }
       removeLockRelatedToCopyDataToEUDataset(idDataflow);
       releaseLocksRelatedToRelease(idDataflow, idDataProvider);
     }
