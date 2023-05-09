@@ -1720,6 +1720,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
          FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
 
       CopyManager copyManager = new CopyManager((BaseConnection) con);
+      ObjectMapper mapper = new ObjectMapper();
       if (tableCount == 1) {
         fos.write(("{\n\"tables\": [\n").getBytes());
       }
@@ -1748,7 +1749,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             LOG.error("Error creating export file for datasetId {} and jobId {}, json created is not valid", datasetId, jobId);
             throw new InvalidJsonException();
           }
-          ObjectMapper mapper = new ObjectMapper();
           String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(buffer));
           fos.write(res.getBytes());
         }
