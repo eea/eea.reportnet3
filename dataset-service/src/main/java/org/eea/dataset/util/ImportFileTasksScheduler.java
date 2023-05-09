@@ -87,46 +87,41 @@ public class ImportFileTasksScheduler extends MessageReceiver {
   public void scheduledConsumer() {
     Long newDelay = delay;
     try {
-        for (Task task : taskRepository.findAllByTaskTypeAndStatusOrderByIdAsc(TaskType.IMPORT_TASK,ProcessStatusEnum.IN_QUEUE)) {
-            try {
-              ObjectMapper objectMapper = new ObjectMapper();
-              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-              EEAEventVO event = objectMapper.readValue(task.getJson(), EEAEventVO.class);
-              String filePath = String.valueOf(event.getData().get("filePath"));
-              InputStream inputStream = null;
-              try {
-                inputStream = Files.newInputStream(Path.of(filePath));
-              } catch (IOException er) {
-                LOG.error("Error while trying to access file {} for task with id {}, {}", filePath, task.getId(), er);
-                continue;
-              } finally {
-                if (inputStream!=null) {
-                  inputStream.close();
-                }
-              }
-              task.setStartingDate(new Date());
-              task.setPod(serviceInstanceId);
-              task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-              taskRepository.saveAndFlush(task);
-
-              Message<EEAEventVO> message = MessageBuilder.withPayload(event).build();
-              message.getPayload().getData().put("task_id", task.getId());
-              message.getPayload().getData().put("service_instance_id", serviceInstanceId);
-
-              consumeMessage(message);
-            } catch (EEAException | JsonProcessingException e) {
-              LOG.error("failed the import task schedule because of {} ", e);
-            } catch (ObjectOptimisticLockingFailureException | IOException e) {
-              newDelay = 1L;
-              LOG.error(e.getMessage());
-            }
-
+      Task task = taskRepository.findFirstByTaskTypeAndStatusOrderByIdAsc(TaskType.IMPORT_TASK, ProcessStatusEnum.IN_QUEUE);
+      try {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        EEAEventVO event = objectMapper.readValue(task.getJson(), EEAEventVO.class);
+        String filePath = String.valueOf(event.getData().get("filePath"));
+        InputStream inputStream = null;
+        try {
+          inputStream = Files.newInputStream(Path.of(filePath));
+        } catch (IOException er) {
+          newDelay = 1L;
+          return;
+        } finally {
+          if (inputStream != null) {
+            inputStream.close();
+          }
         }
+        task.setStartingDate(new Date());
+        task.setPod(serviceInstanceId);
+        task.setStatus(ProcessStatusEnum.IN_PROGRESS);
+        taskRepository.saveAndFlush(task);
 
+        Message<EEAEventVO> message = MessageBuilder.withPayload(event).build();
+        message.getPayload().getData().put("task_id", task.getId());
+        message.getPayload().getData().put("service_instance_id", serviceInstanceId);
 
+        consumeMessage(message);
+      } catch (EEAException | JsonProcessingException e) {
+        LOG.error("failed the import task schedule because of {} ", e);
+      } catch (ObjectOptimisticLockingFailureException | IOException e) {
+        newDelay = 1L;
+        LOG.error(e.getMessage());
+      }
     } finally {
       scheduler.schedule(() -> scheduledConsumer(), newDelay, TimeUnit.MILLISECONDS);
-
     }
   }
 
