@@ -116,6 +116,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   @Query(nativeQuery = true,
           value = "update task set status= :status where id=:taskId ")
   void updateStatus(@Param("status") String status, @Param("taskId") Long taskId);
+
+  Task findFirstByTaskTypeAndStatusOrderByIdAsc(TaskType taskType, ProcessStatusEnum status);
 }
 
 
