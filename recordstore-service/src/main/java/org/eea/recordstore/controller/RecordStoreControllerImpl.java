@@ -679,7 +679,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param idSnapshot
    * @param startingNumber
    * @param endingNumber
-   * @param type
+   * @param forSplitting
    */
   @HystrixCommand
   @PostMapping(value = "/restoreSpecificFileSnapshotData")
@@ -694,14 +694,14 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       @RequestParam("startingNumber") Long startingNumber,
       @ApiParam(value = "Ending number", example = "0", required = true)
       @RequestParam("endingNumber") Long endingNumber,
-      @ApiParam(value = "FIELD or ATTACHMENT", example = "FIELD", required = true)
-      @RequestParam("type") String type) {
+      @ApiParam(value = "TRUE or FALSE", example = "TRUE")
+      @RequestParam("forSplitting") boolean forSplitting) {
 
     try {
-      LOG.info("Method restoreSpecificSnapshotData starts for datasetId: {}, idSnapshot: {}, startingNumber: {}, endingNumber: {}, type: {}",
-          datasetId, idSnapshot, startingNumber, endingNumber, type);
+      LOG.info("Method restoreSpecificSnapshotData starts for datasetId: {}, idSnapshot: {}, startingNumber: {}, endingNumber: {}, forSplitting: {}",
+          datasetId, idSnapshot, startingNumber, endingNumber, forSplitting);
 
-      recordStoreService.restoreSpecificFileSnapshot(datasetId, idSnapshot, startingNumber, endingNumber, type);
+      recordStoreService.restoreSpecificFileSnapshot(datasetId, idSnapshot, startingNumber, endingNumber, forSplitting);
 
       LOG.info("Method restoreSpecificFileSnapshot ends");
     } catch (Exception e) {

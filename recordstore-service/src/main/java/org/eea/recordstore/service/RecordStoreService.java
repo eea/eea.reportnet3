@@ -257,6 +257,15 @@ public interface RecordStoreService {
   TaskVO findReleaseTaskByTaskId(Long taskId);
 
 
+  /**
+   * Restore specific file snapshot
+   *
+   * @param datasetId
+   * @param idSnapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param forSplitting
+   */
   void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
-      Long startingNumber, Long endingNumber, String type);
+      Long startingNumber, Long endingNumber, boolean forSplitting);
 }

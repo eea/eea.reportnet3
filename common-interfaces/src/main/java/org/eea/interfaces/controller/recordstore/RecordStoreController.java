@@ -266,7 +266,7 @@ public interface RecordStoreController {
    * @param idSnapshot
    * @param startingNumber
    * @param endingNumber
-   * @param type
+   * @param forSplitting
    */
   @PostMapping(value = "/restoreSpecificFileSnapshotData")
   void restoreSpecificFileSnapshotData(
@@ -274,5 +274,5 @@ public interface RecordStoreController {
       @RequestParam("idSnapshot") Long idSnapshot,
       @RequestParam("startingNumber") Long startingNumber,
       @RequestParam("endingNumber") Long endingNumber,
-      @RequestParam("type") String type);
+      @RequestParam("forSplitting") boolean forSplitting);
 }
