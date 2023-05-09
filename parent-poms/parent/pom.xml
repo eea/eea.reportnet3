@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.2-apikey</api-gateway.version>
-    <communication.version>v3.2-apikey</communication.version>
-    <collaboration.version>v3.2-apikey</collaboration.version>
-    <dataflow.version>v3.2-apikey</dataflow.version>
-    <dataset.version>v3.2-apikey</dataset.version>
-    <document.version>v3.2-apikey</document.version>
-    <frontend.version>v3.2-apikey</frontend.version>
-    <indexsearch.version>v3.2-apikey</indexsearch.version>
-    <inspire.version>v3.2-apikey</inspire.version>
-    <recordstore.version>v3.2-apikey</recordstore.version>
-    <ums.version>v3.2-apikey</ums.version>
-    <validation.version>v3.2-apikey</validation.version>
-    <common-interfaces.version>v3.2-apikey</common-interfaces.version>
-    <common-utitlities.version>v3.2-apikey</common-utitlities.version>
-    <rod.version>v3.2-apikey</rod.version>
-    <orchestrator.version>v3.2-apikey</orchestrator.version>
+    <api-gateway.version>v3.2</api-gateway.version>
+    <communication.version>v3.2</communication.version>
+    <collaboration.version>v3.2</collaboration.version>
+    <dataflow.version>v3.2</dataflow.version>
+    <dataset.version>v3.2</dataset.version>
+    <document.version>v3.2</document.version>
+    <frontend.version>v3.2</frontend.version>
+    <indexsearch.version>v3.2</indexsearch.version>
+    <inspire.version>v3.2</inspire.version>
+    <recordstore.version>v3.2</recordstore.version>
+    <ums.version>v3.2</ums.version>
+    <validation.version>v3.2</validation.version>
+    <common-interfaces.version>v3.2</common-interfaces.version>
+    <common-utitlities.version>v3.2</common-utitlities.version>
+    <rod.version>v3.2</rod.version>
+    <orchestrator.version>v3.2</orchestrator.version>
   </properties>
 </project>
