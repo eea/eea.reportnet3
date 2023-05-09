@@ -268,8 +268,8 @@ public interface RecordStoreController {
    * @param endingNumber
    * @param forSplitting
    */
-  @PostMapping(value = "/restoreSpecificFileSnapshotData")
-  void restoreSpecificFileSnapshotData(
+  @PostMapping(value = "/restoreSpecificFileSnapshotDataNoProcess")
+  void restoreSpecificFileSnapshotDataNoProcess(
       @RequestParam("datasetId") Long datasetId,
       @RequestParam("idSnapshot") Long idSnapshot,
       @RequestParam("startingNumber") Long startingNumber,

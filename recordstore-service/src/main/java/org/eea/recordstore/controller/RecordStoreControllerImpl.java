@@ -682,10 +682,10 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    * @param forSplitting
    */
   @HystrixCommand
-  @PostMapping(value = "/restoreSpecificFileSnapshotData")
+  @PostMapping(value = "/restoreSpecificFileSnapshotDataNoProcess")
   @ApiOperation(value = "Restore specific snapshot data", hidden = true)
   @ApiResponse(code = 500, message = "Could not restore the specific snapshot data")
-  public void restoreSpecificFileSnapshotData(
+  public void restoreSpecificFileSnapshotDataNoProcess(
       @ApiParam(value = "Dataset Id", example = "0", required = true)
       @RequestParam("datasetId") Long datasetId,
       @ApiParam(value = "Snapshot Id", example = "0", required = true)
