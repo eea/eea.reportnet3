@@ -688,6 +688,7 @@
     "file": "File",
     "fileColumnsLabel": "File columns",
     "fileDescription": "File description",
+    "fileExport": "File export",
     "fileExtension": "File extension",
     "fileExtensionsSelection": "No valid file extensions selected",
     "fileNotSelectedError": "File not selected",
