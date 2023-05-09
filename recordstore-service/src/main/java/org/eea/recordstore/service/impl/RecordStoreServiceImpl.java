@@ -536,7 +536,8 @@ public class RecordStoreServiceImpl implements RecordStoreService {
 
   @Override
   public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot, Long startingNumber,
-      Long endingNumber, String type) {
+      Long endingNumber, boolean forSplitting) {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
+
 }
