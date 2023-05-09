@@ -669,4 +669,45 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   public void saveTask(@RequestBody TaskVO task) {
     taskService.saveTask(task);
   }
+
+
+
+  /**
+   * Restore specific file snapshot data.
+   *
+   * @param datasetId
+   * @param idSnapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param forSplitting
+   */
+  @HystrixCommand
+  @PostMapping(value = "/restoreSpecificFileSnapshotDataNoProcess")
+  @ApiOperation(value = "Restore specific snapshot data", hidden = true)
+  @ApiResponse(code = 500, message = "Could not restore the specific snapshot data")
+  public void restoreSpecificFileSnapshotDataNoProcess(
+      @ApiParam(value = "Dataset Id", example = "0", required = true)
+      @RequestParam("datasetId") Long datasetId,
+      @ApiParam(value = "Snapshot Id", example = "0", required = true)
+      @RequestParam("idSnapshot") Long idSnapshot,
+      @ApiParam(value = "Starting number", example = "0", required = true)
+      @RequestParam("startingNumber") Long startingNumber,
+      @ApiParam(value = "Ending number", example = "0", required = true)
+      @RequestParam("endingNumber") Long endingNumber,
+      @ApiParam(value = "TRUE or FALSE", example = "TRUE")
+      @RequestParam("forSplitting") boolean forSplitting) {
+
+    try {
+      LOG.info("Method restoreSpecificSnapshotData starts for datasetId: {}, idSnapshot: {}, startingNumber: {}, endingNumber: {}, forSplitting: {}",
+          datasetId, idSnapshot, startingNumber, endingNumber, forSplitting);
+
+      recordStoreService.restoreSpecificFileSnapshot(datasetId, idSnapshot, startingNumber, endingNumber, forSplitting);
+
+      LOG.info("Method restoreSpecificFileSnapshot ends");
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in method restoreSpecificSnapshotData for datasetId: {} with error {}", datasetId, e);
+    }
+
+  }
+
 }

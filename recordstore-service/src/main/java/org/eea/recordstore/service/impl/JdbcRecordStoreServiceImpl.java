@@ -1082,7 +1082,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
      * @param endingNumber
      * @param processId
      */
-    @Async @Override public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
+    @Async @Override
+    public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
         int startingNumber, int endingNumber, String processId, String currentSplitFileName) throws SQLException, IOException {
 
         LOG.info(
@@ -1128,6 +1129,98 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         }
     }
 
+  /**
+   * Copy process specific File snapshot
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @param cm the cm
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
+   */
+  private void copyProcessSpecificFileSnapshot(Long datasetId, Long idSnapshot,
+      CopyManager cm, Long startingNumber, Long endingNumber, boolean forSplitting)
+      throws IOException, SQLException {
+
+      LOG.info("Method copyProcessSpecificSnapshot starts with datasetId: {}", datasetId);
+
+      if (forSplitting) {
+        // Record value
+        String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+            LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
+
+        String copyQueryRecord = COPY_DATASET + datasetId
+            + ".record_value(id, id_record_schema, id_table, dataset_partition_id, data_provider_code) FROM STDIN";
+        copyFromFile(copyQueryRecord, nameFileRecordValue, cm);
+        LOG.info("Executed copyFromFile for record_value with file {} and datasetId {}", nameFileRecordValue, datasetId);
+
+        String nameFileFieldValue = pathSnapshot
+            + String.format(FILE_PATTERN_NAME, idSnapshot, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+
+        SplitSnapfile snapFileForSplitting = isSnapFileForSplitting(nameFileFieldValue);
+        splitSnapFile(nameFileFieldValue, idSnapshot, snapFileForSplitting);
+      }
+
+      String copyQueryField = COPY_DATASET + datasetId
+          + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
+      for (Long i = startingNumber; i <= endingNumber; i++) {
+        String splitFile = pathSnapshot
+            + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+        try {
+          LOG.info("Recover copy file {}", splitFile);
+          copyFromFileRecovery(copyQueryField, splitFile, cm);
+          LOG.info("Recover file {} copied and will be deleted", splitFile);
+          //deleteFile(Arrays.asList(splitFile));
+          LOG.info("Recover file {} has been deleted", splitFile);
+        } catch (Exception e) {
+          LOG_ERROR.error("Error in recover copy field process for snapshotId {} with error {}", idSnapshot, e);
+        }
+      }
+
+      String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+          LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+
+      String copyQueryAttachment = COPY_DATASET + datasetId
+          + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
+      copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
+
+
+      LOG.info("Method copyProcessSpecificSnapshot ends with datasetId: {}", datasetId);
+  }
+
+  /**
+   * Restore specific file snapshot.
+   *
+   * @param datasetId      the dataset id
+   * @param idSnapshot     the id snapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param forSplitting
+   */
+  @Async
+  @Override
+  public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
+      Long startingNumber, Long endingNumber, boolean forSplitting) {
+
+    LOG.info("Method restoreSpecificFileSnapshot starts with datasetId: {}", datasetId);
+    try {
+      ConnectionDataVO connection =
+          getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+      Connection con =
+          DriverManager.getConnection(connection.getConnectionString(), connection.getUser(),
+              connection.getPassword());
+      con.setAutoCommit(true);
+
+      CopyManager cm = new CopyManager((BaseConnection) con);
+
+      copyProcessSpecificFileSnapshot(datasetId, idSnapshot, cm, startingNumber, endingNumber, forSplitting);
+
+      LOG.info("Method restoreSpecificFileSnapshot ends with datasetId: {}", datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in method restoreSpecificFileSnapshot for datasetId: {} with error {}",
+          datasetId, e);
+    }
+  }
 
     @Override
     public boolean recoverCheckForStuckFile(Long datasetId, String firstFieldId, String lastFieldId) {
@@ -2291,6 +2384,45 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
         LOG.info("Method splitSnapFile ends for file {} ", inputfile);
     }
+
+  private void splitSnapFile(String inputfile, Long idSnapshot, SplitSnapfile snapFileForSplitting) {
+
+    LOG.info("Method splitSnapFile starts for file {} with idSnapshot {}, snapFileForSplitting {}", inputfile, idSnapshot, snapFileForSplitting);
+    int numberOfFiles = snapFileForSplitting.getNumberOfFiles();
+    int maxLinesPerFile = 200000;
+
+    try {
+      // Actual splitting of file into smaller files
+      FileInputStream fstream = new FileInputStream(inputfile);
+      DataInputStream in = new DataInputStream(fstream);
+      BufferedReader br = new BufferedReader(new InputStreamReader(in));
+      String strLine;
+
+      for (int j = 1; j <= numberOfFiles; j++) {
+        // Destination File Location
+        String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j,
+            LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+        FileWriter fstream1 = new FileWriter(pathSnapshot + splitFileName);
+        BufferedWriter out = new BufferedWriter(fstream1);
+        for (int i = 1; i <= maxLinesPerFile; i++) {
+          strLine = br.readLine();
+          if (strLine != null) {
+            out.write(strLine);
+            if (i != maxLinesPerFile) {
+              out.newLine();
+            }
+          }
+        }
+        out.close();
+      }
+
+      in.close();
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in file {} with error", inputfile, e);
+    }
+
+    LOG.info("Method splitSnapFile ends for file {} ", inputfile);
+  }
 
   /**
    * Check if the snapshot will be splitted and get the number of files and rows
