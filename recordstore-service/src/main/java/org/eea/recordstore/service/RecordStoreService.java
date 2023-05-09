@@ -1,5 +1,5 @@
 /*
- * 
+ *
  */
 package org.eea.recordstore.service;
 
@@ -255,4 +255,8 @@ public interface RecordStoreService {
    * @param taskId
    */
   TaskVO findReleaseTaskByTaskId(Long taskId);
+
+
+  void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
+      Long startingNumber, Long endingNumber, String type);
 }

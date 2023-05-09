@@ -1128,6 +1128,84 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         }
     }
 
+  /**
+   * Copy process specific File snapshot
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @param cm the cm
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws SQLException the SQL exception
+   */
+  private void copyProcessSpecificFileSnapshot(Long datasetId, Long idSnapshot,
+      CopyManager cm, Long startingNumber, Long endingNumber, String type)
+      throws IOException, SQLException {
+
+    LOG.info("Method copyProcessSpecificSnapshot starts with datasetId: {}", datasetId);
+    switch (type) {
+      case FIELD_TYPE:
+        String copyQueryField = COPY_DATASET + datasetId
+            + ".field_value(id, type, value, id_field_schema, id_record) FROM STDIN";
+
+        for (Long i = startingNumber; i <= endingNumber; i++) {
+          String splitFile = pathSnapshot
+              + String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, i, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+          try {
+            LOG.info("Recover copy file {}", splitFile);
+            copyFromFileRecovery(copyQueryField, splitFile, cm);
+            LOG.info("Recover file {} copied and will be deleted", splitFile);
+            //deleteFile(Arrays.asList(splitFile));
+            LOG.info("Recover file {} has been deleted", splitFile);
+          } catch (Exception e) {
+            LOG_ERROR.error("Error in recover copy field process for snapshotId {} with error {}", idSnapshot, e);
+          }
+        }
+        break;
+      case ATTACHMENT_TYPE:
+        String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+            LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+
+        String copyQueryAttachment = COPY_DATASET + datasetId
+            + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
+        copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
+        break;
+    }
+    LOG.info("Method copyProcessSpecificSnapshot ends with datasetId: {}", datasetId);
+  }
+
+  /**
+   * Restore specific file snapshot.
+   *
+   * @param datasetId      the dataset id
+   * @param idSnapshot     the id snapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param type
+   */
+  @Async
+  @Override
+  public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
+      Long startingNumber, Long endingNumber, String type) {
+
+    LOG.info("Method restoreSpecificFileSnapshot starts with datasetId: {}", datasetId);
+    try {
+      ConnectionDataVO connection =
+          getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+      Connection con =
+          DriverManager.getConnection(connection.getConnectionString(), connection.getUser(),
+              connection.getPassword());
+      con.setAutoCommit(true);
+
+      CopyManager cm = new CopyManager((BaseConnection) con);
+
+      copyProcessSpecificFileSnapshot(datasetId, idSnapshot, cm, startingNumber, endingNumber, type);
+
+      LOG.info("Method restoreSpecificFileSnapshot ends with datasetId: {}", datasetId);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error in method restoreSpecificFileSnapshot for datasetId: {} with error {}",
+          datasetId, e);
+    }
+  }
 
     @Override
     public boolean recoverCheckForStuckFile(Long datasetId, String firstFieldId, String lastFieldId) {

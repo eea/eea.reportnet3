@@ -258,4 +258,21 @@ public interface RecordStoreController {
    */
   @PostMapping(value = "/private/task/save")
   void saveTask(@RequestBody TaskVO task);
+
+  /**
+   * Restore specific file snapshot data.
+   *
+   * @param datasetId
+   * @param idSnapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param type
+   */
+  @PostMapping(value = "/restoreSpecificFileSnapshotData")
+  void restoreSpecificFileSnapshotData(
+      @RequestParam("datasetId") Long datasetId,
+      @RequestParam("idSnapshot") Long idSnapshot,
+      @RequestParam("startingNumber") Long startingNumber,
+      @RequestParam("endingNumber") Long endingNumber,
+      @RequestParam("type") String type);
 }
