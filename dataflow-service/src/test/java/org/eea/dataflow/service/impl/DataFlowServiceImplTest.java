@@ -409,6 +409,8 @@ public class DataFlowServiceImplTest {
 
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
+    resource.setRole(SecurityRoleEnum.ADMIN);
+
     List<ResourceAccessVO> resources = new ArrayList<>();
     resources.add(resource);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
@@ -1189,6 +1191,7 @@ public class DataFlowServiceImplTest {
 
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
     resourceAccessVO.setId(0L);
+    resourceAccessVO.setRole(SecurityRoleEnum.ADMIN);
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
     authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -1208,6 +1211,8 @@ public class DataFlowServiceImplTest {
 
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
     resourceAccessVO.setId(0L);
+    resourceAccessVO.setRole(SecurityRoleEnum.ADMIN);
+
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
     authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -1229,6 +1234,8 @@ public class DataFlowServiceImplTest {
 
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
     resourceAccessVO.setId(0L);
+    resourceAccessVO.setRole(SecurityRoleEnum.ADMIN);
+
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
     authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -1257,6 +1264,7 @@ public class DataFlowServiceImplTest {
 
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
     resourceAccessVO.setId(0L);
+    resourceAccessVO.setRole(SecurityRoleEnum.DATA_CUSTODIAN);
     List<ResourceAccessVO> idResources = new ArrayList<>();
     idResources.add(resourceAccessVO);
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
@@ -1315,6 +1323,8 @@ public class DataFlowServiceImplTest {
 
     ResourceAccessVO resourceAccessVO = new ResourceAccessVO();
     resourceAccessVO.setId(0L);
+    resourceAccessVO.setRole(SecurityRoleEnum.ADMIN);
+
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
     authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -1351,6 +1361,7 @@ public class DataFlowServiceImplTest {
 
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
+    resource.setRole(SecurityRoleEnum.ADMIN);
     List<ResourceAccessVO> resources = new ArrayList<>();
     resources.add(resource);
     when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
