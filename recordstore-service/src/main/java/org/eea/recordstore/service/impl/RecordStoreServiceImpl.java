@@ -533,4 +533,10 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   @Override public TaskVO findReleaseTaskByTaskId(Long taskId) {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
+
+  @Override
+  public void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot, Long startingNumber,
+      Long endingNumber, String type) {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
 }
