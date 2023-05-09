@@ -270,6 +270,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       JobVO job = null;
       if (fmeJobId!=null) {
+        jobControllerZuul.updateFmeCallbackJobParameter(fmeJobId, true);
         job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
       }
       if(job!=null){
@@ -2028,7 +2029,7 @@ public class DatasetControllerImpl implements DatasetController {
    */
   @Override
   @DeleteMapping(value = "/deleteLocksToImportProcess/{datasetId}")
-  @PreAuthorize("hasAnyRole('ADMIN')")
+  @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Deletes the locks related to import", hidden = true)
   public void deleteLocksToImportProcess(@ApiParam(value = "Dataset id from which locks should be removed",
           example = "15") @PathVariable("datasetId") Long datasetId) {

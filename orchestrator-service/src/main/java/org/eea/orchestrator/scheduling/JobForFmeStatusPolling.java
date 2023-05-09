@@ -34,8 +34,13 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Component
 
@@ -80,11 +85,16 @@ public class JobForFmeStatusPolling {
     private JobUtils jobUtils;
 
     private static final String JSON_STATUS_PARAM="status";
-    private static final String FME_TOKEN_HEADER="fmetoken token=";
+    private static final String JSON_TIME_FINISHED_PARAM="timeFinished";
+
     private static final String MEDIA_TYPE_JSON="application/json";
 
     @Value("${integration.fme.polling.token}")
     private String fmeTokenProperty;
+
+    /* The maximum time in milliseconds for which an import fme job that is successfully finished in fme can have no callback with a file */
+    @Value(value = "${scheduling.inProgress.import.fme.jobs.without.callback.max.time}")
+    private Long maxTimeInMsForInProgressImportJobsWithoutTasks;
 
     @PostConstruct
     private void init() {
@@ -95,9 +105,10 @@ public class JobForFmeStatusPolling {
     }
 
     /**
-     * The job runs every 10 minutes. It finds fme import jobs that have tasks with status=IN_PROGRESS and fme_status not success.
+     * The job runs every 10 minutes. It finds fme import jobs that have tasks with status=IN_PROGRESS
      * Then it polls for fme status and updates the value.
      * If fme_status is ABORTED, FME_FAILURE or JOB_FAILURE the job is failed.
+     * If fme_status is SUCCESS but we haven't received a callback from fme for 30 minutes the job will be failed.
      */
     public void pollingForFmeJobs() {
         try {
@@ -108,9 +119,9 @@ public class JobForFmeStatusPolling {
             LOG.info("Running scheduled job pollingForFmeJobs");
             for (JobVO job: jobsForPolling){
                 try {
-                    String fmeStatus = pollFmeForJobStatus(job.getId().toString(), job.getFmeJobId());
-                    FmeJobStatusEnum fmeStatusEnum = FmeJobStatusEnum.valueOf(fmeStatus);
-                    if(fmeStatusEnum == null) {
+                    JSONObject jsonResponse = pollFmeForJobStatusAndGetResponse(job.getId().toString(), job.getFmeJobId());
+                    FmeJobStatusEnum fmeStatus =  FmeJobStatusEnum.valueOf(jsonResponse.get(JSON_STATUS_PARAM).toString());
+                    if(fmeStatus == null) {
                         String exceptionMessage = "Got unknown status when polling fme for jobId " + job.getId() + " and fmeJobId " + job.getFmeJobId()
                                 + " Status was: " + fmeStatus;
                         throw new Exception(exceptionMessage);
@@ -118,12 +129,32 @@ public class JobForFmeStatusPolling {
 
                     //if job's fme status is empty or job's fme status has been modified, we need to update it
                     if(job.getFmeStatus() == null || (job.getFmeStatus() != null && !job.getFmeStatus().getValue().equals(fmeStatus))){
-                        jobService.updateFmeStatus(job.getId(), fmeStatusEnum);
+                        jobService.updateFmeStatus(job.getId(), fmeStatus);
                     }
 
                     String [] failedStatuses = {FmeJobStatusEnum.ABORTED.getValue(), FmeJobStatusEnum.FME_FAILURE.getValue(), FmeJobStatusEnum.JOB_FAILURE.getValue()};
-                    if ( Arrays.stream(failedStatuses).anyMatch(fmeStatusEnum.getValue()::equals)){
+                    if ( Arrays.stream(failedStatuses).anyMatch(fmeStatus.getValue()::equals)){
                         failJob(job);
+                    }
+                    else{
+                        if(fmeStatus.getValue().equals(FmeJobStatusEnum.SUCCESS.getValue())){
+                            //check for fme callback and if thirty minutes have passed since timeFinished fme parameter
+                            Map<String, Object> insertedParameters = job.getParameters();
+                            if(insertedParameters.get("fmeCallback") != null && (Boolean) insertedParameters.get("fmeCallback") == false){
+                                if (jsonResponse.get(JSON_TIME_FINISHED_PARAM) != null) {
+                                    String timeFinished = (String) jsonResponse.get(JSON_TIME_FINISHED_PARAM);
+                                    if(fmeJobExceededMaxDuration(timeFinished))
+                                    {
+                                        failJob(job);
+                                    }
+                                } else {
+                                    String exceptionMessage = "Job with id " + job.getId() + " and fmeJobId " + job.getFmeJobId() + " has fme status SUCCESS, hasn't received a file and timeFinished parameter was not provided";
+                                    throw new FmeIntegrationException(exceptionMessage);
+                                }
+
+                            }
+
+                        }
                     }
                 }
                 catch (Exception e){
@@ -168,7 +199,7 @@ public class JobForFmeStatusPolling {
         LOG.info("Sent notification FME_IMPORT_JOB_FAILED_EVENT for jobId {} and fmeJobId {}", job.getId(), job.getFmeJobId());
     }
 
-    private String pollFmeForJobStatus(String jobId, String fmeJobId) throws FmeIntegrationException, IOException {
+    private JSONObject pollFmeForJobStatusAndGetResponse(String jobId, String fmeJobId) throws FmeIntegrationException, IOException {
         String fmePollingUrl = "https://fme.discomap.eea.europa.eu/fmerest/v3/transformations/jobs/id/" + fmeJobId;
 
         HttpGet request = new HttpGet(fmePollingUrl);
@@ -186,7 +217,7 @@ public class JobForFmeStatusPolling {
                 if (jsonResponse.get(JSON_STATUS_PARAM) != null) {
                     FmeJobStatusEnum fmeStatus =  FmeJobStatusEnum.valueOf(jsonResponse.get(JSON_STATUS_PARAM).toString());
                     LOG.info("When polling for fme status for jobId {} and fmeJobId {} received fme status {}", jobId, fmeJobId, fmeStatus.getValue());
-                    return fmeStatus.toString();
+                    return jsonResponse;
                 } else {
                     String exceptionMessage = "When polling for fme status, received wrong response status " + jsonResponse.get(JSON_STATUS_PARAM) + " for jobId " + jobId + " and fmeJobId " + fmeJobId;
                     throw new FmeIntegrationException(exceptionMessage);
@@ -201,5 +232,25 @@ public class JobForFmeStatusPolling {
             throw new FmeIntegrationException(exceptionMessage);
         }
 
+    }
+
+    private Boolean fmeJobExceededMaxDuration(String timeFinished){
+        DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter
+                .ofPattern("yyyy-MM-dd'T'HH:mm:ssz");
+
+        //Instance with given offset
+        OffsetDateTime odtInstanceAtOffset = OffsetDateTime.parse(timeFinished, DATE_TIME_FORMATTER);
+
+        //Instance in UTC
+        OffsetDateTime odtInstanceAtUTC = odtInstanceAtOffset.withOffsetSameInstant(ZoneOffset.UTC);
+
+
+        Long fmeTimeFinishedInMs = odtInstanceAtUTC.toInstant().toEpochMilli();
+        Long durationOfJob = new Date().getTime() - fmeTimeFinishedInMs;
+        if(durationOfJob > maxTimeInMsForInProgressImportJobsWithoutTasks)
+        {
+            return true;
+        }
+        return false;
     }
 }

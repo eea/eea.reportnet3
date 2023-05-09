@@ -10,6 +10,7 @@ import org.eea.dataflow.service.IntegrationService;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAUnauthorizedException;
 import org.eea.interfaces.controller.dataflow.integration.fme.FMEController;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.integration.fme.FMECollectionVO;
@@ -18,7 +19,6 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.lock.service.LockService;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -76,6 +76,9 @@ public class FMEControllerImpl implements FMEController {
 
   @Autowired
   private JobControllerZuul jobControllerZuul;
+
+  @Autowired
+  private DataSetControllerZuul dataSetControllerZuul;
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
@@ -145,8 +148,8 @@ public class FMEControllerImpl implements FMEController {
       fmeCommunicationService.releaseNotifications(fmeJob, fmeOperationInfoVO.getStatusNumber(),
           fmeOperationInfoVO.isNotificationRequired());
       fmeCommunicationService.updateJobStatus(fmeJob, fmeOperationInfoVO.getStatusNumber());
-      if(fmeOperationInfoVO.getStatusNumber() != 0L && fmeJob.getOperation() == IntegrationOperationTypeEnum.IMPORT) {
-        updateFailedJobAndProcessStatus(fmeJob.getJobId());
+      if(fmeJob.getOperation() == IntegrationOperationTypeEnum.IMPORT) {
+        updateFailedJobAndProcessStatus(fmeJob.getJobId(), fmeOperationInfoVO.getStatusNumber());
       }
     } catch (EEAForbiddenException e) {
       exception = e;
@@ -169,12 +172,24 @@ public class FMEControllerImpl implements FMEController {
     }
   }
 
-  private void updateFailedJobAndProcessStatus(Long fmeJobId){
+  private void updateFailedJobAndProcessStatus(Long fmeJobId, Long fmeStatusNum){
     try{
       JobVO jobVO = jobControllerZuul.findJobByFmeJobId(fmeJobId.toString());
+      if(fmeStatusNum == 0L){
+        Map<String, Object> insertedParameters = jobVO.getParameters();
+        if(insertedParameters.get("fmeCallback") == null || (Boolean) insertedParameters.get("fmeCallback") == true){
+          LOG.info("Fme job with jobId {} and fmeJobId {} is successful and a callback has been made with a file", jobVO.getId(), fmeJobId);
+          return;
+        }
+      }
       if(jobVO.getJobStatus().getValue().equals(JobStatusEnum.IN_PROGRESS.getValue())) {
+        //if the job is in progress and the job either failed in fme or was successful but no file was sent to Reportnet3, the job will be failed.
         jobControllerZuul.updateJobAndProcess(jobVO.getId(), JobStatusEnum.FAILED, ProcessStatusEnum.CANCELED);
         LOG.info("Updated fme job, job and process in /operationFinished for jobId {} and fmeJobId {}", jobVO.getId(), fmeJobId);
+
+        dataSetControllerZuul.deleteLocksToImportProcess(jobVO.getDatasetId());
+        jobControllerZuul.sendFmeImportFailedNotification(jobVO);
+
       }
     }
     catch (Exception e) {
