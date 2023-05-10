@@ -5,11 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.eea.dataset.exception.InvalidJsonException;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.persistence.data.util.JsonValidator;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -62,7 +60,6 @@ import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.io.*;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -320,6 +317,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private static final String JSON = ".json";
 
   private int defaultFileExportProcessPriority = 20;
+
+  private static final Integer ETL_EXPORT_MIN_LIMIT = 10000;
 
   /**
    * Find by table value with order.
@@ -1663,12 +1662,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                   .filter(s -> StringUtils.isNotBlank(s)).collect(Collectors.joining(","));
         }
 
-        String copyQueryDataset = null;
-        if (totalRecords != null && totalRecords > 0L) {
-            StringBuilder stringQuery = createEtlExportQuery(false, limit, offset, datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchema, filterChain);
-            copyQueryDataset = "COPY (" + stringQuery + ") to STDOUT";
-        }
-        createJsonRecordsForTable(datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchemaList, tableName, copyQueryDataset, tableCount, totalRecords, jsonFile, jobId);
+        createJsonRecordsForTable(datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchemaList, tableName, tableCount, totalRecords, jsonFile,
+                jobId, limit, offset, filterChain, tableSchema);
       }
 
       createZipFromJson(filePath, datasetId, jobId);
@@ -1691,6 +1686,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     String jsonFile = filePath+JSON;
     Path path = Paths.get(jsonFile);
     String zipFile = filePath+ZIP;
+    LOG.info("Starting creation of FILE_EXPORT file {}, for datasetId {} and jobId {}", zipFile, datasetId, jobId);
     try (ZipOutputStream out =
                  new ZipOutputStream(new FileOutputStream(zipFile));
          FileInputStream fis = new FileInputStream(jsonFile)) {
@@ -1700,6 +1696,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       int len;
       while ((len = fis.read(buffer)) != -1) {
         out.write(buffer, 0, len);
+        buffer = new byte[1024];
       }
       LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", zipFile, datasetId, jobId);
     } catch (Exception e) {
@@ -1714,11 +1711,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
   }
 
-  private void createJsonRecordsForTable(Long datasetId, String tableSchemaId, String filterValue, String columnName, String dataProviderCodes, List<TableSchema> tableSchemaList, String tableName, String query,
-                                                Integer tableCount, Long totalRecords, String jsonFile, Long jobId) throws IOException, InvalidJsonException, SQLException {
+  private void createJsonRecordsForTable(Long datasetId, String tableSchemaId, String filterValue, String columnName, String dataProviderCodes, List<TableSchema> tableSchemaList, String tableName,
+                                                Integer tableCount, Long totalRecords, String jsonFile, Long jobId, Integer limit, Integer offset, String filterChain, TableSchema tableSchema) throws IOException, SQLException {
     try (Connection con = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
          FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
-
+      LOG.info("Starting creation of json file {} for datasetId {} and jobId {}", jsonFile, datasetId, jobId);
       CopyManager copyManager = new CopyManager((BaseConnection) con);
       ObjectMapper mapper = new ObjectMapper();
       if (tableCount == 1) {
@@ -1736,21 +1733,35 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       fos.write(",\n".getBytes());
       fos.write("\"records\": [\n".getBytes());
       if (totalRecords > 0) {
-        byte[] buffer;
-        CopyOut copyOut = copyManager.copyOut(query);
         Integer recordCount = 0;
-        while ((buffer = copyOut.readFromCopy()) != null) {
-          if (recordCount != 0) {
-            fos.write(",".getBytes());
+        if (limit == null) {
+          limit = totalRecords.intValue();
+        }
+        Integer initExtract = (offset - 1) * limit;
+        Integer limitAux = ETL_EXPORT_MIN_LIMIT;
+        for (Integer offsetAux2 = initExtract; offsetAux2 < initExtract + limit
+                && offsetAux2 < initExtract + totalRecords; offsetAux2 += limitAux) {
+          if (offsetAux2 + limitAux > initExtract + limit) {
+            limitAux = initExtract + limit - offsetAux2;
           }
-          fos.write("\n".getBytes());
-          recordCount++;
-          if (!JsonValidator.isValidJson(new String(buffer, StandardCharsets.UTF_8))) {
-            LOG.error("Error creating export file for datasetId {} and jobId {}, json created is not valid", datasetId, jobId);
-            throw new InvalidJsonException();
+          StringBuilder stringQuery = createEtlExportQuery(false, limitAux, offsetAux2, datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchema, filterChain);
+          CopyOut copyOut = copyManager.copyOut("COPY (" + stringQuery + ") to STDOUT");
+          try {
+            byte[] buffer;
+            while ((buffer = copyOut.readFromCopy()) != null) {
+              if (recordCount != 0) {
+                fos.write(",".getBytes());
+              }
+              fos.write("\n".getBytes());
+              recordCount++;
+              String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(buffer));
+              fos.write(res.getBytes());
+            }
+          } finally {
+            if (copyOut.isActive()) {
+              copyOut.cancelCopy();
+            }
           }
-          String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(buffer));
-          fos.write(res.getBytes());
         }
       }
       fos.write("\n".getBytes());
@@ -1833,11 +1844,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         stringQuery.append(" limit ").append(limit);
       }
       if (offset!=null && offset!=0 && offset!=1) {
-        Integer offsetAux = (offset - 1) * limit;
-        stringQuery.append(" offset ").append(offsetAux);
+        stringQuery.append(" offset ").append(offset);
       }
     }
-    LOG.info("Query: {} ", stringQuery);
     return stringQuery;
   }
 }
