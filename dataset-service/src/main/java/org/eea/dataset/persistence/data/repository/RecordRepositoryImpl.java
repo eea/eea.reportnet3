@@ -318,7 +318,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   private int defaultFileExportProcessPriority = 20;
 
-  private static final Integer ETL_EXPORT_MIN_LIMIT = 10000;
+  private static final Integer ETL_EXPORT_MIN_LIMIT = 100000;
 
   /**
    * Find by table value with order.
@@ -1696,7 +1696,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       int len;
       while ((len = fis.read(buffer)) != -1) {
         out.write(buffer, 0, len);
-        buffer = new byte[1024];
       }
       LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", zipFile, datasetId, jobId);
     } catch (Exception e) {
