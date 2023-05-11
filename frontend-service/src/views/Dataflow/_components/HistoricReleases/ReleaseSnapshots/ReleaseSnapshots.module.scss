@@ -1,0 +1,71 @@
+.snapshots {
+  text-align: center;
+}
+
+.releaseSnapshotsWithoutTable {
+  height: 53.5vh;
+}
+
+.checkedValueColumn {
+  text-align: center;
+
+  .icon {
+    color: var(--main-font-color);
+  }
+}
+
+.downloadIcon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--documenticon-color);
+}
+
+.filesContainer {
+  display: flex;
+  justify-content: center !important;
+
+  .filesIcon {
+    font-size: 1.4rem;
+    color: var(--documenticon-color);
+
+    .cursorPointer {
+      cursor: pointer;
+    }
+  }
+
+  .restrictFromPublicIcon {
+    font-size: 1.3rem;
+    color: var(--c-gray-75);
+    cursor: pointer;
+  }
+}
+
+.spinner {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
+}
+
+.noFilters {
+  padding-top: 2.5rem;
+}
+
+.releaseSnapshots {
+  height: 50vh;
+}
+
+.noReleaseSnapshots,
+.emptyFilteredData {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  height: 75%;
+}

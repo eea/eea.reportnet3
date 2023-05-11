@@ -1211,6 +1211,8 @@ export const Dataflow = () => {
           dataflowState={dataflowState}
           dataProviderId={dataProviderId}
           handleRedirect={handleRedirect}
+          isAdmin={isAdmin}
+          isCustodian={isCustodian}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
           manageDialogs={manageDialogs}
           onCleanUpReceipt={onCleanUpReceipt}
