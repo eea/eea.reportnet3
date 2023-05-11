@@ -270,4 +270,8 @@ public interface DatasetSnapshotController {
    */
   @PutMapping(value = "/private/removeHistoricRelease/{datasetId}")
   void removeHistoricRelease(@PathVariable("datasetId") Long datasetId);
+
+  @GetMapping(value = "/private/v1/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ReleaseVO> historicReleasesPrivate(@RequestParam("datasetId") Long datasetId,
+                                   @RequestParam(value = "dataflowId", required = false) Long dataflowId);
 }

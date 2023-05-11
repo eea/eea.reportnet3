@@ -520,6 +520,22 @@ public class JobControllerImpl implements JobController {
     }
 
     /**
+     * Updates job info value
+     * @param jobId
+     * @param jobInfo
+     */
+    @Override
+    @PostMapping(value = "/private/updateJobInfo/{jobId}")
+    public void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo){
+        try {
+            jobService.updateJobInfo(jobId, jobInfo);
+        } catch (Exception e) {
+            LOG.error("Error while updating job info for jobId {} and jobInfo {}", jobId, jobInfo.getValue(), e);
+            throw e;
+        }
+    }
+
+    /**
      * Update the fmeCallback job parameter
      *
      * @param fmeJobId the fme job id
@@ -623,22 +639,6 @@ public class JobControllerImpl implements JobController {
     public void sendFmeImportFailedNotification(@RequestBody JobVO jobVO){
         jobUtils.sendKafkaImportNotification(jobVO, EventType.FME_IMPORT_JOB_FAILED_EVENT, "Fme job failed");
         LOG.info("Sent notification FME_IMPORT_JOB_FAILED_EVENT for jobId {} and fmeJobId {}", jobVO.getId(), jobVO.getFmeJobId());
-    }
-
-    /**
-     * Updates job info value
-     * @param jobId
-     * @param jobInfo
-     */
-    @Override
-    @PostMapping(value = "/private/updateJobInfo/{jobId}")
-    public void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo){
-        try {
-            jobService.updateJobInfo(jobId, jobInfo);
-        } catch (Exception e) {
-            LOG.error("Error while updating job info for jobId {} and jobInfo {}", jobId, jobInfo.getValue(), e);
-            throw e;
-        }
     }
 }
 

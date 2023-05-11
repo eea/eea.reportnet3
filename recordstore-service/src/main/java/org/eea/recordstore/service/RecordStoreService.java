@@ -1,18 +1,19 @@
 /*
- * 
+ *
  */
 package org.eea.recordstore.service;
+
+import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.recordstore.exception.RecordStoreAccessException;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
-import org.eea.interfaces.vo.validation.TaskVO;
-import org.eea.recordstore.exception.RecordStoreAccessException;
 
 /**
  * The Interface RecordStoreService.
@@ -255,4 +256,24 @@ public interface RecordStoreService {
    * @param taskId
    */
   TaskVO findReleaseTaskByTaskId(Long taskId);
+
+
+  /**
+   * Restore specific file snapshot
+   *
+   * @param datasetId
+   * @param idSnapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param forSplitting
+   */
+  void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
+      Long startingNumber, Long endingNumber, boolean forSplitting);
+
+  /**
+   * Get list of the latest release snapshot files
+   * @param datasetId
+   * @return
+   */
+  List<String> getLatestReleaseSnapshots(Long datasetId, Long dataflowId);
 }

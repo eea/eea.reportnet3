@@ -146,7 +146,7 @@ public interface JobController {
      * @param status the job's status
      * @return
      */
-    @PostMapping(value = "/private/updateJobStatus/{id}/{status}")
+    @PostMapping(value = "/updateJobStatus/{id}/{status}")
     void updateJobStatus(@PathVariable("id") Long jobId, @PathVariable("status") JobStatusEnum status);
 
 
@@ -213,6 +213,14 @@ public interface JobController {
     @PutMapping(value = "/cancelJob/{jobId}")
     void cancelJob(@PathVariable("jobId") Long jobId) throws Exception;
 
+    /**
+     * Updates job info value
+     * @param jobId
+     * @param jobInfo
+     */
+    @PostMapping(value = "/private/updateJobInfo/{jobId}")
+    void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo);
+
 
     /**
      * Update the fmeCallback job parameter
@@ -232,14 +240,6 @@ public interface JobController {
      */
     @PostMapping(value = "/private/sendFmeImportFailedNotification")
     void sendFmeImportFailedNotification(@RequestBody JobVO jobVO);
-
-    /**
-     * Updates job info value
-     * @param jobId
-     * @param jobInfo
-     */
-    @PostMapping(value = "/private/updateJobInfo/{jobId}")
-    void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo);
 }
 
 

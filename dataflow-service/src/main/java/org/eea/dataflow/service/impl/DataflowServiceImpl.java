@@ -312,32 +312,23 @@ public class DataflowServiceImpl implements DataflowService {
       if (MapUtils.isNotEmpty(filters) && filters.containsKey("role")) {
         List<ResourceAccessVO> resourcesByUser = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW,
                 SecurityRoleEnum.fromValue(filters.get("role")));
-        LOG.info("idsResources {}", resourcesByUser);
         resourcesByUser.removeIf(
             resourceAccessVO -> resourceAccessVO.getRole().equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
                 && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
-        LOG.info("resourcesByUser after deletion {}", resourcesByUser);
         idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
-        LOG.info("idsResources {}", idsResources);
 
         List<ResourceAccessVO> resourcesByUserWithoutRole = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
-        LOG.info("resourcesByUser {}", resourcesByUserWithoutRole);
         resourcesByUserWithoutRole.removeIf(
             resourceAccessVO -> resourceAccessVO.getRole().equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
                 && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
-        LOG.info("resourcesByUserWithoutRole after deletion {}", resourcesByUserWithoutRole);
         idsResourcesWithoutRole = resourcesByUserWithoutRole.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
-        LOG.info("idsResourcesWithoutRole {}", idsResourcesWithoutRole);
         filters.remove("role");
       } else {
         List<ResourceAccessVO> resourcesByUser = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
-        LOG.info("resourcesByUser {}", resourcesByUser);
         resourcesByUser.removeIf(
             resourceAccessVO -> resourceAccessVO.getRole().equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
                 && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
-        LOG.info("resourcesByUser after deletion {}", resourcesByUser);
         idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
-        LOG.info("idsResources {}", idsResources);
       }
 
       Map<String, List<String>> attributes = userManagementControllerZull.getUserAttributes();
@@ -1598,7 +1589,7 @@ public class DataflowServiceImpl implements DataflowService {
   public List<DataflowCountVO> getDataflowsCount() {
 
     boolean isAdmin = isAdmin();
-    
+
     List<ResourceAccessVO> resourcesByUser = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
     LOG.info("resourcesByUser {}", resourcesByUser);
     resourcesByUser.removeIf(

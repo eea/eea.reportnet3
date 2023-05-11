@@ -7,6 +7,7 @@ import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.sql.SQLException;
@@ -258,4 +259,37 @@ public interface RecordStoreController {
    */
   @PostMapping(value = "/private/task/save")
   void saveTask(@RequestBody TaskVO task);
+
+  /**
+   * Restore specific file snapshot data.
+   *
+   * @param datasetId
+   * @param idSnapshot
+   * @param startingNumber
+   * @param endingNumber
+   * @param forSplitting
+   */
+  @PostMapping(value = "/restoreSpecificFileSnapshotDataNoProcess")
+  void restoreSpecificFileSnapshotDataNoProcess(
+      @RequestParam("datasetId") Long datasetId,
+      @RequestParam("idSnapshot") Long idSnapshot,
+      @RequestParam("startingNumber") Long startingNumber,
+      @RequestParam("endingNumber") Long endingNumber,
+      @RequestParam("forSplitting") boolean forSplitting);
+
+  /**
+   * Get list of the latest release snapshot files
+   * @param datasetId
+   * @return
+   */
+  @GetMapping(value = "/getLatestReleaseSnapshots")
+  List<String> getLatestReleaseSnapshots(@RequestParam("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId);
+
+  /**
+   * Downloads snapshot file
+   * @param datasetId
+   * @param fileName
+   */
+  @GetMapping(value = "/downloadSnapshot/{datasetId}")
+  void downloadSnapshotFile(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId, @RequestParam("fileName") String fileName, HttpServletResponse response) throws Exception;
 }
