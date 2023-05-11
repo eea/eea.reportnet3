@@ -5,6 +5,8 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -27,6 +29,8 @@ import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,7 +38,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -51,6 +59,9 @@ import java.util.Map;
 @RequestMapping("/recordstore")
 @ApiIgnore
 public class RecordStoreControllerImpl implements RecordStoreController {
+
+  @Value("${pathSnapshot}")
+  private String pathSnapshot;
 
   /**
    * The record store service.
@@ -710,4 +721,58 @@ public class RecordStoreControllerImpl implements RecordStoreController {
 
   }
 
+  /**
+   * Get list of the latest release snapshot files
+   * @param datasetId
+   * @param dataflowId
+   * @return
+   */
+  @HystrixCommand
+  @GetMapping(value = "/getLatestReleaseSnapshots")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD') OR hasAnyRole('ADMIN')")
+  @Override
+  public List<String> getLatestReleaseSnapshots(@RequestParam("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId) {
+    List<String> snapshotFiles;
+    try {
+      snapshotFiles = recordStoreService.getLatestReleaseSnapshots(datasetId, dataflowId);
+    } catch (Exception e) {
+      LOG.error("Error retrieving snapshot files for datasetId " + datasetId);
+      throw e;
+    }
+    return snapshotFiles;
+  }
+
+  @HystrixCommand
+  @GetMapping(value = "/downloadSnapshot/{datasetId}")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD') OR hasAnyRole('ADMIN')")
+  @Override
+  public void downloadSnapshotFile(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
+                                   @RequestParam("fileName") String fileName, HttpServletResponse response) throws EEAException, IOException {
+    File file = new File(new File(pathSnapshot), FilenameUtils.getName(fileName));
+    if (!file.exists()) {
+      LOG.error( "Error downloading file {}, file doesn't exist", fileName);
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+    }
+    response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+    try (OutputStream out = response.getOutputStream();
+         FileInputStream in = new FileInputStream(file)) {
+      IOUtils.copyLarge(in, out);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error downloading file {}. Message: {}", fileName, e.getMessage());
+      throw e;
+    }
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -24,6 +24,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
@@ -1222,7 +1223,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
-    @Override
+  @Override
     public boolean recoverCheckForStuckFile(Long datasetId, String firstFieldId, String lastFieldId) {
         try {
             LOG.info(
@@ -2632,4 +2633,23 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     executeQueryViewCommands(stringQuery.toString().toLowerCase());
   }
 
+  /**
+   * Get list of the latest release snapshot files
+   * @param datasetId
+   * @return
+   */
+  @Override
+  public List<String> getLatestReleaseSnapshots(Long datasetId, Long dataflowId) {
+    List<ReleaseVO> releases = dataSetSnapshotControllerZuul.historicReleasesPrivate(datasetId, dataflowId);
+    List<String> releaseFiles = new ArrayList<>();
+    if (releases.size() > 0) {
+      Long snapshotId = releases.get(0).getId();
+      releaseFiles.add(String.format(FILE_PATTERN_NAME, snapshotId, LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX));
+      releaseFiles.add(String.format(FILE_PATTERN_NAME, snapshotId, LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX));
+      releaseFiles.add(String.format(FILE_PATTERN_NAME, snapshotId, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX));
+      releaseFiles.add(String.format(FILE_PATTERN_NAME, snapshotId, LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX));
+      releaseFiles.add(String.format(FILE_PATTERN_NAME, snapshotId, LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX));
+    }
+    return releaseFiles;
+  }
 }

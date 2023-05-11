@@ -13,6 +13,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.recordstore.exception.RecordStoreAccessException;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * The Interface RecordStoreService.
@@ -268,4 +269,11 @@ public interface RecordStoreService {
    */
   void restoreSpecificFileSnapshot(Long datasetId, Long idSnapshot,
       Long startingNumber, Long endingNumber, boolean forSplitting);
+
+  /**
+   * Get list of the latest release snapshot files
+   * @param datasetId
+   * @return
+   */
+  List<String> getLatestReleaseSnapshots(Long datasetId, Long dataflowId);
 }

@@ -910,4 +910,30 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   public void removeHistoricRelease(@PathVariable("datasetId") Long datasetId) {
       datasetSnapshotService.removeHistoricRelease(datasetId);
   }
+
+  /**
+   * Obtain the dataset historic releases.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/v1/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<ReleaseVO> historicReleasesPrivate(@RequestParam("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId) {
+    List<ReleaseVO> releases;
+    // get dataset type
+    try {
+      releases = datasetSnapshotService.getReleases(datasetId);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error retrieving releases for dataflowId {} and datasetId {}. Error message: {}", dataflowId, datasetId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving historic releases for dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId, e.getMessage());
+      throw e;
+    }
+
+    return releases;
+  }
 }

@@ -540,4 +540,9 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
 
+  @Override
+  public List<String> getLatestReleaseSnapshots(Long datasetId, Long dataflowId) {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
+
 }
