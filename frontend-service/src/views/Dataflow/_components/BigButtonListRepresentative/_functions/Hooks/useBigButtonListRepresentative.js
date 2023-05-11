@@ -22,7 +22,9 @@ const useBigButtonListRepresentative = ({
   onLoadReceiptData,
   onOpenReleaseConfirmDialog,
   onShowHistoricReleases,
-  representativeId
+  representativeId,
+  onShowReleaseSnapshots,
+  getDataReleaseSnapshots
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
@@ -172,6 +174,13 @@ const useBigButtonListRepresentative = ({
             command: () => {
               onShowHistoricReleases('reportingDataset', true);
               getDataHistoricReleases(dataset.datasetId, dataset.name);
+            }
+          },
+          {
+            label: resourcesContext.messages['releaseSnapshots'],
+            command: () => {
+              onShowReleaseSnapshots('reportingDataset', true);
+              getDataReleaseSnapshots(dataset.datasetId, dataset.name);
             }
           }
         ],

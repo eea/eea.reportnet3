@@ -646,6 +646,9 @@
           "key": "LOAD_HISTORIC_RELEASES_ERROR"
         },
         {
+          "key": "LOAD_RELEASE_SNAPSHOTS_ERROR"
+        },
+        {
           "key": "NOT_ALLOWED_ERROR",
           "lifeTime": 5000
         },
