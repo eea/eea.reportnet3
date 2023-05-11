@@ -1026,6 +1026,7 @@
     "noTableSelected": "Please select a table first",
     "noTablesToSelect": "There are no tables to select",
     "notAllowedError": "You are not allowed to see the requested page",
+    "notAllowedForThisDataflow": "The selected action is not allowed for this dataflow",
     "notEmpty": "Mandatory table",
     "notFieldToSelect": "No field",
     "notFoundError": "Page not found error. The requested page does not exist",
