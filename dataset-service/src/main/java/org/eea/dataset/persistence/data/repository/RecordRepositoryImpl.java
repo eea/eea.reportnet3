@@ -2,6 +2,7 @@ package org.eea.dataset.persistence.data.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -318,7 +319,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   private int defaultFileExportProcessPriority = 20;
 
-  private static final Integer ETL_EXPORT_MIN_LIMIT = 100000;
+  private static final Integer ETL_EXPORT_MIN_LIMIT = 500000;
 
   /**
    * Find by table value with order.
@@ -1692,11 +1693,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
          FileInputStream fis = new FileInputStream(jsonFile)) {
       ZipEntry entry = new ZipEntry(jsonFile);
       out.putNextEntry(entry);
-      byte[] buffer = new byte[1024];
-      int len;
-      while ((len = fis.read(buffer)) != -1) {
-        out.write(buffer, 0, len);
-      }
+      IOUtils.copyLarge(fis, out);
       LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", zipFile, datasetId, jobId);
     } catch (Exception e) {
       LOG.error("Error creating file {} for datasetId {} and jobId {}. Message: ", zipFile, datasetId, jobId, e);
