@@ -146,14 +146,14 @@ public interface JobController {
      * @param status the job's status
      * @return
      */
-    @PostMapping(value = "/updateJobStatus/{id}/{status}")
+    @PostMapping(value = "/private/updateJobStatus/{id}/{status}")
     void updateJobStatus(@PathVariable("id") Long jobId, @PathVariable("status") JobStatusEnum status);
 
 
     @PostMapping(value = "/private/updateFmeJobId/{jobId}/{fmeJobId}")
     void updateFmeJobId(@PathVariable("jobId") Long jobId, @PathVariable("fmeJobId") String fmeJobId);
 
-    @GetMapping(value = "/pollForJobStatus/{jobId}")
+    @GetMapping(value = "/private/pollForJobStatus/{jobId}")
     Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId, @RequestParam("datasetId") Long datasetId,
                                         @RequestParam("dataflowId") Long dataflowId,
                                         @RequestParam(value = "providerId", required = false) Long providerId);
