@@ -799,7 +799,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           LOG.error("Unexpected error! Error exporting file {}. Message: {}", fileName, e.getMessage());
           notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_ERROR",
                   userNotificationContentVO);
-          throw e;
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, EEAErrorMessage.FILE_EXPORT_ERROR_MESSAGE);
         }
       };
       return ResponseEntity.ok().body(responseBody);
@@ -807,7 +807,7 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       LOG.error("Unexpected error! Error exporting file {}. Message: {}", fileName, e.getMessage());
       notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_ERROR",
               userNotificationContentVO);
-      throw e;
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, EEAErrorMessage.FILE_EXPORT_ERROR_MESSAGE);
     }
   }
 }
