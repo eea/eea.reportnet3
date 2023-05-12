@@ -9,11 +9,9 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
-import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -22,6 +20,9 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.validation.ProcessTaskVO;
 import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.exception.RecordStoreAccessException;
 import org.eea.recordstore.service.ProcessService;
 import org.eea.recordstore.service.RecordStoreService;
@@ -100,11 +101,8 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
 
-  /**
-   * The notification controller zuul
-   */
   @Autowired
-  private NotificationControllerZuul notificationControllerZuul;
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * The Constant LOG_ERROR.
@@ -762,12 +760,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD') OR hasAnyRole('ADMIN')")
   @Override
   public ResponseEntity<StreamingResponseBody> downloadSnapshotFile(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
-                                                                    @RequestParam("fileName") String fileName, HttpServletResponse response) throws IOException {
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDatasetId(datasetId);
+                                                                    @RequestParam("fileName") String fileName, HttpServletResponse response) throws EEAException {
+
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
-    userNotificationContentVO.setUserId(user);
-    userNotificationContentVO.setFileName(fileName);
     try {
       File file = new File(new File(pathSnapshot), FilenameUtils.getName(fileName));
       if (!file.exists()) {
@@ -781,9 +776,9 @@ public class RecordStoreControllerImpl implements RecordStoreController {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                 String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
       }
-      notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_START",
-              userNotificationContentVO);
 
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_FILE_START, null,
+              NotificationVO.builder().datasetId(datasetId).user(user).fileName(fileName).build());
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
       StreamingResponseBody responseBody = outputStream -> {
@@ -793,20 +788,24 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           while ((len = in.read(buffer)) != -1) {
             outputStream.write(buffer, 0, len);
           }
-          notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_COMPLETE",
-                  userNotificationContentVO);
+          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_FILE_COMPLETE, null,
+                  NotificationVO.builder().datasetId(datasetId).user(user).fileName(fileName).build());
         } catch (Exception e) {
           LOG.error("Unexpected error! Error exporting file {}. Message: {}", fileName, e.getMessage());
-          notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_ERROR",
-                  userNotificationContentVO);
+          try {
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_FILE_ERROR, null,
+                    NotificationVO.builder().datasetId(datasetId).user(user).fileName(fileName).build());
+          } catch (EEAException ex) {
+            LOG.error("Error sending notification for not exporting file " + fileName);
+          }
           throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, EEAErrorMessage.FILE_EXPORT_ERROR_MESSAGE);
         }
       };
       return ResponseEntity.ok().body(responseBody);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error exporting file {}. Message: {}", fileName, e.getMessage());
-      notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_ERROR",
-              userNotificationContentVO);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_FILE_ERROR, null,
+              NotificationVO.builder().datasetId(datasetId).user(user).fileName(fileName).build());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, EEAErrorMessage.FILE_EXPORT_ERROR_MESSAGE);
     }
   }

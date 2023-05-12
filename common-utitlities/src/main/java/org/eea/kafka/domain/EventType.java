@@ -576,7 +576,16 @@ public enum EventType {
 
   /** The fme import job failed event */
   FME_IMPORT_JOB_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-          "fme_import_job_failed_event", true);
+          "fme_import_job_failed_event", true),
+
+  EXPORT_FILE_START(LiteralConstants.DATA_REPORTING_TOPIC,
+          "export_file_start_event", true),
+
+  EXPORT_FILE_COMPLETE(LiteralConstants.DATA_REPORTING_TOPIC,
+          "export_file_complete_event", true),
+
+  EXPORT_FILE_ERROR(LiteralConstants.DATA_REPORTING_TOPIC,
+          "export_file_error_event", true);
 
 
   /** The topic. */
