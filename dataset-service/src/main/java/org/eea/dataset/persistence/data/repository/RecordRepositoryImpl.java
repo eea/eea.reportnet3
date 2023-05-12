@@ -2,14 +2,13 @@ package org.eea.dataset.persistence.data.repository;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.eea.dataset.exception.InvalidJsonException;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
-import org.eea.dataset.persistence.data.util.JsonValidator;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -62,7 +61,6 @@ import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.io.*;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -1691,16 +1689,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     String jsonFile = filePath+JSON;
     Path path = Paths.get(jsonFile);
     String zipFile = filePath+ZIP;
+    LOG.info("Starting creation of FILE_EXPORT file {}, for datasetId {} and jobId {}", zipFile, datasetId, jobId);
     try (ZipOutputStream out =
                  new ZipOutputStream(new FileOutputStream(zipFile));
          FileInputStream fis = new FileInputStream(jsonFile)) {
       ZipEntry entry = new ZipEntry(jsonFile);
       out.putNextEntry(entry);
-      byte[] buffer = new byte[1024];
-      int len;
-      while ((len = fis.read(buffer)) != -1) {
-        out.write(buffer, 0, len);
-      }
+      IOUtils.copyLarge(fis, out);
       LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", zipFile, datasetId, jobId);
     } catch (Exception e) {
       LOG.error("Error creating file {} for datasetId {} and jobId {}. Message: ", zipFile, datasetId, jobId, e);
@@ -1715,7 +1710,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   }
 
   private void createJsonRecordsForTable(Long datasetId, String tableSchemaId, String filterValue, String columnName, String dataProviderCodes, List<TableSchema> tableSchemaList, String tableName, String query,
-                                                Integer tableCount, Long totalRecords, String jsonFile, Long jobId) throws IOException, InvalidJsonException, SQLException {
+                                                Integer tableCount, Long totalRecords, String jsonFile, Long jobId) throws IOException, SQLException {
+    LOG.info("Starting creation of json file {} for datasetId {} and jobId {}", jsonFile, datasetId, jobId);
     try (Connection con = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
          FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
 
@@ -1745,10 +1741,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           }
           fos.write("\n".getBytes());
           recordCount++;
-          if (!JsonValidator.isValidJson(new String(buffer, StandardCharsets.UTF_8))) {
-            LOG.error("Error creating export file for datasetId {} and jobId {}, json created is not valid", datasetId, jobId);
-            throw new InvalidJsonException();
-          }
           String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(buffer));
           fos.write(res.getBytes());
         }
