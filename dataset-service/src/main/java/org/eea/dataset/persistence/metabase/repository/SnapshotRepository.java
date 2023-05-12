@@ -126,4 +126,6 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
   @Query(nativeQuery = true,
           value = "UPDATE snapshot SET date_released=null WHERE reporting_dataset_id=:datasetId AND dc_released=true")
   void removeHistoricRelease(@Param("datasetId") Long datasetId);
+
+  Snapshot findFirstByReportingDatasetIdAndDateReleasedIsNotNullOrderByCreationDateDesc(@Param("idReportingDataset") Long idDataset);
 }

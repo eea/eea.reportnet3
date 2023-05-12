@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -778,13 +777,28 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     }
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDatasetId(datasetId);
-    notificationControllerZuul.createUserNotificationPrivate("EXPORT_DATASET_DATA",
+    String user = SecurityContextHolder.getContext().getAuthentication().getName();
+    userNotificationContentVO.setUserId(user);
+    userNotificationContentVO.setFileName(fileName);
+    notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_START",
             userNotificationContentVO);
 
     response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-    try (FileInputStream in = new FileInputStream(file)) {
-      StreamingResponseBody responsebody = outputStream -> IOUtils.copyLarge(in, outputStream);
-      return ResponseEntity.ok().body(responsebody);
+    try {
+      StreamingResponseBody responseBody = outputStream -> {
+        try (FileInputStream in = new FileInputStream(file)) {
+          byte[] buffer = new byte[1024];
+          int len;
+          while ((len = in.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, len);
+          }
+        } catch (Exception e) {
+          throw e;
+        }
+        notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_COMPLETE",
+                userNotificationContentVO);
+      };
+      return ResponseEntity.ok().body(responseBody);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error downloading file {}. Message: {}", fileName, e.getMessage());
       throw e;

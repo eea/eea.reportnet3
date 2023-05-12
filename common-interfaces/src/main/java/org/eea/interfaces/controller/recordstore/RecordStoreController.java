@@ -293,5 +293,6 @@ public interface RecordStoreController {
    * @param fileName
    */
   @GetMapping(value = "/downloadSnapshot/{datasetId}")
-  ResponseEntity<StreamingResponseBody> downloadSnapshotFile(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId, @RequestParam("fileName") String fileName, HttpServletResponse response) throws Exception;
+  ResponseEntity<StreamingResponseBody> downloadSnapshotFile(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
+                                                             @RequestParam("fileName") String fileName, HttpServletResponse response) throws Exception;
 }

@@ -912,7 +912,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   }
 
   /**
-   * Obtain the dataset historic releases.
+   * Obtain the latest historic release snapshot.
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
@@ -920,20 +920,15 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
    */
   @Override
   @HystrixCommand
-  @GetMapping(value = "/private/v1/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<ReleaseVO> historicReleasesPrivate(@RequestParam("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId) {
-    List<ReleaseVO> releases;
-    // get dataset type
+  @GetMapping(value = "/private/latestReleaseSnapshot", produces = MediaType.APPLICATION_JSON_VALUE)
+  public SnapshotVO getLatestHistoricReleaseSnapshot(@RequestParam("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId) {
+    SnapshotVO snapshotVO;
     try {
-      releases = datasetSnapshotService.getReleases(datasetId);
-    } catch (EEAException e) {
-      LOG_ERROR.error("Error retrieving releases for dataflowId {} and datasetId {}. Error message: {}", dataflowId, datasetId, e.getMessage(), e);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_NOTFOUND);
+      snapshotVO = datasetSnapshotService.getLatestReleaseSnapshot(datasetId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving historic releases for dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId, e.getMessage());
+      LOG_ERROR.error("Unexpected error! Error retrieving latest historic release snapshot for dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId, e.getMessage());
       throw e;
     }
-
-    return releases;
+    return snapshotVO;
   }
 }

@@ -1256,6 +1256,8 @@
         { "key": "RECEIVED_MESSAGE" },
         { "key": "DOWNLOAD_USERS_BY_COUNTRY_START" },
         { "key": "EXPORT_TABLE_DATA_START" },
+        { "key": "EXPORT_FILE_START"},
+        { "key": "EXPORT_FILE_COMPLETE"},
         { "key": "DOWNLOAD_SCHEMAS_INFO_START" },
         { "key": "EXTERNAL_EXPORT_DESIGN_INIT" },
         {
