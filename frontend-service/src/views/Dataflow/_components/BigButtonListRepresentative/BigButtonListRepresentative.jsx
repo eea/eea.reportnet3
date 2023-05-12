@@ -9,6 +9,7 @@ import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { DownloadFile } from 'views/_components/DownloadFile';
 import { HistoricReleases } from 'views/Dataflow/_components/HistoricReleases';
+import { ReleaseSnapshots } from 'views/Dataflow/_components/HistoricReleases/ReleaseSnapshots';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -24,6 +25,8 @@ export const BigButtonListRepresentative = ({
   dataflowState,
   dataProviderId,
   handleRedirect,
+  isAdmin,
+  isCustodian,
   isLeadReporterOfCountry,
   manageDialogs,
   onCleanUpReceipt,
@@ -41,8 +44,11 @@ export const BigButtonListRepresentative = ({
       datasetId: null,
       dataProviderId: null,
       historicReleasesDialogHeader: [],
+      releaseSnapshotsDialogHeader: [],
       historicReleasesView: '',
-      isHistoricReleasesDialogVisible: false
+      releaseSnapshotsView: '',
+      isHistoricReleasesDialogVisible: false,
+      isReleaseSnapshotsDialogVisible: false
     }
   );
 
@@ -70,8 +76,19 @@ export const BigButtonListRepresentative = ({
     });
   };
 
+  const getDataReleaseSnapshots = (datasetId, value, dataProviderId) => {
+    bigButtonListRepresentativeDispatch({
+      type: 'GET_RELEASE_SNAPSHOTS_DATASET_DATA',
+      payload: { datasetId, value, dataProviderId }
+    });
+  };
+
   const onCloseHistoricReleasesDialogVisible = value => {
     bigButtonListRepresentativeDispatch({ type: 'ON_CLOSE_HISTORIC_RELEASE_DIALOG', payload: value });
+  };
+
+  const onCloseReleaseSnapshotsDialogVisible = value => {
+    bigButtonListRepresentativeDispatch({ type: 'ON_CLOSE_RELEASE_SNAPSHOTS_DIALOG', payload: value });
   };
 
   const onLoadReceiptData = async () => {
@@ -92,6 +109,14 @@ export const BigButtonListRepresentative = ({
     bigButtonListRepresentativeDispatch({ type: 'ON_SHOW_HISTORIC_RELEASES', payload: { typeView, value } });
   };
 
+  const onShowReleaseSnapshots = (typeView, value) => {
+    if (dataflowState.id === '557') {
+      bigButtonListRepresentativeDispatch({ type: 'ON_SHOW_RELEASE_SNAPSHOTS', payload: { typeView, value } });
+    } else {
+      notificationContext.add({ type: 'NOT_ALLOWED_FOR_THIS_DATAFLOW' }, true);
+    }
+  };
+
   const renderDialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink p-button-right-aligned"
@@ -99,6 +124,7 @@ export const BigButtonListRepresentative = ({
       label={resourcesContext.messages['close']}
       onClick={() => {
         onCloseHistoricReleasesDialogVisible(false);
+        onCloseReleaseSnapshotsDialogVisible(false);
         resetHistoricReleasesFiltersState();
       }}
     />
@@ -113,11 +139,13 @@ export const BigButtonListRepresentative = ({
               dataflowState,
               dataProviderId,
               getDataHistoricReleases,
+              getDataReleaseSnapshots,
               handleRedirect,
               isLeadReporterOfCountry,
               onLoadReceiptData,
               onOpenReleaseConfirmDialog,
               onShowHistoricReleases,
+              onShowReleaseSnapshots,
               uniqRepresentatives,
               representativeId: representativeId
             })
@@ -142,6 +170,25 @@ export const BigButtonListRepresentative = ({
           }}
           visible={bigButtonListRepresentativeState.isHistoricReleasesDialogVisible}>
           <HistoricReleases
+            dataProviderId={bigButtonListRepresentativeState.dataProviderId}
+            datasetId={bigButtonListRepresentativeState.datasetId}
+            historicReleasesView={bigButtonListRepresentativeState.historicReleasesView}
+          />
+        </Dialog>
+      )}
+
+      {bigButtonListRepresentativeState.isReleaseSnapshotsDialogVisible && (isAdmin || isCustodian) && (
+        <Dialog
+          className={styles.dialog}
+          footer={renderDialogFooter}
+          header={`${resourcesContext.messages['releaseSnapshotsHeader']} ${bigButtonListRepresentativeState.releaseSnapshotsDialogHeader}`}
+          onHide={() => {
+            onCloseReleaseSnapshotsDialogVisible(false);
+            resetHistoricReleasesFiltersState();
+          }}
+          visible={bigButtonListRepresentativeState.isReleaseSnapshotsDialogVisible}>
+          <ReleaseSnapshots
+            dataflowId={dataflowState.id}
             dataProviderId={bigButtonListRepresentativeState.dataProviderId}
             datasetId={bigButtonListRepresentativeState.datasetId}
             historicReleasesView={bigButtonListRepresentativeState.historicReleasesView}
