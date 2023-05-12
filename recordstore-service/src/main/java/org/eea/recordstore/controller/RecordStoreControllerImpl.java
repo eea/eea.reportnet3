@@ -10,8 +10,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -32,17 +35,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -90,6 +94,18 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   /** The dataset metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+
+  /**
+   * The dataset controller zuul
+   */
+  @Autowired
+  private DataSetControllerZuul dataSetControllerZuul;
+
+  /**
+   * The notification controller zuul
+   */
+  @Autowired
+  private NotificationControllerZuul notificationControllerZuul;
 
   /**
    * The Constant LOG_ERROR.
@@ -746,17 +762,29 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @GetMapping(value = "/downloadSnapshot/{datasetId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD') OR hasAnyRole('ADMIN')")
   @Override
-  public void downloadSnapshotFile(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
-                                   @RequestParam("fileName") String fileName, HttpServletResponse response) throws EEAException, IOException {
+  public ResponseEntity<StreamingResponseBody> downloadSnapshotFile(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
+                                                                    @RequestParam("fileName") String fileName, HttpServletResponse response) throws IOException {
     File file = new File(new File(pathSnapshot), FilenameUtils.getName(fileName));
     if (!file.exists()) {
       LOG.error( "Error downloading file {}, file doesn't exist", fileName);
-      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_NOT_FOUND);
     }
+    if (!dataflowId.equals(dataSetControllerZuul.getDataFlowIdById(datasetId))) {
+      String errorMessage =
+              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
+      LOG_ERROR.error(errorMessage);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+    }
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDatasetId(datasetId);
+    notificationControllerZuul.createUserNotificationPrivate("EXPORT_DATASET_DATA",
+            userNotificationContentVO);
+
     response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-    try (OutputStream out = response.getOutputStream();
-         FileInputStream in = new FileInputStream(file)) {
-      IOUtils.copyLarge(in, out);
+    try (FileInputStream in = new FileInputStream(file)) {
+      StreamingResponseBody responsebody = outputStream -> IOUtils.copyLarge(in, outputStream);
+      return ResponseEntity.ok().body(responsebody);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error downloading file {}. Message: {}", fileName, e.getMessage());
       throw e;
