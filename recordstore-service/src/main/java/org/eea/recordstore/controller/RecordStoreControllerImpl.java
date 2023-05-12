@@ -763,28 +763,29 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @Override
   public ResponseEntity<StreamingResponseBody> downloadSnapshotFile(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
                                                                     @RequestParam("fileName") String fileName, HttpServletResponse response) throws IOException {
-    File file = new File(new File(pathSnapshot), FilenameUtils.getName(fileName));
-    if (!file.exists()) {
-      LOG.error( "Error downloading file {}, file doesn't exist", fileName);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_NOT_FOUND);
-    }
-    if (!dataflowId.equals(dataSetControllerZuul.getDataFlowIdById(datasetId))) {
-      String errorMessage =
-              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
-      LOG_ERROR.error(errorMessage);
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
-    }
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDatasetId(datasetId);
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
     userNotificationContentVO.setUserId(user);
     userNotificationContentVO.setFileName(fileName);
-    notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_START",
-            userNotificationContentVO);
-
-    response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
     try {
+      File file = new File(new File(pathSnapshot), FilenameUtils.getName(fileName));
+      if (!file.exists()) {
+        LOG.error("Error downloading file {}, file doesn't exist", fileName);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_NOT_FOUND);
+      }
+      if (!dataflowId.equals(dataSetControllerZuul.getDataFlowIdById(datasetId))) {
+        String errorMessage =
+                String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
+        LOG_ERROR.error(errorMessage);
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+      }
+      notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_START",
+              userNotificationContentVO);
+
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
       StreamingResponseBody responseBody = outputStream -> {
         try (FileInputStream in = new FileInputStream(file)) {
           byte[] buffer = new byte[1024];
@@ -792,15 +793,20 @@ public class RecordStoreControllerImpl implements RecordStoreController {
           while ((len = in.read(buffer)) != -1) {
             outputStream.write(buffer, 0, len);
           }
+          notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_COMPLETE",
+                  userNotificationContentVO);
         } catch (Exception e) {
+          LOG.error("Unexpected error! Error exporting file {}. Message: {}", fileName, e.getMessage());
+          notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_ERROR",
+                  userNotificationContentVO);
           throw e;
         }
-        notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_COMPLETE",
-                userNotificationContentVO);
       };
       return ResponseEntity.ok().body(responseBody);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error downloading file {}. Message: {}", fileName, e.getMessage());
+      LOG.error("Unexpected error! Error exporting file {}. Message: {}", fileName, e.getMessage());
+      notificationControllerZuul.createUserNotificationPrivate("EXPORT_FILE_ERROR",
+              userNotificationContentVO);
       throw e;
     }
   }
