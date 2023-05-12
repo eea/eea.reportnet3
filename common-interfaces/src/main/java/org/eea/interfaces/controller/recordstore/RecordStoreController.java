@@ -5,7 +5,9 @@ import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.validation.ProcessTaskVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -291,5 +293,6 @@ public interface RecordStoreController {
    * @param fileName
    */
   @GetMapping(value = "/downloadSnapshot/{datasetId}")
-  void downloadSnapshotFile(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId, @RequestParam("fileName") String fileName, HttpServletResponse response) throws Exception;
+  ResponseEntity<StreamingResponseBody> downloadSnapshotFile(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
+                                                             @RequestParam("fileName") String fileName, HttpServletResponse response) throws Exception;
 }

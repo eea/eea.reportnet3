@@ -725,6 +725,9 @@ public final class EEAErrorMessage {
   /** The Constant DUPLICATE_JOB */
   public static final String DUPLICATE_JOB = "There is already a job running on this dataset";
 
+  /** The Constant FILE_EXPORT_ERROR_MESSAGE */
+  public static final String FILE_EXPORT_ERROR_MESSAGE = "Error exporting file";
+
   /**
    * Instantiates a new EEA error message.
    */

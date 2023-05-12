@@ -1026,6 +1026,7 @@
     "noTableSelected": "Please select a table first",
     "noTablesToSelect": "There are no tables to select",
     "notAllowedError": "You are not allowed to see the requested page",
+    "notAllowedForThisDataflow": "The selected action is not allowed for this dataflow",
     "notEmpty": "Mandatory table",
     "notFieldToSelect": "No field",
     "notFoundError": "Page not found error. The requested page does not exist",
@@ -1620,6 +1621,9 @@
     "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>, {:error}",
     "disableRulesErrorEvent": "SQL rules containing errors were found in the Data Collection creation process",
     "canceled_by_admin": "Canceled by admin",
-    "finishedValidationWithCanceledTasks": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>. Validation contains canceled tasks"
+    "finishedValidationWithCanceledTasks": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>. Validation contains canceled tasks",
+    "exportFileStart": "Exporting file {:fileName}",
+    "exportFileComplete": "File {:fileName} exported",
+    "exportFileError": "Error exporting file {:fileName}"
   }
 }

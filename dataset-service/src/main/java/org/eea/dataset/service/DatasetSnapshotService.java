@@ -265,4 +265,11 @@ public interface DatasetSnapshotService {
    * @param datasetId
    */
   void removeHistoricRelease(Long datasetId);
+
+  /**
+   * Gets latest release snapshot
+   * @param datasetId
+   * @return
+   */
+  SnapshotVO getLatestReleaseSnapshot(Long datasetId);
 }

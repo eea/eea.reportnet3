@@ -1417,4 +1417,15 @@ public void releaseLocksRelatedToRelease(Long dataflowId, Long dataProviderId)
   public void removeHistoricRelease(Long datasetId) {
       snapshotRepository.removeHistoricRelease(datasetId);
   }
+
+  /**
+   * Gets latest release snapshot
+   * @param datasetId
+   * @return
+   */
+  @Override
+  public SnapshotVO getLatestReleaseSnapshot(Long datasetId) {
+    Snapshot snapshot = snapshotRepository.findFirstByReportingDatasetIdAndDateReleasedIsNotNullOrderByCreationDateDesc(datasetId);
+    return snapshotMapper.entityToClass(snapshot);
+  }
 }
