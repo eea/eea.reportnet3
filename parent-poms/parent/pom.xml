@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</api-gateway.version>
-    <communication.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</communication.version>
-    <collaboration.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</collaboration.version>
-    <dataflow.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</dataflow.version>
-    <dataset.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</dataset.version>
-    <document.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</document.version>
-    <frontend.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</frontend.version>
-    <indexsearch.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</indexsearch.version>
-    <inspire.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</inspire.version>
-    <recordstore.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</recordstore.version>
-    <ums.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</ums.version>
-    <validation.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</validation.version>
-    <common-interfaces.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</common-interfaces.version>
-    <common-utitlities.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</common-utitlities.version>
-    <rod.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</rod.version>
-    <orchestrator.version>v3.2-157416-REMOVE-EU-COUNTRY-LIST</orchestrator.version>
+    <api-gateway.version>v3.1.6-ARCHITECTURE</api-gateway.version>
+    <communication.version>v3.1.6-ARCHITECTURE</communication.version>
+    <collaboration.version>v3.1.6-ARCHITECTURE</collaboration.version>
+    <dataflow.version>v3.1.6-ARCHITECTURE</dataflow.version>
+    <dataset.version>v3.1.6-ARCHITECTURE</dataset.version>
+    <document.version>v3.1.6-ARCHITECTURE</document.version>
+    <frontend.version>v3.1.6-ARCHITECTURE</frontend.version>
+    <indexsearch.version>v3.1.6-ARCHITECTURE</indexsearch.version>
+    <inspire.version>v3.1.6-ARCHITECTURE</inspire.version>
+    <recordstore.version>v3.1.6-ARCHITECTURE</recordstore.version>
+    <ums.version>v3.1.6-ARCHITECTURE</ums.version>
+    <validation.version>v3.1.6-ARCHITECTURE</validation.version>
+    <common-interfaces.version>v3.1.6-ARCHITECTURE</common-interfaces.version>
+    <common-utitlities.version>v3.1.6-ARCHITECTURE</common-utitlities.version>
+    <rod.version>v3.1.6-ARCHITECTURE</rod.version>
+    <orchestrator.version>v3.1.6-ARCHITECTURE</orchestrator.version>
   </properties>
 </project>
