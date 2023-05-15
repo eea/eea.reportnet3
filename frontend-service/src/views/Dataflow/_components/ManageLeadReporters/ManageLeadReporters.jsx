@@ -227,7 +227,9 @@ export const ManageLeadReporters = ({
   const getGroupCountries = async () => {
     try {
       const response = await RepresentativeService.getGroupCountries();
-      formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes: response.data } });
+      const filteredGroups = response.data.filter(countriesGroup => countriesGroup.label !== 'EEA Member countries');
+
+      formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes: filteredGroups } });
     } catch (error) {
       console.error('RepresentativesList - getGroupCountries.', error);
     }
