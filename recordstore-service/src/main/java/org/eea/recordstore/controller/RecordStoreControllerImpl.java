@@ -5,8 +5,8 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -34,19 +34,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -759,36 +759,26 @@ public class RecordStoreControllerImpl implements RecordStoreController {
   @GetMapping(value = "/downloadSnapshot/{datasetId}")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD') OR hasAnyRole('ADMIN')")
   @Override
-  public ResponseEntity<InputStreamResource> downloadSnapshotFile(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
-                                                                    @RequestParam("fileName") String fileName) throws EEAException {
+  public void downloadSnapshotFile(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
+                                                                  @RequestParam("fileName") String fileName, HttpServletResponse response) throws EEAException, IOException {
 
     String user = SecurityContextHolder.getContext().getAuthentication().getName();
-    try {
-      File file = new File(new File(pathSnapshot), FilenameUtils.getName(fileName));
-      if (!file.exists()) {
-        LOG.error("Error downloading file {}, file doesn't exist", fileName);
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_NOT_FOUND);
-      }
-      if (!dataflowId.equals(dataSetControllerZuul.getDataFlowIdById(datasetId))) {
-        String errorMessage =
-                String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
-        LOG_ERROR.error(errorMessage);
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
-      }
-
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_FILE_START_EVENT, null,
+    File file = new File(new File(pathSnapshot), FilenameUtils.getName(fileName));
+    if (!file.exists()) {
+      LOG.error("Error downloading file {}, file doesn't exist", fileName);
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+    }
+    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_FILE_START_EVENT, null,
+            NotificationVO.builder().datasetId(datasetId).user(user).fileName(fileName).build());
+    response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+    try (OutputStream out = response.getOutputStream();
+         FileInputStream in = new FileInputStream(file)) {
+      IOUtils.copyLarge(in, out);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_FILE_COMPLETE_EVENT, null,
               NotificationVO.builder().datasetId(datasetId).user(user).fileName(fileName).build());
-
-      InputStreamResource resource = new InputStreamResource(FileUtils.openInputStream(file));
-      HttpHeaders header = new HttpHeaders();
-      header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-      ResponseEntity<InputStreamResource> responseEntity = ResponseEntity.ok().headers(header).contentLength(file.length())
-              .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
-      return responseEntity;
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error exporting file {}. Message: {}", fileName, e.getMessage());
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, EEAErrorMessage.FILE_EXPORT_ERROR_MESSAGE);
+      LOG.error("Unexpected error! Error downloading file {}. Message: {}", fileName, e.getMessage());
+      throw e;
     }
   }
 }
