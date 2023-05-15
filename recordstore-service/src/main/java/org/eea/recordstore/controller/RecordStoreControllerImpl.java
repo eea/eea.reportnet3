@@ -785,8 +785,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       header.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
       ResponseEntity<InputStreamResource> responseEntity = ResponseEntity.ok().headers(header).contentLength(file.length())
               .contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_FILE_COMPLETE_EVENT, null,
-              NotificationVO.builder().datasetId(datasetId).user(user).fileName(fileName).build());
       return responseEntity;
     } catch (Exception e) {
       LOG.error("Unexpected error! Error exporting file {}. Message: {}", fileName, e.getMessage());
