@@ -1740,9 +1740,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             fos.write(",".getBytes());
           }
           fos.write("\n".getBytes());
-          recordCount++;
           String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(buffer));
           fos.write(res.getBytes());
+          if (recordCount==0) {
+            recordCount++;
+          }
         }
       }
       fos.write("\n".getBytes());
