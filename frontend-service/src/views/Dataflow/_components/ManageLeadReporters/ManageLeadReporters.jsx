@@ -227,9 +227,7 @@ export const ManageLeadReporters = ({
   const getGroupCountries = async () => {
     try {
       const response = await RepresentativeService.getGroupCountries();
-      const filteredGroups = response.data.filter(countriesGroup => countriesGroup.label !== 'EEA Member countries');
-
-      formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes: filteredGroups } });
+      formDispatcher({ type: 'GET_PROVIDERS_TYPES_LIST', payload: { providerTypes: response.data } });
     } catch (error) {
       console.error('RepresentativesList - getGroupCountries.', error);
     }
@@ -542,7 +540,13 @@ export const ManageLeadReporters = ({
         name="dataProvidersDropdown"
         onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
         optionLabel="label"
-        options={formState.dataProvidersTypesList}
+        options={
+          formState.selectedDataProviderGroup
+            ? formState.selectedDataProviderGroup.dataProviderGroupId === 1
+              ? formState.dataProvidersTypesList
+              : formState.dataProvidersTypesList.filter(countriesGroup => countriesGroup.dataProviderGroupId !== 1)
+            : formState.dataProvidersTypesList.filter(countriesGroup => countriesGroup.dataProviderGroupId !== 1)
+        }
         placeholder={resourcesContext.messages['manageRolesDialogDropdownPlaceholder']}
         value={formState.selectedDataProviderGroup}
       />
