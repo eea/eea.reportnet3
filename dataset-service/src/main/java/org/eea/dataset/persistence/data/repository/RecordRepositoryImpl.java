@@ -319,7 +319,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   private int defaultFileExportProcessPriority = 20;
 
-  private static final Integer ETL_EXPORT_MIN_LIMIT = 500000;
+  private static final Integer ETL_EXPORT_MIN_LIMIT = 10000;
 
   /**
    * Find by table value with order.
@@ -1709,10 +1709,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   private void createJsonRecordsForTable(Long datasetId, String tableSchemaId, String filterValue, String columnName, String dataProviderCodes, List<TableSchema> tableSchemaList, String tableName,
                                                 Integer tableCount, Long totalRecords, String jsonFile, Long jobId, Integer limit, Integer offset, String filterChain, TableSchema tableSchema) throws IOException, SQLException {
-    try (Connection con = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
-         FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
+    try (FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
       LOG.info("Starting creation of json file {} for datasetId {} and jobId {}", jsonFile, datasetId, jobId);
-      CopyManager copyManager = new CopyManager((BaseConnection) con);
       ObjectMapper mapper = new ObjectMapper();
       if (tableCount == 1) {
         fos.write(("{\n\"tables\": [\n").getBytes());
@@ -1729,33 +1727,31 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       fos.write(",\n".getBytes());
       fos.write("\"records\": [\n".getBytes());
       if (totalRecords > 0) {
-        Integer recordCount = 0;
         if (limit == null) {
           limit = totalRecords.intValue();
         }
         Integer initExtract = (offset - 1) * limit;
         Integer limitAux = ETL_EXPORT_MIN_LIMIT;
+        Integer recordCount = 0;
         for (Integer offsetAux2 = initExtract; offsetAux2 < initExtract + limit
                 && offsetAux2 < initExtract + totalRecords; offsetAux2 += limitAux) {
           if (offsetAux2 + limitAux > initExtract + limit) {
             limitAux = initExtract + limit - offsetAux2;
           }
           StringBuilder stringQuery = createEtlExportQuery(false, limitAux, offsetAux2, datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchema, filterChain);
-          CopyOut copyOut = copyManager.copyOut("COPY (" + stringQuery + ") to STDOUT");
-          try {
-            byte[] buffer;
-            while ((buffer = copyOut.readFromCopy()) != null) {
+          Query queryResult = entityManager.createNativeQuery(stringQuery.toString());
+          List<String> result = queryResult.getResultList();
+          if (result.size() > 0) {
+            for (String record : result) {
               if (recordCount != 0) {
                 fos.write(",".getBytes());
               }
               fos.write("\n".getBytes());
-              recordCount++;
-              String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(buffer));
+              String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(record.getBytes()));
               fos.write(res.getBytes());
-            }
-          } finally {
-            if (copyOut.isActive()) {
-              copyOut.cancelCopy();
+              if (recordCount==0) {
+                recordCount++;
+              }
             }
           }
         }
