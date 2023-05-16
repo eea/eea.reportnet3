@@ -777,8 +777,6 @@ public class RecordStoreControllerImpl implements RecordStoreController {
     try (OutputStream out = response.getOutputStream();
          FileInputStream in = new FileInputStream(file)) {
       IOUtils.copyLarge(in, out);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_FILE_COMPLETE_EVENT, null,
-              NotificationVO.builder().datasetId(datasetId).user(user).fileName(fileName).build());
     } catch (Exception e) {
       LOG.error("Unexpected error! Error downloading file {}. Message: {}", fileName, e.getMessage());
       throw e;
