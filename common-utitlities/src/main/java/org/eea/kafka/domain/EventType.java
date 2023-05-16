@@ -579,10 +579,7 @@ public enum EventType {
           "fme_import_job_failed_event", true),
 
   EXPORT_FILE_START_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-          "export_file_start_event", true),
-
-  EXPORT_FILE_COMPLETE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-          "export_file_complete_event", true);
+          "export_file_start_event", true);
 
 
   /** The topic. */
