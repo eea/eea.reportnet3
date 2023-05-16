@@ -87,7 +87,7 @@ public class ImportFileTasksScheduler extends MessageReceiver {
   public void scheduledConsumer() {
     Long newDelay = delay;
     try {
-      Task task = taskRepository.findFirstByTaskTypeAndStatusOrderByIdAsc(TaskType.IMPORT_TASK, ProcessStatusEnum.IN_QUEUE);
+      Task task = taskRepository.findFirstByTaskTypeAndStatusOrderByVersionAscIdAsc(TaskType.IMPORT_TASK, ProcessStatusEnum.IN_QUEUE);
       if (task!=null) {
         try {
           ObjectMapper objectMapper = new ObjectMapper();
