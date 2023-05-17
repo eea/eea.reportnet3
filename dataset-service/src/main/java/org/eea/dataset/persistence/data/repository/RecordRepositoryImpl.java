@@ -1748,7 +1748,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
               }
               fos.write("\n".getBytes());
               String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(record.getBytes()));
-              fos.write(res.getBytes());
+              FileOutputStream fosDb = new FileOutputStream(jsonFile, true);
+              fosDb.write(res.getBytes());
+              fosDb.close();
               if (recordCount==0) {
                 recordCount++;
               }
