@@ -1739,22 +1739,24 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             limitAux = initExtract + limit - offsetAux2;
           }
           StringBuilder stringQuery = createEtlExportQuery(false, limitAux, offsetAux2, datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchema, filterChain);
-          Query queryResult = entityManager.createNativeQuery(stringQuery.toString());
-          List<String> result = queryResult.getResultList();
-          if (result.size() > 0) {
-            for (String record : result) {
+          String formattedQuery = "COPY (" + stringQuery + ") to STDOUT";
+          try (Connection con = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword)) {
+            CopyManager copyManager = new CopyManager((BaseConnection) con);
+            byte[] buffer;
+            CopyOut copyOut = copyManager.copyOut(formattedQuery);
+            while ((buffer = copyOut.readFromCopy()) != null) {
               if (recordCount != 0) {
                 fos.write(",".getBytes());
               }
               fos.write("\n".getBytes());
-              String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(record.getBytes()));
-              FileOutputStream fosDb = new FileOutputStream(jsonFile, true);
-              fosDb.write(res.getBytes());
-              fosDb.close();
+              String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(buffer));
+              fos.write(res.getBytes());
               if (recordCount==0) {
                 recordCount++;
               }
             }
+          } catch (Exception e) {
+            throw e;
           }
         }
       }
