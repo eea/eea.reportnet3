@@ -319,7 +319,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   private int defaultFileExportProcessPriority = 20;
 
-  private static final Integer ETL_EXPORT_MIN_LIMIT = 300000;
+  private static final Integer ETL_EXPORT_MIN_LIMIT = 200000;
 
   /**
    * Find by table value with order.
@@ -1709,73 +1709,67 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   private void createJsonRecordsForTable(Long datasetId, String tableSchemaId, String filterValue, String columnName, String dataProviderCodes, List<TableSchema> tableSchemaList, String tableName,
                                                 Integer tableCount, Long totalRecords, String jsonFile, Long jobId, Integer limit, Integer offset, String filterChain, TableSchema tableSchema) throws IOException, SQLException {
-    try (FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
+    try (FileWriter fw = new FileWriter(jsonFile, true);
+         BufferedWriter bw = new BufferedWriter(fw);) {
       LOG.info("Starting creation of json file {} for datasetId {} and jobId {}", jsonFile, datasetId, jobId);
+      ObjectMapper mapper = new ObjectMapper();
       if (tableCount == 1) {
-        fos.write(("{\n\"tables\": [\n").getBytes());
+        bw.write("{\n\"tables\": [\n");
       }
-      fos.write("{".getBytes());
+      bw.write("{");
       if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
               || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-        fos.write("\"totalRecords\":".getBytes());
-        fos.write(totalRecords.toString().getBytes());
-        fos.write(",\n".getBytes());
+        bw.write("\"totalRecords\":");
+        bw.write(totalRecords.toString());
+        bw.write(",\n");
       }
-      fos.write(("\"tableName\":").getBytes());
-      fos.write(("\"" + tableName + "\"").getBytes());
-      fos.write(",\n".getBytes());
-      fos.write("\"records\": [\n".getBytes());
-    } catch (Exception e) {
-      LOG.error("Error writing file {} for datasetId {} and jobId {}. Message: ", jsonFile, datasetId, jobId, e);
-      throw e;
-    }
-    if (totalRecords > 0) {
-      if (limit == null) {
-        limit = totalRecords.intValue();
-      }
-      Integer initExtract = (offset - 1) * limit;
-      Integer limitAux = ETL_EXPORT_MIN_LIMIT;
-      Integer recordCount = 0;
-      ObjectMapper mapper = new ObjectMapper();
-      for (Integer offsetAux2 = initExtract; offsetAux2 < initExtract + limit
-              && offsetAux2 < initExtract + totalRecords; offsetAux2 += limitAux) {
-        if (offsetAux2 + limitAux > initExtract + limit) {
-          limitAux = initExtract + limit - offsetAux2;
+      bw.write("\"tableName\":");
+      bw.write("\"" + tableName + "\"");
+      bw.write(",\n");
+      bw.write("\"records\": [\n");
+      if (totalRecords > 0) {
+        if (limit == null) {
+          limit = totalRecords.intValue();
         }
-        try (FileOutputStream fos = new FileOutputStream(jsonFile, true);
-             Connection con = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword)) {
+        Integer initExtract = (offset - 1) * limit;
+        Integer limitAux = ETL_EXPORT_MIN_LIMIT;
+        Integer recordCount = 0;
+        for (Integer offsetAux2 = initExtract; offsetAux2 < initExtract + limit
+                && offsetAux2 < initExtract + totalRecords; offsetAux2 += limitAux) {
+          if (offsetAux2 + limitAux > initExtract + limit) {
+            limitAux = initExtract + limit - offsetAux2;
+          }
           StringBuilder stringQuery = createEtlExportQuery(false, limitAux, offsetAux2, datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchema, filterChain);
           String formattedQuery = "COPY (" + stringQuery + ") to STDOUT";
-          CopyManager copyManager = new CopyManager((BaseConnection) con);
-          byte[] buffer;
-          CopyOut copyOut = copyManager.copyOut(formattedQuery);
-          while ((buffer = copyOut.readFromCopy()) != null) {
-            if (recordCount != 0) {
-              fos.write(",".getBytes());
+          try (Connection con = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword)) {
+            CopyManager copyManager = new CopyManager((BaseConnection) con);
+            byte[] buffer;
+            CopyOut copyOut = copyManager.copyOut(formattedQuery);
+            while ((buffer = copyOut.readFromCopy()) != null) {
+              if (recordCount != 0) {
+                bw.write(",");
+              }
+              bw.write("\n");
+              String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(buffer));
+              bw.write(res);
+              if (recordCount==0) {
+                recordCount++;
+              }
             }
-            fos.write("\n".getBytes());
-            String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(buffer));
-            fos.write(res.getBytes());
-            if (recordCount == 0) {
-              recordCount++;
-            }
+          } catch (Exception e) {
+            throw e;
           }
-        } catch (Exception e) {
-          LOG.error("Error writing file {} for datasetId {} and jobId {}. Message: ", jsonFile, datasetId, jobId, e);
-          throw e;
         }
       }
-    }
-    try (FileOutputStream fos = new FileOutputStream(jsonFile, true)) {
-      fos.write("\n".getBytes());
-      fos.write(("]\n").getBytes());
-      fos.write(("\n}").getBytes());
+      bw.write("\n");
+      bw.write("]\n");
+      bw.write("\n}");
       if (tableCount < tableSchemaList.size()) {
-        fos.write(",".getBytes());
+        bw.write(",");
       }
-      fos.write("\n".getBytes());
+      bw.write("\n");
       if (tableCount == tableSchemaList.size()) {
-        fos.write(("]\n" + "}").getBytes());
+        bw.write("]\n" + "}");
       }
       LOG.info("Created json file {} for datasetId {} and jobId {}", jsonFile, datasetId, jobId);
     } catch (Exception e) {
