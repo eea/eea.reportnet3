@@ -319,7 +319,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   private int defaultFileExportProcessPriority = 20;
 
-  private static final Integer ETL_EXPORT_MIN_LIMIT = 200000;
+  private static final Integer ETL_EXPORT_MIN_LIMIT = 300000;
 
   /**
    * Find by table value with order.
@@ -1710,7 +1710,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private void createJsonRecordsForTable(Long datasetId, String tableSchemaId, String filterValue, String columnName, String dataProviderCodes, List<TableSchema> tableSchemaList, String tableName,
                                                 Integer tableCount, Long totalRecords, String jsonFile, Long jobId, Integer limit, Integer offset, String filterChain, TableSchema tableSchema) throws IOException, SQLException {
     try (FileWriter fw = new FileWriter(jsonFile, true);
-         BufferedWriter bw = new BufferedWriter(fw);) {
+         BufferedWriter bw = new BufferedWriter(fw)) {
       LOG.info("Starting creation of json file {} for datasetId {} and jobId {}", jsonFile, datasetId, jobId);
       ObjectMapper mapper = new ObjectMapper();
       if (tableCount == 1) {
@@ -1756,6 +1756,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                 recordCount++;
               }
             }
+            System.gc();
           } catch (Exception e) {
             throw e;
           }
@@ -1771,6 +1772,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       if (tableCount == tableSchemaList.size()) {
         bw.write("]\n" + "}");
       }
+      System.gc();
       LOG.info("Created json file {} for datasetId {} and jobId {}", jsonFile, datasetId, jobId);
     } catch (Exception e) {
       LOG.error("Error writing file {} for datasetId {} and jobId {}. Message: ", jsonFile, datasetId, jobId, e);
