@@ -1734,6 +1734,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         Integer initExtract = (offset - 1) * limit;
         Integer limitAux = ETL_EXPORT_MIN_LIMIT;
         Integer recordCount = 0;
+        String res;
         for (Integer offsetAux2 = initExtract; offsetAux2 < initExtract + limit
                 && offsetAux2 < initExtract + totalRecords; offsetAux2 += limitAux) {
           if (offsetAux2 + limitAux > initExtract + limit) {
@@ -1750,7 +1751,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                 bw.write(",");
               }
               bw.write("\n");
-              String res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(buffer));
+              res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(buffer));
               bw.write(res);
               if (recordCount==0) {
                 recordCount++;
