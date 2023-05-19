@@ -43,6 +43,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -183,7 +188,12 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);
         createSnapshotVO.setAutomatic(Boolean.TRUE);
-        createSnapshotVO.setDescription("Release " + dateRelease + " CET");
+
+        //force date description to CET
+        DateTimeFormatter utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter cetFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("CET"));
+        String cetReleaseDate = LocalDateTime.parse(dateRelease, utcFormatter).atZone(ZoneOffset.UTC).format(cetFormatter);
+        createSnapshotVO.setDescription("Release " + cetReleaseDate + " CET");
 
         LOG.info("Creating release process for dataflowId {}, dataProviderId {} dataset {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
         String nextProcessId = UUID.randomUUID().toString();
@@ -273,7 +283,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       }
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
-      throw e;
+      throw new EEAException(e.getMessage());
     }
   }
 
