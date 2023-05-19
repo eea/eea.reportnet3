@@ -1735,6 +1735,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         Integer limitAux = ETL_EXPORT_MIN_LIMIT;
         Integer recordCount = 0;
         String res;
+        CopyOut copyOut;
+        CopyManager copyManager;
+        byte[] buffer;
         for (Integer offsetAux2 = initExtract; offsetAux2 < initExtract + limit
                 && offsetAux2 < initExtract + totalRecords; offsetAux2 += limitAux) {
           if (offsetAux2 + limitAux > initExtract + limit) {
@@ -1743,9 +1746,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           StringBuilder stringQuery = createEtlExportQuery(false, limitAux, offsetAux2, datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchema, filterChain);
           String formattedQuery = "COPY (" + stringQuery + ") to STDOUT";
           try (Connection con = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword)) {
-            CopyManager copyManager = new CopyManager((BaseConnection) con);
-            byte[] buffer;
-            CopyOut copyOut = copyManager.copyOut(formattedQuery);
+            copyManager = new CopyManager((BaseConnection) con);
+            copyOut = copyManager.copyOut(formattedQuery);
             while ((buffer = copyOut.readFromCopy()) != null) {
               if (recordCount != 0) {
                 bw.write(",");
