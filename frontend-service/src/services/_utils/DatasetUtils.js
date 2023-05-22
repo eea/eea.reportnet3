@@ -1,9 +1,9 @@
 import cloneDeep from 'lodash/cloneDeep';
 import isNil from 'lodash/isNil';
 
-import { config } from 'conf';
+import dayjs from 'dayjs';
 
-import { DateTimeUtils } from './DateTimeUtils';
+import { config } from 'conf';
 
 import { Dataset } from 'entities/Dataset';
 
@@ -18,7 +18,7 @@ const sortDatasetTypeByName = (a, b) => {
 const parseDatasetListDTO = datasetsDTO => datasetsDTO?.map(datasetDTO => parseDatasetDTO(datasetDTO));
 
 const parseDatasetDTO = datasetDTO => {
-  const releaseDate = DateTimeUtils.getUserDateTime(datasetDTO.dateReleased);
+  const releaseDate = dayjs(datasetDTO.dateReleased);
 
   return new Dataset({
     availableInPublic: datasetDTO.availableInPublic,
