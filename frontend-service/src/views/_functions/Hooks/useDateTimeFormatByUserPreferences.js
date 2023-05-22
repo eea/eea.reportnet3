@@ -17,7 +17,7 @@ export const useDateTimeFormatByUserPreferences = () => {
       .format(
         `${userContext.userProps.dateFormat} ${userContext.userProps.amPm24h ? 'HH' : 'hh'}:mm:ss${
           userContext.userProps.amPm24h ? '' : ' A'
-        } ${hasCET ? 'CET' : ''}`
+        }`
       );
 
   const getDateDifferenceInMinutes = timestamp => {
