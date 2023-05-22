@@ -80,8 +80,7 @@ import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -325,8 +324,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
       // 1. Create the snapshot in the metabase
       Snapshot snap = new Snapshot();
-      //force date to CET
-      snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now(ZoneId.of("CET"))));
+      
+      //force date to UTC
+      Instant utcInstant = Instant.now();
+      Date dateReleaseUTC = new Date(Timestamp.from(utcInstant).getTime());
+      snap.setCreationDate(dateReleaseUTC);
       snap.setDescription(createSnapshotVO.getDescription());
       DataSetMetabase dataset = new DataSetMetabase();
       dataset.setId(idDataset);
@@ -697,8 +699,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     try (ByteArrayOutputStream outStream = new ByteArrayOutputStream()) {
       // 1. Create the snapshot in the metabase
       SnapshotSchema snap = new SnapshotSchema();
-      //force date to CET
-      snap.setCreationDate(java.sql.Timestamp.valueOf(LocalDateTime.now(ZoneId.of("CET"))));
+
+      //force date to UTC
+      Instant utcInstant = Instant.now();
+      Date dateReleaseUTC = new Date(Timestamp.from(utcInstant).getTime());
+      snap.setCreationDate(dateReleaseUTC);
       snap.setDescription(description);
       DesignDataset designDataset = new DesignDataset();
       designDataset.setId(idDataset);

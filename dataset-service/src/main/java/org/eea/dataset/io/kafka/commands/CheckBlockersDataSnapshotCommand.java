@@ -39,8 +39,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.*;
 
 /**
@@ -246,11 +245,13 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);
         createSnapshotVO.setAutomatic(Boolean.TRUE);
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        //force date to CET
-        Date dateRelease = java.sql.Timestamp.valueOf(LocalDateTime.now(ZoneId.of("CET")));
+        //force date to UTC and description to CET
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date dateRelease = new Date();
+        dateFormatter.setTimeZone(TimeZone.getTimeZone("CET"));
         createSnapshotVO.setDescription("Release " + dateFormatter.format(dateRelease) + " CET");
+        dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
         JobProcessVO jobProcessVO = new JobProcessVO(null, releaseJob.getId(), processId);
@@ -263,7 +264,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         LOG.info("Updated release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), releaseJob.getId(), processId);
 
         datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
-                dateRelease.toString(), false, processId);
+                dateFormatter.format(dateRelease), false, processId);
       }
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
