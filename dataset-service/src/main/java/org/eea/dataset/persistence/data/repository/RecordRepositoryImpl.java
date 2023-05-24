@@ -319,7 +319,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   private int defaultFileExportProcessPriority = 20;
 
-  private static final Integer ETL_EXPORT_MIN_LIMIT = 100000;
+  private static final Integer ETL_EXPORT_MIN_LIMIT = 200000;
 
   /**
    * Find by table value with order.
