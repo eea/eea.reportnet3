@@ -321,6 +321,18 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   private static final Integer ETL_EXPORT_MIN_LIMIT = 200000;
 
+  /** The Constant RECORD_COUNT_QUERY: {@value}. */
+  private static final String RECORD_COUNT_QUERY = "SELECT count(id) AS recordCount from dataset_%s.temp_etlexport"
+      + " WHERE filter_value= ?";
+
+  /** The Constant POSITION_QUERY: {@value}. */
+  private static final String POSITION_QUERY = "SELECT id from dataset_%s.temp_etlexport WHERE filter_value= ?"
+      + " order by id limit 1";
+
+  /** The Constant RECORD_JSON_QUERY: {@value}. */
+  private static final String RECORD_JSON_QUERY = "SELECT record_json from dataset_%s.temp_etlexport "
+      + "WHERE filter_value= ? and id>= ? and id< ?";
+
   /**
    * Find by table value with order.
    *
@@ -463,7 +475,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public String findAndGenerateETLJson(Long datasetId, OutputStream outputStream,
       String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
-      String dataProviderCodes) throws EEAException {
+      String dataProviderCodes) throws EEAException, SQLException {
     checkSql(filterValue);
     checkSql(columnName);
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
@@ -509,10 +521,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
         // We need to know which is the first position in the temp table to take the results
         // If there's no position that means we have to import the data from that request
-        String query = "SELECT count(id) from dataset_" + datasetId + ".temp_etlexport " + "WHERE filter_value='" + filterChain + "';";
-        Query recordsTmpExportQueryResult = entityManager.createNativeQuery(query);
         try {
-          int recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.getSingleResult()).intValue();
+
+          int recordsTmpExport = queryGetRecordCountbyFilterChain(RECORD_COUNT_QUERY, datasetId, filterChain);
           LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}", recordsTmpExport, filterChain, totalRecords);
 
           while (recordsTmpExport != totalRecords) {
@@ -521,12 +532,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                 LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}. Deleting old records", recordsTmpExport, filterChain, totalRecords);
                 deleteTempEtlExportByFilterValue(datasetId, filterChain, recordsTmpExport);
 
-                recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.getSingleResult()).intValue();
+                recordsTmpExport = queryGetRecordCountbyFilterChain(RECORD_COUNT_QUERY, datasetId, filterChain);
                 LOG.info("Table temp_etlexport has {} rows for filterChain {}. Records stored {}", recordsTmpExport, filterChain, recordsTmpExport);
               } while (recordsTmpExport != 0);
             }
             exportAndImportToEtlExportTable(datasetId, filterChain, stringQuery);
-            recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.getSingleResult()).intValue();
+            recordsTmpExport = queryGetRecordCountbyFilterChain(RECORD_COUNT_QUERY, datasetId, filterChain);
           }
         } catch (Exception e) {
           LOG_ERROR.error("Error creating a file into the temp_etlexport from dataset {}", datasetId, e);
@@ -570,20 +581,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       if (totalRecords != null && totalRecords > 0L) {
 
         Object resultPosition = null;
-        Object result = null;
 
 
         // We need to know which is the first position in the temp table to take the results
         // If there's no position that means we have to import the data from that request
-        String queryPosition = "SELECT id from dataset_" + datasetId + ".temp_etlexport "
-            + "WHERE filter_value='" + filterChain + "' order by id limit 1";
-        Query queryPositionResult = entityManager.createNativeQuery(queryPosition);
-        try {
-          resultPosition = queryPositionResult.getSingleResult();
-        } catch (NoResultException nre) {
-          LOG.info("temp table etlexport empty for this filter");
-          break;
-        }
+        resultPosition = queryGetRecordCountbyFilterChain(POSITION_QUERY, datasetId, filterChain);
         LOG.info("First position in the temp_etlexport {}", resultPosition.toString());
 
         Long firstPosition = Long.valueOf(resultPosition.toString());
@@ -594,21 +596,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             limitAux = initExtract + limit - offsetAux2;
           }
 
-          String queryFromTemp = "SELECT record_json from dataset_" + datasetId + ".temp_etlexport "
-              + "WHERE filter_value='" + filterChain + "' and id>= " + offsetAux2 + " and id<"
-              + (offsetAux2 + limitAux);
-          LOG.info("Partial query from the temp_etlexport table: {}", queryFromTemp);
-          Query queryResult = entityManager.createNativeQuery(queryFromTemp);
-          try {
-            result = queryResult.getResultList();
-          } catch (NoResultException nre) {
-            LOG.info("no result, ignore message");
-          }
+          List recordJsons = queryGetRecordJSONbyFilterChain(RECORD_JSON_QUERY, datasetId, filterChain, offsetAux2, limitAux);
+
           // add to table's records list
-          if (result != null) {
-            tableRecords.addAll(gsonparser.parseList(result.toString()));
+          if (recordJsons != null) {
+            tableRecords.addAll(gsonparser.parseList(recordJsons.toString()));
           }
-          result = null;
           System.gc();
         }
       }
@@ -620,6 +613,79 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     System.gc();
 
     return resultjson.toString();
+  }
+
+  private Integer queryGetRecordCountbyFilterChain(String query, Long datasetId, String filterChain)
+      throws SQLException {
+    Connection connection = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    try {
+      connection = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
+      query = String.format(query, datasetId);
+      LOG.info("Partial query from the temp_etlexport table: {}", query);
+
+      pstmt = connection.prepareStatement(query);
+      pstmt.setString(1, filterChain);
+      LOG.info("Partial query from the temp_etlexport table: {}", pstmt);
+
+      rs = pstmt.executeQuery();
+      rs.next();
+
+      return rs.getInt(1);
+    } catch (Exception e) {
+      LOG.error(
+          "Unexpected error! Error in queryGetRecordCountbyFilterChain for datasetId {} with filter_value {}",
+          datasetId, filterChain, e);
+    } finally {
+      if (rs != null)
+        rs.close();
+      if (pstmt != null)
+        pstmt.close();
+      if (connection != null)
+        connection.close();
+    }
+
+    return null;
+  }
+
+  private List queryGetRecordJSONbyFilterChain(String query, Long datasetId, String filterChain,
+      Long offsetAux2, Long limitAux)
+      throws SQLException {
+
+    Connection connection = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    List list = new ArrayList<>();
+    try {
+      connection = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
+      query = String.format(query, datasetId);
+
+      pstmt = connection.prepareStatement(query);
+      pstmt.setString(1, filterChain);
+      pstmt.setLong(2, offsetAux2);
+      pstmt.setLong(3, offsetAux2 + limitAux);
+      LOG.info("Partial query from the temp_etlexport table: {}", pstmt);
+
+      rs = pstmt.executeQuery();
+      while (rs.next()) {
+        list.add(rs.getString("record_json"));
+      }
+
+    } catch (Exception e) {
+      LOG.error(
+          "Unexpected error! Error in queryGetRecordCountbyFilterChain for datasetId {} with filter_value {}",
+          datasetId, filterChain, e);
+    } finally {
+      if (rs != null)
+        rs.close();
+      if (pstmt != null)
+        pstmt.close();
+      if (connection != null)
+        connection.close();
+    }
+
+    return list;
   }
 
   private void exportAndImportToEtlExportTable(Long datasetId, String filterChain, StringBuilder stringQuery) {
@@ -876,7 +942,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       Long datasetId) {
     if (!filter.isEmpty()) {
       Query query2;
-      query2 = entityManager.createQuery(MASTER_QUERY_COUNT + filter);
+      StringBuilder builder = new StringBuilder(MASTER_QUERY_COUNT);
+      query2 = entityManager.createQuery(builder.append(filter).toString());
       query2.setParameter(ID_TABLE_SCHEMA, idTableSchema);
       if (null != idRules && !idRules.isEmpty()) {
         query2.setParameter(RULE_ID_LIST, idRules);

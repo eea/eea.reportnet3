@@ -3142,6 +3142,8 @@ public class DatasetServiceImpl implements DatasetService {
       LOG.info("Finish ETL Export proccess for datasetId {}", datasetId);
     } catch (IOException e) {
       LOG.error("ETLExport error for datasetId {} Message: {}", datasetId, e.getMessage(), e);
+    } catch (SQLException e) {
+      LOG.error("ETLExport error for datasetId {} Message: {}", datasetId, e.getMessage(), e);
     }
   }
 

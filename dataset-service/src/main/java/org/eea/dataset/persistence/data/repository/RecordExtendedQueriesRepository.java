@@ -1,5 +1,8 @@
 package org.eea.dataset.persistence.data.repository;
 
+import java.io.OutputStream;
+import java.sql.SQLException;
+import java.util.List;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.util.SortField;
 import org.eea.exception.EEAException;
@@ -83,7 +86,7 @@ public interface RecordExtendedQueriesRepository {
    */
   String findAndGenerateETLJson(Long datasetId, OutputStream outputStream, String tableSchemaId,
       Integer limit, Integer offset, String filterValue, String columnName,
-      String dataProviderCodes) throws EEAException;
+      String dataProviderCodes) throws EEAException, SQLException;
 
   /**
    * Find ordered native record.

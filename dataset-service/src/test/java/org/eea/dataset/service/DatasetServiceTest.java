@@ -135,7 +135,7 @@ import org.springframework.test.util.ReflectionTestUtils;
  * The Class DatasetServiceTest.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class 
+public class
 DatasetServiceTest {
   /** The dataset service. */
   @InjectMocks
@@ -3142,7 +3142,7 @@ DatasetServiceTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void etlExportDatasetTest() throws IOException, EEAException {
+  public void etlExportDatasetTest() throws IOException, EEAException, SQLException {
     ObjectId id = new ObjectId();
     DataSetSchema dsSchema = new DataSetSchema();
     TableSchema tSchema = new TableSchema();
@@ -3172,7 +3172,7 @@ DatasetServiceTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void etlExportDatasetExceptionTest() throws IOException, EEAException {
+  public void etlExportDatasetExceptionTest() throws IOException, EEAException, SQLException {
     ObjectId id = new ObjectId();
     DataSetSchema dsSchema = new DataSetSchema();
     TableSchema tSchema = new TableSchema();
