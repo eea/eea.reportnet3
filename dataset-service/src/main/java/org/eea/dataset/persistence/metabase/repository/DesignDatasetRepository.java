@@ -38,4 +38,12 @@ public interface DesignDatasetRepository extends CrudRepository<DesignDataset, L
   @Query(value = "select d from DesignDataset d where d.datasetSchema IN :datasetSchemas")
   List<DesignDataset> findbyDatasetSchemaList(@Param("datasetSchemas") List<String> datasetSchemas);
 
+  /**
+   * Delete entry by id
+   *
+   * @param id
+   * @return
+   */
+  void deleteById(Long id);
+
 }
