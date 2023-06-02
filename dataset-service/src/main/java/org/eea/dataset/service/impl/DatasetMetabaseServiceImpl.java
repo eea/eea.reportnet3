@@ -280,9 +280,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       dataSetMetabaseRepository.deleteNativeDataset(datasetId);
     } catch(Exception e){
       LOG.info("Removing design dataset entry before removing dataset with id {}", datasetId);
-      //This code was added because in Transport there is no "on delete cascade" for the dataset_design_fkey
+      //This code was added because in Transport there is no "on delete cascade" for the dataset_design_fkey.
       designDatasetRepository.deleteById(datasetId);
-      dataSetMetabaseRepository.deleteNativeDataset(datasetId);
     }
     LOG.info("Deleted native dataset with datasetId {}", datasetId);
   }
