@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</api-gateway.version>
-    <communication.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</communication.version>
-    <collaboration.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</collaboration.version>
-    <dataflow.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</dataflow.version>
-    <dataset.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</dataset.version>
-    <document.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</document.version>
-    <frontend.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</frontend.version>
-    <indexsearch.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</indexsearch.version>
-    <inspire.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</inspire.version>
-    <recordstore.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</recordstore.version>
-    <ums.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</ums.version>
-    <validation.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</validation.version>
-    <common-interfaces.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</common-interfaces.version>
-    <common-utitlities.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</common-utitlities.version>
-    <rod.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</rod.version>
-    <orchestrator.version>v3.2-253661_DELETE_TRANSPORT_DATAFLOWS</orchestrator.version>
+    <api-gateway.version>v3.2</api-gateway.version>
+    <communication.version>v3.2</communication.version>
+    <collaboration.version>v3.2</collaboration.version>
+    <dataflow.version>v3.2</dataflow.version>
+    <dataset.version>v3.2</dataset.version>
+    <document.version>v3.2</document.version>
+    <frontend.version>v3.2</frontend.version>
+    <indexsearch.version>v3.2</indexsearch.version>
+    <inspire.version>v3.2</inspire.version>
+    <recordstore.version>v3.2</recordstore.version>
+    <ums.version>v3.2</ums.version>
+    <validation.version>v3.2</validation.version>
+    <common-interfaces.version>v3.2</common-interfaces.version>
+    <common-utitlities.version>v3.2</common-utitlities.version>
+    <rod.version>v3.2</rod.version>
+    <orchestrator.version>v3.2</orchestrator.version>
   </properties>
 </project>
