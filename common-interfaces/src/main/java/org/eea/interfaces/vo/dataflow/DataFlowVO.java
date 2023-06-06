@@ -81,6 +81,9 @@ public class DataFlowVO extends GenericDataflowVO implements Serializable {
   /** The automatic reporting deletion. */
   private boolean automaticReportingDeletion;
 
+  /** The big data. */
+  private Boolean bigData;
+
   /**
    * Equals.
    *
