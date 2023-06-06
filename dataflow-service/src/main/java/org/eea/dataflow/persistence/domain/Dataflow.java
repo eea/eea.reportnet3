@@ -117,6 +117,10 @@ public class Dataflow {
   @Column(name = "AUTOMATIC_REPORTING_DELETION")
   private boolean automaticReportingDeletion;
 
+  /** The big data column. */
+  @Column(name = "BIG_DATA")
+  private Boolean bigData;
+
   /**
    * Equals.
    *
