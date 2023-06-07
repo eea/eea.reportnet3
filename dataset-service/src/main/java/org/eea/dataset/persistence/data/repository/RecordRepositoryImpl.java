@@ -1826,6 +1826,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                 recordCount++;
               }
             }
+            bw.flush();
             System.gc();
           } catch (Exception e) {
             throw e;
