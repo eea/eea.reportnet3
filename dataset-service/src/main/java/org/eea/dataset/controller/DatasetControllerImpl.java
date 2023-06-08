@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
+import org.eea.dataset.service.BigDataDatasetService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -121,6 +122,10 @@ public class DatasetControllerImpl implements DatasetController {
   /** The dataflow controller zuul */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  /** The big data dataset service */
+  @Autowired
+  private BigDataDatasetService bigDataDatasetService;
 
   /**
    * Gets the data tables values.
@@ -268,65 +273,70 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "Fme Job Id",
               example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
 
-    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
-    Long jobId = null;
-    try {
-      if (dataflowId == null){
-        dataflowId = datasetService.getDataFlowIdById(datasetId);
-      }
-
-      JobVO job = null;
-      if (fmeJobId!=null) {
-        jobControllerZuul.updateFmeCallbackJobParameter(fmeJobId, true);
-        job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
-        if (job!=null && (job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN))) {
-          LOG.info("Job {} is cancelled. Exiting import!", job.getId());
-          return;
+    DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
+    if(dataFlowVO.getBigData()){
+    }
+    else{
+      JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
+      Long jobId = null;
+      try {
+        if (dataflowId == null){
+          dataflowId = datasetService.getDataFlowIdById(datasetId);
         }
-      }
-      if(job!=null){
-        jobId = job.getId();
-        LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, datasetId);
-      }else{
-        //check if there is already an import job with status IN_PROGRESS for the specific datasetId
-        List<Long> datasetIds = new ArrayList<>();
-        datasetIds.add(datasetId);
-        jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-        jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus, fmeJobId);
-        if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
-          LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
-          datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());
-          throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
-        }
-      }
 
-      LOG.info("Importing big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
-      fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId, delimiter, jobId);
-      LOG.info("Successfully imported big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
-    } catch (EEAException e) {
-      LOG.error(
-          "File import failed: dataflowId={} datasetId={}, tableSchemaId={}, fileName={}. Message: {}", dataflowId, datasetId,
-          tableSchemaId, file.getOriginalFilename(), e.getMessage(), e);
-      if (jobId!=null) {
-        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        JobVO job = null;
+        if (fmeJobId!=null) {
+          jobControllerZuul.updateFmeCallbackJobParameter(fmeJobId, true);
+          job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+          if (job!=null && (job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN))) {
+            LOG.info("Job {} is cancelled. Exiting import!", job.getId());
+            return;
+          }
+        }
+        if(job!=null){
+          jobId = job.getId();
+          LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, datasetId);
+        }else{
+          //check if there is already an import job with status IN_PROGRESS for the specific datasetId
+          List<Long> datasetIds = new ArrayList<>();
+          datasetIds.add(datasetId);
+          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+          jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus, fmeJobId);
+          if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
+            LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
+            datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());
+            throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
+          }
+        }
+
+        LOG.info("Importing big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
+        fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId, delimiter, jobId);
+        LOG.info("Successfully imported big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
+      } catch (EEAException e) {
+        LOG.error(
+                "File import failed: dataflowId={} datasetId={}, tableSchemaId={}, fileName={}. Message: {}", dataflowId, datasetId,
+                tableSchemaId, file.getOriginalFilename(), e.getMessage(), e);
+        if (jobId!=null) {
+          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        }
+        Map<String, Object> importFileData = new HashMap<>();
+        importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+        importFileData.put(LiteralConstants.DATASETID, datasetId);
+        lockService.removeLockByCriteria(importFileData);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                EEAErrorMessage.IMPORTING_FILE_DATASET);
+      } catch (Exception e) {
+        String fileName = (file != null) ? file.getName() : null;
+        LOG.error("Unexpected error! Error importing big file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
+        if (jobId!=null && jobStatus != JobStatusEnum.REFUSED) {
+          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        }
+        Map<String, Object> importFileData = new HashMap<>();
+        importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+        importFileData.put(LiteralConstants.DATASETID, datasetId);
+        lockService.removeLockByCriteria(importFileData);
+        throw e;
       }
-      Map<String, Object> importFileData = new HashMap<>();
-      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
-      importFileData.put(LiteralConstants.DATASETID, datasetId);
-      lockService.removeLockByCriteria(importFileData);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.IMPORTING_FILE_DATASET);
-    } catch (Exception e) {
-      String fileName = (file != null) ? file.getName() : null;
-      LOG.error("Unexpected error! Error importing big file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
-      if (jobId!=null && jobStatus != JobStatusEnum.REFUSED) {
-        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
-      }
-      Map<String, Object> importFileData = new HashMap<>();
-      importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
-      importFileData.put(LiteralConstants.DATASETID, datasetId);
-      lockService.removeLockByCriteria(importFileData);
-      throw e;
     }
   }
 
