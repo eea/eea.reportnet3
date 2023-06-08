@@ -1954,5 +1954,17 @@
   {
     "key": "config/orchestrator/scheduling.inProgress.import.fme.jobs.without.callback.max.time",
     "value": "JHtGTUVfVE9LRU46QmFzaWMgVW1Wd2IzSjBibVYwTXpwU1pYQnZjblJ1WlhRelh6SXdNakFofQ=="
+  },
+  {
+    "key": "config/application/amazon.s3.endpoint",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+  },
+  {
+    "key": "config/application/amazon.s3.accessKey",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+  },
+  {
+    "key": "config/application/amazon.s3.secretKey",
+    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
   }
 ]
