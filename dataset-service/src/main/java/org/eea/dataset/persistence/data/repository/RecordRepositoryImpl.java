@@ -61,6 +61,7 @@ import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -1776,10 +1777,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   private void createJsonRecordsForTable(Long datasetId, String tableSchemaId, String filterValue, String columnName, String dataProviderCodes, List<TableSchema> tableSchemaList, String tableName,
                                                 Integer tableCount, Long totalRecords, String jsonFile, Long jobId, Integer limit, Integer offset, String filterChain, TableSchema tableSchema) throws IOException, SQLException {
-    try (FileWriter fw = new FileWriter(jsonFile, true);
-         BufferedWriter bw = new BufferedWriter(fw)) {
+    try (FileWriter bw = new FileWriter(jsonFile, true)) {
       LOG.info("Starting creation of json file {} for datasetId {} and jobId {}", jsonFile, datasetId, jobId);
-      ObjectMapper mapper = new ObjectMapper();
       if (tableCount == 1) {
         bw.write("{\n\"tables\": [\n");
       }
@@ -1801,7 +1800,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         Integer initExtract = (offset - 1) * limit;
         Integer limitAux = ETL_EXPORT_MIN_LIMIT;
         Integer recordCount = 0;
-        String res;
         CopyOut copyOut;
         CopyManager copyManager;
         byte[] buffer;
@@ -1820,13 +1818,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                 bw.write(",");
               }
               bw.write("\n");
-              res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(buffer));
-              bw.write(res);
+              bw.write(new String(buffer, StandardCharsets.UTF_8));
               if (recordCount==0) {
                 recordCount++;
               }
             }
-            fw.flush();
             bw.flush();
             System.gc();
           } catch (Exception e) {
