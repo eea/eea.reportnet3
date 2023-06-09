@@ -61,6 +61,7 @@ import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -1778,7 +1779,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                                                 Integer tableCount, Long totalRecords, String jsonFile, Long jobId, Integer limit, Integer offset, String filterChain, TableSchema tableSchema) throws IOException, SQLException {
     try (FileWriter bw = new FileWriter(jsonFile, true)) {
       LOG.info("Starting creation of json file {} for datasetId {} and jobId {}", jsonFile, datasetId, jobId);
-      ObjectMapper mapper = new ObjectMapper();
       if (tableCount == 1) {
         bw.write("{\n\"tables\": [\n");
       }
@@ -1818,7 +1818,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                 bw.write(",");
               }
               bw.write("\n");
-              bw.write(mapper.writeValueAsString(mapper.readTree(buffer)));
+              bw.write(new String(buffer, StandardCharsets.UTF_8));
               if (recordCount==0) {
                 recordCount++;
               }
