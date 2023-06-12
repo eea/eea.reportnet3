@@ -18,7 +18,7 @@ public class TestDremioControllerImpl {
 
     @GetMapping("run")
     public void run() {
-        SqlRowSet rs = dremioJdbcTemplate.queryForRowSet("SELECT * FROM rn3-dataset.rn3-dataset.\"tab.csv\"");
+        SqlRowSet rs = dremioJdbcTemplate.queryForRowSet("SELECT * FROM \"rn3-dataset.rn3-dataset\".\"tab.csv\";");
         while (rs.next()) {
             System.out.println(rs.getString("A") + "," + rs.getString("B") + "," + rs.getString("C") + "," + rs.getString("D"));
         }
