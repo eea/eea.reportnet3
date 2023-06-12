@@ -1037,8 +1037,8 @@ public class FileTreatmentHelper implements DisposableBean {
         private List<File> unzipAndStore (File folder, String saveLocationPath, ZipInputStream zip)
       throws EEAException, IOException {
 
-            List<File> files = new ArrayList<>();
-            ZipEntry entry = zip.getNextEntry();
+        List<File> files = new ArrayList<>();
+        ZipEntry entry = zip.getNextEntry();
 
           try {
             while (null != entry) {

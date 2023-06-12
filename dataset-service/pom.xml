@@ -81,6 +81,17 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-spatial</artifactId>
 		</dependency>
+		<!-- ParquetConvertService dependencies -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.10.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.parquet</groupId>
+			<artifactId>parquet-avro</artifactId>
+			<version>1.13.1</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<snapshotRepository>

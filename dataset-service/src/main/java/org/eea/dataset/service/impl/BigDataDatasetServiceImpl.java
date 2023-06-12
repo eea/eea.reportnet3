@@ -1,30 +1,50 @@
 package org.eea.dataset.service.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.eea.dataset.service.BigDataDatasetService;
+import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.ParquetConverterService;
+import org.eea.dataset.service.S3HandlerService;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
-import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
-import java.nio.file.Paths;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
 
 @Service
 public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(BigDataDatasetServiceImpl.class);
+
+    @Value("${importPath}")
+    private String importPath;
+
     @Autowired
-    S3Client s3Client;
+    DatasetService datasetService;
+
+    @Autowired
+    S3HandlerService s3HandlerService;
+
+    @Autowired
+    ParquetConverterService parquetConverterService;
 
     @Override
     public void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
-                       MultipartFile file, Boolean replace, Long integrationId, String delimiter, String fmeJobId){
+                              MultipartFile file, Boolean replace, Long integrationId, String delimiter, String fmeJobId) {
 
 
         /*
-         * Part 1:
+         * Part 1 is done:
          * Lets say we got a zip file
          *
          * extract it
@@ -34,6 +54,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
          * send parquet files to s3
          *
          * */
+
+        List<File> filesToImport = storeImportFiles(file, datasetId);
+        Map<String, String> parquetFileNamesAndPaths =  parquetConverterService.convertCsvFilesToParquetFiles(filesToImport);
+        for (Map.Entry<String, String> parquetFileNameAndPath : parquetFileNamesAndPaths.entrySet()) {
+            s3HandlerService.uploadFileToBucket("reportnet", "", parquetFileNameAndPath.getKey(), parquetFileNameAndPath.getValue());
+        }
+
+
+
+
+
 
         /*
          * Part 2:
@@ -60,26 +91,66 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
          * */
     }
 
-    public Boolean checkIfBucketExists(String bucketName){
-        HeadBucketRequest headBucketRequest = HeadBucketRequest.builder()
-                .bucket(bucketName)
-                .build();
-        try {
-            s3Client.headBucket(headBucketRequest);
-            return true;
-        } catch (NoSuchBucketException e) {
-            return false;
+    private List<File> storeImportFiles(MultipartFile multipartFile, Long datasetId){
+        List<File> files = new ArrayList<>();
+
+        try (InputStream input = multipartFile.getInputStream()) {
+
+            // Prepare the folder where files will be stored
+            File root = new File(importPath);
+            File folder = new File(root, datasetId.toString());
+            String saveLocationPath = folder.getCanonicalPath();
+
+            if (!folder.exists()) {
+                folder.mkdir();
+            }
+
+
+            try (ZipInputStream zip = new ZipInputStream(input)) {
+                ZipEntry entry = zip.getNextEntry();
+
+                try {
+                    while (null != entry) {
+                        String entryName = entry.getName();
+                        String mimeType = datasetService.getMimetype(entryName);
+                        File file = new File(folder, entryName);
+                        String filePath = file.getCanonicalPath();
+
+                        // Prevent Zip Slip attack or skip if the entry is a directory
+                        if ((entryName.split("/").length > 1)
+                                || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
+                                || !filePath.startsWith(saveLocationPath + File.separator)) {
+                            LOG.error("Ignored file from ZIP: {}", entryName);
+                            entry = zip.getNextEntry();
+                            continue;
+                        }
+
+                        // Store the file in the persistence volume
+                        try (FileOutputStream output = new FileOutputStream(file)) {
+                            IOUtils.copyLarge(zip, output);
+                            LOG.info("Stored file {}", file.getPath());
+                        } catch (Exception e) {
+                            LOG.error("Unexpected error! Error in copyLarge for saveLocationPath {}. Message: {}", saveLocationPath, e.getMessage());
+                            throw e;
+                        }
+
+                        entry = zip.getNextEntry();
+                        files.add(file);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Unexpected error processing file! Message: {}", e.getMessage());
+                    throw e;
+                }
+
+
+            } catch (Exception e) {
+                LOG.error("Unexpected error! Error in unzipAndStore for datasetId {}. Message: {}", datasetId, e.getMessage());
+                throw e;
+            }
+
+        } catch (Exception e) {
+            LOG.error("Unexpected error! Error in fileManagement for datasetId {} and  Message: {}", datasetId, e.getMessage());
         }
-    }
-
-    public void uploadFileToBucket(String bucketName, String s3Path, String fileName, String filePath){
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileName)
-                .build();
-
-        java.nio.file.Path file = Paths.get(filePath);
-
-        PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, file);
+        return files;
     }
 }

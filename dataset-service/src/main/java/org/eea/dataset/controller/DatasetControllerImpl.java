@@ -275,6 +275,7 @@ public class DatasetControllerImpl implements DatasetController {
 
     DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
     if(dataFlowVO.getBigData()){
+      bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, fmeJobId);
     }
     else{
       JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;

@@ -21,22 +21,4 @@ public interface BigDataDatasetService {
     void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
                        MultipartFile file, Boolean replace, Long integrationId, String delimiter, String fmeJobId);
 
-    /**
-     * Checks if bucket exists
-     *
-     * @param bucketName the bucket name
-     * @return true if bucket exists else false
-     */
-    Boolean checkIfBucketExists(String bucketName);
-
-    /**
-     * Checks if bucket exists
-     *
-     * @param bucketName the bucket name
-     * @param s3Path the s3 path
-     * @param fileName the file name
-     * @param filePath the file path
-     * @return
-     */
-    void uploadFileToBucket(String bucketName, String s3Path, String fileName, String filePath);
 }
