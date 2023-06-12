@@ -1,1 +1,1 @@
-ALTER TABLE public.dataflow ADD "big_data" bool NOT NULL DEFAULT false;
+ALTER TABLE public.dataflow ADD COLUMN IF NOT EXISTS "big_data" bool NOT NULL DEFAULT false;
