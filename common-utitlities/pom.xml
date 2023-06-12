@@ -163,6 +163,12 @@
 			<artifactId>json</artifactId>
 			<version>20230227</version>
 		</dependency>
+		<!-- S3 Client dependencies-->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>2.20.80</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

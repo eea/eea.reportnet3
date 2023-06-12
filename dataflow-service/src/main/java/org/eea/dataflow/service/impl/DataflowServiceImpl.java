@@ -539,6 +539,9 @@ public class DataflowServiceImpl implements DataflowService {
         throw new EEAException(EEAErrorMessage.USERFME_NOTFOUND);
       }
     }
+    if(dataflowVO.getBigData() == null){
+      dataflowVO.setBigData(false);
+    }
     dataflowVO.setCreationDate(new Date());
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
     dataflowVO.setReleasable(true);
