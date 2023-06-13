@@ -176,6 +176,9 @@ public final class LiteralConstants {
   /** The Constant S3_NAME_PATTERN_LENGTH: {@value}. */
   public static final int S3_NAME_PATTERN_LENGTH = 7;
 
+  /** The Constant S3_DEFAULT_BUCKET: {@value}. */
+  public static final String S3_DEFAULT_BUCKET = "\"rn3-dataset\".\"rn3-dataset\"";
+
   /** The Constant S3_LEFT_PAD: {@value}. */
   public static final String S3_LEFT_PAD= "0";
 
@@ -197,29 +200,56 @@ public final class LiteralConstants {
   /** The Constant S3_CURRENT_PATH: {@value}. */
   public static final String S3_IMPORT_PATH = "/%s/%s/%s/current/import/%s";
 
+  /** The Constant S3_IMPORT_QUERY_PATH: {@value}. */
+  public static final String S3_IMPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"import\".\"%s\"";
+
   /** The Constant S3_VALIDATION_PATH: {@value}. */
   public static final String S3_VALIDATION_PATH = "/%s/%s/%s/current/validation/%s/%s";
+
+  /** The Constant S3_VALIDATION_PATH: {@value}. */
+  public static final String S3_VALIDATION_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"validation\".\"%s\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_VALIDATE_PATH: {@value}. */
   public static final String S3_TABLE_NAME_VALIDATE_PATH = "/%s/%s/%s/current/%s_validate/%s";
 
+  /** The Constant S3_TABLE_NAME_VALIDATE_QUERY_PATH: {@value}. */
+  public static final String S3_TABLE_NAME_VALIDATE_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s_validate\".\"%s\"";
+
   /** The Constant S3_TABLE_NAME_PATH: {@value}. */
   public static final String S3_TABLE_NAME_PATH = "/%s/%s/%s/current/%s/%s";
+
+  /** The Constant S3_TABLE_NAME_QUERY_PATH: {@value}. */
+  public static final String S3_TABLE_NAME_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\".\"%s\"";
 
   /** The Constant S3_VALIDATION_DC_PATH: {@value}. */
   public static final String S3_VALIDATION_DC_PATH = "/%s/%s/%s/current/validation/%s/%s/%s";
 
+  /** The Constant S3_VALIDATION_DC_QUERY_PATH: {@value}. */
+  public static final String S3_VALIDATION_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"validation\".\"%s\".\"%s\".\"%s\"";
+
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_PATH: {@value}. */
   public static final String S3_TABLE_NAME_VALIDATE_DC_PATH = "/%s/%s/%s/current/%s_validate/%s/%s";
+
+  /** The Constant S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH: {@value}. */
+  public static final String S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s_validate\".\"%s\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_DC_PATH: {@value}. */
   public static final String S3_TABLE_NAME_DC_PATH = "/%s/%s/%s/current/%s/%s/%s";
 
+  /** The Constant S3_TABLE_NAME_DC_QUERY_PATH: {@value}. */
+  public static final String S3_TABLE_NAME_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\".\"%s\".\"%s\"";
+
   /** The Constant S3_DATAFLOW_REFERENCE_PATH: {@value}. */
   public static final String S3_DATAFLOW_REFERENCE_PATH = "/%s/reference/%s";
 
+  /** The Constant S3_DATAFLOW_REFERENCE_QUERY_PATH: {@value}. */
+  public static final String S3_DATAFLOW_REFERENCE_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"reference\".\"%s\"";
+
   /** The Constant S3_EXPORT_PATH: {@value}. */
   public static final String S3_EXPORT_PATH = "/%s/%s/%s/export/%s";
+
+  /** The Constant S3_EXPORT_QUERY_PATH: {@value}. */
+  public static final String S3_EXPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"export\".\"%s\"";
 
   /** The Constant S3_IMPORT: {@value}. */
   public static final String S3_IMPORT = "IMPORT";
@@ -233,8 +263,8 @@ public final class LiteralConstants {
   /** The Constant S3_TABLE_NAME: {@value}. */
   public static final String S3_TABLE_NAME = "TABLE_NAME";
 
-  /** The Constant S3_TABLE_NAME_VALIDATIOM: {@value}. */
-  public static final String S3_TABLE_NAME_VALIDATIOM = "TABLE_NAME_VALIDATIOM";
+  /** The Constant S3_TABLE_NAME_VALIDATION: {@value}. */
+  public static final String S3_TABLE_NAME_VALIDATION = "TABLE_NAME_VALIDATION";
 
   /**
    * Instantiates a new literal constants.
