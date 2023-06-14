@@ -56,6 +56,30 @@ public interface DatasetController {
       @RequestParam(value = "fieldValue", required = false) String fieldValue);
 
   /**
+   *
+   * @param datasetId
+   * @param idTableSchema
+   * @param pageNum
+   * @param pageSize
+   * @param fields
+   * @param levelError
+   * @param idRules
+   * @param fieldSchemaId
+   * @param fieldValue
+   * @return
+   */
+  @GetMapping("TableValueDatasetDL/{id}")
+  TableVO getDataTablesValuesDL(@PathVariable("id") Long datasetId,
+                              @RequestParam("idTableSchema") String idTableSchema,
+                              @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+                              @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                              @RequestParam(value = "fields", required = false) String fields,
+                              @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError,
+                              @RequestParam(value = "idRules", required = false) String[] idRules,
+                              @RequestParam(value = "fieldSchemaId", required = false) String fieldSchemaId,
+                              @RequestParam(value = "fieldValue", required = false) String fieldValue);
+
+  /**
    * Update dataset.
    *
    * @param dataset the dataset

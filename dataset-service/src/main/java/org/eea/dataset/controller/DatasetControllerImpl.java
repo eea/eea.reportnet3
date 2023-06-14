@@ -196,6 +196,66 @@ public class DatasetControllerImpl implements DatasetController {
     return result;
   }
 
+  @Override
+  @HystrixCommand
+  @GetMapping("TableValueDatasetDL/{id}")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATACOLLECTION_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','DATASET_NATIONAL_COORDINATOR','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','DATACOLLECTION_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Get table data", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+          @ApiResponse(code = 400, message = "Dataset id incorrect"),
+          @ApiResponse(code = 404, message = "Dataset not found"),
+          @ApiResponse(code = 500, message = "Error getting the data")})
+  public TableVO getDataTablesValuesDL(
+          @ApiParam(type = "Long", value = "Dataset id",
+                  example = "0") @PathVariable("id") Long datasetId,
+          @ApiParam(type = "String", value = "Table schema id",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("idTableSchema") String idTableSchema,
+          @ApiParam(type = "Integer", value = "Page number", example = "0") @RequestParam(
+                  value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+          @ApiParam(type = "Integer", value = "Page size",
+                  example = "0") @RequestParam(value = "pageSize", required = false) Integer pageSize,
+          @ApiParam(type = "String", value = "Field names",
+                  example = "field1") @RequestParam(value = "fields", required = false) String fields,
+          @ApiParam(value = "Level error to filter", example = "INFO,WARNING") @RequestParam(
+                  value = "levelError", required = false) ErrorTypeEnum[] levelError,
+          @ApiParam(value = "List of rule ids to filter",
+                  example = "a,b,c") @RequestParam(value = "idRules", required = false) String[] idRules,
+          @ApiParam(type = "String", value = "Field schema id",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "fieldSchemaId",
+                  required = false) String fieldSchemaId,
+          @ApiParam(type = "String", value = "Value to filter",
+                  example = "3") @RequestParam(value = "fieldValue", required = false) String fieldValue) {
+    if (null == datasetId || null == idTableSchema) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+    // check if the parameters received from the frontend are the needed to get the table values
+    // WITHOUT PAGINATION
+    Pageable pageable = null;
+    if (pageSize != null) {
+      pageable = PageRequest.of(pageNum, pageSize);
+    }
+    // else pageable will be null, it will be created inside the service
+    TableVO result = null;
+    try {
+      result = datasetService.getTableValuesDLById(datasetId, idTableSchema, pageable, fields,
+              levelError, idRules, fieldSchemaId, fieldValue);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+      if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATASET_NOTFOUND);
+      }
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+              EEAErrorMessage.OBTAINING_TABLE_DATA);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving datalake table values for datasetId {} and tableSchemaId {} Message: {}", datasetId, idTableSchema, e.getMessage());
+      throw e;
+    }
+
+    return result;
+  }
+
   /**
    * Update dataset.
    *

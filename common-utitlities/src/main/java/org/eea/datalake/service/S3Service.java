@@ -92,4 +92,10 @@ public interface S3Service {
      * @return export DC query path
      */
     String getExportDCQueryPath(S3PathResolver s3PathResolver);
+
+    /**
+     * @param s3PathResolver
+     * @return table name query path
+     */
+    String getTableAsFolderQueryPath(S3PathResolver s3PathResolver);
 }

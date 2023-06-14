@@ -239,6 +239,8 @@ public final class LiteralConstants {
   /** The Constant S3_TABLE_NAME_DC_QUERY_PATH: {@value}. */
   public static final String S3_TABLE_NAME_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\".\"%s\".\"%s\"";
 
+  public static final String S3_TABLE_AS_FOLDER_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\"";
+
   /** The Constant S3_DATAFLOW_REFERENCE_PATH: {@value}. */
   public static final String S3_DATAFLOW_REFERENCE_PATH = "/%s/reference/%s";
 

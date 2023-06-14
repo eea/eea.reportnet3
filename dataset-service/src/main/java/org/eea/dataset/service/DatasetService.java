@@ -71,6 +71,22 @@ public interface DatasetService {
       String fields, ErrorTypeEnum[] levelError, String[] idRules, String fieldSchema,
       String fieldValue) throws EEAException;
 
+  /**
+   *
+   * @param datasetId
+   * @param mongoID
+   * @param pageable
+   * @param fields
+   * @param levelError
+   * @param idRules
+   * @param fieldSchema
+   * @param fieldValue
+   * @return
+   * @throws EEAException
+   */
+  TableVO getTableValuesDLById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
+                             String fields, ErrorTypeEnum[] levelError, String[] idRules, String fieldSchema,
+                             String fieldValue) throws EEAException;
 
   /**
    * Update dataset.
