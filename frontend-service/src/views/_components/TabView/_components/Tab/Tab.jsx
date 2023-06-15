@@ -61,9 +61,11 @@ export const Tab = ({
   onTabDragAndDrop,
   onTabDragAndDropStart,
   onTabEditingHeader,
+  onTabHasErrors,
   onTabHeaderClick,
   onTabMouseWheel,
   onTabNameError,
+  onTabNameLengthWarning,
   readOnly = false,
   rightIcon,
   rightIconClass = '',
@@ -310,6 +312,7 @@ export const Tab = ({
           setEditingHeader(false);
         }
         setHasErrors(false);
+        onTabHasErrors(false);
       }
     }
     if (event.key === 'Enter') {
@@ -329,18 +332,27 @@ export const Tab = ({
   const onInputBlur = (value, index, initialTitleHeader) => {
     const correctNameChange = onTabBlur(value, index, initialTitleHeader);
     //Check for duplicates. Undefined is also a correct value
+    if (value.length > 30) {
+      onTabNameLengthWarning(
+        resourcesContext.messages['longTableNameWarningHeader'],
+        resourcesContext.messages['longTableNameWarning']
+      );
+    }
     if (!isUndefined(correctNameChange)) {
       if (correctNameChange.correct) {
         setEditingHeader(false);
         setTitleHeader(correctNameChange.tableName);
         setHasErrors(false);
+        onTabHasErrors(false);
       } else {
         setEditingHeader(true);
         setHasErrors(true);
+        onTabHasErrors(true);
       }
     } else {
       setEditingHeader(false);
       setHasErrors(false);
+      onTabHasErrors(false);
     }
   };
 
@@ -566,6 +578,12 @@ export const Tab = ({
                 if (titleHeader.trim() !== '') {
                   if (!invalidCharsRegex.test(titleHeader)) {
                     onInputBlur(e.target.value.trim(), index, initialTitleHeader);
+                    if (titleHeader.trim().length > 30) {
+                      onTabNameLengthWarning(
+                        resourcesContext.messages['longTableNameWarningHeader'],
+                        resourcesContext.messages['longTableNameWarning']
+                      );
+                    }
                   } else {
                     onTabNameError(
                       resourcesContext.messages['invalidCharactersTabHeader'],
