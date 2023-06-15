@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -46,9 +43,9 @@ public class TestDremioControllerImpl {
     }
 
 
-    @GetMapping("/export/{filename}")
-    public void export(@ApiParam(type = "String",
-        value = "Filename") @PathVariable("filename") String filename) throws IOException {
+    @GetMapping("/export")
+    public void export(@ApiParam(type = "String", value = "filename")
+        @RequestParam("filename") String filename) throws IOException {
 
         try {
             GetObjectRequest objectRequest = GetObjectRequest
