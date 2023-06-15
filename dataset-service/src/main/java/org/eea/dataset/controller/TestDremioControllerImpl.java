@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ import java.io.*;
 
 @RequestMapping("/dremio")
 @RestController
+@Import(org.eea.datalake.service.impl.S3ConvertServiceImpl.class)
 public class TestDremioControllerImpl {
 
     @Qualifier("dremioJdbcTemplate")
