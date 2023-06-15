@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class DremioMapper implements RowMapper<RecordVO> {
+public class DremioRecordMapper implements RowMapper<RecordVO> {
 
     private String datasetSchemaId;
     private String tableSchemaId;
@@ -30,9 +30,11 @@ public class DremioMapper implements RowMapper<RecordVO> {
             field.setIdFieldSchema(fieldSchemaVO.getId());
             field.setType(fieldSchemaVO.getType());
             field.setValue(resultSet.getString(fieldSchemaVO.getName()));
+            field.setName(fieldSchemaVO.getName());
             fields.add(field);
         }
         recordVO.setFields(fields);
+        recordVO.setId(resultSet.getString("A"));
         return recordVO;
     }
 
@@ -40,7 +42,7 @@ public class DremioMapper implements RowMapper<RecordVO> {
         return datasetSchemaId;
     }
 
-    public DremioMapper setDatasetSchemaId(String datasetSchemaId) {
+    public DremioRecordMapper setDatasetSchemaId(String datasetSchemaId) {
         this.datasetSchemaId = datasetSchemaId;
         return this;
     }
@@ -49,7 +51,7 @@ public class DremioMapper implements RowMapper<RecordVO> {
         return tableSchemaId;
     }
 
-    public DremioMapper setTableSchemaId(String tableSchemaId) {
+    public DremioRecordMapper setTableSchemaId(String tableSchemaId) {
         this.tableSchemaId = tableSchemaId;
         return this;
     }
@@ -58,20 +60,8 @@ public class DremioMapper implements RowMapper<RecordVO> {
         return recordSchemaVO;
     }
 
-    public DremioMapper setRecordSchemaVO(RecordSchemaVO recordSchemaVO) {
+    public DremioRecordMapper setRecordSchemaVO(RecordSchemaVO recordSchemaVO) {
         this.recordSchemaVO = recordSchemaVO;
         return this;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

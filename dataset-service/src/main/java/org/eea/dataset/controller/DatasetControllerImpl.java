@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
+import org.eea.dataset.service.DataLakeService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -121,6 +122,10 @@ public class DatasetControllerImpl implements DatasetController {
   /** The dataflow controller zuul */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  /** The datalake service */
+  @Autowired
+  private DataLakeService dataLakeService;
 
   /**
    * Gets the data tables values.
@@ -239,7 +244,7 @@ public class DatasetControllerImpl implements DatasetController {
     // else pageable will be null, it will be created inside the service
     TableVO result = null;
     try {
-      result = datasetService.getTableValuesDLById(datasetId, idTableSchema, pageable, fields,
+      result = dataLakeService.getTableValuesDLById(datasetId, idTableSchema, pageable, fields,
               levelError, idRules, fieldSchemaId, fieldValue);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());

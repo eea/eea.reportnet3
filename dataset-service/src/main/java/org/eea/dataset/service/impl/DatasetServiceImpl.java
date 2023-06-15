@@ -7,8 +7,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.eea.datalake.service.S3Service;
-import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.*;
 import org.eea.dataset.persistence.data.domain.*;
 import org.eea.dataset.persistence.data.repository.*;
@@ -28,7 +26,6 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.PaMService;
-import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.PostgresBulkImporter;
 import org.eea.dataset.service.model.TruncateDataset;
@@ -37,7 +34,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -53,7 +49,6 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -77,7 +72,6 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -328,22 +322,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private TaskMapper taskMapper;
 
-  @Autowired
-  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
-
-  @Autowired
-  private DremioMapper dremioMapper;
-
-  @Qualifier("dremioJdbcTemplate")
-  @Autowired
-  private JdbcTemplate dremioJdbcTemplate;
-
-  @Autowired
-  FileCommonUtils fileCommon;
-
-  @Autowired
-  S3Service s3Service;
-
   /** The import path. */
   @Value("${importPath}")
   private String importPath;
@@ -581,71 +559,6 @@ public class DatasetServiceImpl implements DatasetService {
         // Retrieve validations to set them into the final result
         retrieveValidations(recordVOs);
       }
-    }
-    result.setTotalRecords(totalRecords);
-    return result;
-  }
-
-  @Override
-  @Transactional
-  public TableVO getTableValuesDLById(final Long datasetId, final String idTableSchema,
-                                    Pageable pageable, final String fields, ErrorTypeEnum[] levelError, String[] idRules,
-                                    String fieldSchema, String fieldValue) throws EEAException {
-    DataSetSchemaVO dataSetSchemaVO;
-    TableVO result = new TableVO();
-    StringBuilder dataCountQuery = new StringBuilder();
-    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-    String datasetSchemaId = dataset.getDatasetSchema();
-    try {
-      dataSetSchemaVO = fileCommon.getDataSetSchemaVO(datasetSchemaId);
-    } catch (EEAException e) {
-      LOG.error("Error retrieving dataset schema for datasetSchemaId {}", datasetSchemaId);
-      throw new EEAException(e);
-    }
-    Optional<TableSchemaVO> tableSchemaOptional = dataSetSchemaVO.getTableSchemas().stream().filter(t -> t.getIdTableSchema().equals(idTableSchema)).findFirst();
-    TableSchemaVO tableSchemaVO = null;
-    if (!tableSchemaOptional.isPresent()) {
-      LOG.error("table with id " + idTableSchema + " not found in mongo results");
-      throw new EEAException("Error retrieving table with id " + idTableSchema);
-    }
-    tableSchemaVO = tableSchemaOptional.get();
-
-    S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), datasetId, tableSchemaVO.getNameTableSchema());
-    dataCountQuery.append("select count(*) from " + s3Service.getTableAsFolderQueryPath(s3PathResolver));
-    Long totalRecords = dremioJdbcTemplate.queryForObject(dataCountQuery.toString(), Long.class);
-    if (totalRecords == 0) {
-      result.setTotalFilteredRecords(0L);
-      result.setTableValidations(new ArrayList<>());
-      result.setTotalRecords(0L);
-      result.setRecords(new ArrayList<>());
-    } else {
-      pageable = calculatePageable(pageable, totalRecords);
-      dremioMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(idTableSchema);
-      StringBuilder dataQuery = new StringBuilder();
-      dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver));
-      int limit;
-      int offset;
-      if (!fieldValue.equals("")) {
-        dataQuery.append(" where ");
-        List<String> headers = tableSchemaVO.getRecordSchema().getFieldSchema().stream().map(fieldSchemaVO -> fieldSchemaVO.getName()).collect(Collectors.toList());
-        dataQuery.append(headers.get(0)).append(" like '%").append(fieldValue).append("%'");
-        headers.remove(headers.get(0));
-        headers.forEach(header -> dataQuery.append(" OR ").append(header).append(" like '%").append(fieldValue).append("%'"));
-      }
-      if (pageable!=null) {
-        limit = pageable.getPageSize();
-        offset = pageable.getPageNumber() * pageable.getPageSize();
-        if (limit!=0) {
-          dataQuery.append(" LIMIT ").append(limit);
-        }
-        if (offset!=0) {
-          dataQuery.append(" OFFSET ").append(offset);
-        }
-      }
-      List<RecordVO> recordVOS = dremioJdbcTemplate.query(dataQuery.toString(), dremioMapper);
-      result.setIdTableSchema(idTableSchema);
-      result.setRecords(recordVOS);
-      result.setTotalFilteredRecords(0L);
     }
     result.setTotalRecords(totalRecords);
     return result;

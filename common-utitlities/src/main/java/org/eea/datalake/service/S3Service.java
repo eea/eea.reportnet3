@@ -97,5 +97,5 @@ public interface S3Service {
      * @param s3PathResolver
      * @return table name query path
      */
-    String getTableAsFolderQueryPath(S3PathResolver s3PathResolver);
+    String getTableAsFolderQueryPath(S3PathResolver s3PathResolver, boolean validation);
 }
