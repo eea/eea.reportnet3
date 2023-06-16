@@ -75,6 +75,8 @@
     "availableInPublicView": "Available in public view",
     "back": "Back",
     "basemapLayer": "Basemap layer",
+    "bigDataStorage": "Big data storage",
+    "bigDataStorageMessage": "Check to choose big data storage for the new dataflow",
     "blocker": "Blocker",
     "bulkDeleteCheckTooltip": "Delete multiple fields",
     "bulkDeleteCheckTooltipShift": "Hold shift to select more than one field",
