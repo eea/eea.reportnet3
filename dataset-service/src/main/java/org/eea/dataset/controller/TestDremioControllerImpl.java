@@ -70,8 +70,8 @@ public class TestDremioControllerImpl {
         }
     }
 
-    @GetMapping("/exporJSON")
-    public void exporJSON(@ApiParam(type = "String", value = "filename")
+    @GetMapping("/exportJSON")
+    public void exportJSON(@ApiParam(type = "String", value = "filename")
         @RequestParam("filename") String filename,
         HttpServletResponse response) {
 
@@ -89,8 +89,8 @@ public class TestDremioControllerImpl {
         }
     }
 
-    @GetMapping("/exporXML")
-    public void exporXML(@ApiParam(type = "String", value = "filename")
+    @GetMapping("/exportXML")
+    public void exportXML(@ApiParam(type = "String", value = "filename")
         @RequestParam("filename") String filename,
         HttpServletResponse response) {
 
@@ -98,7 +98,7 @@ public class TestDremioControllerImpl {
             File myFile = getFile(filename);
 
             File toExport = new File("/reportnet3-data/input/importFiles/"+filename+".xml");
-            s3ConvertService.convertParquetToJSON(myFile, toExport);
+            s3ConvertService.convertParquetToXML(myFile, toExport);
 
             download(filename, response, toExport);
         } catch (IOException | ResponseStatusException ex) {
