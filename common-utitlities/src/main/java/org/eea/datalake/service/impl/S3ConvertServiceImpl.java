@@ -1,6 +1,5 @@
 package org.eea.datalake.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -96,8 +95,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
 
             bw.write("{\"records\":[\n");
-            List<String> headers = new ArrayList<>();
             GenericRecord record = r.read();
+            List<String> headers = new ArrayList<>();
             int size = record.getSchema().getFields().size();
             for (int i = 0; i < size; i++) {
                 headers.add(record.get(i).toString());
@@ -126,6 +125,54 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 bw.write("}");
             }
             bw.write("\n]}");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void convertParquetToXML(File parquetFile, File xmlOutputFile) {
+        Preconditions.checkArgument(parquetFile.getName().endsWith(".parquet"),
+            "parquet file should have .parquet extension");
+        Preconditions.checkArgument(xmlOutputFile.getName().endsWith(".xml"),
+            "csv file should have .xml extension");
+        Preconditions.checkArgument(!xmlOutputFile.exists(),
+            "Output file " + xmlOutputFile.getAbsolutePath() + " already exists");
+
+        LOG.info("Converting {} to {}", parquetFile.getName(), xmlOutputFile.getName());
+
+        try (InputStream inputStream = new FileInputStream(parquetFile);
+            FileWriter fw = new FileWriter(xmlOutputFile, true);
+            BufferedWriter bw = new BufferedWriter(fw)) {
+
+            ParquetStream parquetStream = new ParquetStream(inputStream);
+            ParquetReader<GenericRecord> r = AvroParquetReader
+                .<GenericRecord>builder(parquetStream)
+                .disableCompatibility()
+                .build();
+
+            Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+
+            bw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+            bw.write("<Records>\n");
+            GenericRecord record = r.read();
+
+            List<String> headers = new ArrayList<>();
+            int size = record.getSchema().getFields().size();
+            for (int i = 0; i < size; i++) {
+                headers.add(record.get(i).toString());
+            }
+            while ((record = r.read()) != null) {
+                bw.write("<Record>");
+                for (int i = 0; i < size; i++) {
+                    String recordValue = record.get(i).toString();
+                    bw.write("<"+headers.get(i)+">");
+                    bw.write(recordValue);
+                    bw.write("</"+headers.get(i)+">");
+                }
+                bw.write("</Record>\n");
+            }
+            bw.write("</Records>");
         } catch (IOException e) {
             e.printStackTrace();
         }

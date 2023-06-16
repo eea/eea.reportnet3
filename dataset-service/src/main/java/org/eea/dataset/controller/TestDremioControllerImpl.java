@@ -54,15 +54,13 @@ public class TestDremioControllerImpl {
     @GetMapping("/exportCSV")
     public void exportCSV(@ApiParam(type = "String", value = "filename")
         @RequestParam("filename") String filename,
-        HttpServletResponse response) throws IOException {
+        HttpServletResponse response) {
 
         try {
             File myFile = getFile(filename);
 
             File toExport = new File("/reportnet3-data/input/importFiles/"+filename+".csv");
             s3ConvertService.convertParquetToCSV(myFile, toExport);
-
-            toExport = new File("/reportnet3-data/input/importFiles/"+filename+".csv");
 
             download(filename, response, toExport);
         } catch (IOException | ResponseStatusException ex) {
@@ -75,7 +73,7 @@ public class TestDremioControllerImpl {
     @GetMapping("/exporJSON")
     public void exporJSON(@ApiParam(type = "String", value = "filename")
         @RequestParam("filename") String filename,
-        HttpServletResponse response) throws IOException {
+        HttpServletResponse response) {
 
         try {
             File myFile = getFile(filename);
@@ -83,7 +81,24 @@ public class TestDremioControllerImpl {
             File toExport = new File("/reportnet3-data/input/importFiles/"+filename+".json");
             s3ConvertService.convertParquetToJSON(myFile, toExport);
 
-            toExport = new File("/reportnet3-data/input/importFiles/"+filename+".json");
+            download(filename, response, toExport);
+        } catch (IOException | ResponseStatusException ex) {
+            LOG.error("IOException/ResponseStatusException ", ex);
+        } catch (S3Exception e) {
+            LOG.error("S3Exception ", e);
+        }
+    }
+
+    @GetMapping("/exporXML")
+    public void exporXML(@ApiParam(type = "String", value = "filename")
+        @RequestParam("filename") String filename,
+        HttpServletResponse response) {
+
+        try {
+            File myFile = getFile(filename);
+
+            File toExport = new File("/reportnet3-data/input/importFiles/"+filename+".xml");
+            s3ConvertService.convertParquetToJSON(myFile, toExport);
 
             download(filename, response, toExport);
         } catch (IOException | ResponseStatusException ex) {
