@@ -19,6 +19,6 @@ public interface BigDataDatasetService {
      * @return
      */
     void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
-                       MultipartFile file, Boolean replace, Long integrationId, String delimiter, String fmeJobId);
+                       MultipartFile file, Boolean replace, Long integrationId, String delimiter, String fmeJobId) throws Exception;
 
 }

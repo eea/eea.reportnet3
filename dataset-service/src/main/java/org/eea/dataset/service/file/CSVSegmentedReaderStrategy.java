@@ -273,7 +273,7 @@ public class CSVSegmentedReaderStrategy {
      * @return the list
      * @throws EEAException the EEA exception
      */
-    private List<FieldSchema> setHeaders(final List<String> values, final String idTableSchema,
+    public List<FieldSchema> setHeaders(final List<String> values, final String idTableSchema,
                                          DataSetSchema dataSetSchema) throws EEAException {
 
         boolean atLeastOneFieldSchema = false;

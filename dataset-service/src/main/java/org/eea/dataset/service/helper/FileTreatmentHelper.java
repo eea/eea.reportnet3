@@ -1340,9 +1340,7 @@ public class FileTreatmentHelper implements DisposableBean {
          * @param error the error
          * @param errorWrongFilename the error wrong filename
          */
-        public void finishImportProcess ( Long datasetId, String processId, String tableSchemaId, String
-        originalFileName,
-                String error,boolean errorWrongFilename){
+        public void finishImportProcess ( Long datasetId, String processId, String tableSchemaId, String originalFileName, String error,boolean errorWrongFilename){
             try {
                 releaseLockAndDeleteImportFileDirectory(datasetId);
 
@@ -1420,13 +1418,11 @@ public class FileTreatmentHelper implements DisposableBean {
         }
 
 
-    public void finishImportProcessV2 (Long taskId,Long dataflowId, Long datasetId, String processId, String tableSchemaId, String
-            originalFileName,
-                                     String error,boolean errorWrongFilename){
-        Optional<Task> task =     taskRepository.findById(taskId);
+    public void finishImportProcessV2 (Long taskId,Long dataflowId, Long datasetId, String processId, String tableSchemaId,
+                                       String originalFileName, String error,boolean errorWrongFilename){
 
+        Optional<Task> task = taskRepository.findById(taskId);
         try {
-
             LOG.info("About to Release Lock for TaskId:"+taskId + " ProcessId:"+processId);
             releaseLockAndDeleteImportFileDirectory(datasetId);
 
@@ -1671,10 +1667,8 @@ public class FileTreatmentHelper implements DisposableBean {
             }
         }
 
-        private void processFileIntoTasks (@DatasetId Long datasetId, String processId, String fileName, String
-        filePath,
-                String idTableSchema,boolean replace, DataSetSchema schema, String delimiter, Boolean createCsvFinalizationCommand)
-          throws EEAException, IOException {
+        private void processFileIntoTasks (@DatasetId Long datasetId, String processId, String fileName, String filePath, String idTableSchema,
+                                           boolean replace, DataSetSchema schema, String delimiter, Boolean createCsvFinalizationCommand) throws EEAException, IOException {
             // obtains the file type from the extension
             if (fileName == null) {
                 throw new EEAException(EEAErrorMessage.FILE_NAME);
@@ -1821,7 +1815,7 @@ public class FileTreatmentHelper implements DisposableBean {
          * @param mimeType the mime type
          * @throws EEAException the EEA exception
          */
-        private void validateFileType ( final String mimeType) throws EEAException {
+        public void validateFileType(final String mimeType) throws EEAException {
             // files that will be accepted: csv, xml, xls, xlsx
             switch (FileTypeEnum.getEnum(mimeType)) {
                 case CSV:

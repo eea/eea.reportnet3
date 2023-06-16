@@ -81,7 +81,7 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-spatial</artifactId>
 		</dependency>
-		<!-- ParquetConvertService dependencies -->
+		<!-- ParquetConverterService dependencies -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>

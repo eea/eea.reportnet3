@@ -3,6 +3,7 @@ package org.eea.dataset.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -243,6 +244,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param integrationId the integration id
    * @param delimiter the delimiter
    */
+  @SneakyThrows
   @Override
   @HystrixCommand(commandProperties = {@HystrixProperty(
       name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
@@ -275,7 +277,13 @@ public class DatasetControllerImpl implements DatasetController {
 
     DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
     if(dataFlowVO.getBigData()){
-      bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, fmeJobId);
+      try {
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, fmeJobId);
+      } catch (Exception e) {
+        //TODO handle exception
+        LOG.error("Error when importing data to Dremio for datasetId {}", datasetId, e);
+        throw e;
+      }
     }
     else{
       JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
