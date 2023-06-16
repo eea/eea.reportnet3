@@ -51,48 +51,81 @@ public class TestDremioControllerImpl {
     }
 
 
-    @GetMapping("/export")
-    public void export(@ApiParam(type = "String", value = "filename")
+    @GetMapping("/exportCSV")
+    public void exportCSV(@ApiParam(type = "String", value = "filename")
         @RequestParam("filename") String filename,
         HttpServletResponse response) throws IOException {
 
         try {
-            GetObjectRequest objectRequest = GetObjectRequest
-                .builder()
-                .key(filename+".parquet")
-                .bucket("rn3-dataset")
-                .build();
-
-            ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
-            byte[] data = objectBytes.asByteArray();
-
-            // Write the data to a local file.
-            File myFile = new File("/reportnet3-data/input/importFiles/"+filename+".parquet");
-            LOG.info("Local file {}", myFile);
-            OutputStream os = new FileOutputStream(myFile);
-            os.write(data);
-            LOG.info("Successfully obtained bytes from an S3 object");
-            os.close();
+            File myFile = getFile(filename);
 
             File toExport = new File("/reportnet3-data/input/importFiles/"+filename+".csv");
             s3ConvertService.convertParquetToCSV(myFile, toExport);
 
-            response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=" + FilenameUtils.getName(filename));
-            LOG.info("FilenameUtils.getName(filename) value: {}", FilenameUtils.getName(filename));
+            toExport = new File("/reportnet3-data/input/importFiles/"+filename+".csv");
 
-            OutputStream out = response.getOutputStream();
-            FileInputStream in = new FileInputStream(toExport);
-            // copy from in to out
-            IOUtils.copyLarge(in, out);
-            out.close();
-            in.close();
-            // delete the file after downloading it
-            FileUtils.forceDelete(toExport);
+            download(filename, response, toExport);
         } catch (IOException | ResponseStatusException ex) {
             LOG.error("IOException/ResponseStatusException ", ex);
         } catch (S3Exception e) {
             LOG.error("S3Exception ", e);
         }
+    }
+
+    @GetMapping("/exporJSON")
+    public void exporJSON(@ApiParam(type = "String", value = "filename")
+        @RequestParam("filename") String filename,
+        HttpServletResponse response) throws IOException {
+
+        try {
+            File myFile = getFile(filename);
+
+            File toExport = new File("/reportnet3-data/input/importFiles/"+filename+".json");
+            s3ConvertService.convertParquetToJSON(myFile, toExport);
+
+            toExport = new File("/reportnet3-data/input/importFiles/"+filename+".json");
+
+            download(filename, response, toExport);
+        } catch (IOException | ResponseStatusException ex) {
+            LOG.error("IOException/ResponseStatusException ", ex);
+        } catch (S3Exception e) {
+            LOG.error("S3Exception ", e);
+        }
+    }
+
+    private void download(String filename, HttpServletResponse response, File toExport)
+        throws IOException {
+        response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
+            "attachment; filename=" + FilenameUtils.getName(filename));
+        LOG.info("FilenameUtils.getName(filename) value: {}", FilenameUtils.getName(filename));
+
+        OutputStream out = response.getOutputStream();
+        FileInputStream in = new FileInputStream(toExport);
+        // copy from in to out
+        IOUtils.copyLarge(in, out);
+        out.close();
+        in.close();
+        // delete the file after downloading it
+        FileUtils.forceDelete(toExport);
+    }
+
+    private File getFile(String filename) throws IOException {
+        GetObjectRequest objectRequest = GetObjectRequest
+            .builder()
+            .key(filename +".parquet")
+            .bucket("rn3-dataset")
+            .build();
+
+        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
+        byte[] data = objectBytes.asByteArray();
+
+        // Write the data to a local file.
+        File myFile = new File("/reportnet3-data/input/importFiles/"+ filename +".parquet");
+        LOG.info("Local file {}", myFile);
+        OutputStream os = new FileOutputStream(myFile);
+        os.write(data);
+        LOG.info("Successfully obtained bytes from an S3 object");
+        os.close();
+        return myFile;
     }
 }

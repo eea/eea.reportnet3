@@ -1,5 +1,6 @@
 package org.eea.datalake.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -13,7 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,6 +67,65 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                     csvWriter.writeNext(columns, false);
                 }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void convertParquetToJSON(File parquetFile, File jsonOutputFile) {
+        Preconditions.checkArgument(parquetFile.getName().endsWith(".parquet"),
+            "parquet file should have .parquet extension");
+        Preconditions.checkArgument(jsonOutputFile.getName().endsWith(".json"),
+            "csv file should have .json extension");
+        Preconditions.checkArgument(!jsonOutputFile.exists(),
+            "Output file " + jsonOutputFile.getAbsolutePath() + " already exists");
+
+        LOG.info("Converting {} to {}", parquetFile.getName(), jsonOutputFile.getName());
+
+        try (InputStream inputStream = new FileInputStream(parquetFile);
+            FileWriter fw = new FileWriter(jsonOutputFile, true);
+            BufferedWriter bw = new BufferedWriter(fw)) {
+
+            ParquetStream parquetStream = new ParquetStream(inputStream);
+            ParquetReader<GenericRecord> r = AvroParquetReader
+                .<GenericRecord>builder(parquetStream)
+                .disableCompatibility()
+                .build();
+
+            Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+
+            bw.write("{\"records\":[\n");
+            List<String> headers = new ArrayList<>();
+            GenericRecord record = r.read();
+            int size = record.getSchema().getFields().size();
+            for (int i = 0; i < size; i++) {
+                headers.add(record.get(i).toString());
+            }
+            int counter = 0;
+            while ((record = r.read()) != null) {
+                if (counter == 0 ) {
+                    bw.write("{");
+                    counter++;
+                } else {
+                    bw.write(",\n{");
+                }
+                for (int i = 0; i < size; i++) {
+                    String recordValue = record.get(i).toString();
+                    boolean isNumeric = pattern.matcher(recordValue).matches();
+                    bw.write("\""+headers.get(i)+"\":");
+                    if (isNumeric) {
+                        bw.write(recordValue);
+                    } else {
+                        bw.write("\""+recordValue+"\"");
+                    }
+                    if (i < size - 1) {
+                        bw.write(",");
+                    }
+                }
+                bw.write("}");
+            }
+            bw.write("\n]}");
         } catch (IOException e) {
             e.printStackTrace();
         }
