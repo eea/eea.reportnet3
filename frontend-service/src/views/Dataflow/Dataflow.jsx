@@ -73,6 +73,7 @@ export const Dataflow = () => {
 
   const dataflowInitialState = {
     anySchemaAvailableInPublic: false,
+    bigData: false,
     currentUrl: '',
     data: {},
     dataflowType: '',
@@ -769,6 +770,7 @@ export const Dataflow = () => {
         type: 'INITIAL_LOAD',
         payload: {
           anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
+          bigData: dataflow.bigData,
           data: dataflow,
           dataflowType: dataflow.type,
           description: dataflow.description,
@@ -1237,9 +1239,20 @@ export const Dataflow = () => {
       return dataflowState.data.name;
     } else {
       if (isInsideACountry && !isNil(country) && country.length > 0) {
-        return dataflowState.data.name;
+        return dataflowState.data.bigData ? (
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                name: dataflowState.data.name
+              })
+            }}></p>
+        ) : (
+          dataflowState.data.name
+        );
       } else {
-        return resourcesContext.messages['dataflow'];
+        return dataflowState.data.bigData
+          ? resourcesContext.messages['bigDataDataflow']
+          : resourcesContext.messages['dataflow'];
       }
     }
   };
