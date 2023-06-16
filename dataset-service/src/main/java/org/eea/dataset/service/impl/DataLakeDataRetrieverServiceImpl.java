@@ -7,7 +7,7 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.DremioRecordMapper;
 import org.eea.dataset.mapper.DremioValidationMapper;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
-import org.eea.dataset.service.DataLakeService;
+import org.eea.dataset.service.DataLakeDataRetrieverService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 
 @ImportDataLakeCommons
 @Service
-public class DataLakeServiceImpl implements DataLakeService {
+public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverService {
 
     private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
     private JdbcTemplate dremioJdbcTemplate;
@@ -46,8 +46,8 @@ public class DataLakeServiceImpl implements DataLakeService {
     private SchemasRepository schemasRepository;
 
     @Autowired
-    public DataLakeServiceImpl(DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate,
-                               FileCommonUtils fileCommon, S3Service s3Service, SchemasRepository schemasRepository) {
+    public DataLakeDataRetrieverServiceImpl(DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate,
+                                            FileCommonUtils fileCommon, S3Service s3Service, SchemasRepository schemasRepository) {
         this.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.fileCommon = fileCommon;
@@ -56,7 +56,7 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     /** The Constant LOG. */
-    private static final Logger LOG = LoggerFactory.getLogger(DataLakeServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DataLakeDataRetrieverServiceImpl.class);
 
     @Override
     @Transactional
@@ -176,7 +176,7 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private static void buildFilterQuery(String fieldValue, Map<String, FieldSchemaVO> fieldIdMap, StringBuilder dataQuery) {
         dataQuery.append(" where ");
-        List<String> headers = fieldIdMap.values().stream().map(fieldSchemaVO -> fieldSchemaVO.getName()).collect(Collectors.toList());
+        List<String> headers = fieldIdMap.values().stream().map(FieldSchemaVO::getName).collect(Collectors.toList());
         dataQuery.append(headers.get(0)).append(" like '%").append(fieldValue).append("%'");
         headers.remove(headers.get(0));
         headers.forEach(header -> dataQuery.append(" OR ").append(header).append(" like '%").append(fieldValue).append("%'"));
@@ -193,7 +193,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         Optional<TableSchemaVO> tableSchemaOptional = dataSetSchemaVO.getTableSchemas().stream().filter(t -> t.getIdTableSchema().equals(idTableSchema)).findFirst();
         TableSchemaVO tableSchemaVO = null;
         if (!tableSchemaOptional.isPresent()) {
-            LOG.error("table with id " + idTableSchema + " not found in mongo results");
+            LOG.error("table with id {} not found in mongo results", idTableSchema);
             throw new EEAException("Error retrieving table with id " + idTableSchema);
         }
         tableSchemaVO = tableSchemaOptional.get();

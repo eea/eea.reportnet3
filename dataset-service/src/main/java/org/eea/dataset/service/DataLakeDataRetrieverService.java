@@ -6,7 +6,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
 
-public interface DataLakeService {
+public interface DataLakeDataRetrieverService {
 
     /**
      *
