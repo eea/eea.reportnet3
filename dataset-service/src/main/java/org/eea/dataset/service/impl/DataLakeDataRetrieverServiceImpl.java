@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static org.eea.utils.LiteralConstants.*;
 
 @ImportDataLakeCommons
 @Service
@@ -44,15 +47,17 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
     private FileCommonUtils fileCommon;
     private S3Service s3Service;
     private SchemasRepository schemasRepository;
+    private S3Client s3Client;
 
     @Autowired
     public DataLakeDataRetrieverServiceImpl(DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate,
-                                            FileCommonUtils fileCommon, S3Service s3Service, SchemasRepository schemasRepository) {
+                                            FileCommonUtils fileCommon, S3Service s3Service, SchemasRepository schemasRepository, S3Client s3Client) {
         this.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.fileCommon = fileCommon;
         this.s3Service = s3Service;
         this.schemasRepository = schemasRepository;
+        this.s3Client = s3Client;
     }
 
     /** The Constant LOG. */
@@ -71,7 +76,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         TableSchemaVO tableSchemaVO = getTableSchemaVO(idTableSchema, datasetSchemaId);
 
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchemaVO.getNameTableSchema());
-        dataCountQuery.append("select count(*) from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, false));
+        dataCountQuery.append("select count(*) from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
         Long totalRecords = dremioJdbcTemplate.queryForObject(dataCountQuery.toString(), Long.class);
         if (totalRecords == 0) {
             result.setTotalFilteredRecords(0L);
@@ -84,7 +89,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             DremioRecordMapper recordMapper = new DremioRecordMapper();
             recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(idTableSchema);
             StringBuilder dataQuery = new StringBuilder();
-            dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, false));
+            dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
             //filter value
             if (!fieldValue.equals("")) {
                 buildFilterQuery(fieldValue, fieldIdMap, dataQuery);
@@ -101,19 +106,39 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             result.setIdTableSchema(idTableSchema);
             result.setRecords(recordVOS);
             result.setTotalFilteredRecords(Long.valueOf(recordVOS.size()));
-            retrieveValidations(recordVOS, s3PathResolver);
+            s3PathResolver.setTableName(S3_VALIDATION);
+            if (checkValidationExist(s3PathResolver)) {
+                retrieveValidations(recordVOS, tableSchemaVO.getNameTableSchema(), s3PathResolver);
+            }
         }
         result.setTotalRecords(totalRecords);
         return result;
     }
 
-    private void retrieveValidations(List<RecordVO> recordVOS, S3PathResolver s3PathResolver) {
+    /**
+     * checks if folder validation is created in the s3 storage for the specific dataset
+     * @param s3PathResolver
+     * @return
+     */
+    private boolean checkValidationExist(S3PathResolver s3PathResolver) {
+        String key = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_VALIDATION_TABLE_PATH);
+        return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
+    }
+
+    /**
+     * retrieves validation results from dremio validation folder and maps them to fieldVO objects
+     * @param recordVOS
+     * @param tableName
+     * @param s3PathResolver
+     */
+    private void retrieveValidations(List<RecordVO> recordVOS, String tableName, S3PathResolver s3PathResolver) {
         StringBuilder validationQuery = new StringBuilder();
-        validationQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, true));
+        validationQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
+        validationQuery.append(" where table_name='").append(tableName).append("'");
         List<DremioValidationVO> dremioValidationsVOS = dremioJdbcTemplate.query(validationQuery.toString(), new DremioValidationMapper());
         for (DremioValidationVO dv : dremioValidationsVOS) {
-           List<RecordVO> valRecords =  recordVOS.stream().filter(recordVO -> recordVO.getId().equals(dv.getRecordId())).collect(Collectors.toList());
-           valRecords.forEach(vr -> vr.getFields().parallelStream().forEach(fieldVO -> {
+           List<RecordVO> records =  recordVOS.stream().filter(recordVO -> recordVO.getId().equals(dv.getRecordId())).collect(Collectors.toList());
+           records.forEach(vr -> vr.getFields().parallelStream().forEach(fieldVO -> {
                if (fieldVO.getName().equals(dv.getFieldName())) {
                    FieldValidationVO fieldValidationVO = new FieldValidationVO();
                    List<FieldValidationVO> fieldValidations = new ArrayList<>();
@@ -123,13 +148,22 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
                    validationVO.setMessage(dv.getMessage());
                    validationVO.setTypeEntity(dv.getValidationArea());
                    fieldValidationVO.setValidation(validationVO);
+                   if (fieldVO.getFieldValidations()!=null) {
+                       fieldValidations = fieldVO.getFieldValidations();
+                   }
                    fieldValidations.add(fieldValidationVO);
                    fieldVO.setFieldValidations(fieldValidations);
+                   System.out.println(fieldVO.getName() + fieldValidations.size());
                }
            }));
         }
     }
 
+    /**
+     * builds query according to pagination options
+     * @param pageable
+     * @param dataQuery
+     */
     private static void buildPaginationQuery(Pageable pageable, StringBuilder dataQuery) {
         int limit;
         int offset;
@@ -143,6 +177,13 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         }
     }
 
+    /**
+     * builds query according to sorting options
+     * @param fields
+     * @param datasetSchemaId
+     * @param fieldIdMap
+     * @param dataQuery
+     */
     private void buildSortQuery(String fields, String datasetSchemaId, Map<String, FieldSchemaVO> fieldIdMap, StringBuilder dataQuery) {
         String[] sort = fields.split(":");
         String sortFieldId = sort[0];
@@ -174,6 +215,12 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         dataQuery.append(sort[1].equals("1") ? "asc" : "desc");
     }
 
+    /**
+     * builds query according to filtering options
+     * @param fieldValue
+     * @param fieldIdMap
+     * @param dataQuery
+     */
     private static void buildFilterQuery(String fieldValue, Map<String, FieldSchemaVO> fieldIdMap, StringBuilder dataQuery) {
         dataQuery.append(" where ");
         List<String> headers = fieldIdMap.values().stream().map(FieldSchemaVO::getName).collect(Collectors.toList());
@@ -182,6 +229,13 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         headers.forEach(header -> dataQuery.append(" OR ").append(header).append(" like '%").append(fieldValue).append("%'"));
     }
 
+    /**
+     * finds tableSchemaVO
+     * @param idTableSchema
+     * @param datasetSchemaId
+     * @return
+     * @throws EEAException
+     */
     private TableSchemaVO getTableSchemaVO(String idTableSchema, String datasetSchemaId) throws EEAException {
         DataSetSchemaVO dataSetSchemaVO;
         try {

@@ -224,6 +224,9 @@ public final class LiteralConstants {
   /** The Constant S3_VALIDATION_DC_PATH: {@value}. */
   public static final String S3_VALIDATION_DC_PATH = "/%s/%s/%s/current/validation/%s/%s/%s";
 
+  /** The Constant S3_VALIDATION_TABLE_PATH: {@value}. */
+  public static final String S3_VALIDATION_TABLE_PATH = "/%s/%s/%s/current/validation";
+
   /** The Constant S3_VALIDATION_DC_QUERY_PATH: {@value}. */
   public static final String S3_VALIDATION_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"validation\".\"%s\".\"%s\".\"%s\"";
 
@@ -267,6 +270,9 @@ public final class LiteralConstants {
 
   /** The Constant S3_TABLE_NAME_VALIDATION: {@value}. */
   public static final String S3_TABLE_NAME_VALIDATION = "TABLE_NAME_VALIDATION";
+
+  /** The Constant S3_BUCKET_NAME: {@value}. */
+  public static final String S3_BUCKET_NAME = "reportnet";
 
   /**
    * Instantiates a new literal constants.
