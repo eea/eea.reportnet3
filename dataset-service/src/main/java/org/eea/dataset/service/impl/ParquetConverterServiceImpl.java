@@ -17,6 +17,7 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.ParquetConverterService;
 import org.eea.dataset.service.file.FileCommonUtils;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -31,10 +32,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ParquetConverterServiceImpl implements ParquetConverterService {
@@ -50,24 +48,27 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     @Autowired
     private FileCommonUtils fileCommonUtils;
 
+    @Autowired
+    private FileTreatmentHelper fileTreatmentHelper;
+
     @Override
     public Map<String, String> convertCsvFilesToParquetFiles(ImportFileInDremioInfo importFileInDremioInfo, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
         Map<String, String> parquetFileNamesAndPaths = new HashMap<>();
         for(File csvFile: csvFiles){
             String parquetFilePath = csvFile.getPath().replace(".csv",".parquet");
             String parquetFileName = csvFile.getName().replace(".csv",".parquet");
-            convertCsvToParquet(csvFile.getPath(), parquetFilePath, importFileInDremioInfo.getDelimiter(), dataSetSchema, importFileInDremioInfo.getTableSchemaId(), importFileInDremioInfo.getDatasetId());
+            convertCsvToParquet(csvFile, parquetFilePath, dataSetSchema, importFileInDremioInfo);
             parquetFileNamesAndPaths.put(parquetFileName, parquetFilePath);
         }
         return parquetFileNamesAndPaths;
     }
 
-    private void convertCsvToParquet(String csvFilePath, String parquetFilePath, String delimiter, DataSetSchema dataSetSchema, String tableSchemaId, Long datasetId) throws Exception {
+    private void convertCsvToParquet(File csvFile, String parquetFilePath, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
 
-        //TODO change recordId to actual record id
+        LOG.info("For job {} converting csv file {} to parquet file {}", importFileInDremioInfo, csvFile.getPath(), parquetFilePath);
         char delimiterChar = defaultDelimiter;
-        if (!StringUtils.isBlank(delimiter)){
-            delimiterChar = delimiter.charAt(0);
+        if (!StringUtils.isBlank(importFileInDremioInfo.getDelimiter())){
+            delimiterChar = importFileInDremioInfo.getDelimiter().charAt(0);
         }
 
 
@@ -76,6 +77,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             try {
                 Files.delete(Paths.get(parquetFilePath));
             } catch (IOException e) {
+                LOG.error("Could not delete folder for file {}. {}", parquetFilePath, importFileInDremioInfo);
                 throw new Exception("Could not delete folder for file " + parquetFilePath);
             }
         }
@@ -85,28 +87,28 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         List<FieldSchema> sanitizedHeaders;
         //Reading csv file
         try (
-                Reader reader = Files.newBufferedReader(Paths.get(csvFilePath));
+                Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
                 CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT
                         .withDelimiter(delimiterChar)
                         .withFirstRecordAsHeader()
                         .withIgnoreHeaderCase()
                         .withTrim())) {
-            csvHeaders.add("recordId");
+            csvHeaders.add("record_id");
             csvHeaders.addAll(csvParser.getHeaderMap().keySet());
 
-            sanitizedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, tableSchemaId, datasetId);
+            sanitizedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
 
-            Integer recordCounter = 0;
             for (CSVRecord csvRecord : csvParser) {
                 if(csvRecord.values().length == 0){
-                    LOG.error("Empty first line in csv file {}", csvFilePath);
+                    LOG.error("Empty first line in csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
                     throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
                 }
-                recordCounter++;
+                //TODO change record id into a sequential uuid
+                String recordIdValue = UUID.randomUUID().toString();
                 List<String> row = new ArrayList<>();
                 for (FieldSchema sanitizedHeader : sanitizedHeaders) {
-                    if(sanitizedHeader.getHeaderName().equals("recordId")){
-                        row.add(recordCounter.toString());
+                    if(sanitizedHeader.getHeaderName().equals("record_id")){
+                        row.add(recordIdValue);
                     }
                     else {
                         row.add(csvRecord.get(sanitizedHeader.getHeaderName()));
@@ -115,7 +117,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 data.add(row);
             }
         } catch (IOException e) {
-            throw new Exception("Could not read csv file " + csvFilePath);
+            LOG.error("Could not read csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
+            throw new Exception("Could not read csv file " + csvFile.getPath());
         }
         //Defining schema
         List<Schema.Field> fields = new ArrayList<>();
@@ -140,17 +143,20 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 writer.write(record);
             }
         } catch (IOException e) {
+            LOG.error("Could not write in parquet file {}. {}", parquetFilePath, importFileInDremioInfo);
             throw new Exception("Could not write in parquet file " + parquetFilePath);
         }
-        LOG.info("Finished writing to Parquet file: {}", parquetFilePath);
+        LOG.info("Finished writing to Parquet file: {}. {}", parquetFilePath, importFileInDremioInfo);
     }
 
-    private List<FieldSchema> checkIfCSVHeadersAreCorrect(List<String> csvHeaders, DataSetSchema dataSetSchema, String tableSchemaId, Long datasetId) throws EEAException {
+    private List<FieldSchema> checkIfCSVHeadersAreCorrect(List<String> csvHeaders, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, String csvFileName) throws EEAException {
         boolean atLeastOneFieldSchema = false;
         List<FieldSchema> headers = new ArrayList<>();
-        FieldSchema recordIdHeader = new FieldSchema();
-        recordIdHeader.setHeaderName("recordId");
-        headers.add(recordIdHeader);
+
+        String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
+        if (StringUtils.isBlank(tableSchemaId)) {
+            tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFileName);
+        }
 
         for (String csvHeader : csvHeaders) {
             FieldSchema header = new FieldSchema();
@@ -169,8 +175,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
 
         if (!atLeastOneFieldSchema) {
-            LOG.error("Error parsing CSV file. No headers matching FieldSchemas: datasetId={}, tableSchemaId={}, expectedHeaders={}, actualHeaders={}",
-                    datasetId, tableSchemaId, getFieldNames(tableSchemaId, dataSetSchema), csvHeaders);
+            LOG.error("Error parsing CSV file. No headers matching FieldSchemas: {}. expectedHeaders={}, actualHeaders={}",
+                    importFileInDremioInfo, getFieldNames(tableSchemaId, dataSetSchema), csvHeaders);
+            importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING);
             throw new EEAException(EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING);
         }
         return headers;

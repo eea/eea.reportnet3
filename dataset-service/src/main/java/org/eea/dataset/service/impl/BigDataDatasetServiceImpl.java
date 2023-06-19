@@ -87,26 +87,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                               MultipartFile file, Boolean replace, Long integrationId, String delimiter, String fmeJobId) throws Exception {
 
         /*
-         * Part 2:
+         * Part 5:
          *
-         * Add job and handle it
+         * Send file to specific folder in s3
          * */
-
-        /*
-         * Part 3:
-         *
-         * Add checks for wrong filenames or sth
-         * */
-
-        /*
-         * Part 4:
-         *
-         * Pass jobId in methods for logging purposes
-         * */
-
 
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
         Long jobId = null;
+        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo();
         try {
             if (dataflowId == null){
                 dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -125,38 +113,34 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
             }
 
-            ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, delimiter, integrationId);
+            importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, delimiter, integrationId);
 
-            //LOG.info("Importing file to s3 for jobId {}, dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", jobId, dataflowId, datasetId, tableSchemaId, replace);
             LOG.info("Importing file to s3 {}", importFileInDremioInfo);
             importDatasetDataToDremio(importFileInDremioInfo, file);
             //TODO update geometries
-            //TODO set up errorMessage
             finishImportProcess(importFileInDremioInfo);
             LOG.info("Successfully imported file to s3 {}", importFileInDremioInfo);
         } catch (EEAException e) {
             LOG.error("File import failed: for jobId {} dataflowId={} datasetId={}, tableSchemaId={}, fileName={} ", jobId, dataflowId, datasetId,
                     tableSchemaId, file.getOriginalFilename(), e);
-            if (jobId!=null) {
-                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            if (jobId != null) {
+                if(StringUtils.isBlank(importFileInDremioInfo.getErrorMessage())){
+                    importFileInDremioInfo.setErrorMessage(StringUtils.isNotBlank(e.getMessage()) ? e.getMessage() : "Error in dremio import" );
+                }
+                finishImportProcess(importFileInDremioInfo);
             }
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_DATASET);
         } catch (Exception e) {
             String fileName = (file != null) ? file.getName() : null;
             LOG.error("Unexpected error! Error importing file {} to s3 for jobId {} datasetId {} providerId {} and tableSchemaId {} ", fileName, jobId, datasetId, providerId, tableSchemaId, e);
             if (jobId!=null && jobStatus != JobStatusEnum.REFUSED) {
-                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+                if(StringUtils.isBlank(importFileInDremioInfo.getErrorMessage())){
+                    importFileInDremioInfo.setErrorMessage(StringUtils.isNotBlank(e.getMessage()) ? e.getMessage() : "Error in dremio import" );
+                }
+                finishImportProcess(importFileInDremioInfo);
             }
             throw e;
         }
-
-
-
-        /*
-         * Part 5:
-         *
-         * Send file to specific folder in s3
-         * */
 
         /*
          * Part 6:
@@ -169,21 +153,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
          *
          * Case where we get notification from s3 that zip file has been uploaded (queued import job must be added)
          * */
-
-
-        /*
-         * Part 8:
-         *
-         * Add job status info
-         * */
     }
 
     private void importDatasetDataToDremio(ImportFileInDremioInfo importFileInDremioInfo, MultipartFile file) throws Exception {
 
         if (importFileInDremioInfo.getDelimiter() != null && importFileInDremioInfo.getDelimiter().length() > 1) {
             LOG.error("Error when importing file data to s3 {}. The size of the delimiter cannot be greater than 1", importFileInDremioInfo);
-            datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(),
-                    DatasetRunningStatusEnum.ERROR_IN_IMPORT);
+            datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(), DatasetRunningStatusEnum.ERROR_IN_IMPORT);
+            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_WRONG_DELIMITER_SIZE);
             throw new EEAException("The size of the delimiter cannot be greater than 1");
         }
 
@@ -194,11 +171,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         processUUID = UUID.randomUUID().toString();
         importFileInDremioInfo.setProcessId(processUUID);
 
-        Boolean defaultReleaseStatusToBeChanged = null;
-
         DataSetSchema schema = datasetService.getSchemaIfReportable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getTableSchemaId());
         processControllerZuul.updateProcess(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.IMPORT, processUUID,
-                SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, defaultReleaseStatusToBeChanged);
+                SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
 
         if(importFileInDremioInfo.getJobId() != null && !processExists){
             JobProcessVO jobProcessVO = new JobProcessVO(null, importFileInDremioInfo.getJobId(), processUUID);
@@ -206,6 +181,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         if (null == schema) {
+            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_NOT_REPORTABLE_DATASET);
             throw new EEAException("Dataset is not reportable: datasetId=" + importFileInDremioInfo.getDatasetId() + ", tableSchemaId=" + importFileInDremioInfo.getTableSchemaId() + ", fileName=" + file.getOriginalFilename());
         }
 
@@ -218,10 +194,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if (datasetMetabaseVO.getDataProviderId() != null) {
             datasetService.createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria, SecurityContextHolder.getContext().getAuthentication().getName());
         }
+        /* TODO the following is not needed because we will not use dataset db
         // now the view is not updated, update the check to false
         datasetService.updateCheckView(importFileInDremioInfo.getDatasetId(), false);
         // delete the temporary table from etlExport
         datasetService.deleteTempEtlExport(importFileInDremioInfo.getDatasetId());
+         */
 
         handleZipFile(importFileInDremioInfo, file, schema);
     }
@@ -232,6 +210,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
 
         if(!processWasUpdated) {
+            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_UPDATING_PROCESS);
             throw new Exception("Could not update process to status IN_PROGRESS for processId=" + importFileInDremioInfo.getProcessId() + " and jobId "+ importFileInDremioInfo.getJobId());
         }
 
@@ -239,69 +218,57 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String mimeType = datasetService.getMimetype(originalFileName);
 
         IntegrationVO integrationVO = null;
-        /* TODO fme
-        if (integrationId != null) {
-            integrationVO = getIntegrationVO(integrationId);
-            if (null == integrationVO) {
-                LOG.error("Error. Integration {} not found for datasetId {} dataflowId {} and processId {}", integrationId, datasetId, dataflowId, processId);
-            }
-        }
-         */
-
         //TODO fme handling
-        List<File> filesToImport = storeImportFiles(file, importFileInDremioInfo.getDatasetId());
-        checkCsvFiles(importFileInDremioInfo, schema, filesToImport, integrationVO, mimeType);
-        Map<String, String> parquetFileNamesAndPaths =  parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, filesToImport, schema);
+
+        List<File> filesToImport = storeImportFiles(file, importFileInDremioInfo);
+        List<File> correctFilesForImport = checkCsvFiles(importFileInDremioInfo, schema, filesToImport, integrationVO, mimeType);
+        Map<String, String> parquetFileNamesAndPaths =  parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
         for (Map.Entry<String, String> parquetFileNameAndPath : parquetFileNamesAndPaths.entrySet()) {
             s3HandlerService.uploadFileToBucket("reportnet", "", parquetFileNameAndPath.getKey(), parquetFileNameAndPath.getValue());
         }
+        LOG.info("Uploaded parquet files to s3 {}", importFileInDremioInfo);
     }
 
-    private void checkCsvFiles(ImportFileInDremioInfo importFileInDremioInfo, DataSetSchema schema, List<File> files, IntegrationVO integrationVO, String mimeType)
+    private List<File> checkCsvFiles(ImportFileInDremioInfo importFileInDremioInfo, DataSetSchema schema, List<File> files, IntegrationVO integrationVO, String mimeType)
             throws EEAException {
 
-        //TODO fme prepareFmeFileProcess
-        LOG.info("Checking csv files for datasetId {} and files {}", importFileInDremioInfo.getDatasetId(), files);
+        LOG.info("Checking csv files {}. {}", files, importFileInDremioInfo);
+        List<File> correctFilesForImport = new ArrayList<>();
 
-        // delete precious data if necessary
-        /* TODO handle replaceData
-        wipeData(datasetId, tableSchemaId, replace);
-        LOG.info("Data has been wiped during rn3FileProcessIntoTasks datasetId {}, files {}", datasetId, files);
-         */
+        // TODO handle replaceData
 
         Boolean guessTableName = null == importFileInDremioInfo.getTableSchemaId();
+        String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
         Boolean sendWrongFileNameWarning = false;
         int numberOfWrongFiles = 0;
         for (File file : files) {
             String fileName = file.getName();
+            LOG.info("Checking csv file {}. {}", fileName, importFileInDremioInfo);
 
             if (guessTableName) {
-                String tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(schema, fileName);
-                if (StringUtils.isNotBlank(tableSchemaId)){
-                    importFileInDremioInfo.setTableSchemaId(tableSchemaId);
-                }
+                tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(schema, fileName);
             }
 
-            if (!guessTableName || StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())) {
+            if (!guessTableName || StringUtils.isNotBlank(tableSchemaId)) {
                 // obtains the file type from the extension
                 if (fileName == null) {
+                    jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_EMPTY_FILENAME);
                     throw new EEAException(EEAErrorMessage.FILE_NAME);
                 }
-                final String mimeTypeInDb = datasetService.getMimetype(fileName).toLowerCase();
+                final String fileMimeType = datasetService.getMimetype(fileName).toLowerCase();
                 // validates file types for the data load
-                fileTreatmentHelper.validateFileType(mimeTypeInDb);
+                fileTreatmentHelper.validateFileType(fileMimeType);
 
-                if (FileTypeEnum.getEnum(mimeTypeInDb.toLowerCase()) == FileTypeEnum.CSV) {
+                if (FileTypeEnum.getEnum(fileMimeType.toLowerCase()) == FileTypeEnum.CSV) {
                     //TODO check read only, prefilled, fixed number of records etc
+                    correctFilesForImport.add(file);
                 }
-                /* TODO handle xlsx files
-                if (FileTypeEnum.getEnum(mimeTypeInDb.toLowerCase()) == FileTypeEnum.XLSX) {
-
+                else {
+                    // TODO handle xlsx files
                 }
-                 */
             } else {
                 sendWrongFileNameWarning = true;
-                LOG.error("Importing file to s3 for datasetId {} failed: fileName={}. There's no table with that fileName", importFileInDremioInfo.getDatasetId(), fileName);
+                LOG.error("Importing file {} to s3. {}. There's no table with that fileName", fileName, importFileInDremioInfo);
                 datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(), DatasetRunningStatusEnum.ERROR_IN_IMPORT);
                 numberOfWrongFiles++;
                 if (numberOfWrongFiles == files.size()) {
@@ -311,82 +278,78 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                             ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
                             : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
 
-                    datasetService.failImportJobAndProcess(importFileInDremioInfo.getProcessId(), importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getTableSchemaId(), fileName, eventType, JobInfoEnum.ERROR_WRONG_FILE_NAME);
+                    datasetService.failImportJobAndProcess(importFileInDremioInfo.getProcessId(), importFileInDremioInfo.getDatasetId(), tableSchemaId, fileName, eventType, JobInfoEnum.ERROR_WRONG_FILE_NAME);
+                    importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
+                    importFileInDremioInfo.setSendWrongFileNameWarning(sendWrongFileNameWarning);
                     throw new EEAException(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
                 }
             }
-            LOG.info("Checking csv file for datasetId {} and file {} and tableSchemaId {}", importFileInDremioInfo.getDatasetId(), file.getName(), importFileInDremioInfo.getTableSchemaId());
         }
         importFileInDremioInfo.setSendWrongFileNameWarning(sendWrongFileNameWarning);
+        return correctFilesForImport;
 
     }
 
-    private List<File> storeImportFiles(MultipartFile multipartFile, Long datasetId) throws Exception {
+    private List<File> storeImportFiles(MultipartFile multipartFile, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
         List<File> files = new ArrayList<>();
 
         try (InputStream input = multipartFile.getInputStream()) {
 
             // Prepare the folder where files will be stored
             File root = new File(importPath);
-            File folder = new File(root, datasetId.toString());
+            File folder = new File(root, importFileInDremioInfo.getDatasetId().toString());
             String saveLocationPath = folder.getCanonicalPath();
 
             if (!folder.exists()) {
                 folder.mkdir();
             }
 
-            /* TODO fme
-            if (null == integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
-             */
+            // TODO fme handling
 
             try (ZipInputStream zip = new ZipInputStream(input)) {
                 ZipEntry entry = zip.getNextEntry();
 
-                try {
-                    while (null != entry) {
-                        String entryName = entry.getName();
-                        String mimeType = datasetService.getMimetype(entryName);
-                        File file = new File(folder, entryName);
-                        String filePath = file.getCanonicalPath();
+                while (null != entry) {
+                    String entryName = entry.getName();
+                    String mimeType = datasetService.getMimetype(entryName);
+                    File file = new File(folder, entryName);
+                    String filePath = file.getCanonicalPath();
 
-                        // Prevent Zip Slip attack or skip if the entry is a directory
-                        if ((entryName.split("/").length > 1)
-                                || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
-                                || !filePath.startsWith(saveLocationPath + File.separator)) {
-                            LOG.error("Ignored file from ZIP: {}", entryName);
-                            entry = zip.getNextEntry();
-                            continue;
-                        }
-
-                        // Store the file in the persistence volume
-                        try (FileOutputStream output = new FileOutputStream(file)) {
-                            IOUtils.copyLarge(zip, output);
-                            LOG.info("Stored file {}", file.getPath());
-                        } catch (Exception e) {
-                            LOG.error("Unexpected error! Error in copyLarge for saveLocationPath {}. Message: {}", saveLocationPath, e.getMessage());
-                            throw e;
-                        }
-
+                    // Prevent Zip Slip attack or skip if the entry is a directory
+                    if ((entryName.split("/").length > 1)
+                            || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
+                            || !filePath.startsWith(saveLocationPath + File.separator)) {
+                        LOG.error("Ignored file from ZIP: {}. {}", entryName, importFileInDremioInfo);
                         entry = zip.getNextEntry();
-                        files.add(file);
+                        continue;
                     }
-                    // Queue import tasks for stored files
-                    if (!files.isEmpty()) {
-                        return files;
-                    } else {
-                        datasetMetabaseService.updateDatasetRunningStatus(datasetId, DatasetRunningStatusEnum.ERROR_IN_IMPORT);
-                        throw new EEAException("Error trying to import a zip file to s3 for datasetId " + datasetId + ". Empty zip file");
+
+                    // Store the file in the persistence volume
+                    try (FileOutputStream output = new FileOutputStream(file)) {
+                        IOUtils.copyLarge(zip, output);
+                        LOG.info("Stored file {}. {}", file.getPath(), importFileInDremioInfo);
+                    } catch (Exception e) {
+                        LOG.error("Unexpected error! Error in copyLarge for saveLocationPath {}. {} Message: {}", saveLocationPath, importFileInDremioInfo, e.getMessage());
+                        throw e;
                     }
-                } catch (Exception e) {
-                    LOG.error("Unexpected error processing file {} for datasetId {}", multipartFile.getOriginalFilename(), datasetId, e);
-                    throw e;
+
+                    entry = zip.getNextEntry();
+                    files.add(file);
+                }
+                // Queue import tasks for stored files
+                if (!files.isEmpty()) {
+                    return files;
+                } else {
+                    datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(), DatasetRunningStatusEnum.ERROR_IN_IMPORT);
+                    jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_EMPTY_ZIP);
+                    throw new EEAException("Error trying to import a zip file to s3 for datasetId " + importFileInDremioInfo.getDatasetId() + ". Empty zip file");
                 }
             } catch (Exception e) {
-                LOG.error("Unexpected error! Error in unzipAndStore for datasetId {}. Message: {}", datasetId, e.getMessage());
+                LOG.error("Unexpected error! Error in storeImportFiles {}. Message: {}", importFileInDremioInfo, e.getMessage());
                 throw e;
             }
         } catch (Exception e) {
-            LOG.error("Unexpected error! Error in fileManagement for datasetId {} and  Message: {}", datasetId, e.getMessage());
+            LOG.error("Unexpected error! Error in fileManagement {} Message: {}", importFileInDremioInfo, e.getMessage());
             throw e;
         }
     }
@@ -407,9 +370,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         EventType eventType;
         DatasetTypeEnum type = datasetService.getDatasetType(importFileInDremioInfo.getDatasetId());
 
-        Long jobId = jobProcessControllerZuul.findJobIdByProcessId(importFileInDremioInfo.getProcessId());
+        Long jobId = importFileInDremioInfo.getJobId();
         JobStatusEnum jobStatus;
-        if (null != importFileInDremioInfo.getErrorMessage()) {
+        if (importFileInDremioInfo.getErrorMessage() != null) {
             if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(importFileInDremioInfo.getErrorMessage())) {
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME);
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
@@ -427,18 +390,22 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(),
                     DatasetRunningStatusEnum.ERROR_IN_IMPORT);
-            processControllerZuul.updateProcess(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(),
-                    ProcessStatusEnum.CANCELED, ProcessTypeEnum.IMPORT, importFileInDremioInfo.getProcessId(),
-                    SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
+            if(StringUtils.isNotBlank(importFileInDremioInfo.getProcessId())) {
+                processControllerZuul.updateProcess(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(),
+                        ProcessStatusEnum.CANCELED, ProcessTypeEnum.IMPORT, importFileInDremioInfo.getProcessId(),
+                        SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
+            }
 
             jobStatus = JobStatusEnum.CANCELED;
         } else {
             datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(),
                     DatasetRunningStatusEnum.IMPORTED);
 
-            processControllerZuul.updateProcess(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(),
-                    ProcessStatusEnum.FINISHED, ProcessTypeEnum.IMPORT, importFileInDremioInfo.getProcessId(),
-                    SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
+            if(StringUtils.isNotBlank(importFileInDremioInfo.getProcessId())) {
+                processControllerZuul.updateProcess(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(),
+                        ProcessStatusEnum.FINISHED, ProcessTypeEnum.IMPORT, importFileInDremioInfo.getProcessId(),
+                        SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
+            }
 
             eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                     ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
@@ -454,7 +421,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
         // If importing a zip a file doesn't match with the table and the process ignores it, we send
         // a warning notification
-        if (importFileInDremioInfo.getSendWrongFileNameWarning()) {
+        if (importFileInDremioInfo.getSendWrongFileNameWarning() != null && importFileInDremioInfo.getSendWrongFileNameWarning()) {
             NotificationVO notificationWarning = NotificationVO.builder()
                     .user(SecurityContextHolder.getContext().getAuthentication().getName())
                     .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();

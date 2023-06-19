@@ -2,6 +2,8 @@ package org.eea.dataset.io.notification.events;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.exception.EEAException;
@@ -73,9 +75,8 @@ public class ImportDesignCompletedEvent implements NotificableEventHandler {
     String tableSchemaId = notificationVO.getTableSchemaId();
     String tableSchemaName = notificationVO.getTableSchemaName();
 
-    if (null == tableSchemaName && null != tableSchemaId) {
-      tableSchemaName =
-          dataschemaService.getTableSchemaName(datasetVO.getDatasetSchema(), tableSchemaId);
+    if (null == tableSchemaName && !StringUtils.isBlank(tableSchemaId)) {
+      tableSchemaName = dataschemaService.getTableSchemaName(datasetVO.getDatasetSchema(), tableSchemaId);
     }
 
     Map<String, Object> notification = new HashMap<>();

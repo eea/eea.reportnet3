@@ -22,7 +22,7 @@ public class ImportFileInDremioInfo {
     private String errorMessage;
     private Boolean sendWrongFileNameWarning;
 
-    public ImportFileInDremioInfo(Long jobId, Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String fileName, Boolean replaceData, String delimite, Long integrationId) {
+    public ImportFileInDremioInfo(Long jobId, Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String fileName, Boolean replaceData, String delimiter, Long integrationId) {
         this.jobId = jobId;
         this.datasetId = datasetId;
         this.dataflowId = dataflowId;

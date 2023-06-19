@@ -35,6 +35,8 @@ public class S3HandlerServiceImpl implements S3HandlerService {
     }
 
     public void uploadFileToBucket(String bucketName, String s3Path, String fileName, String filePath) {
+        //TODO add presigned url
+        //TODO send files to specific folders
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(fileName)
