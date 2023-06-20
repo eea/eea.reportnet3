@@ -226,7 +226,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         Map<String, String> parquetFileNamesAndPaths =  parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
         for (Map.Entry<String, String> parquetFileNameAndPath : parquetFileNamesAndPaths.entrySet()) {
             String importPathForParquet = getImportPathForParquet(importFileInDremioInfo, parquetFileNameAndPath.getKey());
-            s3HandlerService.uploadFileToBucket("reportnet", importPathForParquet, parquetFileNameAndPath.getValue());
+            s3HandlerService.uploadFileToBucket(importPathForParquet, parquetFileNameAndPath.getValue());
         }
         LOG.info("Uploaded parquet files to s3 {}", importFileInDremioInfo);
     }

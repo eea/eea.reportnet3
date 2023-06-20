@@ -1,6 +1,7 @@
 package org.eea.dataset.service.impl;
 
 import org.eea.dataset.service.S3HandlerService;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,11 @@ public class S3HandlerServiceImpl implements S3HandlerService {
     @Autowired
     S3Client s3Client;
 
-    public void uploadFileToBucket(String bucketName, String filePathInS3, String filePathInReportnet) {
+    public void uploadFileToBucket(String filePathInS3, String filePathInReportnet) {
         //TODO add presigned url
         //TODO handle replace Data
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
+                .bucket(LiteralConstants.S3_BUCKET_NAME)
                 .key(filePathInS3)
                 .build();
 
