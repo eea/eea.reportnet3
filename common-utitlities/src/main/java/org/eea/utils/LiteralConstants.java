@@ -198,73 +198,58 @@ public final class LiteralConstants {
   public static final String S3_COLLECTIONS = "collections";
 
   /** The Constant S3_CURRENT_PATH: {@value}. */
-  public static final String S3_IMPORT_PATH = "/%s/%s/%s/current/import/%s";
+  public static final String S3_IMPORT_PATH = "%s/%s/%s/current/import/%s";
 
   /** The Constant S3_IMPORT_QUERY_PATH: {@value}. */
   public static final String S3_IMPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"import\".\"%s\"";
 
   /** The Constant S3_VALIDATION_PATH: {@value}. */
-  public static final String S3_VALIDATION_PATH = "/%s/%s/%s/current/validation/%s/%s";
+  public static final String S3_VALIDATION_PATH = "%s/%s/%s/current/validation/%s/%s";
 
   /** The Constant S3_VALIDATION_PATH: {@value}. */
   public static final String S3_VALIDATION_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"validation\".\"%s\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_VALIDATE_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_VALIDATE_PATH = "/%s/%s/%s/current/%s_validate/%s";
+  public static final String S3_TABLE_NAME_VALIDATE_PATH = "%s/%s/%s/current/%s_validate/%s";
 
   /** The Constant S3_TABLE_NAME_VALIDATE_QUERY_PATH: {@value}. */
   public static final String S3_TABLE_NAME_VALIDATE_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s_validate\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_PATH = "/%s/%s/%s/current/%s/%s";
+  public static final String S3_TABLE_NAME_PATH = "%s/%s/%s/current/%s/%s";
 
   /** The Constant S3_TABLE_NAME_QUERY_PATH: {@value}. */
   public static final String S3_TABLE_NAME_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\".\"%s\"";
 
   /** The Constant S3_VALIDATION_DC_PATH: {@value}. */
-  public static final String S3_VALIDATION_DC_PATH = "/%s/%s/%s/current/validation/%s/%s/%s";
+  public static final String S3_VALIDATION_DC_PATH = "%s/%s/%s/current/validation/%s/%s/%s";
 
   /** The Constant S3_VALIDATION_DC_QUERY_PATH: {@value}. */
   public static final String S3_VALIDATION_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"validation\".\"%s\".\"%s\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_VALIDATE_DC_PATH = "/%s/%s/%s/current/%s_validate/%s/%s";
+  public static final String S3_TABLE_NAME_VALIDATE_DC_PATH = "%s/%s/%s/current/%s_validate/%s/%s";
 
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH: {@value}. */
   public static final String S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s_validate\".\"%s\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_DC_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_DC_PATH = "/%s/%s/%s/current/%s/%s/%s";
+  public static final String S3_TABLE_NAME_DC_PATH = "%s/%s/%s/current/%s/%s/%s";
 
   /** The Constant S3_TABLE_NAME_DC_QUERY_PATH: {@value}. */
   public static final String S3_TABLE_NAME_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\".\"%s\".\"%s\"";
 
   /** The Constant S3_DATAFLOW_REFERENCE_PATH: {@value}. */
-  public static final String S3_DATAFLOW_REFERENCE_PATH = "/%s/reference/%s";
+  public static final String S3_DATAFLOW_REFERENCE_PATH = "%s/reference/%s";
 
   /** The Constant S3_DATAFLOW_REFERENCE_QUERY_PATH: {@value}. */
   public static final String S3_DATAFLOW_REFERENCE_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"reference\".\"%s\"";
 
   /** The Constant S3_EXPORT_PATH: {@value}. */
-  public static final String S3_EXPORT_PATH = "/%s/%s/%s/export/%s";
+  public static final String S3_EXPORT_PATH = "%s/%s/%s/export/%s";
 
   /** The Constant S3_EXPORT_QUERY_PATH: {@value}. */
   public static final String S3_EXPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"export\".\"%s\"";
-
-  /** The Constant S3_IMPORT: {@value}. */
-  public static final String S3_IMPORT = "IMPORT";
-
-  /** The Constant S3_EXPORT: {@value}. */
-  public static final String S3_EXPORT = "EXPORT";
-
-  /** The Constant S3_VALIDATION: {@value}. */
-  public static final String S3_VALIDATION = "VALIDATION";
-
-  /** The Constant S3_TABLE_NAME: {@value}. */
-  public static final String S3_TABLE_NAME = "TABLE_NAME";
-
-  /** The Constant S3_TABLE_NAME_VALIDATION: {@value}. */
-  public static final String S3_TABLE_NAME_VALIDATION = "TABLE_NAME_VALIDATION";
 
   /**
    * Instantiates a new literal constants.
