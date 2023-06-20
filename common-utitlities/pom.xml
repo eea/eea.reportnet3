@@ -173,6 +173,11 @@
 			<artifactId>hadoop-client-api</artifactId>
 			<version>3.3.5</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-mapreduce-client-core</artifactId>
+			<version>3.3.5</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
