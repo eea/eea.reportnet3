@@ -1,28 +1,31 @@
 package org.eea.validation.persistence.data.repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.transaction.Transactional;
 import org.apache.commons.lang.StringUtils;
 import org.eea.interfaces.vo.dataset.GroupValidationVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.validation.persistence.data.domain.Validation;
+import org.eea.validation.util.ValidationHelper;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.transaction.Transactional;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Class ValidationRepositoryPaginatedImpl.
@@ -34,6 +37,9 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
 
   private static final String TABLE = "table";
   private static final String FIELD = "field";
+
+  @Autowired
+  ValidationHelper validationHelper;
 
   /**
    * The entity manager.
@@ -198,31 +204,9 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
   private String originFilter(String originsFilter, String entity) {
     StringBuilder stringBuilder = new StringBuilder("");
     if (!StringUtils.isBlank(originsFilter)) {
-      stringBuilder.append(" and " + entity + "Name  in ").append(composeListQuery(originsFilter));
+      stringBuilder.append(" and " + entity + "Name  in ").append(validationHelper.composeListQuery(originsFilter));
     }
     return stringBuilder.toString();
-  }
-
-  /**
-   * Compose list query.
-   *
-   * @param originsFilter the origins filter
-   *
-   * @return the string
-   */
-  private String composeListQuery(String originsFilter) {
-    return "('" + originsFilter.replace(",", "','") + "')";
-  }
-
-  /**
-   * Removes the spaces generated with automatic toString.
-   *
-   * @param listFormatted the list formatted
-   *
-   * @return the string
-   */
-  private String removeSpacesEnum(String listFormatted) {
-    return listFormatted.replace(", ", ",").replace("[", "").replace("]", "");
   }
 
   /**
@@ -235,7 +219,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     StringBuilder stringBuilder = new StringBuilder("");
     if (null != typeEntitiesFilter && !typeEntitiesFilter.isEmpty()) {
       stringBuilder.append(" and typeEntity in ")
-          .append(composeListQuery(removeSpacesEnum(typeEntitiesFilter.toString())));
+          .append(validationHelper.composeListQuery(validationHelper.removeSpacesEnum(typeEntitiesFilter.toString())));
     }
     return stringBuilder.toString();
   }
@@ -250,7 +234,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     StringBuilder stringBuilder = new StringBuilder("");
     if (null != levelErrorsFilter && !levelErrorsFilter.isEmpty()) {
       stringBuilder.append(" and levelError in ")
-          .append(composeListQuery(removeSpacesEnum(levelErrorsFilter.toString())));
+          .append(validationHelper.composeListQuery(validationHelper.removeSpacesEnum(levelErrorsFilter.toString())));
     }
     return stringBuilder.toString();
   }
