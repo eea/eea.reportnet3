@@ -275,7 +275,7 @@ public final class LiteralConstants {
   public static final String S3_TABLE_NAME_VALIDATION = "TABLE_NAME_VALIDATION";
 
   /** The Constant S3_BUCKET_NAME: {@value}. */
-  public static final String S3_BUCKET_NAME = "reportnet";
+  public static final String S3_BUCKET_NAME = "rn3-dataset";
 
   /**
    * Instantiates a new literal constants.
