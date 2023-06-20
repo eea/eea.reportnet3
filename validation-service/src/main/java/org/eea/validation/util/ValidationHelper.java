@@ -15,7 +15,6 @@ import org.eea.interfaces.controller.dataset.ReferenceDatasetController.Referenc
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
-import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -1223,5 +1222,23 @@ public class ValidationHelper implements DisposableBean {
        return taskMapper.entityToClass(task.get());
      }
      return null;
+  }
+
+  /**
+   * Compose list query.
+   * @param originsFilter the origins filter
+   * @return the string
+   */
+  public String composeListQuery(String originsFilter) {
+    return "('" + originsFilter.replace(",", "','") + "')";
+  }
+
+  /**
+   * Removes the spaces generated with automatic toString.
+   * @param listFormatted the list formatted
+   * @return the string
+   */
+  public String removeSpacesEnum(String listFormatted) {
+    return listFormatted.replace(", ", ",").replace("[", "").replace("]", "");
   }
 }

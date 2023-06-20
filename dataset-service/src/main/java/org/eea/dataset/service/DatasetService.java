@@ -71,7 +71,6 @@ public interface DatasetService {
       String fields, ErrorTypeEnum[] levelError, String[] idRules, String fieldSchema,
       String fieldValue) throws EEAException;
 
-
   /**
    * Update dataset.
    *
