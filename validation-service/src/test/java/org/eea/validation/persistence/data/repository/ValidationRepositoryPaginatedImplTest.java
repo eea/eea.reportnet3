@@ -10,6 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.validation.util.ValidationHelper;
 import org.hibernate.Session;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +38,9 @@ public class ValidationRepositoryPaginatedImplTest {
   /** The entity manager. */
   @Mock
   private EntityManager entityManager;
+  
+  @Mock
+  private ValidationHelper validationHelper;
 
   /** The pageable. */
   private Pageable pageable;
