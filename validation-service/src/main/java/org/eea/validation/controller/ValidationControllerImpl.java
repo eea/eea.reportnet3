@@ -35,6 +35,7 @@ import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
+import org.eea.validation.service.impl.LoadValidationsHelperDL;
 import org.eea.validation.util.ValidationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,6 +111,9 @@ public class ValidationControllerImpl implements ValidationController {
   /** The task repository. */
   @Autowired
   private TaskRepository taskRepository;
+
+  @Autowired
+  private LoadValidationsHelperDL loadValidationsHelperDL;
 
   /**
    * Executes the validation job
@@ -345,6 +349,67 @@ public class ValidationControllerImpl implements ValidationController {
     try {
       validations = loadValidationsHelper.getListGroupValidations(datasetId, pageable,
           levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, headers, asc);
+    } catch (EEAException e) {
+      LOG_ERROR.error(e.getMessage());
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error retrieving group validations for datasetId {}. Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
+
+    return validations;
+  }
+
+  @Override
+  @GetMapping(value = "listGroupValidationsDL/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId)")
+  @ApiOperation(value = "Gets all the failed validations for a given dataset grouped by code",
+          hidden = true)
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
+  public FailedValidationsDatasetVO getGroupFailedValidationsByIdDatasetDL(
+          @ApiParam(value = "Dataset id used in the retrieval process",
+                  example = "1") @PathVariable("id") Long datasetId,
+          @ApiParam(value = "Page number the filtering starts in.", example = "0", defaultValue = "0",
+                  required = false) @RequestParam(value = "pageNum", defaultValue = "0",
+                  required = false) Integer pageNum,
+          @ApiParam(value = "How many records are going to be shown per page.", example = "10",
+                  defaultValue = "20", required = false) @RequestParam(value = "pageSize",
+                  defaultValue = "20", required = false) Integer pageSize,
+          @ApiParam(value = "The headers used in the retrieval process") @RequestParam(
+                  value = "headers", required = false) String headers,
+          @ApiParam(value = "Are the validations going to be ordered in ascending order?",
+                  example = "false",
+                  defaultValue = "true") @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+          @ApiParam(value = "The level of error the validations are going to be filtered with",
+                  required = false) @RequestParam(value = "levelErrorsFilter",
+                  required = false) List<ErrorTypeEnum> levelErrorsFilter,
+          @ApiParam(value = "The types of entities used in the retrieval process", example = "DATASET",
+                  required = false) @RequestParam(value = "typeEntitiesFilter",
+                  required = false) List<EntityTypeEnum> typeEntitiesFilter,
+          @ApiParam(value = "The table filter used in the retrieval process",
+                  required = false) @RequestParam(value = "tableFilter",
+                  required = false) String tableFilter,
+          @ApiParam(value = "The filtered field value used in the retrieval process",
+                  required = false) @RequestParam(value = "fieldValueFilter",
+                  required = false) String fieldValueFilter) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    FailedValidationsDatasetVO validations = null;
+    Pageable pageable = null;
+    if (StringUtils.isNotBlank(headers)) {
+      headers = headers.replace("tableSchemaName", "tableName");
+      headers = headers.replace("fieldSchemaName", "fieldName");
+      headers = headers.replace("entityType", "typeEntity");
+      Sort order = asc ? Sort.by(headers).ascending() : Sort.by(headers).descending();
+      PageRequest.of(pageNum, pageSize, order);
+      pageable = PageRequest.of(pageNum, pageSize, order);
+    } else {
+      pageable = PageRequest.of(pageNum, pageSize);
+    }
+    try {
+      validations = loadValidationsHelperDL.getListGroupValidationsDL(datasetId, pageable,
+              levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, headers, asc);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
     } catch (Exception e) {

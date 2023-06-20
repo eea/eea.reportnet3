@@ -98,6 +98,33 @@ public interface ValidationController {
 
 
   /**
+   * Gets the group failed validations by id dataset from dremio
+   * @param datasetId
+   * @param pageNum
+   * @param pageSize
+   * @param fields
+   * @param asc
+   * @param levelErrorsFilter
+   * @param typeEntitiesFilter
+   * @param tableFilter
+   * @param fieldValueFilter
+   * @return
+   */
+  @GetMapping(value = "/listGroupValidationsDL/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  FailedValidationsDatasetVO getGroupFailedValidationsByIdDatasetDL(
+          @PathVariable("id") Long datasetId,
+          @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+          @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+          @RequestParam(value = "fields", required = false) String fields,
+          @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+          @RequestParam(value = "levelErrorsFilter",
+                  required = false) List<ErrorTypeEnum> levelErrorsFilter,
+          @RequestParam(value = "typeEntitiesFilter",
+                  required = false) List<EntityTypeEnum> typeEntitiesFilter,
+          @RequestParam(value = "tableFilter", required = false) String tableFilter,
+          @RequestParam(value = "fieldValueFilter", required = false) String fieldValueFilter);
+
+  /**
    * Export validation data CSV.
    *
    * @param datasetId the dataset id

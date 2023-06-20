@@ -75,6 +75,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
@@ -99,6 +100,7 @@ import java.util.stream.Collectors;
 /**
  * The Class DatasetServiceImpl.
  */
+@Import(org.eea.datalake.service.impl.S3ServiceImpl.class)
 @Service("datasetService")
 public class DatasetServiceImpl implements DatasetService {
 
@@ -561,7 +563,6 @@ public class DatasetServiceImpl implements DatasetService {
     result.setTotalRecords(totalRecords);
     return result;
   }
-
 
   /**
    * Update dataset.

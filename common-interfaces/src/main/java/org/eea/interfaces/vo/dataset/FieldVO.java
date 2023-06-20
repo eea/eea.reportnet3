@@ -54,6 +54,8 @@ public class FieldVO implements Serializable {
   /** The level error. */
   private ErrorTypeEnum levelError;
 
+  private String name;
+
   /**
    * Hash code.
    *
