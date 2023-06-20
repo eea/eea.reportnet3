@@ -2,6 +2,8 @@ package org.eea.dataset.service.impl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eea.datalake.service.impl.S3ServiceImpl;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -32,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -44,6 +47,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 
+@Import(org.eea.datalake.service.impl.S3ServiceImpl.class)
 @Service
 public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
@@ -81,16 +85,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Autowired
     private KafkaSenderUtils kafkaSenderUtils;
 
+    @Autowired
+    private S3ServiceImpl s3Service;
+
 
     @Override
     public void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
                               MultipartFile file, Boolean replace, Long integrationId, String delimiter, String fmeJobId) throws Exception {
-
-        /*
-         * Part 5:
-         *
-         * Send file to specific folder in s3
-         * */
 
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
         Long jobId = null;
@@ -224,9 +225,26 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         List<File> correctFilesForImport = checkCsvFiles(importFileInDremioInfo, schema, filesToImport, integrationVO, mimeType);
         Map<String, String> parquetFileNamesAndPaths =  parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
         for (Map.Entry<String, String> parquetFileNameAndPath : parquetFileNamesAndPaths.entrySet()) {
-            s3HandlerService.uploadFileToBucket("reportnet", "", parquetFileNameAndPath.getKey(), parquetFileNameAndPath.getValue());
+            String importPathForParquet = getImportPathForParquet(importFileInDremioInfo, parquetFileNameAndPath.getKey());
+            s3HandlerService.uploadFileToBucket("reportnet", importPathForParquet, parquetFileNameAndPath.getValue());
         }
         LOG.info("Uploaded parquet files to s3 {}", importFileInDremioInfo);
+    }
+
+    private String getImportPathForParquet(ImportFileInDremioInfo importFileInDremioInfo, String fileName) throws Exception {
+        Long providerId = importFileInDremioInfo.getProviderId();
+        if(providerId == null){
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId());
+            providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
+        }
+        String tableSchemaName = fileName.replace(".parquet", "");
+        S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName);
+        String pathToS3ForImport = s3Service.getTableNameProviderPath(s3PathResolver);
+        if(StringUtils.isBlank(pathToS3ForImport)){
+            LOG.error("Could not resolve path to s3 for import for providerId {} {}", providerId, importFileInDremioInfo);
+            throw new Exception("Could not resolve path to s3 for import");
+        }
+        return pathToS3ForImport;
     }
 
     private List<File> checkCsvFiles(ImportFileInDremioInfo importFileInDremioInfo, DataSetSchema schema, List<File> files, IntegrationVO integrationVO, String mimeType)

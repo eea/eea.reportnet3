@@ -6,8 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
-import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
@@ -21,28 +19,15 @@ public class S3HandlerServiceImpl implements S3HandlerService {
     @Autowired
     S3Client s3Client;
 
-
-    public Boolean checkIfBucketExists(String bucketName) {
-        HeadBucketRequest headBucketRequest = HeadBucketRequest.builder()
-                .bucket(bucketName)
-                .build();
-        try {
-            s3Client.headBucket(headBucketRequest);
-            return true;
-        } catch (NoSuchBucketException e) {
-            return false;
-        }
-    }
-
-    public void uploadFileToBucket(String bucketName, String s3Path, String fileName, String filePath) {
+    public void uploadFileToBucket(String bucketName, String filePathInS3, String filePathInReportnet) {
         //TODO add presigned url
-        //TODO send files to specific folders
+        //TODO handle replace Data
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
-                .key(fileName)
+                .key(filePathInS3)
                 .build();
 
-        java.nio.file.Path file = Paths.get(filePath);
+        java.nio.file.Path file = Paths.get(filePathInReportnet);
 
         PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, file);
     }
