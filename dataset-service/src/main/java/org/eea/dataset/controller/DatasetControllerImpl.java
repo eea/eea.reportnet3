@@ -341,7 +341,7 @@ public class DatasetControllerImpl implements DatasetController {
               example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
 
     DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
-    if(dataFlowVO.getBigData()){
+    if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
         bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, fmeJobId);
       } catch (Exception e) {
