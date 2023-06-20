@@ -259,6 +259,13 @@ public final class LiteralConstants {
   /** The Constant S3_EXPORT_QUERY_PATH: {@value}. */
   public static final String S3_EXPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"export\".\"%s\"";
 
+  /** The Constant S3_VALIDATION: {@value}. */
+  public static final String S3_VALIDATION = "VALIDATION";
+
+  /** The Constant S3_BUCKET_NAME: {@value}. */
+  public static final String S3_BUCKET_NAME = "rn3-dataset";
+
+
   /**
    * Instantiates a new literal constants.
    */
