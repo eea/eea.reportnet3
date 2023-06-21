@@ -1,6 +1,7 @@
 export class Dataflow {
   constructor({
     anySchemaAvailableInPublic,
+    bigData,
     creationDate,
     dataCollections,
     dataProviderGroupId,
@@ -31,6 +32,7 @@ export class Dataflow {
     webLinks
   } = {}) {
     this.anySchemaAvailableInPublic = anySchemaAvailableInPublic;
+    this.bigData = bigData;
     this.creationDate = creationDate;
     this.dataCollections = dataCollections;
     this.dataProviderGroupId = dataProviderGroupId;
