@@ -21,6 +21,9 @@ export const reportingDataflowReducer = (state, { type, payload }) => {
     case 'RESET_STATE':
       return (state = payload.resetData);
 
+    case 'TOGGLE_BIG_DATA':
+      return { ...state, bigDataStorage: payload };
+
     case 'TOGGLE_PIN':
       return { ...state, pinDataflow: payload };
 

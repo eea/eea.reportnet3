@@ -56,6 +56,7 @@ export const ManageDataflow = ({
     name: isEditing ? state.name : '',
     obligation,
     pinDataflow: false,
+    bigDataStorage: false,
     isReleasable: state.isReleasable
   };
 
@@ -128,7 +129,8 @@ export const ManageDataflow = ({
     reportingDataflowDispatch({ type: 'ON_DELETE_INPUT_CHANGE', payload: { deleteInput: value } });
 
   const onSave = () => {
-    if (formRef.current) formRef.current.handleSubmit(reportingDataflowState.pinDataflow);
+    if (formRef.current)
+      formRef.current.handleSubmit(reportingDataflowState.pinDataflow, reportingDataflowState.bigDataStorage);
   };
 
   const renderCancelButton = action => (
@@ -202,12 +204,49 @@ export const ManageDataflow = ({
       }
     };
 
+    const renderBigDataStorage = () => {
+      if (!isEditing) {
+        return (
+          <div className={styles.checkboxWrapper}>
+            <Checkbox
+              ariaLabel={resourcesContext.messages['bigDataStorage']}
+              checked={reportingDataflowState.bigDataStorage}
+              id="bigDataCheckbox"
+              inputId="bigDataCheckbox"
+              onChange={() =>
+                reportingDataflowDispatch({
+                  type: 'TOGGLE_BIG_DATA',
+                  payload: !reportingDataflowState.bigDataStorage
+                })
+              }
+              role="checkbox"
+            />
+            <label>
+              <span
+                onClick={() =>
+                  reportingDataflowDispatch({
+                    type: 'TOGGLE_BIG_DATA',
+                    payload: !reportingDataflowState.bigDataStorage
+                  })
+                }>
+                {resourcesContext.messages['bigDataStorage']}
+              </span>
+            </label>
+            <TooltipButton
+              message={resourcesContext.messages['bigDataStorageMessage']}
+              uniqueIdentifier="bigDataStorage"></TooltipButton>
+          </div>
+        );
+      }
+    };
+
     return (
       <Fragment>
         <div className="p-toolbar-group-left">
           {renderDeleteDataflowButton()}
           {renderCheckBoxPinned()}
         </div>
+        <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
         <Button
           className={`p-button-primary ${
             !isEmpty(reportingDataflowState.name) &&

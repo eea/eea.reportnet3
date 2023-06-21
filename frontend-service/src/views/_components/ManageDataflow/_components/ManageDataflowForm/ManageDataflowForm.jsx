@@ -97,7 +97,7 @@ export const ManageDataflowForm = forwardRef(
       return hasErrors;
     };
 
-    const onConfirm = async pinned => {
+    const onConfirm = async (pinned, bigData) => {
       checkIsCorrectInputValue(metadata.obligation.title, 'obligation');
       checkIsCorrectInputValue(name, 'name');
       checkIsCorrectInputValue(description, 'description');
@@ -115,12 +115,19 @@ export const ManageDataflowForm = forwardRef(
               description,
               metadata.obligation.id,
               metadata.isReleasable,
-              metadata.showPublicInfo
+              metadata.showPublicInfo,
+              bigData
             );
 
             onEdit(name, description, metadata.obligation.id);
           } else {
-            const creationResponse = await service.create(name, description, metadata.obligation.id);
+            const creationResponse = await service.create(
+              name,
+              description,
+              metadata.obligation.id,
+              undefined,
+              bigData
+            );
 
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
