@@ -23,7 +23,9 @@ public class EeaFeignSecurityInterceptor implements RequestInterceptor {
   public void apply(RequestTemplate template) {
     SecurityContext securityContext = SecurityContextHolder.getContext();
     Authentication authentication = securityContext.getAuthentication();
-
+    if (template.url().contains("api/v3/catalog/by-path")) {
+      return;
+    }
     if (authentication instanceof UsernamePasswordAuthenticationToken) {
       template.header(AUTHORIZATION_HEADER, authentication.getCredentials().toString());
       template.header("FeignInvocationUser", authentication.getName());

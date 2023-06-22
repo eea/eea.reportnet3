@@ -179,6 +179,9 @@ public final class LiteralConstants {
   /** The Constant S3_DEFAULT_BUCKET: {@value}. */
   public static final String S3_DEFAULT_BUCKET = "\"rn3-dataset\".\"rn3-dataset\"";
 
+  /** The Constant S3_DEFAULT_BUCKET_PATH: {@value}. */
+  public static final String S3_DEFAULT_BUCKET_PATH = "rn3-dataset/rn3-dataset";
+
   /** The Constant S3_LEFT_PAD: {@value}. */
   public static final String S3_LEFT_PAD= "0";
 
@@ -221,6 +224,9 @@ public final class LiteralConstants {
   /** The Constant S3_TABLE_NAME_FOLDER_PATH: {@value}. */
   public static final String S3_TABLE_NAME_FOLDER_PATH = "/%s/%s/%s/current/%s";
 
+  /** The Constant S3_CURRENT_PATH: {@value}. */
+  public static final String S3_CURRENT_PATH = "/%s/%s/%s/current";
+
   /** The Constant S3_TABLE_NAME_QUERY_PATH: {@value}. */
   public static final String S3_TABLE_NAME_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\".\"%s\"";
 
@@ -260,7 +266,7 @@ public final class LiteralConstants {
   public static final String S3_EXPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"export\".\"%s\"";
 
   /** The Constant S3_VALIDATION: {@value}. */
-  public static final String S3_VALIDATION = "VALIDATION";
+  public static final String S3_VALIDATION = "validation";
 
   /** The Constant S3_BUCKET_NAME: {@value}. */
   public static final String S3_BUCKET_NAME = "rn3-dataset";
