@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 
-import static org.eea.utils.LiteralConstants.*;
+import static org.eea.utils.LiteralConstants.S3_BUCKET_NAME;
+import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
 
 @Service
 public class S3HelperImpl implements S3Helper {

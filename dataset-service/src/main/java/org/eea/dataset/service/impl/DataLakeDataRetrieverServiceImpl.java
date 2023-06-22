@@ -1,6 +1,7 @@
 package org.eea.dataset.service.impl;
 
 import org.bson.Document;
+import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
@@ -50,10 +51,12 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
     private SchemasRepository schemasRepository;
     private S3Client s3Client;
     private S3Helper s3Helper;
+    private DremioHelperService dremioHelperService;
 
     @Autowired
     public DataLakeDataRetrieverServiceImpl(DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate,
-                                            FileCommonUtils fileCommon, S3Service s3Service, SchemasRepository schemasRepository, S3Client s3Client, S3Helper s3Helper) {
+                                            FileCommonUtils fileCommon, S3Service s3Service, SchemasRepository schemasRepository, S3Client s3Client, S3Helper s3Helper,
+                                            DremioHelperService dremioHelperService) {
         this.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.fileCommon = fileCommon;
@@ -61,6 +64,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         this.schemasRepository = schemasRepository;
         this.s3Client = s3Client;
         this.s3Helper = s3Helper;
+        this.dremioHelperService = dremioHelperService;
     }
 
     /** The Constant LOG. */
@@ -79,12 +83,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         TableSchemaVO tableSchemaVO = getTableSchemaVO(idTableSchema, datasetSchemaId);
 
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchemaVO.getNameTableSchema());
-        if (!s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
-            result.setTotalFilteredRecords(0L);
-            result.setTableValidations(new ArrayList<>());
-            result.setTotalRecords(0L);
-            result.setRecords(new ArrayList<>());
-        } else {
+        if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, tableSchemaVO.getNameTableSchema())) {
             totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
             pageable = calculatePageable(pageable, totalRecords);
             fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
@@ -112,6 +111,11 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
                 retrieveValidations(recordVOS, tableSchemaVO.getNameTableSchema(), s3PathResolver);
             }
+        } else {
+            result.setTotalFilteredRecords(0L);
+            result.setTableValidations(new ArrayList<>());
+            result.setTotalRecords(0L);
+            result.setRecords(new ArrayList<>());
         }
         result.setTotalRecords(totalRecords);
         return result;
