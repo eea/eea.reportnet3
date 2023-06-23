@@ -105,7 +105,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                     LOG.error("Empty first line in csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
                     throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
                 }
-                //TODO change record id into a sequential uuid
+
                 String recordIdValue = UUID.randomUUID().toString();
                 List<String> row = new ArrayList<>();
                 for (FieldSchema sanitizedHeader : sanitizedHeaders) {

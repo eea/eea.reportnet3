@@ -345,7 +345,6 @@ public class DatasetControllerImpl implements DatasetController {
       try {
         bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, fmeJobId);
       } catch (Exception e) {
-        //TODO handle exception
         LOG.error("Error when importing data to Dremio for datasetId {}", datasetId, e);
         throw e;
       }

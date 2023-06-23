@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.impl.S3ServiceImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -107,7 +108,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
 
             JobVO job = null;
-            // TODO fme checks
+            //TODO fme checks
             //check if there is already an import job with status IN_PROGRESS for the specific datasetId
             List<Long> datasetIds = new ArrayList<>();
             datasetIds.add(datasetId);
@@ -181,7 +182,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         //if there is already a process created for the import then it should be updated instead of creating a new one
         String processUUID = null;
         Boolean processExists = false;
-        // TODO fme check if process exists
+        //TODO fme check if process exists
         processUUID = UUID.randomUUID().toString();
         importFileInDremioInfo.setProcessId(processUUID);
 
@@ -232,6 +233,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         for (Map.Entry<String, String> parquetFileNameAndPath : parquetFileNamesAndPaths.entrySet()) {
             String importPathForParquet = getImportPathForParquet(importFileInDremioInfo, parquetFileNameAndPath.getKey());
             s3HandlerService.uploadFileToBucket(importPathForParquet, parquetFileNameAndPath.getValue());
+            //promote folder
         }
         LOG.info("Uploaded parquet files to s3 {}", importFileInDremioInfo);
     }
@@ -254,7 +256,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         LOG.info("Checking csv files {}. {}", files, importFileInDremioInfo);
         List<File> correctFilesForImport = new ArrayList<>();
 
-        // TODO handle replaceData
+        //TODO handle replaceData
 
         Boolean guessTableName = null == importFileInDremioInfo.getTableSchemaId();
         String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
@@ -283,7 +285,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     correctFilesForImport.add(file);
                 }
                 else {
-                    // TODO handle xlsx files
+                    //TODO handle xlsx files
                 }
             } else {
                 sendWrongFileNameWarning = true;
@@ -330,7 +332,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 folder.mkdir();
             }
 
-            // TODO fme handling
+            //TODO fme handling
 
             try (ZipInputStream zip = new ZipInputStream(input)) {
                 ZipEntry entry = zip.getNextEntry();
@@ -381,8 +383,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     private void finishImportProcess(ImportFileInDremioInfo importFileInDremioInfo) throws EEAException {
-
-        // TODO delete directory in disk?
 
         Map<String, Object> value = new HashMap<>();
         value.put(LiteralConstants.DATASET_ID, importFileInDremioInfo.getDatasetId());
