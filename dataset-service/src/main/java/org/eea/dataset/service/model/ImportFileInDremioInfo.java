@@ -21,8 +21,10 @@ public class ImportFileInDremioInfo {
     private String delimiter;
     private String errorMessage;
     private Boolean sendWrongFileNameWarning;
+    private String dataProviderCode;
 
-    public ImportFileInDremioInfo(Long jobId, Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String fileName, Boolean replaceData, String delimiter, Long integrationId) {
+    public ImportFileInDremioInfo(Long jobId, Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String fileName, Boolean replaceData,
+                                  String delimiter, Long integrationId, String dataProviderCode) {
         this.jobId = jobId;
         this.datasetId = datasetId;
         this.dataflowId = dataflowId;
@@ -32,5 +34,6 @@ public class ImportFileInDremioInfo {
         this.replaceData = replaceData;
         this.delimiter = delimiter;
         this.integrationId = integrationId;
+        this.dataProviderCode = dataProviderCode;
     }
 }
