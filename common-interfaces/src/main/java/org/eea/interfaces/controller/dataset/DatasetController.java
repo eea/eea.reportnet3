@@ -213,7 +213,7 @@ public interface DatasetController {
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("mimeType") String mimeType, @RequestBody ExportFilterVO exportFilterVO);
 
-  /**
+    /**
    * Export file through integration.
    *
    * @param datasetId the dataset id
@@ -626,6 +626,17 @@ public interface DatasetController {
       @RequestParam("mimeType") String mimeType);
 
 
+  /**
+   * Export dataset file DL.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   */
+  @GetMapping(value = "/{datasetId}/exportDatasetFile")
+  void exportDatasetFileDL(
+      @PathVariable("datasetId") Long datasetId,
+      @RequestParam("mimeType") String mimeType);
+
 
   /**
    * Download file.
@@ -652,6 +663,17 @@ public interface DatasetController {
       @RequestParam String fileName);
 
   /**
+   * Download file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @param response the response
+   */
+  @GetMapping(value = "/{datasetId}/downloadFileDL",
+        produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  void downloadFileDL(@PathVariable Long datasetId, @RequestParam String fileName, HttpServletResponse response);
+
+    /**
    * Update check view.
    *
    * @param datasetId the dataset id

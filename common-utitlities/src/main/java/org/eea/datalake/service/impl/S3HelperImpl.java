@@ -3,9 +3,22 @@ package org.eea.datalake.service.impl;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.S3Object;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
 
 import static org.eea.utils.LiteralConstants.S3_BUCKET_NAME;
 import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
@@ -13,8 +26,16 @@ import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
 @Service
 public class S3HelperImpl implements S3Helper {
 
+    private static final Logger LOG = LoggerFactory.getLogger(S3HelperImpl.class);
+
     private S3Service s3Service;
     private S3Client s3Client;
+
+    /**
+     * The path public file.
+     */
+    @Value("${pathPublicFile}")
+    private String pathPublicFile;
 
     @Autowired
     public S3HelperImpl(S3Service s3Service, S3Client s3Client) {
@@ -46,4 +67,43 @@ public class S3HelperImpl implements S3Helper {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver, path);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
+
+    /**
+     * Gets filenames from export folder
+     * @param s3PathResolver
+     * @return
+     */
+    @Override
+    public List<S3Object> getFilenamesFromFolderExport(S3PathResolver s3PathResolver) {
+        String key = s3Service.getExportFolderPath(s3PathResolver);
+        return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents();
+    }
+
+    /**
+     * Gets file
+     * @param key
+     * @return
+     */
+    @Override
+    public File getFileFromS3(String key) throws IOException {
+        GetObjectRequest objectRequest = GetObjectRequest
+            .builder()
+            .key(key)
+            .bucket(S3_BUCKET_NAME)
+            .build();
+
+        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
+        byte[] data = objectBytes.asByteArray();
+
+        // Write the data to a local file.
+        File parquetFile = new File(pathPublicFile + "/exportDL/" + key);
+        LOG.info("Local file {}", parquetFile);
+        OutputStream os = new FileOutputStream(parquetFile);
+        os.write(data);
+        LOG.info("Successfully obtained bytes from file: {}", key);
+        os.close();
+        return parquetFile;
+    }
+
+
 }

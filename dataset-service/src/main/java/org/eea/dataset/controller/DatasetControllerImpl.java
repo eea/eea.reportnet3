@@ -1848,6 +1848,36 @@ public class DatasetControllerImpl implements DatasetController {
   }
 
 
+  /**
+   * Export dataset file DL.
+   *
+   * @param datasetId the dataset id
+   * @param mimeType the mime type
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/{datasetId}/exportDatasetFileDL")
+  @ApiOperation(value = "Export dataset file", hidden = true)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_CUSTODIAN','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  public void exportDatasetFileDL(
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @PathVariable("datasetId")
+      Long datasetId,
+      @ApiParam(type = "String", value = "mime type (extension file)", example = "csv")
+      @RequestParam("mimeType") String mimeType) {
+    LOG.info("Exporting dataset data for datasetId {}, with type {}", datasetId, mimeType);
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDatasetId(datasetId);
+    notificationControllerZuul.createUserNotificationPrivate("EXPORT_DATASET_DATA",
+        userNotificationContentVO);
+
+    try {
+      fileTreatmentHelper.exportDatasetFileDL(datasetId, mimeType);
+      LOG.info("Successfully exported dataset data from datasetId {}, with type {}", datasetId, mimeType);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error exporting dataset file for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
+  }
 
   /**
    * Download file.
@@ -1870,6 +1900,54 @@ public class DatasetControllerImpl implements DatasetController {
       LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
           datasetId, fileName);
       File file = datasetService.downloadExportedFile(datasetId, fileName);
+      LOG.info("Successfully downloaded file generated from export dataset. DatasetId {} Filename {}",
+              datasetId, fileName);
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
+      OutputStream out = response.getOutputStream();
+      try (FileInputStream in = new FileInputStream(file)) {
+        // copy from in to out
+        IOUtils.copyLarge(in, out);
+        out.close();
+        in.close();
+        // delete the file after downloading it
+        FileUtils.forceDelete(file);
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error in copying large file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage());
+        throw e;
+      }
+    } catch (IOException | EEAException e) {
+      LOG.error(
+          "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",
+          datasetId, fileName, e.getMessage());
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error downloading file {} for datasetId {} Message: {}", fileName, datasetId, e.getMessage());
+      throw e;
+    }
+  }
+
+
+
+  /**
+   * Download file DL.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @param response the response
+   */
+  @Override
+  @GetMapping(value = "/{datasetId}/downloadFileDL",
+      produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Download file", hidden = true)
+  public void downloadFileDL(
+      @ApiParam(type = "Long", value = "Dataset Id", example = "0") @PathVariable Long datasetId,
+      @ApiParam(type = "String", value = "File name", example = "file.csv") @RequestParam
+      String fileName, @ApiParam(value = "response") HttpServletResponse response) {
+    try {
+      LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
+          datasetId, fileName);
+      File file = datasetService.downloadExportedFileDL(datasetId, fileName);
       LOG.info("Successfully downloaded file generated from export dataset. DatasetId {} Filename {}",
               datasetId, fileName);
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
