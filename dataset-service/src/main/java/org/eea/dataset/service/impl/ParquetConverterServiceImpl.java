@@ -21,6 +21,7 @@ import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,8 +94,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                         .withFirstRecordAsHeader()
                         .withIgnoreHeaderCase()
                         .withTrim())) {
-            csvHeaders.add("record_id");
+            csvHeaders.add(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER);
             csvHeaders.addAll(csvParser.getHeaderMap().keySet());
+            csvHeaders.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
 
             sanitizedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
 
@@ -107,8 +109,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 String recordIdValue = UUID.randomUUID().toString();
                 List<String> row = new ArrayList<>();
                 for (FieldSchema sanitizedHeader : sanitizedHeaders) {
-                    if(sanitizedHeader.getHeaderName().equals("record_id")){
+                    if(sanitizedHeader.getHeaderName().equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)){
                         row.add(recordIdValue);
+                    }
+                    else if(sanitizedHeader.getHeaderName().equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)){
+                        row.add((importFileInDremioInfo.getDataProviderCode() != null) ? importFileInDremioInfo.getDataProviderCode() : "");
                     }
                     else {
                         row.add(csvRecord.get(sanitizedHeader.getHeaderName()));

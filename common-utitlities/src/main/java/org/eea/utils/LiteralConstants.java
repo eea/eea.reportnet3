@@ -277,6 +277,13 @@ public final class LiteralConstants {
   /** The Constant S3_BUCKET_NAME: {@value}. */
   public static final String S3_BUCKET_NAME = "rn3-dataset";
 
+  /** The Constant PARQUET_RECORD_ID_COLUMN_HEADER: {@value}. */
+  public static final String PARQUET_RECORD_ID_COLUMN_HEADER = "record_id";
+
+  /** The Constant PARQUET_PROVIDER_CODE_COLUMN_HEADER: {@value}. */
+  public static final String PARQUET_PROVIDER_CODE_COLUMN_HEADER = "data_provider_code";
+
+
   /**
    * Instantiates a new literal constants.
    */
