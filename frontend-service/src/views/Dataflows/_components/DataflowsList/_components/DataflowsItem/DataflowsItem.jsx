@@ -158,7 +158,16 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
 
       <div className={`${styles.text}`}>
         <h3 className={`${styles.title}`} data-for={idTooltip} data-tip>
-          {itemContent.name}
+          {itemContent.bigData ? (
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                  name: itemContent.name
+                })
+              }}></p>
+          ) : (
+            itemContent.name
+          )}
         </h3>
         <p>{itemContent.description}</p>
         {renderTooltipDescription()}

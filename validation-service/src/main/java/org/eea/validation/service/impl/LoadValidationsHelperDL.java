@@ -1,5 +1,6 @@
 package org.eea.validation.service.impl;
 
+import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
@@ -29,7 +30,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static org.eea.utils.LiteralConstants.*;
+import static org.eea.utils.LiteralConstants.S3_VALIDATION;
+import static org.eea.utils.LiteralConstants.S3_VALIDATION_TABLE_PATH;
 
 @ImportDataLakeCommons
 @Component
@@ -42,10 +44,11 @@ public class LoadValidationsHelperDL {
     private S3Helper s3Helper;
     private JdbcTemplate dremioJdbcTemplate;
     private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
+    private DremioHelperService dremioHelperService;
 
     @Autowired
     public LoadValidationsHelperDL(DataLakeValidationService dataLakeValidationService, S3Service s3Service, S3Client s3Client, DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul,
-                                   S3Helper s3Helper, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, DatasetSchemaControllerZuul datasetSchemaControllerZuul) {
+                                   S3Helper s3Helper, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioHelperService dremioHelperService) {
         this.dataLakeValidationService = dataLakeValidationService;
         this.s3Service = s3Service;
         this.s3Client = s3Client;
@@ -53,6 +56,7 @@ public class LoadValidationsHelperDL {
         this.s3Helper = s3Helper;
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.datasetSchemaControllerZuul = datasetSchemaControllerZuul;
+        this.dremioHelperService = dremioHelperService;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadValidationsHelperDL.class);
@@ -69,7 +73,7 @@ public class LoadValidationsHelperDL {
 
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), S3_VALIDATION);
         s3PathResolver.setTableName(S3_VALIDATION);
-        if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
+        if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, S3_VALIDATION)) {
             List<GroupValidationVO> errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter, typeEntitiesFilter, tableFilter,
                     fieldValueFilter, pageable, headerField, asc, true);
             validation.setErrors(errors);
