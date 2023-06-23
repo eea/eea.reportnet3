@@ -321,17 +321,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         File root = new File(importPath);
         File folder = new File(root, importFileInDremioInfo.getDatasetId().toString());
         String saveLocationPath = folder.getCanonicalPath();
+        if (!folder.exists()) {
+            folder.mkdir();
+        }
+        //store zip file
         File storedMultipartFile = new File(saveLocationPath + "/" + multipartFile.getOriginalFilename());
-
         try (OutputStream os = new FileOutputStream(storedMultipartFile)) {
             os.write(multipartFile.getBytes());
         }
 
         try (InputStream input = multipartFile.getInputStream()) {
-            if (!folder.exists()) {
-                folder.mkdir();
-            }
-
             //TODO fme handling
 
             try (ZipInputStream zip = new ZipInputStream(input)) {
