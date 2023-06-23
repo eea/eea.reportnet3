@@ -9,6 +9,7 @@ const getActiveTab = (tabMenuItems, activeIndex) => {
 const parseDataflows = (data, pinnedDataflows) => {
   const dataflows = data?.map(dataflow => ({
     id: dataflow.id,
+    bigData: dataflow.bigData,
     creationDate: dataflow.creationDate,
     description: dataflow.description,
     expirationDate: dataflow.expirationDate,
