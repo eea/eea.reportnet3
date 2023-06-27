@@ -14,6 +14,7 @@ import { NotificationContext } from 'views/_functions/Contexts/NotificationConte
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const Webforms = ({
+  bigData,
   dataflowId,
   dataProviderId,
   datasetId,
@@ -63,6 +64,7 @@ export const Webforms = ({
     case 'PAMS':
       return (
         <PaMsWebform
+          bigData={bigData}
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
@@ -76,6 +78,7 @@ export const Webforms = ({
     case 'TABLES':
       return (
         <TableWebform
+          bigData={bigData}
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
@@ -87,6 +90,7 @@ export const Webforms = ({
     case 'QA':
       return (
         <QuestionAnswerWebform
+          bigData={bigData}
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}

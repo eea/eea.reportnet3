@@ -48,6 +48,8 @@ export const DatasetConfig = {
   importTableSchema:
     '/dataschema/v1/{:datasetSchemaId}/importFieldSchemas?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}',
   getShowValidationErrors:
+    '/validation/listGroupValidations/{:datasetId}?asc={:asc}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
+  getShowValidationErrorsDL:
     '/validation/listGroupValidationsDL/{:datasetId}?asc={:asc}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
   getStatistics: '/datasetmetabase/{:datasetId}/loadStatistics',
   updateFieldOrder: '/dataschema/{:datasetId}/fieldSchema/order',

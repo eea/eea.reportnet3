@@ -29,6 +29,7 @@ import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const PaMsWebform = ({
+  bigData,
   dataflowId,
   dataProviderId,
   datasetId,
@@ -60,7 +61,6 @@ export const PaMsWebform = ({
     tableList: { group: [], single: [] },
     view: 'overview'
   });
-
   const { isDataUpdated, isLoading, pamsRecords, selectedTable, selectedTableName, tableList, view } = paMsWebformState;
 
   useEffect(() => initialLoad(), [tables]);
@@ -115,13 +115,24 @@ export const PaMsWebform = ({
   };
 
   const getPamsTableRecords = async tableSchemaId => {
+    let data;
     if (!isNil(tableSchemaId[0])) {
-      const data = await DatasetService.getTableData({
-        datasetId,
-        tableSchemaId: tableSchemaId[0],
-        pageSize: 300,
-        levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
-      });
+      if (bigData) {
+        data = await DatasetService.getTableDataDL({
+          datasetId,
+          tableSchemaId: tableSchemaId[0],
+          pageSize: 300,
+          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+        });
+      } else {
+        data = await DatasetService.getTableData({
+          datasetId,
+          tableSchemaId: tableSchemaId[0],
+          pageSize: 300,
+          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+        });
+      }
+
       return onParseWebformRecords(data.records, paMsWebformState.data[0], {}, data.totalRecords) || [];
     }
 
@@ -214,13 +225,23 @@ export const PaMsWebform = ({
   const onLoadPamsData = async () => {
     const tableSchemaId = paMsWebformState.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
     try {
+      let data;
       if (!isNil(tableSchemaId[0])) {
-        const data = await DatasetService.getTableData({
-          datasetId,
-          tableSchemaId: tableSchemaId[0],
-          pageSize: 300,
-          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
-        });
+        if (bigData) {
+          data = await DatasetService.getTableDataDL({
+            datasetId,
+            tableSchemaId: tableSchemaId[0],
+            pageSize: 300,
+            levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+          });
+        } else {
+          data = await DatasetService.getTableData({
+            datasetId,
+            tableSchemaId: tableSchemaId[0],
+            pageSize: 300,
+            levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+          });
+        }
 
         if (!isNil(data.records)) {
           const tableData = {};
@@ -310,6 +331,7 @@ export const PaMsWebform = ({
     if (view === 'details') {
       return (
         <WebformView
+          bigData={bigData}
           data={paMsWebformState.data}
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
@@ -332,6 +354,7 @@ export const PaMsWebform = ({
 
     return (
       <TableManagement
+        bigData={bigData}
         dataflowId={dataflowId}
         datasetId={datasetId}
         isAddingPamsId={paMsWebformState.isAddingSingleRecord || paMsWebformState.isAddingGroupRecord}

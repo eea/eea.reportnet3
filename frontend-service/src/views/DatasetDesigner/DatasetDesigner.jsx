@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
@@ -69,7 +69,6 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const { dataflowId, datasetId } = useParams();
-  const location = useLocation();
 
   const actionsContext = useContext(ActionsContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -1474,7 +1473,18 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           ariaLabelledBy={designerState.datasetSchemaName}
           icon="pencilRuler"
           iconSize="3.4rem"
-          subtitle={designerState.dataflowName}
+          subtitle={
+            designerState.bigData ? (
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                    name: designerState.dataflowName
+                  })
+                }}></p>
+            ) : (
+              designerState.dataflowName
+            )
+          }
           title={`${resourcesContext.messages['datasetSchema']}: ${designerState.datasetSchemaName}`}
         />
         <h4 className={styles.descriptionLabel}>
@@ -1762,6 +1772,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         {renderSwitchView()}
         {!isNil(designerState.webform) && designerState.viewType['webform'] ? (
           <Webforms
+            bigData={designerState.bigData}
             dataflowId={dataflowId}
             datasetId={datasetId}
             options={webformOptions}
@@ -1871,6 +1882,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             style={{ width: '90%' }}
             visible={designerState.isValidationViewerVisible}>
             <ShowValidationsList
+              bigData={designerState.bigData}
               dataflowId={dataflowId}
               datasetId={datasetId}
               datasetName={designerState.datasetSchemaName}

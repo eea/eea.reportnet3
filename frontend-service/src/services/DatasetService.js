@@ -289,6 +289,60 @@ export const DatasetService = {
     return dataset;
   },
 
+  getShowValidationErrorsDL: async (
+    datasetId,
+    pageNum,
+    pageSize,
+    sortField,
+    asc,
+    fieldValueFilter,
+    levelErrorsFilter,
+    typeEntitiesFilter,
+    tablesFilter
+  ) => {
+    console.log('Inside DatasetService getShowValidationErrorsDL');
+    const datasetErrorsDTO = await DatasetRepository.getShowValidationErrorsDL(
+      datasetId,
+      pageNum,
+      pageSize,
+      sortField || '',
+      isNumber(asc) ? asc : '',
+      fieldValueFilter,
+      levelErrorsFilter,
+      typeEntitiesFilter,
+      tablesFilter
+    );
+    const dataset = new Dataset({
+      datasetId: datasetErrorsDTO.data.idDataset,
+      datasetSchemaId: datasetErrorsDTO.data.idDatasetSchema,
+      datasetSchemaName: datasetErrorsDTO.data.nameDataSetSchema,
+      totalErrors: datasetErrorsDTO.data.totalErrors,
+      totalRecords: datasetErrorsDTO.data.totalRecords,
+      totalFilteredErrors: datasetErrorsDTO.data.totalFilteredRecords
+    });
+
+    dataset.errors = datasetErrorsDTO.data.errors.map(
+      datasetErrorDTO =>
+        datasetErrorDTO &&
+        new DatasetError({
+          entityType: datasetErrorDTO.typeEntity,
+          fieldSchemaName: datasetErrorDTO.nameFieldSchema,
+          levelError: datasetErrorDTO.levelError,
+          message: datasetErrorDTO.message,
+          numberOfRecords: datasetErrorDTO.numberOfRecords,
+          objectId: datasetErrorDTO.idObject,
+          ruleId: datasetErrorDTO.idRule,
+          shortCode: datasetErrorDTO.shortCode,
+          tableSchemaId: datasetErrorDTO.idTableSchema,
+          tableSchemaName: datasetErrorDTO.nameTableSchema,
+          validationDate: datasetErrorDTO.validationDate,
+          validationId: datasetErrorDTO.idValidation
+        })
+    );
+
+    return dataset;
+  },
+
   updateFieldOrder: async (datasetId, position, fieldSchemaId) =>
     await DatasetRepository.updateFieldOrder(datasetId, position, fieldSchemaId),
 

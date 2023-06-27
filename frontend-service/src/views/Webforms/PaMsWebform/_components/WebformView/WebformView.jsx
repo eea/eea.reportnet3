@@ -29,6 +29,7 @@ import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformView = ({
+  bigData,
   data,
   dataProviderId,
   dataflowId,
@@ -157,15 +158,15 @@ export const WebformView = ({
   };
 
   const combinationTableRender = tableName => {
-    const calculated = singlesCalculatedData
-      .flatMap(singlesRecord =>
-        singlesRecord[Object.keys(singlesRecord).find(key => key.toLowerCase() === tableName.toLowerCase())]
-          .map(tableRecord => ({
-            pamsId: singlesRecord['id'],
-            pamName: singlesRecord['paMName'],
-            ...tableRecord,
-          }))
-      );
+    const calculated = singlesCalculatedData.flatMap(singlesRecord =>
+      singlesRecord[Object.keys(singlesRecord).find(key => key.toLowerCase() === tableName.toLowerCase())].map(
+        tableRecord => ({
+          pamsId: singlesRecord['id'],
+          pamName: singlesRecord['paMName'],
+          ...tableRecord
+        })
+      )
+    );
     return renderTable(uniqBy(calculated, value => JSON.stringify(value)));
   };
 
@@ -268,6 +269,7 @@ export const WebformView = ({
 
     return (
       <WebformTable
+        bigData={bigData}
         calculateSingle={calculateSingle}
         dataflowId={dataflowId}
         dataProviderId={dataProviderId}

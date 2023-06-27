@@ -269,6 +269,7 @@ export const DataViewer = ({
 
   const { columns, getTooltipMessage, onShowFieldInfo, originalColumns, selectedHeader, setColumns } = useSetColumns(
     actionTemplate,
+    bigData,
     cellDataEditor,
     colsSchema,
     columnOptions,
@@ -369,7 +370,6 @@ export const DataViewer = ({
       }
       if (bigData) {
         data = await DatasetService.getTableDataDL({
-          bigData,
           datasetId,
           tableSchemaId: tableId,
           pageNum: Math.floor(fRow / nRows),
@@ -1165,6 +1165,7 @@ export const DataViewer = ({
             (hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !tableFixedNumber) ||
             (hasWritePermissions && isReferenceDataset) ? (
               <Footer
+                bigData={bigData}
                 hasWritePermissions={
                   (hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)
                 }

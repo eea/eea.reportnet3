@@ -10,7 +10,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const QuestionAnswerWebform = ({ dataflowId, dataProviderId, datasetId, state, tables = [] }) => {
+export const QuestionAnswerWebform = ({ bigData, dataflowId, dataProviderId, datasetId, state, tables = [] }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const { areEquals } = TextUtils;
@@ -61,6 +61,7 @@ export const QuestionAnswerWebform = ({ dataflowId, dataProviderId, datasetId, s
         return (
           <Fragment key={uniqueId()}>
             <QuestionAnswerWebformTable
+              bigData={bigData}
               dataflowId={dataflowId}
               dataProviderId={dataProviderId}
               datasetId={datasetId}

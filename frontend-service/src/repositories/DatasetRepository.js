@@ -189,6 +189,35 @@ export const DatasetRepository = {
     });
   },
 
+  getShowValidationErrorsDL: async (
+    datasetId,
+    pageNum,
+    pageSize,
+    sortField,
+    asc,
+    fieldValueFilter,
+    levelErrorsFilter,
+    typeEntitiesFilter,
+    tablesFilter
+  ) => {
+    if (asc === -1) {
+      asc = 0;
+    }
+    return await HTTPRequester.get({
+      url: getUrl(DatasetConfig.getShowValidationErrorsDL, {
+        datasetId,
+        pageNum,
+        pageSize,
+        sortField,
+        asc,
+        fieldValueFilter,
+        levelErrorsFilter,
+        typeEntitiesFilter,
+        tableFilter: tablesFilter
+      })
+    });
+  },
+
   updateFieldOrder: async (datasetId, position, fieldSchemaId) =>
     await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateFieldOrder, { datasetId, position }),
