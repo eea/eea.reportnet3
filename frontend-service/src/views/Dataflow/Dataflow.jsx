@@ -386,7 +386,13 @@ export const Dataflow = () => {
     </div>
   );
 
-  const handleRedirect = target => navigate(target);
+  const handleRedirect = target => {
+    navigate(target, {
+      state: {
+        bigData: dataflowState.data.bigData
+      }
+    });
+  };
 
   const setRightPermissionsChange = isRightPermissionsChanged => {
     dataflowDispatch({

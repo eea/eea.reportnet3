@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import ReactTooltip from 'react-tooltip';
 
 import isEmpty from 'lodash/isEmpty';
@@ -69,6 +69,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const { dataflowId, datasetId } = useParams();
+  const location = useLocation();
 
   const actionsContext = useContext(ActionsContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
@@ -94,6 +95,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     arePrefilledTablesDeleted: false,
     areUpdatingTables: false,
     availableInPublic: true,
+    bigData: false,
     constraintManagingId: '',
     dashDialogVisible: false,
     dataflowName: '',
@@ -327,6 +329,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     designerDispatch({
       type: 'GET_METADATA',
       payload: {
+        bigData: metaData.dataflow.bigData,
         dataflowName: metaData.dataflow.name,
         dataflowType: metaData.dataflow.type,
         metaData,
@@ -1767,6 +1770,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           />
         ) : (
           <TabsDesigner
+            bigData={designerState.bigData}
             changeMode={changeMode}
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}

@@ -5,563 +5,649 @@ import isNull from 'lodash/isNull';
 import isNumber from 'lodash/isNumber';
 import isUndefined from 'lodash/isUndefined';
 
-import {DatasetRepository} from 'repositories/DatasetRepository';
-import {ValidationRepository} from 'repositories/ValidationRepository';
+import { DatasetRepository } from 'repositories/DatasetRepository';
+import { ValidationRepository } from 'repositories/ValidationRepository';
 
-import {DatasetUtils} from 'services/_utils/DatasetUtils';
+import { DatasetUtils } from 'services/_utils/DatasetUtils';
 
-import {Dataset} from 'entities/Dataset';
-import {DatasetError} from 'entities/DatasetError';
-import {DatasetTable} from 'entities/DatasetTable';
-import {DatasetTableField} from 'entities/DatasetTableField';
-import {DatasetTableRecord} from 'entities/DatasetTableRecord';
-import {Validation} from 'entities/Validation';
+import { Dataset } from 'entities/Dataset';
+import { DatasetError } from 'entities/DatasetError';
+import { DatasetTable } from 'entities/DatasetTable';
+import { DatasetTableField } from 'entities/DatasetTableField';
+import { DatasetTableRecord } from 'entities/DatasetTableRecord';
+import { Validation } from 'entities/Validation';
 
-import {CoreUtils} from 'repositories/_utils/CoreUtils';
-import {TextUtils} from 'repositories/_utils/TextUtils';
+import { CoreUtils } from 'repositories/_utils/CoreUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DatasetService = {
-    createRecordDesign: async (datasetId, datasetTableRecordField) => {
-        const datasetTableFieldDesign = new DatasetTableField({});
-        datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
-        datasetTableFieldDesign.description = datasetTableRecordField.description;
-        datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
-        datasetTableFieldDesign.maxSize = !isNil(datasetTableRecordField.maxSize)
-            ? datasetTableRecordField.maxSize.toString()
-            : null;
-        datasetTableFieldDesign.name = datasetTableRecordField.name;
-        datasetTableFieldDesign.pk = datasetTableRecordField.pk;
-        datasetTableFieldDesign.pkHasMultipleValues = datasetTableRecordField.pkHasMultipleValues;
-        datasetTableFieldDesign.ignoreCaseInLinks = datasetTableRecordField.ignoreCaseInLinks;
-        datasetTableFieldDesign.pkMustBeUsed = datasetTableRecordField.pkMustBeUsed;
-        datasetTableFieldDesign.readOnly = datasetTableRecordField.readOnly;
-        datasetTableFieldDesign.referencedField = datasetTableRecordField.referencedField;
-        datasetTableFieldDesign.required = datasetTableRecordField.required;
-        datasetTableFieldDesign.type = datasetTableRecordField.type;
-        datasetTableFieldDesign.validExtensions = datasetTableRecordField.validExtensions;
+  createRecordDesign: async (datasetId, datasetTableRecordField) => {
+    const datasetTableFieldDesign = new DatasetTableField({});
+    datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
+    datasetTableFieldDesign.description = datasetTableRecordField.description;
+    datasetTableFieldDesign.idRecord = datasetTableRecordField.recordId;
+    datasetTableFieldDesign.maxSize = !isNil(datasetTableRecordField.maxSize)
+      ? datasetTableRecordField.maxSize.toString()
+      : null;
+    datasetTableFieldDesign.name = datasetTableRecordField.name;
+    datasetTableFieldDesign.pk = datasetTableRecordField.pk;
+    datasetTableFieldDesign.pkHasMultipleValues = datasetTableRecordField.pkHasMultipleValues;
+    datasetTableFieldDesign.ignoreCaseInLinks = datasetTableRecordField.ignoreCaseInLinks;
+    datasetTableFieldDesign.pkMustBeUsed = datasetTableRecordField.pkMustBeUsed;
+    datasetTableFieldDesign.readOnly = datasetTableRecordField.readOnly;
+    datasetTableFieldDesign.referencedField = datasetTableRecordField.referencedField;
+    datasetTableFieldDesign.required = datasetTableRecordField.required;
+    datasetTableFieldDesign.type = datasetTableRecordField.type;
+    datasetTableFieldDesign.validExtensions = datasetTableRecordField.validExtensions;
 
-        return await DatasetRepository.createRecordDesign(datasetId, datasetTableFieldDesign);
-    },
+    return await DatasetRepository.createRecordDesign(datasetId, datasetTableFieldDesign);
+  },
 
-    createRecord: async (datasetId, tableSchemaId, records) => {
-        const datasetTableRecords = [];
-        records.forEach(record => {
-            const fields = record.dataRow.map(dataTableFieldDTO => {
-                const newField = new DatasetTableField({});
-                newField.id = null;
-                newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
-                newField.type = dataTableFieldDTO.fieldData.type;
-                newField.value = DatasetUtils.parseValue({
-                    type: dataTableFieldDTO.fieldData.type,
-                    value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
-                    splitSRID: true
-                });
-
-                return newField;
-            });
-
-            const datasetTableRecord = new DatasetTableRecord();
-
-            datasetTableRecord.datasetPartitionId = record.dataSetPartitionId;
-            datasetTableRecord.fields = fields;
-            datasetTableRecord.idRecordSchema = record.recordSchemaId;
-            datasetTableRecord.id = null;
-
-            datasetTableRecords.push(datasetTableRecord);
+  createRecord: async (datasetId, tableSchemaId, records) => {
+    const datasetTableRecords = [];
+    records.forEach(record => {
+      const fields = record.dataRow.map(dataTableFieldDTO => {
+        const newField = new DatasetTableField({});
+        newField.id = null;
+        newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
+        newField.type = dataTableFieldDTO.fieldData.type;
+        newField.value = DatasetUtils.parseValue({
+          type: dataTableFieldDTO.fieldData.type,
+          value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
+          splitSRID: true
         });
 
-        return await DatasetRepository.createRecord(datasetId, tableSchemaId, datasetTableRecords);
-    },
+        return newField;
+      });
 
-    createTableDesign: async (datasetId, tableSchemaName) =>
-        await DatasetRepository.createTableDesign(datasetId, tableSchemaName),
+      const datasetTableRecord = new DatasetTableRecord();
 
-    deleteData: async (datasetId, arePrefilledTablesDeleted) =>
-        await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
+      datasetTableRecord.datasetPartitionId = record.dataSetPartitionId;
+      datasetTableRecord.fields = fields;
+      datasetTableRecord.idRecordSchema = record.recordSchemaId;
+      datasetTableRecord.id = null;
 
-    deleteAttachment: async (dataflowId, datasetId, fieldId, dataProviderId) =>
-        await DatasetRepository.deleteAttachment(dataflowId, datasetId, fieldId, dataProviderId),
+      datasetTableRecords.push(datasetTableRecord);
+    });
 
-    deleteFieldDesign: async (datasetId, recordId) => await DatasetRepository.deleteFieldDesign(datasetId, recordId),
+    return await DatasetRepository.createRecord(datasetId, tableSchemaId, datasetTableRecords);
+  },
 
-    deleteRecord: async (datasetId, recordId, deleteInCascade) =>
-        await DatasetRepository.deleteRecord(datasetId, recordId, deleteInCascade),
+  createTableDesign: async (datasetId, tableSchemaName) =>
+    await DatasetRepository.createTableDesign(datasetId, tableSchemaName),
 
-    deleteSchema: async datasetId => await DatasetRepository.deleteSchema(datasetId),
+  deleteData: async (datasetId, arePrefilledTablesDeleted) =>
+    await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
 
-    deleteTableData: async (datasetId, tableId) => await DatasetRepository.deleteTableData(datasetId, tableId),
+  deleteAttachment: async (dataflowId, datasetId, fieldId, dataProviderId) =>
+    await DatasetRepository.deleteAttachment(dataflowId, datasetId, fieldId, dataProviderId),
 
-    deleteTableDesign: async (datasetId, tableSchemaId) =>
-        await DatasetRepository.deleteTableDesign(datasetId, tableSchemaId),
+  deleteFieldDesign: async (datasetId, recordId) => await DatasetRepository.deleteFieldDesign(datasetId, recordId),
 
-    downloadExportDatasetFile: async (datasetId, fileName) =>
-        await DatasetRepository.downloadExportDatasetFile(datasetId, fileName),
+  deleteRecord: async (datasetId, recordId, deleteInCascade) =>
+    await DatasetRepository.deleteRecord(datasetId, recordId, deleteInCascade),
 
-    downloadExportFile: async (datasetId, fileName, providerId) =>
-        await DatasetRepository.downloadExportFile(datasetId, fileName, providerId),
+  deleteSchema: async datasetId => await DatasetRepository.deleteSchema(datasetId),
 
-    downloadFileData: async (dataflowId, datasetId, fieldId, dataProviderId) =>
-        await DatasetRepository.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId),
+  deleteTableData: async (datasetId, tableId) => await DatasetRepository.deleteTableData(datasetId, tableId),
 
-    downloadPublicDatasetFile: async (dataflowId, dataProviderId, fileName) =>
-        await DatasetRepository.downloadPublicDatasetFile(dataflowId, dataProviderId, fileName),
+  deleteTableDesign: async (datasetId, tableSchemaId) =>
+    await DatasetRepository.deleteTableDesign(datasetId, tableSchemaId),
 
-    downloadPublicReferenceDatasetFileData: async (dataflowId, fileName) =>
-        await DatasetRepository.downloadPublicReferenceDatasetFileData(dataflowId, fileName),
+  downloadExportDatasetFile: async (datasetId, fileName) =>
+    await DatasetRepository.downloadExportDatasetFile(datasetId, fileName),
 
-    downloadTableData: async (datasetId, fileName) => await DatasetRepository.downloadTableData(datasetId, fileName),
+  downloadExportFile: async (datasetId, fileName, providerId) =>
+    await DatasetRepository.downloadExportFile(datasetId, fileName, providerId),
 
-    getStatistics: async (datasetId, tableSchemaNames) => {
-        const datasetTablesDTO = await DatasetRepository.getStatistics(datasetId);
+  downloadFileData: async (dataflowId, datasetId, fieldId, dataProviderId) =>
+    await DatasetRepository.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId),
 
-        //Sort by schema order
-        datasetTablesDTO.data.tables = datasetTablesDTO.data.tables.sort(
-            (a, b) => tableSchemaNames.indexOf(a.nameTableSchema) - tableSchemaNames.indexOf(b.nameTableSchema)
-        );
+  downloadPublicDatasetFile: async (dataflowId, dataProviderId, fileName) =>
+    await DatasetRepository.downloadPublicDatasetFile(dataflowId, dataProviderId, fileName),
 
-        const dataset = new Dataset({});
-        dataset.datasetSchemaName = datasetTablesDTO.data.nameDataSetSchema;
-        dataset.datasetErrors = datasetTablesDTO.data.datasetErrors;
-        const tableStatisticValues = [];
-        const allDatasetLevelErrors = [];
-        const datasetTables = datasetTablesDTO.data.tables.map(datasetTableDTO => {
-            allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(datasetTablesDTO.data));
-            tableStatisticValues.push([
-                datasetTableDTO.totalRecords -
-                (datasetTableDTO.totalRecordsWithBlockers +
-                    datasetTableDTO.totalRecordsWithErrors +
-                    datasetTableDTO.totalRecordsWithWarnings +
-                    datasetTableDTO.totalRecordsWithInfos),
-                datasetTableDTO.totalRecordsWithInfos,
-                datasetTableDTO.totalRecordsWithWarnings,
-                datasetTableDTO.totalRecordsWithErrors,
-                datasetTableDTO.totalRecordsWithBlockers
-            ]);
+  downloadPublicReferenceDatasetFileData: async (dataflowId, fileName) =>
+    await DatasetRepository.downloadPublicReferenceDatasetFileData(dataflowId, fileName),
 
-            return new DatasetTable({
-                hasErrors: datasetTableDTO.tableErrors,
-                tableSchemaId: datasetTableDTO.idTableSchema,
-                tableSchemaName: datasetTableDTO.nameTableSchema
-            });
-        });
+  downloadTableData: async (datasetId, fileName) => await DatasetRepository.downloadTableData(datasetId, fileName),
 
-        //In design datasets the statistics are not generated until validation is executed, so we have to do a sanity check for those cases
-        const tableBarStatisticValues = !isEmpty(tableStatisticValues)
-            ? DatasetUtils.tableStatisticValuesWithErrors(tableStatisticValues)
-            : [];
+  getStatistics: async (datasetId, tableSchemaNames) => {
+    const datasetTablesDTO = await DatasetRepository.getStatistics(datasetId);
 
-        dataset.levelErrorTypes = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
+    //Sort by schema order
+    datasetTablesDTO.data.tables = datasetTablesDTO.data.tables.sort(
+      (a, b) => tableSchemaNames.indexOf(a.nameTableSchema) - tableSchemaNames.indexOf(b.nameTableSchema)
+    );
 
-        const transposedValues = !isEmpty(tableStatisticValues) ? CoreUtils.transposeMatrix(tableStatisticValues) : [];
+    const dataset = new Dataset({});
+    dataset.datasetSchemaName = datasetTablesDTO.data.nameDataSetSchema;
+    dataset.datasetErrors = datasetTablesDTO.data.datasetErrors;
+    const tableStatisticValues = [];
+    const allDatasetLevelErrors = [];
+    const datasetTables = datasetTablesDTO.data.tables.map(datasetTableDTO => {
+      allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(datasetTablesDTO.data));
+      tableStatisticValues.push([
+        datasetTableDTO.totalRecords -
+          (datasetTableDTO.totalRecordsWithBlockers +
+            datasetTableDTO.totalRecordsWithErrors +
+            datasetTableDTO.totalRecordsWithWarnings +
+            datasetTableDTO.totalRecordsWithInfos),
+        datasetTableDTO.totalRecordsWithInfos,
+        datasetTableDTO.totalRecordsWithWarnings,
+        datasetTableDTO.totalRecordsWithErrors,
+        datasetTableDTO.totalRecordsWithBlockers
+      ]);
 
-        dataset.tableStatisticValues = !isEmpty(tableStatisticValues)
-            ? CoreUtils.transposeMatrix(tableBarStatisticValues)
-            : [];
-        dataset.tableStatisticPercentages = !isEmpty(tableStatisticValues) ? CoreUtils.getPercentage(transposedValues) : [];
+      return new DatasetTable({
+        hasErrors: datasetTableDTO.tableErrors,
+        tableSchemaId: datasetTableDTO.idTableSchema,
+        tableSchemaName: datasetTableDTO.nameTableSchema
+      });
+    });
 
-        dataset.tables = datasetTables;
-        return dataset;
-    },
+    //In design datasets the statistics are not generated until validation is executed, so we have to do a sanity check for those cases
+    const tableBarStatisticValues = !isEmpty(tableStatisticValues)
+      ? DatasetUtils.tableStatisticValuesWithErrors(tableStatisticValues)
+      : [];
 
-    exportDatasetData: async (datasetId, fileType) => await DatasetRepository.exportDatasetData(datasetId, fileType),
+    dataset.levelErrorTypes = [...new Set(CoreUtils.orderLevelErrors(allDatasetLevelErrors.flat()))];
 
-    exportDatasetDataExternal: async (datasetId, integrationId) =>
-        await DatasetRepository.exportDatasetDataExternal(datasetId, integrationId),
+    const transposedValues = !isEmpty(tableStatisticValues) ? CoreUtils.transposeMatrix(tableStatisticValues) : [];
 
-    exportTableData: async (
-        datasetId,
-        tableSchemaId,
-        fileType,
-        filterValue,
-        levelErrorValidations,
-        selectedRuleId,
-        isExportFilteredCsv,
-        isFilterValidationsActive
-    ) =>
-        await DatasetRepository.exportTableData(
-            datasetId,
-            tableSchemaId,
-            fileType,
-            filterValue,
-            levelErrorValidations,
-            selectedRuleId,
-            isExportFilteredCsv,
-            isFilterValidationsActive
-        ),
+    dataset.tableStatisticValues = !isEmpty(tableStatisticValues)
+      ? CoreUtils.transposeMatrix(tableBarStatisticValues)
+      : [];
+    dataset.tableStatisticPercentages = !isEmpty(tableStatisticValues) ? CoreUtils.getPercentage(transposedValues) : [];
 
-    exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
-        await DatasetRepository.exportTableSchema(datasetId, datasetSchemaId, tableSchemaId, fileType),
+    dataset.tables = datasetTables;
+    return dataset;
+  },
 
-    getMetadata: async datasetId => {
-        const datasetTableDataDTO = await DatasetRepository.getMetadata(datasetId);
+  exportDatasetData: async (datasetId, fileType) => await DatasetRepository.exportDatasetData(datasetId, fileType),
 
-        return new Dataset({
-            datasetFeedbackStatus:
-                !isNil(datasetTableDataDTO.data.status) && capitalize(datasetTableDataDTO.data.status.split('_').join(' ')),
-            datasetRunningStatus: datasetTableDataDTO.data.datasetRunningStatus,
-            datasetSchemaId: datasetTableDataDTO.data.datasetSchema,
-            datasetSchemaName: datasetTableDataDTO.data.dataSetName,
-            dataProviderId: TextUtils.areEquals(datasetTableDataDTO.data.datasetTypeEnum, 'TEST')
-                ? 0
-                : datasetTableDataDTO.data.dataProviderId
-        });
-    },
+  exportDatasetDataExternal: async (datasetId, integrationId) =>
+    await DatasetRepository.exportDatasetDataExternal(datasetId, integrationId),
 
-    getReferencedFieldValues: async (
-        datasetId,
-        fieldSchemaId,
-        searchToken,
-        conditionalValue,
-        datasetSchemaId,
-        resultsNumber
-    ) => {
-        const referencedFieldValuesDTO = await DatasetRepository.getReferencedFieldValues(
-            datasetId,
-            fieldSchemaId,
-            searchToken,
-            conditionalValue,
-            datasetSchemaId,
-            resultsNumber
-        );
+  exportTableData: async (
+    datasetId,
+    tableSchemaId,
+    fileType,
+    filterValue,
+    levelErrorValidations,
+    selectedRuleId,
+    isExportFilteredCsv,
+    isFilterValidationsActive
+  ) =>
+    await DatasetRepository.exportTableData(
+      datasetId,
+      tableSchemaId,
+      fileType,
+      filterValue,
+      levelErrorValidations,
+      selectedRuleId,
+      isExportFilteredCsv,
+      isFilterValidationsActive
+    ),
 
-        return referencedFieldValuesDTO.data.map(
-            referencedFieldDTO =>
-                new DatasetTableField({
-                    fieldId: referencedFieldDTO.id,
-                    fieldSchemaId: referencedFieldDTO.idFieldSchema,
-                    label: referencedFieldDTO.label,
-                    type: referencedFieldDTO.type,
-                    value: referencedFieldDTO.value
-                })
-        );
-    },
+  exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
+    await DatasetRepository.exportTableSchema(datasetId, datasetSchemaId, tableSchemaId, fileType),
 
-    getShowValidationErrors: async (
-        datasetId,
-        pageNum,
-        pageSize,
-        sortField,
-        asc,
-        fieldValueFilter,
-        levelErrorsFilter,
-        typeEntitiesFilter,
-        tablesFilter
-    ) => {
-        const datasetErrorsDTO = await DatasetRepository.getShowValidationErrors(
-            datasetId,
-            pageNum,
-            pageSize,
-            sortField || '',
-            isNumber(asc) ? asc : '',
-            fieldValueFilter,
-            levelErrorsFilter,
-            typeEntitiesFilter,
-            tablesFilter
-        );
-        const dataset = new Dataset({
-            datasetId: datasetErrorsDTO.data.idDataset,
-            datasetSchemaId: datasetErrorsDTO.data.idDatasetSchema,
-            datasetSchemaName: datasetErrorsDTO.data.nameDataSetSchema,
-            totalErrors: datasetErrorsDTO.data.totalErrors,
-            totalRecords: datasetErrorsDTO.data.totalRecords,
-            totalFilteredErrors: datasetErrorsDTO.data.totalFilteredRecords
-        });
+  getMetadata: async datasetId => {
+    const datasetTableDataDTO = await DatasetRepository.getMetadata(datasetId);
 
-        dataset.errors = datasetErrorsDTO.data.errors.map(
-            datasetErrorDTO =>
-                datasetErrorDTO &&
-                new DatasetError({
-                    entityType: datasetErrorDTO.typeEntity,
-                    fieldSchemaName: datasetErrorDTO.nameFieldSchema,
-                    levelError: datasetErrorDTO.levelError,
-                    message: datasetErrorDTO.message,
-                    numberOfRecords: datasetErrorDTO.numberOfRecords,
-                    objectId: datasetErrorDTO.idObject,
-                    ruleId: datasetErrorDTO.idRule,
-                    shortCode: datasetErrorDTO.shortCode,
-                    tableSchemaId: datasetErrorDTO.idTableSchema,
-                    tableSchemaName: datasetErrorDTO.nameTableSchema,
-                    validationDate: datasetErrorDTO.validationDate,
-                    validationId: datasetErrorDTO.idValidation
-                })
-        );
+    return new Dataset({
+      datasetFeedbackStatus:
+        !isNil(datasetTableDataDTO.data.status) && capitalize(datasetTableDataDTO.data.status.split('_').join(' ')),
+      datasetRunningStatus: datasetTableDataDTO.data.datasetRunningStatus,
+      datasetSchemaId: datasetTableDataDTO.data.datasetSchema,
+      datasetSchemaName: datasetTableDataDTO.data.dataSetName,
+      dataProviderId: TextUtils.areEquals(datasetTableDataDTO.data.datasetTypeEnum, 'TEST')
+        ? 0
+        : datasetTableDataDTO.data.dataProviderId
+    });
+  },
 
-        return dataset;
-    },
+  getReferencedFieldValues: async (
+    datasetId,
+    fieldSchemaId,
+    searchToken,
+    conditionalValue,
+    datasetSchemaId,
+    resultsNumber
+  ) => {
+    const referencedFieldValuesDTO = await DatasetRepository.getReferencedFieldValues(
+      datasetId,
+      fieldSchemaId,
+      searchToken,
+      conditionalValue,
+      datasetSchemaId,
+      resultsNumber
+    );
 
-    updateFieldOrder: async (datasetId, position, fieldSchemaId) =>
-        await DatasetRepository.updateFieldOrder(datasetId, position, fieldSchemaId),
+    return referencedFieldValuesDTO.data.map(
+      referencedFieldDTO =>
+        new DatasetTableField({
+          fieldId: referencedFieldDTO.id,
+          fieldSchemaId: referencedFieldDTO.idFieldSchema,
+          label: referencedFieldDTO.label,
+          type: referencedFieldDTO.type,
+          value: referencedFieldDTO.value
+        })
+    );
+  },
 
-    updateTableOrder: async (datasetId, position, tableSchemaId) =>
-        await DatasetRepository.updateTableOrder(datasetId, position, tableSchemaId),
+  getShowValidationErrors: async (
+    datasetId,
+    pageNum,
+    pageSize,
+    sortField,
+    asc,
+    fieldValueFilter,
+    levelErrorsFilter,
+    typeEntitiesFilter,
+    tablesFilter
+  ) => {
+    const datasetErrorsDTO = await DatasetRepository.getShowValidationErrors(
+      datasetId,
+      pageNum,
+      pageSize,
+      sortField || '',
+      isNumber(asc) ? asc : '',
+      fieldValueFilter,
+      levelErrorsFilter,
+      typeEntitiesFilter,
+      tablesFilter
+    );
+    const dataset = new Dataset({
+      datasetId: datasetErrorsDTO.data.idDataset,
+      datasetSchemaId: datasetErrorsDTO.data.idDatasetSchema,
+      datasetSchemaName: datasetErrorsDTO.data.nameDataSetSchema,
+      totalErrors: datasetErrorsDTO.data.totalErrors,
+      totalRecords: datasetErrorsDTO.data.totalRecords,
+      totalFilteredErrors: datasetErrorsDTO.data.totalFilteredRecords
+    });
 
-    getSchema: async (dataflowId, datasetId) => {
-        const datasetSchemaDTO = await DatasetRepository.getSchema(datasetId);
-        const rulesDTO = await ValidationRepository.getAll(dataflowId, datasetSchemaDTO.data.idDataSetSchema);
+    dataset.errors = datasetErrorsDTO.data.errors.map(
+      datasetErrorDTO =>
+        datasetErrorDTO &&
+        new DatasetError({
+          entityType: datasetErrorDTO.typeEntity,
+          fieldSchemaName: datasetErrorDTO.nameFieldSchema,
+          levelError: datasetErrorDTO.levelError,
+          message: datasetErrorDTO.message,
+          numberOfRecords: datasetErrorDTO.numberOfRecords,
+          objectId: datasetErrorDTO.idObject,
+          ruleId: datasetErrorDTO.idRule,
+          shortCode: datasetErrorDTO.shortCode,
+          tableSchemaId: datasetErrorDTO.idTableSchema,
+          tableSchemaName: datasetErrorDTO.nameTableSchema,
+          validationDate: datasetErrorDTO.validationDate,
+          validationId: datasetErrorDTO.idValidation
+        })
+    );
 
-        const dataset = new Dataset({
-            availableInPublic: datasetSchemaDTO.data.availableInPublic,
-            datasetSchemaDescription: datasetSchemaDTO.data.description,
-            datasetSchemaId: datasetSchemaDTO.data.idDataSetSchema,
-            datasetSchemaName: datasetSchemaDTO.data.nameDatasetSchema,
-            levelErrorTypes:
-                !isUndefined(rulesDTO.data) && rulesDTO.data !== ''
-                    ? DatasetUtils.getAllLevelErrorsFromRuleValidations(rulesDTO.data)
-                    : [],
-            referenceDataset: datasetSchemaDTO.data.referenceDataset,
-            webform: datasetSchemaDTO.data.webform ? datasetSchemaDTO.data.webform : null
-        });
+    return dataset;
+  },
 
-        const tables = datasetSchemaDTO.data.tableSchemas.map(datasetTableDTO => {
-            const records = !isNull(datasetTableDTO.recordSchema)
-                ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
-                    const fields = !isNull(dataTableRecordDTO.fieldSchema)
-                        ? dataTableRecordDTO.fieldSchema.map(
-                            dataTableFieldDTO =>
-                                new DatasetTableField({
-                                    codelistItems: dataTableFieldDTO.codelistItems,
-                                    description: dataTableFieldDTO.description,
-                                    fieldId: dataTableFieldDTO.id,
-                                    maxSize: dataTableFieldDTO.maxSize,
-                                    pk: !isNull(dataTableFieldDTO.pk) ? dataTableFieldDTO.pk : false,
-                                    pkHasMultipleValues: !isNull(dataTableFieldDTO.pkHasMultipleValues)
-                                        ? dataTableFieldDTO.pkHasMultipleValues
-                                        : false,
-                                    ignoreCaseInLinks: !isNull(dataTableFieldDTO.ignoreCaseInLinks)
-                                        ? dataTableFieldDTO.ignoreCaseInLinks
-                                        : false,
-                                    pkMustBeUsed: !isNull(dataTableFieldDTO.pkMustBeUsed) ? dataTableFieldDTO.pkMustBeUsed : false,
-                                    pkReferenced: !isNull(dataTableFieldDTO.pkReferenced) ? dataTableFieldDTO.pkReferenced : false,
-                                    name: dataTableFieldDTO.name,
-                                    readOnly: dataTableFieldDTO.readOnly,
-                                    recordId: dataTableFieldDTO.idRecord,
-                                    referencedField: dataTableFieldDTO.referencedField,
-                                    required: dataTableFieldDTO.required,
-                                    type: dataTableFieldDTO.type,
-                                    validExtensions: !isNull(dataTableFieldDTO.validExtensions)
-                                        ? dataTableFieldDTO.validExtensions
-                                        : []
-                                })
-                        )
-                        : null;
+  updateFieldOrder: async (datasetId, position, fieldSchemaId) =>
+    await DatasetRepository.updateFieldOrder(datasetId, position, fieldSchemaId),
 
-                    return new DatasetTableRecord({
-                        datasetPartitionId: dataTableRecordDTO.id,
-                        fields,
-                        recordSchemaId: dataTableRecordDTO.idRecordSchema
-                    });
-                })
-                : null;
+  updateTableOrder: async (datasetId, position, tableSchemaId) =>
+    await DatasetRepository.updateTableOrder(datasetId, position, tableSchemaId),
 
-            return new DatasetTable({
-                hasPKReferenced: !isEmpty(
-                    records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
-                ),
-                tableSchemaToPrefill: isNull(datasetTableDTO.toPrefill) ? false : datasetTableDTO.toPrefill,
-                tableSchemaId: datasetTableDTO.idTableSchema,
-                tableSchemaDescription: datasetTableDTO.description,
-                tableSchemaFixedNumber: isNull(datasetTableDTO.fixedNumber) ? false : datasetTableDTO.fixedNumber,
-                tableSchemaName: datasetTableDTO.nameTableSchema,
-                tableSchemaNotEmpty: isNull(datasetTableDTO.notEmpty) ? false : datasetTableDTO.notEmpty,
-                tableSchemaReadOnly: isNull(datasetTableDTO.readOnly) ? false : datasetTableDTO.readOnly,
-                records: records,
-                recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
-            });
-        });
+  getSchema: async (dataflowId, datasetId) => {
+    const datasetSchemaDTO = await DatasetRepository.getSchema(datasetId);
+    const rulesDTO = await ValidationRepository.getAll(dataflowId, datasetSchemaDTO.data.idDataSetSchema);
 
-        dataset.tables = tables;
-        return dataset;
-    },
+    const dataset = new Dataset({
+      availableInPublic: datasetSchemaDTO.data.availableInPublic,
+      datasetSchemaDescription: datasetSchemaDTO.data.description,
+      datasetSchemaId: datasetSchemaDTO.data.idDataSetSchema,
+      datasetSchemaName: datasetSchemaDTO.data.nameDatasetSchema,
+      levelErrorTypes:
+        !isUndefined(rulesDTO.data) && rulesDTO.data !== ''
+          ? DatasetUtils.getAllLevelErrorsFromRuleValidations(rulesDTO.data)
+          : [],
+      referenceDataset: datasetSchemaDTO.data.referenceDataset,
+      webform: datasetSchemaDTO.data.webform ? datasetSchemaDTO.data.webform : null
+    });
 
-    getTableData: async ({
-                             datasetId,
-                             fields = undefined,
-                             fieldSchemaId = undefined,
-                             levelError = null,
-                             pageNum,
-                             pageSize,
-                             ruleId = undefined,
-                             tableSchemaId,
-                             value = ''
-                         }) => {
-        const tableDataDTO = await DatasetRepository.getTableData(
-            datasetId,
-            tableSchemaId,
-            pageNum,
-            pageSize,
-            fields,
-            levelError,
-            ruleId,
-            fieldSchemaId,
-            value
-        );
-        const table = new DatasetTable({});
-
-        table.tableSchemaId = tableDataDTO.data.idTableSchema;
-        table.totalRecords = tableDataDTO.data.totalRecords;
-        table.totalFilteredRecords = tableDataDTO.data.totalFilteredRecords;
-
-        let field;
-
-        const records = tableDataDTO.data.records.map(dataTableRecordDTO => {
-            const fields = dataTableRecordDTO.fields.map(DataTableFieldDTO => {
-                field = new DatasetTableField({
-                    fieldId: DataTableFieldDTO.id,
-                    fieldSchemaId: DataTableFieldDTO.idFieldSchema,
-                    name: DataTableFieldDTO.name,
-                    recordId: dataTableRecordDTO.idRecordSchema,
-                    type: DataTableFieldDTO.type,
-                    value: DatasetUtils.parseValue({
-                        type: DataTableFieldDTO.type,
-                        value: DataTableFieldDTO.value
+    const tables = datasetSchemaDTO.data.tableSchemas.map(datasetTableDTO => {
+      const records = !isNull(datasetTableDTO.recordSchema)
+        ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
+            const fields = !isNull(dataTableRecordDTO.fieldSchema)
+              ? dataTableRecordDTO.fieldSchema.map(
+                  dataTableFieldDTO =>
+                    new DatasetTableField({
+                      codelistItems: dataTableFieldDTO.codelistItems,
+                      description: dataTableFieldDTO.description,
+                      fieldId: dataTableFieldDTO.id,
+                      maxSize: dataTableFieldDTO.maxSize,
+                      pk: !isNull(dataTableFieldDTO.pk) ? dataTableFieldDTO.pk : false,
+                      pkHasMultipleValues: !isNull(dataTableFieldDTO.pkHasMultipleValues)
+                        ? dataTableFieldDTO.pkHasMultipleValues
+                        : false,
+                      ignoreCaseInLinks: !isNull(dataTableFieldDTO.ignoreCaseInLinks)
+                        ? dataTableFieldDTO.ignoreCaseInLinks
+                        : false,
+                      pkMustBeUsed: !isNull(dataTableFieldDTO.pkMustBeUsed) ? dataTableFieldDTO.pkMustBeUsed : false,
+                      pkReferenced: !isNull(dataTableFieldDTO.pkReferenced) ? dataTableFieldDTO.pkReferenced : false,
+                      name: dataTableFieldDTO.name,
+                      readOnly: dataTableFieldDTO.readOnly,
+                      recordId: dataTableFieldDTO.idRecord,
+                      referencedField: dataTableFieldDTO.referencedField,
+                      required: dataTableFieldDTO.required,
+                      type: dataTableFieldDTO.type,
+                      validExtensions: !isNull(dataTableFieldDTO.validExtensions)
+                        ? dataTableFieldDTO.validExtensions
+                        : []
                     })
-                });
+                )
+              : null;
 
-                if (!isNull(DataTableFieldDTO.fieldValidations)) {
-                    field.validations = DataTableFieldDTO.fieldValidations.map(fieldValidation => {
-                        return new Validation({
-                            date: fieldValidation.validation.validationDate,
-                            entityType: fieldValidation.validation.typeEntity,
-                            id: fieldValidation.id,
-                            levelError: fieldValidation.validation.levelError,
-                            message: fieldValidation.validation.message
-                        });
-                    });
-                }
-                return field;
+            return new DatasetTableRecord({
+              datasetPartitionId: dataTableRecordDTO.id,
+              fields,
+              recordSchemaId: dataTableRecordDTO.idRecordSchema
             });
-            const record = new DatasetTableRecord({
-                datasetPartitionId: dataTableRecordDTO.datasetPartitionId,
-                fields: fields,
-                providerCode: dataTableRecordDTO.dataProviderCode,
-                recordId: dataTableRecordDTO.id,
-                recordSchemaId: dataTableRecordDTO.idRecordSchema
-            });
+          })
+        : null;
 
-            if (!isNull(dataTableRecordDTO.recordValidations)) {
-                record.validations = dataTableRecordDTO.recordValidations.map(
-                    recordValidation =>
-                        new Validation({
-                            date: recordValidation.validation.validationDate,
-                            entityType: recordValidation.validation.typeEntity,
-                            id: recordValidation.id,
-                            levelError: recordValidation.validation.levelError,
-                            message: recordValidation.validation.message
-                        })
-                );
-            }
-            return record;
-        });
-
-        table.records = records;
-        return table;
-    },
-
-    downloadTableDefinitions: async datasetSchemaId => await DatasetRepository.downloadTableDefinitions(datasetSchemaId),
-
-    updateField: async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue, updateInCascade) => {
-        const datasetTableField = new DatasetTableField({});
-        datasetTableField.id = fieldId;
-        datasetTableField.idFieldSchema = fieldSchemaId;
-        datasetTableField.type = fieldType;
-        datasetTableField.value = DatasetUtils.parseValue({
-            type: fieldType,
-            value: fieldValue,
-            splitSRID: true
-        });
-
-        return await DatasetRepository.updateField(datasetId, datasetTableField, updateInCascade);
-    },
-
-    updateFieldDesign: async (datasetId, record) => {
-        const datasetTableFieldDesign = new DatasetTableField({});
-        datasetTableFieldDesign.codelistItems = record.codelistItems;
-        datasetTableFieldDesign.description = record.description;
-        datasetTableFieldDesign.id = record.fieldSchemaId;
-        datasetTableFieldDesign.idRecord = record.recordId;
-        datasetTableFieldDesign.maxSize = !isNil(record.maxSize) ? record.maxSize.toString() : null;
-        datasetTableFieldDesign.name = record.name;
-        datasetTableFieldDesign.pk = record.pk;
-        datasetTableFieldDesign.pkHasMultipleValues = record.pkHasMultipleValues;
-        datasetTableFieldDesign.ignoreCaseInLinks = record.ignoreCaseInLinks;
-        datasetTableFieldDesign.pkMustBeUsed = record.pkMustBeUsed;
-        datasetTableFieldDesign.readOnly = record.readOnly;
-        datasetTableFieldDesign.referencedField = record.referencedField;
-        datasetTableFieldDesign.required = record.required;
-        datasetTableFieldDesign.type = record.type;
-        datasetTableFieldDesign.validExtensions = record.validExtensions;
-
-        return await DatasetRepository.updateFieldDesign(datasetId, datasetTableFieldDesign);
-    },
-
-    updateRecord: async (datasetId, record, updateInCascade) => {
-        const fields = record.dataRow.map(dataTableFieldDTO => {
-            const newField = new DatasetTableField({});
-            newField.id = dataTableFieldDTO.fieldData.id;
-            newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
-            newField.type = dataTableFieldDTO.fieldData.type;
-            newField.value = DatasetUtils.parseValue({
-                type: dataTableFieldDTO.fieldData.type,
-                value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
-                splitSRID: true
-            });
-
-            return newField;
-        });
-
-        const datasetTableRecord = new DatasetTableRecord();
-
-        datasetTableRecord.datasetPartitionId = record.dataSetPartitionId;
-        datasetTableRecord.fields = fields;
-        datasetTableRecord.idRecordSchema = record.recordSchemaId;
-        datasetTableRecord.id = record.recordId;
-        //The service will take an array of objects(records). Actually the frontend only allows one record CRUD
-        return await DatasetRepository.updateRecord(datasetId, [datasetTableRecord], updateInCascade);
-    },
-
-    updateReferenceDatasetStatus: async (datasetId, updatable) =>
-        await DatasetRepository.updateReferenceDatasetStatus(datasetId, updatable),
-
-    updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) =>
-        await DatasetRepository.updateDatasetFeedbackStatus(
-            dataflowId,
-            datasetId,
-            message,
-            feedbackStatus.toUpperCase().split(' ').join('_')
+      return new DatasetTable({
+        hasPKReferenced: !isEmpty(
+          records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
         ),
+        tableSchemaToPrefill: isNull(datasetTableDTO.toPrefill) ? false : datasetTableDTO.toPrefill,
+        tableSchemaId: datasetTableDTO.idTableSchema,
+        tableSchemaDescription: datasetTableDTO.description,
+        tableSchemaFixedNumber: isNull(datasetTableDTO.fixedNumber) ? false : datasetTableDTO.fixedNumber,
+        tableSchemaName: datasetTableDTO.nameTableSchema,
+        tableSchemaNotEmpty: isNull(datasetTableDTO.notEmpty) ? false : datasetTableDTO.notEmpty,
+        tableSchemaReadOnly: isNull(datasetTableDTO.readOnly) ? false : datasetTableDTO.readOnly,
+        records: records,
+        recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null
+      });
+    });
 
-    updateDatasetDesign: async (datasetId, datasetSchema) =>
-        await DatasetRepository.updateDatasetDesign(datasetId, datasetSchema),
+    dataset.tables = tables;
+    return dataset;
+  },
 
-    updateDatasetNameDesign: async (datasetId, datasetSchemaName) =>
-        await DatasetRepository.updateDatasetNameDesign(datasetId, datasetSchemaName),
+  getTableData: async ({
+    datasetId,
+    fields = undefined,
+    fieldSchemaId = undefined,
+    levelError = null,
+    pageNum,
+    pageSize,
+    ruleId = undefined,
+    tableSchemaId,
+    value = ''
+  }) => {
+    console.log('Inside DatasetService getTableData');
+    const tableDataDTO = await DatasetRepository.getTableData(
+      datasetId,
+      tableSchemaId,
+      pageNum,
+      pageSize,
+      fields,
+      levelError,
+      ruleId,
+      fieldSchemaId,
+      value
+    );
+    const table = new DatasetTable({});
 
-    updateTableDesign: async (
-        tableSchemaToPrefill,
-        tableSchemaId,
-        tableSchemaDescription,
-        tableSchemaIsReadOnly,
-        datasetId,
-        tableSchemaNotEmpty,
-        tableSchemaFixedNumber
-    ) =>
-        await DatasetRepository.updateTableDesign(
-            tableSchemaToPrefill,
-            tableSchemaId,
-            tableSchemaDescription,
-            tableSchemaIsReadOnly,
-            datasetId,
-            tableSchemaNotEmpty,
-            tableSchemaFixedNumber
-        ),
+    table.tableSchemaId = tableDataDTO.data.idTableSchema;
+    table.totalRecords = tableDataDTO.data.totalRecords;
+    table.totalFilteredRecords = tableDataDTO.data.totalFilteredRecords;
 
-    updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) =>
-        await DatasetRepository.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId),
+    let field;
 
-    validate: async datasetId => await DatasetRepository.validate(datasetId),
+    const records = tableDataDTO.data.records.map(dataTableRecordDTO => {
+      const fields = dataTableRecordDTO.fields.map(DataTableFieldDTO => {
+        field = new DatasetTableField({
+          fieldId: DataTableFieldDTO.id,
+          fieldSchemaId: DataTableFieldDTO.idFieldSchema,
+          name: DataTableFieldDTO.name,
+          recordId: dataTableRecordDTO.idRecordSchema,
+          type: DataTableFieldDTO.type,
+          value: DatasetUtils.parseValue({
+            type: DataTableFieldDTO.type,
+            value: DataTableFieldDTO.value
+          })
+        });
 
-    validateSqlRules: async (datasetId, datasetSchemaId) =>
-        await DatasetRepository.validateSqlRules(datasetId, datasetSchemaId),
-    
-    testImportProcess: async datasetId => await DatasetRepository.testImportProcess(datasetId),
+        if (!isNull(DataTableFieldDTO.fieldValidations)) {
+          field.validations = DataTableFieldDTO.fieldValidations.map(fieldValidation => {
+            return new Validation({
+              date: fieldValidation.validation.validationDate,
+              entityType: fieldValidation.validation.typeEntity,
+              id: fieldValidation.id,
+              levelError: fieldValidation.validation.levelError,
+              message: fieldValidation.validation.message
+            });
+          });
+        }
+        return field;
+      });
+      const record = new DatasetTableRecord({
+        datasetPartitionId: dataTableRecordDTO.datasetPartitionId,
+        fields: fields,
+        providerCode: dataTableRecordDTO.dataProviderCode,
+        recordId: dataTableRecordDTO.id,
+        recordSchemaId: dataTableRecordDTO.idRecordSchema
+      });
+
+      if (!isNull(dataTableRecordDTO.recordValidations)) {
+        record.validations = dataTableRecordDTO.recordValidations.map(
+          recordValidation =>
+            new Validation({
+              date: recordValidation.validation.validationDate,
+              entityType: recordValidation.validation.typeEntity,
+              id: recordValidation.id,
+              levelError: recordValidation.validation.levelError,
+              message: recordValidation.validation.message
+            })
+        );
+      }
+      return record;
+    });
+
+    table.records = records;
+    return table;
+  },
+
+  getTableDataDL: async ({
+    datasetId,
+    fields = undefined,
+    fieldSchemaId = undefined,
+    levelError = null,
+    pageNum,
+    pageSize,
+    ruleId = undefined,
+    tableSchemaId,
+    value = ''
+  }) => {
+    console.log('Inside DatasetService getTableDataDL');
+    const tableDataDTO = await DatasetRepository.getTableDataDL(
+      datasetId,
+      tableSchemaId,
+      pageNum,
+      pageSize,
+      fields,
+      levelError,
+      ruleId,
+      fieldSchemaId,
+      value
+    );
+    const table = new DatasetTable({});
+
+    table.tableSchemaId = tableDataDTO.data.idTableSchema;
+    table.totalRecords = tableDataDTO.data.totalRecords;
+    table.totalFilteredRecords = tableDataDTO.data.totalFilteredRecords;
+
+    let field;
+
+    const records = tableDataDTO.data.records.map(dataTableRecordDTO => {
+      const fields = dataTableRecordDTO.fields.map(DataTableFieldDTO => {
+        field = new DatasetTableField({
+          fieldId: DataTableFieldDTO.id,
+          fieldSchemaId: DataTableFieldDTO.idFieldSchema,
+          name: DataTableFieldDTO.name,
+          recordId: dataTableRecordDTO.idRecordSchema,
+          type: DataTableFieldDTO.type,
+          value: DatasetUtils.parseValue({
+            type: DataTableFieldDTO.type,
+            value: DataTableFieldDTO.value
+          })
+        });
+
+        if (!isNull(DataTableFieldDTO.fieldValidations)) {
+          field.validations = DataTableFieldDTO.fieldValidations.map(fieldValidation => {
+            return new Validation({
+              date: fieldValidation.validation.validationDate,
+              entityType: fieldValidation.validation.typeEntity,
+              id: fieldValidation.id,
+              levelError: fieldValidation.validation.levelError,
+              message: fieldValidation.validation.message
+            });
+          });
+        }
+        return field;
+      });
+      const record = new DatasetTableRecord({
+        datasetPartitionId: dataTableRecordDTO.datasetPartitionId,
+        fields: fields,
+        providerCode: dataTableRecordDTO.dataProviderCode,
+        recordId: dataTableRecordDTO.id,
+        recordSchemaId: dataTableRecordDTO.idRecordSchema
+      });
+
+      if (!isNull(dataTableRecordDTO.recordValidations)) {
+        record.validations = dataTableRecordDTO.recordValidations.map(
+          recordValidation =>
+            new Validation({
+              date: recordValidation.validation.validationDate,
+              entityType: recordValidation.validation.typeEntity,
+              id: recordValidation.id,
+              levelError: recordValidation.validation.levelError,
+              message: recordValidation.validation.message
+            })
+        );
+      }
+      return record;
+    });
+
+    table.records = records;
+    return table;
+  },
+
+  downloadTableDefinitions: async datasetSchemaId => await DatasetRepository.downloadTableDefinitions(datasetSchemaId),
+
+  updateField: async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue, updateInCascade) => {
+    const datasetTableField = new DatasetTableField({});
+    datasetTableField.id = fieldId;
+    datasetTableField.idFieldSchema = fieldSchemaId;
+    datasetTableField.type = fieldType;
+    datasetTableField.value = DatasetUtils.parseValue({
+      type: fieldType,
+      value: fieldValue,
+      splitSRID: true
+    });
+
+    return await DatasetRepository.updateField(datasetId, datasetTableField, updateInCascade);
+  },
+
+  updateFieldDesign: async (datasetId, record) => {
+    const datasetTableFieldDesign = new DatasetTableField({});
+    datasetTableFieldDesign.codelistItems = record.codelistItems;
+    datasetTableFieldDesign.description = record.description;
+    datasetTableFieldDesign.id = record.fieldSchemaId;
+    datasetTableFieldDesign.idRecord = record.recordId;
+    datasetTableFieldDesign.maxSize = !isNil(record.maxSize) ? record.maxSize.toString() : null;
+    datasetTableFieldDesign.name = record.name;
+    datasetTableFieldDesign.pk = record.pk;
+    datasetTableFieldDesign.pkHasMultipleValues = record.pkHasMultipleValues;
+    datasetTableFieldDesign.ignoreCaseInLinks = record.ignoreCaseInLinks;
+    datasetTableFieldDesign.pkMustBeUsed = record.pkMustBeUsed;
+    datasetTableFieldDesign.readOnly = record.readOnly;
+    datasetTableFieldDesign.referencedField = record.referencedField;
+    datasetTableFieldDesign.required = record.required;
+    datasetTableFieldDesign.type = record.type;
+    datasetTableFieldDesign.validExtensions = record.validExtensions;
+
+    return await DatasetRepository.updateFieldDesign(datasetId, datasetTableFieldDesign);
+  },
+
+  updateRecord: async (datasetId, record, updateInCascade) => {
+    const fields = record.dataRow.map(dataTableFieldDTO => {
+      const newField = new DatasetTableField({});
+      newField.id = dataTableFieldDTO.fieldData.id;
+      newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
+      newField.type = dataTableFieldDTO.fieldData.type;
+      newField.value = DatasetUtils.parseValue({
+        type: dataTableFieldDTO.fieldData.type,
+        value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
+        splitSRID: true
+      });
+
+      return newField;
+    });
+
+    const datasetTableRecord = new DatasetTableRecord();
+
+    datasetTableRecord.datasetPartitionId = record.dataSetPartitionId;
+    datasetTableRecord.fields = fields;
+    datasetTableRecord.idRecordSchema = record.recordSchemaId;
+    datasetTableRecord.id = record.recordId;
+    //The service will take an array of objects(records). Actually the frontend only allows one record CRUD
+    return await DatasetRepository.updateRecord(datasetId, [datasetTableRecord], updateInCascade);
+  },
+
+  updateReferenceDatasetStatus: async (datasetId, updatable) =>
+    await DatasetRepository.updateReferenceDatasetStatus(datasetId, updatable),
+
+  updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) =>
+    await DatasetRepository.updateDatasetFeedbackStatus(
+      dataflowId,
+      datasetId,
+      message,
+      feedbackStatus.toUpperCase().split(' ').join('_')
+    ),
+
+  updateDatasetDesign: async (datasetId, datasetSchema) =>
+    await DatasetRepository.updateDatasetDesign(datasetId, datasetSchema),
+
+  updateDatasetNameDesign: async (datasetId, datasetSchemaName) =>
+    await DatasetRepository.updateDatasetNameDesign(datasetId, datasetSchemaName),
+
+  updateTableDesign: async (
+    tableSchemaToPrefill,
+    tableSchemaId,
+    tableSchemaDescription,
+    tableSchemaIsReadOnly,
+    datasetId,
+    tableSchemaNotEmpty,
+    tableSchemaFixedNumber
+  ) =>
+    await DatasetRepository.updateTableDesign(
+      tableSchemaToPrefill,
+      tableSchemaId,
+      tableSchemaDescription,
+      tableSchemaIsReadOnly,
+      datasetId,
+      tableSchemaNotEmpty,
+      tableSchemaFixedNumber
+    ),
+
+  updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) =>
+    await DatasetRepository.updateTableNameDesign(tableSchemaId, tableSchemaName, datasetId),
+
+  validate: async datasetId => await DatasetRepository.validate(datasetId),
+
+  validateSqlRules: async (datasetId, datasetSchemaId) =>
+    await DatasetRepository.validateSqlRules(datasetId, datasetSchemaId),
+
+  testImportProcess: async datasetId => await DatasetRepository.testImportProcess(datasetId)
 };
