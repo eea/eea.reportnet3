@@ -95,13 +95,12 @@ public class S3HelperImpl implements S3Helper {
         ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
         byte[] data = objectBytes.asByteArray();
 
-        String filename = new File(key).getName();
         // Write the data to a local file.
-        File parquetFile = new File(exportDLPath + datasetName);
+        File parquetFile = new File(exportDLPath + datasetName + ".parquet");
         LOG.info("Local file {}", parquetFile);
         OutputStream os = new FileOutputStream(parquetFile);
         os.write(data);
-        LOG.info("Successfully obtained bytes from file: {}", datasetName);
+        LOG.info("Successfully obtained bytes from file: {}", datasetName + ".parquet");
         os.close();
         return parquetFile;
     }
