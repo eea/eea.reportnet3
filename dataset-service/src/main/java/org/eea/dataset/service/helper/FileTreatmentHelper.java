@@ -211,6 +211,12 @@ public class FileTreatmentHelper implements DisposableBean {
     private String pathPublicFile;
 
     /**
+     * The path export DL.
+     */
+    @Value("${exportDLPath}")
+    private String exportDLPath;
+
+    /**
      * The file export factory.
      */
     @Autowired
@@ -762,8 +768,7 @@ public class FileTreatmentHelper implements DisposableBean {
     public void exportDatasetFileDL(Long datasetId, String mimeType) {
         //get folder files
         Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-        Long dataProviderId = datasetService.getDataProviderIdById(datasetId);
-        S3PathResolver pathResolver = new S3PathResolver(dataflowId, dataProviderId, datasetId);
+        S3PathResolver pathResolver = new S3PathResolver(dataflowId, datasetId);
         List<S3Object> exportFilenames = s3Helper.getFilenamesFromFolderExport(pathResolver);
         LOG.info("Exported dataset data for exportFilenames {}", exportFilenames);
 
@@ -784,7 +789,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     String key = myValue.key();
                     String filename = new File(key).getName();
                     File parquetFile = s3Helper.getFileFromS3(key);
-                    File csvFile = new File(pathPublicFile + "/exportDL/" + filename.replace(".parquet",".csv"));
+                    File csvFile = new File(exportDLPath + filename.replace(".parquet",".csv"));
 
                     s3ConvertService.convertParquetToCSV(parquetFile, csvFile);
                 }
