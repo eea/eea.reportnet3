@@ -32,10 +32,10 @@ public class S3HelperImpl implements S3Helper {
     private S3Client s3Client;
 
     /**
-     * The path public file.
+     * The path export DL.
      */
-    @Value("${pathPublicFile}")
-    private String pathPublicFile;
+    @Value("${exportDLPath}")
+    private String exportDLPath;
 
     @Autowired
     public S3HelperImpl(S3Service s3Service, S3Client s3Client) {
@@ -95,12 +95,13 @@ public class S3HelperImpl implements S3Helper {
         ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
         byte[] data = objectBytes.asByteArray();
 
+        String filename = new File(key).getName();
         // Write the data to a local file.
-        File parquetFile = new File(pathPublicFile + "/exportDL/" + key);
+        File parquetFile = new File(exportDLPath + filename);
         LOG.info("Local file {}", parquetFile);
         OutputStream os = new FileOutputStream(parquetFile);
         os.write(data);
-        LOG.info("Successfully obtained bytes from file: {}", key);
+        LOG.info("Successfully obtained bytes from file: {}", filename);
         os.close();
         return parquetFile;
     }
