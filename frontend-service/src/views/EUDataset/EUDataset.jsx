@@ -31,6 +31,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const EUDataset = () => {
   const navigate = useNavigate();
@@ -320,7 +321,23 @@ export const EUDataset = () => {
 
   return renderLayout(
     <Fragment>
-      <Title icon="euDataset" iconSize="3.5rem" subtitle={dataflowName} title={datasetName} />
+      <Title
+        icon="euDataset"
+        iconSize="3.5rem"
+        subtitle={
+          euDatasetState.bigData ? (
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                  name: dataflowName
+                })
+              }}></p>
+          ) : (
+            dataflowName
+          )
+        }
+        title={datasetName}
+      />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
