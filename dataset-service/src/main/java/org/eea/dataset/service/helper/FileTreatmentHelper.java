@@ -792,6 +792,13 @@ public class FileTreatmentHelper implements DisposableBean {
                     File csvFile = new File(exportDLPath + filename.replace(".parquet",".csv"));
 
                     s3ConvertService.convertParquetToCSV(parquetFile, csvFile);
+                } else if (extension.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
+                    String key = myValue.key();
+                    String filename = new File(key).getName();
+                    File parquetFile = s3Helper.getFileFromS3(key);
+                    File xlsxFile = new File(exportDLPath + filename.replace(".parquet",".xlsx"));
+
+                    s3ConvertService.convertParquetToExcel(parquetFile, xlsxFile);
                 }
             }
         } catch (IOException | NullPointerException e) {
