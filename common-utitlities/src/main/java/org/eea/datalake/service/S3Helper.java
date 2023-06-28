@@ -36,5 +36,5 @@ public interface S3Helper {
      * @param filename
      * @return
      */
-    File getFileFromS3(String filename) throws IOException;
+    File getFileFromS3(String filename, String datasetName) throws IOException;
 }

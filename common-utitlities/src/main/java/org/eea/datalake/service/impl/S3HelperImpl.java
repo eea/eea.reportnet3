@@ -85,7 +85,7 @@ public class S3HelperImpl implements S3Helper {
      * @return
      */
     @Override
-    public File getFileFromS3(String key) throws IOException {
+    public File getFileFromS3(String key, String datasetName) throws IOException {
         GetObjectRequest objectRequest = GetObjectRequest
             .builder()
             .key(key)
@@ -97,11 +97,11 @@ public class S3HelperImpl implements S3Helper {
 
         String filename = new File(key).getName();
         // Write the data to a local file.
-        File parquetFile = new File(exportDLPath + filename);
+        File parquetFile = new File(exportDLPath + datasetName);
         LOG.info("Local file {}", parquetFile);
         OutputStream os = new FileOutputStream(parquetFile);
         os.write(data);
-        LOG.info("Successfully obtained bytes from file: {}", filename);
+        LOG.info("Successfully obtained bytes from file: {}", datasetName);
         os.close();
         return parquetFile;
     }
