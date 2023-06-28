@@ -44,7 +44,6 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             int size = 0;
             GenericRecord record;
             while ((record = r.read()) != null) {
-
                 if (counter == 0 ) {
                     size = record.getSchema().getFields().size();
                     List<String> headers = record.getSchema().getFields().stream()

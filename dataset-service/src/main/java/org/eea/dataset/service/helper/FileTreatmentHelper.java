@@ -10,6 +10,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
+import org.eea.datalake.service.S3ConvertService;
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.impl.S3HelperImpl;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.persistence.data.domain.*;
 import org.eea.dataset.persistence.data.repository.*;
@@ -77,12 +81,16 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
@@ -99,6 +107,7 @@ import java.util.zip.*;
  * The Class FileTreatmentHelper.
  */
 @Component
+@Import({org.eea.datalake.service.impl.S3ServiceImpl.class, S3HelperImpl.class})
 public class FileTreatmentHelper implements DisposableBean {
 
     /**
@@ -293,6 +302,14 @@ public class FileTreatmentHelper implements DisposableBean {
     /** The job controller zuul */
     @Autowired
     private JobControllerZuul jobControllerZuul;
+
+    /** The big data dataset service */
+    @Autowired
+    private S3Helper s3Helper;
+
+    /** The S3 convert service */
+    @Autowired
+    private S3ConvertService s3ConvertService;
 
 
     /**
@@ -730,6 +747,61 @@ public class FileTreatmentHelper implements DisposableBean {
             } catch (EEAException ex) {
                 LOG_ERROR.error("Error sending export dataset fail notification for datasetId {}. Message {}",
                         datasetId, e.getMessage(), ex);
+            }
+        }
+
+    }
+
+    /**
+     * Export dataset file.
+     *
+     * @param datasetId the dataset id
+     * @param mimeType  the mime type
+     */
+    @Async
+    public void exportDatasetFileDL(Long datasetId, String mimeType) {
+        //get folder files
+        Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+        Long dataProviderId = datasetService.getDataProviderIdById(datasetId);
+        S3PathResolver pathResolver = new S3PathResolver(dataflowId, dataProviderId, datasetId);
+        List<S3Object> exportFilenames = s3Helper.getFilenamesFromFolderExport(pathResolver);
+        LOG.info("Exported dataset data for exportFilenames {}", exportFilenames);
+
+        // Extension arrive with zip+xlsx, zip+csv or xlsx, but to the backend arrives with empty space.
+        // Split the extensions to know
+        // if its a zip or only xlsx
+        String[] type = mimeType.split(" ");
+        String extension = "";
+        if (type.length > 1) {
+            extension = type[1];
+        } else {
+            extension = type[0];
+        }
+
+        try {
+            for (S3Object myValue : exportFilenames) {
+                if (extension.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
+                    String key = myValue.key();
+                    String filename = new File(key).getName();
+                    File parquetFile = s3Helper.getFileFromS3(key);
+                    File csvFile = new File(pathPublicFile + "/exportDL/" + filename.replace(".parquet",".csv"));
+
+                    s3ConvertService.convertParquetToCSV(parquetFile, csvFile);
+                }
+            }
+        } catch (IOException | NullPointerException e) {
+            LOG_ERROR.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
+                datasetId, mimeType, e.getMessage(), e);
+            // Send notification
+            NotificationVO notificationVO = NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .error("Error exporting dataset data").build();
+            try {
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null,
+                    notificationVO);
+            } catch (EEAException ex) {
+                LOG_ERROR.error("Error sending export dataset fail notification for datasetId {}. Message {}",
+                    datasetId, e.getMessage(), ex);
             }
         }
 
