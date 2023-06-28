@@ -136,7 +136,7 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public String getExportFolderPath(S3PathResolver s3PathResolver) {
-        String s3ExportPath = calculateS3TableAsFolderPath(s3PathResolver, S3_EXPORT_FOLDER_PATH);
+        String s3ExportPath = calculateS3DCPath(s3PathResolver, S3_EXPORT_FOLDER_PATH);
         LOG.info("Method getExportDCPath returns S3 Export Path: {}", s3ExportPath);
         return s3ExportPath;
     }

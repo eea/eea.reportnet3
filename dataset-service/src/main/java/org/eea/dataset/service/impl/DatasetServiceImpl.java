@@ -326,13 +326,16 @@ public class DatasetServiceImpl implements DatasetService {
   @Value("${importPath}")
   private String importPath;
 
-  @Value("${pathSnapshot}")
-  private String pathSnapshot;
-
   /**
    * The default process priority
    */
   private int defaultProcessPriority = 20;
+
+  /**
+   * The path export DL.
+   */
+  @Value("${exportDLPath}")
+  private String exportDLPath;
 
   /**
    * Save all records.
@@ -2919,7 +2922,7 @@ public class DatasetServiceImpl implements DatasetService {
       throws EEAException {
     // we compound the route and create the file
     File file =
-        new File(new File(pathSnapshot + "/exportDL/"), FilenameUtils.getName(fileName));
+        new File(new File(exportDLPath), FilenameUtils.getName(fileName));
 
     if (!file.exists()) {
       LOG_ERROR.error(
