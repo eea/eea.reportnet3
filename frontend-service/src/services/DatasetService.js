@@ -300,7 +300,6 @@ export const DatasetService = {
     typeEntitiesFilter,
     tablesFilter
   ) => {
-    console.log('Inside DatasetService getShowValidationErrorsDL');
     const datasetErrorsDTO = await DatasetRepository.getShowValidationErrorsDL(
       datasetId,
       pageNum,
@@ -438,7 +437,6 @@ export const DatasetService = {
     tableSchemaId,
     value = ''
   }) => {
-    console.log('Inside DatasetService getTableData');
     const tableDataDTO = await DatasetRepository.getTableData(
       datasetId,
       tableSchemaId,
@@ -523,7 +521,6 @@ export const DatasetService = {
     tableSchemaId,
     value = ''
   }) => {
-    console.log('Inside DatasetService getTableDataDL');
     const tableDataDTO = await DatasetRepository.getTableDataDL(
       datasetId,
       tableSchemaId,
