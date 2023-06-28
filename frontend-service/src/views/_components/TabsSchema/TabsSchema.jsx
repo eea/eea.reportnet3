@@ -16,6 +16,7 @@ import { QuerystringUtils } from 'views/_functions/Utils/QuerystringUtils';
 import { TabsUtils } from 'views/_functions/Utils/TabsUtils';
 
 export const TabsSchema = ({
+  bigData,
   dataflowType,
   dataProviderId,
   datasetSchemaId,
@@ -73,6 +74,7 @@ export const TabsSchema = ({
               toPrefill={table.toPrefill}>
               <div className={styles.tabsSchema}>
                 <DataViewer
+                  bigData={bigData}
                   dataflowType={dataflowType}
                   dataProviderId={dataProviderId}
                   datasetSchemaId={datasetSchemaId}

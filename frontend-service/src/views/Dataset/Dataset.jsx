@@ -114,13 +114,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     id: null,
     name: ''
   });
-
   const [importSelectedIntegrationExtension, setImportSelectedIntegrationExtension] = useState(null);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDataset, setIsDataset] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
   const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
-
   const [isDownloadingQCRules, setIsDownloadingQCRules] = useState(false);
   const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
@@ -1102,6 +1100,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     if (selectedView === 'webform') {
       return (
         <Webforms
+          bigData={metadata?.dataflow.bigData}
           dataflowId={dataflowId}
           dataProviderId={metadata?.dataset.dataProviderId}
           datasetId={datasetId}
@@ -1120,6 +1119,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
     return (
       <TabsSchema
+        bigData={metadata?.dataflow.bigData}
         dataProviderId={metadata?.dataset.dataProviderId}
         datasetSchemaId={metadata?.dataset.datasetSchemaId}
         hasWritePermissions={hasWritePermissions}
@@ -1159,9 +1159,20 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         icon={isReferenceDatasetReferenceDataflow ? 'howTo' : 'dataset'}
         iconSize={isReferenceDatasetReferenceDataflow ? '4rem' : '3.5rem'}
         insideTitle={`${datasetInsideTitle()}`}
-        subtitle={`${metadata?.dataflow.name} - ${
-          isTestDataset ? resourcesContext.messages['testDataset'] : datasetName
-        }`}
+        subtitle={
+          metadata?.dataflow.bigData ? (
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                  name: `${metadata?.dataflow.name} - ${
+                    isTestDataset ? resourcesContext.messages['testDataset'] : datasetName
+                  }`
+                })
+              }}></p>
+          ) : (
+            `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`
+          )
+        }
         title={datasetSchemaName}
       />
       <div className={styles.ButtonsBar}>
@@ -1318,6 +1329,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           style={{ width: '90%' }}
           visible={validationsVisible}>
           <ShowValidationsList
+            bigData={metadata?.dataflow.bigData}
             dataflowId={dataflowId}
             datasetId={datasetId}
             datasetName={datasetName}

@@ -246,6 +246,7 @@ export const DataCollection = () => {
 
   const onRenderTabsSchema = (
     <TabsSchema
+      bigData={metadata?.dataflow.bigData}
       dataflowType={dataflowType}
       datasetSchemaId={datasetSchemaId}
       hasCountryCode={true}

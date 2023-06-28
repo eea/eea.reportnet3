@@ -41,6 +41,7 @@ export const EUDataset = () => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [euDatasetState, euDatasetDispatch] = useReducer(euDatasetReducer, {
+    bigData: false,
     dataflowName: '',
     dataflowType: '',
     datasetHasData: false,
@@ -113,6 +114,7 @@ export const EUDataset = () => {
       euDatasetDispatch({
         type: 'GET_DATAFLOW_DETAILS',
         payload: {
+          bigData: data.bigData,
           dataflowType: data.type,
           name: data.name
         }
@@ -294,6 +296,7 @@ export const EUDataset = () => {
 
   const renderTabsSchema = () => (
     <TabsSchema
+      bigData={euDatasetState.bigData}
       dataflowType={dataflowType}
       datasetSchemaId={euDatasetState.metaData?.dataset?.datasetSchemaId}
       hasCountryCode={true}

@@ -32,6 +32,7 @@ import { ErrorUtils } from 'views/_functions/Utils/ErrorUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const TableManagement = ({
+  bigData,
   dataflowId,
   datasetId,
   isAddingPamsId = false,
@@ -257,13 +258,24 @@ export const TableManagement = ({
     });
     const parentTablesDataPromises = parentTables.map(async parentTable => {
       const sortFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
-      const data = await DatasetService.getTableData({
-        datasetId,
-        tableSchemaId: parentTable.tableSchemaId,
-        pageSize: 300,
-        fields: sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
-        levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
-      });
+      let data;
+      if (bigData) {
+        data = await DatasetService.getTableDataDL({
+          datasetId,
+          tableSchemaId: parentTable.tableSchemaId,
+          pageSize: 300,
+          fields: sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
+          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+        });
+      } else {
+        data = await DatasetService.getTableData({
+          datasetId,
+          tableSchemaId: parentTable.tableSchemaId,
+          pageSize: 300,
+          fields: sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
+          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+        });
+      }
 
       return { data, tableSchemaId: parentTable.tableSchemaId, tableSchemaName: parentTable.tableSchemaName };
     });

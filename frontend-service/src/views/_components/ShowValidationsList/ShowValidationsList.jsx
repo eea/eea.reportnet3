@@ -31,6 +31,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ShowValidationsList = memo(
   ({
+    bigData,
     dataflowId,
     datasetId,
     datasetSchemaId,
@@ -311,18 +312,33 @@ export const ShowValidationsList = memo(
 
       try {
         let pageNums = isChangedPage ? Math.floor(firstRow / numberRows) : 0;
+        let data;
 
-        const data = await DatasetService.getShowValidationErrors(
-          datasetId,
-          pageNums,
-          numberRows,
-          sortField,
-          sortOrder,
-          fieldValueFilter,
-          levelErrorsFilter,
-          typeEntitiesFilter,
-          tablesFilter
-        );
+        if (bigData) {
+          data = await DatasetService.getShowValidationErrorsDL(
+            datasetId,
+            pageNums,
+            numberRows,
+            sortField,
+            sortOrder,
+            fieldValueFilter,
+            levelErrorsFilter,
+            typeEntitiesFilter,
+            tablesFilter
+          );
+        } else {
+          data = await DatasetService.getShowValidationErrors(
+            datasetId,
+            pageNums,
+            numberRows,
+            sortField,
+            sortOrder,
+            fieldValueFilter,
+            levelErrorsFilter,
+            typeEntitiesFilter,
+            tablesFilter
+          );
+        }
 
         addTableSchemaId(data.errors);
         validationDispatch({

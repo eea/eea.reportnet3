@@ -87,6 +87,7 @@ export const useContextMenu = (
 
 export const useSetColumns = (
   actionTemplate,
+  bigData,
   cellDataEditor,
   colsSchema,
   columnOptions,
@@ -406,7 +407,8 @@ export const useSetColumns = (
           }`}
           editor={
             ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(column.type) ||
-            (hasWebformWritePermissions &&
+            (!bigData &&
+              hasWebformWritePermissions &&
               hasWritePermissions &&
               column.type !== 'ATTACHMENT' &&
               !isDataflowOpen &&
@@ -488,7 +490,7 @@ export const useSetColumns = (
     );
 
     if (!hasCountryCode) {
-      hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
+      hasWritePermissions & !bigData ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
     }
 
     if (hasCountryCode) {
