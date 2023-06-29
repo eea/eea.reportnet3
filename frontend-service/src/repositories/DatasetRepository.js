@@ -69,6 +69,11 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.downloadExportDatasetFile, { datasetId, fileName })
     }),
 
+  downloadExportDatasetFileDL: async (datasetId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadExportDatasetFileDL, { datasetId, fileName })
+    }),
+
   downloadExportFile: async (datasetId, fileName, providerId = null) =>
     await HTTPRequester.download({
       url: providerId
@@ -104,6 +109,12 @@ export const DatasetRepository = {
   exportDatasetData: async (datasetId, fileType) =>
     await HTTPRequester.download({
       url: getUrl(DatasetConfig.exportDatasetData, { datasetId, fileType }),
+      headers: { 'Content-Type': 'application/octet-stream' }
+    }),
+
+  exportDatasetDataDL: async (datasetId, fileType) =>
+    await HTTPRequester.download({
+      url: getUrl(DatasetConfig.exportDatasetDataDL, { datasetId, fileType }),
       headers: { 'Content-Type': 'application/octet-stream' }
     }),
 

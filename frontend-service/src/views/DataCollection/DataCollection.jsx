@@ -58,6 +58,9 @@ export const DataCollection = () => {
 
   let exportMenuRef = useRef();
   let growlRef = useRef();
+  let bigDataRef = useRef();
+
+  bigDataRef.current = metadata?.dataflow.bigData;
 
   useBreadCrumbs({ currentPage: CurrentPage.DATA_COLLECTION, dataflowId, dataflowType, isLoading });
 
@@ -123,7 +126,11 @@ export const DataCollection = () => {
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
     try {
-      await DatasetService.exportDatasetData(datasetId, fileType);
+      if (bigDataRef.current) {
+        await DatasetService.exportDatasetDataDL(datasetId, fileType);
+      } else {
+        await DatasetService.exportDatasetData(datasetId, fileType);
+      }
     } catch (error) {
       console.error('DataCollection - onExportDataInternalExtension.', error);
       const {
@@ -267,7 +274,7 @@ export const DataCollection = () => {
 
   const layout = children => {
     return (
-      <MainLayout leftSideBarConfig={{ buttons: [] }}>
+      <MainLayout bigData={metadata?.dataflow.bigData} leftSideBarConfig={{ buttons: [] }}>
         <Growl ref={growlRef} />
         <div className="rep-container">{children}</div>
       </MainLayout>
